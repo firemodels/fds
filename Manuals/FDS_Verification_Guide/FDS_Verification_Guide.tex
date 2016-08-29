@@ -4441,10 +4441,10 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 \label{HVAC_energy_pressure}
 
 A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Fig.~\ref{fig_HVAC_e_p}.
-The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 \si{kJ/(kg.K)} and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.
+The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 \si{kJ/(kg.K)} and a specific enthalpy of 293.15~kJ/kg at the reference temperature of 293.15~K.
 The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of ducts is created.
 The first duct takes suction from the lower left half and discharges into the lower right half and is given an area of 0.1 m$^2$ and fixed volume flow rate 0.1 \si{m^3/s}.
-The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~(\ref{HVAC_steady_state})
+The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 56.3 Pa based on Eq.~(\ref{HVAC_steady_state})
 
 \begin{figure}[ht]
 \noindent
