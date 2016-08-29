@@ -1,7 +1,10 @@
 #!/bin/bash
+PDIR=..
+CUR=`pwd`
+DIR=`basename $CUR`
  
 DDIR=Current_Results
-WDIR=FDS_Output_Files
+WDIR=$PDIR/$DIR/FDS_Output_Files
 cp $DDIR/Arup*devc.csv $WDIR
 cp $DDIR/*git.txt $WDIR
 
