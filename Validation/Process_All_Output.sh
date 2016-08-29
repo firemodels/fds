@@ -1,9 +1,9 @@
-#!/bin/bash -f
+#!/bin/bash
 
-if [ "$FDSSMV" == "" ] ; then
-  export FDSSMV=~/FDS-SMVgitclean
+if [ "$FDSSMVNEW" == "" ] ; then
+  export FDSSMVNEW=~/FDS-SMVgitclean
 fi
-export VDIR=$FDSSMV/Validation
+export VDIR=$FDSSMVNEW/FDS/Validation
 
 # This list of active validation data sets is used by Validationbot
 # to automatically run validation cases on a regular basis.
