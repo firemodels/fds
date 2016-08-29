@@ -140,11 +140,11 @@ for predc={'Prescribed','Predicted'},
         print(gcf,'-dpdf',[pltdir,outfile])
         close
         
-         %%%%%%%%%%
-         %%%% RMS values
-         %%%%%%%%%%
-         
-         %RMS Radial Velocity
+        %%%%%%%%%%
+        %%%% RMS values
+        %%%%%%%%%%
+        
+        %RMS Radial Velocity
         figure;
         plot_style;
         % load data
