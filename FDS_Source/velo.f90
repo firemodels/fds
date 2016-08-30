@@ -3093,48 +3093,6 @@ ENDDO
 !$OMP END DO nowait
 !$OMP END PARALLEL
 
-! Reverting this part of the routine for now to fix firebot and get other issues sorted out
-LIMIT_BARO_IF: IF (LIMIT_BAROCLINIC_TERM) THEN
-   TWO_DT = 2._EB*DT
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            BLIM_LOC = MIN( ABS(FVX_B(I,J,K)), ABS(UU(I,J,K)/TWO_DT) ) / (ABS(FVX_B(I,J,K)+TWO_EPSILON_EB))
-            FVX_B(I,J,K) = FVX_B(I,J,K)*BLIM_LOC
-            IF (STORE_B_LIMITER) BLIM(I,J,K) = BLIM_LOC
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho)
-
-   IF (.NOT.TWO_D) THEN
-      DO K=1,KBAR
-         DO J=0,JBAR
-            DO I=1,IBAR
-               BLIM_LOC = MIN( ABS(FVY_B(I,J,K)), ABS(VV(I,J,K)/TWO_DT) ) / (ABS(FVY_B(I,J,K)+TWO_EPSILON_EB))
-               FVY_B(I,J,K) = FVY_B(I,J,K)*BLIM_LOC
-               IF (STORE_B_LIMITER) BLIM(I,J,K) = MIN(BLIM(I,J,K),BLIM_LOC)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
-
-   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho)
-
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            BLIM_LOC = MIN( ABS(FVZ_B(I,J,K)), ABS(WW(I,J,K)/TWO_DT) ) / (ABS(FVZ_B(I,J,K)+TWO_EPSILON_EB))
-            FVZ(I,J,K) = FVZ(I,J,K) + FVZ_B(I,J,K)*BLIM_LOC
-            IF (STORE_B_LIMITER) BLIM(I,J,K) = MIN(BLIM(I,J,K),BLIM_LOC)
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF LIMIT_BARO_IF
-
 T_USED(4) = T_USED(4) + SECOND() - TNOW
 END SUBROUTINE BAROCLINIC_CORRECTION
 
