@@ -55,7 +55,7 @@ echo "\endhead" >> $OUTPUT_TEX_FILE
 maketable=$FDSSMV/FDS/Validation/Process_All_Output.sh
 CASELIST=/tmp/temp.out.$$
 TABLE_ENTRIES=/tmp/temp2.out.$$
-grep VDIR $maketable | awk 'BEGIN { FS = "/" } ; { print $2 }' > $CASELIST
+grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' > $CASELIST
 while read p; do
   MAKEGITENTRY   $p  >> $TABLE_ENTRIES
 done <$CASELIST
