@@ -126,7 +126,7 @@ if [[ "$EMAIL" != "" ]]; then
 fi
 if [[ "$UPDATEREPO" == "1" ]]; then
    UPDATE=-u
-   cd $reponame/FDS
+   cd $reponame/fds
    if [[ "$RUNFIREBOT" == "1" ]]; then
      git remote update &> /dev/null
      git checkout $BRANCH &> /dev/null
