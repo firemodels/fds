@@ -303,6 +303,20 @@ void TrimMZeros(char *line){
   }
 }
 
+/* ------------------ STRNCMP ------------------------ */
+
+int STRNCMP(const char *s1, const char *s2, const int n){
+  int i=0;
+
+  //  same as the standard function, strncmp, but ignores case
+
+  while(toupper(*s1) == toupper(*s2++)&&i<n){
+    i++;
+    if(*s1++ == 0)return (0);
+  }
+  return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
+}
+
 /* ------------------ STRCMP ------------------------ */
 
 int STRCMP(const char *s1, const char *s2){
