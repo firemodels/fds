@@ -9,10 +9,10 @@ SVNROOT=`pwd`/../../..
 cd $SVNROOT
 SVNROOT=`pwd`
 
-cd $SVNROOT/FDS
+cd $SVNROOT/fds
 FDSROOT=`pwd`
 
-cd $SVNROOT/SMV
+cd $SVNROOT/smv
 SMVROOT=`pwd`
 
 echo looking for $script in FDS repo

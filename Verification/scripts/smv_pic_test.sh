@@ -5,15 +5,15 @@ rm -f $testimage
 cd ../..
 # define location of various directories
 reporoot=`pwd`
-visdir=$reporoot/Verification/Visualization
+visdir=$reporoot/smv/Verification/Visualization
 if [ "`uname`" == "Darwin" ]; then
-  SMVDIR=$reporoot/SMV/Build/intel_osx_64
+  SMVDIR=$reporoot/smv/Build/intel_osx_64
   SMVPROG=smokeview_osx_64
-  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $SMVDIR/$SMVPROG"
+  SMV="$reporoot/fds/Utilities/Scripts/smokeview.sh -e $SMVDIR/$SMVPROG"
 else
-  SMVDIR=$reporoot/SMV/Build/intel_linux_64
-  SMVPROG=smokeview_linux_64
-  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $SMVDIR/$SMVPROG"
+  SMVDIR="$reporoot/smv/Build/intel_linux_64"
+  SMVPROG="smokeview_linux_64"
+  SMV="$reporoot/fds/Utilities/Scripts/smokeview.sh -e $SMVDIR/$SMVPROG"
 fi
 
 # building smokeview if it does not exist
