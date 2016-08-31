@@ -31,25 +31,25 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 :: set up environment variables for making and erasing stop files and running fds and cfast
 
-set RUNFDS_R=call %SVNROOT%\FDS\Utilities\Scripts\runfds.bat
-set RUNTFDS_R=call %SVNROOT%\FDS\Utilities\Scripts\runfds.bat
+set RUNFDS_R=call %SVNROOT%\fds\Utilities\Scripts\runfds.bat
+set RUNTFDS_R=call %SVNROOT%\fds\Utilities\Scripts\runfds.bat
 
-set RUNFDS_M=call %SVNROOT%\FDS\Verification\scripts\make_stop.bat
-set RUNTFDS_M=call %SVNROOT%\FDS\Verification\scripts\make_stop.bat
+set RUNFDS_M=call %SVNROOT%\fds\Verification\scripts\make_stop.bat
+set RUNTFDS_M=call %SVNROOT%\fds\Verification\scripts\make_stop.bat
 
-set RUNFDS_E=call %SVNROOT%\FDS\Verification\scripts\erase_stop.bat
-set RUNTFDS_E=call %SVNROOT%\FDS\Verification\scripts\erase_stop.bat
+set RUNFDS_E=call %SVNROOT%\fds\Verification\scripts\erase_stop.bat
+set RUNTFDS_E=call %SVNROOT%\fds\Verification\scripts\erase_stop.bat
 
 :: program locations
 
-::set BACKGROUNDEXE=%SVNROOT%\SMV\Build\background\intel_win%size%\background.exe
+::set BACKGROUNDEXE=%SVNROOT%\smv\Build\background\intel_win%size%\background.exe
 set BACKGROUNDEXE=background.exe
 
-::set SH2BAT=%SVNROOT%\SMV\Build\sh2bat\intel_win_64\sh2bat
+::set SH2BAT=%SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat
 set SH2BAT=sh2bat
 
 set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
-set FDSEXE=%SVNROOT%\FDS\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set FDSEXE=%SVNROOT%\fds\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
 
 :: ---------- Ensure that various programs exists
 

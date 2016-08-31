@@ -4,28 +4,28 @@ set fdsversion=%fds_edition%
 set smvversion=SMV6
 
 set SVNROOT=%svn_root%
-set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
-set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
+set fdsdir=%svn_root%\fds\Build\intel_win_%platform%
+set fdsmpidir=%svn_root%\fds\Build\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%userprofile%\FDS_Guides
 set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
-set in_fds2ascii=%svn_root%\Utilities\fds2ascii
-set in_setpath=%svn_root%\SMV\Build\set_path\intel_win_64
+set in_fds2ascii=%svn_root%\fds\Utilities\fds2ascii
+set in_setpath=%svn_root%\smv\Build\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
-set in_smokediff=%svn_root%\SMV\Build\smokediff
-set in_smokezip=%svn_root%\SMV\Build\smokezip
-set in_dem2fds=%svn_root%\SMV\Build\dem2fds
-set in_smvscriptdir=%svn_root%\SMV\scripts
-set in_wind2fds=%svn_root%\SMV\Build\wind2fds
-set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
-set in_background=%svn_root%\SMV\Build\background
-set in_smv=%svn_root%\SMV\Build\smokeview\intel_win_%platform%
-set in_for_bundle=%svn_root%\SMV\for_bundle
-set in_sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
+set in_smokediff=%svn_root%\smv\Build\smokediff
+set in_smokezip=%svn_root%\smv\Build\smokezip
+set in_dem2fds=%svn_root%\smv\Build\dem2fds
+set in_smvscriptdir=%svn_root%\smv\scripts
+set in_wind2fds=%svn_root%\smv\Build\wind2fds
+set in_testmpi=%svn_root%\fds\Utilities\test_mpi\impi_intel_win
+set in_background=%svn_root%\smv\Build\background
+set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
+set in_for_bundle=%svn_root%\smv\for_bundle
+set in_sh2bat=%svn_root%\smv\Build\sh2bat\intel_win_64
 set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
-set uploads=%svn_root%\Utilities\uploads
+set uploads=%svn_root%\fds\Utilities\uploads
 set basedir=%uploads%\%basename%
 
 set out_bundle=%basedir%\firemodels
@@ -35,22 +35,22 @@ set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\%fdsversion%\Examples
-set out_examples2=%svn_root%\Verification
+set out_examples2=%svn_root%\fds\Verification
 
 set out_smv=%out_bundle%\%smvversion%
 set out_textures=%out_smv%\textures
 
-set fds_casessh=%svn_root%\Verification\FDS_Cases.sh
-set fds_casesbat=%svn_root%\Verification\FDS_Cases.bat
-set smv_casessh=%svn_root%\Verification\scripts\SMV_Cases.sh
-set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
-set wui_casessh=%svn_root%\Verification\scripts\WUI_Cases.sh
-set wui_casesbat=%svn_root%\Verification\scripts\WUI_Cases.bat
+set fds_casessh=%svn_root%\fds\Verification\FDS_Cases.sh
+set fds_casesbat=%svn_root%\fds\Verification\FDS_Cases.bat
+set smv_casessh=%svn_root%\smv\Verification\scripts\SMV_Cases.sh
+set smv_casesbat=%svn_root%\smv\Verification\scripts\SMV_Cases.bat
+set wui_casessh=%svn_root%\smv\Verification\scripts\WUI_Cases.sh
+set wui_casesbat=%svn_root%\smv\Verification\scripts\WUI_Cases.bat
 
-set copyFDScases=%svn_root%\Utilities\Scripts\copyFDScases.bat
-set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
+set copyFDScases=%svn_root%\fds\Utilities\Scripts\copyFDScases.bat
+set copyCFASTcases=%svn_root%\fds\Utilities\Scripts\copyCFASTcases.bat
 
-set bundleinfo=%svn_root%\Utilities\Scripts\for_bundle
+set bundleinfo=%svn_root%\fds\Utilities\Scripts\for_bundle
 
 :: erase the temporary bundle directory if it already exists
 

@@ -6,7 +6,7 @@ Title Building FDS for 64 bit Windows
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use smv/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -19,7 +19,7 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\FDS\Utilities\test_mpi\impi_intel_win
+cd %svn_root%\fds\Utilities\test_mpi\impi_intel_win
 erase *.obj 
 erase *.mod
 .\make_test_mpi

@@ -118,32 +118,32 @@ fds2asciiout=fds2ascii$OUT
 
 scp_fds_smvroot=$fds_smvroot
 fds_smvroot=~/$fds_smvroot
-fdsroot=$scp_fds_smvroot/FDS_Compilation
-backgroundroot=$scp_fds_smvroot/SMV/Build/background
-smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
-smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
-dem2fdsroot=$scp_fds_smvroot/SMV/Build/dem2fds
-smvscriptdir=$scp_fds_smvroot/SMV/scripts
-wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
-uploaddir=$fds_smvroot/Utilities/uploads
+fdsroot=$scp_fds_smvroot/fds/Build
+backgroundroot=$scp_fds_smvroot/smv/Build/background
+smokediffroot=$scp_fds_smvroot/smv/Build/smokediff
+smokeziproot=$scp_fds_smvroot/smv/Build/smokezip
+dem2fdsroot=$scp_fds_smvroot/smv/Build/dem2fds
+smvscriptdir=$scp_fds_smvroot/smv/scripts
+wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
+uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
-for_bundle=$fds_smvroot/Utilities/Scripts/for_bundle
+for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
-smvbindir=$scp_fds_smvroot/SMV/Build/smokeview/$smokeviewdir
-forbundle=$fds_smvroot/SMV/for_bundle
+smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
+forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
-fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
-wikify=$fds_smvroot/Utilities/Scripts/wikify.py
+fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
+wikify=$fds_smvroot/fds/Utilities/Scripts/wikify.py
 fullmanifestdir=$uploaddir/$bundledir/bin
 fullmanifest=$fullmanifestdir/$manifest
-makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
+makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
-fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
-smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
-wui_cases=$fds_smvroot/Verification/scripts/WUI_Cases.sh
-copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
-copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
-ExamplesDirectory=$fds_smvroot/Verification
+fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
+smv_cases=$fds_smvroot/smv/Verification/scripts/SMV_Cases.sh
+wui_cases=$fds_smvroot/smv/Verification/scripts/WUI_Cases.sh
+copyfdscase=$fds_smvroot/fds/Utilities/Scripts/copyfdscase.sh
+copycfastcase=$fds_smvroot/fds/Utilities/Scripts/copycfastcase.sh
+ExamplesDirectory=$fds_smvroot/fds/Verification
 
 cd $uploaddir
 rm -rf $bundlebase
