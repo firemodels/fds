@@ -2,18 +2,20 @@
 
 CURDIR=`pwd`
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-GITROOT=$SCRIPTDIR/../..
+GITROOT=$SCRIPTDIR/../../..
 cd $GITROOT
 GITROOT=`pwd`
 
-cd $GITROOT/FDS_Source
-git clean -dxf
-cd $GITROOT/FDS_Compilation
+cd $GITROOT/fds/Source
 git clean -dxf
 
-cd $GITROOT/SMV/source
+cd $GITROOT/fds/Build
 git clean -dxf
-cd $GITROOT/SMV/Build
+
+cd $GITROOT/smv/Source
+git clean -dxf
+
+cd $GITROOT/smv/Build
 git clean -dxf
 
 cd $CURDIR
