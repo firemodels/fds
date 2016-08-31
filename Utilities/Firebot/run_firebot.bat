@@ -46,10 +46,10 @@ if %force% == 0 goto skip_force
 call :normalise %CD% curdir
 set curdir=%temparg%
 
-call :normalise %fdsrepo%\FDS\Utilities\Firebot
+call :normalise %fdsrepo%\fds\Utilities\Firebot
 set fdsbotdir=%temparg%
 if not %fdsbotdir% == %curdir% (
-   echo "***error: firebot not running in the FDS\Utilities\Firebot"
+   echo "***error: firebot not running in the fds\Utilities\Firebot"
    echo exiting firebot
    exit
 )
@@ -62,16 +62,16 @@ if exist %running% goto skip_running
 
     if %update% == 0 goto no_update
        echo Updating FDS repo
-       cd %fdsrepo%\FDS
+       cd %fdsrepo%\fds
        git remote update
        git merge origin/master 1> Nul 2>&1
-       git merge remote/master 1> Nul 2>&1
+       git merge firemodels/master 1> Nul 2>&1
        
        echo Updating SMV repo
-       cd %fdsrepo%\SMV
+       cd %fdsrepo%\smv
        git remote update
        git merge origin/master 1> Nul 2>&1
-       git merge remote/master 1> Nul 2>&1
+       git merge firemodels/master 1> Nul 2>&1
 
        cd %curdir%
     :no_update
