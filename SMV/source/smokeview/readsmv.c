@@ -976,16 +976,14 @@ void ReadSMVDynamic(char *file){
         plot3di->v = -1;
         plot3di->w = -1;
         for(n=0;n<5;n++){
-          char *UVEL="U-VEL", *VVEL="V-VEL", *WVEL="W-VEL";
-
           if(ReadLabels(&plot3di->label[n],stream)==2)return;
-          if(Match(plot3di->label[n].shortlabel,UVEL) == 1){
+          if(STRCMP(plot3di->label[n].shortlabel,"U-VEL") == 0){
             plot3di->u = n;
           }
-          if(Match(plot3di->label[n].shortlabel,VVEL) == 1){
+          if(STRCMP(plot3di->label[n].shortlabel,"V-VEL") == 0){
             plot3di->v = n;
           }
-          if(Match(plot3di->label[n].shortlabel,WVEL) == 1){
+          if(STRCMP(plot3di->label[n].shortlabel,"W-VEL") == 0){
             plot3di->w = n;
           }
         }
@@ -4632,13 +4630,13 @@ int ReadSMV(char *file, char *file2){
           if(strcmp(labelj->shortlabel,"ELEVATION")==0){
             partclassi->col_elevation=j-2;
           }
-          if(strcmp(labelj->shortlabel,"U-VEL")==0){
+          if(STRCMP(labelj->shortlabel,"U-VEL")==0){
             partclassi->col_u_vel=j-2;
           }
-          if(strcmp(labelj->shortlabel,"V-VEL")==0){
+          if(STRCMP(labelj->shortlabel,"V-VEL")==0){
             partclassi->col_v_vel=j-2;
           }
-          if(strcmp(labelj->shortlabel,"W-VEL")==0){
+          if(STRCMP(labelj->shortlabel,"W-VEL")==0){
             partclassi->col_w_vel=j-2;
           }
         }
