@@ -1681,7 +1681,7 @@ void update_slice_menu_show(void){
       flowlabels *label;
 
       label = &sd->label;
-      if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+      if(STRCMP(label->shortlabel,"U-VEL")==0||STRCMP(label->shortlabel,"V-VEL")==0||STRCMP(label->shortlabel,"W-VEL")==0){
         sd->menu_show=0;
       }
     }
@@ -2703,15 +2703,15 @@ void updatevslices(void){
 
     sdi = sliceinfo+i;
     sdi->vec_comp=0;
-    if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0){
+    if(STRNCMP(sdi->label.shortlabel,"U-VEL",5)==0){
        sdi->vec_comp=1;
        continue;
     }
-    if(strncmp(sdi->label.shortlabel,"V-VEL",5)==0){
+    if(STRNCMP(sdi->label.shortlabel,"V-VEL",5)==0){
       sdi->vec_comp=2;
       continue;
     }
-    if(strncmp(sdi->label.shortlabel,"W-VEL",5)==0){
+    if(STRNCMP(sdi->label.shortlabel,"W-VEL",5)==0){
       sdi->vec_comp=3;
       continue;
     }

@@ -8398,7 +8398,7 @@ updatemenu=0;
                 flowlabels *label;
 
                 label = &sd->label;
-                if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+                if(STRCMP(label->shortlabel,"U-VEL")==0||STRCMP(label->shortlabel,"V-VEL")==0||STRCMP(label->shortlabel,"W-VEL")==0){
                   continue;
                 }
               }
@@ -8408,7 +8408,7 @@ updatemenu=0;
               flowlabels *label;
 
               label = &sd->label;
-              if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+              if(STRCMP(label->shortlabel,"U-VEL")==0||STRCMP(label->shortlabel,"V-VEL")==0||STRCMP(label->shortlabel,"W-VEL")==0){
                 continue;
               }
             }
