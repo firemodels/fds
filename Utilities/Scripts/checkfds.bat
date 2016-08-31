@@ -4,7 +4,7 @@
 :: $Revision$
 :: $Author$
 
-call %SVNROOT%\FDS\Utilities\Scripts\getopts.bat %*
+call %SVNROOT%\fds\Utilities\Scripts\getopts.bat %*
 
 set fulldir=%BASEDIR%/%dir%
 
