@@ -24,8 +24,8 @@ esac
 done
 shift $(($OPTIND-1))
 
-echo "You are about to download the repos:"
-echo "cor, exp, out, smv, fds and radcal from "
+echo "You are about to clone the Git repos:"
+echo "cfast, cor, exp, fds, out, radcal and smv from"
 echo "git@github.com:$UN"
 echo "Press any key to continue, <CTRL> c to abort or"
 echo "$0 -h"
