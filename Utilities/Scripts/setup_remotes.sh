@@ -29,7 +29,7 @@ read val
 CURDIR=`pwd`
 for repo in cfast cor exp fds out radcal smv
 do
-echo.
+echo
 echo updating remotes for $repo
   cd $CURDIR/$repo
   git remote add firemodels git@github.com:firemodels/$repo.git

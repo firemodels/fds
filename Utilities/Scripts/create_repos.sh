@@ -33,12 +33,9 @@ echo "for other options"
 read val
 
 for repo in cor cfast exp out radcal smv
-  echo.
-  echo cloning $UN/$repo
-  git clone git@github.com\:$UN/$repo.git
 do 
+  echo
+  git clone git@github.com\:$UN/$repo.git
 done
-echo.
-repo=fds
-echo cloning $UN/$repo
-git clone  --recursive git@github.com\:$UN/repo.git
+echo
+git clone  --recursive git@github.com\:$UN/fds.git
