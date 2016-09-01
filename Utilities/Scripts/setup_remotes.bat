@@ -8,32 +8,39 @@ echo You should only run this command if you have cloned these
 echo repos from repos that have been forked from firemodels
 set /p varname=""
 
-CURDIR=%CD%
+set CURDIR=%CD%
 
-cd %CD%\cor
+echo.
+cd %CURDIR%\cor
 git remote add firemodels git@github.com:firemodels/cfast.git
 git remote update
 
+echo.
 git remote add firemodels git@github.com:firemodels/cor.git
 git remote update
 
-cd %CD%\exp
+echo.
+cd %CURDIR%\exp
 git remote add firemodels git@github.com:firemodels/exp.git
 git remote update
 
-cd %CD%\fds
+echo.
+cd %CURDIR%\fds
 git remote add firemodels git@github.com:firemodels/fds.git
 git remote update
 
-cd %CD%\out
+echo.
+cd %CURDIR%\out
 git remote add firemodels git@github.com:firemodels/out.git
 git remote update
 
-cd %CD%\radcal
+echo.
+cd %CURDIR%\radcal
 git remote add firemodels git@github.com:firemodels/radcal.git
 git remote update
 
-cd %CD%\smv
+echo.
+cd %CURDIR%\smv
 git remote add firemodels git@github.com:firemodels/smv.git
 git remote update
 
@@ -68,3 +75,5 @@ echo.
 echo Options:
 echo -h - display this message
 exit /b
+
+:eof
