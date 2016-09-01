@@ -7,7 +7,7 @@
 MAKEGITENTRY(){
 DIR=$1
 gitrevisions=/tmp/gitrevisions.$$
-cat $FDSSMV/fds/Validation/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
+cat $FIREMODELS/fds/Validation/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $4}' | sed 's/^.\{1\}//'`
@@ -20,25 +20,25 @@ rm $gitrevisions
 
 
 CURRENT_DIR=`pwd`
-if [ "$FDSSMV" == "" ] ; then
-   FDSSMV=~/FDS-SMVgitclean
+if [ "$FIREMODELS" == "" ] ; then
+   FIREMODELS=~/FDS-SMVfork
 fi
-export FDSSMV
+export FIREMODELS
 
 while getopts 'r:' OPTION
 do
 case $OPTION  in
   r)
-   FDSSMV="$OPTARG"
+   FIREMODELS="$OPTARG"
    ;;
 esac
 done
 shift $(($OPTIND-1))
 
-cd $FDSSMV/fds/Utilities/Scripts
+cd $FIREMODELS/fds/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics
-OUTPUT_TEX_FILE=$FDSSMV/fds/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
+OUTPUT_TEX_FILE=$FIREMODELS/fds/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
 
 # Table header
 echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
@@ -52,7 +52,7 @@ echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >
 echo "\endhead" >> $OUTPUT_TEX_FILE
 
 # Table body
-maketable=$FDSSMV/fds/Validation/Process_All_Output.sh
+maketable=$FIREMODELS/fds/Validation/Process_All_Output.sh
 CASELIST=/tmp/temp.out.$$
 TABLE_ENTRIES=/tmp/temp2.out.$$
 grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' > $CASELIST

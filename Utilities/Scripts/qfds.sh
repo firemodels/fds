@@ -1,8 +1,8 @@
 #!/bin/bash
 
 FDSROOT=~/FDS-SMV
-if [ "$FDSSMV" != "" ] ; then
-  FDSROOT=$FDSSMV
+if [ "$FIREMODELS" != "" ] ; then
+  FDSROOT=$FIREMODELS
 fi
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   walltime=99-99:99:99
