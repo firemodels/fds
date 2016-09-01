@@ -40,9 +40,9 @@ CLEANREPO=0
 UPDATEREPO=0
 JOBPREFIX=FB_
 
-fdsrepo=$FDSSMVNEW
+fdsrepo=$FIREMODELS
 if [ "$fdsrepo" == "" ] ; then
-  fdsrepo=~/FDS-SMVgitclean
+  fdsrepo=~/FDS-SMVfork
 fi
 
 DB=_db
