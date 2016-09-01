@@ -1,5 +1,5 @@
 #!/bin/bash
-PDIR=..
+PDIR=../../../out
 CUR=`pwd`
 DIR=`basename $CUR`
 DDIR=Current_Results
