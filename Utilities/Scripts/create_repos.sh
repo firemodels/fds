@@ -32,9 +32,13 @@ echo "$0 -h"
 echo "for other options"
 read val
 
-git clone git@github.com\:$UN/cor.git
-git clone git@github.com\:$UN/exp.git
-git clone git@github.com\:$UN/out.git
-git clone git@github.com\:$UN/smv.git
-git clone  --recursive git@github.com\:$UN/fds.git
-git clone git@github.com\:$UN/radcal.git
+for repo in cor cfast exp out radcal smv
+  echo.
+  echo cloning $UN/$repo
+  git clone git@github.com\:$UN/$repo.git
+do 
+done
+echo.
+repo=fds
+echo cloning $UN/$repo
+git clone  --recursive git@github.com\:$UN/repo.git
