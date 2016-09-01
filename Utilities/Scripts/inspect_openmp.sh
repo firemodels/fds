@@ -2,8 +2,8 @@
 CURDIR=`pwd`
 
 GITROOT=~/FDS-SMVgitclean
-if [ "$FDSSMVNEW" != "" ] ; then
-  GITROOT=$FDSSMVNEW
+if [ "$FIREMODELS" != "" ] ; then
+  GITROOT=$FIREMODELS
 fi
 RESULT_DIR=$GITROOT/fds/Utilities/Scripts/inspect_openmp_ti3
 

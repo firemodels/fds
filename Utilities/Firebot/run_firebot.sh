@@ -6,8 +6,8 @@ running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 reponame=~/FDS-SMVgitclean
-if [ "$FDSSMVNEW" != "" ] ; then
-  reponame=$FDSSMVNEW
+if [ "$FIREMODELS" != "" ] ; then
+  reponame=$FIREMODELS
 fi
 if [ -e .fds_git ]; then
   cd ../../..
