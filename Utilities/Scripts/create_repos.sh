@@ -24,17 +24,18 @@ esac
 done
 shift $(($OPTIND-1))
 
-echo "You are about to download the repos:"
-echo "cor, exp, out, smv, fds and radcal from "
+echo "You are about to clone the Git repos:"
+echo "cfast, cor, exp, fds, out, radcal and smv from"
 echo "git@github.com:$UN"
 echo "Press any key to continue, <CTRL> c to abort or"
 echo "$0 -h"
 echo "for other options"
 read val
 
-git clone git@github.com\:$UN/cor.git
-git clone git@github.com\:$UN/exp.git
-git clone git@github.com\:$UN/out.git
-git clone git@github.com\:$UN/smv.git
+for repo in cor cfast exp out radcal smv
+do 
+  echo
+  git clone git@github.com\:$UN/$repo.git
+done
+echo
 git clone  --recursive git@github.com\:$UN/fds.git
-git clone git@github.com\:$UN/radcal.git

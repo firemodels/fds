@@ -27,28 +27,12 @@ echo "repos from repos that have been forked from firemodels"
 read val
 
 CURDIR=`pwd`
-cd $CURDIR/cor
-git remote add firemodels git@github.com:firemodels/cor.git
-git remote update
+for repo in cfast cor exp fds out radcal smv
+do
+echo
+echo updating remotes for $repo
+  cd $CURDIR/$repo
+  git remote add firemodels git@github.com:firemodels/$repo.git
+  git remote update
+done
 
-cd $CURDIR/exp
-git remote add firemodels git@github.com:firemodels/exp.git
-git remote update
-
-cd $CURDIR/out
-git remote add firemodels git@github.com:firemodels/out.git
-git remote update
-
-cd $CURDIR/smv
-git remote add firemodels git@github.com:firemodels/smv.git
-git remote update
-
-cd $CURDIR/fds
-git remote add firemodels git@github.com:firemodels/fds.git
-git remote update
-
-cd $CURDIR/radcal
-git remote add firemodels git@github.com:firemodels/radcal.git
-git remote update
-
-cd $CURDIR
