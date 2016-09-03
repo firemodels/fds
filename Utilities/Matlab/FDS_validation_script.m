@@ -40,18 +40,18 @@ fm_datacenter_scatter
 
 % Dataplot and scatplot options
 
-Dataplot_Inputs_File = [pwd,'/FDS_validation_dataplot_inputs.csv'];
-EXP_Dir = [pwd, '/../../../exp/'];
-OUT_Dir = [pwd, '/../../../out/'];
-Manuals_Dir = [pwd, '/../../Manuals/'];
-Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
+Dataplot_Inputs_File = 'FDS_validation_dataplot_inputs.csv';
+EXP_Dir = '../../../exp/';
+OUT_Dir = '../../../out/';
+Manuals_Dir = '../../Manuals/';
+Scatterplot_Inputs_File = 'FDS_validation_scatterplot_inputs.csv';
 
 % Statistics output options
 
 Stats_Output = 'Validation';
-Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
-Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
-Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
+Output_File = 'FDS_validation_scatterplot_output.csv';
+Statistics_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
+Histogram_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
 
 % Override the plot style options with NRC 1824 plot options
 
@@ -60,7 +60,7 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_DIR, OUT_DIR, Manuals_Dir);
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
