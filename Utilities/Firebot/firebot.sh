@@ -10,6 +10,7 @@
 size=_64
 
 # define run directories
+PID_FILE=~/.fdssmvgit/firebot_pid
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
 HISTORY_DIR="$HOME/.firebot/history"
@@ -66,6 +67,7 @@ echo "-i - use installed version of smokeview"
 echo "-L - firebot lite,  run only stages that build a debug fds and run cases with it"
 echo "                    (no release fds, no release cases, no matlab, etc)"
 echo "-m email_address "
+echo "-p pid_file - file containing process id of firebot process "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo "-r - repository location [default: $fdsrepo]"
@@ -80,7 +82,7 @@ GIT_REVISION=
 SKIPMATLAB=
 SKIPFIGURES=
 FIREBOT_LITE=
-while getopts 'b:cFhiLm:q:r:suUv:' OPTION
+while getopts 'b:cFhiLm:p:q:r:suUv:' OPTION
 do
 case $OPTION in
   b)
@@ -104,6 +106,9 @@ case $OPTION in
   m)
    mailToFDS="$OPTARG"
    ;;
+  p)
+   PID_FILE="$OPTARG"
+   ;;
   q)
    QUEUE="$OPTARG"
    ;;
@@ -123,6 +128,7 @@ esac
 done
 shift $(($OPTIND-1))
 
+echo $$ > $PID_FILE
 notfound=
 if [ "$COMPILER" == "intel" ]; then
    if [[ "$IFORT_COMPILER" != "" ]] ; then
