@@ -41,7 +41,8 @@ fm_datacenter_scatter
 % Dataplot and scatplot options
 
 Dataplot_Inputs_File = [pwd,'/FDS_validation_dataplot_inputs.csv'];
-Working_Dir = [pwd, '/../../Validation/'];
+EXP_Dir = [pwd, '/../../../exp/'];
+OUT_Dir = [pwd, '/../../../out/'];
 Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
 
@@ -59,7 +60,7 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_DIR, OUT_DIR, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
