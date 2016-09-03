@@ -138,8 +138,11 @@ if [ "$KILL_FIREBOT" == "1" ]; then
     PID=`head -1 $firebot_pid`
     kill -9 $(LIST_DESCENDANTS $PID)
     kill -9 $PID
+    ../../Verification/scripts/Run_FDS_Cases.sh -s >& /dev/null
     echo firebot process $PID killed
-    rm $firebot_pid
+    if [ -e $firebot_pid ]; then
+      rm $firebot_pid
+    fi
   else
     echo firebot is not running, cannot be killed.
   fi
