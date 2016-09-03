@@ -124,8 +124,9 @@ if [ "$KILL_FIREBOT" == "1" ]; then
     PID=`head -1 $firebot_pid`
     kill -9 $PID
     echo firebot process $PID killed
+    rm $firebot_pid
   else
-    echo "firebot is not running.  Cannot be killed."
+    echo firebot is not running, cannot be killed.
   fi
   exit
 fi
