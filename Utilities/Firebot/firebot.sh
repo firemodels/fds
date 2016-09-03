@@ -302,7 +302,7 @@ do_git_checkout()
 #     echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
 #     git fetch origin >> $OUTPUT_DIR/stage1 2>&1
 #     echo "Updating submodules." >> $OUTPUT_DIR/stage1 2>&1
-#     git submodule foreach git remote update >> $OUTPUT_DIR/stage1 2>&1
+#     git submodule foreach git fetch origin >> $OUTPUT_DIR/stage1 2>&1
 #     git submodule foreach git merge origin/master >> $OUTPUT_DIR/stage1 2>&1
 #   fi
 
@@ -324,7 +324,7 @@ do_git_checkout()
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    if [[ "$UPDATEREPO" == "1" ]] ; then
       echo Updating $fdsrepo/smv
-      git remote update >> $OUTPUT_DIR/stage1 2>&1
+      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
       git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
    fi
 
@@ -332,7 +332,7 @@ do_git_checkout()
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    if [[ "$UPDATEREPO" == "1" ]] ; then
       echo Updating $fdsrepo/fds
-      git remote update >> $OUTPUT_DIR/stage1 2>&1
+      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
       git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
    fi
    GIT_REVISION=`git describe --long --dirty`
