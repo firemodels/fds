@@ -24,6 +24,7 @@ notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ $notfound -eq 1 ] ; then
   QUEUE=none
 fi
+
 function usage {
 echo "Verification and validation testing script for FDS"
 echo ""
@@ -50,6 +51,19 @@ echo "-U - upload guides (only by user firebot)"
 echo "-v - show options used to run firebot"
 exit
 }
+
+LIST_DESCENDANTS ()
+{
+  local children=$(ps -o pid= --ppid "$1")
+
+  for pid in $children
+  do
+    list_descendants "$pid"
+  done
+
+  echo "$children"
+}
+
 USEINSTALL=
 BRANCH=master
 botscript=firebot.sh
@@ -122,6 +136,7 @@ shift $(($OPTIND-1))
 if [ "$KILL_FIREBOT" == "1" ]; then
   if [ -e $firebot_pid ] ; then
     PID=`head -1 $firebot_pid`
+    kill -9 $(LIST_DESCENDANTS $PID)
     kill -9 $PID
     echo firebot process $PID killed
     rm $firebot_pid
