@@ -4,17 +4,17 @@
 %
 % Sew together fire front positions from multiple mesh simulation of grassland fire spread
 
-FDS_Output_Files = '../../Validation/CSIRO_Grassland_Fires/FDS_Output_Files/';
+outdir = '../../../out/CSIRO_Grassland_Fires/FDS_Output_Files/';
 
-M1 = importdata([FDS_Output_Files,'Case_C064_devc.csv'],',',2);
-M2 = importdata([FDS_Output_Files,'Case_F19_devc.csv'],',',2);
+M1 = importdata([outdir,'Case_C064_devc.csv'],',',2);
+M2 = importdata([outdir,'Case_F19_devc.csv'],',',2);
 
 H = cell(2,2);
 H(1,:) = {'s' 'm'};
 H(2,:) = {'Time' 'Front'};
 
-fid1 = fopen([FDS_Output_Files,'Case_C064_devc_combined.csv'],'wt','n');
-fid2 = fopen([FDS_Output_Files,'Case_F19_devc_combined.csv'],'wt','n');
+fid1 = fopen([outdir,'Case_C064_devc_combined.csv'],'wt','n');
+fid2 = fopen([outdir,'Case_F19_devc_combined.csv'],'wt','n');
 
 fprintf(fid1,'%s, %s\n',H{1,:});
 fprintf(fid1,'%s, %s\n',H{2,:});
