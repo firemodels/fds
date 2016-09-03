@@ -58,7 +58,7 @@ LIST_DESCENDANTS ()
 
   for pid in $children
   do
-    list_descendants "$pid"
+    LIST_DESCENDANTS "$pid"
   done
 
   echo "$children"
