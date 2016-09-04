@@ -22,7 +22,6 @@ if nargin<1|nargin>100;
     display('Error in argument list')
 end
 if nargin>=1
-    plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
     iarg = 1;
     plot_file   = varargin{iarg}; iarg=iarg+1;
     data_format = varargin{iarg}; iarg=iarg+1;
@@ -328,5 +327,5 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
-print(gcf,'-dpdf',[plotdir,plot_file])
+print(gcf,'-dpdf',plot_file)
 
