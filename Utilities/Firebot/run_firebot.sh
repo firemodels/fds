@@ -141,12 +141,11 @@ if [ "$KILL_FIREBOT" == "1" ]; then
     echo killing firebot (PID=$PID)
     kill -9 $PID
     JOBIDS=`qstat -a | grep FB_ | awk -v user="$USER" '{if($2==user){print $1}}'`
-    if [ "$JOBIDS" != ""]; then
-      echo killing fds jobs started by smokebot
-      echo Job IDs=$JOBIDS
+    if [ "$JOBIDS" != "" ]; then
+      echo killing firebot jobs with Id:$JOBIDS
       qdel $JOBIDS
     fi
-    echo firebot process $firebot_pid killed
+    echo firebot process $PID killed
     if [ -e $firebot_pid ]; then
       rm $firebot_pid
     fi
