@@ -83,8 +83,8 @@ headers = H{:}'; clear H
 
 n_plots = length(A);
 
-if nargin==4
-    drange = varargin{4};
+if nargin==5
+    drange = varargin{5};
 else
     drange = 2:n_plots;
 end
