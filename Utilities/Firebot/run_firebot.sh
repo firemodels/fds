@@ -136,11 +136,15 @@ shift $(($OPTIND-1))
 if [ "$KILL_FIREBOT" == "1" ]; then
   if [ -e $firebot_pid ] ; then
     PID=`head -1 $firebot_pid`
+    echo killing process invoked by firebot
     kill -9 $(LIST_DESCENDANTS $PID)
+    echo "killing firebot (PID=$PID)"
     kill -9 $PID
-    cd ../../Verification/scripts
-    ./Run_FDS_Cases.sh -s >& /dev/null
-    cd $CURDIR
+    JOBIDS=`qstat -a | grep FB_ | awk -v user="$USER" '{if($2==user){print $1}}'`
+    if [ "$JOBIDS" != "" ]; then
+      echo killing firebot jobs with Id:$JOBIDS
+      qdel $JOBIDS
+    fi
     echo firebot process $PID killed
     if [ -e $firebot_pid ]; then
       rm $firebot_pid
