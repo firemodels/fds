@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
-addpath('../../Validation/Heskestad_Flame_Height/Experimental_Data/');
+outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+expdir = '../../../exp/Heskestad_Flame_Height/';
 
 % list of line files
 filename = {'Qs=p1_RI=05_line.csv',    'Qs=p1_RI=10_line.csv',    'Qs=p1_RI=20_line.csv';   ...
@@ -36,7 +36,7 @@ Qdot=[151 303 756 1513 3025 7564 15127 30255 75636 151273 302545 756363 1512725 
 for i=1:16 % hrr loop
     for j=1:3 % resolution loop
         
-        M = csvread(filename{i,j},2,0);
+        M = csvread([outdir,filename{i,j}],2,0);
         z = M(:,1); dz = z(2)-z(1);
         hrrpul = M(:,2);
         Qdot_line = sum(hrrpul)*dz;
@@ -45,22 +45,22 @@ for i=1:16 % hrr loop
         % determine flame height
         for n=1:length(z)
             hrr(n) = sum(hrrpul(1:n))*dz*Qdot(i)/Qdot_line; % cummulative heat release
-		end
+        end
 
         k = find(hrr>(0.99)*Qdot(i),1);
         if (k>1) 
             L_99(i,j) = z(k-1)+dz*((0.99)*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
-		else
-			L_99(i,j) = dz*(0.99)*Qdot(i)/hrr(k);
-		end
+        else
+            L_99(i,j) = dz*(0.99)*Qdot(i)/hrr(k);
+        end
         
-		k = find(hrr>(0.95)*Qdot(i),1);
+        k = find(hrr>(0.95)*Qdot(i),1);
         if (k>1) 
-			L_95(i,j) = z(k-1)+dz*((0.95)*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
-		else
-			L_95(i,j) = dz*(0.95)*Qdot(i)/hrr(k);
-		end
-		
+            L_95(i,j) = z(k-1)+dz*((0.95)*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
+        else
+            L_95(i,j) = dz*(0.95)*Qdot(i)/hrr(k);
+        end
+        
     end % resolution loop
     
 end % hrr loop
@@ -75,7 +75,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-M=importdata('flame_lengths.csv',',',1);
+M=importdata([expdir,'flame_lengths.csv'],',',1);
 Steward             = M.data(:,5);
 Becker_and_Liang    = M.data(:,6);
 Cox_and_Chitty      = M.data(:,7);
@@ -124,17 +124,17 @@ text(X_Title_Position,Y_Title_Position,...
     Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
 legend_handle=legend(H,...
-	                'Steward',...
-					'Becker & Liang',...
-					'Cox & Chitty',...
-					'Heskestad',...
-					'Hasemi & Tokunaga',...
-					'Cetegen',...
-					'Delichatsios',...
-					'Max FDS 99%',...
-					'Min FDS 95%',...
-					'Location','SoutheastOutside');
-				
+                    'Steward',...
+                    'Becker & Liang',...
+                    'Cox & Chitty',...
+                    'Heskestad',...
+                    'Hasemi & Tokunaga',...
+                    'Cetegen',...
+                    'Delichatsios',...
+                    'Max FDS 99%',...
+                    'Min FDS 95%',...
+                    'Location','SoutheastOutside');
+                
 set(legend_handle,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 set(legend_handle,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
@@ -156,20 +156,10 @@ set(plot_handle,'YTick',[1e-1 1e0 1e1 1e2 1e3])
 set(plot_handle,'XTick',[1e-1 1e0 1e1 1e2 1e3 1e4])
 set(plot_handle,'Position',plot_position)
 
-% add SVN if file is available
+% add VerStr if file is available
 
-svn_file = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/Qs=10000_RI=05_git.txt';
-addverstr(gca,svn_file,'loglog')
-
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = [outdir,'Qs=10000_RI=05_git.txt'];
+addverstr(gca,git_file,'loglog')
 
 % print to pdf
 
@@ -180,5 +170,5 @@ set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]); 
 display('Printing plot Flame_Height2...')
-print -dpdf ../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2
+print -dpdf '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2'
 
