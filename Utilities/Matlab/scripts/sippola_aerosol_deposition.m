@@ -7,7 +7,7 @@
 
 clear all
 
-FDS_Output_Files = '../../Validation/Sippola_Aerosol_Deposition/FDS_Output_Files/';
+outdir = '../../../out/Sippola_Aerosol_Deposition/FDS_Output_Files/';
 
 filename = {'Sippola_Test_01_devc.csv', 'Sippola_Test_02_devc.csv' ...
             'Sippola_Test_03_devc.csv', 'Sippola_Test_04_devc.csv' ...
@@ -21,8 +21,8 @@ filename = {'Sippola_Test_01_devc.csv', 'Sippola_Test_02_devc.csv' ...
 % Check for missing files
 skip_case = 0;
 for i=1:length(filename)
-    if ~exist([FDS_Output_Files, filename{i}])
-        display(['Error: File ',[FDS_Output_Files, filename{i}],' does not exist. Skipping case.'])
+    if ~exist([outdir, filename{i}])
+        display(['Error: File ',[outdir, filename{i}],' does not exist. Skipping case.'])
         skip_case = 1;
     end
 end
@@ -52,7 +52,7 @@ time = 100;
                  
 % Primary calculations
 for i=1:length(filename)
-    test = importdata([FDS_Output_Files, filename{i}],',',2);
+    test = importdata([outdir, filename{i}],',',2);
 
     upstream_concentration   = test.data(end,2);
     downstream_concentration = test.data(end,3);
@@ -87,7 +87,7 @@ for i=1:length(filename)
 end
 
 % Write out results file
-fid = fopen([FDS_Output_Files,'Sippola_All_Tests.csv'],'wt','n');
+fid = fopen([outdir,'Sippola_All_Tests.csv'],'wt','n');
 fprintf(fid,'Test,Air Velocity 1 um (m/s),Friction Velocity 1 um (m/s),Ceiling Deposition Velocity 1 um (m/s),Wall Deposition Velocity 1 um (m/s),Floor Deposition Velocity 1 um (m/s),Dimensionless Ceiling Deposition Velocity 1 um (m/s),Dimensionless Wall Deposition Velocity 1 um (m/s),Dimensionless Floor Deposition Velocity 1 um (m/s),Test,Air Velocity 3 um (m/s),Friction Velocity 3 um (m/s),Ceiling Deposition Velocity 3 um (m/s),Wall Deposition Velocity 3 um (m/s),Floor Deposition Velocity 3 um (m/s),Dimensionless Ceiling Deposition Velocity 3 um (m/s),Dimensionless Wall Deposition Velocity 3 um (m/s),Dimensionless Floor Deposition Velocity 3 um (m/s),Test,Air Velocity 5 um (m/s),Friction Velocity 5 um (m/s),Ceiling Deposition Velocity 5 um (m/s),Wall Deposition Velocity 5 um (m/s),Floor Deposition Velocity 5 um (m/s),Dimensionless Ceiling Deposition Velocity 5 um (m/s),Dimensionless Wall Deposition Velocity 5 um (m/s),Dimensionless Floor Deposition Velocity 5 um (m/s),Test,Air Velocity 9 um (m/s),Friction Velocity 9 um (m/s),Ceiling Deposition Velocity 9 um (m/s),Wall Deposition Velocity 9 um (m/s),Floor Deposition Velocity 9 um (m/s),Dimensionless Ceiling Deposition Velocity 9 um (m/s),Dimensionless Wall Deposition Velocity 9 um (m/s),Dimensionless Floor Deposition Velocity 9 um (m/s),Test,Air Velocity 16 um (m/s),Friction Velocity 16 um (m/s),Ceiling Deposition Velocity 16 um (m/s),Wall Deposition Velocity 16 um (m/s),Floor Deposition Velocity 16 um (m/s),Dimensionless Ceiling Deposition Velocity 16 um (m/s),Dimensionless Wall Deposition Velocity 16 um (m/s),Dimensionless Floor Deposition Velocity 16 um (m/s)\n');
 fprintf(fid,'1,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 2,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 3,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 4,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 5,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e\n', air_velocity{1}, friction_velocity{1}, V_d_ceiling{1}, V_d_wall{1}, V_d_floor{1}, V_d_ceiling_nondim{1}, V_d_wall_nondim{1}, V_d_floor_nondim{1}, air_velocity{2},  friction_velocity{2},  V_d_ceiling{2},  V_d_wall{2},  V_d_floor{2},  V_d_ceiling_nondim{2},  V_d_wall_nondim{2},  V_d_floor_nondim{2},  air_velocity{3},  friction_velocity{3},  V_d_ceiling{3},  V_d_wall{3},  V_d_floor{3},  V_d_ceiling_nondim{3},  V_d_wall_nondim{3},  V_d_floor_nondim{3},  air_velocity{4},  friction_velocity{4},  V_d_ceiling{4},  V_d_wall{4},  V_d_floor{4},  V_d_ceiling_nondim{4},  V_d_wall_nondim{4},  V_d_floor_nondim{4},  air_velocity{5},  friction_velocity{5},  V_d_ceiling{5},  V_d_wall{5},  V_d_floor{5},  V_d_ceiling_nondim{5},  V_d_wall_nondim{5},  V_d_floor_nondim{5});
 fprintf(fid,'6,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 8,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 9,  %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 10, %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, 11, %f, %f, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e, %3.1e\n', air_velocity{6}, friction_velocity{6}, V_d_ceiling{6}, V_d_wall{6}, V_d_floor{6}, V_d_ceiling_nondim{6}, V_d_wall_nondim{6}, V_d_floor_nondim{6}, air_velocity{8},  friction_velocity{8},  V_d_ceiling{8},  V_d_wall{8},  V_d_floor{8},  V_d_ceiling_nondim{8},  V_d_wall_nondim{8},  V_d_floor_nondim{8},  air_velocity{9},  friction_velocity{9},  V_d_ceiling{9},  V_d_wall{9},  V_d_floor{9},  V_d_ceiling_nondim{9},  V_d_wall_nondim{9},  V_d_floor_nondim{9},  air_velocity{10}, friction_velocity{10}, V_d_ceiling{10}, V_d_wall{10}, V_d_floor{10}, V_d_ceiling_nondim{10}, V_d_wall_nondim{10}, V_d_floor_nondim{10}, air_velocity{11}, friction_velocity{11}, V_d_ceiling{11}, V_d_wall{11}, V_d_floor{11}, V_d_ceiling_nondim{11}, V_d_wall_nondim{11}, V_d_floor_nondim{11});

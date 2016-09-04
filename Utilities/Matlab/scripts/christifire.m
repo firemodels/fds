@@ -9,75 +9,75 @@ clear all
 
 % Set global reaction rate parameters
 
-addpath('../../Validation/CHRISTIFIRE/Experimental_Data')
-addpath('../../Validation/CHRISTIFIRE/FDS_Output_Files')
+expdir = '../../../exp/CHRISTIFIRE/';
+outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
 
 close all
     
 plot_style
 
 skip_case = 0;
-if ~exist('CHRISTIFIRE_S701_tga_N2_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_S701_tga_N2_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_S701_tga_air_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_S701_tga_air_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_S701_mcc_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_S701_mcc_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_I701_tga_N2_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_I701_tga_N2_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_I701_mcc_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_I701_mcc_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_25_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_25_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_50_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_50_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_50_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_75_v1_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_75_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_75_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_25_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_25_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_50_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_50_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_50_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('CHRISTIFIRE_C701_cone_75_v2_devc.csv')
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_75_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_75_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
@@ -88,13 +88,13 @@ end
 
 % TGA (Cable sheath)---------------------------------------------
 % read experimental results
-[S_tga_N2] = csvread('CHRISTIFIRE_S701_tga_N2.csv',2);
-[S_tga_air] = csvread('CHRISTIFIRE_S701_tga_air.csv',2);
+[S_tga_N2] = csvread([expdir,'CHRISTIFIRE_S701_tga_N2.csv'],2);
+[S_tga_air] = csvread([expdir,'CHRISTIFIRE_S701_tga_air.csv'],2);
 % read FDS results
-[S_tga_N2_v1] = csvread('CHRISTIFIRE_S701_tga_N2_v1_devc.csv',2);
-[S_tga_air_v1] = csvread('CHRISTIFIRE_S701_tga_air_v1_devc.csv',2);
-[S_tga_N2_v2] = csvread('CHRISTIFIRE_S701_tga_N2_v2_devc.csv',2);
-[S_tga_air_v2] = csvread('CHRISTIFIRE_S701_tga_air_v2_devc.csv',2);
+[S_tga_N2_v1] = csvread([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'],2);
+[S_tga_air_v1] = csvread([outdir,'CHRISTIFIRE_S701_tga_air_v1_devc.csv'],2);
+[S_tga_N2_v2] = csvread([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'],2);
+[S_tga_air_v2] = csvread([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'],2);
 
 hf = figure(1);
 hX = plot(S_tga_N2(:,1),S_tga_N2(:,2),'k');
@@ -124,10 +124,9 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_tga_N2_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_S701_tga_N2_v1_git.txt'];
 addverstr(gca,git_file,'linear')
-
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -142,10 +141,10 @@ close all
 
 % MCC(Cable sheath)-------------------------------------------------
 % read experimental results
-[S_mcc] = csvread('CHRISTIFIRE_S701_mcc.csv',2);
+[S_mcc] = csvread([expdir,'CHRISTIFIRE_S701_mcc.csv'],2);
 % read FDS results
-[S_mcc_v1] = csvread('CHRISTIFIRE_S701_mcc_v1_devc.csv',2);
-[S_mcc_v2] = csvread('CHRISTIFIRE_S701_mcc_v2_devc.csv',2);
+[S_mcc_v1] = csvread([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'],2);
+[S_mcc_v2] = csvread([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'],2);
 
 hf = figure(2);
 hX = plot(S_mcc(:,1),S_mcc(:,2),'k');
@@ -173,8 +172,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_mcc_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_S701_mcc_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -190,10 +189,10 @@ close all
 
 % TGA (Cable insulation)---------------------------------------------
 % read experimental results
-[I_tga_N2] = csvread('CHRISTIFIRE_I701_tga_N2.csv',2);
+[I_tga_N2] = csvread([expdir,'CHRISTIFIRE_I701_tga_N2.csv'],2);
 % read FDS results
-[I_tga_N2_v1] = csvread('CHRISTIFIRE_I701_tga_N2_v1_devc.csv',2);
-[I_tga_N2_v2] = csvread('CHRISTIFIRE_I701_tga_N2_v2_devc.csv',2);
+[I_tga_N2_v1] = csvread([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'],2);
+[I_tga_N2_v2] = csvread([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'],2);
 
 hf = figure(3);
 hX = plot(I_tga_N2(:,1),I_tga_N2(:,2),'k');
@@ -221,8 +220,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_tga_N2_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_I701_tga_N2_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -238,10 +237,10 @@ close all
 
 % MCC(Cable insulation)--------------------------------------------------
 % read experimental results
-[I_mcc] = csvread('CHRISTIFIRE_I701_mcc.csv',2);
+[I_mcc] = csvread([expdir,'CHRISTIFIRE_I701_mcc.csv'],2);
 % read FDS results
-[I_mcc_v1] = csvread('CHRISTIFIRE_I701_mcc_v1_devc.csv',2);
-[I_mcc_v2] = csvread('CHRISTIFIRE_I701_mcc_v2_devc.csv',2);
+[I_mcc_v1] = csvread([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'],2);
+[I_mcc_v2] = csvread([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'],2);
 
 hf = figure(4);
 hX = plot(I_mcc(:,1),I_mcc(:,2),'k');
@@ -269,8 +268,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_mcc_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_I701_mcc_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -286,16 +285,16 @@ close all
 
 % Cone calorimeter results---------------------------------------------
 % read experimental results
-[C_cone_25] = csvread('CHRISTIFIRE_C701_cone_25.csv',2);
-[C_cone_50] = csvread('CHRISTIFIRE_C701_cone_50.csv',2);
-[C_cone_75] = csvread('CHRISTIFIRE_C701_cone_75.csv',2);
+[C_cone_25] = csvread([expdir,'CHRISTIFIRE_C701_cone_25.csv'],2);
+[C_cone_50] = csvread([expdir,'CHRISTIFIRE_C701_cone_50.csv'],2);
+[C_cone_75] = csvread([expdir,'CHRISTIFIRE_C701_cone_75.csv'],2);
 % read FDS results
-[C_cone_25_v1] = csvread('CHRISTIFIRE_C701_cone_25_v1_devc.csv',2);
-[C_cone_50_v1] = csvread('CHRISTIFIRE_C701_cone_50_v1_devc.csv',2);
-[C_cone_75_v1] = csvread('CHRISTIFIRE_C701_cone_75_v1_devc.csv',2);
-[C_cone_25_v2] = csvread('CHRISTIFIRE_C701_cone_25_v2_devc.csv',2);
-[C_cone_50_v2] = csvread('CHRISTIFIRE_C701_cone_50_v2_devc.csv',2);
-[C_cone_75_v2] = csvread('CHRISTIFIRE_C701_cone_75_v2_devc.csv',2);
+[C_cone_25_v1] = csvread([outdir,'CHRISTIFIRE_C701_cone_25_v1_devc.csv'],2);
+[C_cone_50_v1] = csvread([outdir,'CHRISTIFIRE_C701_cone_50_v1_devc.csv'],2);
+[C_cone_75_v1] = csvread([outdir,'CHRISTIFIRE_C701_cone_75_v1_devc.csv'],2);
+[C_cone_25_v2] = csvread([outdir,'CHRISTIFIRE_C701_cone_25_v2_devc.csv'],2);
+[C_cone_50_v2] = csvread([outdir,'CHRISTIFIRE_C701_cone_50_v2_devc.csv'],2);
+[C_cone_75_v2] = csvread([outdir,'CHRISTIFIRE_C701_cone_75_v2_devc.csv'],2);
 
 %plot HRR 50 kW/m2
 hf = figure(5);
@@ -324,8 +323,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_50_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -366,8 +365,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_25_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -408,8 +407,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_75_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -450,8 +449,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_50_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -492,8 +491,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_25_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -534,8 +533,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_75_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -576,8 +575,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_50_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -618,8 +617,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_25_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -660,8 +659,8 @@ X_Title_Position = x_lim(1)+Title_Scale_X*(x_lim(2)-x_lim(1));
 Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+% add VerStr if file is available
+git_file = [outdir,'CHRISTIFIRE_C701_cone_75_v1_git.txt'];
 addverstr(gca,git_file,'linear')
 
 % print to pdf

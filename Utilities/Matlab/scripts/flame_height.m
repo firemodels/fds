@@ -12,7 +12,8 @@
 % confirm heat release rate
 check_hrr
 
-addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
+outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+expdir = '../../../exp/Heskestad_Flame_Height/';
 
 % list of line files
 filename = {'Qs=p1_RI=05_line.csv',    'Qs=p1_RI=10_line.csv',    'Qs=p1_RI=20_line.csv';   ...
@@ -44,7 +45,7 @@ Qdot=[151 303 756 1513 3025 7564 15127 30255 75636 151273 302545 756363 1512725 
 for i=1:16 % hrr loop
     for j=1:3 % resolution loop
         
-        M = csvread(filename{i,j},2,0);
+        M = csvread([outdir,filename{i,j}],2,0);
         z = M(:,1); dz = z(2)-z(1);
         hrrpul = M(:,2);
         Qdot_line = sum(hrrpul)*dz;
@@ -72,7 +73,7 @@ end % hrr loop
 fclose('all');
 
 header1 = {'Q*','L/D (RI=5)','L/D (RI=10)','L/D (RI=20)'};
-filename1 = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv';
+filename1 = [outdir,'FDS_Flame_Height.csv'];
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s\n',header1{:});
 for i=1:16
@@ -81,7 +82,7 @@ end
 fclose(fid);
   
 header2 = {'Q*','L/D'};
-filename2 = '../../Validation/Heskestad_Flame_Height/Experimental_Data/Heskestad_Correlation.csv';
+filename2 = [expdir,'Heskestad_Correlation.csv'];
 fid = fopen(filename2,'wt');
 fprintf(fid,'%s, %s\n',header2{:});
 for i=1:16
@@ -91,12 +92,9 @@ fclose(fid);
 
 % Generate FDS results for Tamanini cases
 
-close all
-clear all
-
-filename{1} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=05.csv';
-filename{2} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=10.csv';
-filename{3} = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Tamanini_RI=20.csv';
+filename{1} = [outdir,'FDS_Tamanini_RI=05.csv'];
+filename{2} = [outdir,'FDS_Tamanini_RI=10.csv'];
+filename{3} = [outdir,'FDS_Tamanini_RI=20.csv'];
 
 fds_line_file = {'Qs=1500_RI=05_line.csv', 'Qs=p6_RI=05_line.csv', 'Qs=p3_RI=05_line.csv'; ...
                  'Qs=1500_RI=10_line.csv', 'Qs=p6_RI=10_line.csv', 'Qs=p3_RI=10_line.csv'; ...
@@ -116,7 +114,7 @@ for j=1:3 % resolution loop
 
     for k=1:3 % hrr loop
 
-        M = importdata(fds_line_file{j,k},',',2);
+        M = importdata([outdir,fds_line_file{j,k}],',',2);
         z = M.data(:,1);
         dz = z(2)-z(1);
         hrrpul = M.data(:,2);

@@ -2,7 +2,7 @@
 % 6-06-2012
 % dataplot.m
 %
-% [saved_data, drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [drange])
+% [saved_data, drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir, [drange])
 %
 % Output:
 %
@@ -15,7 +15,9 @@
 %
 %    Dataplot_Inputs_File - base configuration file
 %
-%    Working_Dir - base input file directory
+%    EXP_Dir - location of experimental data repository
+%
+%    OUT_Dir - location of output file repository
 %
 %    Manuals_Dir - base plot directory
 %
@@ -35,12 +37,12 @@
 %    parsepipe.m
 %    parseplus.m
 %
-% Example: From the command line within the Matlab/functions/ directory,
+% Example: From the command line within the Matlab/scripts/ directory,
 %    type
 %
-%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [2:4,6:8]);
+%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir, [2:4,6:8]);
 %
-%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, 'WTC');
+%    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir, 'WTC');
 %
 % Special switch_id tags:
 %
@@ -54,13 +56,14 @@
 
 function [saved_data,drange] = dataplot(varargin)
 
-if nargin<3||nargin>4; 
+if nargin<4||nargin>5; 
     display('Error in argument list')
 end
-if nargin>=3
+if nargin>=4
     Dataplot_Inputs_File = varargin{1};
-    Working_Dir = varargin{2};
-    Manuals_Dir = varargin{3};
+    EXP_Dir = varargin{2};
+    OUT_Dir = varargin{3};
+    Manuals_Dir = varargin{4};
 end
 
 % Read in global plot options
@@ -80,8 +83,8 @@ headers = H{:}'; clear H
 
 n_plots = length(A);
 
-if nargin==4
-    drange = varargin{4};
+if nargin==5
+    drange = varargin{5};
 else
     drange = 2:n_plots;
 end

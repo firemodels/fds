@@ -7,8 +7,8 @@ clear all
 
 plot_style
 
-res_dir = '../../Validation/Wind_Engineering/FDS_Output_Files/';
-exp_dir = '../../Validation/Wind_Engineering/Experimental_Data/';
+res_dir = '../../../out/Wind_Engineering/FDS_Output_Files/';
+exp_dir = '../../../exp/Wind_Engineering/';
 plt_dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Wind_Engineering/';
 
 str_angle = {'180','270'}; % angles used

@@ -5,11 +5,11 @@
 close all
 clear all
 
-addpath('../../Validation/Beyler_Hood/Experimental_Data')
-addpath('../../Validation/Beyler_Hood/FDS_Output_Files')
+expdir = '../../../exp/Beyler_Hood/';
+outdir = '../../../out/Beyler_Hood/FDS_Output_Files/';
 
 % load experimental data and FDS prediction
-[exp_data] = csvread('Beyler_Hood_data_lr.csv',2);
+[exp_data] = csvread([expdir,'Beyler_Hood_data_lr.csv'],2);
 
 Fuel{1} = 'acetone';
 
@@ -132,7 +132,7 @@ LineWidth = 1.5;
 
 for f = 1:N_Fuels
    for s = 1:NumPoints(f)
-      FDS_File = ['Beyler_Hood_' Fuel{f} '_' num2str(TestID(f,s)) '_lr_devc.csv'];
+      FDS_File = [outdir,'Beyler_Hood_' Fuel{f} '_' num2str(TestID(f,s)) '_lr_devc.csv'];
       [fds_data] = csvread(FDS_File,2);
       n_fds = size(fds_data,1);
       for ns = 1:N_Species
@@ -181,20 +181,10 @@ for ns = 1:N_Species
    ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
    legend(hX,XLegendStr,'Location','NorthWest')
 
-   % add SVN if file is available
+   % add VerStr if file is available
 
-   svn_file = '../../Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_git.txt';
-   addverstr(gca,svn_file,'linear')
-
-   % if exist(svn_file,'file')
-   %     SVN = importdata(svn_file);
-   %     x_lim = get(gca,'XLim');
-   %     y_lim = get(gca,'YLim');
-   %     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-   %     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-   %     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-   %         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-   % end
+   git_file = [outdir,'Beyler_Hood_acetone_117_lr_git.txt'];
+   addverstr(gca,git_file,'linear')
 
    % print to pdf
    set(gcf,'Visible',Figure_Visibility);
