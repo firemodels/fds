@@ -138,7 +138,7 @@ if [ "$KILL_FIREBOT" == "1" ]; then
     PID=`head -1 $firebot_pid`
     echo killing process invoked by firebot
     kill -9 $(LIST_DESCENDANTS $PID)
-    echo killing firebot (PID=$PID)
+    echo "killing firebot (PID=$PID)"
     kill -9 $PID
     JOBIDS=`qstat -a | grep FB_ | awk -v user="$USER" '{if($2==user){print $1}}'`
     if [ "$JOBIDS" != "" ]; then
