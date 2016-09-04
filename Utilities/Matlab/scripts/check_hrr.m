@@ -13,9 +13,8 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
-
-M = csvread('box_height.csv',1,0);
+outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+M = csvread([outdir,'box_height.csv'],1,0);
 Qs = M(:,1);
 Q = M(:,2);
 RI = {'_RI=05','_RI=10','_RI=20'};
@@ -26,7 +25,7 @@ K(4)=loglog(Qs,Q,'k-'); hold on
 for j=1:length(Qs)
     for i=1:3
         filename = ['Qs=',QI{j},RI{i},'_hrr.csv'];
-        A = csvread(filename,2,0);
+        A = csvread([outdir,filename],2,0);
         n = length(A(:,1));
         Q_fds = mean(A(round(n/2):n,2));
         if (i==1); K(1)=loglog(Qs(j),Q_fds,'ksq'); end

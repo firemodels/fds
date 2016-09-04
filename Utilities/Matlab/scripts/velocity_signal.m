@@ -5,10 +5,7 @@
 function []=velocity_signal(devc_file,devc_col,vel_style,tmin,tmax,vmin,vmax,xaxis_title,yaxis_title, ...
                             title_label,text_label,signal_file,git_file)
 
-plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
-datadir = ['../../Validation/Sandia_Plumes/FDS_Output_Files/'];
-
-M = csvread([datadir,devc_file],2,0);
+M = csvread(devc_file,2,0);
 
 range = find(M(:,1)>tmin & M(:,1)<tmax);
 
@@ -48,5 +45,5 @@ addverstr(gca,git_file,'linear')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'Sandia_Plumes/',signal_file])
+print(gcf,'-dpdf',signal_file)
 

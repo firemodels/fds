@@ -5,13 +5,13 @@
 close all
 clear all
 
-addpath('../../Validation/Cup_Burner/Experimental_Data')
-addpath('../../Validation/Cup_Burner/FDS_Output_Files')
+expdir = '../../../exp/Cup_Burner/';
+outdir = '../../../out/Cup_Burner/FDS_Output_Files/';
 
 plot_style
 
 % load experimental data and FDS prediction
-[exp_data] = csvread('Cup_burner_data.csv',2);
+[exp_data] = csvread([expdir,'Cup_burner_data.csv'],2);
 
 HRR_Limit = 1E-10;
 
@@ -50,7 +50,7 @@ MarkerSize = 10;
 for f = 1:N_Fuels
 for s = 1:N_Agents
 
-   FDS_File = ['Cup_' Fuel{f} '_' Agent{s} '_devc.csv'];
+   FDS_File = [outdir 'Cup_' Fuel{f} '_' Agent{s} '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
    n_fds = size(fds_data,1);
    i_first = find(fds_data(1:n_fds,4)>HRR_Limit,1,'first');
@@ -107,20 +107,10 @@ xlabel('Measured MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontNam
 ylabel('Predicted MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hX,XLegendStr,'Location','NorthWest')
 
-% add SVN if file is available
+% add VerStr if file is available
 
-svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = [outdir,'Cup_C7H16_CO2_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -128,7 +118,6 @@ set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_volfrac');
-
 
 % plot Y
 
@@ -164,20 +153,10 @@ xlabel('Measured MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName'
 ylabel('Predicted MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hY,YLegendStr,'Location','NorthWest')
 
-% add SVN if file is available
+% add VerStr if file is available
 
-svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');                
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = [outdir,'Cup_C7H16_CO2_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);

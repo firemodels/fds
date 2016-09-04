@@ -1,12 +1,16 @@
-% $Id$
-% $Revision$
+% drjfloyd
+% 9-3-2016
+% fm_datacenter_veltest.m
 
 % Generate velocity comparison plots for the FM datacenter flow mapping tests
 
+expdir = '../../../exp/FM_FPRF_Datacenter/';
+outdir = '../../../out/FM_FPRF_Datacenter/FDS_Output_Files/';
+
 % High flow test
-[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_high.csv',1);
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
-n_fds_data=size(fds_data,1);
+[exp_data] = csvread([expdir,'fm_datacenter_veltest_high.csv'],1);
+[fds_data] = csvread([outdir,'FM_Datacenter_Veltest_High_devc.csv'],13);
+n_fds_data = size(fds_data,1);
 
 % compute average velocity
 for i = 13:207
@@ -46,18 +50,8 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = [outdir,'FM_Datacenter_Veltest_High_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -86,16 +80,7 @@ ytitle = ['Predicted V-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -124,16 +109,7 @@ ytitle = ['Predicted W-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -162,16 +138,7 @@ ytitle = ['Predicted Total Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -184,9 +151,9 @@ hold off
 clear hX
 
 % Low flow test
-[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_low.csv',1);
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
-n_fds_data=size(fds_data,1);
+[exp_data] = csvread([expdir,'fm_datacenter_veltest_low.csv'],1);
+[fds_data] = csvread([outdir,'FM_Datacenter_Veltest_Low_devc.csv'],13);
+n_fds_data = size(fds_data,1);
 
 % compute average velocity
 for i = 13:195
@@ -219,18 +186,8 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = [outdir,'FM_Datacenter_Veltest_Low_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -259,16 +216,7 @@ ytitle = ['Predicted V-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -297,16 +245,7 @@ ytitle = ['Predicted W-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -335,16 +274,7 @@ ytitle = ['Predicted Total Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%    SVN = importdata(svn_file);
-%    x_lim = get(gca,'XLim');
-%    y_lim = get(gca,'YLim');
-%    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%    'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);

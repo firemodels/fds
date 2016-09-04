@@ -2,25 +2,32 @@
 
 plot_style
 
-repository = '../../Validation/VTT_Sprays/';
+outdir = '../../../out/VTT_Sprays/FDS_Output_Files/';
+expdir = '../../../exp/VTT_Sprays/';
 
-files = dir(strcat(repository,'*_line.csv'));
+files = dir(strcat([outdir,'*_line.csv']));
 
-chids=strrep({files.name},'FDS_Output_Files/*_line.csv','');
-cases={ 'LN02_1' ,'LN02_2','LN02_4'};
-stop = ~all(cellfun(@(cname) any(strcmp(cname,cases)),chids));
-
-if(stop) 
-    display(['Error: File missing in ' repository, '. Skipping case.']);
+skip_case = 0;
+if ~exist([outdir,'LN02_1_line.csv'])
+    display('Error: File LN02_1_line.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist([outdir,'LN02_2_line.csv'])
+    display('Error: File LN02_2_line.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if ~exist([outdir,'LN02_4_line.csv'])
+    display('Error: File LN02_4_line.csv does not exist. Skipping case.')
+    skip_case = 1;
+end
+if skip_case 
     return
 end
-   
-edata=importdata([repository,'Experimental_Data/LN02.csv']);
-L1=importdata([repository,'FDS_Output_Files/LN02_1_line.csv']);
-L2=importdata([repository,'FDS_Output_Files/LN02_2_line.csv']);
-L4=importdata([repository,'FDS_Output_Files/LN02_4_line.csv']);
 
-
+edata=importdata([expdir,'LN02.csv']);
+L1=importdata([outdir,'LN02_1_line.csv']);
+L2=importdata([outdir,'LN02_2_line.csv']);
+L4=importdata([outdir,'LN02_4_line.csv']);
 
 fds40diamx =strcmp('d32_40-x',L1.colheaders);
 fds62diamx =strcmp('d32_60-x',L1.colheaders);
@@ -74,7 +81,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_40.pdf...')
@@ -108,7 +115,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
@@ -142,7 +149,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
@@ -177,7 +184,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_62.pdf...')
@@ -211,7 +218,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
@@ -245,7 +252,7 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')

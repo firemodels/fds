@@ -62,17 +62,17 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 
 % return
 
-expdir = '../../Validation/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
-fdsdir = '../../Validation/UMD_Line_Burner/FDS_Output_Files/';
+expdir = '../../../exp/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
+outdir = '../../../out/UMD_Line_Burner/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
-F1 = importdata([fdsdir,'methane_dx_1p25cm_line.csv'],',',2);
-F2 = importdata([fdsdir,'methane_dx_p625cm_line.csv'],',',2);
-F3 = importdata([fdsdir,'methane_dx_p3125cm_line.csv'],',',2);
+F1 = importdata([outdir,'methane_dx_1p25cm_line.csv'],',',2);
+F2 = importdata([outdir,'methane_dx_p625cm_line.csv'],',',2);
+F3 = importdata([outdir,'methane_dx_p3125cm_line.csv'],',',2);
 
 % % oxygen level
 
-% % J1 = importdata([fdsdir,'methane_dx_1p25cm_devc.csv'],',',2);
+% % J1 = importdata([outdir,'methane_dx_1p25cm_devc.csv'],',',2);
 
 % t = J1.data(:,1);
 % X_O2 = J1.data(:,2);
@@ -94,7 +94,7 @@ F3 = importdata([fdsdir,'methane_dx_p3125cm_line.csv'],',',2);
 % HOC = 49674; % kJ/kg methane
 % mf = 0.04;   % kg/m2/s methane
 % A  = 0.05*0.5; % m2
-% G1 = importdata([fdsdir,'methane_dx_1p25cm_hrr.csv'],',',2);
+% G1 = importdata([outdir,'methane_dx_1p25cm_hrr.csv'],',',2);
 % t = G1.data(:,1);
 % HRR = G1.data(:,strcmp(G1.colheaders,'HRR'));
 % MLR = G1.data(:,strcmp(G1.colheaders,'MLR_FUEL'));
@@ -160,7 +160,7 @@ lh = legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
 set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
-git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+git_file = [outdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
 set(gca,'FontName',Font_Name)
@@ -224,7 +224,7 @@ ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Lab
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
 
 % add Git revision if file is available
-git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+git_file = [outdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
 set(gca,'FontName',Font_Name)
@@ -288,7 +288,7 @@ ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpre
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
 
 % add Git revision if file is available
-git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+git_file = [outdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
 set(gca,'FontName',Font_Name)
@@ -352,7 +352,7 @@ ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpre
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
 
 % add Git revision if file is available
-git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+git_file = [outdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
 set(gca,'FontName',Font_Name)
