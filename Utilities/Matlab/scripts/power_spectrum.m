@@ -6,8 +6,6 @@ function []=power_spectrum(spectrum_file,dt_puff,slope_scale,xaxis_title,yaxis_t
                            devc_file,devc_col,tmin,tmax,dt,spectrum_style,nyquist_style, ...
                            title1,title2,git_file)
 
-plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
-
 M = csvread(devc_file,2,0);
 
 range = find(M(:,1)>tmin & M(:,1)<tmax);
@@ -78,7 +76,7 @@ addverstr(gca,git_file,'loglog')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'Sandia_Plumes/',spectrum_file])
+print(gcf,'-dpdf',spectrum_file)
 
 
 
