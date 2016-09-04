@@ -5,13 +5,13 @@
 close all
 clear all
 
-addpath('../../Validation/BRE_Spray/Experimental_Data')
-addpath('../../Validation/BRE_Spray/FDS_Input_Files')
-addpath('../../Validation/BRE_Spray/FDS_Output_Files')
+expdir = '../../../exp/BRE_Spray/';
+outdir = '../../../out/BRE_Spray/FDS_Output_Files/';
+inpdir = '../../Validation/BRE_Spray/FDS_Input_Files/';
 
 % load experimental data and FDS prediction
 
-exp_data(1:24,1:7) = csvread('BRE_Spray_Test.csv',2);
+exp_data(1:24,1:7) = csvread([expdir,'BRE_Spray_Test.csv'],2);
 exp_col_d = 6;
 exp_col_w = 7;
 exp_col_att = 4;
@@ -55,7 +55,7 @@ dmax = 800;
 for n = 1:3
 for p = 1:8
 
-   FDS_File = ['BRE_Spray_' Nozzle{n} '_' int2str(p) '_devc.csv'];
+   FDS_File = [outdir,'BRE_Spray_' Nozzle{n} '_' int2str(p) '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
    
    % Collect data
@@ -177,14 +177,14 @@ print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_S
 
 %add LEMTA data base to BRE data base
 
-addpath('../../Validation/LEMTA_Spray/Experimental_Data')
-addpath('../../Validation/LEMTA_Spray/FDS_Input_Files')
-addpath('../../Validation/LEMTA_Spray/FDS_Output_Files')
+expdir = '../../../exp/LEMTA_Spray/';
+outdir = '../../../out/LEMTA_Spray/FDS_Output_Files/';
+inpdir = '../../Validation/LEMTA_Spray/FDS_Input_Files/';
 
 % load experimental data and FDS prediction
 
-exp_data(25:29,1:4)=csvread('LEMTA_Spray_Test.csv',2,0,[2,0,6,3]);
-exp_data(25:29,8)=csvread('LEMTA_Spray_Test.csv',2,4); %distance
+exp_data(25:29,1:4)=csvread([expdir,'LEMTA_Spray_Test.csv'],2,0,[2,0,6,3]);
+exp_data(25:29,8)=csvread([expdir,'LEMTA_Spray_Test.csv'],2,4); %distance
 
 exp_marker{4} = 'kv';
 exp_color{4} = 'k';
@@ -200,7 +200,7 @@ exp_rows(4,1:5) = [25:29];
 n=4;
 for p = 1:5
 
-   FDS_File = ['LEMTA_Spray_' int2str(p) '_devc.csv'];
+   FDS_File = [outdir 'LEMTA_Spray_' int2str(p) '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
    
    % Collect data
