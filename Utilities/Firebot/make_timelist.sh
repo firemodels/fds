@@ -19,7 +19,7 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
-for file in $historydir/Git*benchmark*csv 
+for file in $historydir/*benchmark*csv 
 do
 time=`tail -1 $file`
 hash=`tail -2 $file | head -1`
