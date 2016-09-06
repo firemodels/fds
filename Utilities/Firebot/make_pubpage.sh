@@ -81,7 +81,7 @@ ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | h
                           if($8=="2")font="<font color=\"#FF00FF\">";\
                           if($8=="3")font="<font color=\"#FF0000\">";\
                           printf("%s %s</font><br>\n",font,$1);\
-                          printf("<a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a><br>\n",$4,$5);\
+                          printf("<a href=\"https://github.com/firemodels/fds/commit/%s\">Revision: %s</a><br>\n",$4,$5);\
                           printf("Revision date: %s<br>\n",$2);\
                           if($9!="")printf("%s <br>\n",cputime);\
                           }' 
@@ -110,7 +110,7 @@ ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | h
                           if($8=="2")font="<font color=\"#FF00FF\">";\
                           if($8=="3")font="<font color=\"#FF0000\">";\
                           printf("<p>%s %s</font><br>\n",font,$1);\
-                          printf("<a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a><br>\n",$4,$5);\
+                          printf("<a href=\"https://github.com/firemodels/fds/commit/%s\">Revision: %s</a><br>\n",$4,$5);\
                           printf("Revision date: %s<br>\n",$2);\
                           if($9!="")printf("%s <br>\n",cputime);\
                           }' 
