@@ -9111,6 +9111,14 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (ABS(XB1-XB2)<=SPACING(XB2) ) VT%UNDIVIDED_INPUT_AREA = (XB4-XB3)*(XB6-XB5)
                IF (ABS(XB3-XB4)<=SPACING(XB4) ) VT%UNDIVIDED_INPUT_AREA = (XB2-XB1)*(XB6-XB5)
                IF (ABS(XB5-XB6)<=SPACING(XB6) ) VT%UNDIVIDED_INPUT_AREA = (XB2-XB1)*(XB4-XB3)
+               IF (RADIUS>0._EB)                VT%UNDIVIDED_INPUT_AREA = PI*RADIUS**2
+ 
+               VT%X1_ORIG = XB1
+               VT%X2_ORIG = XB2
+               VT%Y1_ORIG = XB3
+               VT%Y2_ORIG = XB4
+               VT%Z1_ORIG = XB5
+               VT%Z2_ORIG = XB6
 
                XB1 = MAX(XB1,XS)
                XB2 = MIN(XB2,XF)

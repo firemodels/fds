@@ -1,8 +1,7 @@
 #!/bin/bash
 FORCE=$1
 
-gitwebrepo=~/FDS-SMVgitweb
-firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
+gitwebrepo=~/FDS-SMVwebpages
 oldpage=~/.firebot/oldpage
 newpage=~/.firebot/newpage
 olddata=~/.firebot/old_data
@@ -12,7 +11,6 @@ curdir=`pwd`
 EXIT="yes"
 
 # don't update status page if firebot is running
-cd $firebotdir
 if [ -e $running ] ; then
   if [ "$FORCE" == "" ]; then
     exit
