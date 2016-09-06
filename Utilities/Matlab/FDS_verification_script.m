@@ -39,10 +39,10 @@ random_walk_soln
 
 % Dataplot and scatplot options
 
-Dataplot_Inputs_File = [pwd, '/FDS_verification_dataplot_inputs.csv'];
-Working_Dir = [pwd, '/../../Verification/'];
-Manuals_Dir = [pwd, '/../../Manuals/'];
-Scatterplot_Inputs_File = [pwd, '/FDS_verification_scatterplot_inputs.csv'];
+Dataplot_Inputs_File = 'FDS_verification_dataplot_inputs.csv';
+Working_Dir = '../../Verification/';
+Manuals_Dir = '../../Manuals/';
+Scatterplot_Inputs_File = 'FDS_verification_scatterplot_inputs.csv';
 
 % Statistics output options
 
@@ -57,7 +57,7 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Working_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
