@@ -2003,7 +2003,7 @@ INTEGER, INTENT(IN) :: I,J,K,NM,OBST_INDEX,IW,IOR,SURF_INDEX
 INTEGER  :: NOM_FOUND,NOM=0,ITER,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX,VENT_INDEX
 INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: TT
-REAL(EB) :: PX,PY,PZ,X1,X2,Y1,Y2,Z1,Z2,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,UW,RDN,AW,TSI,&
+REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,UW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
 INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,NOM_CHECK(0:1),BOUNDARY_TYPE
 INTEGER :: NSLICE
@@ -2424,58 +2424,48 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
 
    ! Special velocity profiles
 
-   IF (SF%PROFILE==PARABOLIC_PROFILE) THEN
+   PARABOLIC_IF: IF (SF%PROFILE==PARABOLIC_PROFILE) THEN
       SELECT CASE(ABS(IOR))
          CASE(1)
-            Y1 = M%Y(VT%J1)
-            Y2 = M%Y(VT%J2)
-            Z1 = M%Z(VT%K1)
-            Z2 = M%Z(VT%K2)
             IF (VT%RADIUS>0._EB) THEN
-               Y1 = VT%Y0-VT%RADIUS
-               Y2 = VT%Y0+VT%RADIUS
-               Z1 = VT%Z0-VT%RADIUS
-               Z2 = VT%Z0+VT%RADIUS
-            ENDIF
-            PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
-            PZ = 4._EB*(M%ZC(K)-Z1)*(Z2-M%ZC(K))/(Z2-Z1)**2
-            WC%UW0 = WC%UW0*PY*PZ
-         CASE(2)
-            X1 = M%X(VT%I1)
-            X2 = M%X(VT%I2)
-            Z1 = M%Z(VT%K1)
-            Z2 = M%Z(VT%K2)
-            IF (VT%RADIUS>0._EB) THEN
-               X1 = VT%X0-VT%RADIUS
-               X2 = VT%X0+VT%RADIUS
-               Z1 = VT%Z0-VT%RADIUS
-               Z2 = VT%Z0+VT%RADIUS
-            ENDIF
-            PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
-            PZ = 4._EB*(M%ZC(K)-Z1)*(Z2-M%ZC(K))/(Z2-Z1)**2
-            WC%UW0 = WC%UW0*PX*PZ
-         CASE(3)
-            X1 = M%X(VT%I1)
-            X2 = M%X(VT%I2)
-            IF (CYLINDRICAL .AND. ABS(X1)<=TWO_EPSILON_EB) X1 = -X2
-            Y1 = M%Y(VT%J1)
-            Y2 = M%Y(VT%J2)
-            IF (VT%RADIUS>0._EB) THEN
-               X1 = VT%X0-VT%RADIUS
-               X2 = VT%X0+VT%RADIUS
-               Y1 = VT%Y0-VT%RADIUS
-               Y2 = VT%Y0+VT%RADIUS
-            ENDIF
-            PX = 4._EB*(M%XC(I)-X1)*(X2-M%XC(I))/(X2-X1)**2
-            PY = 4._EB*(M%YC(J)-Y1)*(Y2-M%YC(J))/(Y2-Y1)**2
-            IF (CYLINDRICAL) THEN
-               WC%UW0 = WC%UW0*PX
+               RR = (M%YC(J)-VT%Y0)**2 + (M%ZC(K)-VT%Z0)**2
+               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
             ELSE
-               WC%UW0 = WC%UW0*PX*PY
+               PY = 4._EB*(M%YC(J)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(J))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
+               PZ = 4._EB*(M%ZC(K)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(K))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
+               WC%UW0 = WC%UW0*PY*PZ
+            ENDIF
+         CASE(2)
+            IF (VT%RADIUS>0._EB) THEN
+               RR = (M%XC(I)-VT%X0)**2 + (M%ZC(K)-VT%Z0)**2
+               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
+            ELSE
+               PX = 4._EB*(M%XC(I)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(I))/(VT%X2_ORIG-VT%X1_ORIG)**2
+               PZ = 4._EB*(M%ZC(K)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(K))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
+               WC%UW0 = WC%UW0*PX*PZ
+            ENDIF
+         CASE(3)
+            IF (VT%RADIUS>0._EB) THEN
+               RR = (M%XC(I)-VT%X0)**2 + (M%YC(J)-VT%Y0)**2
+               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
+            ELSE
+               PX = 4._EB*(M%XC(I)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(I))/(VT%X2_ORIG-VT%X1_ORIG)**2
+               PY = 4._EB*(M%YC(J)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(J))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
+               IF (CYLINDRICAL) THEN
+                  WC%UW0 = WC%UW0*PX
+               ELSE
+                  WC%UW0 = WC%UW0*PX*PY
+               ENDIF
             ENDIF
       END SELECT
-      IF (ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) WC%UW0 = WC%UW0*9._EB/4._EB  ! Match desired volume flow
-   ENDIF
+      IF (ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) THEN   ! Match desired volume flow
+         IF (VT%RADIUS>0._EB) THEN
+            WC%UW0 = WC%UW0*2._EB
+         ELSE
+            WC%UW0 = WC%UW0*9._EB/4._EB
+         ENDIF
+      ENDIF
+   ENDIF PARABOLIC_IF
 
    IF (SF%PROFILE==BOUNDARY_LAYER_PROFILE) THEN
 
