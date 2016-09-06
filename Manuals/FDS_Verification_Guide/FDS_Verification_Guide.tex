@@ -830,7 +830,7 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
 
 \clearpage
 
-\section{Scalar Transport (\texorpdfstring\textct{move\_slug}{move\_slug})}
+\section{Scalar Transport (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
 
 In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.
 The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.
@@ -862,7 +862,7 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \clearpage
 
-\section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring\textct{saad}{saad})}
+\section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring{\textct{saad}}{saad})}
 \label{sec:saad_temporal_error}
 
 \textbf{Tony Saad and James Sutherland, The University of Utah}\\
@@ -922,7 +922,7 @@ The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the 
 
 \clearpage
 
-\section{Variable-Density Manufactured Solution (\texorpdfstring\textct{shunn3}{shunn3})}
+\section{Variable-Density Manufactured Solution (\texorpdfstring{\textct{shunn3}}{shunn3})}
 \label{sec:shunn_mms}
 
 To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
@@ -1141,7 +1141,7 @@ Norm & $\rho$ & $Z$ & $u$ & $H$ \\
 
 \clearpage
 
-\section{Collapse of a Hot Layer in a Micro-gravity Environment (\texorpdfstring\textct{hot\_layer\_360}{hot\_layer\_360})}
+\section{Collapse of a Hot Layer in a Micro-gravity Environment (\texorpdfstring{\textct{hot\_layer\_360}}{hot\_layer\_360})}
 \label{sec:baum_hot_layer}
 
 \textbf{Howard R. Baum, NIST Fellow Emeritus}\\
@@ -1998,7 +1998,7 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 \end{figure}
 
 
-\subsection{Solid phase energy conservation (\texorpdfstring\textct{energy\_budget\_solid}{energy\_budget\_solid})}
+\subsection{Solid phase energy conservation (\texorpdfstring{\textct{energy\_budget\_solid}}{energy\_budget\_solid})}
 \label{energy_budget_solid}
 
 This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 \si{m^3} box is filled with 1 kg of a gas with a specific heat of 1 \si{kJ/(kg.K)}, a molecular weight of 28 g/mol, and an initial temperature of 20 \si{\degree C}.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 \si{W/(m.K)},  a specific heat of 1 \si{kJ/(kg.K)}, an initial temperature of 150 \si{\degree C}, and a density of 1,000 \si{kg/m^3}.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state, the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 \si{\degree C}.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
@@ -2426,7 +2426,7 @@ This chapter contains examples that test the computations related to species con
 
 
 
-\section{Product Yields (\texorpdfstring\textct{methane\_flame}{methane\_flame})}
+\section{Product Yields (\texorpdfstring{\textct{methane\_flame}}{methane\_flame})}
 \label{methane_flame}
 
 A simple methane flame with 10~\% CO yield is burned inside a closed cavity for 5~s.
@@ -2444,7 +2444,7 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \clearpage
 
-\section{Reaction Rates (\texorpdfstring\textct{reactionrate}{reactionrate})}
+\section{Reaction Rates (\texorpdfstring{\textct{reactionrate}}{reactionrate})}
 
 This section describes a series of test cases designed to check the reaction rate mechanism using the eddy dissipation concept model for infinitely fast reactions (EDC) and  finite-rate (Arrhenius) reactions. In the most basic sense, if a reaction occurs the rate of the reaction is either infinite or finite-rate. For an infinite-rate reaction, the rate is limited by the minimum reactant concentration. For $i$ finite-rate reactions, the rate of species $\alpha$ is dependent on factors such as local species concentration ($Y_{\alpha}$), temperature ($T$), and Arrhenius parameters ($E,A,a$):
 \begin{equation}\label{eq:finite_rate1}
@@ -2453,7 +2453,7 @@ This section describes a series of test cases designed to check the reaction rat
 
 Detailed discussion on the combustion routines can be found in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
-\subsection{Mixing-Controlled Reactions (\texorpdfstring\textct{reactionrate\_EDC}{reactionrate\_EDC})}
+\subsection{Mixing-Controlled Reactions (\texorpdfstring{\textct{reactionrate\_EDC}}{reactionrate\_EDC})}
 \label{mixing_reactions}
 \label{reactionrate_EDC_flim_1step_CH4}
 \label{reactionrate_EDC_flim_1step_C3H8}
@@ -2603,7 +2603,7 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 
 \clearpage
 
-\subsection{Finite Rate Reactions (\texorpdfstring\textct{reactionrate\_arrhenius}{reactionrate\_arrhenius})}
+\subsection{Finite Rate Reactions (\texorpdfstring{\textct{reactionrate\_arrhenius}}{reactionrate\_arrhenius})}
 \label{finite_rate_reactions}
 \label{reactionrate_arrhenius_equilibrium}
 \label{reactionrate_arrhenius_0order_1step}
@@ -3066,7 +3066,7 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 
 \section{Aerosol Deposition}
 
-\subsection{Surface Deposition of Aerosols (\texorpdfstring\textct{propane\_flame\_deposition}{propane\_flame\_deposition})}
+\subsection{Surface Deposition of Aerosols (\texorpdfstring{\textct{propane\_flame\_deposition}}{propane\_flame\_deposition})}
 \label{propane_flame_deposition}
 
 The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes the aerosol deposition model in FDS (i.e., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire (\textct{HEAT\_OF\_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A \textct{RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting mass of soot should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the mass of soot in the gas phase to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of soot to exist in the gas phase and the remainder of soot to be deposited on the wall. The sum of soot in the gas phase and deposited soot should be 0.447~g.
@@ -3086,7 +3086,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 \clearpage
 
-\subsection{Gravitational Settling of Aerosols (\texorpdfstring\textct{soot\_gravitational\_settling}{soot\_gravitational\_settling})}
+\subsection{Gravitational Settling of Aerosols (\texorpdfstring{\textct{soot\_gravitational\_settling}}{soot\_gravitational\_settling})}
 \label{soot_gravitational_settling}
 \label{soot_gravitational_settling_2}
 
@@ -3970,7 +3970,7 @@ This chapter contains verification cases that test all aspects of particles, dro
 The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between solid particles or liquid droplets and air. Details of the FDS integration scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
 
 
-\subsection{Particles Swept Up in a Free Stream (\texorpdfstring\textct{fluid\_part\_mom}{fluid\_part\_mom})}
+\subsection{Particles Swept Up in a Free Stream (\texorpdfstring{\textct{fluid\_part\_mom}}{fluid\_part\_mom})}
 
 Consider a 1~m square duct that is 10~m long.  The boundary conditions are periodic in the streamwise direction and free slip along the inside walls. The fluid velocity is initialized to be 10~m/s. A monodisperse distribution of 1000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct. Gravity is set to zero. As the case proceeds momentum is exchanged between the fluid and the particles. The results for all three tests are shown in Fig.~\ref{fig_fluid_part_mom}.  On the top, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the bottom shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (green dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
 
@@ -4015,7 +4015,7 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 
 
 
-\subsection{Stationary Spherical Particles in a Duct (\texorpdfstring\textct{sphere\_drag}{sphere\_drag})}
+\subsection{Stationary Spherical Particles in a Duct (\texorpdfstring{\textct{sphere\_drag}}{sphere\_drag})}
 \label{sphere_drag_1}
 \label{sphere_drag_2}
 
@@ -4037,7 +4037,7 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 
 
 
-\subsection{Mesh Screen in a Duct (\texorpdfstring\textct{screen\_drag}{screen\_drag})}
+\subsection{Mesh Screen in a Duct (\texorpdfstring{\textct{screen\_drag}}{screen\_drag})}
 \label{screen_drag_1}
 \label{screen_drag_2}
 
@@ -4054,7 +4054,7 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 \label{screen_drag_plots}
 \end{figure}
 
-\subsection{Flow through Porous Media (\texorpdfstring\textct{porous\_media}{porous\_media})}
+\subsection{Flow through Porous Media (\texorpdfstring{\textct{porous\_media}}{porous\_media})}
 \label{porous_media}
 
 This case involves a 2~m long duct with a 0.5~m by 0.5~m cross section and 1~m/s flow in the $x$ direction. An 8.5~cm thick block of rigid aluminum foam is positioned in the duct. The pressure drop induced by the foam is expected to be approximately:
@@ -4073,7 +4073,7 @@ where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate
 
 
 
-\subsection{Particle Terminal Velocity (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
+\subsection{Particle Terminal Velocity (\texorpdfstring{\textct{terminal\_velocity}}{terminal\_velocity})}
 
 If a single particle with a constant drag coefficient falls through a stationary fluid, its terminal velocity can be found analytically. The equation governing this motion is
 \be
@@ -4133,7 +4133,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 
 
 
-\subsection{Particle Trajectory (\texorpdfstring\textct{flat\_fire}{flat\_fire})}
+\subsection{Particle Trajectory (\texorpdfstring{\textct{flat\_fire}}{flat\_fire})}
 \label{flat_fire}
 
 There are no known solutions of the particle trajectory equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is relatively small compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u_{\rm p}$, is a good approximation for the velocity magnitude, $|\mathbf{u_{\rm p}}|$. In 2D, this approximation decouples the horizontal ($x$) equation of motion from the vertical ($z$) and reduces the vertical equation of motion to a linear ODE:
@@ -4386,7 +4386,7 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
 
-\section{Duct Flow Losses (\texorpdfstring\textct{HVAC\_flow\_loss}{HVAC\_flow\_loss})}
+\section{Duct Flow Losses (\texorpdfstring{\textct{HVAC\_flow\_loss}}{HVAC\_flow\_loss})}
 \label{HVAC_flow_loss}
 
 The pressure drop due to steady flow in a duct is given by
@@ -4402,7 +4402,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \clearpage
 
-\section{Node Flow Losses (\texorpdfstring\textct{HVAC\_tee\_loss\_1}{HVAC\_tee\_loss\_1}, \texorpdfstring\textct{HVAC\_tee\_loss\_2}{HVAC\_tee\_loss\_2})}
+\section{Node Flow Losses (\texorpdfstring{\textct{HVAC\_tee\_loss\_1}}{HVAC\_tee\_loss\_1}, \texorpdfstring{\textct{HVAC\_tee\_loss\_2}}{HVAC\_tee\_loss\_2})}
 \label{HVAC_tee_loss_1}
 \label{HVAC_tee_loss_2}
 
@@ -4420,7 +4420,7 @@ These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. Howeve
 
 \clearpage
 
-\section{HVAC Mass Conservation (\texorpdfstring\textct{HVAC\_mass\_conservation}{HVAC\_mass\_conservation})}
+\section{HVAC Mass Conservation (\texorpdfstring{\textct{HVAC\_mass\_conservation}}{HVAC\_mass\_conservation})}
 \label{HVAC_mass_conservation}
 
 A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compartment being filled with a species called \textct{SPEC1} having the same molecular weight as air, see Fig.~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure \textct{SPEC1} being discharged in the upper half.
@@ -4437,14 +4437,14 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 
 \clearpage
 
-\section{HVAC Energy Conservation and Pressure (\texorpdfstring\textct{HVAC\_energy\_pressure}{HVAC\_energy\_pressure})}
+\section{HVAC Energy Conservation and Pressure (\texorpdfstring{\textct{HVAC\_energy\_pressure}}{HVAC\_energy\_pressure})}
 \label{HVAC_energy_pressure}
 
 A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Fig.~\ref{fig_HVAC_e_p}.
-The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 \si{kJ/(kg.K)} and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.
+The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 \si{kJ/(kg.K)} and a specific enthalpy of 293.15~kJ/kg at the reference temperature of 293.15~K.
 The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of ducts is created.
 The first duct takes suction from the lower left half and discharges into the lower right half and is given an area of 0.1 m$^2$ and fixed volume flow rate 0.1 \si{m^3/s}.
-The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~(\ref{HVAC_steady_state})
+The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 56.3 Pa based on Eq.~(\ref{HVAC_steady_state})
 
 \begin{figure}[ht]
 \noindent
@@ -4460,7 +4460,7 @@ The second duct is placed in the upper half of the compartment and is assigned a
 
 \clearpage
 
-\section{HVAC Dampers (\texorpdfstring\textct{HVAC\_damper}{HVAC\_damper})}
+\section{HVAC Dampers (\texorpdfstring{\textct{HVAC\_damper}}{HVAC\_damper})}
 \label{HVAC_damper}
 
 The \textct{HVAC\_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \textct{DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s, and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s, and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
@@ -4475,7 +4475,7 @@ The \textct{HVAC\_damper} example case is a simple duct network of three ducts c
 
 \clearpage
 
-\section{HVAC Filters (\texorpdfstring\textct{HVAC\_filter}{HVAC\_filter})}
+\section{HVAC Filters (\texorpdfstring{\textct{HVAC\_filter}}{HVAC\_filter})}
 \label{HVAC_filter}
 
 The sample case \textct{HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~kg$^{-1}$ (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximum pressure of 20~Pa and a maximum flow of 0.2~\si{m^3/s} takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Fig.~\ref{fig_filter}.
@@ -4493,7 +4493,7 @@ The sample case \textct{HVAC\_filter} demonstrates the use of the filter input. 
 
 \clearpage
 
-\section{HVAC Fans (\texorpdfstring\textct{fan\_test}{fan\_test})}
+\section{HVAC Fans (\texorpdfstring{\textct{fan\_test}}{fan\_test})}
 \label{fan_test}
 
 Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One has a quadratic fan with a maximum volumetric flow of 0.16~\si{m^3/s} and a stall pressure of 10~Pa. The second is an open duct with a flow loss of 10. The volume flow through the fans is obtained from the equation below:
@@ -4525,7 +4525,7 @@ The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). No
 
 In the following examples, both leaks and fans are demonstrated.
 
-\subsection{Single Zone Leakage (\texorpdfstring\textct{leak\_test}{leak\_test})}
+\subsection{Single Zone Leakage (\texorpdfstring{\textct{leak\_test}}{leak\_test})}
 \label{single_zone_leak}
 \label{leak_test}
 
@@ -4549,7 +4549,7 @@ where $A_{\hbox{\scriptsize leak}}=0.002$~m$^2$ and $\rho$ is the density at the
 \label{leak_test_fig}
 \end{figure}
 
-\subsection{Multiple zone leakage (\texorpdfstring\textct{leak\_test\_2}{leak\_test\_2})}
+\subsection{Multiple zone leakage (\texorpdfstring{\textct{leak\_test\_2}}{leak\_test\_2})}
 \label{leak_test_2}
 
 This case starts with the same input as \textct{leak\_test}.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan pushes air from one compartment to the other. As the pressure rises, the leakage increases until the leakage flow rate is equal to the fan flow rate. Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments decreases until the pressure of the interior compartment is equal to that of the ambient. At this point in time, there is no more leakage to the outside and the fan flow rate equals the leakage flow rate between the two compartments.  Given the leakage area and the fan curve, this occurs when the pressure difference between the two compartments is the same as the pressure difference from \textct{leak\_test}, only now the discharge side should be at 0~Pa.
@@ -4602,7 +4602,7 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 \chapter{Outputs}
 
-\section{Statistical Quantities (\texorpdfstring\textct{rms\_cov\_corr}{rms\_cov\_corr})}
+\section{Statistical Quantities (\texorpdfstring{\textct{rms\_cov\_corr}}{rms\_cov\_corr})}
 
 FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line {\ct DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.
 
