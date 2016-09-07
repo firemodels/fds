@@ -4097,11 +4097,29 @@ the right portal.}
 \section{Special Flow Profiles}
 \label{info:profiles}
 
-Simulating a fire in the outdoors is not much different than a fire indoors, but there are a few issues that need to be addressed. First, the velocity of the wind profile at any exterior boundary will be a top hat (constant) by default, but the parameter {\ct PROFILE} on the {\ct SURF} line can yield other profiles.
+By default, the air injected at a vent has a uniform or ``top hat'' velocity profile, but the parameter {\ct PROFILE} on the {\ct SURF} line can yield other profiles.
 
 \subsubsection{Parabolic}
+\label{parabolic_profile}
 
-{\ct PROFILE='PARABOLIC'} produces a parabolic profile with {\ct VEL} (m/s) being the maximum velocity or {\ct VOLUME\_FLOW} (m$^3$/s) being the desired volume flow.
+{\ct PROFILE='PARABOLIC'} produces a parabolic profile with {\ct VEL} (m/s) being the maximum velocity or {\ct VOLUME\_FLOW} (m$^3$/s) being the desired volume flow. As an example, the test case in the {\ct Flowfields} examples folder called {\ct parabolic\_profile.fds} demonstrates how you can create a circular or rectangular vent, each with a parabolic inlet profile. The two {\ct VENT} lines below create circular and rectangular inlets, respectively, each of which inject air (or the background gas) at a rate of 0.5~m$^3$/s {\em into} the compartment.
+\begin{lstlisting}
+&SURF ID='BLOW', VOLUME_FLOW=-0.5, PROFILE='PARABOLIC' /
+&VENT SURF_ID='BLOW', XB=-3,1,-3,1,0,0, RADIUS=2., XYZ=-1,-1,0 /
+&VENT SURF_ID='BLOW', XB= 3,5,-2,1,0,0 /
+\end{lstlisting}
+The purpose of the test case is to ensure that the proper amount of gas (in this case nitrogen) is forced into the compartment, as confirmed by the pressure rise. Figure~\ref{parabolic_profile_fig} displays a comparison of the calculated versus the exact pressure rise in a large compartment with these two parabolic vents. The pressure should rise according to the equation and analytical solution:
+\be
+   \frac{\d p}{\d t} = \frac{\gamma \, \dot{V}}{V} \, p   \quad \Longrightarrow \quad p(t) - p_0 = p_0 \left( {\rm e}^{\frac{\gamma \, \dot{V}}{V} \, t} - 1 \right)
+\ee
+where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m$^3$/s, volume, $V=4000$~m$^3$, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} set to true. 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/parabolic_profile}
+\caption[Results of the {\ct parabolic\_profile} test case]{Results of the {\ct parabolic\_profile} test case}
+\label{parabolic_profile_fig}
+\end{figure}
+
 
 \subsubsection{Atmospheric}
 
