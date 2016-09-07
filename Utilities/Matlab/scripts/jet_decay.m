@@ -5,19 +5,19 @@
 close all
 clear all
 
-addpath ../../Validation/Turbulent_Jet/FDS_Output_Files/
+outdir = '../../../out/Turbulent_Jet/FDS_Output_Files/';
 
 % gather FDS results
 
-M = importdata('jet_csmag_dx10cm_line.csv',',',2);     u_csmag_10     = M.data(:,2);
-M = importdata('jet_dsmag_dx10cm_line.csv',',',2);     u_dsmag_10     = M.data(:,2);
-M = importdata('jet_deardorff_dx10cm_line.csv',',',2); u_deardorff_10 = M.data(:,2);
-M = importdata('jet_vreman_dx10cm_line.csv',',',2);    u_vreman_10    = M.data(:,2);
+M = importdata([outdir,'jet_csmag_dx10cm_line.csv'],',',2);     u_csmag_10     = M.data(:,2);
+M = importdata([outdir,'jet_dsmag_dx10cm_line.csv'],',',2);     u_dsmag_10     = M.data(:,2);
+M = importdata([outdir,'jet_deardorff_dx10cm_line.csv'],',',2); u_deardorff_10 = M.data(:,2);
+M = importdata([outdir,'jet_vreman_dx10cm_line.csv'],',',2);    u_vreman_10    = M.data(:,2);
 
-M = importdata('jet_csmag_dx5cm_line.csv',',',2);      u_csmag_5      = M.data(:,2);
-M = importdata('jet_dsmag_dx5cm_line.csv',',',2);      u_dsmag_5      = M.data(:,2);
-M = importdata('jet_deardorff_dx5cm_line.csv',',',2);  u_deardorff_5  = M.data(:,2);
-M = importdata('jet_vreman_dx5cm_line.csv',',',2);     u_vreman_5     = M.data(:,2);
+M = importdata([outdir,'jet_csmag_dx5cm_line.csv'],',',2);      u_csmag_5      = M.data(:,2);
+M = importdata([outdir,'jet_dsmag_dx5cm_line.csv'],',',2);      u_dsmag_5      = M.data(:,2);
+M = importdata([outdir,'jet_deardorff_dx5cm_line.csv'],',',2);  u_deardorff_5  = M.data(:,2);
+M = importdata([outdir,'jet_vreman_dx5cm_line.csv'],',',2);     u_vreman_5     = M.data(:,2);
 
 % analytical solutions
 
@@ -82,7 +82,7 @@ set(legend_handle,'Box','on');
 
 % add Git revision if file is available
 
-Git_Filename = ['jet_dsmag_dx5cm_git.txt'];
+Git_Filename = [outdir,'jet_dsmag_dx5cm_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
