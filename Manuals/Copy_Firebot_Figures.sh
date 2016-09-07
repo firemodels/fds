@@ -1,7 +1,6 @@
 #!/bin/bash
 
-export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVcentral/fds/
-#export FIREBOTROOT=/home4/mcgratta/Git_Repositories/FDS-SMV/
+export FIREBOTROOT=/home2/smokevis2/firebot/FireModels_central/fds/
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
 export FIREBOTVER=$FIREBOTROOT/Verification/
 export FIREBOTVAL=$FIREBOTROOT/Validation/
