@@ -320,17 +320,28 @@ do_git_checkout()
    else
       BRANCH=$CURRENT_BRANCH
    fi
-   cd $fdsrepo/smv
-   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+ 
    if [[ "$UPDATEREPO" == "1" ]] ; then
+      cd $fdsrepo/exp
+      echo "Updating latest revision of branch exp/$BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+      echo Updating $fdsrepo/exp
+      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+      git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
+   
+      cd $fdsrepo/out
+      echo "Updating latest revision of branch out/$BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+      echo Updating $fdsrepo/out
+      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+      git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
+
+      cd $fdsrepo/smv
+      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
       echo Updating $fdsrepo/smv
       git fetch origin >> $OUTPUT_DIR/stage1 2>&1
       git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
-   fi
 
-   cd $fdsrepo/fds
-   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-   if [[ "$UPDATEREPO" == "1" ]] ; then
+      cd $fdsrepo/fds
+      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
       echo Updating $fdsrepo/fds
       git fetch origin >> $OUTPUT_DIR/stage1 2>&1
       git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
