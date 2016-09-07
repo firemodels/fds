@@ -17,10 +17,10 @@ plot_style
 
 % plot the DNS results
 
-out_dir='../../Validation/Heated_Channel_Flow/FDS_Output_Files/';
-exp_dir='../../Validation/Heated_Channel_Flow/Experimental_Data/';
+outdir='../../../out/Heated_Channel_Flow/FDS_Output_Files/';
+expdir='../../../exp/Heated_Channel_Flow/';
 
-M = importdata([exp_dir,'heated_channel_dns_data.csv'],',',1);
+M = importdata([expdir,'heated_channel_dns_data.csv'],',',1);
 
 yp_up_mean      = M.data(:,find(strcmp(M.colheaders,'yp_up_mean')));
 up_mean         = M.data(:,find(strcmp(M.colheaders,'up_mean')));
@@ -91,23 +91,23 @@ skip_case = 0;
         
 for i = [1,2,3,4]
     
-    if ~exist([out_dir,devcfile{i}])
-        display(['Error: File ' [out_dir,devcfile{i}] ' does not exist. Skipping case.'])
+    if ~exist([outdir,devcfile{i}])
+        display(['Error: File ' [outdir,devcfile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
     
-    M = importdata([out_dir,devcfile{i}],',',2);
+    M = importdata([outdir,devcfile{i}],',',2);
     q_w = mean(M.data(3,2:3));
     T_tau = q_w/(rho*u_tau*cp);
     
-    if ~exist([out_dir,linefile{i}])
-        display(['Error: File ' [out_dir,linefile{i}] ' does not exist. Skipping case.'])
+    if ~exist([outdir,linefile{i}])
+        display(['Error: File ' [outdir,linefile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
     
-    M = importdata([out_dir,linefile{i}],',',2);
+    M = importdata([outdir,linefile{i}],',',2);
     
     zp = M.data(1:16,1)/delta_nu;
     
@@ -135,7 +135,7 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add Git if file is available
 
-Git_Filename = [out_dir,'heated_channel_Pr_1p00_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_1p00_32_git.txt'];
 addverstr(gca,Git_Filename,'semilogx')
 
 % print pdf
@@ -152,7 +152,7 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add Git if file is available
 
-Git_Filename = [out_dir,'heated_channel_Pr_0p71_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_0p71_32_git.txt'];
 addverstr(gca,Git_Filename,'semilogx')
 
 % print pdf

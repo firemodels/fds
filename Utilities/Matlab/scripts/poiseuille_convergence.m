@@ -9,12 +9,12 @@ dpdx = -1;
 L = 1;
 N = [8,16,32,64];
 
-dir = '../../Validation/Moody_Chart/FDS_Output_Files/';
+outdir = '../../../out/Moody_Chart/FDS_Output_Files/';
 
-[f(1),Re(1)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N8_mu025_devc.csv']);
-[f(2),Re(2)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N16_mu025_devc.csv']);
-[f(3),Re(3)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N32_mu025_devc.csv']);
-[f(4),Re(4)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N64_mu025_devc.csv']);
+[f(1),Re(1)] = friction_factor_calc(dpdx,L,[outdir,'poiseuille_N8_mu025_devc.csv']);
+[f(2),Re(2)] = friction_factor_calc(dpdx,L,[outdir,'poiseuille_N16_mu025_devc.csv']);
+[f(3),Re(3)] = friction_factor_calc(dpdx,L,[outdir,'poiseuille_N32_mu025_devc.csv']);
+[f(4),Re(4)] = friction_factor_calc(dpdx,L,[outdir,'poiseuille_N64_mu025_devc.csv']);
 
 % plot convergence for Poiseuille flow (mu = 0.025)
 
@@ -38,7 +38,7 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 
-Git_Filename = [dir,'poiseuille_N8_mu025_git.txt'];
+Git_Filename = [outdir,'poiseuille_N8_mu025_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf

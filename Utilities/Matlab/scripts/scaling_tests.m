@@ -7,16 +7,16 @@
 clear all
 close all
 
-FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
 
-M(1) = importdata([FDS_Output_Files,'strong_scaling_test_001_cpu.csv'],',',1);
-M(2) = importdata([FDS_Output_Files,'strong_scaling_test_008_cpu.csv'],',',1);
-M(3) = importdata([FDS_Output_Files,'strong_scaling_test_032_cpu.csv'],',',1);
-M(4) = importdata([FDS_Output_Files,'strong_scaling_test_064_cpu.csv'],',',1);
-M(5) = importdata([FDS_Output_Files,'strong_scaling_test_096_cpu.csv'],',',1);
-M(6) = importdata([FDS_Output_Files,'strong_scaling_test_192_cpu.csv'],',',1);
-M(7) = importdata([FDS_Output_Files,'strong_scaling_test_288_cpu.csv'],',',1);
-M(8) = importdata([FDS_Output_Files,'strong_scaling_test_432_cpu.csv'],',',1);
+M(1) = importdata([outdir,'strong_scaling_test_001_cpu.csv'],',',1);
+M(2) = importdata([outdir,'strong_scaling_test_008_cpu.csv'],',',1);
+M(3) = importdata([outdir,'strong_scaling_test_032_cpu.csv'],',',1);
+M(4) = importdata([outdir,'strong_scaling_test_064_cpu.csv'],',',1);
+M(5) = importdata([outdir,'strong_scaling_test_096_cpu.csv'],',',1);
+M(6) = importdata([outdir,'strong_scaling_test_192_cpu.csv'],',',1);
+M(7) = importdata([outdir,'strong_scaling_test_288_cpu.csv'],',',1);
+M(8) = importdata([outdir,'strong_scaling_test_432_cpu.csv'],',',1);
 
 r = [1 8 32 64 96 192 288 432];
 r2 = [.1 8 32 64 96 192 432 1000];
@@ -69,7 +69,7 @@ legend_handle = legend(H,'Total','DIVG','MASS','VELO','PRES','COMM','RADI','MAIN
 set(legend_handle,'Interpreter',Font_Interpreter);
 set(legend_handle,'Fontsize',8);
 
-git_file = [FDS_Output_Files,'strong_scaling_test_288_git.txt'];
+git_file = [outdir,'strong_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'loglog')
 
 set(gcf,'Visible',Figure_Visibility);
@@ -81,19 +81,19 @@ print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_t
 clear all
 close all
 
-FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
 
-M(1)  = importdata([FDS_Output_Files,'weak_scaling_test_001_cpu.csv'],',',1);
-M(2)  = importdata([FDS_Output_Files,'weak_scaling_test_002_cpu.csv'],',',1);
-M(3)  = importdata([FDS_Output_Files,'weak_scaling_test_004_cpu.csv'],',',1);
-M(4)  = importdata([FDS_Output_Files,'weak_scaling_test_008_cpu.csv'],',',1);
-M(5)  = importdata([FDS_Output_Files,'weak_scaling_test_016_cpu.csv'],',',1);
-M(6)  = importdata([FDS_Output_Files,'weak_scaling_test_032_cpu.csv'],',',1);
-M(7)  = importdata([FDS_Output_Files,'weak_scaling_test_064_cpu.csv'],',',1);
-M(8)  = importdata([FDS_Output_Files,'weak_scaling_test_128_cpu.csv'],',',1);
-M(9)  = importdata([FDS_Output_Files,'weak_scaling_test_192_cpu.csv'],',',1);
-M(10) = importdata([FDS_Output_Files,'weak_scaling_test_288_cpu.csv'],',',1);
-M(11) = importdata([FDS_Output_Files,'weak_scaling_test_432_cpu.csv'],',',1);
+M(1)  = importdata([outdir,'weak_scaling_test_001_cpu.csv'],',',1);
+M(2)  = importdata([outdir,'weak_scaling_test_002_cpu.csv'],',',1);
+M(3)  = importdata([outdir,'weak_scaling_test_004_cpu.csv'],',',1);
+M(4)  = importdata([outdir,'weak_scaling_test_008_cpu.csv'],',',1);
+M(5)  = importdata([outdir,'weak_scaling_test_016_cpu.csv'],',',1);
+M(6)  = importdata([outdir,'weak_scaling_test_032_cpu.csv'],',',1);
+M(7)  = importdata([outdir,'weak_scaling_test_064_cpu.csv'],',',1);
+M(8)  = importdata([outdir,'weak_scaling_test_128_cpu.csv'],',',1);
+M(9)  = importdata([outdir,'weak_scaling_test_192_cpu.csv'],',',1);
+M(10) = importdata([outdir,'weak_scaling_test_288_cpu.csv'],',',1);
+M(11) = importdata([outdir,'weak_scaling_test_432_cpu.csv'],',',1);
 
 r = [1 2 4 8 16 32 64 128 192 288 432];
 
@@ -124,7 +124,7 @@ Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
 text(X_Title_Position,Y_Title_Position,'Weak Scaling Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 legend(H,'FDS','Ideal','Location','Southwest')
 
-git_file = [FDS_Output_Files,'weak_scaling_test_288_git.txt'];
+git_file = [outdir,'weak_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'semilogx')
 
 set(gcf,'Visible',Figure_Visibility);
