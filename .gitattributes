@@ -6,7 +6,9 @@
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
 *.csv text
-Utilities/Matlab/*.csv eol=lf
+
+# Force dataplot input files to be LF
+Utilities/Matlab/*.csv text eol=lf
 
 # Submodules retain attributes of their respective repos
 Validation/Submodules/* text=auto
