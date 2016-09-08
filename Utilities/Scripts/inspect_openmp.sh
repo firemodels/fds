@@ -38,6 +38,7 @@ case $OPTION  in
    ;;
   r)
    GITROOT="$OPTARG"
+   RESULT_DIR=$GITROOT/fds/Utilities/Scripts/inspect_openmp_ti3
    ;;
   v)
    showinput=1
