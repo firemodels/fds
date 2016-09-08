@@ -6,6 +6,7 @@
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
 *.csv text
+Utilities/Matlab/*.csv eol=lf
 
 # Submodules retain attributes of their respective repos
-/Validation/Submodules/* text=auto
+Validation/Submodules/* text=auto
