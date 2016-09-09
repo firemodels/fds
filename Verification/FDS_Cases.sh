@@ -214,6 +214,7 @@ $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
 
+$QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
 $QFDS -d Radiation droplet_absorption_cyl.fds
 $QFDS -d Radiation particle_absorption_cart_surf_cart.fds
