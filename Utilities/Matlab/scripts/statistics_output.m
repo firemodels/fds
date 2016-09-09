@@ -51,24 +51,16 @@ if strcmp(Stats_Output, 'Verification')
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endlastfoot');
     [rows, cols] = size(output_stats);
-    for i_row = 2:rows
-        % Format strings for various columns in table (and add short names)
-        m = output_stats;
-        % Escape underscores for LaTeX
+    m = sortrows(output_stats(2:rows,:),1);
+    for i_row = 1:rows-1
         case_name = strrep(m{i_row, 3}, '_', '\_');
         case_name_section = ['\ref{',m{i_row,3},'}'];
-        % Additional columns
         expected_value = m{i_row, 5};
         predicted_value = m{i_row, 6};
-        % Remove " Error" from string to save horizontal space
         error_type = strrep(m{i_row, 8}, ' Error', '');
-        % Convert strings to numbers for later formatting
         error_val = str2num(m{i_row, 9});
         tol = str2num(m{i_row, 10});
-        % Additional columns
         within_tolerance = m{i_row, 11};
-        
-        % Write out all columns to .tex file
         fprintf(fid, '%s', case_name, ' & ');
         fprintf(fid, '%s', case_name_section, ' & ');
         fprintf(fid, '%s', num2str(expected_value, '%1.2e'), ' & ');
