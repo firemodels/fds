@@ -4112,7 +4112,7 @@ The purpose of the test case is to ensure that the proper amount of gas (in this
 \be
    \frac{\d p}{\d t} = \frac{\gamma \, \dot{V}}{V} \, p   \quad \Longrightarrow \quad p(t) - p_0 = p_0 \left( {\rm e}^{\frac{\gamma \, \dot{V}}{V} \, t} - 1 \right)
 \ee
-where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m$^3$/s, volume, $V=4000$~m$^3$, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} set to true. 
+where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m$^3$/s, volume, $V=4000$~m$^3$, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} set to true.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/parabolic_profile}
@@ -7305,13 +7305,25 @@ FDS includes a calculation of the adiabatic surface temperature (AST), a quantit
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
+The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
       ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
 This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+
+\subsubsection{Example: AST vs. Surface Temperature}
+\label{adiabatic_surface_temperature}
+
+The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated ({\ct BACKING='INSULATED'} on the {\ct SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature} shows the plate temperature rising towards the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE'} applied via a {\ct DEVC} at the plate surface, and the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a {\ct DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate {\ct SURF}ace conditions and the AST-Gas {\ct PROP}erties must both include the same explicitly-defined {\ct HEAT\_TRANSFER\_COEFFICIENT} and {\ct EMISSIVITY}.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature}
+\includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature_gas}
+\caption[Results of the {\ct adiabatic\_surface\_temperature} test case]{(Left) Surface temperature vs. adiabatic surface temperature of an insulated plate. (Right) AST recorded with a device positioned on the plate surface (AST) and one just off the surface (AST-Gas).}
+\label{adiabatic_surface_temperature_fig}
+\end{figure}
 
 
 
