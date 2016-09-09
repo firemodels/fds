@@ -1130,7 +1130,7 @@ fi
    echo "Start Time: $start_time " >> $TIME_LOG
    echo "Stop Time: $stop_time " >> $TIME_LOG
    if [ "$UPLOADGUIDES" == "1" ]; then
-   echo "Firebot status:  https://pages.nist.gov/fds/firebot_status.html" >> $TIME_LOG
+   echo "Firebot status:  https://pages.nist.gov/fds-smv/firebot_status.html" >> $TIME_LOG
    fi
    echo "-------------------------------" >> $TIME_LOG
 
