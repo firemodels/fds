@@ -255,7 +255,11 @@ DO NN=1,N_HVAC_READ
             IF (N_CELLS > 0) THEN 
                DU%N_CELLS = N_CELLS
             ELSE
-               DU%N_CELLS = NINT(DU%LENGTH*10._EB) ! Default to 10 cm cells
+               IF (DU%LENGTH <=0.1) THEN ! If duct is less than 10 cm, adopt two cells, else default to 10 cm cells
+                  DU%N_CELLS = 2
+               ELSE
+                  DU%N_CELLS = NINT(DU%LENGTH*10._EB)
+               END IF
             ENDIF
             DU%DX = DU%LENGTH/DU%N_CELLS
             SELECT CASE(DUCT_INTERP_TYPE) ! Reads duct interpolation type user input and sets duct interpolation index
