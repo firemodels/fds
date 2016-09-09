@@ -4635,24 +4635,27 @@ Computation of the these quantities by their typical statistical definition woul
 \chapter{Summary of Verification Results}
 \label{info:verification_statistics}
 
-This appendix summarizes the accuracy of results from cases in the FDS verification suite. These metrics are an integral part of a process known as regression testing, which aims to evaluate the accuracy of output predicted by a numerical software package. The results from this appendix can be compared to another version of FDS as a way of measuring the quality of results between revisions. These statistical metrics also help determine the impact of code additions on the overall accuracy of FDS and can help identify errors in the FDS source code.
+This appendix summarizes the accuracy of cases in the FDS verification suite. These cases are an integral part of the continuous integration process for FDS in which daily source code changes are checked each night against this growing list of cases to verify the overall accuracy of FDS and to quickly identify errors introduced into the source code.
 
+The cases in the table below are described either in the FDS Verification Guide or the FDS User's Guide. Those cases that are in the User's Guide help to explain various input parameters. Dark blue links refer to sections in the Verification Guide; light blue links refer to the User's Guide. For each case, there are one or more point to point comparisons between an FDS predicted value and an exact or expected value. If the relative or absolute difference between the predicted and exact/expected values is within the specified tolerance, the case passes.
+
+%\begin{landscape}
 \IfFileExists{SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}{\input{SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}}
+%\end{landscape}
 
-\newpage
+
 
 \chapter{Installation Testing}
 \label{info:installation_testing}
 
-The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States, both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software, this involves a test program in which the software is used to execute a number of sample cases and the results are compared to accepted values.  The purpose of this testing process is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred.
-
-The acceptance test procedure is as follows:
+The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States, both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software, this involves a test program in which the software is used to execute a number of sample cases and the results are compared to accepted values.  The purpose of this testing process is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred. The acceptance test procedure is as follows:
 
 \begin{enumerate}
-\item Obtain and install the version of FDS you will be running.  Note that this procedure will need to be repeated for each version of the FDS executable being used (i.e., if you will be running both the serial and MPI versions of FDS, then the procedure will be done twice).
-\item Either check out the FDS repository by following the link from the FDS-SMV website or navigate to the repository via a web browser and download the files shown in Table~\ref{tbl:installation_test}.  The folder identified is a subfolder of the Verification folder.
+\item Obtain and install the version of FDS you will be running.  Note that this procedure will need to be repeated for each version of the FDS executable being used.
+\item Find the files shown in Table~\ref{tbl:installation_test} in the {\ct Examples} folder of the FDS-SMV installation package.  The Folder listed in the table is a subfolder of the {\ct Examples} folder.
 \item Run each of the FDS input files listed in Table~\ref{tbl:installation_test}. \label{itm:run_step}
-\item Compare the results of each FDS output file shown in Table~\ref{tbl:installation_test} with the expected results in the corresponding expected results file.
+\item Compare the results of each FDS Output File listed in Table~\ref{tbl:installation_test} with the exact/expected results in the corresponding Expected Results File. The Expected Results Files can be found at \\ \href{https://github.com/firemodels/fds/tree/master/Verification}{https://github.com/firemodels/fds/tree/master/Verification} \\
+    This is a link to the FDS repository hosted by GitHub.
 \item Verify that the expected results match the results from Step~\ref{itm:run_step} using the criteria shown in Appendix~\ref{info:verification_statistics}.
 \end{enumerate}
 
@@ -4660,27 +4663,27 @@ The acceptance test procedure is as follows:
 \vspace{\baselineskip}
 \begin{sidewaystable}[p]
 \centering
-\caption[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference.}
+\caption[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.}
 \label{tbl:installation_test}
 \footnotesize
 \begin{tabular}{|l|c|l|l|l|}
 \hline
-Folder                  & Reference                       & Input File                                 & Output File                                      & Expected Results File \\ \hline \hline
-Controls                & \cite{FDS_Users_Guide}          & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
+Folder                  & Reference                       & Input File                                 & FDS Output File                                  & Expected Results File \\ \hline \hline
+Controls                & \ref{activate_vents}            & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
 Pressure\_Effects       & \ref{isentropic2}               & isentropic2.fds                            & insentropic2\_devc.csv                           & isentropic2.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_tmix}        & energy\_budget\_tmix.fds                   & energy\_budget\_tmix\_devc.csv                   & energy\_budget\_tmix.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_walls}       & energy\_budget\_cold\_walls.fds            & energy\_budget\_cold\_walls\_hrr.csv             & energy\_budget\_cold\_walls.csv \\ \hline
-Fires                   & \cite{FDS_Users_Guide}          & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
+Fires                   & \ref{spray_burner}              & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
 Heat\_Transfer          & \ref{heat_conduction_kc}        & heat\_conduction\_kc.fds                   & heat\_conduction\_kc\_devc.csv                   & heat\_conduction\_kc.csv \\ \hline
 HVAC                    & \ref{ashrae7}                   & ashrae7\_table.fds                         & ashrae7\_table\_devc.csv                         & ashrae7\_exp.csv \\ \hline
-Pressure\_Solver        & \cite{FDS_Users_Guide}          & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
+Pressure\_Solver        & \ref{duct_flow}                 & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
 Pyrolysis               & \ref{enthalpy}                  & enthalpy.fds                               & enthalpy\_devc.csv                               & enthalpy.csv \\ \hline
-Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell.csv                                & shrink\_swell.csv \\ \hline
+Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell\_devc.csv                          & shrink\_swell.csv \\ \hline
 Radiation               & \ref{radiation_shield}          & radiation\_shield.fds                      & radiation\_shield\_devc.csv                      & radiation\_shield.csv \\ \hline
-Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.csv  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
-Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.csv & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.fds  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.fds & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
 Sprinklers\_and\_Sprays & \ref{water_evaporation_1}       & water\_evaporation\_1.fds                  & water\_evaporation\_1\_devc.csv                  &  water\_evaporation\_1.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16.csv                     &  particle\_drag\_U50\_N16.csv \\ \hline
+Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16\_devc.csv               &  particle\_drag\_U50\_N16.csv \\ \hline
 
 \end{tabular}
 \end{sidewaystable}
