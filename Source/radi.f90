@@ -1234,7 +1234,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         COSINE = ORIENTATION_VECTOR(1,LP%ORIENTATION_INDEX)*DLX(N) + &
                                  ORIENTATION_VECTOR(2,LP%ORIENTATION_INDEX)*DLY(N) + &
                                  ORIENTATION_VECTOR(3,LP%ORIENTATION_INDEX)*DLZ(N)
-                        IF (COSINE<0._EB) LP%ONE_D%ILW(N,IBND) = -COSINE * IL_UP(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+                        IF (COSINE<0._EB) THEN
+                           IF (LPC%MASSLESS_TARGET) THEN
+                              LP%ONE_D%ILW(N,IBND) = -COSINE * IL(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+                           ELSE
+                              ! IL_UP does not account for the absorption of radiation within the cell occupied by the particle
+                              LP%ONE_D%ILW(N,IBND) = -COSINE * IL_UP(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+                           ENDIF
+                        ENDIF
                      CASE(2:)
                         LP%ONE_D%ILW(N,IBND) = ORIENTATION_FACTOR(N,LP%ORIENTATION_INDEX)*RSA(N)* &
                                                IL(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
@@ -1290,7 +1297,7 @@ ENDIF
 
 ! Calculate the incoming radiative flux onto the solid particles
 
-IF (SOLID_PARTICLES) THEN
+IF (SOLID_PARTICLES .AND. UPDATE_INTENSITY) THEN
    PARTICLE_LOOP: DO IP=1,NLP
       LP => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
