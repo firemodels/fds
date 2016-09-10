@@ -6,6 +6,7 @@
 % information (csv and tex files) to be used in various guides.
 
 % Write all verification or validation statistics from output_stats to csv output_file
+
 if ~strcmp(Stats_Output, 'None')
     [rows, cols] = size(output_stats);
     fid = fopen(Output_File, 'w');
@@ -37,14 +38,14 @@ if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\scriptsize');
-    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Predicted & Type of & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          &         & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Expected & Predicted & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          &         & Quantity & Value    & Quantity  & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Predicted & Type of & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          &         & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Expected & Predicted & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          &         & Quantity & Value    & Quantity  & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endfoot');
@@ -55,15 +56,19 @@ if strcmp(Stats_Output, 'Verification')
     for i_row = 1:rows-1
         case_name = strrep(m{i_row, 3}, '_', '\_');
         case_name_section = ['\ref{',m{i_row,3},'}'];
-        expected_value = m{i_row, 5};
-        predicted_value = m{i_row, 6};
-        error_type = strrep(m{i_row, 8}, ' Error', '');
-        error_val = str2num(m{i_row, 9});
-        tol = str2num(m{i_row, 10});
-        within_tolerance = m{i_row, 11};
+        expected_quantity = strrep(m{i_row, 5}, '_', '\_');
+        expected_value = m{i_row, 6};
+        predicted_quantity = strrep(m{i_row, 7}, '_', '\_');
+        predicted_value = m{i_row, 8};
+        error_type = strrep(m{i_row,10}, ' Error', '');
+        error_val = str2num(m{i_row,11});
+        tol = str2num(m{i_row, 12});
+        within_tolerance = m{i_row, 13};
         fprintf(fid, '%s', case_name, ' & ');
         fprintf(fid, '%s', case_name_section, ' & ');
+        fprintf(fid, '%s', expected_quantity, ' & ');
         fprintf(fid, '%s', num2str(expected_value, '%1.2e'), ' & ');
+        fprintf(fid, '%s', predicted_quantity, ' & ');
         fprintf(fid, '%s', num2str(predicted_value, '%1.2e'), ' & ');
         fprintf(fid, '%s', error_type, ' & ');
         fprintf(fid, '%s', num2str(error_val, '%1.2e'), ' & ');
