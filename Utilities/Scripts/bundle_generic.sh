@@ -133,7 +133,6 @@ smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
 forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
-wikify=$fds_smvroot/fds/Utilities/Scripts/wikify.py
 fullmanifestdir=$uploaddir/$bundledir/bin
 fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
