@@ -62,6 +62,8 @@ Save_Plot_Filename    = saved_data{:,8};
 Save_Dep_Title        = saved_data{:,9};
 Save_Error_Tolerance  = saved_data{:,10};
 Save_Metric_Type      = saved_data{:,11};
+Save_Measured_Quantity= saved_data{:,12};
+Save_Predicted_Quantity= saved_data{:,13};
 
 Size_Save_Quantity = size(Save_Quantity);
 
@@ -95,14 +97,16 @@ if strcmp(Stats_Output, 'Verification')
     output_stats{1,2} = 'Verification Group';
     output_stats{1,3} = 'Case Name';
     output_stats{1,4} = 'Type of Metric';
-    output_stats{1,5} = 'Expected Metric';
-    output_stats{1,6} = 'Predicted Metric';
-    output_stats{1,7} = 'Dependent Variable';
-    output_stats{1,8} = 'Type of Error';
-    output_stats{1,9} = 'Error';
-    output_stats{1,10} = 'Error Tolerance';
-    output_stats{1,11} = 'Within Specified Error Tolerance';
-    output_stats{1,12} = 'Plot Filename';
+    output_stats{1,5} = 'Expected Quantity';
+    output_stats{1,6} = 'Expected Value';
+    output_stats{1,7} = 'Predicted Quantity';
+    output_stats{1,8} = 'Predicted Value';
+    output_stats{1,9} = 'Dependent Variable';
+    output_stats{1,10} = 'Type of Error';
+    output_stats{1,11} = 'Error';
+    output_stats{1,12} = 'Error Tolerance';
+    output_stats{1,13} = 'Within Specified Error Tolerance';
+    output_stats{1,14} = 'Plot Filename';
     stat_line = 2;
 end
 
@@ -206,14 +210,16 @@ for j=2:length(Q);
                     output_stats{stat_line,2} = Save_Group_Key_Label{i,1};
                     output_stats{stat_line,3} = Save_Dataname{i,1};
                     output_stats{stat_line,4} = Save_Metric_Type{i,1};
-                    output_stats{stat_line,5} = single_measured_metric(m);
-                    output_stats{stat_line,6} = single_predicted_metric(m);
-                    output_stats{stat_line,7} = Save_Dep_Title{i,1};
-                    output_stats{stat_line,8} = error_type;
-                    output_stats{stat_line,9} = sprintf('%1.2e', error_val);
-                    output_stats{stat_line,10} = sprintf('%1.2e', error_tolerance);
-                    output_stats{stat_line,11} = within_tolerance;
-                    output_stats{stat_line,12} = Save_Plot_Filename{i,1};
+                    output_stats{stat_line,5} = Save_Measured_Quantity{i,m,1};
+                    output_stats{stat_line,6} = single_measured_metric(m);
+                    output_stats{stat_line,7} = Save_Predicted_Quantity{i,m,1};
+                    output_stats{stat_line,8} = single_predicted_metric(m);
+                    output_stats{stat_line,9} = Save_Dep_Title{i,1};
+                    output_stats{stat_line,10} = error_type;
+                    output_stats{stat_line,11} = sprintf('%1.2e', error_val);
+                    output_stats{stat_line,12} = sprintf('%1.2e', error_tolerance);
+                    output_stats{stat_line,13} = within_tolerance;
+                    output_stats{stat_line,14} = Save_Plot_Filename{i,1};
                     stat_line = stat_line + 1;
                 end
             end
