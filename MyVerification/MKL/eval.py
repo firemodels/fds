@@ -186,6 +186,7 @@ chid.append('fft_1x1')
 chid.append('cg_1x1')
 chid.append('mkl_1x1')
 chid.append('gmg_1x1')
+chid.append('gmg_mkl_1x1')
 
 nsim = len(chid)
 
