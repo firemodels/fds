@@ -1715,7 +1715,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER,INTERPOLATED_EDGE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
@@ -1773,6 +1773,8 @@ OME_E = -1.E6_EB
 
 EDGE_LOOP: DO IE=1,N_EDGES
 
+   INTERPOLATED_EDGE = .FALSE.
+
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
 
    PROCESS_EDGE = .FALSE.
@@ -1786,7 +1788,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    ! If the edge is to be "smoothed," set tau and omega to zero and cycle
 
-   IF (EDGE_TYPE(1,IE)==SMOOTH_EDGE) THEN
+   IF (EVACUATION_ONLY(NM)) THEN
       OME_E(:,IE) = 0._EB
       TAU_E(:,IE) = 0._EB
       CYCLE EDGE_LOOP
@@ -2246,6 +2248,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
 
+            INTERPOLATED_EDGE = .TRUE.
             OM => OMESH(ABS(NOM(ICD)))
 
             IF (PREDICTOR) THEN
@@ -2362,9 +2365,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
       ENDDO ORIENTATION_LOOP
    ENDDO SIGN_LOOP
 
-   ! If the edge is on an interpolated boundary, cycle
+   ! If the edge is on an interpolated boundary, and all cells around it are not solid, cycle
 
-   IF (EDGE_TYPE(1,IE)==INTERPOLATED_EDGE .OR. EDGE_TYPE(2,IE)==INTERPOLATED_EDGE) THEN
+   IF (INTERPOLATED_EDGE) THEN
       PROCESS_EDGE = .FALSE.
       DO IS=5,8
          IF (SOLID(IJKE(IS,IE))) PROCESS_EDGE = .TRUE.
