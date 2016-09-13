@@ -80,7 +80,7 @@ def read_csv(chid, time, uvel, vvel, wvel, pres, site, sres, srate, i):
     srate.append(srate0)
 
 
-def plot_csv(chid, time, quan, name, tstart, tend, nmeshes):
+def plot_csv(chid, time, quan, name, tstart, tend, top):
 
 
     fig = plt.figure (facecolor='w')
@@ -172,21 +172,23 @@ def plot_csv(chid, time, quan, name, tstart, tend, nmeshes):
     for label in labels:
         label.set_size(13)
 
-    output = "pictures/%s_%dmesh_ts%.2f_te%.2f.png" % (name, nmeshes, tstart, tend)
+    output = "pictures/%s_%s_ts%.2f_te%.2f.png" % (name, top, tstart, tend)
     savefig(output)
     #show()
 
 
-nmeshes = int(sys.argv[1])
+top     = sys.argv[1]
 tstart  = float(sys.argv[2])
 tend    = float(sys.argv[3])
 
 chid=[]
 chid.append('fft_1x1')
-chid.append('cg_1x1')
-chid.append('mkl_1x1')
-chid.append('gmg_1x1')
-chid.append('gmg_mkl_1x1')
+chid.append('cg_ssor_%s'%top)
+chid.append('cg_pardiso_%s'%top)
+chid.append('cg_cluster_%s'%top)
+chid.append('mkl_%s'%top)
+chid.append('gmg_%s'%top)
+chid.append('gmg_mkl_%s'%top)
 
 nsim = len(chid)
 
@@ -203,7 +205,7 @@ for i in range(nsim):
    print 'reading ',chid[i]
    read_csv(chid, time, uvel, vvel, wvel, pres, site, sres, srate, i)
 
-plot_csv(chid, time, pres, 'Pressure', tstart, tend, nmeshes)
+plot_csv(chid, time, pres, 'Pressure', tstart, tend, top)
 
 
 
