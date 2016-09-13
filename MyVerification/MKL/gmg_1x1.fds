@@ -16,7 +16,7 @@
       SCARC_MULTIGRID_CYCLE      = 'V'
       SCARC_MULTIGRID_LEVEL      =  2
       SCARC_COARSE               = 'ITERATIVE'
-      SCARC_DEBUG                = 'MUCH'
+      SCARC_DEBUG                = 'NONE'
       SCARC_SMOOTH               = 'SSOR'
       SCARC_SMOOTH_ITERATIONS    =   5     /
 

@@ -1,4 +1,4 @@
-&HEAD CHID='mkl_1x1', TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
+&HEAD CHID='fft_1x1',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
 &MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
@@ -9,11 +9,6 @@
 
 &TIME T_END = 0.5 /
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
-
-&PRES SCARC_METHOD             = 'MKL'
-      SCARC_MKL                = 'GLOBAL'
-      SCARC_MKL_SYMMETRIC      = .TRUE.    
-      SCARC_DEBUG              = 'NONE'   /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

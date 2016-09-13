@@ -1,6 +1,9 @@
-&HEAD CHID='mkl_1x1', TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
+&HEAD CHID='mkl_2x2', TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
-&MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
+&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
+&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.4,0.8 /
+&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.4,0.8 /
 
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
