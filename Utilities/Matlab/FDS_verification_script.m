@@ -93,5 +93,6 @@ radiating_polygon
 saad_mms_temporal_error
 shunn_mms_temporal_error
 scaling_tests
+hvac_mass_transport
 
 display('verification scripts completed successfully!')

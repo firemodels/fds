@@ -4390,7 +4390,9 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 \label{HVAC_flow_loss}
 
 The pressure drop due to steady flow in a duct is given by
-\be \Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}\ee
+\be
+\Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}
+\ee
 where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $u$ is the mean velocity. In this example, a duct is split at a tee joint into two ducts. All ducts have the same cross sectional area.  The primary duct is assigned a constant flow rate of 0.3~\si{m^3/s}.  The other two ducts are assigned loss coefficients of 4 and 16 and outlets at the same elevation.  From Eq.~(\ref{HVAC_steady_state}), it can be shown that since the two branch ducts have the same pressure at their outlets, the steady-state velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.  FDS results are shown in Fig.~\ref{fig_HVAC_loss}.
 
 \begin{figure}[ht]
@@ -4584,7 +4586,139 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 \label{ASHRAE7}
 \end{figure}
 
-\newpage
+\section{HVAC transient mass transport}
+This section documents verification of the mass transport subroutine of the HVAC module. Unless otherwise stated, the general test case has a \SI{1}{\meter\cubed} domain split into two equally sized compartments (being their own pressure zones) connected in some manner by an HVAC network. The left and right compartments are initialized with species~1 and species~2 respectively. Both species have an initial density of \SI[per-mode=symbol]{1.0}{\kilogram\per\meter\cubed}. The ducts have a cross sectional area of \SI{0.01}{m^2} and a flow rate of \SI[per-mode=symbol]{0.01}{\meter\cubed\per\second} (velocity of \SI[per-mode=symbol]{1}{\meter\per\second}).
+
+\subsection{Convergence study for HVAC mass transport (\texorpdfstring{\textct{HVAC\_convergence\_study\_x}}{HVAC\_mass\_transport\_conv\_x})}
+\label{HVAC_mass_transport_conv_0020}
+\label{HVAC_mass_transport_conv_0040}
+\label{HVAC_mass_transport_conv_0080}
+\label{HVAC_mass_transport_conv_0160}
+\label{HVAC_mass_transport_conv_0320}
+The time-dependent mass transport subroutine is an explicit Euler method solver which uses a Godunov upwinding scheme. This method is formally first-order accurate in space and should exhibit L1 and L2 norm error decay rates of \(O(\Delta x)\) for a continuous solution.
+
+We undertake a convergence study to demonstrate that the adopted numerical method exhibits the expected spatial error decay. The two compartments are connected with a single \SI{1}{\meter} long duct which is initialized using linear interpolation between the upstream and downstream duct node. In this manner the mass fraction of species~1 linearly decreases from \num{1} to \SI[per-mode=symbol]{0}{\kilogram\per\kilogram}. If we examine the species~1 mass fraction at the downstream node we expect to see it's value increase linearly from \num{0} to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} between \SI{0}{\second} to \SI{1}{\second} and then to remain at \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} until the end of the simulation. The mass fraction of species 1 at the downstream duct node is examined and compared to the analytical result for a range of duct cell numbers (20, 40, 80, 160 and 320). The time step is fixed to satisfy the CFL of the case cell size (CFL \(= \Delta x/2u\)); this ensures that the \(\Delta x/\Delta t\) ratio is fixed for each case. Fig.~\ref{fig_HVAC_mass_transport_conv_1} shows the mass fraction at the downstream duct node for all cases and the analytical solution. Fig.~\ref{fig_HVAC_mass_transport_conv_2} gives the L1 and L2 norm errors.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_1}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} test case result.]{Species~\num{1} mass fraction in the downstream duct node for the cell size convergence study. The mass fraction starts at zero and then linearly increases due to the initial conditions in the duct. At \SI{1}{\second} the mass fraction reaches its maximum and remains at this value until the end of the simulation. The figure illustrates that at lower cell counts (blue line) there is increased numerical diffusivity and that, for higher cell counts (cyan line), the numerical solution converges towards the analytical solution (black dashed line).}
+\label{fig_HVAC_mass_transport_conv_1}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
+   \end{tabular*}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results.]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
+\label{fig_HVAC_mass_transport_conv_2}
+\end{figure}
+
+\subsection{Transport time (\texorpdfstring{\textct{HVAC\_mass\_transport}}{HVAC\_mass\_transport})}
+\label{HVAC_mass_transport}
+A single \SI{10}{\meter} long duct connects the two compartments. The duct is initialized using data from the right duct node (i.e. species 2). As HVAC does not account for diffusion in the duct (only advection) we expect to see species~1 mass fraction at the downstream duct node start and remain at \SI[per-mode=symbol]{0}{\kilogram\per\kilogram} until \SI{10}{\second} and then instantaneously increase to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram}. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport}
+\caption[\textct{HVAC\_mass\_transport} test case.]{Species \num{1} mass fraction in the downstream duct node.}
+\label{fig_HVAC_mass_transport}
+\end{figure}
+
+\subsection{Duct definition sensitivity analysis (\texorpdfstring{\textct{HVAC\_mass\_transport\_x}}{HVAC\_mass\_transport\_\x})}
+\label{HVAC_mass_transport_1}
+\label{HVAC_mass_transport_2}
+\label{HVAC_mass_transport_3}
+\label{HVAC_mass_transport_4}
+A sensitivity analysis is carried out to verify that results are not sensitive to differing methods of defining the same duct network. The general arrangement is identical to that of Section~\ref{HVAC_mass_transport}. Test cases \numrange{1}{4} incorporate the use of increasing numbers of \textct{DUCT}s (one, two, four and five respectively) and affiliated \textct{DUCTNODE}s but the number of cells in the discretized duct (\textct{N\_CELLS}), and hence the cell size, remains identical. We look at species \num{1} mass fraction at the downstream \textct{DUCTNODE} and expect to see no variation in the results for the differing number of \textct{DUCT}s. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_x}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_x}
+\caption[\textct{HVAC\_mass\_transport\_x} test case.]{Species \num{1} mass fraction in the downstream duct node for different duct definitions. Although different numbers of ducts are used, the number of cells is identical for all cases. Therefore the output for all cases should also be identical.}
+\label{fig_HVAC_mass_transport_x}
+\end{figure}
+
+\subsection{Mass conservation 1 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_1}}{HVAC\_mass\_transport\_conservation\_1})}
+\label{HVAC_mass_transport_conservation_1}
+The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} presents the species~1 and 2 masses in the left and right compartments.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Total mass in the FDS domain and total mass in the left and right compartments.}
+\label{fig_HVAC_mass_transport_conservation_1}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Species~1 and 2 masses in the left and right compartments.}
+\label{fig_HVAC_mass_transport_conservation_2}
+\end{figure}
+
+\subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
+\label{HVAC_mass_transport_conservation_2}
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} shows the total masses of species~1 and 2.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_2} test case.]{Total species~1 and 2 masses in the FDS domain. The initial equilibrium is prior to species~1 entering duct~B and species~2 entering duct~A.}
+\label{fig_HVAC_mass_transport_conservation_3}
+\end{figure}
+
+\subsection{Mass conservation 3 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_3}}{HVAC\_mass\_transport\_conservation\_3})}
+\label{HVAC_mass_transport_conservation_3}
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_4} presents the ideal and FDS total masses of species~1 and 2.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_4}
+\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the CFD domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
+\label{fig_HVAC_mass_transport_conservation_4}
+\end{figure}
+
+\subsection{Transient transport through branching ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_branch}}{HVAC\_mass\_transport\_branch})}
+\label{HVAC_mass_transport_branch}
+The two compartments are connected by an HVAC network comprising a single \SI{5}{\meter} feed duct which branches into two ducts (ducts~A and B) at a tee with both ducts discharging to the right compartment. Ducts~A and B each have a cross-sectional area of \SI{0.005}{\meter\squared}, half that of the feed duct, and will therefore both have a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}. Duct~A has a length of \SI{5}{\meter} and duct~B has a length of \SI{10}{\meter}. The duct network is initialized using data from the right compartment. Based on the duct lengths and a constant velocity we expect to see the species~\num{1} mass fraction at outlet~A and B increase from \num{0} to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} at \SI{10}{\second} and \SI{15}{\second} respectively. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_branch}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_branch}
+\caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species \num{1} mass fraction in the downstream duct nodes. The distance from the inlet to outlet~A and from the inlet to outlet~B is \SI{10}{\meter} and \SI{15}{\meter} respectively. Given a constant velocity of \SI[per-mode=symbol]{1}{\meter\per\second} through the network, the transport time from inlet to outlets~A and B should be \SI{10}{\second} and \SI{15}{\second} respectively.}
+\label{fig_HVAC_mass_transport_branch}
+\end{figure}
+
+\subsection{Transient transport through combining ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_combine}}{HVAC\_mass\_transport\_combine})}
+\label{HVAC_mass_transport_combine}
+The left compartment is separated into two sub-compartments, A and B. These sub-compartments are initialized with species \numlist{1;2} respectively. An inlet vent is located in each sub-compartment and these vents are connected to separate ducts, of lengths \SI{1}{\meter} and \SI{2}{\meter} respectively, which combine at an internal tee. A single duct, with a length of \SI{1}{\meter}, connects this tee to the right compartment where it discharges to a single outlet into the right compartment. The right compartment and the duct network is initialized with species \num{3}. If we examine species mass fractions at the downstream outlet duct node we expect to see a species \num{3} mass fraction of \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} for \SI{2}{\second}, a species \numlist{1;3} mass fraction of \SI[per-mode=symbol]{0.5}{\kilogram\per\kilogram} each from \SI{2}{\second} to \SI{3}{\second} and a species \numlist{1;2} mass fraction of \SI[per-mode=symbol]{0.5}{\kilogram\per\kilogram} each from \SI{3}{\second} until the end of the simulation. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_combine}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_combine}
+\caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species mass fractions at the outlet duct node. Species~3 starts and remains at \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} for \SI{2}{\second} as the initial contents of the duct flows out of the outlet. At \SI{2}{\second} the species from the sub-compartment connected via the shorter duct and the remaining initial species from the longer duct flows out of the outlet. At \SI{3}{\second} the species from the sub-compartment connected by the longer duct reaches the outlet and the mass fraction is split between the species from the two upstream sub-compartments - no initial species remains in the ducts.}
+\label{fig_HVAC_mass_transport_combine}
+\end{figure}
+
+\subsection{Energy conservation and pressure (\texorpdfstring{\textct{HVAC\_mass\_transport\_energy}}{HVAC\_mass\_transport\_energy})}
+\label{HVAC_mass_transport_energy}
+The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelcius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left the right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
+
+\begin{equation}
+h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
+\label{eq_HVAC_mass_transport_energy}
+\end{equation}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_p} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_e} }
+   \end{tabular*}
+\caption[\textct{HVAC\_mass\_transport\_energy} $\Delta$ p and enthalpy results.]{Pressure difference between the inlet and outlet of duct~B (left). Total enthalpy in the CFD domain (right).}
+\label{fig_HVAC_mass_transport_energy}
+\end{figure}
 
 %\chapter{Unstructured Geometry}
 %
