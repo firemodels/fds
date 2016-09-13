@@ -296,8 +296,8 @@ echo "--- copying example files ---"
 echo ""
 cd $FDSExamplesDirectory
 $fds_cases
-$wui_cases
 cd $SMVExamplesDirectory
+$wui_cases
 $smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
