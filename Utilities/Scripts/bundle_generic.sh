@@ -143,7 +143,8 @@ smv_cases=$fds_smvroot/smv/Verification/scripts/SMV_Cases.sh
 wui_cases=$fds_smvroot/smv/Verification/scripts/WUI_Cases.sh
 copyfdscase=$fds_smvroot/fds/Utilities/Scripts/copyfdscase.sh
 copycfastcase=$fds_smvroot/fds/Utilities/Scripts/copycfastcase.sh
-ExamplesDirectory=$fds_smvroot/fds/Verification
+FDSExamplesDirectory=$fds_smvroot/fds/Verification
+SMVExamplesDirectory=$fds_smvroot/smv/Verification
 
 cd $uploaddir
 rm -rf $bundlebase
@@ -285,7 +286,6 @@ CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 CP2 $for_bundle readme_examples.html $bundledir/Examples
 
-cd $ExamplesDirectory
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
 export RUNTFDS=$copyfdscase
@@ -294,9 +294,11 @@ export RUNCFAST=$copycfastcase
 echo ""
 echo "--- copying example files ---"
 echo ""
+cd $FDSExamplesDirectory
 $fds_cases
-$smv_cases
 $wui_cases
+cd $SMVExamplesDirectory
+$smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
 echo >> $fullmanifest
