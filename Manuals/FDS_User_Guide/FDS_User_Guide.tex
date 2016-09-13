@@ -3533,7 +3533,9 @@ There are occasions where simply defining fixed flow and fixed species boundary 
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
-The current HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step).
+
+By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
+
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
@@ -3561,6 +3563,12 @@ A typical input line specifying a duct is as follows:
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
+Or, if you are using {\ct MASS\_TRANSPORT=.TRUE.}, as follows:
+\begin{lstlisting}
+&HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
+      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
+      DUCT_INTERP_TYPE='NODE1', N_CELLS=200 /
+\end{lstlisting}
 where:
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
@@ -3568,10 +3576,12 @@ where:
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DIAMETER}] is the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
+\item[{\ct DUCT\_INTERP\_TYPE}] sets whether the duct is initialized with data from the first node ({\ct NODE1}) or the second node ({\ct NODE2}). Continuous runs of ducts cannot have a mix of interpolation methods (refer to Section~\ref{info:hvacmasstransport}).
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  Note that {\ct LENGTH} is not computed automatically as the difference between the {\ct XYZ} of the duct's endpoints.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
+\item[{\ct N\_CELLS}] defines the number of cells used in a discretized duct.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
@@ -3591,8 +3601,8 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \label{fig:HVAC_Simplify}
 \end{figure}
 
-This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting, $K$, losses through the duct as follows:
-\be K_{\mbox{\tiny eff}} = \sum_i {K_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
+This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting losses ($K_{\mbox{\tiny minor}}$) through the duct as follows:
+\be K_{\mbox{\tiny eff}} = \sum_i {(K_{\mbox{\tiny minor}})_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 \subsection{HVAC Dampers}
@@ -3825,9 +3835,16 @@ The HVAC system being modeled may either have louvers that redirect the flow lea
 \end{lstlisting}
 The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
+\subsection{HVAC mass transport}
+\label{info:hvacmasstransport}
 
+If you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line this will call the HVAC mass transport subroutine. This subroutine accounts for mass storage in the duct network and transport time of species and energy. The current HVAC solver does not account for heat loss in the HVAC network.
 
+To avoid the possibility of there being no available initialization data for a duct run (a series of ducts connected to one another via ducts and nodes), {\ct DUCT\_INTERP\_TYPE} in each comprising duct must be consistent. This ensures that there is a non-internal duct node from which the duct run adopts its initial data. If duct interpolation is set to {\ct NODE1} then data from the first node of the lowest numbered duct in the duct run is initialized in the duct, if it is set to {\ct NODE2} then data from the second node of the highest numbered duct in the duct run is initialized in the duct. {\ct DUCT\_INTERP\_TYPE} is related to initialization only; if the FDS domain is initialized as ambient/background data then there will be no difference in output when using either duct interpolation method.
 
+You can increase or decrease the number of cells each discretized duct has, to increase solution accuracy or decrease simulation time respectively. The default value is set based upon a cell size of \SI{100}{\milli\meter}. Where the duct is not divisible by \SI{100}{\milli\meter}, the number of cells is rounded up to the nearest integer (e.g. a duct with a length of \SI{1.05}{\meter} will have \num{11} cells). Ducts with a length of less than \SI{100}{\milli\meter} adopt a cell number of 2. If {\ct N\_CELLS=1} is assigned to a duct then, even if {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}, the HVAC mass transport subroutine will not be called for this duct.
+
+If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain. 
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -8657,27 +8674,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & \si{kJ/(kg.K)} &               \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
 {\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}       &               &                \\ \hline
-{\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               & {\ct .FALSE.}  \\ \hline
+{\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               & {\ct .FALSE.}  \\ \hline
 {\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}      &               &                \\ \hline
 {\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct EFFICIENCY}                & Real Array        & Sections ~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                       &               & 1.0            \\ \hline
+{\ct DUCT\_INTERP\_TYPE}        & Character         & Section~\ref{info:hvacmasstransport}                                          &               & {\ct 'NODE1'}  \\ \hline
+{\ct EFFICIENCY}                & Real Array        & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                        &               & 1.0            \\ \hline
 {\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &                \\ \hline
+{\ct FIXED\_Q}                  & Real              & Section~\ref{info:HVACaircoil}                                                & kW            &                \\ \hline
 {\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
-{\ct LEAK\_ENTHALPY}            & Logical           & Section~\ref{info:local_leakage}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct LEAK\_ENTHALPY}            & Logical           & Section~\ref{info:local_leakage}                                              &               & {\ct .FALSE.}  \\ \hline
 {\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
-{\ct LOADING}                   & Real Array        & Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        & Section ~\ref{info:HVACfilter}                                               & 1/kg          & 1.0            \\ \hline
+{\ct LOADING}                   & Real Array        & Section ~\ref{info:HVACfilter}                                                & kg            & 0.0            \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        & Section ~\ref{info:HVACfilter}                                                & 1/kg          & 1.0            \\ \hline
 {\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0            \\ \hline
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
-{\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
+{\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
+{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)                 \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
-{\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               &                \\ \hline
+{\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
 {\ct SPEC\_ID}                  & Character Array   & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
@@ -8686,7 +8705,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0            \\ \hline
 {\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
 {\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct VENT2\_ID}                 & Character         & Section~\ref{info:local_leakage}                                                   &               &                \\ \hline
+{\ct VENT2\_ID}                 & Character         & Section~\ref{info:local_leakage}                                              &               &                \\ \hline
 {\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                               &  m$^3$/s      &                \\ \hline
 {\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &  0.0           \\ \hline
 \end{longtable}
@@ -8912,6 +8931,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
+{\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
