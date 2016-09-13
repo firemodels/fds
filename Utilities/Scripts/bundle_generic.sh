@@ -127,6 +127,7 @@ smvscriptdir=$scp_fds_smvroot/smv/scripts
 wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
+webpagesdir=$fds_smvroot/webpages
 for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
@@ -279,7 +280,7 @@ echo "--- copying release notes ---"
 echo ""
 CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
-CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
+CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
 CP2 $for_bundle readme_examples.html $bundledir/Examples
