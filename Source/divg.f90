@@ -203,32 +203,22 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
 
-   DO K=1,KBAR
-      DO J=1,JBAR
+   !$OMP PARALLEL DO PRIVATE(N) SCHEDULE(STATIC)
+   DO K=0,KBAR
+      DO J=0,JBAR
          DO I=0,IBAR
             N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I+1,J,K,1:N_TRACKED_SPECIES),1)
             RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDX(I,J,K,N))
-         ENDDO
-      ENDDO
-   ENDDO
 
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
             N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J+1,K,1:N_TRACKED_SPECIES),1)
             RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDY(I,J,K,N))
-         ENDDO
-      ENDDO
-   ENDDO
 
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
             N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J,K+1,1:N_TRACKED_SPECIES),1)
             RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDZ(I,J,K,N))
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Diffusive heat flux
 
