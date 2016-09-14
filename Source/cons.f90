@@ -28,8 +28,6 @@ INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0, &                                  
                       FISHPAK_BC_DIRICHLET_NEUMANN=2, &
                       FISHPAK_BC_NEUMANN_NEUMANN=3, &
                       FISHPAK_BC_NEUMANN_DIRICHLET=4
-INTEGER, PARAMETER :: NULL_EDGE=0,SOLID_EDGE=1,OPEN_EDGE=2,MIRROR_EDGE=3,SMOOTH_EDGE=4, &
-                      INTERPOLATED_EDGE=6,PERIODIC_EDGE=7                                   ! Edge Type
 INTEGER, PARAMETER :: DIRICHLET=1,NEUMANN=2,INTERNAL=3                                      ! Pressure Boundary Conditions
 INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
                       PYROLYSIS_MATERIAL=3,PYROLYSIS_SPECIFIED=4                            ! Pyrolysis model
