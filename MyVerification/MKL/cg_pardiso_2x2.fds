@@ -1,9 +1,9 @@
 &HEAD CHID='cg_pardiso_2x2',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
-&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
-&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
-&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.4,0.8 /
-&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.4,0.8 /
+&MESH IJK=8,1,8, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
+&MESH IJK=8,1,8, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
+&MESH IJK=8,1,8, XB=0.0,0.4,-0.01,0.01,0.4,0.8 /
+&MESH IJK=8,1,8, XB=0.4,0.8,-0.01,0.01,0.4,0.8 /
 
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
@@ -14,10 +14,12 @@
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
 &PRES SCARC_METHOD             = 'KRYLOV'
-      SCARC_DEBUG              = 'NONE'
+      SCARC_DEBUG              = 'MEDIUM'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'PARDISO'    /
+      SCARC_PRECON             = 'PARDISO'   
+      VELOCITY_TOLERANCE       =  1E-6
+      MAX_PRESSURE_ITERATIONS  =  100            /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

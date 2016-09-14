@@ -1,9 +1,9 @@
 &HEAD CHID='gmg_mkl_2x2',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
-&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
-&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
-&MESH IJK=4,1,4, XB=0.0,0.4,-0.01,0.01,0.4,0.8 /
-&MESH IJK=4,1,4, XB=0.4,0.8,-0.01,0.01,0.4,0.8 /
+&MESH IJK=8,1,8, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
+&MESH IJK=8,1,8, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
+&MESH IJK=8,1,8, XB=0.0,0.4,-0.01,0.01,0.4,0.8 /
+&MESH IJK=8,1,8, XB=0.4,0.8,-0.01,0.01,0.4,0.8 /
 
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
@@ -13,11 +13,12 @@
 &TIME T_END = 0.5 /
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
+&PRES VELOCITY_TOLERANCE=1E-6, MAX_PRESSURE_ITERATIONS=100 /
 &PRES SCARC_METHOD               = 'MULTIGRID'
       SCARC_MULTIGRID            = 'GEOMETRIC'
       SCARC_MULTIGRID_ACCURACY   =  1E-8
       SCARC_MULTIGRID_CYCLE      =  'V'
-      SCARC_MULTIGRID_LEVEL      =  m
+      SCARC_MULTIGRID_LEVEL      =  2
       SCARC_COARSE               = 'DIRECT'
       SCARC_COARSE_SYMMETRIC     = .TRUE.
       SCARC_SMOOTH               = 'SSOR'
