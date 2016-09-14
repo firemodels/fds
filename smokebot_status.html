@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html><head><title>Smokebot Build Status</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
+[247.95385,2004.700],
+[248.76956,2003.400],
+[248.82215,2005.200],
+[249.48074,2001.700],
+[249.58267,2005.000],
+[249.62104,2002.900],
+[249.64873,2003.700],
+[250.88714,2006.900],
+        ]);
+
+        var options = {
+          title: '',
+          curveType: 'line',
+          legend: { position: 'right' },
+          colors: ['black'],
+          pointSize: 5,
+          hAxis:{ title: 'Day'},
+          vAxis:{ title: 'Time (s)'}
+        };
+        options.legend = 'none';
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
+</head>
+<body>
+<h2>Smokebot Summary</h2>
+<hr align='left'>
+<h3>Status - Fri Sep  9 05:06:21 EDT 2016</h3>
+<font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/f40e47e909ce85a5385838c109ea828f20684cef">Revision: SMV0-88-gf40e47e</a><br>
+Revision date: Wed Sep 7 22:17:29 2016<br>
+Benchmark time: 2006.900 s <br>
+<h3>Timing History</h3>
+
+<div id="curve_chart" style="width: 500px; height: 300px"></div>
+Mean: 2004 s <br>
+Standard deviation: 1.5 s (0.1 %) <br>
+<h3>Manuals</h3>
+<a href="http://goo.gl/n1Q3WH">Manuals</a>
+
+<h3>Status History</h3>
+
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/f40e47e909ce85a5385838c109ea828f20684cef">Revision: SMV0-88-gf40e47e</a><br>
+Revision date: Wed Sep 7 22:17:29 2016<br>
+Benchmark time: 2006.900 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/20f557c57d6bf469bbfd36352e08522d97f5577c">Revision: SMV0-82-g20f557c</a><br>
+Revision date: Tue Sep 6 16:34:11 2016<br>
+Benchmark time: 2003.700 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/d485f44f6c4ce1a84fc698130452c849947f1d69">Revision: SMV0-80-gd485f44</a><br>
+Revision date: Tue Sep 6 15:54:18 2016<br>
+Benchmark time: 2002.900 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/263c7a8d237524b62d63fcd78555eec2658a3dff">Revision: SMV0-77-g263c7a8</a><br>
+Revision date: Tue Sep 6 14:59:03 2016<br>
+Benchmark time: 2005.000 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/f22108e9b2d7b5ed2f9e74798341f26acf1c808f">Revision: SMV0-70-gf22108e</a><br>
+Revision date: Tue Sep 6 12:32:16 2016<br>
+Benchmark time: 2001.700 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/16f4427d8f702f19811689982126c5e553514528">Revision: SMV0-66-g16f4427</a><br>
+Revision date: Mon Sep 5 20:43:54 2016<br>
+Benchmark time: 2005.200 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/0626c2812fc869692ce9f76988d4ed1f3cd84161">Revision: SMV0-64-g0626c28</a><br>
+Revision date: Mon Sep 5 19:28:10 2016<br>
+Benchmark time: 2003.400 s <br>
+<p><font color="#00FF00"> Build success!</font><br>
+<a href="https://github.com/firemodels/smv/commit/a3ed9df2f4bb86af072fff73b3fbc4772be2a881">Revision: SMV0-62-ga3ed9df</a><br>
+Revision date: Sun Sep 4 23:53:33 2016<br>
+Benchmark time: 2004.700 s <br>
+<br><br>
+<hr align='left'><br>
+
+</body>
+</html>
