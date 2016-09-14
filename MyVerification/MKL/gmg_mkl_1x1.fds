@@ -1,6 +1,6 @@
 &HEAD CHID='gmg_mkl_1x1',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
-&MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=16,1,16, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
@@ -10,6 +10,7 @@
 &TIME T_END = 0.5 /
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
+&PRES VELOCITY_TOLERANCE=1E-6, MAX_PRESSURE_ITERATIONS=100 /
 &PRES SCARC_METHOD               = 'MULTIGRID'
       SCARC_MULTIGRID            = 'GEOMETRIC'
       SCARC_MULTIGRID_ACCURACY   =  1E-8

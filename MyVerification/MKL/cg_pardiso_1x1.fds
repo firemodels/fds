@@ -1,6 +1,6 @@
 &HEAD CHID='cg_pardiso_1x1',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
-&MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=16,1,16, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
@@ -14,7 +14,9 @@
       SCARC_DEBUG              = 'NONE'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'PARDISO'    /
+      SCARC_PRECON             = 'PARDISO'    
+      VELOCITY_TOLERANCE       =  1E-6
+      MAX_PRESSURE_ITERATIONS  =  100            /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

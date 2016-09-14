@@ -1,4 +1,4 @@
-&HEAD CHID='cg_ssor_2x2',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
+&HEAD CHID='gmg_ssor_2x2',TITLE='Simple 2D-Test Case with MKL solver on 1 mesh' /
 
 &MESH IJK=8,1,8, XB=0.0,0.4,-0.01,0.01,0.0,0.4 /
 &MESH IJK=8,1,8, XB=0.4,0.8,-0.01,0.01,0.0,0.4 /
@@ -13,13 +13,16 @@
 &TIME T_END = 0.5 /
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
-&PRES SCARC_METHOD             = 'KRYLOV'
-      SCARC_DEBUG              = 'NONE'
-      SCARC_KRYLOV             = 'CG'
-      SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'SSOR'    
-      VELOCITY_TOLERANCE       =  1E-6
-      MAX_PRESSURE_ITERATIONS  =  100            /
+&PRES VELOCITY_TOLERANCE=1E-6, MAX_PRESSURE_ITERATIONS=100 /
+&PRES SCARC_METHOD               = 'MULTIGRID'
+      SCARC_MULTIGRID            = 'GEOMETRIC'
+      SCARC_MULTIGRID_ACCURACY   =  1E-8
+      SCARC_MULTIGRID_CYCLE      = 'V'
+      SCARC_MULTIGRID_LEVEL      =  2
+      SCARC_COARSE               = 'ITERATIVE'
+      SCARC_DEBUG                = 'NONE'
+      SCARC_SMOOTH               = 'SSOR'
+      SCARC_SMOOTH_ITERATIONS    =   5     /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

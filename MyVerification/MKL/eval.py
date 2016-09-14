@@ -182,12 +182,12 @@ tstart  = float(sys.argv[2])
 tend    = float(sys.argv[3])
 
 chid=[]
-chid.append('fft_1x1')
+chid.append('fft_%s'%top)
+chid.append('mkl_%s'%top)
 chid.append('cg_ssor_%s'%top)
 chid.append('cg_pardiso_%s'%top)
 chid.append('cg_cluster_%s'%top)
-chid.append('mkl_%s'%top)
-chid.append('gmg_%s'%top)
+chid.append('gmg_ssor_%s'%top)
 chid.append('gmg_mkl_%s'%top)
 
 nsim = len(chid)

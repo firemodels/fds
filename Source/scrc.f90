@@ -3405,7 +3405,7 @@ MESHES_LOOP: DO NM = 1, NMESHES
                END SELECT SELECT_PRECON_MG
 
             !> ---------------------------------------------------------------------------------------
-            !> in case of Pardiso/Cluster_sparse_solver as preconditioner: 
+            !> in case of Pardiso/Cluster_Sparse_Solver as preconditioner: 
             !> ---------------------------------------------------------------------------------------
             CASE (NSCARC_PRECON_PARDISO, NSCARC_PRECON_CLUSTER)
 
