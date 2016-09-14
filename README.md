@@ -12,3 +12,5 @@ For more information, including a link to our discussion forum, please visit the
 Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds/firebot_status.html).
 
 Pull requests welcome!
+
+TEST
