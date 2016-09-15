@@ -14,7 +14,7 @@
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
 &PRES SCARC_METHOD             = 'KRYLOV'
-      SCARC_DEBUG              = 'MEDIUM'
+      SCARC_DEBUG              = 'NONE'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
       SCARC_PRECON             = 'CLUSTER'    
