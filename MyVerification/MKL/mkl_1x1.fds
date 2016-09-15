@@ -12,7 +12,7 @@
 
 &PRES SCARC_METHOD             = 'MKL'
       SCARC_MKL                = 'GLOBAL'
-      SCARC_MKL_SYMMETRIC      = .TRUE.    
+      SCARC_MKL_MTYPE          = 'SYMMETRIC'
       SCARC_DEBUG              = 'NONE'  
       VELOCITY_TOLERANCE       = 1E-6
       MAX_PRESSURE_ITERATIONS  = 100            /
