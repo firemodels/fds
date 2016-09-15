@@ -10954,20 +10954,63 @@ END SUBROUTINE PROC_CTRL
 
 SUBROUTINE PROC_OBST
 
-INTEGER :: NM, N
+USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
+INTEGER :: NM,N,I,J,K,IS,JS,KS,IC1,IC2
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF(EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+   IF (PROCESS(NM)/=MYID)   CYCLE MESH_LOOP
+   IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
 
    M=>MESHES(NM)
-   DO N=1,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
+   CALL POINT_TO_MESH(NM)
+
+   ! Assign a property index to the obstruction for use in Smokeview
+
+   DO N=1,N_OBST
+      OB=>OBSTRUCTION(N)
       IF (OB%PROP_ID /='null') THEN
          CALL GET_PROPERTY_INDEX(OB%PROP_INDEX,'OBST',OB%PROP_ID)
       ENDIF
-   END DO
-END DO MESH_LOOP
+   ENDDO
+
+   ! Make mesh edge cells not solid if cells on either side are not solid
+
+   DO K=0,KBP1,KBP1
+      IF (K==0) THEN ; KS=1 ; ELSE ; KS=-1 ; ENDIF
+      DO J=0,JBP1,JBP1
+         IF (J==0) THEN ; JS=1 ; ELSE ; JS=-1 ; ENDIF
+         DO I=1,IBAR
+            IC1 = CELL_INDEX(I,J+JS,K) ; IC2 = CELL_INDEX(I,J,K+KS)
+            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO K=0,KBP1,KBP1
+      IF (K==0) THEN ; KS=1 ; ELSE ; KS=-1 ; ENDIF
+      DO I=0,IBP1,IBP1
+         IF (I==0) THEN ; IS=1 ; ELSE ; IS=-1 ; ENDIF
+         DO J=1,JBAR
+            IC1 = CELL_INDEX(I+IS,J,K) ; IC2 = CELL_INDEX(I,J,K+KS)
+            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   DO J=0,JBP1,JBP1
+      IF (J==0) THEN ; JS=1 ; ELSE ; JS=-1 ; ENDIF
+      DO I=0,IBP1,IBP1
+         IF (I==0) THEN ; IS=1 ; ELSE ; IS=-1 ; ENDIF
+         DO K=1,KBAR
+            IC1 = CELL_INDEX(I+IS,J,K) ; IC2 = CELL_INDEX(I,J+JS,K)
+            IF (.NOT.SOLID(IC1) .AND. .NOT.SOLID(IC2)) CALL BLOCK_CELL(NM,I,I,J,J,K,K,0,0)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO MESH_LOOP
+
 
 END SUBROUTINE PROC_OBST
 
