@@ -2022,7 +2022,6 @@ In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundari
 \label{sec:periodic}
 
 A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following (valid for a single mesh case):
-
 \begin{lstlisting}
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
@@ -2034,7 +2033,13 @@ For multi-mesh cases with {\ct PERIODIC} boundaries the {\ct VENT} planes must b
 &VENT PBX=0, SURF_ID='PERIODIC' /
 &VENT PBX=1, SURF_ID='PERIODIC' /
 \end{lstlisting}
-For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
+Also, you must explicitly tell FDS that two non-connected meshes need to share information. To do this, use the parameter {\ct PERIODIC\_MESH\_IDS(1:3)} on the appropriate {\ct MESH} lines. For example, suppose you have three meshes side by side. Mesh~1 and Mesh~3 have periodic boundaries, but they do not physically touch each other. Provide this information as follows:
+\begin{lstlisting}
+&MESH ID='mesh1', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh3' /
+&MESH ID='mesh2', IJK=..., XB=... /
+&MESH ID='mesh3', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh1' /
+\end{lstlisting}
+Note that {\ct PERIODIC\_MESH\_IDS} is an array of three character strings because it is possible to have three periodic boundaries, one in each coordinate direction. For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
@@ -3844,7 +3849,7 @@ To avoid the possibility of there being no available initialization data for a d
 
 You can increase or decrease the number of cells each discretized duct has, to increase solution accuracy or decrease simulation time respectively. The default value is set based upon a cell size of \SI{100}{\milli\meter}. Where the duct is not divisible by \SI{100}{\milli\meter}, the number of cells is rounded up to the nearest integer (e.g. a duct with a length of \SI{1.05}{\meter} will have \num{11} cells). Ducts with a length of less than \SI{100}{\milli\meter} adopt a cell number of 2. If {\ct N\_CELLS=1} is assigned to a duct then, even if {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}, the HVAC mass transport subroutine will not be called for this duct.
 
-If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain. 
+If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain.
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -8858,19 +8863,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR}             & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
-{\ct CYLINDRICAL}       & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVACUATION}        & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}      & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}   & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
-{\ct ID}                & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
-{\ct IJK}               & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
-{\ct LEVEL}             & Integer                       & For future use                            &    & 0                \\ \hline
-{\ct MPI\_PROCESS}      & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct N\_THREADS}        & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct MULT\_ID }         & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct RGB}               & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
-{\ct XB(6)}             & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
+{\ct COLOR}                & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL}          & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}           & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}         & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}      & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
+{\ct ID}                   & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
+{\ct IJK}                  & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
+{\ct LEVEL}                & Integer                       & For future use                            &    & 0                \\ \hline
+{\ct MPI\_PROCESS}         & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct N\_THREADS}           & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct MULT\_ID }            & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct PERIODIC\_MESH\_IDS}  & Character Array               & Section~\ref{sec:periodic}                &    &                  \\ \hline
+{\ct RGB}                  & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct XB(6)}                & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
 
