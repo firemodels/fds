@@ -1002,7 +1002,7 @@ ITER_LOOP: DO
             VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
             MTOT = MTOT + VFLOW * DU%RHO_D
             ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
-            TGUESS = VFLOW * DU%RHO_D * DU%TMP_D
+            TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
             IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
                IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
                   DN2=>DUCTNODE(DU%NODE_INDEX(2))
