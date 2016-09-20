@@ -4820,15 +4820,15 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%PDPA_N           = PDPA_N
    PY%PDPA_INTEGRATE   = PDPA_INTEGRATE
    PY%PDPA_NORMALIZE   = PDPA_NORMALIZE
-   IF (PY%QUANTITY == 'NUMBER CONCENTRATION') THEN
+   IF (TRIM(PY%QUANTITY) == 'NUMBER CONCENTRATION') THEN
       PY%PDPA_M        = 0
       PY%PDPA_N        = 0
    ENDIF
-   IF ((PY%QUANTITY == 'MASS CONCENTRATION').OR. &
-       (PY%QUANTITY == 'ENTHALPY')          .OR. &
-       (PY%QUANTITY == 'PARTICLE FLUX X')    .OR. &
-       (PY%QUANTITY == 'PARTICLE FLUX Y')    .OR. &
-       (PY%QUANTITY == 'PARTICLE FLUX Z')) THEN
+   IF ((TRIM(PY%QUANTITY) == 'MASS CONCENTRATION') .OR. &
+       (TRIM(PY%QUANTITY) == 'ENTHALPY')           .OR. &
+       (TRIM(PY%QUANTITY) == 'PARTICLE FLUX X')    .OR. &
+       (TRIM(PY%QUANTITY) == 'PARTICLE FLUX Y')    .OR. &
+       (TRIM(PY%QUANTITY) == 'PARTICLE FLUX Z')) THEN
       PY%PDPA_M        = 3
       PY%PDPA_N        = 0
    ENDIF
@@ -5046,7 +5046,6 @@ TABLE_NORMED = .FALSE.
 PROP_LOOP: DO N=0,N_PROP
    PY => PROPERTY(N)
 
-
    ! Assign PART_INDEX to Device PROPERTY array
 
    IF (PY%PART_ID/='null') THEN
@@ -5060,13 +5059,19 @@ PROP_LOOP: DO N=0,N_PROP
       ENDDO
 
       IF (PY%PART_INDEX<0) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' not found'
+         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ',N,' not found'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       IF (LPC%ID==PY%PART_ID .AND. LPC%MASSLESS_TRACER) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ' ,N,' cannot refer to MASSLESS particles'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         IF ( .NOT.(TRIM(PY%QUANTITY)=='NUMBER CONCENTRATION' .OR. &
+                    TRIM(PY%QUANTITY)=='U-VELOCITY'           .OR. &
+                    TRIM(PY%QUANTITY)=='V-VELOCITY'           .OR. &
+                    TRIM(PY%QUANTITY)=='W-VELOCITY'           .OR. &
+                    TRIM(PY%QUANTITY)=='VELOCITY')                 ) THEN
+            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: PART_ID for PROP ',N,' cannot refer to MASSLESS particles'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
       ENDIF
 
       PARTICLE_FILE=.TRUE.

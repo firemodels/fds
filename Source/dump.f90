@@ -2713,7 +2713,7 @@ SURFLOOP: DO N=0,N_SURF
    THICK: IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Material List'
       DO NN=1,SF%N_MATL
-         WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,SF%MATL_NAME(NN)
+         WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,TRIM(SF%MATL_NAME(NN))
       ENDDO
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
