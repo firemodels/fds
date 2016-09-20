@@ -10768,7 +10768,7 @@ REAL(EB), DIMENSION(:)    , POINTER ::  V1, V2
 REAL(EB), DIMENSION(:)    , POINTER ::  AC
 INTEGER , DIMENSION(:)    , POINTER ::  AC_ROW, AC_COL
 INTEGER , POINTER:: NC
-INTEGER  :: NPRECON, NM, I, J, K, IC, ICOL
+INTEGER  :: NPRECON, NM, I, J, K, IC, ICOL, IROW, JCOL
 REAL(EB) :: AUX, OMEGA=1.5_EB
 TYPE (MESH_TYPE), POINTER :: M
 #ifdef WITH_MKL
@@ -10816,7 +10816,7 @@ SELECT CASE (NPRECON)
          AC_COL => SCARC(NM)%MKL(NL)%AS_COL
 
          IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
-            WRITE(LU_SCARC,*) 'PRECON_PARDISO'
+            WRITE(LU_SCARC,*) 'PRECON_CLUSTER'
             !WRITE(LU_SCARC,*) 'PT=',SM%PT
             WRITE(LU_SCARC,*) 'MAXFCT=',SM%MAXFCT
             WRITE(LU_SCARC,*) 'MNUM=',SM%MNUM
@@ -10831,6 +10831,13 @@ SELECT CASE (NPRECON)
             WRITE(LU_SCARC,*) 'IPARM=',SM%IPARM
             WRITE(LU_SCARC,*) 'MSGLVL=',SM%MSGLVL
             WRITE(LU_SCARC,*) 'ERROR2=',SM%ERROR
+    DO IROW=1,NC
+        DO JCOL=AC_ROW(IROW),AC_ROW(IROW)-1
+           WRITE(77,'(2I8,F18.12)') IROW,AC_COL(JCOL),AC(JCOL)
+        ENDDO
+        WRITE(77,*)
+     ENDDO
+
          ENDIF
          
          CALL SCARC_DEBUG_LEVEL (NVECTOR1, 'SCARC_PRECON_PARDISO', 'X INIT', NL)
@@ -10876,14 +10883,17 @@ SELECT CASE (NPRECON)
             WRITE(LU_SCARC,*) 'MTYPE=',SM%MTYPE
             WRITE(LU_SCARC,*) 'PHASE=',SM%PHASE
             WRITE(LU_SCARC,*) 'SL%NC=',NC
-            WRITE(LU_SCARC,*) 'SM%AS=',AC
-            WRITE(LU_SCARC,*) 'SM%AS_ROW=',AC_ROW
-            WRITE(LU_SCARC,*) 'SM%AS_COL=',AC_COL
             WRITE(LU_SCARC,*) 'PERM=',SM%PERM
             WRITE(LU_SCARC,*) 'NRHS=',SM%NRHS
             WRITE(LU_SCARC,*) 'IPARM=',SM%IPARM
             WRITE(LU_SCARC,*) 'MSGLVL=',SM%MSGLVL
             WRITE(LU_SCARC,*) 'ERROR2=',SM%ERROR
+            DO IROW=1,NC
+               DO JCOL=AC_ROW(IROW),AC_ROW(IROW+1)-1
+                   WRITE(LU_SCARC,'(2I6,F18.12)') IROW,AC_COL(JCOL),AC(JCOL)/(-125E0)
+               ENDDO
+               WRITE(LU_SCARC,*)
+            ENDDO
          ENDIF
          
          CALL SCARC_DEBUG_LEVEL (NVECTOR1, 'SCARC_PRECON_PARDISO', 'X INIT', NL)
@@ -14062,6 +14072,12 @@ SELECT CASE (NTYPE)
                WRITE(LU_SCARC,'(i5,a,20i9)') IC,':',(SM%AG_COL(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
             ENDDO
          ENDIF
+         DO IC=1,SL%NC
+            DO IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1
+                WRITE(LU_SCARC,'(2I8,F18.12)') IC,SL%A_COL(IP),SL%A(IP)/(-125E0)
+            ENDDO
+            WRITE(LU_SCARC,*)
+         ENDDO
 #endif
 
          CALL SCARC_PRINT_MATRIX (SL%A, SL%A_ROW, SL%A_COL, SL%NC, SL%NC, NM, NL, 'A')
@@ -14096,6 +14112,12 @@ SELECT CASE (NTYPE)
          !WRITE(LU_SCARC,*) '---------------------- AS:', SM%AS_ROW(IC+1)- SM%AS_ROW(IC)
          DO IC = 1, SL%NC
             WRITE(LU_SCARC,'(i5,a,20f9.2)') IC,':',(SM%AS(IP),IP=SM%AS_ROW(IC),SM%AS_ROW(IC+1)-1)
+         ENDDO
+         DO IC=1,SL%NC
+            DO IP=SM%AS_ROW(IC),SM%AS_ROW(IC+1)-1
+                WRITE(LU_SCARC,'(2I8,F18.12)') IC,SM%AS_COL(IP),SM%AS(IP)/(-125E0)
+            ENDDO
+            WRITE(LU_SCARC,*)
          ENDDO
 
          CALL SCARC_PRINT_MATRIX (SM%AS, SM%AS_ROW, SM%AS_COL, SL%NC, SL%NC, NM, NL, 'AS')
