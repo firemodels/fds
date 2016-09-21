@@ -1941,7 +1941,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
                                (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
 
-            IF (ANY(MEAN_FORCING)) THEN  ! For a wind open boundary, determine the diretion of the normal component of velocity
+            IF (WIND_BOUNDARY) THEN  ! For a wind open boundary, determine the diretion of the normal component of velocity
 
                SELECT CASE(IEC)
                   CASE(1)
