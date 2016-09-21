@@ -2013,7 +2013,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             ENDIF FLOW_DIRECTION_IF
 
-            CYCLE EDGE_LOOP  ! Do no further processing of this edge
+            IF (IWM/=0 .AND. IWP/=0) THEN
+               CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN
+            ELSE
+               CYCLE ORIENTATION_LOOP
+            ENDIF
 
          ENDIF OPEN_AND_WIND_BC
 
@@ -2356,6 +2360,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
       ENDDO ORIENTATION_LOOP
    ENDDO SIGN_LOOP
+
+   ! Cycle out of the EDGE_LOOP if no tangential gradients have been altered.
+
+   IF (.NOT.ANY(ALTERED_GRADIENT)) CYCLE EDGE_LOOP
 
    ! If the edge is on an interpolated boundary, and all cells around it are not solid, cycle
 
