@@ -9,20 +9,20 @@
 
 &DUMP DT_SLCF=1, DT_DEVC=1/
 
-&MISC U0=10.,RAMP_U0='RAMPU',RAMP_U0_Z='ramp_u_z',MEAN_FORCING(1)=.TRUE.,
-      V0=10.,RAMP_V0='RAMPV',RAMP_V0_Z='ramp_v_z',MEAN_FORCING(2)=.TRUE.,
+&MISC U0=10., RAMP_U0_T='RAMPU', RAMP_U0_Z='ramp_u_z', MEAN_FORCING(1)=.TRUE.,
+      V0=10., RAMP_V0_T='RAMPV', RAMP_V0_Z='ramp_v_z', MEAN_FORCING(2)=.TRUE.,
       DT_MEAN_FORCING=1./
 
 &SURF ID='GROUND',ROUGHNESS=0.5,COLOR='FOREST GREEN'/
 &SURF ID='SKY',FREE_SLIP=.TRUE.,COLOR='SKY BLUE'/
 
-&RAMP ID='ramp_u_z', T= -10, F= 0.0 /
-&RAMP ID='ramp_u_z', T=   0, F= 0.0 /
-&RAMP ID='ramp_u_z', T= 990, F= 1.0 /
+&RAMP ID='ramp_u_z', Z= -10, F= 0.0 /
+&RAMP ID='ramp_u_z', Z=   0, F= 0.0 /
+&RAMP ID='ramp_u_z', Z= 990, F= 1.0 /
 
-&RAMP ID='ramp_v_z', T= -10, F= 0.0 /
-&RAMP ID='ramp_v_z', T=   0, F= 0.0 /
-&RAMP ID='ramp_v_z', T= 990, F= 1.0 /
+&RAMP ID='ramp_v_z', Z= -10, F= 0.0 /
+&RAMP ID='ramp_v_z', Z=   0, F= 0.0 /
+&RAMP ID='ramp_v_z', Z= 990, F= 1.0 /
 
 &RAMP ID='RAMPU', T= 0.0, F=  1.0 /
 &RAMP ID='RAMPU', T= 2.5, F=  0.0 /
