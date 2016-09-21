@@ -1,0 +1,239 @@
+&HEAD CHID='wind_example',  TITLE='Test of z-profile mean velocity ramp for one-way WRF coupling with FDS' /
+
+&MESH IJK=100,100,10, XB=-500.,0.,-500.,0.,0.,50., MULT_ID='mesh' /
+&MULT ID='mesh', DX=500., DY=500., DZ=50., I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+
+&TIME T_BEGIN=-5., T_END=60. /
+
+&MISC U0=10., RAMP_U0_T='u-ramp', RAMP_U0_Z='prof', MEAN_FORCING(1)=.TRUE.,
+      V0=10., RAMP_V0_T='v-ramp', RAMP_V0_Z='prof', MEAN_FORCING(2)=.TRUE.,
+      DT_MEAN_FORCING=1./
+
+&SURF ID='GROUND', ROUGHNESS=0.5 /
+
+&RAMP ID='prof', Z= 0 F= 0 /
+&RAMP ID='prof', Z= 2 F= 0.832553207 /
+&RAMP ID='prof', Z= 4 F= 0.9563525 /
+&RAMP ID='prof', Z= 6 F= 1.037137289 /
+&RAMP ID='prof', Z= 8 F= 1.098560543 /
+&RAMP ID='prof', Z= 10 F= 1.148698355 /
+&RAMP ID='prof', Z= 12 F= 1.191357898 /
+&RAMP ID='prof', Z= 14 F= 1.228659679 /
+&RAMP ID='prof', Z= 16 F= 1.261914689 /
+&RAMP ID='prof', Z= 18 F= 1.29199401 /
+&RAMP ID='prof', Z= 20 F= 1.319507911 /
+&RAMP ID='prof', Z= 22 F= 1.344901678 /
+&RAMP ID='prof', Z= 24 F= 1.368510858 /
+&RAMP ID='prof', Z= 26 F= 1.390595017 /
+&RAMP ID='prof', Z= 28 F= 1.411359352 /
+&RAMP ID='prof', Z= 30 F= 1.430969081 /
+&RAMP ID='prof', Z= 32 F= 1.449559327 /
+&RAMP ID='prof', Z= 34 F= 1.467242109 /
+&RAMP ID='prof', Z= 36 F= 1.484111394 /
+&RAMP ID='prof', Z= 38 F= 1.500246832 /
+&RAMP ID='prof', Z= 40 F= 1.515716567 /
+&RAMP ID='prof', Z= 42 F= 1.530579376 /
+&RAMP ID='prof', Z= 44 F= 1.544886345 /
+&RAMP ID='prof', Z= 46 F= 1.558682163 /
+&RAMP ID='prof', Z= 48 F= 1.572006171 /
+&RAMP ID='prof', Z= 50 F= 1.584893192 /
+&RAMP ID='prof', Z= 52 F= 1.597374208 /
+&RAMP ID='prof', Z= 54 F= 1.609476912 /
+&RAMP ID='prof', Z= 56 F= 1.621226166 /
+&RAMP ID='prof', Z= 58 F= 1.632644381 /
+&RAMP ID='prof', Z= 60 F= 1.64375183 /
+&RAMP ID='prof', Z= 62 F= 1.654566919 /
+&RAMP ID='prof', Z= 64 F= 1.665106415 /
+&RAMP ID='prof', Z= 66 F= 1.67538563 /
+&RAMP ID='prof', Z= 68 F= 1.685418597 /
+&RAMP ID='prof', Z= 70 F= 1.695218203 /
+&RAMP ID='prof', Z= 72 F= 1.704796317 /
+&RAMP ID='prof', Z= 74 F= 1.714163894 /
+&RAMP ID='prof', Z= 76 F= 1.723331068 /
+&RAMP ID='prof', Z= 78 F= 1.732307237 /
+&RAMP ID='prof', Z= 80 F= 1.741101127 /
+&RAMP ID='prof', Z= 82 F= 1.749720861 /
+&RAMP ID='prof', Z= 84 F= 1.758174012 /
+&RAMP ID='prof', Z= 86 F= 1.766467654 /
+&RAMP ID='prof', Z= 88 F= 1.774608403 /
+&RAMP ID='prof', Z= 90 F= 1.782602458 /
+&RAMP ID='prof', Z= 92 F= 1.790455636 /
+&RAMP ID='prof', Z= 94 F= 1.798173404 /
+&RAMP ID='prof', Z= 96 F= 1.805760903 /
+&RAMP ID='prof', Z= 98 F= 1.813222979 /
+&RAMP ID='prof', Z= 100 F= 1.820564203 /
+
+&RAMP ID='u-ramp', T= 0 F= 1  /
+&RAMP ID='u-ramp', T= 1 F= 0.992114715  /
+&RAMP ID='u-ramp', T= 2 F= 0.968583214  /
+&RAMP ID='u-ramp', T= 3 F= 0.929776603  /
+&RAMP ID='u-ramp', T= 4 F= 0.876306885  /
+&RAMP ID='u-ramp', T= 5 F= 0.809017306  /
+&RAMP ID='u-ramp', T= 6 F= 0.728969063  /
+&RAMP ID='u-ramp', T= 7 F= 0.637424562  /
+&RAMP ID='u-ramp', T= 8 F= 0.535827512  /
+&RAMP ID='u-ramp', T= 9 F= 0.425780156  /
+&RAMP ID='u-ramp', T= 10 F= 0.309018004  /
+&RAMP ID='u-ramp', T= 11 F= 0.187382461  /
+&RAMP ID='u-ramp', T= 12 F= 0.062791791  /
+&RAMP ID='u-ramp', T= 13 F= -0.062789142  /
+&RAMP ID='u-ramp', T= 14 F= -0.187379855  /
+&RAMP ID='u-ramp', T= 15 F= -0.30901548  /
+&RAMP ID='u-ramp', T= 16 F= -0.425777755  /
+&RAMP ID='u-ramp', T= 17 F= -0.535825271  /
+&RAMP ID='u-ramp', T= 18 F= -0.637422518  /
+&RAMP ID='u-ramp', T= 19 F= -0.728967247  /
+&RAMP ID='u-ramp', T= 20 F= -0.809015747  /
+&RAMP ID='u-ramp', T= 21 F= -0.876305606  /
+&RAMP ID='u-ramp', T= 22 F= -0.929775626  /
+&RAMP ID='u-ramp', T= 23 F= -0.968582554  /
+&RAMP ID='u-ramp', T= 24 F= -0.992114382  /
+&RAMP ID='u-ramp', T= 25 F= -1  /
+&RAMP ID='u-ramp', T= 26 F= -0.992115047  /
+&RAMP ID='u-ramp', T= 27 F= -0.968583874  /
+&RAMP ID='u-ramp', T= 28 F= -0.92977758  /
+&RAMP ID='u-ramp', T= 29 F= -0.876308163  /
+&RAMP ID='u-ramp', T= 30 F= -0.809018866  /
+&RAMP ID='u-ramp', T= 31 F= -0.72897088  /
+&RAMP ID='u-ramp', T= 32 F= -0.637426607  /
+&RAMP ID='u-ramp', T= 33 F= -0.535829752  /
+&RAMP ID='u-ramp', T= 34 F= -0.425782557  /
+&RAMP ID='u-ramp', T= 35 F= -0.309020528  /
+&RAMP ID='u-ramp', T= 36 F= -0.187385068  /
+&RAMP ID='u-ramp', T= 37 F= -0.062794439  /
+&RAMP ID='u-ramp', T= 38 F= 0.062786494  /
+&RAMP ID='u-ramp', T= 39 F= 0.187377248  /
+&RAMP ID='u-ramp', T= 40 F= 0.309012956  /
+&RAMP ID='u-ramp', T= 41 F= 0.425775354  /
+&RAMP ID='u-ramp', T= 42 F= 0.535823031  /
+&RAMP ID='u-ramp', T= 43 F= 0.637420473  /
+&RAMP ID='u-ramp', T= 44 F= 0.72896543  /
+&RAMP ID='u-ramp', T= 45 F= 0.809014187  /
+&RAMP ID='u-ramp', T= 46 F= 0.876304328  /
+&RAMP ID='u-ramp', T= 47 F= 0.929774649  /
+&RAMP ID='u-ramp', T= 48 F= 0.968581894  /
+&RAMP ID='u-ramp', T= 49 F= 0.992114049  /
+&RAMP ID='u-ramp', T= 50 F= 1  /
+
+&RAMP ID='v-ramp', T= 0 F= 0  /
+&RAMP ID='v-ramp', T= 1 F= 0.125333128  /
+&RAMP ID='v-ramp', T= 2 F= 0.248689682  /
+&RAMP ID='v-ramp', T= 3 F= 0.368124257  /
+&RAMP ID='v-ramp', T= 4 F= 0.481753302  /
+&RAMP ID='v-ramp', T= 5 F= 0.587784823  /
+&RAMP ID='v-ramp', T= 6 F= 0.684546642  /
+&RAMP ID='v-ramp', T= 7 F= 0.770512769  /
+&RAMP ID='v-ramp', T= 8 F= 0.844327471  /
+&RAMP ID='v-ramp', T= 9 F= 0.904826646  /
+&RAMP ID='v-ramp', T= 10 F= 0.951056188  /
+&RAMP ID='v-ramp', T= 11 F= 0.982287032  /
+&RAMP ID='v-ramp', T= 12 F= 0.998026648  /
+&RAMP ID='v-ramp', T= 13 F= 0.998026815  /
+&RAMP ID='v-ramp', T= 14 F= 0.982287529  /
+&RAMP ID='v-ramp', T= 15 F= 0.951057008  /
+&RAMP ID='v-ramp', T= 16 F= 0.904827776  /
+&RAMP ID='v-ramp', T= 17 F= 0.844328892  /
+&RAMP ID='v-ramp', T= 18 F= 0.770514461  /
+&RAMP ID='v-ramp', T= 19 F= 0.684548576  /
+&RAMP ID='v-ramp', T= 20 F= 0.58778697  /
+&RAMP ID='v-ramp', T= 21 F= 0.481755627  /
+&RAMP ID='v-ramp', T= 22 F= 0.368126724  /
+&RAMP ID='v-ramp', T= 23 F= 0.248692252  /
+&RAMP ID='v-ramp', T= 24 F= 0.125335761  /
+&RAMP ID='v-ramp', T= 25 F= 2.65359E-06  /
+&RAMP ID='v-ramp', T= 26 F= -0.125330496  /
+&RAMP ID='v-ramp', T= 27 F= -0.248687111  /
+&RAMP ID='v-ramp', T= 28 F= -0.368121789  /
+&RAMP ID='v-ramp', T= 29 F= -0.481750977  /
+&RAMP ID='v-ramp', T= 30 F= -0.587782676  /
+&RAMP ID='v-ramp', T= 31 F= -0.684544707  /
+&RAMP ID='v-ramp', T= 32 F= -0.770511078  /
+&RAMP ID='v-ramp', T= 33 F= -0.844326049  /
+&RAMP ID='v-ramp', T= 34 F= -0.904825516  /
+&RAMP ID='v-ramp', T= 35 F= -0.951055368  /
+&RAMP ID='v-ramp', T= 36 F= -0.982286535  /
+&RAMP ID='v-ramp', T= 37 F= -0.998026482  /
+&RAMP ID='v-ramp', T= 38 F= -0.998026982  /
+&RAMP ID='v-ramp', T= 39 F= -0.982288026  /
+&RAMP ID='v-ramp', T= 40 F= -0.951057828  /
+&RAMP ID='v-ramp', T= 41 F= -0.904828905  /
+&RAMP ID='v-ramp', T= 42 F= -0.844330314  /
+&RAMP ID='v-ramp', T= 43 F= -0.770516152  /
+&RAMP ID='v-ramp', T= 44 F= -0.68455051  /
+&RAMP ID='v-ramp', T= 45 F= -0.587789117  /
+&RAMP ID='v-ramp', T= 46 F= -0.481757953  /
+&RAMP ID='v-ramp', T= 47 F= -0.368129191  /
+&RAMP ID='v-ramp', T= 48 F= -0.248694822  /
+&RAMP ID='v-ramp', T= 49 F= -0.125338394  /
+&RAMP ID='v-ramp', T= 50 F= -5.30718E-06  /
+
+&VENT PBX=-500, SURF_ID='OPEN' /
+&VENT PBX= 500, SURF_ID='OPEN' /
+&VENT PBY=-500, SURF_ID='OPEN' /
+&VENT PBY= 500, SURF_ID='OPEN' /
+&VENT PBZ=   0, SURF_ID='GROUND' /
+&VENT PBZ= 100, SURF_ID='OPEN' /
+
+&OBST XB=-180,-240,  40, 100,   0,  10, COLOR='SANDY BROWN'/
+&OBST XB=-300,-240,  40, 100,   0,  10, COLOR='BLACK'/
+&OBST XB=-300,-360,  40, 100,   0,  10, COLOR='WHITE'/
+&OBST XB=-280,-340,-750,-860,   0,  20, COLOR='SANDY BROWN'/
+&OBST XB=-400,-460,-750,-860,   0,  30, COLOR='GRAY'/
+&OBST XB= 110, 120,  90, 100,   0,  10, COLOR='RED'/
+&OBST XB=   0, 110,   0,  40,   0,  50, COLOR='GRAY'/
+&OBST XB=  40,  80, -60, -30,   0,  30, COLOR='GRAY'/
+&OBST XB= -40, -10,-140, -40,   0,  40, COLOR='SANDY BROWN'/
+&OBST XB= -40, -20, -90, -40,  40,  60, COLOR='SANDY BROWN'/
+&OBST XB= 100, 120,-140, -40,   0,  50, COLOR='GRAY'/
+&OBST XB= 110, 200,-225,-175,   0,  50, COLOR='GRAY'/ 
+&OBST XB= 250, 300,-225,-150,   0,  30, COLOR='WHITE'/
+&OBST XB= 150, 200, 230, 350,   0,  20, COLOR='WHITE'/
+&OBST XB= 250, 280, 170, 230,   0,  30, COLOR='SANDY BROWN'/
+&OBST XB=-230,-270, -50,-120,   0,  20, COLOR='WHITE'/
+&OBST XB=-70,0,-170,-180,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-190,-200,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-210,-220,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-210,-220,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-230,-240,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-250,-260,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-270,-280,0,10, COLOR='BRICK'/
+&OBST XB=-70,0,-290,-300,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-170,-180,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-210,-220,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-210,-220,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-230,-240,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-270,-280,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-170,-180,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-190,-200,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-210,-220,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-230,-240,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-250,-260,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-270,-280,0,10, COLOR='BRICK'/
+&OBST XB=-400,-330,-290,-300,0,10, COLOR='BRICK'/
+&OBST XB=-300,-230,-310,-320,0,10, COLOR='SANDY BROWN'/
+&OBST XB=-300,-230,-350,-360,0,10, COLOR='SANDY BROWN'/
+&OBST XB=-300,-230,-370,-380,0,10, COLOR='SANDY BROWN'/
+&OBST XB=-300,-230,-410,-420,0,10, COLOR='SANDY BROWN'/
+&OBST XB=-300,-230,-430,-440,0,10, COLOR='SANDY BROWN'/
+&OBST XB=-400,-330,-310,-320,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-330,-340,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-350,-360,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-370,-380,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-390,-400,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-410,-420,0,10, COLOR='WHITE'/
+&OBST XB=-400,-330,-430,-440,0,10, COLOR='WHITE'/
+
+&SLCF PBX=10,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBY=10,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBZ=10,QUANTITY='VELOCITY',VECTOR=.TRUE./
+&SLCF PBZ=20,QUANTITY='VELOCITY',VECTOR=.TRUE./
+&SLCF PBZ=99,QUANTITY='VELOCITY',VECTOR=.TRUE./
+
+&DUMP DT_DEVC_LINE=7., DT_DEVC=0.5 /
+
+&DEVC XB=-490,-490,-490,-490,2.5,97.5, POINTS=20, QUANTITY='VELOCITY', Z_ID='z', ID='u' /
+&DEVC XB=-500,   0,-500,   0,  5,  10, QUANTITY='U-VELOCITY', STATISTICS='MEAN', ID='u_mean' /
+&DEVC XB=-500,   0,-500,   0,  5,  10, QUANTITY='V-VELOCITY', STATISTICS='MEAN', ID='v_mean' /
+
+&TAIL /
+
