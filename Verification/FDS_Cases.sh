@@ -471,6 +471,8 @@ $QFDS -d WUI random_walk_2.fds
 
 $QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
+$QFDS -t -p 8 -d Atmospheric_Effects wind_example.fds
+
 #$QFDS -t -p 3 -d Evacuation evac_smv_testcase1.fds
 
 $QFDS -t -p 8 -d Fires circular_burner.fds
