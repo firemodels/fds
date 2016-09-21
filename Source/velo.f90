@@ -825,7 +825,7 @@ END IF
 
 ! Mean forcing
 
-IF (ANY(MEAN_FORCING)) CALL MOMENTUM_NUDGING()
+IF (ANY(MEAN_FORCING)) CALL MOMENTUM_NUDGING
 
 ! Coriolis force
 
@@ -873,7 +873,10 @@ IF (PERIODIC_TEST==7) CALL MMS_VELOCITY_FLUX(NM,T)
 
 CONTAINS
 
-SUBROUTINE MOMENTUM_NUDGING()
+SUBROUTINE MOMENTUM_NUDGING
+
+! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
+
 REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING
 
 MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
@@ -901,7 +904,7 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
          ELSE
             UMEAN = 0._EB
          ENDIF
-         UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)
+         UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
          DU_FORCING = (UBAR-UMEAN)/DT_MEAN_FORCING
          DO K=1,KBAR
             DO J=1,JBAR
@@ -933,7 +936,7 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                ! this can happen if all cells in a given row, k, are solid
                UMEAN = 0._EB
             ENDIF
-            UBAR = U0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_U0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
+            UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             DU_FORCING = (UBAR-UMEAN)/DT_MEAN_FORCING
             FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
          ENDDO K_LOOP_U
@@ -965,7 +968,7 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
          ELSE
             VMEAN = 0._EB
          ENDIF
-         VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)
+         VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
          DV_FORCING = (VBAR-VMEAN)/DT_MEAN_FORCING
          DO K=1,KBAR
             DO J=0,JBAR
@@ -996,7 +999,7 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
             ELSE
                VMEAN = 0._EB
             ENDIF
-            VBAR = V0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_V0)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
+            VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             DV_FORCING = (VBAR-VMEAN)/DT_MEAN_FORCING
             FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
          ENDDO K_LOOP_V
@@ -1028,7 +1031,7 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
          ELSE
             WMEAN = 0._EB
          ENDIF
-         WBAR = W0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)
+         WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)
          DW_FORCING = (WBAR-WMEAN)/DT_MEAN_FORCING
          DO K=0,KBAR
             DO J=1,JBAR
@@ -1059,7 +1062,7 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ELSE
                WMEAN = 0._EB
             ENDIF
-            WBAR = W0*EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_W0)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+            WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
             DW_FORCING = (WBAR-WMEAN)/DT_MEAN_FORCING
             FVZ = FVZ - DW_FORCING
          ENDDO K_LOOP_W
@@ -1709,13 +1712,13 @@ SUBROUTINE VELOCITY_BC(T,NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
+REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,SHARP_CORNER,INTERPOLATED_EDGE
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
@@ -1914,19 +1917,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If only one adjacent wall cell is defined, use its properties.
 
-         SHARP_CORNER = .FALSE.
          IF (IWM>0) THEN
             WCM => WALL(IWM)
          ELSE
             WCM => WALL(IWP)
-            SHARP_CORNER = .TRUE.
          ENDIF
 
          IF (IWP>0) THEN
             WCP => WALL(IWP)
          ELSE
             WCP => WALL(IWM)
-            SHARP_CORNER = .TRUE.
          ENDIF
 
          ! If both adjacent wall cells are NULL, cycle out.
@@ -1936,11 +1936,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
-         ! Test NEW_OPEN_BOUNDARY
+         ! OPEN boundary conditions, both varieties, with (MEAN_FORCING) and without a wind
 
-         NEW_OPEN_IF: IF (NEW_OPEN_BOUNDARY) THEN
-            IF (BOUNDARY_TYPE_M==OPEN_BOUNDARY .AND. BOUNDARY_TYPE_P==OPEN_BOUNDARY) THEN
-               ! first, compute velocity component normal to the boundary
+         OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
+                               (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
+
+            IF (ANY(MEAN_FORCING)) THEN  ! For a wind open boundary, determine the diretion of the normal component of velocity
+
                SELECT CASE(IEC)
                   CASE(1)
                      IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
@@ -1958,72 +1960,62 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
                      IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
                END SELECT
-               ! if flow is out of the domain, use zero gradient (Neumann)
-               FLOW_DIRECTION_IF: IF ( REAL(IOR,EB)*TWOUN < 0._EB ) THEN
-                  SELECT CASE(IEC)
-                     CASE(1)
-                        IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WW(II,1,KK)
-                        IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WW(II,JBAR,KK)
-                        IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VV(II,JJ,1)
-                        IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VV(II,JJ,KBAR)
-                     CASE(2)
-                        IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WW(1,JJ,KK)
-                        IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WW(IBAR,JJ,KK)
-                        IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UU(II,JJ,1)
-                        IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UU(II,JJ,KBAR)
-                     CASE(3)
-                        IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VV(1,JJ,KK)
-                        IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VV(IBAR,JJ,KK)
-                        IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
-                        IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
-                  END SELECT
-               ELSE FLOW_DIRECTION_IF
-               ! if flow is into the domain, use prescribed far-field (Dirichlet)
-                  SELECT CASE(IEC)
-                     CASE(1)
-                        IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = W0
-                        IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = W0
-                        IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = V0
-                        IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = V0
-                     CASE(2)
-                        IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = W0
-                        IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = W0
-                        IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = U0
-                        IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = U0
-                     CASE(3)
-                        IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = V0
-                        IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = V0
-                        IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = U0
-                        IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = U0
-                  END SELECT
-               ENDIF FLOW_DIRECTION_IF
-               CYCLE EDGE_LOOP
+
+            ELSE
+
+               TWOUN = -REAL(IOR,EB)  ! For non-wind case, always use free-slip tangential BCs
+
             ENDIF
-         ENDIF NEW_OPEN_IF
 
-         ! At OPEN boundaries, set the external velocity component equal to the internal and exit the EDGE loop.
-         ! Note that this is done only for edges with OPEN boundaries on each side.
+            FLOW_DIRECTION_IF: IF ( REAL(IOR,EB)*TWOUN < 0._EB ) THEN  ! For outflow, use zero gradient (free-slip) BCs
 
-         IF (WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-            SELECT CASE(IEC)
-               CASE(1)
-                  IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WW(II,1,KK)
-                  IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WW(II,JBAR,KK)
-                  IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VV(II,JJ,1)
-                  IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VV(II,JJ,KBAR)
-               CASE(2)
-                  IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WW(1,JJ,KK)
-                  IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WW(IBAR,JJ,KK)
-                  IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UU(II,JJ,1)
-                  IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UU(II,JJ,KBAR)
-               CASE(3)
-                  IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VV(1,JJ,KK)
-                  IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VV(IBAR,JJ,KK)
-                  IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
-                  IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
-            END SELECT
-            CYCLE EDGE_LOOP
-         ENDIF
+               SELECT CASE(IEC)
+                  CASE(1)
+                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WW(II,1,KK)
+                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WW(II,JBAR,KK)
+                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VV(II,JJ,1)
+                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VV(II,JJ,KBAR)
+                  CASE(2)
+                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WW(1,JJ,KK)
+                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WW(IBAR,JJ,KK)
+                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UU(II,JJ,1)
+                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UU(II,JJ,KBAR)
+                  CASE(3)
+                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VV(1,JJ,KK)
+                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VV(IBAR,JJ,KK)
+                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UU(II,1,KK)
+                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
+               END SELECT
+
+            ELSE FLOW_DIRECTION_IF  ! For inflow, use prescribed far-field velocity
+
+               UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
+               VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
+               WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
+
+               SELECT CASE(IEC)
+                  CASE(1)
+                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
+                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
+                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
+                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
+                  CASE(2)
+                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
+                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
+                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
+                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
+                  CASE(3)
+                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
+                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
+                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
+                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
+               END SELECT
+
+            ENDIF FLOW_DIRECTION_IF
+
+            CYCLE EDGE_LOOP  ! Do no further processing of this edge
+
+         ENDIF OPEN_AND_WIND_BC
 
          ! Define the appropriate gas and ghost velocity
 

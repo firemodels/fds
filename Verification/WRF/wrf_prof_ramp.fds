@@ -16,13 +16,13 @@
 &SURF ID='GROUND',ROUGHNESS=0.5, COLOR='FOREST GREEN'/
 &SURF ID='SKY',FREE_SLIP=.TRUE., COLOR='SKY BLUE'/
 
-&RAMP ID='ramp_u_z', T= -10, F= 0.0 /
-&RAMP ID='ramp_u_z', T=   0, F= 0.0 /
-&RAMP ID='ramp_u_z', T= 990, F= 1.0 /
+&RAMP ID='ramp_u_z', Z= -10, F= 0.0 /
+&RAMP ID='ramp_u_z', Z=   0, F= 0.0 /
+&RAMP ID='ramp_u_z', Z= 990, F= 1.0 /
 
-&RAMP ID='ramp_v_z', T= -10, F= 0.0 /
-&RAMP ID='ramp_v_z', T=   0, F= 0.0 /
-&RAMP ID='ramp_v_z', T= 990, F= 1.0 /
+&RAMP ID='ramp_v_z', Z= -10, F= 0.0 /
+&RAMP ID='ramp_v_z', Z=   0, F= 0.0 /
+&RAMP ID='ramp_v_z', Z= 990, F= 1.0 /
 
 &VENT XB = -500,-500,-500, 500, 0, 990, SURF_ID = 'OPEN' /
 &VENT XB =  500, 500,-500, 500, 0, 990, SURF_ID = 'OPEN' /
