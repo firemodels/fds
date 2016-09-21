@@ -4,8 +4,8 @@ directory=$1
 host=$2
 
 cd ~/$directory
-git checkout master
+
+git checkout nist-pages
 git remote update
-git merge origin/master
-git merge firemodels/master
+git merge origin/nist-pages
 git describe --dirty 
