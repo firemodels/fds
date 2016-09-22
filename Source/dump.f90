@@ -7959,15 +7959,17 @@ SUBROUTINE TIMINGS
 
 USE COMP_FUNCTIONS, ONLY: WALL_CLOCK_TIME
 INTEGER :: N
+LOGICAL :: WRITE_HEADER
 TYPE(CONTROL_TYPE), POINTER :: CF=>NULL()
 
 ! Print out detector and control activation times
 
 IF (N_DEVC > 0) THEN
-   WRITE(LU_OUTPUT,'(//A/)')   ' DEVICE Activation Times'
+   WRITE_HEADER = .TRUE.
    DO N=1,N_DEVC
       DV => DEVICE(N)
       IF (DV%SETPOINT>1.E6_EB) CYCLE
+      IF (WRITE_HEADER)             WRITE(LU_OUTPUT,'(//A/)')   ' DEVICE Activation Times' ; WRITE_HEADER = .FALSE.
       IF (DV%T_CHANGE < 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,F8.1,A)') N,DV%ID,DV%T_CHANGE,' s'
       IF (DV%T_CHANGE > 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,A)')      N,DV%ID,'No Activation'
    ENDDO
@@ -7984,9 +7986,11 @@ ENDIF
 
 ! Printout elapsed wall clock time
 
-WALL_CLOCK_END = WALL_CLOCK_TIME()
-WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
-WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+IF (ICYC>0) THEN
+   WALL_CLOCK_END = WALL_CLOCK_TIME()
+   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
+   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+ENDIF
 
 END SUBROUTINE TIMINGS
 
