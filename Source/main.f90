@@ -808,11 +808,6 @@ ENDDO MAIN_LOOP
 !                                                     END OF TIME STEPPING LOOP
 !***********************************************************************************************************************************
 
-! Print out total elapased time to the .out file
-
-IF (MYID==0) CALL TIMINGS
-IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
-
 ! Finish unstructured geometry
 
 IF (N_FACE>0) THEN
@@ -1308,6 +1303,13 @@ IF (USE_MPI) THEN
 ENDIF
 
 IF (MYID==0) THEN
+
+   ! Print out device activation times to the .out file
+
+   CALL TIMINGS
+   IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
+
+   ! Print out stop status to .err and .out files
 
    SELECT CASE(STOP_STATUS)
       CASE(NO_STOP)
