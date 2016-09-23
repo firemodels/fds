@@ -159,6 +159,7 @@ OVERALL_INSERT_LOOP: DO
    CALL DEVICE_PARTICLE_INSERT
    CALL WALL_PARTICLE_INSERT
    CALL VOLUME_PARTICLE_INSERT
+   IF (DUCT_HT) CALL DUCT_PARTICLE_INSERT
 
    ! Reset particle/PARTICLE insertion clocks
 
@@ -903,6 +904,20 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 ENDDO VOLUME_INSERT_LOOP
 
 END SUBROUTINE VOLUME_PARTICLE_INSERT
+
+
+SUBROUTINE DUCT_PARTICLE_INSERT
+!Place holder to inserting particles for duct heat trasnfer
+IF (DUCT_HT_INSERTED) RETURN
+!loop over ducts. If a surface is given insert a particle of type DUCT%LPC_INDEX if the duct segment lies in the current mesh or
+!if the segment lies outside all meshes add to mesh 1
+
+DUCT_HT_INSERTED = .TRUE.
+
+
+
+RETURN
+END SUBROUTINE DUCT_PARTICLE_INSERT
 
 
 SUBROUTINE VOLUME_INIT_PARTICLE(I)
@@ -3939,7 +3954,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       LP  => MESHES(NM)%LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
       SF  => SURFACE(LPC%SURF_INDEX)
-
+      ! Ignore HVAC particles
+      IF (LPC%DUCT_PARTICLE) CYCLE PARTICLE_LOOP
       ! Remove particles that are too small
 
       IF (LPC%SOLID_PARTICLE .AND. SF%THERMALLY_THICK .AND. LP%ONE_D%BURNAWAY) THEN
