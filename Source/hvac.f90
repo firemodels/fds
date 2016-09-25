@@ -553,6 +553,7 @@ ROUGHNESS    = -1._EB
 ROUND        = .TRUE.
 SPEC_ID      = 'null'
 SQUARE       = .FALSE.
+SURF_ID      = 'null'
 TYPE_ID      = 'null'
 TAU_AC       = 1._EB
 TAU_FAN      = 1._EB
