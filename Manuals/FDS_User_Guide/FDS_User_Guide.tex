@@ -8046,7 +8046,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 
 \subsection{Extinction}
 \label{info:extinct_out}
-In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user whether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
+In combustion, knowing if, when, or where chemical reactions have been extinguished is important. The output quantity {\ct EXTINCTION} tells the user whether or not combustion has been prevented by the extinction routine. By default, {\ct EXTINCTION} = 0, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 1 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 1 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
 
 
 
