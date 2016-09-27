@@ -44,6 +44,8 @@ IMPLICIT NONE
 
 LOGICAL  :: EX=.FALSE.,DIAGNOSTICS,EXCHANGE_EVACUATION=.FALSE.,CALL_UPDATE_CONTROLS,CTRL_STOP_STATUS
 INTEGER  :: LO10,NM,IZERO,CNT,ANG_INC_COUNTER
+INTEGER :: III, JJJ, KKK
+INTEGER :: II,JJ,KK
 REAL(EB) :: T,DT,DT_EVAC,TNOW
 REAL(EB), ALLOCATABLE, DIMENSION(:) ::  TC_GLB,TC_LOC,DT_NEW,TI_LOC,TI_GLB, &
                                         DSUM_ALL,PSUM_ALL,USUM_ALL,DSUM_ALL_LOCAL,PSUM_ALL_LOCAL,USUM_ALL_LOCAL
@@ -101,6 +103,8 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = SECOND()
 WRITE(VERSION_STRING,'(A)') 'FDS 6.5.2'
 
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
+
+OPEN(77, FILE='glmat.debug')
 
 ! Read input from CHID.fds file and stop the code if any errors are found
 
@@ -230,6 +234,7 @@ CALL STOP_CHECK(1)
 
 ! Initialize ScaRC solver
 
+
 IF (PRES_METHOD == 'SCARC') CALL SCARC_SETUP
 
 ! Initialize turb arrays
@@ -287,6 +292,12 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL VISCOSITY_BC(NM)
 ENDDO
 
+!WRITE(77,*) '==================== 111 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
 DO I=1,INITIAL_RADIATION_ITERATIONS
@@ -314,6 +325,11 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
+!WRITE(77,*) '==================== 222 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 ! Initialize output files that are mesh-specific
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -364,6 +380,11 @@ IF (HVAC_SOLVE) THEN
    ENDIF
 ENDIF
 
+!WRITE(77,*) '==================== 333 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 ! Make an initial dump of ambient values
 
 IF (.NOT.RESTART) THEN
@@ -412,6 +433,11 @@ DO CNT=1,N_DEVC
    ENDIF
 ENDDO
 
+!WRITE(77,*) '==================== 444 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 ! Start the clock for time stepping
 
 WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
@@ -427,6 +453,21 @@ IF (VEG_LEVEL_SET_UNCOUPLED) THEN
    CALL STOP_CHECK(1)
 ENDIF
 
+!WRITE(77,*) 'CELL_INDEX:'
+DO KKK=MESHES(1)%KBAR+1,0,-1
+   !WRITE(77,'(6i6)') ((CELL_INDEX(III,JJJ,KKK),III=0,MESHES(1)%IBAR+1),JJJ=0,MESHES(1)%JBAR+1)
+ENDDO
+!WRITE(77,*) 'SOLID:'
+DO KKK=MESHES(1)%KBAR+1,0,-1
+   !WRITE(77,'(6i6)') ((SOLID(CELL_INDEX(III,JJJ,KKK)),III=0,MESHES(1)%IBAR+1),JJJ=0,MESHES(1)%JBAR+1)
+ENDDO
+
+!WRITE(77,*) '==================== 555 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
 ! This ends the initialization part of the program
 
 INITIALIZATION_PHASE = .FALSE.
@@ -438,6 +479,10 @@ INITIALIZATION_PHASE = .FALSE.
 MAIN_LOOP: DO
 
    ICYC  = ICYC + 1   ! Time step iterations
+
+!WRITE(77,*) '======================================================================'
+!WRITE(77,*) ' ICYC = ',ICYC
+!WRITE(77,*) '======================================================================'
 
    ! Do not print out general diagnostics into .out file every time step
 
@@ -475,6 +520,17 @@ MAIN_LOOP: DO
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
+!WRITE(77,*) '========================================'
+!WRITE(77,*) ' PREDICTOR'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '========================================'
+
+!WRITE(77,*) '==================== 666 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
    ! Diagnostic timing calls and initialize energy budget array, Q_DOT
 
@@ -496,6 +552,8 @@ MAIN_LOOP: DO
    FIRST_PASS = .TRUE.
 
    CHANGE_TIME_STEP_LOOP: DO
+     
+!WRITE(77,*) 'ICYC =',ICYC, ': CHANGE_TIME_STEP_LOOP = '
 
       ! Predict species mass fractions at the next time step.
 
@@ -507,6 +565,11 @@ MAIN_LOOP: DO
       ! Exchange species mass fractions at interpolated boundaries.
 
       CALL MESH_EXCHANGE(1)
+!WRITE(77,*) '==================== 777 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
       ! Calculate convective and diffusive terms of the velocity equation.
 
@@ -535,6 +598,11 @@ MAIN_LOOP: DO
          CALL DIVERGENCE_PART_1(T,DT,NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
+!WRITE(77,*) '==================== 888 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
 
       IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
@@ -548,19 +616,48 @@ MAIN_LOOP: DO
 
       ! Solve for the pressure at the current time step
 
-      CALL PRESSURE_ITERATION_SCHEME
+!WRITE(77,*) '==================== MAIN: BEFORE 1. PRESSURE_ITERATION ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      CALL PRESSURE_ITERATION_SCHEME(ICYC, PREDICTOR, CORRECTOR)
       CALL EVAC_PRESSURE_ITERATION_SCHEME
+
+!WRITE(77,*) '==================== MAIN: AFTER 1. PRESSURE_ITERATION ======================'
+!WRITE(77,*) 'H:'
+!WRITE(77,'(4F25.16)')  (((H(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'HS:'
+!WRITE(77,'(4F25.16)')  (((HS(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+!WRITE(77,*) '==================== 999 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
       ! Predict the velocity components at the next time step
 
       CHANGE_TIME_STEP_INDEX = 0
       DT_NEW = DT
 
+!WRITE(77,*) 'DT_NEW=', DT_NEW
+
       PREDICT_VELOCITY_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (.NOT.ALL(EVACUATION_ONLY).AND.EVACUATION_ONLY(NM).AND.ICYC>0) CHANGE_TIME_STEP_INDEX(NM)=1
          IF (EVACUATION_SKIP(NM)) CYCLE PREDICT_VELOCITY_LOOP
          CALL VELOCITY_PREDICTOR(T+DT,DT,DT_NEW,NM)
       ENDDO PREDICT_VELOCITY_LOOP
+
+!WRITE(77,*) '==================== MAIN: AFTER 1. VELOCITY_PREDICTOR  ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '==================== AAA ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
 
       ! Check if there is a numerical instability after updating the velocity field. If there is, exit this loop, finish the time
       ! step, and stop the code.
@@ -579,14 +676,21 @@ MAIN_LOOP: DO
          TNOW = SECOND()
          CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_INTEGER,CHANGE_TIME_STEP_INDEX,COUNTS,DISPLS,&
                              MPI_INTEGER,MPI_COMM_WORLD,IERR)
+!WRITE(77,*) 'DT_NEW=', DT_NEW
          IF (ANY(CHANGE_TIME_STEP_INDEX==-1) .OR. ALL(CHANGE_TIME_STEP_INDEX==1)) &
             CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_DOUBLE_PRECISION,DT_NEW,COUNTS,DISPLS, &
                                 MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
          T_USED(11) = T_USED(11) + SECOND() - TNOW
+!WRITE(77,*) 'DT_NEW2=', DT_NEW
       ENDIF
 
+!WRITE(77,*) '==================== MAIN: AFTER 1. MPI_ALLGATHER  ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+      
       IF (ANY(CHANGE_TIME_STEP_INDEX==-1)) THEN  ! If the time step was reduced, CYCLE CHANGE_TIME_STEP_LOOP
          DT = MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY)
+!WRITE(77,*) 'DT=', DT_NEW
          FIRST_PASS = .FALSE.
       ELSE  ! exit the loop and if the time step is to be increased, this will occur at the next time step.
          EXIT CHANGE_TIME_STEP_LOOP
@@ -600,10 +704,25 @@ MAIN_LOOP: DO
 
    ! Force normal components of velocity to match at interpolated boundaries
 
+!WRITE(77,*) '==================== MAIN: BEFORE MATCH_VELOCITY '
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_SKIP(NM)) CYCLE
       CALL MATCH_VELOCITY(NM)
    ENDDO
+!WRITE(77,*) '==================== BBB ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
+
+!WRITE(77,*) '==================== MAIN: AFTER MATCH_VELOCITY '
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
    ! Apply tangential velocity boundary conditions
 
@@ -612,6 +731,17 @@ MAIN_LOOP: DO
       IF (SYNTHETIC_EDDY_METHOD) CALL SYNTHETIC_TURBULENCE(DT,T,NM)
       CALL VELOCITY_BC(T,NM)
    ENDDO VELOCITY_BC_LOOP
+
+!WRITE(77,*) '==================== MAIN: AFTER VELOCITY BC'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '==================== CCC ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
 
    ! Advance the time to start the CORRECTOR step
 
@@ -624,6 +754,11 @@ MAIN_LOOP: DO
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
 
+!WRITE(77,*) '========================================'
+!WRITE(77,*) ' CORRECTOR'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '========================================'
    ! Finite differences for mass and momentum equations for the second half of the time step
 
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -638,6 +773,13 @@ MAIN_LOOP: DO
 
    CALL MESH_EXCHANGE(4)
 
+!WRITE(77,*) '==================== DDD ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
    ! Apply mass and species boundary conditions, update radiation, particles, and re-compute divergence
 
    COMPUTE_DIVERGENCE_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -673,6 +815,13 @@ MAIN_LOOP: DO
       ENDIF
    ENDDO
 
+!WRITE(77,*) '==================== FFF ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
    ! Start the computation of the divergence term.
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -695,10 +844,25 @@ MAIN_LOOP: DO
       CALL DIVERGENCE_PART_2(DT,NM)
    ENDDO FINISH_DIVERGENCE_LOOP_2
 
+!WRITE(77,*) '==================== GGG ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(4F25.16)')  (((MESHES(1)%US(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+      
    ! Solve the pressure equation.
 
-   CALL PRESSURE_ITERATION_SCHEME
+   CALL PRESSURE_ITERATION_SCHEME(ICYC, PREDICTOR, CORRECTOR)
    CALL EVAC_PRESSURE_ITERATION_SCHEME
+
+!WRITE(77,*) '==================== MAIN: AFTER 2. PRESSURE_ITERATION ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'H:'
+!WRITE(77,'(4F25.16)')  (((H(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'HS:'
+!WRITE(77,'(4F25.16)')  (((HS(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
    ! Set up the last big exchange of info.
 
@@ -1136,11 +1300,13 @@ IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I2)') ' Completed Initialization Ste
 END SUBROUTINE MPI_INITIALIZATION_CHORES
 
 
-SUBROUTINE PRESSURE_ITERATION_SCHEME
+SUBROUTINE PRESSURE_ITERATION_SCHEME(ICYC0, BPRE, BCOR)
 
+INTEGER, INTENT(IN):: ICYC0
+LOGICAL, INTENT(IN):: BPRE, BCOR
 ! Iterate calls to pressure solver until velocity tolerance is satisfied
 
-INTEGER :: NM_MAX_V,NM_MAX_P
+INTEGER :: NM_MAX_V,NM_MAX_P, II, JJ, KK
 REAL(EB) :: TNOW,VELOCITY_ERROR_MAX_OLD,PRESSURE_ERROR_MAX_OLD
 
 PRESSURE_ITERATIONS = 0
@@ -1151,15 +1317,25 @@ ELSE
    ITERATE_BAROCLINIC_TERM = .FALSE.
 ENDIF
 
+!WRITE(77,*) '------------ CALLING PRESSURE_ITERATION_SCHEME in iteration ', ICYC0, BPRE, BCOR
+
 PRESSURE_ITERATION_LOOP: DO
 
    PRESSURE_ITERATIONS = PRESSURE_ITERATIONS + 1
    TOTAL_PRESSURE_ITERATIONS = TOTAL_PRESSURE_ITERATIONS + 1
 
+!WRITE(77,*) '    PRESSURE_ITERATIONS=',PRESSURE_ITERATIONS
+!WRITE(77,*) '    TOTAL_PRESSURE_ITERATIONS=',TOTAL_PRESSURE_ITERATIONS
+!WRITE(77,*) '==================== AAA ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+
    ! The following loops and exchange always get executed the first pass through the PRESSURE_ITERATION_LOOP.
    ! If we need to iterate the baroclinic torque term, the loop is executed each time.
 
    IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1) THEN
+!WRITE(77,*) '------->A:    ITERATE_BAROCLINIC_TERM =', ITERATE_BAROCLINIC_TERM
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
          IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T,NM)
@@ -1167,9 +1343,15 @@ PRESSURE_ITERATION_LOOP: DO
       CALL MESH_EXCHANGE(5)  ! Exchange FVX, FVY, FVZ
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+!WRITE(77,*) '------->A:    MATCH_VELOCITY'
          CALL MATCH_VELOCITY_FLUX(NM)
       ENDDO
    ENDIF
+
+!WRITE(77,*) '==================== BBB ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
 
    ! Assert no flux boundary conditions at all solid walls and solve pressure equation.
    ! The WALL_WORK1 array is computed in COMPUTE_VELOCITY_ERROR, but it should
@@ -1178,10 +1360,43 @@ PRESSURE_ITERATION_LOOP: DO
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
       CALL NO_FLUX(DT,NM)
+!WRITE(77,*) '==================== CCC ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
       CALL PRESSURE_SOLVER(T,NM)
    ENDDO
+
+!WRITE(77,*) '------->C.0:PRHS:'
+!WRITE(77,'(4F25.16)')  (((PRHS(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '------->C.0:H:'
+!WRITE(77,'(4F25.16)')  (((H(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '==================== PRESSURE_ITERATION1 ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVY:'
+!WRITE(77,'(4F25.16)')  (((FVY(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(4F25.16)')  (((FVZ(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+
    IF (PRES_METHOD == 'SCARC') CALL SCARC_SOLVER
+
+!WRITE(77,*) '==================== PRESSURE_ITERATION2 ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F25.16)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVY:'
+!WRITE(77,'(4F25.16)')  (((FVY(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(4F25.16)')  (((FVZ(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '------->C.1:H:'
+!WRITE(77,'(4F25.16)')  (((H(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) '------->C.1:HS:'
+!WRITE(77,'(4F25.16)')  (((HS(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+
+
 
    IF (.NOT.ITERATE_PRESSURE) EXIT PRESSURE_ITERATION_LOOP
 
@@ -1191,6 +1406,7 @@ PRESSURE_ITERATION_LOOP: DO
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+!WRITE(77,*) '------->D:    COMPUTE_VELOCITY_ERROR'
       CALL COMPUTE_VELOCITY_ERROR(DT,NM)
    ENDDO
 
@@ -1214,6 +1430,7 @@ PRESSURE_ITERATION_LOOP: DO
    IF (MYID==0 .AND. VELOCITY_ERROR_FILE .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
       NM_MAX_V = MAXLOC(VELOCITY_ERROR_MAX,DIM=1)
       NM_MAX_P = MAXLOC(PRESSURE_ERROR_MAX,DIM=1)
+!WRITE(77,*) '------->E:    NM_MAX_V, NM_MAX_P=',NM_MAX_V, NM_MAX_P
       WRITE(LU_VELOCITY_ERROR,'(7(I7,A),E16.8,A,4(I7,A),E16.8)') ICYC,',',PRESSURE_ITERATIONS,',',TOTAL_PRESSURE_ITERATIONS,',',&
          NM_MAX_V,',',VELOCITY_ERROR_MAX_LOC(1,NM_MAX_V),',',VELOCITY_ERROR_MAX_LOC(2,NM_MAX_V),',',&
          VELOCITY_ERROR_MAX_LOC(3,NM_MAX_V),',',MAXVAL(VELOCITY_ERROR_MAX),',',&
@@ -1224,6 +1441,11 @@ PRESSURE_ITERATION_LOOP: DO
    ! If the VELOCITY_TOLERANCE is satisfied or max/min iterations are hit, exit the loop.
 
    IF (MAXVAL(PRESSURE_ERROR_MAX)<PRESSURE_TOLERANCE) ITERATE_BAROCLINIC_TERM = .FALSE.
+!WRITE(77,*) '------->F:  PRESSURE_TOLERANCE=',PRESSURE_TOLERANCE
+!WRITE(77,*) '------->F:  VELOCITY_TOLERANCE=',VELOCITY_TOLERANCE
+!WRITE(77,*) '------->F:  MAX_PRESSURE_ITERATIONS=',MAX_PRESSURE_ITERATIONS
+!WRITE(77,*) '------->F:  MAXVAL(PRESSURE_ERROR_MAX)=',MAXVAL(PRESSURE_ERROR_MAX)
+!WRITE(77,*) '------->F:  MAXVAL(VELOCITY_ERROR_MAX)=',MAXVAL(VELOCITY_ERROR_MAX)
 
    IF ((MAXVAL(PRESSURE_ERROR_MAX)<PRESSURE_TOLERANCE .AND. &
         MAXVAL(VELOCITY_ERROR_MAX)<VELOCITY_TOLERANCE) .OR. PRESSURE_ITERATIONS>=MAX_PRESSURE_ITERATIONS) &
@@ -1241,6 +1463,7 @@ PRESSURE_ITERATION_LOOP: DO
 
 ENDDO PRESSURE_ITERATION_LOOP
 
+!WRITE(77,*) '------------ LEAVING PRESSURE_ITERATION_SCHEME in iteration ', ICYC0, BPRE, BCOR
 END SUBROUTINE PRESSURE_ITERATION_SCHEME
 
 

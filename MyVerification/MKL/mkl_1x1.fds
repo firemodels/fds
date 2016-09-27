@@ -10,12 +10,10 @@
 &TIME T_END = 0.5 /
 &DUMP VELOCITY_ERROR_FILE = .TRUE./
 
-&PRES SCARC_METHOD             = 'MKL'
-      SCARC_MKL                = 'GLOBAL'
-      SCARC_MKL_MTYPE          = 'SYMMETRIC'
-      SCARC_DEBUG              = 'NONE'  
-      VELOCITY_TOLERANCE       = 1E-6
-      MAX_PRESSURE_ITERATIONS  = 100            /
+&PRES SCARC_METHOD             = 'PARDISO'
+      SCARC_PARDISO            = 'GLOBAL'
+      SCARC_PARDISO_SYMMETRIC  = .TRUE.    
+      SCARC_DEBUG              = 'MUCH'   /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /
