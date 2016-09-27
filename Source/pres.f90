@@ -22,6 +22,7 @@ USE TRAN, ONLY: GET_IJK
 USE TURBULENCE, ONLY: NS_H_EXACT
 
 INTEGER, INTENT(IN) :: NM
+INTEGER:: II,JJ,KK
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP,P,RESIDUAL
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
@@ -58,6 +59,24 @@ ENDIF
 ! LBC, MBC and NBC are codes used be Poisson solver to denote type
 ! of boundary condition at x, y and z boundaries. See Crayfishpak
 ! manual for details.
+
+!WRITE(77,*) '================== PRES ====================='
+!WRITE(77,*) 'UU:'
+!WRITE(77,'(4F18.10)')  (((UU(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'VV:'
+!WRITE(77,'(4F18.10)')  (((VV(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'WW:'
+!WRITE(77,'(4F18.10)')  (((WW(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F18.10)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVY:'
+!WRITE(77,'(4F18.10)')  (((FVY(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(4F18.10)')  (((FVZ(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'HP:'
+!WRITE(77,'(4F18.10)')  (((HP(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'RHOP:'
+!WRITE(77,'(4F18.10)')  (((RHOP(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
@@ -474,6 +493,15 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
    PRESSURE_ERROR_MAX_LOC(:,NM) = MAXLOC(RESIDUAL)
 ENDIF
 
+!WRITE(77,*) '==================== PRES END ======================'
+!WRITE(77,*) 'FVX:'
+!WRITE(77,'(4F18.10)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVY:'
+!WRITE(77,'(4F18.10)')  (((FVY(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(4F18.10)')  (((FVZ(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+
+
 T_USED(5)=T_USED(5)+SECOND()-TNOW
 END SUBROUTINE PRESSURE_SOLVER
 
@@ -489,7 +517,9 @@ USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOL
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2
-REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR
+REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR, DHFCT
+LOGICAL :: PRES_ON_WHOLE_DOMAIN = .FALSE.
+
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: M2
 TYPE(WALL_TYPE), POINTER :: WC
@@ -507,9 +537,30 @@ ENDIF
 VELOCITY_ERROR_MAX(NM) = 0._EB
 WALL_WORK1 = 0._EB
 
+!WRITE(77,*) 'G: ITERATIVE_FACTOR =',ITERATIVE_FACTOR
+!WRITE(77,*) 'G: EXTERNAL_BOUNDARY_CORRECTION =',EXTERNAL_BOUNDARY_CORRECTION
+
 ! Solve Laplace equation for pressure correction, H_PRIME, and add to H or HS.
 
 IF (EXTERNAL_BOUNDARY_CORRECTION) CALL LAPLACE_EXTERNAL_VELOCITY_CORRECTION(DT,NM)
+
+!!WRITE(77,*) '==================== COMPUTE_VELOCITY_ERROR ======================'
+!!WRITE(77,*) 'U:'
+!!WRITE(77,'(4F18.10)')  (((U(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'V:'
+!!WRITE(77,'(4F18.10)')  (((V(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'W:'
+!!WRITE(77,'(4F18.10)')  (((W(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'FVX:'
+!!WRITE(77,'(4F18.10)')  (((FVX(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'FVY:'
+!!WRITE(77,'(4F18.10)')  (((FVY(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'FVZ:'
+!!WRITE(77,'(4F18.10)')  (((FVZ(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'H:'
+!!WRITE(77,'(4F18.10)')  (((H(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
+!!WRITE(77,*) 'HS:'
+!!WRITE(77,'(4F18.10)')  (((HS(II,JJ,KK),II=1,4),JJ=1,4),KK=1,12)
 
 ! Loop over wall cells and check velocity error.
 
@@ -532,39 +583,53 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KK  = WC%ONE_D%KK
    IOR = WC%ONE_D%IOR
 
+   !WRITE(*,*) 'ACHTUNG, HIER NOCH NACH-KORRIGIEREN'
+   DHFCT = 1._EB
+   IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. (.NOT.PRES_ON_WHOLE_DOMAIN)) DHFCT = 0._EB ! This factor makes DH/DN=0.
+
    ! Update normal component of velocity at the mesh boundary
 
    IF (PREDICTOR) THEN
       SELECT CASE(IOR)
          CASE( 1)
-            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
+            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))*DHFCT)
          CASE(-1)
-            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+!!WRITE(77,'(E14.6)') UN_NEW
+            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))*DHFCT)
+!!WRITE(77,'(E14.6)') FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))
+!!WRITE(77,'(E14.6)') DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+!!WRITE(77,'(E14.6)') U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+!!WRITE(77,'(E14.6)') UN_NEW
+!!WRITE(77,'(A,6E14.6, 4i4)') 'H1: IOR=-1:',U(II-1,JJ,KK),FVX(II-1,JJ,KK),H(II,JJ,KK),H(II-1,JJ,KK),RDXN(II-1),UN_NEW,II,JJ,KK,IOR
          CASE( 2)
-            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
+            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))*DHFCT)
          CASE(-2)
-            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
+            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))*DHFCT)
          CASE( 3)
-            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
+            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))*DHFCT)
          CASE(-3)
-            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
+            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))*DHFCT)
       END SELECT
+
    ELSE
       SELECT CASE(IOR)
          CASE( 1)
-            UN_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))*DHFCT))
          CASE(-1)
-            UN_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))))
+            UN_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))*DHFCT))
          CASE( 2)
-            UN_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))*DHFCT))
          CASE(-2)
-            UN_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))))
+            UN_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))*DHFCT))
          CASE( 3)
-            UN_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))*DHFCT))
          CASE(-3)
-            UN_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))))
+            UN_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))*DHFCT))
       END SELECT
+!!WRITE(77,'(A,2E14.6, 3I4)') 'H2: DT, UN_NEW =',DT, UN_NEW, II,JJ,KK
+
    ENDIF
+
 
    ! At interpolated boundaries, compare updated normal component of velocity with that of the other mesh
 
@@ -706,8 +771,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       IF (PREDICTOR) THEN
          UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+!!WRITE(77,*) 'I1: UN_NEW_OTHER =',UN_NEW_OTHER
       ELSE
          UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+!!WRITE(77,*) 'I2: UN_NEW_OTHER =',UN_NEW_OTHER
       ENDIF
    ENDIF
 
@@ -717,6 +784,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC%VEL_ERR_NEW = VELOCITY_ERROR
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(WC%RDN*DT)
 
+!!WRITE(77,*) 'J: VELOCITY_ERROR =',VELOCITY_ERROR
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
 
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
@@ -731,8 +799,11 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       VELOCITY_ERROR_MAX_LOC(3,NM) = KK
       VELOCITY_ERROR_MAX(NM)       = ABS(VELOCITY_ERROR)
    ENDIF
+!!WRITE(77,*) 'K: INDEXES =',II,JJ,KK
 
 ENDDO CHECK_WALL_LOOP
+
+! Loop over wall cells and check velocity error.
 
 T_USED(5)=T_USED(5)+SECOND()-TNOW
 END SUBROUTINE COMPUTE_VELOCITY_ERROR
