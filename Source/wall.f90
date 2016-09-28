@@ -900,7 +900,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                WC%ONE_D%QCONF = HTC*DTMP
             ENDIF SOLID_PHASE_ONLY_IF
 
-
          CASE DEFAULT ! thermally thick
 
             IIG = WC%ONE_D%IIG
