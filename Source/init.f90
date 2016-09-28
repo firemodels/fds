@@ -2171,8 +2171,6 @@ ENDIF
 
 IF (M%SOLID(ICG)) BOUNDARY_TYPE = NULL_BOUNDARY
 
-IF (M%OBSTRUCTION(OBST_INDEX)%HT3D) BOUNDARY_TYPE = SOLID_BOUNDARY
-
 ! Check for neighboring meshes in a multiple mesh calculation
 
 NOM_FOUND = 0
