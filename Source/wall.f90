@@ -280,7 +280,7 @@ IF (SOLID_PARTICLES) THEN
 ENDIF
 
 ! *********************** UNDER CONSTRUCTION *************************
-IF (SOLID_HT3D .AND. CORRECTOR) CALL SOLID_HEAT_TRANSFER_3D
+IF (SOLID_HT3D .AND. CORRECTOR) CALL SOLID_HEAT_TRANSFER_3D(T)
 ! ********************************************************************
 
 
@@ -674,14 +674,16 @@ END SELECT METHOD_OF_HEAT_TRANSFER
 END SUBROUTINE HEAT_TRANSFER_BC
 
 
-SUBROUTINE SOLID_HEAT_TRANSFER_3D
+SUBROUTINE SOLID_HEAT_TRANSFER_3D(T)
 
 ! Solves the 3D heat conduction equation internal to OBSTs.
 ! Currently, this is not hooked into PYROLYSIS shell elements,
 ! but this is under development.
 
-REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ITER
+REAL(EB), INTENT(IN) :: T
+REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,T_IGN,AREA_ADJUST,TMP_OTHER,RAMP_FACTOR,&
+            QNET,TSI,FDERIV,QEXTRA
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ITER,ADCOUNT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
@@ -807,6 +809,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
       IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
@@ -833,16 +838,68 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                CASE(-3); KDTDZ(II,JJ,KK-1) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
             END SELECT
 
-         CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
-
+         CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER ! copied from HEAT_TRANSFER_BC
+            
+            AREA_ADJUST = WC%ONE_D%AREA_ADJUST
             SELECT CASE(IOR)
-               CASE( 1); KDTDX(II,JJ,KK)   = -SF%NET_HEAT_FLUX
-               CASE(-1); KDTDX(II-1,JJ,KK) =  SF%NET_HEAT_FLUX
-               CASE( 2); KDTDY(II,JJ,KK)   = -SF%NET_HEAT_FLUX
-               CASE(-2); KDTDY(II,JJ-1,KK) =  SF%NET_HEAT_FLUX
-               CASE( 3); KDTDZ(II,JJ,KK)   = -SF%NET_HEAT_FLUX
-               CASE(-3); KDTDZ(II,JJ,KK-1) =  SF%NET_HEAT_FLUX
+               CASE( 1); KDTDX(II,JJ,KK)   = -SF%NET_HEAT_FLUX*AREA_ADJUST
+               CASE(-1); KDTDX(II-1,JJ,KK) =  SF%NET_HEAT_FLUX*AREA_ADJUST
+               CASE( 2); KDTDY(II,JJ,KK)   = -SF%NET_HEAT_FLUX*AREA_ADJUST
+               CASE(-2); KDTDY(II,JJ-1,KK) =  SF%NET_HEAT_FLUX*AREA_ADJUST
+               CASE( 3); KDTDZ(II,JJ,KK)   = -SF%NET_HEAT_FLUX*AREA_ADJUST
+               CASE(-3); KDTDZ(II,JJ,KK-1) =  SF%NET_HEAT_FLUX*AREA_ADJUST
             END SELECT
+
+            SOLID_PHASE_ONLY_IF: IF (SOLID_PHASE_ONLY) THEN
+               SELECT CASE(IOR)
+                  CASE( 1); WC%ONE_D%TMP_F = TMP(II,JJ,KK) + KDTDX(II,JJ,KK)   / (K_S * 2._EB * RDX(II))
+                  CASE(-1); WC%ONE_D%TMP_F = TMP(II,JJ,KK) - KDTDX(II-1,JJ,KK) / (K_S * 2._EB * RDX(II))
+                  CASE( 2); WC%ONE_D%TMP_F = TMP(II,JJ,KK) + KDTDY(II,JJ,KK)   / (K_S * 2._EB * RDY(JJ))
+                  CASE(-2); WC%ONE_D%TMP_F = TMP(II,JJ,KK) - KDTDY(II,JJ-1,KK) / (K_S * 2._EB * RDY(JJ))
+                  CASE( 3); WC%ONE_D%TMP_F = TMP(II,JJ,KK) + KDTDZ(II,JJ,KK)   / (K_S * 2._EB * RDZ(KK))
+                  CASE(-3); WC%ONE_D%TMP_F = TMP(II,JJ,KK) - KDTDZ(II,JJ,KK-1) / (K_S * 2._EB * RDZ(KK))
+               END SELECT
+            ELSE
+               TMP_F = WC%ONE_D%TMP_F
+               DTMP = TMP_G - TMP_F
+               T_IGN = WC%ONE_D%T_IGN
+               IF (ABS(T_IGN-T_BEGIN)<= SPACING(T_IGN) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
+                  TSI = T
+               ELSE
+                  TSI = T - T_IGN
+               ENDIF
+               TMP_G = TMP(IIG,JJG,KKG)
+               TMP_OTHER = TMP_F
+               RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
+               QNET = -RAMP_FACTOR*SF%NET_HEAT_FLUX*AREA_ADJUST
+               ADCOUNT = 0
+               ADLOOP: DO
+                  ADCOUNT = ADCOUNT + 1
+                  DTMP = TMP_G - TMP_OTHER
+                  IF (ABS(QNET) > 0._EB .AND. ABS(DTMP) <TWO_EPSILON_EB) DTMP=1._EB
+                  WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,&
+                                             SF%HEAT_TRANSFER_MODEL,SF%ROUGHNESS,WC%SURF_INDEX,WALL_INDEX=IW)
+                  HTC = WC%ONE_D%HEAT_TRANS_COEF
+                  IF (RADIATION) THEN
+                     QEXTRA = WC%ONE_D%HEAT_TRANS_COEF*DTMP + WC%ONE_D%QRADIN - WC%ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 4 - QNET
+                     FDERIV = -WC%ONE_D%HEAT_TRANS_COEF -  4._EB * WC%ONE_D%EMISSIVITY * SIGMA * TMP_OTHER ** 3
+                  ELSE
+                     QEXTRA = WC%ONE_D%HEAT_TRANS_COEF*DTMP - QNET
+                     FDERIV = -WC%ONE_D%HEAT_TRANS_COEF
+                  ENDIF
+                  IF (ABS(FDERIV) > TWO_EPSILON_EB) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
+                  IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 1.E-4_EB .OR. ADCOUNT > 20) THEN
+                     TMP_F = MIN(TMPMAX,TMP_OTHER)
+                     EXIT ADLOOP
+                  ELSE
+                     TMP_F = MIN(TMPMAX,TMP_OTHER)
+                     CYCLE ADLOOP
+                  ENDIF
+               ENDDO ADLOOP
+               WC%ONE_D%TMP_F = TMP_F
+               WC%ONE_D%QCONF = HTC*DTMP
+            ENDIF SOLID_PHASE_ONLY_IF
+
 
          CASE DEFAULT ! thermally thick
 
@@ -869,7 +926,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
                        ( HTC       + 2._EB*K_S*RDN       )
             ENDIF
-
             WC%ONE_D%TMP_F = TMP_F
             WC%ONE_D%QCONF = HTC*(TMP_G-TMP_F)
 
