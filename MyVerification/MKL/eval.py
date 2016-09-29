@@ -116,8 +116,8 @@ def plot_csv(chid, time, quan, name, tstart, tend, top):
 
     nplots = nsim
         
-    pstart0   = max(pstart[1:])
-    pend0     = min(pend[1:])
+    pstart0   = max(pstart[:])
+    pend0     = min(pend[:])
 
     print pstart
     print pend
@@ -139,8 +139,6 @@ def plot_csv(chid, time, quan, name, tstart, tend, top):
 
     min_total = min(min_val)
     max_total = max(max_val)
-    min_total = -0.1
-    max_total = 1.0
     print 'min:',min_val
     print 'max:',max_val
 
@@ -166,7 +164,7 @@ def plot_csv(chid, time, quan, name, tstart, tend, top):
 
     ax.set_xlim(tstart,tend)
     ax.set_ylim(min_total - abs(min_total*0.06), max_total + abs(max_total*0.06))
-    ax.set_ylim(-0.3, 1.5)
+    #ax.set_ylim(-0.05, 0.2)
 
     labels = ax.get_xticklabels() + ax.get_yticklabels()
     for label in labels:
@@ -182,13 +180,22 @@ tstart  = float(sys.argv[2])
 tend    = float(sys.argv[3])
 
 chid=[]
-chid.append('fft_%s'%top)
-chid.append('mkl_%s'%top)
-chid.append('cg_ssor_%s'%top)
-chid.append('cg_pardiso_%s'%top)
-chid.append('cg_cluster_%s'%top)
-chid.append('gmg_ssor_%s'%top)
-chid.append('gmg_mkl_%s'%top)
+#chid.append('cube_test_demo')
+#chid.append('mkl_cubetest_1mesh')
+#chid.append('mkl_cubetest_2mesh')
+#chid.append('cg_mkl_cubetest_1mesh')
+#chid.append('gmg_mkl_cubetest_1mesh')
+#chid.append('glmat')
+chid.append('glmat')
+chid.append('mkl_pardiso_1mesh')
+chid.append('mkl_pardiso_2mesh')
+#chid.append('cg_pardiso_1mesh')
+#chid.append('gmg_pardiso_1mesh')
+#chid.append('cg_ssor_%s'%top)
+#chid.append('cg_pardiso_%s'%top)
+#chid.append('cg_cluster_%s'%top)
+#chid.append('gmg_ssor_%s'%top)
+#chid.append('gmg_mkl_%s'%top)
 
 nsim = len(chid)
 
@@ -205,7 +212,10 @@ for i in range(nsim):
    print 'reading ',chid[i]
    read_csv(chid, time, uvel, vvel, wvel, pres, site, sres, srate, i)
 
-plot_csv(chid, time, pres, 'Pressure', tstart, tend, top)
+plot_csv(chid, time, uvel, 'pres1', tstart, tend, top)
+plot_csv(chid, time, vvel, 'pres2', tstart, tend, top)
+plot_csv(chid, time, wvel, 'pres3', tstart, tend, top)
+plot_csv(chid, time, pres, 'pres4', tstart, tend, top)
 
 
 

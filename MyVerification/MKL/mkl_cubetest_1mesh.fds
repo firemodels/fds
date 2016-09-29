@@ -1,6 +1,6 @@
 &HEAD CHID='mkl_cubetest_1mesh', TITLE='GLMATSOLVER: Test air around cube.' /
   
-&MESH IJK=32,32,48, XB=-2,2,-2,2,0,6 /
+&MESH IJK=16,16,24, XB=-2,2,-2,2,0,6 /
 
 & MESH IJK=32,32,48, XB=-2,2,-2,2,0,6 /
 
@@ -13,7 +13,7 @@
 & MESH IJK=16,16,24, XB=-2,0,-2,0,0,3, MULT_ID='mesh' /
 & MULT ID='mesh', DX=2, DY=2, DZ=3, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
   
-&TIME T_END=1.2 /
+&TIME T_END=5.0 /
 
 &MISC DNS=.TRUE., 
       NOISE=.FALSE.,

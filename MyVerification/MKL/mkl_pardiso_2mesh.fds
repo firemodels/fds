@@ -1,6 +1,7 @@
-&HEAD CHID='mkl_pardiso_1mesh', TITLE='Simple Test Case' /
+&HEAD CHID='mkl_pardiso_2mesh', TITLE='Simple Test Case' /
 
-&MESH IJK=8,8,8, XB=0.0,0.80,0.0,0.80,0.0,0.80 /
+&MESH IJK=4,8,8, XB=0.0,0.4,0.0,0.8,0.0,0.8 /
+&MESH IJK=4,8,8, XB=0.4,0.8,0.0,0.8,0.0,0.8 /
 
 &RADI RADIATION=.FALSE. /
 
