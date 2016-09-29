@@ -1,6 +1,6 @@
 &HEAD CHID='gmg_pardiso_1mesh', TITLE='Simple Test Case' /
 
-&MESH IJK=8,8,8, XB=0.0,0.80,0.0,0.80,0.0,0.80 /
+&MESH IJK=16,16,16, XB=0.0,0.80,0.0,0.80,0.0,0.80 /
 
 &RADI RADIATION=.FALSE. /
 
@@ -15,11 +15,11 @@
       SCARC_MULTIGRID            = 'GEOMETRIC',
       SCARC_MULTIGRID_ACCURACY   =  1E-8,
       SCARC_MULTIGRID_CYCLE      =  'V',
-      SCARC_MULTIGRID_LEVEL      =  2,
+      SCARC_MULTIGRID_LEVEL      =  3,
       SCARC_COARSE               = 'DIRECT',
       SCARC_SMOOTH               = 'SSOR',
       SCARC_SMOOTH_ITERATIONS    =   5,
-      SCARC_DEBUG                = 'MUCH' /
+      SCARC_DEBUG                = 'NONE' /
 
 &DUMP VELOCITY_ERROR_FILE=.TRUE. /
 
