@@ -860,7 +860,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                   CASE(-3); WC%ONE_D%TMP_F = TMP(II,JJ,KK) - KDTDZ(II,JJ,KK-1) / (K_S * 2._EB * RDZ(KK))
                END SELECT
             ELSE
+               TMP_G = TMP(IIG,JJG,KKG)
                TMP_F = WC%ONE_D%TMP_F
+               TMP_OTHER = TMP_F
                DTMP = TMP_G - TMP_F
                T_IGN = WC%ONE_D%T_IGN
                IF (ABS(T_IGN-T_BEGIN)<= SPACING(T_IGN) .AND. SF%RAMP_INDEX(TIME_HEAT)>=1) THEN
@@ -868,8 +870,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                ELSE
                   TSI = T - T_IGN
                ENDIF
-               TMP_G = TMP(IIG,JJG,KKG)
-               TMP_OTHER = TMP_F
                RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_HEAT),SF%RAMP_INDEX(TIME_HEAT))
                QNET = -RAMP_FACTOR*SF%NET_HEAT_FLUX*AREA_ADJUST
                ADCOUNT = 0
@@ -899,7 +899,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                WC%ONE_D%TMP_F = TMP_F
                WC%ONE_D%QCONF = HTC*DTMP
             ENDIF SOLID_PHASE_ONLY_IF
-
 
          CASE DEFAULT ! thermally thick
 
