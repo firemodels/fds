@@ -682,9 +682,9 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D(T)
 
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,T_IGN,AREA_ADJUST,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ITER,ADCOUNT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,ALPHA_MAX
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -702,12 +702,16 @@ ENDIF
 KDTDX=>WORK1; KDTDX=0._EB
 KDTDY=>WORK2; KDTDY=0._EB
 KDTDZ=>WORK3; KDTDZ=0._EB
-DT_SUB = DT ! fix this later; have not run into a case where DT from LES is not sufficient
+TMP_NEW=>WORK4; TMP_NEW=TMP
+
+DT_SUB = DT
 T_LOC = 0._EB
+SUBIT = 0
 
 SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
    DT_SUB = MIN(DT_SUB,DT-T_LOC)
-   T_LOC = T_LOC + DT_SUB
+   K_S_MAX = 0._EB
+   ALPHA_MAX = 0._EB
 
    ! build heat flux vectors
    DO K=1,KBAR
@@ -734,6 +738,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
             ENDIF
             K_S = 0.5_EB*(K_S_M+K_S_P)
+            K_S_MAX = MAX(K_S_MAX,K_S)
             KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
          ENDDO
       ENDDO
@@ -763,6 +768,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                   K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
                ENDIF
                K_S = 0.5_EB*(K_S_M+K_S_P)
+               K_S_MAX = MAX(K_S_MAX,K_S)
                KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
             ENDDO
          ENDDO
@@ -794,6 +800,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
             ENDIF
             K_S = 0.5_EB*(K_S_M+K_S_P)
+            K_S_MAX = MAX(K_S_MAX,K_S)
             KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
          ENDDO
       ENDDO
@@ -824,6 +831,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
          NR = -NINT(ML%K_S)
          K_S = EVALUATE_RAMP(TMP(II,JJ,KK),0._EB,NR)
       ENDIF
+      K_S_MAX = MAX(K_S_MAX,K_S)
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
@@ -955,12 +963,24 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                NR = -NINT(ML%C_S)
                C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
             ENDIF
-            TMP(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                                                             (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                                                             (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
+
+            ALPHA_MAX = MAX(ALPHA_MAX, K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+
+            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+                                                                 (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
          ENDDO
       ENDDO
    ENDDO
+
+   ! time step adjustment
+
+   IF (DT_SUB*ALPHA_MAX <= 0.5_EB .OR. LOCK_TIME_STEP) THEN
+      TMP = TMP_NEW
+      T_LOC = T_LOC + DT_SUB
+      SUBIT = SUBIT + 1
+   ENDIF
+   IF (ALPHA_MAX > TWO_EPSILON_EB .AND. .NOT.LOCK_TIME_STEP) DT_SUB = 0.25_EB / ALPHA_MAX
 
 ENDDO SUBSTEP_LOOP
 
