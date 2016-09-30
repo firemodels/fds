@@ -548,6 +548,7 @@ SUBROUTINE VELOCITY_FLUX(T,DT,NM)
 ! Compute convective and diffusive terms of the momentum equations
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE COMPLEX_GEOMETRY, ONLY: CCIBM_VELOCITY_FLUX
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM,OMXP,OMXM,OMYP,OMYM,OMZP,OMZM,TXYP,TXYM,TXZP,TXZM,TYZP,TYZM, &
@@ -865,7 +866,11 @@ IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX(DT,NM)
 
 ! Direct-forcing Immersed Boundary Method
 
-IF (N_FACE>0) CALL IBM_VELOCITY_FLUX(DT,NM)
+IF (CC_IBM) THEN
+   CALL CCIBM_VELOCITY_FLUX(DT,NM)
+ELSEIF (N_FACE>0) THEN
+   CALL IBM_VELOCITY_FLUX(DT,NM)
+ENDIF
 
 ! Source term in manufactured solution
 
@@ -1329,7 +1334,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL(),OM_HP=>NULL()
-REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,TNOW
+REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,TNOW,DHFCT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
@@ -1455,6 +1460,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IOR = WC%ONE_D%IOR
 
    IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
+      DHFCT=1._EB
+      IF (.NOT. PRES_ON_WHOLE_DOMAIN) DHFCT=0._EB
       IF (PREDICTOR) THEN
          UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
       ELSE
@@ -1467,42 +1474,42 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ELSE
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
             ENDIF
-            FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
+            FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK))*DHFCT - DUUDT
          CASE(-1)
             IF (PREDICTOR) THEN
                DUUDT = RFODT*(UN-U(II-1,JJ,KK))
             ELSE
                DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
             ENDIF
-            FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
+            FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK))*DHFCT - DUUDT
          CASE( 2)
             IF (PREDICTOR) THEN
                DVVDT = RFODT*(UN-V(II,JJ,KK))
             ELSE
                DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)) )
             ENDIF
-            FVY(II,JJ,KK) = -RDYN(JJ)*(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
+            FVY(II,JJ,KK) = -RDYN(JJ)*(HP(II,JJ+1,KK)-HP(II,JJ,KK))*DHFCT - DVVDT
          CASE(-2)
             IF (PREDICTOR) THEN
                DVVDT = RFODT*(UN-V(II,JJ-1,KK))
             ELSE
                DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)) )
             ENDIF
-            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
+            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK))*DHFCT - DVVDT
          CASE( 3)
             IF (PREDICTOR) THEN
                DWWDT = RFODT*(UN-W(II,JJ,KK))
             ELSE
                DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)) )
             ENDIF
-            FVZ(II,JJ,KK) = -RDZN(KK)*(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
+            FVZ(II,JJ,KK) = -RDZN(KK)*(HP(II,JJ,KK+1)-HP(II,JJ,KK))*DHFCT - DWWDT
          CASE(-3)
             IF (PREDICTOR) THEN
                DWWDT = RFODT*(UN-W(II,JJ,KK-1))
             ELSE
                DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)) )
             ENDIF
-            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
+            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1))*DHFCT - DWWDT
       END SELECT
    ENDIF
 
@@ -1533,6 +1540,7 @@ SUBROUTINE VELOCITY_PREDICTOR(T,DT,DT_NEW,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
+USE COMPLEX_GEOMETRY, ONLY : CCIBM_VELOCITY_NO_GRADH
 
 ! Estimates the velocity components at the next time step
 
@@ -1582,6 +1590,9 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 
+IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
+
 ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
@@ -1625,6 +1636,7 @@ SUBROUTINE VELOCITY_CORRECTOR(T,DT,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
+USE COMPLEX_GEOMETRY, ONLY : CCIBM_VELOCITY_NO_GRADH
 
 ! Correct the velocity components
 
@@ -1647,6 +1659,8 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    V = VS
    W = WS
 ELSE FREEZE_VELOCITY_IF
+
+IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.) ! Store U velocities on OBST surfaces.
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1671,6 +1685,9 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+
+IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
 
 ENDIF FREEZE_VELOCITY_IF
 
@@ -3379,5 +3396,147 @@ DEVC_LOOP: DO N=1,N_DEVC
 ENDDO DEVC_LOOP
 
 END SUBROUTINE PATCH_VELOCITY_FLUX
+
+
+! ------------------------ WALL_VELOCITY_NO_GRADH ---------------------------------
+
+SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
+
+! This routine recomputes velocities on wall cells, such that the correct
+! normal derivative of H is used on the projection. It is only used when the Poisson equation
+! for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
+
+REAL(EB), INTENT(IN) :: DT
+LOGICAL, INTENT(IN) :: STORE_UN
+
+! Local variables:
+INTEGER :: IIG,JJG,KKG,IOR,IW
+REAL(EB) :: DHDN, VEL_N
+TYPE (WALL_TYPE), POINTER :: WC
+REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
+
+
+IF (PRES_ON_WHOLE_DOMAIN) RETURN
+
+STORE_UN_COND : IF ( STORE_UN ) THEN
+
+   ! These velocities from the beginning of step are needed for the velocity fix on wall cells at the corrector
+   ! phase (i.e. the loops in VELOCITY_CORRECTOR will change U,V,W to wrong reults using (HP1-HP)/DX gradients,
+   ! when the pressure solver in the GLMAT solver.
+   IF(ALLOCATED(UN_WALLS)) DEALLOCATE(UN_WALLS)
+   ALLOCATE( UN_WALLS(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS) )
+   UN_WALLS(:) = 0._EB
+
+   STORE_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+      WC => WALL(IW)
+      IIG   = WC%ONE_D%IIG
+      JJG   = WC%ONE_D%JJG
+      KKG   = WC%ONE_D%KKG
+      IOR   = WC%ONE_D%IOR
+
+      SELECT CASE(IOR)
+      CASE( IAXIS)
+         UN_WALLS(IW) = U(IIG-1,JJG  ,KKG  )
+      CASE(-IAXIS)
+         UN_WALLS(IW) = U(IIG  ,JJG  ,KKG  )
+      CASE( JAXIS)
+         UN_WALLS(IW) = V(IIG  ,JJG-1,KKG  )
+      CASE(-JAXIS)
+         UN_WALLS(IW) = V(IIG  ,JJG  ,KKG  )
+      CASE( KAXIS)
+         UN_WALLS(IW) = W(IIG  ,JJG  ,KKG-1)
+      CASE(-KAXIS)
+         UN_WALLS(IW) = W(IIG  ,JJG  ,KKG  )
+      END SELECT
+
+   ENDDO STORE_LOOP
+
+   RETURN
+
+ENDIF STORE_UN_COND
+
+! Case of not storing, recompute INTERNAL_WALL_CELL velocities, taking into acct that DHDN=0._EB:
+PREDICTOR_COND : IF (PREDICTOR) THEN
+
+  ! Loop internal wall cells -> on OBST surfaces:
+  WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+     WC => WALL(IW)
+
+     IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
+
+     IIG   = WC%ONE_D%IIG
+     JJG   = WC%ONE_D%JJG
+     KKG   = WC%ONE_D%KKG
+     IOR   = WC%ONE_D%IOR
+
+     DHDN=0._EB ! Set the normal derivative of H to zero for solids.
+
+     SELECT CASE(IOR)
+     CASE( IAXIS)
+        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+     CASE(-IAXIS)
+        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+     CASE( JAXIS)
+        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
+     CASE(-JAXIS)
+        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
+     CASE( KAXIS)
+        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
+     CASE(-KAXIS)
+        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
+     END SELECT
+
+  ENDDO WALL_CELL_LOOP_1
+
+ELSE ! Corrector
+
+  ! Loop internal wall cells -> on OBST surfaces:
+  WALL_CELL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+     WC => WALL(IW)
+
+     IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
+
+     IIG   = WC%ONE_D%IIG
+     JJG   = WC%ONE_D%JJG
+     KKG   = WC%ONE_D%KKG
+     IOR   = WC%ONE_D%IOR
+
+     DHDN=0._EB ! Set the normal derivative of H to zero for solids.
+
+     VEL_N = UN_WALLS(IW)
+
+     SELECT CASE(IOR)
+     CASE( IAXIS)                                 ! | - Problem with this is it was modified in VELOCITY_CORRECTOR,
+                                                  ! V   => Store the untouched U normal on internal WALLs.
+         U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
+                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+     CASE(-IAXIS)
+         U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
+                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+     CASE( JAXIS)
+         V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG-1,KKG  ) - &
+                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
+     CASE(-JAXIS)
+         V(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG  ,KKG  ) - &
+                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
+     CASE( KAXIS)
+         W(IIG  ,JJG  ,KKG-1) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG-1) - &
+                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
+     CASE(-KAXIS)
+         W(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG  ) - &
+                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
+     END SELECT
+
+  ENDDO WALL_CELL_LOOP_2
+
+  DEALLOCATE(UN_WALLS)
+
+ENDIF PREDICTOR_COND
+
+RETURN
+END SUBROUTINE WALL_VELOCITY_NO_GRADH
 
 END MODULE VELO
