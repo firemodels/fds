@@ -28,7 +28,7 @@ plot(xc,T(xc,t_end),'k-')
 
 % gather FDS results
 
-ddir = '/Volumes/rmcdermo/GitHub/fds-smv_rmcdermo/Verification/Heat_Transfer/';
+ddir = '/Volumes/rmcdermo/GitHub/FireModels_rmcdermo/fds/Verification/Heat_Transfer/';
 fnx = {'ht3d_nx_10','ht3d_nx_20','ht3d_nx_40','ht3d_nx_80','ht3d_nx_160'};
 fny = {'ht3d_ny_10','ht3d_ny_20','ht3d_ny_40','ht3d_ny_80','ht3d_ny_160'};
 fnz = {'ht3d_nz_10','ht3d_nz_20','ht3d_nz_40','ht3d_nz_80','ht3d_nz_160'};
