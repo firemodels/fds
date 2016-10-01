@@ -1,8 +1,8 @@
 &HEAD CHID='ht3d_slab', TITLE='Heat transfer to a semi-infinite slab' /
 
-&MESH IJK=20,1,10 XB=-.5,.5,-.05,.05,0,1 /
+&MESH IJK=24,1,10 XB=-.6,.6,-.05,.05,0,1 /
 
-&TIME T_END=1800 /
+&TIME T_END=1800, DT=.1 /
 
 &MISC TMPA=0, STRATIFICATION=F, NOISE=F, FREEZE_VELOCITY=T /
 
