@@ -16,13 +16,13 @@ pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Manag
 pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Management_Plan.err
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep -E "Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"` == "" ]]
+if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX errors detected:"
-      grep -E "Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"
+      grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"
       clean_build=0
 fi
 
