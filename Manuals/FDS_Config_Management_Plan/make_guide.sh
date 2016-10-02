@@ -22,7 +22,7 @@ if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Par
       :
    else
       echo "LaTeX errors detected:"
-      grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"
+      grep -A 10 -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"
       clean_build=0
 fi
 
