@@ -13,10 +13,10 @@ x0 = -.5;
 L = 1;
 A = 100;
 T0 = 20;
-lamda = 2*pi/L;
+lambda = 2*pi/L;
 alpha = 1;
 
-T = @(x,t) T0 + A*sin(lamda*(x-x0))*exp(-lamda^2*alpha*t);
+T = @(x,t) T0 + A*sin(lambda*(x-x0))*exp(-lambda^2*alpha*t);
 
 nx = 256;
 dx = L/nx;
@@ -84,7 +84,7 @@ set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('{\it T} (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'Initial Condition','Final Exact','FDS nx=10','FDS nx=20','FDS nx=40','FDS nx=80','FDS nx=160','location','northeast')
+legend(hh,'Initial Condition','Final Exact','FDS {\itnx}=10','FDS {\itnx}=20','FDS {\itnx}=40','FDS {\itnx}=80','FDS {\itnx}=160','location','northeast')
 legend('boxoff')
 
 % add version string if file is available
@@ -116,7 +116,7 @@ set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('L2 error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS nx','FDS ny','FDS nz','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
+legend(hh,'FDS {\itnx}','FDS {\itny}','FDS {\itnz}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
 legend('boxoff')
 
 % add version string if file is available
