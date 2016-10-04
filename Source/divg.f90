@@ -321,6 +321,13 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
 ENDIF SPECIES_GT_1_IF
 
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-1 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
+
+
 ! Get the specific heat
 
 CP => WORK5
@@ -418,6 +425,12 @@ IF (CHECK_VN) THEN
    !$OMP END PARALLEL DO
 ENDIF
 
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-2 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
+
 ! Compute k*dT/dx, etc
 
 !$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE(STATIC)
@@ -434,6 +447,12 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 !$OMP END PARALLEL DO
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-22 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
 ! Correct thermal gradient (k dT/dn) at boundaries
 
@@ -481,6 +500,26 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO CORRECTION_LOOP
 !$OMP END PARALLEL DO
 
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-23 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDX:'
+!WRITE(77,'(6E16.8)')  (((KDTDX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDY:'
+!WRITE(77,'(6E16.8)')  (((KDTDY(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDZ:'
+!WRITE(77,'(6E16.8)')  (((KDTDZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'TMP:'
+!WRITE(77,'(6E16.8)')  (((TMP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KP:'
+!WRITE(77,'(6E16.8)')  (((KP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E16.8)')  (((Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E16.8)')  (((QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
+
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
@@ -509,6 +548,26 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
       ENDDO
    ENDDO
 END SELECT CYLINDER3
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-3 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDX:'
+!WRITE(77,'(6E16.8)')  (((KDTDX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDY:'
+!WRITE(77,'(6E16.8)')  (((KDTDY(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KDTDZ:'
+!WRITE(77,'(6E16.8)')  (((KDTDZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'TMP:'
+!WRITE(77,'(6E16.8)')  (((TMP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'KP:'
+!WRITE(77,'(6E16.8)')  (((KP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E16.8)')  (((Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E16.8)')  (((QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
 ! Point to the appropriate velocity components
 
@@ -554,6 +613,12 @@ ENDDO
 !$OMP END PARALLEL DO
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-4 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
 CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
@@ -603,6 +668,12 @@ IF (STRATIFICATION) THEN
    ENDDO
 ENDIF
 
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-5 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
+
 ! Manufactured solution
 
 MMS_IF: IF (PERIODIC_TEST==7) THEN
@@ -632,6 +703,12 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
 ENDIF MMS_IF
 
 1000 CONTINUE ! Evacuation meshes jump here
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-6 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
 
@@ -671,6 +748,12 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
    ENDDO WALL_LOOP4
 
 ENDIF IF_PRESSURE_ZONES
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DIVG-7 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
 T_USED(2)=T_USED(2)+SECOND()-TNOW
 
