@@ -3398,7 +3398,7 @@ where $\erfc = 1 - \erf(x)$.
 
 This is a 1D problem in depth into the solid.  In FDS, the problem is solved in 2D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
 
-The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the {\ct HT3D} method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface temperature, $T_s$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_s(t) \equiv T(0,t)$.
+The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface temperature, $T_s$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_s(t) \equiv T(0,t)$.
 
 \begin{figure}[ht]
 \centering
@@ -3416,7 +3416,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
-\includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} \\
+\includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
 \label{fig:ht3d_ibeam_contours}
