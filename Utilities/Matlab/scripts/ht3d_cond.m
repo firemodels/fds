@@ -1,6 +1,6 @@
 % McDermott
 % 6-8-2016
-% crank_1.m
+% ht3d_cond.m
 %
 % Analytical solution to 1D heat equation.
 % J. Crank, The Mathematics of Diffusion, 2nd Ed., Oxford, 1975.
