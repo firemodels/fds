@@ -3407,20 +3407,31 @@ The main purpose of this verification case is to check the accuracy of the conti
 \label{fig:ht3d_slab}
 \end{figure}
 
-%\newpage
-%
-%\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ibeam-ht3d}}{ibeam-ht3d})}
-%\label{ht3d_ibeam}
-%
-%\begin{figure}[ht]
-%\centering
-%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%\includegraphics[height=2.5in]{FIGURES/FE_Ts_contour} &
-%\includegraphics[height=2.5in]{FIGURES/FDS_Ts_contour} \\
-%\end{tabular*}
-%\caption[The \textct{ibeam-ht3d} test case]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
-%\label{fig:ht3d_ibeam}
-%\end{figure}
+\newpage
+
+\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ibeam-ht3d}}{ibeam-ht3d})}
+\label{ht3d_ibeam}
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
+\includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
+\label{fig:ht3d_ibeam_contours}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
+\label{fig:ht3d_ibeam_time_history}
+\end{figure}
+
 
 
 \chapter{Pyrolysis}
