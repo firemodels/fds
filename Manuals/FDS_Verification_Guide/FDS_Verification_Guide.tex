@@ -3362,6 +3362,10 @@ This chapter presents test cases for solid phase heat diffusion (conduction) in 
 
 \section{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
 \label{sec:heat_diff}
+% list the cases associated with this section
+\label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
+\label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
+\label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
 
 This test case is an initial value problem for the heat equation on a 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
 \begin{equation}
@@ -3383,7 +3387,7 @@ Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for ea
 \end{figure}
 
 \section{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
-\label{sec:ht3d_slab}
+\label{ht3d_slab}
 
 In this test case, we utilize the non-steady state conduction solution provided in Carslaw and Jaeger \cite{Carslaw:1} for a semi-infinite slab exposed to a constant ambient temperature, $T_\infty$, with a constant convective heat transfer coefficient, $h$, and no radiation (see also Drysdale \cite{Drysdale:1}, Eq.~(2.25)).  The initial temperature of the slab, $T_0$, is set to \SI{1000}{\degreeCelsius}. The thermal properties of the slab, $k=1$ \si{W/(m.K)}, $\rho=1000$ \si{kg/m^3}, and $c=0.001$ \si{kJ/(kg.K)}, are set to give a thermal diffusivity, $\alpha$, of 0.001 \si{m^2/s}. The analytical solution for this problem for the solid temperature, $T(x,t)$, is given by
 \begin{equation}
@@ -3406,7 +3410,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 %\newpage
 %
 %\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ibeam-ht3d}}{ibeam-ht3d})}
-%\label{sec:ibeam}
+%\label{ht3d_ibeam}
 %
 %\begin{figure}[ht]
 %\centering
