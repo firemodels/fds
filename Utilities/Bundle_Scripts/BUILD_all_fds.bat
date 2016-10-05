@@ -21,23 +21,27 @@ echo.
 
 %svn_drive%
 
+set CURDIR=%CD%
+
 echo ----------------------------------------------------------------------------
 echo building windows fds
 echo. 
 cd %svn_root%\fds\Build\mpi_intel_win_64
 erase *.obj *.mod *.exe
-call make_fds
+start "Building 64 bit Windows FDS" make_fds
 
 echo ----------------------------------------------------------------------------
 echo building Linux fds
 echo. 
 plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64 clean_fds.sh
-plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64 make_fds.sh
+start "Building 64 bit Linux FDS" plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64 make_fds.sh
 
 echo ----------------------------------------------------------------------------
 echo building Linux OSX
 echo. 
 plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 clean_fds.sh
-plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
+start "Building 64 bit OSX FDS" plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
 
 :eof
+
+cd %CURDIR%
