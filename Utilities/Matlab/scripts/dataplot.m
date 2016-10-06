@@ -196,6 +196,7 @@ for i=2:n_plots
             for j=1:length(S1)
                 d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
                 d1_Dep_Col = find(strcmp(H,S1(j)));
+                Save_Measured_Quantity(i,j) = S1(j);
                 clear indices
                 % Clear flag for stat_x_y metric
                 using_stat_x_y = 0;
@@ -300,7 +301,7 @@ for i=2:n_plots
                 
                 % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
-
+                Save_Predicted_Quantity(i,j) = S2(j);
                 d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
                 for jj=1:length(SP)
                     d2_Dep_Col(jj) = find(strcmp(H,SP(jj)));
@@ -533,7 +534,9 @@ saved_data = [{Save_Quantity'},...
               {Save_Plot_Filename'},...
               {Save_Dep_Title'},...
               {Save_Error_Tolerance'},...
-              {Save_Metric_Type'}];
+              {Save_Metric_Type'},...
+              {Save_Measured_Quantity},...
+              {Save_Predicted_Quantity}];
 
 display('dataplot completed successfully!')
 

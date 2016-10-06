@@ -21,6 +21,7 @@ echo Users Guide Figures Copied
 # Copy Verification Guide Figures
 cp $FBVG/SCRIPT_FIGURES/*.pdf $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
 cp $FBVG/SCRIPT_FIGURES/*.png $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
+cp $FBVG/SCRIPT_FIGURES/*.tex $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
 cp $FBVG/SCRIPT_FIGURES/Scatterplots/*.tex $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/.
 echo Verification Figures Copied
 

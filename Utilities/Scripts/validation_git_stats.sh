@@ -7,12 +7,17 @@
 MAKEGITENTRY(){
 DIR=$1
 gitrevisions=/tmp/gitrevisions.$$
-cat $FIREMODELS/fds/Validation/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
+cat $FIREMODELS/out/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $4}' | sed 's/^.\{1\}//'`
-  gitdate=`git show -s --format=%aD $gitrevshort | head -1 | awk '{print $3,$2",",$4}'`
-  gitdate2=`git show -s --format=%at $gitrevshort | head -1 | awk '{print $1}'`
+  gitdate=`git show -s --format=%aD $gitrevshort 2> /dev/null | head -1 | awk '{print $3,$2",",$4}'`
+  if [ "$gitdate" == "" ]; then
+    gitdate="undefined"
+    gitdate2=2000000000
+  else
+    gitdate2=`git show -s --format=%at $gitrevshort | head -1 | awk '{print $1}'`
+  fi
   echo "${DIR//_/\_}  & $gitdate & $gitrev & $gitdate2 \\\\ \hline"
 fi
 rm $gitrevisions
@@ -55,12 +60,13 @@ echo "\endhead" >> $OUTPUT_TEX_FILE
 maketable=$FIREMODELS/fds/Validation/Process_All_Output.sh
 CASELIST=/tmp/temp.out.$$
 TABLE_ENTRIES=/tmp/temp2.out.$$
-grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' > $CASELIST
+grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' | awk '{if(NR>1)print}'> $CASELIST
 while read p; do
   MAKEGITENTRY   $p  >> $TABLE_ENTRIES
 done <$CASELIST
 	cat $TABLE_ENTRIES | sort -n -t '&' -k 4 | awk -F "&" '{ print $1 "&" $2 "&" $3 "\\\\ \\hline"}' >> $OUTPUT_TEX_FILE
 rm $CASELIST $TABLE_ENTRIES
+
 
 # Table footer
 echo "\end{longtable}" >> $OUTPUT_TEX_FILE

@@ -153,6 +153,7 @@ The following individuals contributed to the verification process of FDS.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
+\item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
 \end{itemize}
 
 
@@ -3240,19 +3241,6 @@ lines are FDS results and the circles are the HEATING results. An example input 
 
 \clearpage
 
-\section{Heat Transfer through a Semi-Infinite Slab (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
-\label{ht3d_slab}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
-\caption[Results of the \textct{ht3d\_slab} test case]{Results of the \textct{ht3d\_slab} test case.}
-\label{ht3d_slab_fig}
-\end{figure}
-
-
-\clearpage
-
 \section{Convective Cooling (\texorpdfstring{\textct{convective\_cooling}}{convective\_cooling})}
 \label{convective_cooling}
 
@@ -3367,6 +3355,88 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \label{adiabatic_flux}
 \end{figure}
 
+
+\chapter{Solid Heat Transfer 3D (Beta)}
+\label{ch:ht3d}
+
+This chapter presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous chapter.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+
+\section{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
+\label{sec:heat_diff}
+% list the cases associated with this section
+\label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
+\label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
+\label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
+
+This test case is an initial value problem for the heat equation on a 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
+\begin{equation}
+\label{eq:expdecay}
+T(x,t) = T_0 + A \sin(\lambda(x-x_0)) \exp(-\lambda^2 \alpha t)
+\end{equation}
+where $\lambda = 2\pi/L$.
+
+Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for each coordinate direction.  The left plot shows the spatial profiles at the initial (dashed line) and final states for the various resolutions.  The grid spacing is $\Delta x = L/nx$.  The right plot shows second-order convergence of the L2 error.  Note that even though the time integration scheme is explicit Euler (first order in time) the spatial convergence remains second order by virtue of the Von Neumann time step restriction $\Delta t < \Delta x^2/(2\alpha)$.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
+\end{tabular*}
+\caption[The \textct{ht3d\_nx\_x} test cases]{One-dimensional heat diffusion in a square bar. (Left) Initial and final profiles for each case.  (Right) Spatial order-of-accuracy plot showing second-order convergence for all three spatial directions.}
+\label{fig:ht3d_diff}
+\end{figure}
+
+\section{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
+\label{ht3d_slab}
+
+In this test case, we utilize the non-steady state conduction solution provided in Carslaw and Jaeger \cite{Carslaw:1} for a semi-infinite slab exposed to a constant ambient temperature, $T_\infty$, with a constant convective heat transfer coefficient, $h$, and no radiation (see also Drysdale \cite{Drysdale:1}, Eq.~(2.25)).  The initial temperature of the slab, $T_0$, is set to \SI{1000}{\degreeCelsius}. The thermal properties of the slab, $k=1$ \si{W/(m.K)}, $\rho=1000$ \si{kg/m^3}, and $c=0.001$ \si{kJ/(kg.K)}, are set to give a thermal diffusivity, $\alpha$, of 0.001 \si{m^2/s}. The analytical solution for this problem for the solid temperature, $T(x,t)$, is given by
+\begin{equation}
+\label{eq:semiinfslab}
+\frac{T - T_0}{T_\infty - T_0} = \erfc\left(\frac{x}{2\sqrt{\alpha t}}\right) - \exp\left( \frac{xh}{k} + \frac{\alpha t}{(k/h)^2} \right) \erfc\left( \frac{x}{2\sqrt{\alpha t}} + \frac{\sqrt{\alpha t}}{k/h} \right)
+\end{equation}
+where $\erfc = 1 - \erf(x)$.
+
+This is a 1D problem in depth into the solid.  In FDS, the problem is solved in 2D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
+
+The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface temperature, $T_s$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_s(t) \equiv T(0,t)$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
+\caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3D heat transfer.}
+\label{fig:ht3d_slab}
+\end{figure}
+
+\newpage
+
+\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
+\label{ht3d_ibeam}
+
+The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 1.7 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
+
+Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temperature contours from ANSYS (left) and FDS (right).  Below that, in Fig.~\ref{fig:ht3d_ibeam_time_history}, we show the time history of the surface temperatures for six locations on the bottom flange (positions may be identified from the image on the left).
+
+\begin{figure}[ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
+\includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left, courtesy Chao Zhang) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
+\label{fig:ht3d_ibeam_contours}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
+\label{fig:ht3d_ibeam_time_history}
+\end{figure}
 
 
 
@@ -4390,7 +4460,9 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 \label{HVAC_flow_loss}
 
 The pressure drop due to steady flow in a duct is given by
-\be \Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}\ee
+\be
+\Delta p = \frac{K \rho \, u^2}{2}  \label {HVAC_steady_state}
+\ee
 where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $u$ is the mean velocity. In this example, a duct is split at a tee joint into two ducts. All ducts have the same cross sectional area.  The primary duct is assigned a constant flow rate of 0.3~\si{m^3/s}.  The other two ducts are assigned loss coefficients of 4 and 16 and outlets at the same elevation.  From Eq.~(\ref{HVAC_steady_state}), it can be shown that since the two branch ducts have the same pressure at their outlets, the steady-state velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.  FDS results are shown in Fig.~\ref{fig_HVAC_loss}.
 
 \begin{figure}[ht]
@@ -4584,7 +4656,139 @@ ASHRAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 \label{ASHRAE7}
 \end{figure}
 
-\newpage
+\section{HVAC transient mass transport}
+This section documents verification of the mass transport subroutine of the HVAC module. Unless otherwise stated, the general test case has a \SI{1}{\meter\cubed} domain split into two equally sized compartments (being their own pressure zones) connected in some manner by an HVAC network. The left and right compartments are initialized with species~1 and species~2 respectively. Both species have an initial density of \SI[per-mode=symbol]{1.0}{\kilogram\per\meter\cubed}. The ducts have a cross sectional area of \SI{0.01}{m^2} and a flow rate of \SI[per-mode=symbol]{0.01}{\meter\cubed\per\second} (velocity of \SI[per-mode=symbol]{1}{\meter\per\second}).
+
+\subsection{Convergence study for HVAC mass transport (\texorpdfstring{\textct{HVAC\_convergence\_study\_x}}{HVAC\_mass\_transport\_conv\_x})}
+\label{HVAC_mass_transport_conv_0020}
+\label{HVAC_mass_transport_conv_0040}
+\label{HVAC_mass_transport_conv_0080}
+\label{HVAC_mass_transport_conv_0160}
+\label{HVAC_mass_transport_conv_0320}
+The time-dependent mass transport subroutine is an explicit Euler method solver which uses a Godunov upwinding scheme. This method is formally first-order accurate in space and should exhibit L1 and L2 norm error decay rates of \(O(\Delta x)\) for a continuous solution.
+
+We undertake a convergence study to demonstrate that the adopted numerical method exhibits the expected spatial error decay. The two compartments are connected with a single \SI{1}{\meter} long duct which is initialized using linear interpolation between the upstream and downstream duct node. In this manner the mass fraction of species~1 linearly decreases from \num{1} to \SI[per-mode=symbol]{0}{\kilogram\per\kilogram}. If we examine the species~1 mass fraction at the downstream node we expect to see it's value increase linearly from \num{0} to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} between \SI{0}{\second} to \SI{1}{\second} and then to remain at \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} until the end of the simulation. The mass fraction of species 1 at the downstream duct node is examined and compared to the analytical result for a range of duct cell numbers (20, 40, 80, 160 and 320). The time step is fixed to satisfy the CFL of the case cell size (CFL \(= \Delta x/2u\)); this ensures that the \(\Delta x/\Delta t\) ratio is fixed for each case. Fig.~\ref{fig_HVAC_mass_transport_conv_1} shows the mass fraction at the downstream duct node for all cases and the analytical solution. Fig.~\ref{fig_HVAC_mass_transport_conv_2} gives the L1 and L2 norm errors.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_1}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} test case result.]{Species~\num{1} mass fraction in the downstream duct node for the cell size convergence study. The mass fraction starts at zero and then linearly increases due to the initial conditions in the duct. At \SI{1}{\second} the mass fraction reaches its maximum and remains at this value until the end of the simulation. The figure illustrates that at lower cell counts (blue line) there is increased numerical diffusivity and that, for higher cell counts (cyan line), the numerical solution converges towards the analytical solution (black dashed line).}
+\label{fig_HVAC_mass_transport_conv_1}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
+   \end{tabular*}
+\caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results.]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
+\label{fig_HVAC_mass_transport_conv_2}
+\end{figure}
+
+\subsection{Transport time (\texorpdfstring{\textct{HVAC\_mass\_transport}}{HVAC\_mass\_transport})}
+\label{HVAC_mass_transport}
+A single \SI{10}{\meter} long duct connects the two compartments. The duct is initialized using data from the right duct node (i.e. species 2). As HVAC does not account for diffusion in the duct (only advection) we expect to see species~1 mass fraction at the downstream duct node start and remain at \SI[per-mode=symbol]{0}{\kilogram\per\kilogram} until \SI{10}{\second} and then instantaneously increase to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram}. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport}
+\caption[\textct{HVAC\_mass\_transport} test case.]{Species \num{1} mass fraction in the downstream duct node.}
+\label{fig_HVAC_mass_transport}
+\end{figure}
+
+\subsection{Duct definition sensitivity analysis (\texorpdfstring{\textct{HVAC\_mass\_transport\_x}}{HVAC\_mass\_transport\_\x})}
+\label{HVAC_mass_transport_1}
+\label{HVAC_mass_transport_2}
+\label{HVAC_mass_transport_3}
+\label{HVAC_mass_transport_4}
+A sensitivity analysis is carried out to verify that results are not sensitive to differing methods of defining the same duct network. The general arrangement is identical to that of Section~\ref{HVAC_mass_transport}. Test cases \numrange{1}{4} incorporate the use of increasing numbers of \textct{DUCT}s (one, two, four and five respectively) and affiliated \textct{DUCTNODE}s but the number of cells in the discretized duct (\textct{N\_CELLS}), and hence the cell size, remains identical. We look at species \num{1} mass fraction at the downstream \textct{DUCTNODE} and expect to see no variation in the results for the differing number of \textct{DUCT}s. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_x}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_x}
+\caption[\textct{HVAC\_mass\_transport\_x} test case.]{Species \num{1} mass fraction in the downstream duct node for different duct definitions. Although different numbers of ducts are used, the number of cells is identical for all cases. Therefore the output for all cases should also be identical.}
+\label{fig_HVAC_mass_transport_x}
+\end{figure}
+
+\subsection{Mass conservation 1 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_1}}{HVAC\_mass\_transport\_conservation\_1})}
+\label{HVAC_mass_transport_conservation_1}
+The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} presents the species~1 and 2 masses in the left and right compartments.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Total mass in the FDS domain and total mass in the left and right compartments.}
+\label{fig_HVAC_mass_transport_conservation_1}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Species~1 and 2 masses in the left and right compartments.}
+\label{fig_HVAC_mass_transport_conservation_2}
+\end{figure}
+
+\subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
+\label{HVAC_mass_transport_conservation_2}
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} shows the total masses of species~1 and 2.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\caption[\textct{HVAC\_mass\_transport\_conservation\_2} test case.]{Total species~1 and 2 masses in the FDS domain. The initial equilibrium is prior to species~1 entering duct~B and species~2 entering duct~A.}
+\label{fig_HVAC_mass_transport_conservation_3}
+\end{figure}
+
+\subsection{Mass conservation 3 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_3}}{HVAC\_mass\_transport\_conservation\_3})}
+\label{HVAC_mass_transport_conservation_3}
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_4} presents the ideal and FDS total masses of species~1 and 2.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_4}
+\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the CFD domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
+\label{fig_HVAC_mass_transport_conservation_4}
+\end{figure}
+
+\subsection{Transient transport through branching ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_branch}}{HVAC\_mass\_transport\_branch})}
+\label{HVAC_mass_transport_branch}
+The two compartments are connected by an HVAC network comprising a single \SI{5}{\meter} feed duct which branches into two ducts (ducts~A and B) at a tee with both ducts discharging to the right compartment. Ducts~A and B each have a cross-sectional area of \SI{0.005}{\meter\squared}, half that of the feed duct, and will therefore both have a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}. Duct~A has a length of \SI{5}{\meter} and duct~B has a length of \SI{10}{\meter}. The duct network is initialized using data from the right compartment. Based on the duct lengths and a constant velocity we expect to see the species~\num{1} mass fraction at outlet~A and B increase from \num{0} to \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} at \SI{10}{\second} and \SI{15}{\second} respectively. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_branch}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_branch}
+\caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species \num{1} mass fraction in the downstream duct nodes. The distance from the inlet to outlet~A and from the inlet to outlet~B is \SI{10}{\meter} and \SI{15}{\meter} respectively. Given a constant velocity of \SI[per-mode=symbol]{1}{\meter\per\second} through the network, the transport time from inlet to outlets~A and B should be \SI{10}{\second} and \SI{15}{\second} respectively.}
+\label{fig_HVAC_mass_transport_branch}
+\end{figure}
+
+\subsection{Transient transport through combining ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_combine}}{HVAC\_mass\_transport\_combine})}
+\label{HVAC_mass_transport_combine}
+The left compartment is separated into two sub-compartments, A and B. These sub-compartments are initialized with species \numlist{1;2} respectively. An inlet vent is located in each sub-compartment and these vents are connected to separate ducts, of lengths \SI{1}{\meter} and \SI{2}{\meter} respectively, which combine at an internal tee. A single duct, with a length of \SI{1}{\meter}, connects this tee to the right compartment where it discharges to a single outlet into the right compartment. The right compartment and the duct network is initialized with species \num{3}. If we examine species mass fractions at the downstream outlet duct node we expect to see a species \num{3} mass fraction of \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} for \SI{2}{\second}, a species \numlist{1;3} mass fraction of \SI[per-mode=symbol]{0.5}{\kilogram\per\kilogram} each from \SI{2}{\second} to \SI{3}{\second} and a species \numlist{1;2} mass fraction of \SI[per-mode=symbol]{0.5}{\kilogram\per\kilogram} each from \SI{3}{\second} until the end of the simulation. Ideal result and FDS output is presented in Fig.~\ref{fig_HVAC_mass_transport_combine}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_combine}
+\caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species mass fractions at the outlet duct node. Species~3 starts and remains at \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} for \SI{2}{\second} as the initial contents of the duct flows out of the outlet. At \SI{2}{\second} the species from the sub-compartment connected via the shorter duct and the remaining initial species from the longer duct flows out of the outlet. At \SI{3}{\second} the species from the sub-compartment connected by the longer duct reaches the outlet and the mass fraction is split between the species from the two upstream sub-compartments - no initial species remains in the ducts.}
+\label{fig_HVAC_mass_transport_combine}
+\end{figure}
+
+\subsection{Energy conservation and pressure (\texorpdfstring{\textct{HVAC\_mass\_transport\_energy}}{HVAC\_mass\_transport\_energy})}
+\label{HVAC_mass_transport_energy}
+The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelsius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left the right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
+
+\begin{equation}
+h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
+\label{eq_HVAC_mass_transport_energy}
+\end{equation}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_p} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_e} }
+   \end{tabular*}
+\caption[\textct{HVAC\_mass\_transport\_energy} $\Delta$ p and enthalpy results.]{Pressure difference between the inlet and outlet of duct~B (left). Total enthalpy in the CFD domain (right).}
+\label{fig_HVAC_mass_transport_energy}
+\end{figure}
 
 %\chapter{Unstructured Geometry}
 %
@@ -4635,56 +4839,56 @@ Computation of the these quantities by their typical statistical definition woul
 \chapter{Summary of Verification Results}
 \label{info:verification_statistics}
 
-This appendix summarizes the accuracy of results from cases in the FDS verification suite. These metrics are an integral part of a process known as regression testing, which aims to evaluate the accuracy of output predicted by a numerical software package. The results from this appendix can be compared to another version of FDS as a way of measuring the quality of results between revisions. These statistical metrics also help determine the impact of code additions on the overall accuracy of FDS and can help identify errors in the FDS source code.
+This appendix summarizes the accuracy of cases in the FDS verification suite. These cases are an integral part of the continuous integration process for FDS in which daily source code changes are checked each night against this growing list of cases to verify the overall accuracy of FDS and to quickly identify errors introduced into the source code.
 
+The verification cases that are listed in Table~\ref{summary_table} are described either in the FDS Verification Guide or the FDS User's Guide. Those cases that are in the User's Guide help to explain various input parameters. Dark blue links refer to sections in the Verification Guide; light blue links refer to the User's Guide. For each case, there are one or more point to point comparisons between an FDS predicted value and an exact or expected value. If the relative or absolute difference between the predicted and exact/expected values is within the specified tolerance, the case passes.
+
+\begin{landscape}
+\captionof{table}{Summary of verification cases.} \label{summary_table}
 \IfFileExists{SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}{\input{SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/Scatterplots/verification_statistics.tex}}
+\end{landscape}
 
-\newpage
+
 
 \chapter{Installation Testing}
 \label{info:installation_testing}
 
-The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States, both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software, this involves a test program in which the software is used to execute a number of sample cases and the results are compared to accepted values.  The purpose of this testing process is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred.
-
-The acceptance test procedure is as follows:
+The use of computer software for safety purposes is sometimes regulated under a software quality assurance (SQA) program by the Authority Having Jurisdiction.  For example, in the United States, both the Department of Energy (DOE) via DOE G 414.1-4~\cite{DOE_G_414} and the Nuclear Regulatory Commission (NRC) via NUREG-1737~\cite{NUREG_1737} impose specific requirements on software used for certain safety purposes.  In addition to imposing general requirements on configuration management and verification and validation, SQA programs often impose an acceptance testing requirement.  For simulation software, this involves a test program in which the software is used to execute a number of sample cases and the results are compared to accepted values.  The purpose of this testing process is to ensure that the software installation was successful and that no corruption of the software executable or libraries has occurred. The acceptance test procedure is as follows:
 
 \begin{enumerate}
-\item Obtain and install the version of FDS you will be running.  Note that this procedure will need to be repeated for each version of the FDS executable being used (i.e., if you will be running both the serial and MPI versions of FDS, then the procedure will be done twice).
-\item Either check out the FDS repository by following the link from the FDS-SMV website or navigate to the repository via a web browser and download the files shown in Table~\ref{tbl:installation_test}.  The folder identified is a subfolder of the Verification folder.
+\item Obtain and install the version of FDS you will be running.  Note that this procedure will need to be repeated for each version of the FDS executable being used.
+\item Find the files shown in Table~\ref{tbl:installation_test} in the {\ct Examples} folder of the FDS-SMV installation package.  The Folder listed in the table is a subfolder of the {\ct Examples} folder.
 \item Run each of the FDS input files listed in Table~\ref{tbl:installation_test}. \label{itm:run_step}
-\item Compare the results of each FDS output file shown in Table~\ref{tbl:installation_test} with the expected results in the corresponding expected results file.
+\item Compare the results of each FDS Output File listed in Table~\ref{tbl:installation_test} with the exact/expected results in the corresponding Expected Results File. The Expected Results Files can be found at \\ \href{https://github.com/firemodels/fds/tree/master/Verification}{https://github.com/firemodels/fds/tree/master/Verification} \\
+    This is a link to the FDS repository hosted by GitHub.
 \item Verify that the expected results match the results from Step~\ref{itm:run_step} using the criteria shown in Appendix~\ref{info:verification_statistics}.
 \end{enumerate}
 
-\newpage
-\vspace{\baselineskip}
-\begin{sidewaystable}[p]
+\begin{landscape}
 \centering
-\caption[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference.}
-\label{tbl:installation_test}
+\captionof{table}[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.} \label{tbl:installation_test}
 \footnotesize
 \begin{tabular}{|l|c|l|l|l|}
 \hline
-Folder                  & Reference                       & Input File                                 & Output File                                      & Expected Results File \\ \hline \hline
-Controls                & \cite{FDS_Users_Guide}          & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
+Folder                  & Reference                       & Input File                                 & FDS Output File                                  & Expected Results File \\ \hline \hline
+Controls                & \ref{activate_vents}            & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
 Pressure\_Effects       & \ref{isentropic2}               & isentropic2.fds                            & insentropic2\_devc.csv                           & isentropic2.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_tmix}        & energy\_budget\_tmix.fds                   & energy\_budget\_tmix\_devc.csv                   & energy\_budget\_tmix.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_walls}       & energy\_budget\_cold\_walls.fds            & energy\_budget\_cold\_walls\_hrr.csv             & energy\_budget\_cold\_walls.csv \\ \hline
-Fires                   & \cite{FDS_Users_Guide}          & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
+Fires                   & \ref{spray_burner}              & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
 Heat\_Transfer          & \ref{heat_conduction_kc}        & heat\_conduction\_kc.fds                   & heat\_conduction\_kc\_devc.csv                   & heat\_conduction\_kc.csv \\ \hline
 HVAC                    & \ref{ashrae7}                   & ashrae7\_table.fds                         & ashrae7\_table\_devc.csv                         & ashrae7\_exp.csv \\ \hline
-Pressure\_Solver        & \cite{FDS_Users_Guide}          & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
+Pressure\_Solver        & \ref{duct_flow}                 & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
 Pyrolysis               & \ref{enthalpy}                  & enthalpy.fds                               & enthalpy\_devc.csv                               & enthalpy.csv \\ \hline
-Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell.csv                                & shrink\_swell.csv \\ \hline
+Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell\_devc.csv                          & shrink\_swell.csv \\ \hline
 Radiation               & \ref{radiation_shield}          & radiation\_shield.fds                      & radiation\_shield\_devc.csv                      & radiation\_shield.csv \\ \hline
-Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.csv  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
-Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.csv & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.fds  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
+Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.fds & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step.csv \\ \hline
 Sprinklers\_and\_Sprays & \ref{water_evaporation_1}       & water\_evaporation\_1.fds                  & water\_evaporation\_1\_devc.csv                  &  water\_evaporation\_1.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16.csv                     &  particle\_drag\_U50\_N16.csv \\ \hline
+Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16\_devc.csv               &  particle\_drag\_U50\_N16.csv \\ \hline
 
 \end{tabular}
-\end{sidewaystable}
-
+\end{landscape}
 
 
 \end{document}

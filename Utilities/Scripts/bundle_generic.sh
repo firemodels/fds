@@ -127,13 +127,13 @@ smvscriptdir=$scp_fds_smvroot/smv/scripts
 wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
+webpagesdir=$fds_smvroot/webpages
 for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
 forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
-wikify=$fds_smvroot/fds/Utilities/Scripts/wikify.py
 fullmanifestdir=$uploaddir/$bundledir/bin
 fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
@@ -143,7 +143,8 @@ smv_cases=$fds_smvroot/smv/Verification/scripts/SMV_Cases.sh
 wui_cases=$fds_smvroot/smv/Verification/scripts/WUI_Cases.sh
 copyfdscase=$fds_smvroot/fds/Utilities/Scripts/copyfdscase.sh
 copycfastcase=$fds_smvroot/fds/Utilities/Scripts/copycfastcase.sh
-ExamplesDirectory=$fds_smvroot/fds/Verification
+FDSExamplesDirectory=$fds_smvroot/fds/Verification
+SMVExamplesDirectory=$fds_smvroot/smv/Verification
 
 cd $uploaddir
 rm -rf $bundlebase
@@ -280,12 +281,11 @@ echo "--- copying release notes ---"
 echo ""
 CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
-CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
+CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
 CP2 $for_bundle readme_examples.html $bundledir/Examples
 
-cd $ExamplesDirectory
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
 export RUNTFDS=$copyfdscase
@@ -294,9 +294,11 @@ export RUNCFAST=$copycfastcase
 echo ""
 echo "--- copying example files ---"
 echo ""
+cd $FDSExamplesDirectory
 $fds_cases
-$smv_cases
+cd $SMVExamplesDirectory
 $wui_cases
+$smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
 echo >> $fullmanifest

@@ -1309,21 +1309,52 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
-\item[{\ct U0, V0, W0}] Computationally, these are the initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is convenient to start the flow immediately, like in an outdoor simulation involving wind.  Physically, these values should be thought of a ``far-field'' values of the velocity components.  Setting these values affects the pressure boundary condition for {\ct OPEN} vents.  See the FDS Tech Guide \cite{FDS_Math_Guide}.
 \end{description}
 
-\subsection{Special Topic: Mean Forcing and Data Assimilation}
+\subsection{Special Topic: Specifying a Wind Field}
 \label{info:mean_forcing}
 
-A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Typically, you know only that the mean wind is 10~m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
+If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both {\ct U0} and {\ct V0} to 7.07~m/s. Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
 
-In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s use
+The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct MISC}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters on the {\ct MISC} line:
 \begin{lstlisting}
-&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=.1 /
+&MISC ..., MEAN_FORCING(1:2)=.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=0.1,
+      RAMP_U0_T='t-ramp', ... , RAMP_V0_Z='z-ramp' /
 \end{lstlisting}
-Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
+Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
 
-\subsection{Special Topic: Specified Force Field}
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+\begin{lstlisting}
+&RAMP ID='t-ramp', T=  0., F=0. /
+&RAMP ID='t-ramp', T=100., F=1. /
+
+&RAMP ID='z-ramp', Z=  0., F=1.0 /
+&RAMP ID='z-ramp', Z=200., F=1.5 /
+&RAMP ID='z-ramp', Z=500., F=1.8 /
+\end{lstlisting}
+The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m).
+
+For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
+
+\subsubsection{Example Wind Simulation}
+\label{wind_example}
+
+An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The background wind velocity components vary with height, $z$, and time, $t$:
+\be
+   u(z,t) = 10 \, \cos \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}  \quad ; \quad v(z,t) = 10 \, \sin \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}
+\ee
+The 360$^\circ$ turn of the wind in 50~s is not realistic, but this case is intended to test the ramp functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} was set to 1~s. This time scale falls into the denominator of the forcing term that ``nudges'' the simulated wind to follow the specified time history. If it is too small, the ``nudging'' term becomes too dominant. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
+\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified wind profile.}
+\label{wind_example_fig}
+\end{figure}
+
+
+
+\subsection{Special Topic: Specifying a Force Field}
 \label{info:force_vector}
 
 Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
@@ -2022,7 +2053,6 @@ In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundari
 \label{sec:periodic}
 
 A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following (valid for a single mesh case):
-
 \begin{lstlisting}
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
@@ -2034,7 +2064,13 @@ For multi-mesh cases with {\ct PERIODIC} boundaries the {\ct VENT} planes must b
 &VENT PBX=0, SURF_ID='PERIODIC' /
 &VENT PBX=1, SURF_ID='PERIODIC' /
 \end{lstlisting}
-For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
+Also, you must explicitly tell FDS that two non-connected meshes need to share information. To do this, use the parameter {\ct PERIODIC\_MESH\_IDS(1:3)} on the appropriate {\ct MESH} lines. For example, suppose you have three meshes side by side. Mesh~1 and Mesh~3 have periodic boundaries, but they do not physically touch each other. Provide this information as follows:
+\begin{lstlisting}
+&MESH ID='mesh1', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh3' /
+&MESH ID='mesh2', IJK=..., XB=... /
+&MESH ID='mesh3', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh1' /
+\end{lstlisting}
+Note that {\ct PERIODIC\_MESH\_IDS} is an array of three character strings because it is possible to have three periodic boundaries, one in each coordinate direction. For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
@@ -2698,6 +2734,28 @@ prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat f
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
 
+\subsection{Solid Heat Transfer 3D (Beta)}
+\label{info:ht3d}
+
+The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
+
+{\ct HT3D} solves the 3D heat equation within an {\ct {OBST}} region of the domain.  You may connect multiple {\ct {OBST}} regions.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer much be at least one cell thick.  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements. {\ct HT3D} is not currently hooked up to the pyrolysis model.
+
+The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} should also have {\ct {HT3D=.TRUE.}}.  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}),
+\begin{equation}
+\label{eq:vnht3d}
+\delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
+\end{equation}
+
+Below is an example input file section:
+\begin{lstlisting}
+&MATL ID='steel', .../
+&SURF ID='s1', HT3D=.TRUE./
+&OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
+\end{lstlisting}
+
+
+\clearpage
 
 
 \section{Simple Pyrolysis Models}
@@ -3533,7 +3591,9 @@ There are occasions where simply defining fixed flow and fixed species boundary 
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
-The current HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step).
+
+By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
+
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
@@ -3561,6 +3621,12 @@ A typical input line specifying a duct is as follows:
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
+Or, if you are using {\ct MASS\_TRANSPORT=.TRUE.}, as follows:
+\begin{lstlisting}
+&HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
+      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
+      DUCT_INTERP_TYPE='NODE1', N_CELLS=200 /
+\end{lstlisting}
 where:
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
@@ -3568,10 +3634,12 @@ where:
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DIAMETER}] is the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
+\item[{\ct DUCT\_INTERP\_TYPE}] sets whether the duct is initialized with data from the first node ({\ct NODE1}) or the second node ({\ct NODE2}). Continuous runs of ducts cannot have a mix of interpolation methods (refer to Section~\ref{info:hvacmasstransport}).
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  Note that {\ct LENGTH} is not computed automatically as the difference between the {\ct XYZ} of the duct's endpoints.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
+\item[{\ct N\_CELLS}] defines the number of cells used in a discretized duct.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
@@ -3591,8 +3659,8 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \label{fig:HVAC_Simplify}
 \end{figure}
 
-This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting, $K$, losses through the duct as follows:
-\be K_{\mbox{\tiny eff}} = \sum_i {K_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
+This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting losses ($K_{\mbox{\tiny minor}}$) through the duct as follows:
+\be K_{\mbox{\tiny eff}} = \sum_i {(K_{\mbox{\tiny minor}})_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 \subsection{HVAC Dampers}
@@ -3825,9 +3893,16 @@ The HVAC system being modeled may either have louvers that redirect the flow lea
 \end{lstlisting}
 The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
+\subsection{HVAC mass transport}
+\label{info:hvacmasstransport}
 
+If you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line this will call the HVAC mass transport subroutine. This subroutine accounts for mass storage in the duct network and transport time of species and energy. The current HVAC solver does not account for heat loss in the HVAC network.
 
+To avoid the possibility of there being no available initialization data for a duct run (a series of ducts connected to one another via ducts and nodes), {\ct DUCT\_INTERP\_TYPE} in each comprising duct must be consistent. This ensures that there is a non-internal duct node from which the duct run adopts its initial data. If duct interpolation is set to {\ct NODE1} then data from the first node of the lowest numbered duct in the duct run is initialized in the duct, if it is set to {\ct NODE2} then data from the second node of the highest numbered duct in the duct run is initialized in the duct. {\ct DUCT\_INTERP\_TYPE} is related to initialization only; if the FDS domain is initialized as ambient/background data then there will be no difference in output when using either duct interpolation method.
 
+You can increase or decrease the number of cells each discretized duct has, to increase solution accuracy or decrease simulation time respectively. The default value is set based upon a cell size of \SI{100}{\milli\meter}. Where the duct is not divisible by \SI{100}{\milli\meter}, the number of cells is rounded up to the nearest integer (e.g. a duct with a length of \SI{1.05}{\meter} will have \num{11} cells). Ducts with a length of less than \SI{100}{\milli\meter} adopt a cell number of 2. If {\ct N\_CELLS=1} is assigned to a duct then, even if {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}, the HVAC mass transport subroutine will not be called for this duct.
+
+If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain.
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -3974,7 +4049,7 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will computed based upon the inputs on the referenced {\ct SURF} input.
+The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
@@ -4112,7 +4187,7 @@ The purpose of the test case is to ensure that the proper amount of gas (in this
 \be
    \frac{\d p}{\d t} = \frac{\gamma \, \dot{V}}{V} \, p   \quad \Longrightarrow \quad p(t) - p_0 = p_0 \left( {\rm e}^{\frac{\gamma \, \dot{V}}{V} \, t} - 1 \right)
 \ee
-where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m$^3$/s, volume, $V=4000$~m$^3$, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} set to true. 
+where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m$^3$/s, volume, $V=4000$~m$^3$, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} set to true.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/parabolic_profile}
@@ -7305,13 +7380,25 @@ FDS includes a calculation of the adiabatic surface temperature (AST), a quantit
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
+The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
       ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
 This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+
+\subsubsection{Example: AST vs. Surface Temperature}
+\label{adiabatic_surface_temperature}
+
+The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated ({\ct BACKING='INSULATED'} on the {\ct SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature} shows the plate temperature rising towards the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE'} applied via a {\ct DEVC} at the plate surface, and the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a {\ct DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate {\ct SURF}ace conditions and the AST-Gas {\ct PROP}erties must both include the same explicitly-defined {\ct HEAT\_TRANSFER\_COEFFICIENT} and {\ct EMISSIVITY}.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature}
+\includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature_gas}
+\caption[Results of the {\ct adiabatic\_surface\_temperature} test case]{(Left) Surface temperature vs. adiabatic surface temperature of an insulated plate. (Right) AST recorded with a device positioned on the plate surface (AST) and one just off the surface (AST-Gas).}
+\label{adiabatic_surface_temperature_fig}
+\end{figure}
 
 
 
@@ -7981,7 +8068,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 
 \subsection{Extinction}
 \label{info:extinct_out}
-In combustion, knowing if/when/where chemical reactions have been extinguished is important. The {\ct EXTINCTION} parameter tells the user whether or not combustion has been prevented by FDS' extinction routine. By default, {\ct EXTINCTION} = 1, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 0 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 0 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
+In combustion, knowing if, when, or where chemical reactions have been extinguished is important. The output quantity {\ct EXTINCTION} tells the user whether or not combustion has been prevented by the extinction routine. By default, {\ct EXTINCTION} = 0, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 1 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 1 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
 
 
 
@@ -8645,27 +8732,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & \si{kJ/(kg.K)} &               \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
 {\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}       &               &                \\ \hline
-{\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               & {\ct .FALSE.}  \\ \hline
+{\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               & {\ct .FALSE.}  \\ \hline
 {\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}      &               &                \\ \hline
 {\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct EFFICIENCY}                & Real Array        & Sections ~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                       &               & 1.0            \\ \hline
+{\ct DUCT\_INTERP\_TYPE}        & Character         & Section~\ref{info:hvacmasstransport}                                          &               & {\ct 'NODE1'}  \\ \hline
+{\ct EFFICIENCY}                & Real Array        & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                        &               & 1.0            \\ \hline
 {\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &                \\ \hline
+{\ct FIXED\_Q}                  & Real              & Section~\ref{info:HVACaircoil}                                                & kW            &                \\ \hline
 {\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
-{\ct LEAK\_ENTHALPY}            & Logical           & Section~\ref{info:local_leakage}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct LEAK\_ENTHALPY}            & Logical           & Section~\ref{info:local_leakage}                                              &               & {\ct .FALSE.}  \\ \hline
 {\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
-{\ct LOADING}                   & Real Array        & Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        & Section ~\ref{info:HVACfilter}                                               & 1/kg          & 1.0            \\ \hline
+{\ct LOADING}                   & Real Array        & Section ~\ref{info:HVACfilter}                                                & kg            & 0.0            \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        & Section ~\ref{info:HVACfilter}                                                & 1/kg          & 1.0            \\ \hline
 {\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0            \\ \hline
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
-{\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
+{\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
+{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)                 \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
-{\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               &                \\ \hline
+{\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
 {\ct SPEC\_ID}                  & Character Array   & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
@@ -8674,7 +8763,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0            \\ \hline
 {\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
 {\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
-{\ct VENT2\_ID}                 & Character         & Section~\ref{info:local_leakage}                                                   &               &                \\ \hline
+{\ct VENT2\_ID}                 & Character         & Section~\ref{info:local_leakage}                                              &               &                \\ \hline
 {\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                               &  m$^3$/s      &                \\ \hline
 {\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &  0.0           \\ \hline
 \end{longtable}
@@ -8827,19 +8916,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR}             & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
-{\ct CYLINDRICAL}       & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVACUATION}        & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}      & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}   & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
-{\ct ID}                & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
-{\ct IJK}               & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
-{\ct LEVEL}             & Integer                       & For future use                            &    & 0                \\ \hline
-{\ct MPI\_PROCESS}      & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct N\_THREADS}        & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct MULT\_ID }         & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct RGB}               & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
-{\ct XB(6)}             & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
+{\ct COLOR}                & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL}          & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}           & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}         & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}      & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
+{\ct ID}                   & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
+{\ct IJK}                  & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
+{\ct LEVEL}                & Integer                       & For future use                            &    & 0                \\ \hline
+{\ct MPI\_PROCESS}         & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct N\_THREADS}           & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct MULT\_ID }            & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct PERIODIC\_MESH\_IDS}  & Character Array               & Section~\ref{sec:periodic}                &    &                  \\ \hline
+{\ct RGB}                  & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct XB(6)}                & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
 
@@ -8900,10 +8990,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
+{\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
-%{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:chem_integration}                   &               &  1000             \\ \hline
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                              &               &  200              \\ \hline
@@ -8926,12 +9016,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
-%{\ct RAMP\_U0}                                  & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
-%{\ct RAMP\_V0}                                  & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
-%{\ct RAMP\_W0}                                  & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
-%{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
-%{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
-%{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               & 'null'            \\ \hline
+{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
+{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
+{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
+{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
+{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
+{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
 %{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
@@ -8963,6 +9053,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.4               \\ \hline
 {\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        & 0.000595          \\ \hline
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        & 0.232378          \\ \hline
+%{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
@@ -9031,6 +9122,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct DEVC\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct EVACUATION}          & Logical             & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.} \\ \hline
+{\ct HT3D}                & Logical             & Section~\ref{info:ht3d}                   &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                 & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct MESH\_ID}            & Character           & Reference~\cite{FDS_Evac_Users_Guide}     &           &               \\ \hline
 {\ct MULT\_ID }           & Character           & Section~\ref{info:MULT}                   &           &               \\ \hline
@@ -9502,6 +9594,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
+{\ct HT3D}                            & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
