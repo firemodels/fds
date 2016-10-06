@@ -101,6 +101,7 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
     \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
+    \label{eq:qconv}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
 \be
@@ -156,7 +157,6 @@ h = \frac{\dot{q}_{\rm c}''}{(T_{\rm g} - T_{\rm w})}= \frac{{\rho}{c_p}{u_{\tau
 \end{align}
 
 
-
 \subsection{Component-Averaged Thermal Properties}
 \label{matcoefs}
 
@@ -180,6 +180,36 @@ and the volume fraction of component $\alpha$ is computed as
 \ee
 where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
 
+
+\subsection{Solid Heat Transfer 3D (Beta)}
+\label{sec:ht3d}
+
+Three-dimensional heat conduction may be implemented in FDS by setting {\ct HT3D=.TRUE.} on an {\ct OBST} line.  However, {\ct HT3D} is not currently hooked up with the pyrolysis model.  It is mainly useful for structural fire analysis. This section discusses the mathematical model for this feature.
+
+The governing equation solved in {\ct HT3D} is
+\begin{equation}
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
+  \label{eq:3dheat}
+\end{equation}
+Notice that we do not presently account for volumetric heat sources. Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
+
+Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES timestep, $\delta t$, and the timestep required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+
+For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
+\begin{equation}
+\label{eq:fluxcontinuity}
+\dot{q}_{\rm r, in}'' - \dot{q}_{\rm r, out}'' + \dot{q}_{\rm c}'' = -k_{\rm s} \left. \frac{\partial T_{\rm s}}{\partial n} \right|_{\rm w}
+\end{equation}
+To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$, and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
+\begin{equation}
+\label{eq:discflux}
+( \dot{q}_{\rm r, in}'' )^n - \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
+\end{equation}
+which leads to our final result for the boundary temperature
+\begin{equation}
+\label{eq:tmpwall}
+T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
+\end{equation}
 
 \section{Pyrolysis Models}
 \label{pyrosection}
