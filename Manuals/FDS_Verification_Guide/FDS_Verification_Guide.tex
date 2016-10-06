@@ -3374,7 +3374,7 @@ T(x,t) = T_0 + A \sin(\lambda(x-x_0)) \exp(-\lambda^2 \alpha t)
 \end{equation}
 where $\lambda = 2\pi/L$.
 
-Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for each coordinate direction.  The left plot shows the spatial profiles at the initial (dashed line) and final states for the various resolutions.  The grid spacing is $\Delta x = L/nx$.  The right plot shows second-order convergence of the L2 error.  Note that even though the time integration scheme is explicit Euler (first order in time) the spatial converge remains second order by virtue of the Von Neumann time step restriction $\Delta t < \Delta x^2/(2\alpha)$.
+Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for each coordinate direction.  The left plot shows the spatial profiles at the initial (dashed line) and final states for the various resolutions.  The grid spacing is $\Delta x = L/nx$.  The right plot shows second-order convergence of the L2 error.  Note that even though the time integration scheme is explicit Euler (first order in time) the spatial convergence remains second order by virtue of the Von Neumann time step restriction $\Delta t < \Delta x^2/(2\alpha)$.
 
 \begin{figure}[ht]
 \centering
@@ -3409,7 +3409,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 
 \newpage
 
-\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ibeam-ht3d}}{ibeam-ht3d})}
+\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
 \label{ht3d_ibeam}
 
 \begin{figure}[ht]
