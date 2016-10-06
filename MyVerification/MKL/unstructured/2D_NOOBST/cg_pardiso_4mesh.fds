@@ -26,9 +26,7 @@
       SCARC_DEBUG              = 'NONE'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'PARDISO'      /
-/      VELOCITY_TOLERANCE       =  1E-6
-/      MAX_PRESSURE_ITERATIONS  =  100            /
+      SCARC_PRECON             = 'PARDISO'    /
 
 &VENT XB=0.3,0.5,-0.01,0.01,0.0,0.0 SURF_ID='INFLOW1' /
 &VENT XB=0.0,0.0,-0.01,0.01,0.3,0.5 SURF_ID='INFLOW2' /

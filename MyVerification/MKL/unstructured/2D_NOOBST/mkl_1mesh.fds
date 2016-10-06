@@ -2,7 +2,6 @@
 
 &MESH IJK=32,1,32, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
-
 &MISC DNS=.TRUE.,
       NOISE=.FALSE.,
       STRATIFICATION=.FALSE.,
@@ -16,10 +15,11 @@
 &TIME T_END=0.5, DT=0.002 /
 
 &PRES SCARC_METHOD         = 'MKL'
-      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
+      SCARC_DISCRETIZATION = 'UNSTRUCTURED'
       SCARC_MKL            = 'GLOBAL'
       SCARC_MKL_MTYPE      = 'SYMMETRIC'
-      SCARC_DEBUG          = 'NONE'   /
+      SCARC_DEBUG          = 'NONE'       /
+
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

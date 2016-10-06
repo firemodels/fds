@@ -104,7 +104,7 @@ WRITE(VERSION_STRING,'(A)') 'FDS 6.5.2'
 
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
-OPEN(77, FILE='glmat.debug')
+OPEN(77, FILE='glmat2.debug')
 
 ! Read input from CHID.fds file and stop the code if any errors are found
 
@@ -281,13 +281,13 @@ CALL MESH_EXCHANGE(6)
 ! Ensure normal components of velocity match at mesh boundaries and do velocity BCs just in case the flow is not initialized to zero
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== -1-1-1 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== -1-1-1 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 PREDICTOR = .FALSE.
 CORRECTOR = .TRUE.
@@ -302,13 +302,13 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 000 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:', RADIATION
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 000 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:', RADIATION
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
@@ -317,23 +317,23 @@ DO I=1,INITIAL_RADIATION_ITERATIONS
       IF (EVACUATION_ONLY(NM)) CYCLE
       CALL WALL_BC(T_BEGIN,DT,NM)
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 000-A ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:', RADIATION
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 000-A ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:', RADIATION
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
       IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 000-B ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:', RADIATION
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 000-B ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:', RADIATION
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
    ENDDO
    DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
@@ -342,13 +342,15 @@ ENDIF
 ENDDO
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 111 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 111 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 ! Compute divergence just in case the flow field is not initialized to ambient
 
@@ -358,13 +360,13 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 222 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 222 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 ! Potentially read data from a previous calculation
@@ -390,13 +392,17 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 CALL STOP_CHECK(1)
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 333 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'QR:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'Q:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 333 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'QR:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'Q:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 ! Check to see if only a TGA analysis is to be performed
@@ -474,9 +480,13 @@ IF (ANY(EVACUATION_ONLY)) THEN
 END IF
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 444 ===================='
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 444 ===================='
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 ! Sprinkler piping calculation
@@ -503,23 +513,27 @@ IF (VEG_LEVEL_SET_UNCOUPLED) THEN
    CALL STOP_CHECK(1)
 ENDIF
 
-!!WRITE(77,*) 'CELL_INDEX:'
+!WRITE(77,*) 'CELL_INDEX:'
 !DO KKK=MESHES(1)%KBAR+1,0,-1
 !   !WRITE(77,'(6i6)') ((CELL_INDEX(III,JJJ,KKK),III=0,MESHES(1)%IBAR+1),JJJ=0,MESHES(1)%JBAR+1)
 !ENDDO
-!!WRITE(77,*) 'SOLID:'
+!WRITE(77,*) 'SOLID:'
 !DO KKK=MESHES(1)%KBAR+1,0,-1
 !   !WRITE(77,'(6i6)') ((SOLID(CELL_INDEX(III,JJJ,KKK)),III=0,MESHES(1)%IBAR+1),JJJ=0,MESHES(1)%JBAR+1)
 !ENDDO
 
 IF (MYID == 0) THEN
-!!WRITE(77,*) '==================== 555 ===================='
-!!WRITE(77,*) 'U:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'US:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) 'DDDT:'
-!!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== 555 ===================='
+!WRITE(77,*) 'U:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 ! This ends the initialization part of the program
@@ -540,8 +554,12 @@ IF (MYID == 0) THEN
 !WRITE(77,*) '======================================================================'
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    ! Do not print out general diagnostics into .out file every time step
@@ -585,12 +603,16 @@ IF (MYID == 0) THEN
 !WRITE(77,*) ' PREDICTOR'
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'U:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    ! Diagnostic timing calls and initialize energy budget array, Q_DOT
@@ -628,12 +650,16 @@ IF (MYID == 0) THEN
 !WRITE(77,*) '==================== 777 ===================='
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'U:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       ! Calculate convective and diffusive terms of the velocity equation.
@@ -667,10 +693,14 @@ IF (MYID == 0) THEN
 !WRITE(77,*) '==================== 888 ===================='
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'U:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
 
@@ -689,8 +719,12 @@ IF (MYID == 0) THEN
 !WRITE(77,*) '==================== MAIN: BEFORE 1. PRESSURE_ITERATION ======================'
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       !CALL PRESSURE_ITERATION_SCHEME(ICYC, PREDICTOR, CORRECTOR)
@@ -705,12 +739,16 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'U:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       ! Predict the velocity components at the next time step
@@ -734,12 +772,16 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'U:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
@@ -775,8 +817,12 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
       
       IF (ANY(CHANGE_TIME_STEP_INDEX==-1)) THEN  ! If the time step was reduced, CYCLE CHANGE_TIME_STEP_LOOP
@@ -802,8 +848,14 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'W:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%W(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -822,20 +874,20 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
 
 IF (MYID == 0) THEN
-!WRITE(77,*) '==================== MAIN: AFTER MATCH_VELOCITY '
+!WRITE(77,*) '==================== MAIN ZZZ: AFTER MATCH_VELOCITY '
 !WRITE(77,*) 'H:'
 !WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'HS:'
-!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'FVX:'
-!WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    ! Apply tangential velocity boundary conditions
@@ -847,19 +899,11 @@ ENDIF
    ENDDO VELOCITY_BC_LOOP
 
 IF (MYID == 0) THEN
-!WRITE(77,*) '==================== MAIN: AFTER VELOCITY BC'
+!WRITE(77,*) '==================== MAIN ZZZ: AFTER VELOCITY BC'
 !WRITE(77,*) 'H:'
 !WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'HS:'
-!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'FVX:'
-!WRITE(77,'(6E18.10)')  (((FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
@@ -884,8 +928,18 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'FVX:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%FVX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'U:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'W:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%W(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) '========================================'
 ENDIF
    ! Finite differences for mass and momentum equations for the second half of the time step
@@ -912,8 +966,14 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'W:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%W(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'WS:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%WS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
@@ -922,9 +982,25 @@ ENDIF
    COMPUTE_DIVERGENCE_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_SKIP(NM)) CYCLE COMPUTE_DIVERGENCE_2
       CALL COMPUTE_VELOCITY_FLUX(T,DT,NM,2)
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DDD1 ===================='
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
       IF (AGGLOMERATION .AND. AGGLOMERATION_INDEX>0) CALL CALC_AGGLOMERATION(DT,NM)
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DDD2 ===================='
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
       IF (N_REACTIONS > 0) CALL COMBUSTION(T,DT,NM)
    ENDDO COMPUTE_DIVERGENCE_2
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DDD3 ===================='
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
    IF (HVAC_SOLVE) CALL HVAC_CALC(T,DT,.TRUE.)
 
@@ -938,6 +1014,12 @@ ENDIF
          IF (VEG_LEVEL_SET_COUPLED) CALL LEVEL_SET_FIRESPREAD(T,DT,1)
       ENDIF
    ENDDO COMPUTE_WALL_BC_2A
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== DDD2 ===================='
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
    DO ITER=1,RADIATION_ITERATIONS
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -964,6 +1046,8 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
@@ -974,6 +1058,22 @@ ENDIF
       CALL DIVERGENCE_PART_1(T,DT,NM)
    ENDDO
 
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== FFF2 ===================='
+!WRITE(77,*) 'H:'
+!WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'HS:'
+!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'U:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
+
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
 
    IF (RTE_SOURCE_CORRECTION) CALL CALCULATE_RTE_SOURCE_CORRECTION_FACTOR
@@ -981,6 +1081,22 @@ ENDIF
    ! Exchange global pressure zone information
 
    IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
+
+IF (MYID == 0) THEN
+!WRITE(77,*) '==================== FFF3 ===================='
+!WRITE(77,*) 'H:'
+!WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'HS:'
+!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'U:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'US:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'DDDT:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+ENDIF
 
    ! Finish computing the divergence
 
@@ -1001,6 +1117,8 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
       
@@ -1024,6 +1142,8 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'DDDT:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%DDDT(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    ! Set up the last big exchange of info.
@@ -1069,6 +1189,8 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
    ! Apply velocity boundary conditions, and update values of HRR, DEVC, etc.
@@ -1085,6 +1207,8 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 !WRITE(77,*) 'US:'
 !WRITE(77,'(6E18.10)')  (((MESHES(1)%US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) 'FVZ:'
+!WRITE(77,'(6E18.10)')  (((MESHES(1)%FVZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
    ! Check for dumping end of timestep outputs
 
@@ -1502,8 +1626,8 @@ PRESSURE_ITERATION_LOOP: DO
    TOTAL_PRESSURE_ITERATIONS = TOTAL_PRESSURE_ITERATIONS + 1
 
 IF (MYID==0) THEN
-!!WRITE(77,*) '    PRESSURE_ITERATIONS=',PRESSURE_ITERATIONS
-!!WRITE(77,*) '    TOTAL_PRESSURE_ITERATIONS=',TOTAL_PRESSURE_ITERATIONS
+!WRITE(77,*) '    PRESSURE_ITERATIONS=',PRESSURE_ITERATIONS
+!WRITE(77,*) '    TOTAL_PRESSURE_ITERATIONS=',TOTAL_PRESSURE_ITERATIONS
 ENDIF
 
 
@@ -1537,11 +1661,11 @@ ENDIF
    IF (PRES_METHOD == 'SCARC') CALL SCARC_SOLVER
 
 IF (MYID==0) THEN
-!!WRITE(77,*) '==================== PRESSURE_ITERATION2 ======================'
-!!WRITE(77,*) '------->C.1:H:'
-!!WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!!WRITE(77,*) '------->C.1:HS:'
-!!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '==================== PRESSURE_ITERATION2 ======================'
+!WRITE(77,*) '------->C.1:H:'
+!WRITE(77,'(6E18.10)')  (((H(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
+!WRITE(77,*) '------->C.1:HS:'
+!WRITE(77,'(6E18.10)')  (((HS(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 
@@ -1587,11 +1711,11 @@ ENDIF
 
    IF (MAXVAL(PRESSURE_ERROR_MAX)<PRESSURE_TOLERANCE) ITERATE_BAROCLINIC_TERM = .FALSE.
 IF (MYID==0) THEN
-!!WRITE(77,*) '------->F:  PRESSURE_TOLERANCE=',PRESSURE_TOLERANCE
-!!WRITE(77,*) '------->F:  VELOCITY_TOLERANCE=',VELOCITY_TOLERANCE
-!!WRITE(77,*) '------->F:  MAX_PRESSURE_ITERATIONS=',MAX_PRESSURE_ITERATIONS
-!!WRITE(77,*) '------->F:  MAXVAL(PRESSURE_ERROR_MAX)=',MAXVAL(PRESSURE_ERROR_MAX)
-!!WRITE(77,*) '------->F:  MAXVAL(VELOCITY_ERROR_MAX)=',MAXVAL(VELOCITY_ERROR_MAX)
+!WRITE(77,*) '------->F:  PRESSURE_TOLERANCE=',PRESSURE_TOLERANCE
+!WRITE(77,*) '------->F:  VELOCITY_TOLERANCE=',VELOCITY_TOLERANCE
+!WRITE(77,*) '------->F:  MAX_PRESSURE_ITERATIONS=',MAX_PRESSURE_ITERATIONS
+!WRITE(77,*) '------->F:  MAXVAL(PRESSURE_ERROR_MAX)=',MAXVAL(PRESSURE_ERROR_MAX)
+!WRITE(77,*) '------->F:  MAXVAL(VELOCITY_ERROR_MAX)=',MAXVAL(VELOCITY_ERROR_MAX)
 ENDIF
 
    IF ((MAXVAL(PRESSURE_ERROR_MAX)<PRESSURE_TOLERANCE .AND. &
@@ -2320,7 +2444,7 @@ SUBROUTINE MESH_EXCHANGE(CODE)
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_STORAGE_SLOTS,N_NEW_STORAGE_SLOTS
-INTEGER :: NN1,NN2,IPC,CNT,IBC,STORAGE_INDEX_SAVE,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC
+INTEGER :: NN1,NN2,IPC,CNT,IBC,STORAGE_INDEX_SAVE,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC, III, JJJ, KKK
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
@@ -2943,6 +3067,10 @@ SNODE = PROCESS(NOM)
                ENDDO
             ENDDO
          ENDDO
+!WRITE(77,*) 'AAA: AFTER MESH_EXCHANGE(3): WS'
+DO KKK=KMAX,KMIN,-1
+!WRITE(77,'(4E20.10)') (M2%WS(III,1,KKK), III=IMIN,IMAX)
+ENDDO
       ENDIF
 
       ! Unpack density and species mass fractions following CORRECTOR update

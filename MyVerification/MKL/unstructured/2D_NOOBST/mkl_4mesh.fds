@@ -18,10 +18,11 @@
 &TIME T_END=0.5, DT=0.002 /
 
 &PRES SCARC_METHOD         = 'MKL'
-      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
+      SCARC_DISCRETIZATION = 'UNSTRUCTURED'
       SCARC_MKL            = 'GLOBAL'
       SCARC_MKL_MTYPE      = 'SYMMETRIC'
-      SCARC_DEBUG          = 'MUCH'   /
+      SCARC_DEBUG          = 'NONE'        /
+
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

@@ -1,6 +1,6 @@
 &HEAD CHID='cg_ssor_1mesh',TITLE='Simple 2D-Test Case as FFT reference case on 1 mesh' /
 
-&MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=32,1,32, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
 &MISC DNS=.TRUE.,
       NOISE=.FALSE.,
@@ -16,7 +16,7 @@
 
 &PRES SCARC_METHOD             = 'KRYLOV'
       SCARC_DISCRETIZATION     = 'STRUCTURED'
-      SCARC_DEBUG              = 'MUCH'
+      SCARC_DEBUG              = 'NONE'
       SCARC_KRYLOV             = 'CG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
       SCARC_PRECON             = 'SSOR'    /

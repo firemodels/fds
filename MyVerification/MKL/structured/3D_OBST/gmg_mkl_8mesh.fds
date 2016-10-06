@@ -1,6 +1,6 @@
 &HEAD CHID='gmg_mkl_8mesh', TITLE='Simple Test Case' /
 
-&MESH IJK=4,4,4, XB=0.0,0.40,0.0,0.40,0.0,0.40, MULT_ID='mesh' /
+&MESH IJK=8,8,8, XB=0.0,0.40,0.0,0.40,0.0,0.40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.40, DY=0.40, DZ=0.40, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &MISC DNS=.TRUE.,
@@ -45,9 +45,8 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&OBST XB=0.6,0.8,0.3,0.5,0.3,0.5 /
-&OBST XB=0.3,0.5,0.6,0.8,0.3,0.5 /
-&OBST XB=0.3,0.5,0.3,0.5,0.6,0.8 /
+&OBST XB=0.6,0.8,0.6,0.8,0.6,0.8 /
+&OBST XB=0.2,0.4,0.2,0.4,0.2,0.4 /
 
 /&SLCF PBX=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
 /&SLCF PBX=0.4,QUANTITY='H' /

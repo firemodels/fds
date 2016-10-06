@@ -329,23 +329,24 @@ END SELECT
 ! In case of ScaRC-method leave routine
 
 !PRHS(1:4,1:4,1:4) = 1.0_EB
-IF (MYID == 0) THEN
-!WRITE(77,*) '================== PRES ====================='
-!WRITE(77,*) 'PRHS:'
-!WRITE(77,'(4E18.10)')  (((PRHS(II,JJ,KK),II=1,4),JJ=1,4),KK=4,1,-1)
-!WRITE(77,*) 'BXS:'
-!WRITE(77,'(4E18.10)')  ((BXS(II,JJ),II=1,4),JJ=1,4)
-!WRITE(77,*) 'BXF:'
-!WRITE(77,'(4E18.10)')  ((BXF(II,JJ),II=1,4),JJ=1,4)
-!WRITE(77,*) 'BYS:'
-!WRITE(77,'(4E18.10)')  ((BYS(II,JJ),II=1,4),JJ=1,4)
-!WRITE(77,*) 'BYF:'
-!WRITE(77,'(4E18.10)')  ((BYF(II,JJ),II=1,4),JJ=1,4)
-!WRITE(77,*) 'BZS:'
-!WRITE(77,'(4E18.10)')  ((BZS(II,JJ),II=1,4),JJ=1,4)
-!WRITE(77,*) 'BZF:'
-!WRITE(77,'(4E18.10)')  ((BZF(II,JJ),II=1,4),JJ=1,4)
-ENDIF
+!IF (MYID == 0) THEN
+!!WRITE(77,*) '================== PRES ====================='
+!!WRITE(77,*) 'PRHS:'
+!!WRITE(77,'(4E18.10)')  (((PRHS(II,JJ,KK),II=1,4),JJ=1,1),KK=4,1,-1)
+!!WRITE(77,*) 'BXS:'
+!!WRITE(77,'(4E18.10)')  ((BXS(II,JJ),II=1,4),JJ=1,1)
+!!WRITE(77,*) 'BXF:'
+!!WRITE(77,'(4E18.10)')  ((BXF(II,JJ),II=1,4),JJ=1,1)
+!!WRITE(77,*) 'BYS:'
+!!WRITE(77,'(4E18.10)')  ((BYS(II,JJ),II=1,4),JJ=1,1)
+!!WRITE(77,*) 'BYF:'
+!!WRITE(77,'(4E18.10)')  ((BYF(II,JJ),II=1,4),JJ=1,1)
+!!WRITE(77,*) 'BZS:'
+!!WRITE(77,'(4E18.10)')  ((BZS(II,JJ),II=1,4),JJ=1,1)
+!!WRITE(77,*) 'BZF:'
+!!WRITE(77,'(4E18.10)')  ((BZF(II,JJ),II=1,4),JJ=1,1)
+!ENDIF
+
 IF (PRES_METHOD == 'SCARC') RETURN
 
 ! Call the Poisson solver
