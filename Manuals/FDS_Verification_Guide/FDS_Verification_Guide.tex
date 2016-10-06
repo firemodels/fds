@@ -153,6 +153,7 @@ The following individuals contributed to the verification process of FDS.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
+\item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
 \end{itemize}
 
 
@@ -3412,13 +3413,18 @@ The main purpose of this verification case is to check the accuracy of the conti
 \section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
 \label{ht3d_ibeam}
 
+The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 5 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
+
+Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temperature contours from ANSYS (left) and FDS (right).  Below that, in Fig.~\ref{fig:ht3d_ibeam_time_history}, we show the time history of the surface temperatures for six locations on the bottom flange (positions may be identified from the image on the left).
+
 \begin{figure}[ht]
 \centering
+\vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
 \includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
 \end{tabular*}
-\caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
+\caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left, courtesy Chao Zhang) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
 \label{fig:ht3d_ibeam_contours}
 \end{figure}
 
