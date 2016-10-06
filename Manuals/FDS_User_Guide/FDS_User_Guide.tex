@@ -2741,7 +2741,7 @@ The conduction model described in the previous sections does not account for lat
 
 {\ct HT3D} solves the 3D heat equation within an {\ct {OBST}} region of the domain.  You may connect multiple {\ct {OBST}} regions.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer much be at least one cell thick.  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements. {\ct HT3D} is not currently hooked up to the pyrolysis model.
 
-The method is invoked by adding {\ct {HT3D=T}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} should also have {\ct {HT3D=T}}.  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the {\ct VN} time step restriction based on the thermal diffusivity of the solid (this is problem dependent, see Sec.~\ref{info:CFL}).  Below is an example input file:
+The method is invoked by adding {\ct {HT3D=T}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} should also have {\ct {HT3D=T}}.  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the {\ct VN} time step restriction based on the thermal diffusivity of the solid (this is problem dependent, see Sec.~\ref{info:CFL}).  Below is an example input file section:
 
 \begin{lstlisting}
 &MATL ID='steel', .../
@@ -9117,6 +9117,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct DEVC\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct EVACUATION}          & Logical             & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.} \\ \hline
+{\ct HT3D}                & Logical             & Section~\ref{info:ht3d}                   &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                 & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct MESH\_ID}            & Character           & Reference~\cite{FDS_Evac_Users_Guide}     &           &               \\ \hline
 {\ct MULT\_ID }           & Character           & Section~\ref{info:MULT}                   &           &               \\ \hline
@@ -9588,6 +9589,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
+{\ct HT3D}                            & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
