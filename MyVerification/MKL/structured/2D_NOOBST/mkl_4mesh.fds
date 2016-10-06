@@ -21,7 +21,7 @@
       SCARC_DISCRETIZATION     = 'STRUCTURED'
       SCARC_MKL            = 'GLOBAL'
       SCARC_MKL_MTYPE      = 'SYMMETRIC'
-      SCARC_DEBUG          = 'MUCH'   /
+      SCARC_DEBUG          = 'NONE'   /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

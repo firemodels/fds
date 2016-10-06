@@ -1,6 +1,6 @@
 &HEAD CHID='gmg_ssor_1mesh',TITLE='Simple 2D-Test Case as FFT reference case on 1 mesh' /
 
-&MESH IJK=8,1,8, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=32,1,32, XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
 
 &MISC DNS=.TRUE.,
       NOISE=.FALSE.,
@@ -19,7 +19,7 @@
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /
 
 &PRES SCARC_METHOD               = 'MULTIGRID'
-      SCARC_DISCRETIZATION     = 'STRUCTURED'
+      SCARC_DISCRETIZATION       = 'STRUCTURED'
       SCARC_MULTIGRID            = 'GEOMETRIC'
       SCARC_MULTIGRID_ACCURACY   =  1E-8
       SCARC_MULTIGRID_CYCLE      =  'V'
@@ -27,7 +27,7 @@
       SCARC_COARSE               = 'ITERATIVE'
       SCARC_SMOOTH               = 'SSOR'
       SCARC_SMOOTH_ITERATIONS    =   3     
-      SCARC_DEBUG                = 'MUCH' 
+      SCARC_DEBUG                = 'NONE' 
       VELOCITY_TOLERANCE         = 1E-6
       MAX_PRESSURE_ITERATIONS    =  100 /
 
@@ -37,8 +37,8 @@
 &VENT MB='XMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&OBST XB=0.3,0.5,-0.01,0.01,0.6,0.8 /
-&OBST XB=0.6,0.8,-0.01,0.01,0.3,0.5 /
+&OBST XB=0.2,0.4,-0.01,0.01,0.2,0.4 /
+&OBST XB=0.6,0.8,-0.01,0.01,0.6,0.8 /
 
 /&SLCF PBY=0.0,QUANTITY='VELOCITY',VECTOR=.TRUE. /
 /&SLCF PBY=0.0,QUANTITY='PRESSURE' /

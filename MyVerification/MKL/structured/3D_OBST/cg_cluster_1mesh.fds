@@ -1,6 +1,6 @@
 &HEAD CHID='cg_cluster_1mesh', TITLE='Simple Test Case' /
 
-&MESH IJK=8,8,8, XB=0.0,0.8,0.0,0.8,0.0,0.8 /
+&MESH IJK=16,16,16, XB=0.0,0.8,0.0,0.8,0.0,0.8 /
 
 &MISC DNS=.TRUE.,
       NOISE=.FALSE.,
@@ -40,9 +40,8 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&OBST XB=0.6,0.8,0.3,0.5,0.3,0.5 /
-&OBST XB=0.3,0.5,0.6,0.8,0.3,0.5 /
-&OBST XB=0.3,0.5,0.3,0.5,0.6,0.8 /
+&OBST XB=0.6,0.8,0.6,0.8,0.6,0.8 /
+&OBST XB=0.2,0.4,0.2,0.4,0.2,0.4 /
 
 /&SLCF PBX=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
 /&SLCF PBX=0.4,QUANTITY='H' /

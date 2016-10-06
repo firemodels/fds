@@ -1,6 +1,6 @@
 &HEAD CHID='gmg_mkl_1mesh', TITLE='Simple Test Case' /
 
-&MESH IJK=8,8,8, XB=0.0,0.8,0.0,0.8,0.0,0.8 /
+&MESH IJK=16,16,16, XB=0.0,0.8,0.0,0.8,0.0,0.8 /
 
 &MISC DNS=.TRUE.,
       NOISE=.FALSE.,

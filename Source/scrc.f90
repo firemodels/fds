@@ -604,7 +604,8 @@ INTEGER :: CGSC, UNKH                   !> CCVAR-structure (for neighbors)
 !>
 !> Cell and coordinate numberings
 !>
-INTEGER:: ICW, ICW2                     !> internal wall cell for IW
+INTEGER:: ICW  = IS_UNDEFINED           !> internal wall cell for IW
+INTEGER:: ICW2 = IS_UNDEFINED           !> internal wall cell for IW
 INTEGER:: ICO, ICO2                     !> overlapping cell for IW
 INTEGER:: IXG, IYG, IZG                 !> x-, y- and z-indices of ghost cells
 INTEGER:: IXW, IYW, IZW                 !> x-, y- and z-indices of (internal) wall cells
@@ -650,6 +651,8 @@ INTEGER :: NPOINTS              !> number of points in matrix stencil
 INTEGER :: NOFFSET_MESH         !> offset for global mesh numbering
 INTEGER :: N_EXTERNAL_WALL_CELLS
 INTEGER :: N_INTERNAL_WALL_CELLS
+INTEGER :: N_WALL_CELLS
+INTEGER :: N_OBST
 !>
 !> Different pointers
 !>
@@ -742,6 +745,7 @@ INTEGER,  POINTER, DIMENSION (:,:):: P_PTR            !> pointer vector for AMG-
 !>
 TYPE (SCARC_WALL_TYPE), POINTER, DIMENSION(:) :: WALL !! description of single wall cells
 TYPE (SCARC_FACE_TYPE), POINTER, DIMENSION(:) :: FACE !! description of single faces
+TYPE (SCARC_OBST_TYPE), POINTER, DIMENSION(:) :: OBST !! description of single obstructions
 !>
 END TYPE SCARC_LEVEL_TYPE
 
@@ -755,6 +759,14 @@ INTEGER :: ITE, NIT                         !> local references to iteration cou
 REAL(EB) :: EPS, RES, RESIN, OMEGA          !> local references to solver parameters
 CHARACTER(30) :: CROUTINE = 'null'
 END TYPE SCARC_SCOPE_TYPE
+
+
+!> --------------------------------------------------------------------------------------------
+!> Administration of obstructions for coarser grid levels 
+!> --------------------------------------------------------------------------------------------
+TYPE SCARC_OBST_TYPE
+INTEGER :: I1, I2, J1, J2, K1, K2
+END TYPE SCARC_OBST_TYPE
 
 
 !> --------------------------------------------------------------------------------------------
@@ -1389,8 +1401,8 @@ END SUBROUTINE SCARC_SETUP_TYPES
 !> Setup geometry information for mesh NM
 !> ----------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MESHES
-INTEGER  :: IERR, NL, NM, IX, IY, IZ
-INTEGER  :: NX0, NY0, NZ0, NE0, NI0
+INTEGER  :: IERR, NL, NM, IX, IY, IZ, IO
+INTEGER  :: NX0, NY0, NZ0
 TYPE (MESH_TYPE)       , POINTER :: M
 TYPE (SCARC_TYPE)      , POINTER :: S
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
@@ -1425,9 +1437,6 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
    NY0 = M%JBAR
    NZ0 = M%KBAR
 
-   NE0 = M%N_EXTERNAL_WALL_CELLS
-   NI0 = M%N_INTERNAL_WALL_CELLS
-
    IF (N_MPI_PROCESSES>1) THEN
 
       CALL MPI_ALLREDUCE(S%XS,S%XS_MIN, 1,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERR)
@@ -1461,10 +1470,30 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
 
       SL%NC = SL%NX * SL%NY * SL%NZ
 
-      SL%N_EXTERNAL_WALL_CELLS = NE0
-      SL%N_INTERNAL_WALL_CELLS = NI0
+      SL%N_EXTERNAL_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS
+      SL%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS
+      SL%NW = SL%N_EXTERNAL_WALL_CELLS + SL%N_INTERNAL_WALL_CELLS 
 
-      SL%NW = NE0 + NI0
+      IF (NL == NLEVEL_MIN) THEN
+         SL%N_OBST = M%N_OBST
+         ALLOCATE(SL%OBST(SL%N_OBST), STAT=IERR)
+         CALL ChkMemErr('SCARC_SETUP_MESHES','OBST',IERR)
+         DO IO = 1, SL%N_OBST
+            SL%OBST(IO)%I1  = M%OBSTRUCTION(IO)%I1+1
+            SL%OBST(IO)%I2  = M%OBSTRUCTION(IO)%I2
+            SL%OBST(IO)%J1  = M%OBSTRUCTION(IO)%J1+1
+            SL%OBST(IO)%J2  = M%OBSTRUCTION(IO)%J2
+            SL%OBST(IO)%K1  = M%OBSTRUCTION(IO)%K1+1
+            SL%OBST(IO)%K2  = M%OBSTRUCTION(IO)%K2
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+            WRITE(LU_SCARC,*) 'SHOWING OBSTRUCTIONS'
+            WRITE(LU_SCARC,*) IO, &
+                              M%OBSTRUCTION(IO)%I1, M%OBSTRUCTION(IO)%I2, &
+                              M%OBSTRUCTION(IO)%J1, M%OBSTRUCTION(IO)%J2, &
+                              M%OBSTRUCTION(IO)%K1, M%OBSTRUCTION(IO)%K2
+         ENDIF
+         ENDDO
+      ENDIF
 
       !> step widths in x-, y- and z-direction for level 'NL'
       SL%DX = (S%XF-S%XS)/REAL(SL%NX,EB)
@@ -1487,9 +1516,6 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
       NX0=NX0/2
       IF (TYPE_DIMENSION == NSCARC_DIMENSION_THREE) NY0=NY0/2
       NZ0=NZ0/2
-
-      NE0 = NE0/2
-      NI0 = NI0/2
 
       !> Allocate vectors for coordinate information
       IF (NL == NLEVEL_MIN) THEN
@@ -1674,9 +1700,6 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'ALLOCATING WALL IN LENGTH
 
          SLC => S%LEVEL(NL)
 
-         ALLOCATE(SLC%WALL(SLC%NW), STAT=IERR)
-         CALL ChkMemErr('SCARC_SETUP_INTERFACES','WALL',IERR)
-
          ALLOCATE(SLC%FACE(-3:3), STAT=IERR)
          CALL ChkMemErr('SCARC_SETUP_INTERFACES','WALL',IERR)
       ENDDO
@@ -1770,13 +1793,17 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
             END SELECT
             OSLC%NZ = OSLF%NZ/2
 
-            OSLC%N_EXTERNAL_WALL_CELLS = OSLF%N_EXTERNAL_WALL_CELLS/2
-            OSLC%N_INTERNAL_WALL_CELLS = OSLF%N_INTERNAL_WALL_CELLS/2
+            OSLC%N_EXTERNAL_WALL_CELLS = 2*OSLC%NX * 2*OSLC%NZ + &
+                                         2*OSLC%NX * 2*OSLC%NY + &
+                                         2*OSLC%NY * 2*OSLC%NZ 
 
             OSLC%NC  = OSLC%NX * OSLC%NY * OSLC%NZ
-            OSLC%NW  = OSLC%N_EXTERNAL_WALL_CELLS + OSLC%N_INTERNAL_WALL_CELLS
+            OSLC%NW  = OSLC%N_EXTERNAL_WALL_CELLS 
             OSLC%NA  = 0
             OSLC%NCG = 0
+
+            !OSLC%N_INTERNAL_WALL_CELLS = OSLF%N_INTERNAL_WALL_CELLS/2              ! FALSCH !!!
+            !OSLC%NW  = OSLC%N_EXTERNAL_WALL_CELLS + OSLC%N_INTERNAL_WALL_CELLS     ! GEBRAUCHT ??
 
          ENDDO
       ENDIF
@@ -1919,6 +1946,20 @@ IF (N_MPI_PROCESSES > 1) THEN
    ENDDO
 ENDIF
 
+
+!>
+!> Correct boundary types for cells adjacent to obstructions on ghost cells
+!>
+DO NM = 1, NMESHES
+   IF (PROCESS(NM) /= MYID) CYCLE
+   CALL SCARC_CORRECT_GHOSTCELL_TYPES(NM, NLEVEL_MIN)
+   IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
+      DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+         CALL SCARC_CORRECT_GHOSTCELL_TYPES(NM, NL)
+      ENDDO
+   ENDIF
+ENDDO
+
 !>
 !> ONLY TEMPORARILY: Debug CCVAR-info
 !>
@@ -1983,13 +2024,13 @@ END FUNCTION SCARC_CELL_INDEX
 SUBROUTINE SCARC_SETUP_DECOMPOSITION
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 INTEGER :: NM, NL
-INTEGER :: IWC, IREFINE, IERR, IFACE
+INTEGER :: IREFINE, IERR, IFACE
 INTEGER :: INBR_FACE, INBR_MESH
-INTEGER :: IWG, IWL
+INTEGER :: IWG, IWL, IWC
 INTEGER :: III, JJJ, KKK
 INTEGER :: NOM_LAST , NOM
 INTEGER :: NCPL_LAST, NCPL
-INTEGER :: IOR0_LAST, IOR0
+INTEGER :: IOR_LAST, IOR0
 INTEGER :: MLATEX
 INTEGER :: FACE_NEIGHBORS(NSCARC_MAX_FACE_NEIGHBORS, -3:3)
 INTEGER :: MESH_NEIGHBORS(NSCARC_MAX_MESH_NEIGHBORS)
@@ -2024,11 +2065,21 @@ MESHES_LOOP1: DO NM = 1, NMESHES
    !! Determine array WALL and PRESSURE_BC_INDEX on finest level SLF
    SLF => S%LEVEL(NLEVEL_MIN)
 
+   SLF%NCE = SLF%NCS
+   SLF%NCO = SLF%NCS
+
+   SLF%N_EXTERNAL_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS
+   SLF%N_INTERNAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS
+
+   SLF%NLAYER = 1
+
    IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
       WRITE(LU_SCARC,*) '========== DECOMPOSITION: PROCESSING LEVEL ',NLEVEL_MIN
-      WRITE(LU_SCARC,*) 'NCS:',SLF%NCS
-      WRITE(LU_SCARC,*) 'NCE:',SLF%NCE
-      WRITE(LU_SCARC,*) 'NCO:',SLF%NCO
+      WRITE(LU_SCARC,*) 'SLF%NCS:',SLF%NCS
+      WRITE(LU_SCARC,*) 'SLF%NCE:',SLF%NCE
+      WRITE(LU_SCARC,*) 'SLF%NLAYER:',SLF%NLAYER
+      WRITE(LU_SCARC,*) 'SLF%N_EXTERNAL_WALL_CELLS:',SLF%N_EXTERNAL_WALL_CELLS
+      WRITE(LU_SCARC,*) 'SLF%N_INTERNAL_WALL_CELLS:',SLF%N_INTERNAL_WALL_CELLS
       WRITE(LU_SCARC,*) 'CELL_INDEX:'
       DO KKK=SLF%NZ+1,0,-1
          WRITE(LU_SCARC,'(6i6)') ((CELL_INDEX(III,JJJ,KKK),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
@@ -2037,14 +2088,8 @@ MESHES_LOOP1: DO NM = 1, NMESHES
       DO KKK=SLF%NZ+1,0,-1
          WRITE(LU_SCARC,'(6i6)') ((SOLID(CELL_INDEX(III,JJJ,KKK)),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
       ENDDO
-      WRITE(LU_SCARC,*) 'EXTERNAL_WALLCELLS%NOM:'
-      WRITE(LU_SCARC,'(6i6)') (M%EXTERNAL_WALL(IWG)%NOM, IWG=1,M%N_EXTERNAL_WALL_CELLS)
    ENDIF
 
-
-   SLF%NCE = SLF%NCS
-   SLF%NCO = SLF%NCS
-   SLF%NLAYER = 1
 
    !> -----------------------------------------------------------------------
    !> Determine basic data for single faces (orientation, dimensions)
@@ -2108,23 +2153,27 @@ MESHES_LOOP1: DO NM = 1, NMESHES
    !> store basic data and determine number of adajacent neighbors to each
    !> face with corresponding number of IW's
    !> -----------------------------------------------------------------------
-   IOR0_LAST =  0
+   IOR_LAST =  0
    NOM_LAST  = -1
    NCPL_LAST = -1
    IWL = 0
    BFOUND_NOM = .FALSE.
 
-   IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+   IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
       WRITE(LU_SCARC,*) 'M%N_EXTERNAL_WALL_CELLS=',M%N_EXTERNAL_WALL_CELLS
       WRITE(LU_SCARC,*) 'M%N_INTERNAL_WALL_CELLS=',M%N_INTERNAL_WALL_CELLS
       DO IWG = 1, SLF%N_EXTERNAL_WALL_CELLS
-         WRITE(LU_SCARC,*) 'M%EXTERNAL_WALL(',IWG,')=',M%WALL(IWG)%ONE_D%IOR
+         WRITE(LU_SCARC,*) 'M%WALL(',IWG,')%ONE_D%IOR=',M%WALL(IWG)%ONE_D%IOR
+      ENDDO
+      DO IWG = 1, SLF%N_EXTERNAL_WALL_CELLS
+         WRITE(LU_SCARC,*) 'M%EXTERNAL_WALL(',IWG,')%NOM=',M%EXTERNAL_WALL(IWG)%NOM
       ENDDO
       DO IWG = SLF%N_EXTERNAL_WALL_CELLS+1, SLF%N_EXTERNAL_WALL_CELLS+SLF%N_INTERNAL_WALL_CELLS
          WRITE(LU_SCARC,*) 'M%INTERNAL_WALL(',IWG,')=',M%WALL(IWG)%ONE_D%IOR
       ENDDO
    ENDIF
 
+   !> First process external wall cells
    EXTERNAL_WALLCELLS_LOOP1: DO IWG = 1, SLF%N_EXTERNAL_WALL_CELLS
 
       !> Determine and store neighbors, orientation and number of couplings for a single wall cell
@@ -2160,7 +2209,7 @@ MESHES_LOOP1: DO NM = 1, NMESHES
             OSLF%NCG = NCPL                                 !> initialize counter for local ghost cells
             SLF%NCPL_MAX  = MAX(SLF%NCPL_MAX, NCPL)         !> get max NCPL ever used on this mesh
 
-            IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+            IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
                WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
                      ' A: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
                      ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
@@ -2170,7 +2219,7 @@ MESHES_LOOP1: DO NM = 1, NMESHES
             OSLF%NWL = OSLF%NWL + 1                         !> increase own counter for local wall cells
             OSLF%NCG = OSLF%NCG + NCPL                      !> increase counter for local ghost cells
 
-            IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+            IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
                WRITE(LU_SCARC,'(11(a,i6))') & 'NM=',MYID+1,&
                      ' B: IWG=',IWG,': NOM=',NOM,': OSLF%NWL=', OSLF%NWL, ': SLF%NCO=', SLF%NCO, &
                      ': SLF%NCE=',SLF%NCE,': IWL=',IWL, ': IOR0=',IOR0,': NCPL=',OSLF%NCPL
@@ -2189,14 +2238,15 @@ MESHES_LOOP1: DO NM = 1, NMESHES
 
       ENDIF
 
-      IOR0_LAST = IOR0                                                    !> save former values
+      IOR_LAST  = IOR0                                                    !> save former values
       NCPL_LAST = NCPL
       NOM_LAST  = NOM
 
    ENDDO EXTERNAL_WALLCELLS_LOOP1
+ 
 
-   INTERNAL_WALLCELLS_LOOP1: DO IWG = SLF%N_EXTERNAL_WALL_CELLS + 1, SLF%N_EXTERNAL_WALL_CELLS + SLF%N_INTERNAL_WALL_CELLS
-      
+   !> Then process internal wall cells
+   INTERNAL_WALLCELLS_LOOP1: DO IWG = SLF%N_EXTERNAL_WALL_CELLS+1, SLF%N_EXTERNAL_WALL_CELLS+SLF%N_INTERNAL_WALL_CELLS
 
       SLF%WALL(IWG)%IOR  = M%WALL(IWG)%ONE_D%IOR
       SLF%WALL(IWG)%NOM  = 0
@@ -2212,6 +2262,7 @@ MESHES_LOOP1: DO NM = 1, NMESHES
       SLF%WALL(IWG)%IZW =  M%WALL(IWG)%ONE_D%KKG
 
    ENDDO INTERNAL_WALLCELLS_LOOP1
+
 
    !> allocate array which stores numbers of all neighboring meshes
    IF (NUM_MESH_NEIGHBORS /= 0) THEN
@@ -2230,7 +2281,6 @@ MESHES_LOOP1: DO NM = 1, NMESHES
 
    INBR_MESH = 1
    NEIGHBORS_OF_FACE_LOOP: DO IOR0 = -3, 3
-
       IF (IOR0 == 0) CYCLE NEIGHBORS_OF_FACE_LOOP
 
       !> if there are neighbors at face IOR0 store information about them
@@ -2258,21 +2308,18 @@ MESHES_LOOP1: DO NM = 1, NMESHES
             CALL SCARC_SETUP_OMAPPINGS(NM, NOM, NLEVEL_MIN)
 
          ENDDO
-
       ENDIF
-
    ENDDO NEIGHBORS_OF_FACE_LOOP
 
 
-   !> -----------------------------------------------------------------------
-   !> Second loop over global IW's:
-   !> store detailed coordinate and cell data
-   !> and determine kind of boundary condition
-   !> -----------------------------------------------------------------------
+   !> --------------------------------------------------------------------------
+   !> Second loop over external wall cells:
+   !> store detailed coordinate and cell data and get type of boundary condition
+   !> --------------------------------------------------------------------------
    SLF%ICE_MARKER = SLF%NCS
    SLF%ICO_MARKER = SLF%NCS
 
-   IOR0_LAST = 0
+   IOR_LAST = 0
    WALLCELLS_LOOP2: DO IWG = 1, SLF%N_EXTERNAL_WALL_CELLS
 
       !> Determine neighbors and orientation again
@@ -2310,7 +2357,7 @@ MESHES_LOOP1: DO NM = 1, NMESHES
       ENDIF
 
       NOM_LAST  = NOM
-      IOR0_LAST = IOR0
+      IOR_LAST = IOR0
 
    ENDDO WALLCELLS_LOOP2
 
@@ -2336,18 +2383,8 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
       M   => MESHES(NM)
       SLF => SCARC(NM)%LEVEL(NLEVEL_MIN)
       WRITE(LU_SCARC,*) 'M%N_OBST=',M%N_OBST
-      WRITE(LU_SCARC,*) 'M%OBST_INDEX_C(IC)'
-      DO IWG = 1, SLF%NCS
-         WRITE(LU_SCARC,*) M%OBST_INDEX_C(IWG)
-      ENDDO
-      WRITE(LU_SCARC,*) 'M%HT3D'
-      DO IWG = 1, M%N_OBST
-         WRITE(LU_SCARC,*) M%OBSTRUCTION(IWG)%HT3D
-      ENDDO
-      WRITE(LU_SCARC,*) 'M%REMOVABLE'
-      DO IWG = 1, M%N_OBST
-         WRITE(LU_SCARC,*) M%OBSTRUCTION(IWG)%REMOVABLE
-      ENDDO
+      !WRITE(LU_SCARC,*) 'M%OBST_INDEX_C(IC)'
+      !WRITE(LU_SCARC,*) (M%OBST_INDEX_C(IWG),IWG=1,SLF%NW)
       WRITE(LU_SCARC,*) 'M%OBST ... I1, I2, J1, J2, K1, K2'
       DO IWG = 1, M%N_OBST
          WRITE(LU_SCARC,'(6i6)') M%OBSTRUCTION(IWG)%I1,M%OBSTRUCTION(IWG)%I2,&
@@ -2356,10 +2393,31 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
       ENDDO
       WRITE(LU_SCARC,*) 'M%N_OBST=',M%N_OBST
       WRITE(LU_SCARC,*) 'M%N_WALL_CELLS=',M%N_WALL_CELLS
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX:'
-      DO IWG = 1, SLF%NCS
-         WRITE(LU_SCARC,'(6i4)') M%WALL_INDEX(IWG,-3),M%WALL_INDEX(IWG,-2),M%WALL_INDEX(IWG,-1),&
-                                 M%WALL_INDEX(IWG, 1),M%WALL_INDEX(IWG, 2),M%WALL_INDEX(IWG, 3)
+      WRITE(LU_SCARC,*) 'M%WALLX(.)%BOUNDARY_TYPE:'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL(IWG)%BOUNDARY_TYPE, IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-3):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-3), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-2):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-2), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-1):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-1), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,1):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,1), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,2):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,2), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,3):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,3), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,3):'
+      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,3), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL(.)%ONE_D% IOR,II,JJ,KK:'
+      DO IWG = 1, SLF%NW
+         WRITE(LU_SCARC,'(5I6)') &
+            IWG,M%WALL(IWG)%ONE_D%IOR,M%WALL(IWG)%ONE_D%II,M%WALL(IWG)%ONE_D%JJ,M%WALL(IWG)%ONE_D%KK
+      ENDDO
+      WRITE(LU_SCARC,*) 'M%WALL(.)%ONE_D% IOR,IIG,JJG,KKG:'
+      DO IWG = 1, SLF%NW
+         WRITE(LU_SCARC,'(5I6)') &
+            IWG,M%WALL(IWG)%ONE_D%IOR,M%WALL(IWG)%ONE_D%IIG,M%WALL(IWG)%ONE_D%JJG,M%WALL(IWG)%ONE_D%KKG
       ENDDO
       WRITE(LU_SCARC,*) 'CCVAR(..., CGSC):'
       DO KKK=SLF%NZ+1,0,-1
@@ -2390,25 +2448,6 @@ LEVEL_GMG_IF: IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
       IREFINE=1
       LEVEL_GMG_LEVEL_LOOP: DO NL = NLEVEL_MIN+1, NLEVEL_MAX
 
-   IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
-      WRITE(LU_SCARC,*) '========== DECOMPOSITION: PROCESSING LEVEL ',NL
-      WRITE(LU_SCARC,*) 'NCS:',SLF%NCS
-      WRITE(LU_SCARC,*) 'NCE:',SLF%NCE
-      WRITE(LU_SCARC,*) 'NCO:',SLF%NCO
-      WRITE(LU_SCARC,*) 'CELL_INDEX:'
-      DO KKK=SLF%NZ+1,0,-1
-         WRITE(LU_SCARC,'(6i6)') ((CELL_INDEX(III,JJJ,KKK),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
-      ENDDO
-      WRITE(LU_SCARC,*) 'SOLID:'
-      DO KKK=SLF%NZ+1,0,-1
-         WRITE(LU_SCARC,'(6i6)') ((SOLID(CELL_INDEX(III,JJJ,KKK)),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
-      ENDDO
-      WRITE(LU_SCARC,*) 'EXTERNAL_WALLCELLS%NOM:'
-      WRITE(LU_SCARC,'(6i6)') (M%EXTERNAL_WALL(IWG)%NOM, IWG=1,M%N_EXTERNAL_WALL_CELLS)
-   ENDIF
-
-
-
          !> point to SCARC grid structures on coarser and finer level
          SLF => S%LEVEL(NL-1)
          SLC => S%LEVEL(NL)
@@ -2424,13 +2463,42 @@ LEVEL_GMG_IF: IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
          SLC%ICE_MARKER = SLC%NCS
          SLC%ICO_MARKER = SLC%NCS
 
-         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
-            WRITE(LU_SCARC,*) 'SLC%NCS=',SLC%NCS
-            WRITE(LU_SCARC,*) 'SLC%NCE=',SLC%NCE
-            WRITE(LU_SCARC,*) 'SLC%NCO=',SLC%NCO
-            WRITE(LU_SCARC,*) 'SLC%N_EXTERNAL_WALL_CELLS=',SLC%N_EXTERNAL_WALL_CELLS
-            WRITE(LU_SCARC,*) 'SLC%N_INTERNAL_WALL_CELLS=',SLC%N_INTERNAL_WALL_CELLS
-         ENDIF
+         SLC%N_EXTERNAL_WALL_CELLS = 2*SLC%NX*SLC%NY + 2*SLC%NX*SLC%NZ + 2*SLC%NY*SLC%NZ
+         SLC%N_INTERNAL_WALL_CELLS = SCARC_INTERNAL_WALL_CELLS(NM, NL)
+
+         SLC%NW = SLC%N_EXTERNAL_WALL_CELLS + SLC%N_INTERNAL_WALL_CELLS
+
+   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+      WRITE(LU_SCARC,*) '========== DECOMPOSITION: PROCESSING LEVEL ',NL
+      WRITE(LU_SCARC,*) 'SLC%NX :',SLC%NX 
+      WRITE(LU_SCARC,*) 'SLC%NY :',SLC%NY
+      WRITE(LU_SCARC,*) 'SLC%NZ :',SLC%NZ
+      WRITE(LU_SCARC,*) 'SLC%NCS:',SLC%NCS
+      WRITE(LU_SCARC,*) 'SLC%NCE:',SLC%NCE
+      WRITE(LU_SCARC,*) 'SLC%NCO:',SLC%NCO
+      WRITE(LU_SCARC,*) 'SLC%N_EXTERNAL_WALL_CELLS=',SLC%N_EXTERNAL_WALL_CELLS
+      WRITE(LU_SCARC,*) 'SLC%N_INTERNAL_WALL_CELLS=',SLC%N_INTERNAL_WALL_CELLS
+      WRITE(LU_SCARC,*) 'SLC%NW=',SLC%NW
+      WRITE(LU_SCARC,*) 'SLF%N_OBST:',SLF%N_OBST
+      WRITE(LU_SCARC,*) 'OBSTS:'
+      DO KKK=1,SLF%N_OBST
+         WRITE(LU_SCARC,'(6i6)') SLF%OBST(KKK)%I1,SLF%OBST(KKK)%I2, &
+                                 SLF%OBST(KKK)%J1,SLF%OBST(KKK)%J2, &
+                                 SLF%OBST(KKK)%K1,SLF%OBST(KKK)%K2
+      ENDDO
+      WRITE(LU_SCARC,*) 'CELL_INDEX:'
+      DO KKK=SLF%NZ+1,0,-1
+         WRITE(LU_SCARC,'(6i6)') ((CELL_INDEX(III,JJJ,KKK),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
+      ENDDO
+      WRITE(LU_SCARC,*) 'SOLID:'
+      DO KKK=SLF%NZ+1,0,-1
+         WRITE(LU_SCARC,'(6i6)') ((SOLID(CELL_INDEX(III,JJJ,KKK)),III=0,SLF%NX+1),JJJ=0,SLF%NY+1)
+      ENDDO
+ENDIF
+
+         !! allocate WALL array for coarse level
+         ALLOCATE(SLC%WALL(SLC%NW), STAT=IERR)
+         CALL ChkMemErr('SCARC_SETUP_INTERFACES','WALL',IERR)
 
          !! allocate administrative mapping arrays for own level
          CALL SCARC_SETUP_MAPPINGS(NM, NL)
@@ -2467,7 +2535,7 @@ LEVEL_GMG_IF: IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
                      OSLC%NCG = OSLF%NCG/2
                   ENDIF
 
-                  IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
                      WRITE(LU_SCARC,'(5(a,i4))') 'HIII_FINE   : NOM=',NOM,': NCPL=',OSLC%NCPL,&
                                                  ': NWL=',OSLF%NWL,': NL=',NL,': NCG=',OSLF%NCG
                      WRITE(LU_SCARC,'(5(a,i4))') 'HIII_COARSE: NOM=',NOM,': NCPL=',OSLC%NCPL,&
@@ -2488,8 +2556,10 @@ LEVEL_GMG_IF: IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
 
          ENDDO
 
-         SLC%N_EXTERNAL_WALL_CELLS = 2*SLC%NX + 2*SLC%NZ + 2*SLC%NX*SLC%NZ
-         SLC%N_INTERNAL_WALL_CELLS = SLF%N_INTERNAL_WALL_CELLS/2
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+           WRITE(LU_SCARC,*) 'SLC%N_INTERNAL_WALL_CELLS=', SLC%N_INTERNAL_WALL_CELLS
+
+         CALL SCARC_ASSIGN_INTERNAL_COORDS(NM, NL)
 
       ENDDO LEVEL_GMG_LEVEL_LOOP
    ENDDO MESHES_LOOP2
@@ -2532,6 +2602,268 @@ ENDIF
 
 END SUBROUTINE SCARC_SETUP_DECOMPOSITION
 
+
+!> -------------------------------------------------------------------------------------------------
+!> Setup all necessary information for a wall cell with neighbor
+!> ACHTUNG: FUNKTIONIERT NUR FÜR SPEZIALFÄLLE, DIE AUCH FÜR GMG LAUFEN !!!
+!> ACHTUNG: MUSS DRINGEND NOCH ERWEITERT WERDEN
+!> -------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_ASSIGN_INTERNAL_COORDS(NM, NL)
+INTEGER, INTENT(IN) :: NM, NL
+INTEGER :: IWC, NW_INT
+INTEGER :: IC, IO, IERR
+INTEGER :: I, J, K
+TYPE (SCARC_LEVEL_TYPE), POINTER :: SLF, SLC
+
+SLF => SCARC(NM)%LEVEL(NL-1)
+SLC => SCARC(NM)%LEVEL(NL)
+
+SLC%N_OBST = SLF%N_OBST
+ALLOCATE(SLC%OBST(SLC%N_OBST), STAT=IERR)
+CALL ChkMemErr('SCARC_ASSIGN_INTERNAL_COORDS','OBST',IERR)
+
+IF (SLC%N_INTERNAL_WALL_CELLS == 0) RETURN
+
+NW_INT = 0
+IWC = SLC%N_EXTERNAL_WALL_CELLS + 1
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+   WRITE(LU_SCARC,*) 'ASSIGNING: BTYPE FINE'
+   WRITE(LU_SCARC,'(4i4)') (SLF%WALL(I)%BTYPE, I=1, SLF%NW)
+   WRITE(LU_SCARC,*) 'ASSIGNING: NOM FINE'
+   WRITE(LU_SCARC,'(4i4)') (SLF%WALL(I)%NOM, I=1, SLF%NW)
+   WRITE(LU_SCARC,*) 'ASSIGNING: BTYPE COARSE'
+   WRITE(LU_SCARC,'(4i4)') (SLC%WALL(I)%BTYPE, I=1, SLC%NW)
+   WRITE(LU_SCARC,*) 'ASSIGNING: NOM COARSE'
+   WRITE(LU_SCARC,'(4i4)') (SLC%WALL(I)%NOM, I=1, SLC%NW)
+   WRITE(LU_SCARC,*) 'SLC%N_EXTERNAL_WALL_CELLS=',SLC%N_EXTERNAL_WALL_CELLS
+   WRITE(LU_SCARC,*) 'SLC%N_INTERNAL_WALL_CELLS=',SLC%N_INTERNAL_WALL_CELLS
+   WRITE(LU_SCARC,*) 'SLC%NW=',SLC%NW
+   WRITE(LU_SCARC,*) 'SLC%N_OBST=',SLC%N_OBST
+   WRITE(LU_SCARC,*) 'IWC=',IWC
+ENDIF
+
+!> Number of obstructions on coarse level is the same as on fine level
+DO IO = 1, SLF%N_OBST
+
+   SLC%OBST(IO)%I1 = (SLF%OBST(IO)%I1+1)/2
+   SLC%OBST(IO)%I2 = SLF%OBST(IO)%I2/2
+
+   IF (TYPE_DIMENSION == NSCARC_DIMENSION_TWO) THEN
+      SLC%OBST(IO)%J1 = 1
+      SLC%OBST(IO)%J2 = 1
+   ELSE
+      SLC%OBST(IO)%J1 = (SLF%OBST(IO)%J1+1)/2
+      SLC%OBST(IO)%J2 = SLF%OBST(IO)%J2/2
+   ENDIF
+
+   SLC%OBST(IO)%K1 = (SLF%OBST(IO)%K1+1)/2
+   SLC%OBST(IO)%K2 = SLF%OBST(IO)%K2/2
+   
+   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+      WRITE(LU_SCARC,*) '=========================================================='
+      WRITE(LU_SCARC,*) 'FINE: OBSTRUCTIONS (',NM,',',NL,')', IWC, IO
+      WRITE(LU_SCARC,'(7i6)') IO, &
+                        SLF%OBST(IO)%I1, SLF%OBST(IO)%I2, &
+                        SLF%OBST(IO)%J1, SLF%OBST(IO)%J2, &
+                        SLF%OBST(IO)%K1, SLF%OBST(IO)%K2
+      WRITE(LU_SCARC,*) 'COARSE: OBSTRUCTIONS (',NM,',',NL,')', IO
+      WRITE(LU_SCARC,'(7i6)') IO, &
+                        SLC%OBST(IO)%I1, SLC%OBST(IO)%I2, &
+                        SLC%OBST(IO)%J1, SLC%OBST(IO)%J2, &
+                        SLC%OBST(IO)%K1, SLC%OBST(IO)%K2
+   ENDIF
+
+   !> Analyze IOR = 1
+   I = SLC%OBST(IO)%I1-1
+   DO K = SLC%OBST(IO)%K1, SLC%OBST(IO)%K2
+      DO J = SLC%OBST(IO)%J1, SLC%OBST(IO)%J2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'A: Processing ', IC, I,J,K, 1, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR = 1
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+
+   !> Analyze IOR = -1
+   I = SLC%OBST(IO)%I2+1
+   DO K = SLC%OBST(IO)%K1, SLC%OBST(IO)%K2
+      DO J = SLC%OBST(IO)%J1, SLC%OBST(IO)%J2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'B: Processing ', IC, I,J,K,-1, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR =-1
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+
+   !> Analyze IOR = 2
+   J = SLC%OBST(IO)%J1-1
+   DO K = SLC%OBST(IO)%K1, SLC%OBST(IO)%K2
+      DO I = SLC%OBST(IO)%I1, SLC%OBST(IO)%I2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'C: Processing ', IC, I,J,K,2, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR = 2
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+
+   !> Analyze IOR = -2
+   J = SLC%OBST(IO)%J2+1
+   DO K = SLC%OBST(IO)%K1, SLC%OBST(IO)%K2
+      DO I = SLC%OBST(IO)%I1, SLC%OBST(IO)%I2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'D: Processing ', IC, I,J,K,-2, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR =-2
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+
+   !> Analyze IOR = 3
+   K = SLC%OBST(IO)%K1-1
+   DO J = SLC%OBST(IO)%J1, SLC%OBST(IO)%J2
+      DO I = SLC%OBST(IO)%I1, SLC%OBST(IO)%I2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'E: Processing ', IC, I,J,K,3, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR = 3
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+
+   !> Analyze IOR = -3
+   K = SLC%OBST(IO)%K2+1
+   DO J = SLC%OBST(IO)%J1, SLC%OBST(IO)%J2
+      DO I = SLC%OBST(IO)%I1, SLC%OBST(IO)%I2
+         IC = SLC%CCVAR(I, J, K, UNKH)
+         IF (IC == IS_UNDEFINED) CYCLE
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'F: Processing ', IC, I,J,K,-3, IWC, NW_INT
+         SLC%WALL(IWC)%IXW = I
+         SLC%WALL(IWC)%IYW = J
+         SLC%WALL(IWC)%IZW = K
+         SLC%WALL(IWC)%IOR =-3
+         SLC%WALL(IWC)%BTYPE = NEUMANN
+         IWC = IWC + 1
+         NW_INT = NW_INT + 1
+      ENDDO
+   ENDDO
+         
+ENDDO
+
+IF (NW_INT /= SLC%N_INTERNAL_WALL_CELLS) THEN
+   WRITE(*,*) 'ERROR with NW_INT in ASSIGN_INTERNAL_COORDS'
+   STOP
+ENDIF
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+   WRITE(LU_SCARC,*) 'NW_INT=',NW_INT
+   WRITE(LU_SCARC,*) 'SLC%N_INTERNAL_WALL_CELLS=',SLC%N_INTERNAL_WALL_CELLS
+   WRITE(LU_SCARC,*) 'SLC%NCS=',SLC%NCS
+   DO IWC = 1, SLC%NW
+      WRITE(LU_SCARC,*) SLC%WALL(IWC)%IOR, SLC%WALL(IWC)%IXW, SLC%WALL(IWC)%IYW, SLC%WALL(IWC)%IZW, &
+                        SLC%WALL(IWC)%BTYPE
+   ENDDO
+ENDIF
+
+END SUBROUTINE SCARC_ASSIGN_INTERNAL_COORDS
+
+
+!> -------------------------------------------------------------------------------------------------
+!> Correct BTYPE related to internal obstructions on ghost cells
+!> -------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_CORRECT_GHOSTCELL_TYPES(NM, NL)
+INTEGER, INTENT(IN) :: NM, NL
+INTEGER :: IWG
+INTEGER :: IX, IY, IZ
+TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
+
+SL => SCARC(NM)%LEVEL(NL)
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+   WRITE(LU_SCARC,*) 'M%WALL(.)%NOM:'
+   WRITE(LU_SCARC,'(4i4)') (SL%WALL(IWG)%NOM, IWG=1, SL%NW)
+   WRITE(LU_SCARC,*) 'M%WALL(.)%BTYPE:'
+   WRITE(LU_SCARC,'(4i4)') (SL%WALL(IWG)%BTYPE, IWG=1, SL%NW)
+ENDIF
+
+DO IWG = 1, SL%N_EXTERNAL_WALL_CELLS
+   IF (SL%WALL(IWG)%NOM == 0) CYCLE
+   IX = SL%WALL(IWG)%IXG
+   IY = SL%WALL(IWG)%IYG
+   IZ = SL%WALL(IWG)%IZG
+   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+     WRITE(LU_SCARC,*) '1: CORRECTING ', IWG, IX, IY, IZ, SL%CCVAR(IX, IY, IZ, CGSC), SL%WALL(IWG)%BTYPE
+   IF (SL%CCVAR(IX, IY, IZ, CGSC) == IS_SOLID) SL%WALL(IWG)%BTYPE=NEUMANN
+   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+     WRITE(LU_SCARC,*) '2: CORRECTING ', IWG, IX, IY, IZ, SL%CCVAR(IX, IY, IZ, CGSC), SL%WALL(IWG)%BTYPE
+ENDDO
+
+END SUBROUTINE SCARC_CORRECT_GHOSTCELL_TYPES
+
+
+!> -------------------------------------------------------------------------------------------------
+!> Setup all necessary information for a wall cell with neighbor
+!> -------------------------------------------------------------------------------------------------
+INTEGER FUNCTION SCARC_INTERNAL_WALL_CELLS(NM, NL)
+INTEGER, INTENT(IN) :: NM, NL
+INTEGER :: IX, IY, IZ, NW_INT
+TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
+
+SL => SCARC(NM)%LEVEL(NL)
+
+NW_INT = 0
+DO IZ = 1, SL%NZ 
+   DO IY = 1, SL%NY 
+      DO IX = 1, SL%NX 
+         IF (SL%CCVAR(IX  , IY  , IZ  , UNKH) /= IS_UNDEFINED) CYCLE
+         IF (SL%CCVAR(IX-1, IY  , IZ  , UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+         IF (SL%CCVAR(IX+1, IY  , IZ  , UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+         IF (SL%CCVAR(IX  , IY-1, IZ  , UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+         IF (SL%CCVAR(IX  , IY+1, IZ  , UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+         IF (SL%CCVAR(IX  , IY  , IZ-1, UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+         IF (SL%CCVAR(IX  , IY  , IZ+1, UNKH) /= IS_UNDEFINED) NW_INT = NW_INT+1
+      ENDDO
+   ENDDO
+ENDDO
+
+SCARC_INTERNAL_WALL_CELLS = NW_INT
+RETURN
+
+END FUNCTION SCARC_INTERNAL_WALL_CELLS
 
 
 !> -------------------------------------------------------------------------------------------------
@@ -2996,7 +3328,7 @@ SELECT CASE (ABS(IOR0))
       ENDIF
 END SELECT
 
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,*) '========================== SETUP_FACE:  IOR0=',IOR0
    WRITE(LU_SCARC,*) 'NX1=',NX1
    WRITE(LU_SCARC,*) 'NX2=',NX2
@@ -3064,7 +3396,7 @@ DO IZ = NZ1, NZ2
                WC(IWC)%IZW = IZ-1
          END SELECT
 
-         IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+         IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
             WRITE(LU_SCARC,*) 'WC(',IWC,')%IOR0=',WC(IWC)%IOR
             WRITE(LU_SCARC,*) 'WC(',IWC,')%ICW =',WC(IWC)%ICW
             WRITE(LU_SCARC,*) 'WC(',IWC,')%IXG =',WC(IWC)%IXG
@@ -3094,7 +3426,7 @@ DO IZ = NZ1, NZ2
                END SELECT
                IWF(2) = IWF(1)+1
 
-               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+               IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
                   WRITE(LU_SCARC,*) 'IWF(1)=',IWF(1)
                   WRITE(LU_SCARC,*) 'IWF(2)=',IWF(2)
                ENDIF
@@ -3107,7 +3439,7 @@ DO IZ = NZ1, NZ2
                   CALL SHUTDOWN(SCARC_MESSAGE); RETURN
                ENDIF
 
-               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+               IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
                   WRITE(LU_SCARC,*) 'NOMF(1)=',NOMF(1)
                   WRITE(LU_SCARC,*) 'NOMF(2)=',NOMF(2)
                ENDIF
@@ -3839,16 +4171,16 @@ SELECT CASE (TYPE_DIMENSION)
 
             CALL SCARC_SETUP_MATRIX_MAINDIAG (IC, IP, IX, IY, IZ, NM, NL)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 3
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 3
             CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 3, IC, IP, IZ, &
                  SL%CCVAR(IX, 1, IZ-1, CGSC), SL%CCVAR(IX, 1, IZ-1, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 1
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 1
             CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 1, IC, IP, IX, &
                  SL%CCVAR(IX-1, 1, IZ, CGSC), SL%CCVAR(IX-1, 1, IZ, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -1
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -1
             CALL SCARC_SETUP_MATRIX_SUBDIAG  (-1, IC, IP, IX, &
                  SL%CCVAR(IX+1, 1, IZ, CGSC), SL%CCVAR(IX+1, 1, IZ, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -3
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -3
             CALL SCARC_SETUP_MATRIX_SUBDIAG  (-3, IC, IP, IZ, &
                  SL%CCVAR(IX, 1, IZ+1, CGSC), SL%CCVAR(IX, 1, IZ+1, UNKH), NM, NL)
 
@@ -3858,7 +4190,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX
    !! --------------------- 3D -----------------
    CASE (NSCARC_DIMENSION_THREE)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'SETTING UP MATRIX FOR UNSTRUCTURED'
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'SETTING UP MATRIX FOR UNSTRUCTURED'
 
       IP  = 1
       DO IZ = 1, SL%NZ
@@ -3868,7 +4200,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'SETTING UP MATRIX FOR UNS
                IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(IX, IY, IZ, CGSC)/=IS_GASPHASE) CYCLE
                IC = SL%CCVAR(IX, IY, IZ, UNKH)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC
                CALL SCARC_SETUP_MATRIX_MAINDIAG (IC, IP, IX, IY, IZ, NM, NL)
 
                CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 3, IC, IP, IZ, &
@@ -3940,7 +4272,7 @@ IF ((TYPE_MKL == NSCARC_MKL_GLOBAL .AND. NL == NLEVEL_MIN) .OR. &
     (TYPE_MKL == NSCARC_MKL_COARSE .AND. NL == NLEVEL_MAX)) THEN
   SM => SCARC(NM)%MKL(NL)
   SM%AG_COL(IP) = SL%A_COL(IP) + NCS_OFFSET(NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,'(A,5I4,E14.6)') &
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,'(A,5I4,E14.6)') &
     'MAINDIAG:', NL,IC, IP, IC, SL%A_COL(IP)+SL%NUNKH_LOC(NM), SL%A(IP)
       ENDIF
 #endif
@@ -4017,7 +4349,7 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': AG_
 !> if IC is a boundary cell of the mesh, compute matrix contribution only if there is a neighbor for that cell
 ELSE IF (SL%FACE(IOR0)%NUM_NEIGHBORS /= 0) THEN
    
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: HAS NEIGHBOR??? '
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: HAS NEIGHBOR??? '
    IF (HAS_NEIGHBOR(SL%CCVAR, SL%WALL, IC, IW, SL%FACE(IOR0)%IWG_MARKER, SL%FACE(IOR0)%NFW)) THEN
       SL%A(IP)     = SL%A(IP) + DSCAL
       SL%A_COL(IP) = SL%WALL(IW)%ICE(1)
@@ -4072,20 +4404,29 @@ LOGICAL FUNCTION HAS_NEIGHBOR(CCVAR0, WALL0, IC, IW, IW0, IL0)
 TYPE (SCARC_WALL_TYPE), DIMENSION(:), INTENT(IN):: WALL0
 INTEGER, DIMENSION(0:,0:,0:,:), INTENT(IN):: CCVAR0
 INTEGER, INTENT(IN)    :: IC, IW0, IL0
-INTEGER    :: IX0, IY0, IZ0, IC0
+INTEGER :: IXW0, IYW0, IZW0
+INTEGER :: IXG0, IYG0, IZG0
+INTEGER :: IC0
 INTEGER, INTENT(INOUT) :: IW
 
 HAS_NEIGHBOR = .FALSE.
 SEARCH_WALLCELLS_LOOP: DO IW = IW0, IW0+IL0-1
-  IX0 = WALL0(IW)%IXW
-  IY0 = WALL0(IW)%IYW
-  IZ0 = WALL0(IW)%IZW
-  IC0 = CCVAR0(IX0, IY0, IZ0, UNKH) 
-IF (TYPE_DEBUG>NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'HAS_NEIGHBOR? IC, IW, IX0, IY0, IZ0, IC0:', IC, IW, IX0, IY0, IZ0, IC0
 
-  IF (IC == IC0 .AND. WALL0(IW)%NOM /= 0) THEN
+  IXW0 = WALL0(IW)%IXW
+  IYW0 = WALL0(IW)%IYW
+  IZW0 = WALL0(IW)%IZW
+
+  IXG0 = WALL0(IW)%IXG
+  IYG0 = WALL0(IW)%IYG
+  IZG0 = WALL0(IW)%IZG
+
+  IC0 = CCVAR0(IXW0, IYW0, IZW0, UNKH) 
+IF (TYPE_DEBUG>NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'HAS_NEIGHBOR? IC, IW, IX0, IY0, IZ0, IXG0, IYG0, IZG0, IC0:', &
+    IC, IW, IXW0, IYW0, IZW0, IXG0, IYG0, IZG0, IC0
+
+  IF (IC == IC0 .AND. (WALL0(IW)%NOM /= 0.AND.CCVAR0(IXG0, IYG0, IZG0, CGSC)/=IS_SOLID)) THEN
      HAS_NEIGHBOR = .TRUE.
-IF (TYPE_DEBUG>NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'HAS_NEIGHBOR      ==============> YES'
+IF (TYPE_DEBUG>NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'HAS_NEIGHBOR      ==============> YES'
      EXIT SEARCH_WALLCELLS_LOOP
   ENDIF
 ENDDO SEARCH_WALLCELLS_LOOP
@@ -4881,7 +5222,7 @@ END SUBROUTINE SCARC_SETUP_OVERLAPS
 !> ------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_BOUNDARY (NM, NL)
 INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP, NW
+INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP, NW, ITYPE
 REAL(EB) :: DBC, A_OLD
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
@@ -4902,15 +5243,20 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,*) 'NL = ', NL
    WRITE(LU_SCARC,*) 'NW = ', NW
    WRITE(LU_SCARC,*) 'NCS= ', SL%NCS
+   WRITE(LU_SCARC,*) 'NA = ', SL%NA
    WRITE(LU_SCARC,*) 'N_EXTERNAL_WALL_CELLS= ', SL%N_EXTERNAL_WALL_CELLS
    WRITE(LU_SCARC,*) 'N_INTERNAL_WALL_CELLS= ', SL%N_INTERNAL_WALL_CELLS
-   WRITE(LU_SCARC,*) '---------------------- A_ROW:', SL%NCS
+   WRITE(LU_SCARC,*) '---------------------- WALL(.)%BTYPE:'
+   WRITE(LU_SCARC,'(6i9)') (SL%WALL(IW)%BTYPE, IW=1,SL%NW)
+   WRITE(LU_SCARC,*) '---------------------- CCVAR:'
+   WRITE(LU_SCARC,'(6i9)') ((SL%CCVAR(I,1,K,CGSC), I=0,SL%NX+1), K=0,SL%NZ+1)
+   WRITE(LU_SCARC,*) '---------------------- A_ROW:', SL%NCS, SIZE(SL%A_ROW)
    WRITE(LU_SCARC,'(4i9)') (SL%A_ROW(IC), IC=1,SL%NCS+1)
-   WRITE(LU_SCARC,*) '---------------------- A_COL:'
+   WRITE(LU_SCARC,*) '---------------------- A_COL:', SIZE(SL%A_COL)
    DO IC = 1, SL%NCS
       WRITE(LU_SCARC,'(i5,a,20i9)') IC,':',(SL%A_COL(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
    ENDDO
-   WRITE(LU_SCARC,*) '---------------------- A:', SL%A_ROW(IC+1)- SL%A_ROW(IC)
+   WRITE(LU_SCARC,*) '---------------------- A:', SL%A_ROW(IC+1)- SL%A_ROW(IC), SIZE(SL%A)
    DO IC = 1, SL%NCS
       WRITE(LU_SCARC,'(i5,a,20f9.2)') IC,':',(SL%A(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
    ENDDO
@@ -4924,7 +5270,7 @@ SELECT_DIMENSION: SELECT CASE (TYPE_DIMENSION)
       WALLCELLS_LOOP2D: DO IW = 1, NW
 
          IOR0 = SL%WALL(IW)%IOR
-         IF (ABS(IOR0) == 2) CYCLE          !> 2D: in case of y-boundary cycle
+         IF (ABS(IOR0) == 2) CYCLE          !> 2D: cycle boundaries in y-direction
 
          I    = SL%WALL(IW)%IXW
          J    = 1
@@ -4932,13 +5278,15 @@ SELECT_DIMENSION: SELECT CASE (TYPE_DIMENSION)
 
          NOM  = SL%WALL(IW)%NOM
 
-         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%CCVAR(I,J,K,CGSC)/=IS_GASPHASE) CYCLE
+         ITYPE = SL%CCVAR(I,J,K,CGSC)
+
+         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.ITYPE/=IS_GASPHASE) CYCLE
 
          SL%WALL(IW)%ICW = SL%CCVAR(I, J, K, UNKH)
          IC = SL%CCVAR(I, J, K, UNKH)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
-   WRITE(LU_SCARC,*) 'BOUNDARY, PROCESSING ', IW,SL%CCVAR(I,J,K,UNKH), IC, I, J, K
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS)  WRITE(LU_SCARC,'(A,8i4)') &
+   'BOUNDARY, PROCESSING: IW, I, J, K, NOM, IOR: ', IW, I, J, K, NOM, IOR0, ITYPE, IC
 
          SELECT CASE (ABS(IOR0))
             CASE (1)
@@ -4974,11 +5322,16 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
          K    = SL%WALL(IW)%IZW
 
          NOM  = SL%WALL(IW)%NOM
+         ITYPE = SL%CCVAR(I,J,K,CGSC)
 
-         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%CCVAR(I,J,K,CGSC)/=IS_GASPHASE) CYCLE
+         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.ITYPE/=IS_GASPHASE) CYCLE
+
          SL%WALL(IW)%ICW = SL%CCVAR(I, J, K, UNKH)
          IC = SL%CCVAR(I, J, K, UNKH)
-!WRITE(LU_SCARC,*) 'HALLO: IW=',IW,': IOR=',IOR0,': I,J,K =', I, J, K,': NOM=',NOM,': BTYPE=',SL%WALL(IW)%BTYPE
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+   WRITE(LU_SCARC,*) 'BOUNDARY, PROCESSING: IW, I, J, K, NOM, IOR: ', IW, I, J, K, NOM, IOR0, ITYPE
+
          SELECT CASE (ABS(IOR0))
             CASE (1)
                DBC= SL%DXI2           ! Achtung: Wirklich richtig oder Mittelwert?
@@ -5006,7 +5359,7 @@ END SELECT SELECT_DIMENSION
 IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,*) 'SETUP BOUNDARY '
    WRITE(LU_SCARC,*) '---------------------- A_ROW:', SL%NCS
-   WRITE(LU_SCARC,'(4i9)') (SL%A_ROW(IC), IC=1,SL%NC+1)
+   WRITE(LU_SCARC,'(4i9)') (SL%A_ROW(IC), IC=1,SL%NCS+1)
    WRITE(LU_SCARC,*) '---------------------- A_COL:'
    DO IC = 1, SL%NCS
       WRITE(LU_SCARC,'(i5,a,20i9)') IC,':',(SL%A_COL(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
@@ -10357,7 +10710,7 @@ REAL(EB), POINTER, DIMENSION(:)     :: V1, V2
 REAL(EB), POINTER, DIMENSION(:)     :: AC
 REAL(EB) :: VCO, TNOW
 INTEGER , POINTER, DIMENSION(:)     :: AC_ROW, AC_COL
-INTEGER , POINTER :: NC
+INTEGER , POINTER :: NC, NCE
 INTEGER :: NM, IC, JC, ICOL
 
 TNOW = SECOND()
@@ -10387,13 +10740,11 @@ DO NM = 1, NMESHES
    CALL POINT_TO_VECTOR (NVECTOR2, NM, NL, V2)
 
    NC => SCARC(NM)%LEVEL(NL)%NCS                                      !> number of cells
+   NCE => SCARC(NM)%LEVEL(NL)%NCE                                      !> number of cells
 
    AC     => SCARC(NM)%LEVEL(NL)%A                                    !> system matrix
    AC_ROW => SCARC(NM)%LEVEL(NL)%A_ROW                                !> row pointer
    AC_COL => SCARC(NM)%LEVEL(NL)%A_COL                                !> column pointer
-
-!WRITE(LU_SCARC,'(a, 14f10.5)') 'V1:', (V1(IC),IC=1,12)
-!WRITE(LU_SCARC,'(a, 14f10.5)') 'V2:', (V2(IC),IC=1,12)
 
    DO IC = 1, NC
 
@@ -10403,13 +10754,13 @@ DO NM = 1, NMESHES
 
       V2 (IC) = AC(ICOL)* V1(JC)
       VCO = V2(IC)
-!WRITE(LU_SCARC,'(a,i4,a,5f14.6,i4)') 'MATVEC 1: V2(',IC,')=',V2(IC), 0.0_EB, V1(JC), AC(ICOL), AC(ICOL)*V1(JC), JC
+!WRITE(LU_SCARC,'(a,i4,a,5e14.6,i4)') 'MATVEC 1: V2(',IC,')=',V2(IC), 0.0_EB, V1(JC), AC(ICOL), AC(ICOL)*V1(JC), JC
 
       !> subdiagonal entries
       DO ICOL = AC_ROW(IC)+1, AC_ROW(IC+1)-1
          JC = AC_COL(ICOL)
          V2(IC) =  V2(IC) + AC(ICOL)* V1(JC)
-!WRITE(LU_SCARC,'(a,i4,a,5f14.6,i4)') 'MATVEC 2: V2(',IC,')=',V2(IC), VCO, V1(JC), AC(ICOL), AC(ICOL)*V1(JC), JC
+!WRITE(LU_SCARC,'(a,i4,a,5e14.6,i4)') 'MATVEC 2: V2(',IC,')=',V2(IC), VCO, V1(JC), AC(ICOL), AC(ICOL)*V1(JC), JC
          VCO = V2(IC)
       ENDDO
 
@@ -10432,7 +10783,7 @@ REAL(EB) FUNCTION SCARC_SCALAR_PRODUCT(NVECTOR1, NVECTOR2, NL)
 INTEGER, INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), DIMENSION(:)    , POINTER ::  V1, V2
 INTEGER , POINTER :: NC
-INTEGER  :: NM, IERR, NL0
+INTEGER  :: NM, IERR, NL0 
 #if defined(WITH_MKL)
 REAL(EB) :: DDOT
 EXTERNAL :: DDOT
@@ -11296,6 +11647,9 @@ CG%RESIN = CG%RES
 ISTATE = SCARC_CONVERGENCE_STATE (CG, 0, NL)                            !>  RES < TOL ??
 CALL SCARC_VECTOR_COPY     (CG%W, CG%G, 1.0_EB, NL)                       !>  G := W
 CALL SCARC_PRECONDITIONING (CG%W, CG%G, NL, NSCOPE)                       !>  G := PRECON(W)
+
+CALL SCARC_DEBUG_LEVEL (CG%W, 'SCARC_METHOD_CG', 'W PRE_SCALPROD', NL)
+CALL SCARC_DEBUG_LEVEL (CG%G, 'SCARC_METHOD_CG', 'G PRE_SCALPROD', NL)
 
 SIGMA0 = SCARC_SCALAR_PRODUCT(CG%W, CG%G, NL)                             !>  SIGMA0 := (W,G)
 
@@ -12548,6 +12902,17 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
          CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
          CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, FC_CO)
 
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+            WRITE(LU_SCARC,*) 'NX_CO=',NX_CO
+            WRITE(LU_SCARC,*) 'NY_CO=',NY_CO
+            WRITE(LU_SCARC,*) 'NZ_CO=',NZ_CO
+            WRITE(LU_SCARC,*) 'NX_FI=',NX_FI
+            WRITE(LU_SCARC,*) 'NY_FI=',NY_FI
+            WRITE(LU_SCARC,*) 'NZ_FI=',NZ_FI
+            WRITE(LU_SCARC,*) 'SIZE(DC_FI)=',SIZE(DC_FI)
+            WRITE(LU_SCARC,*) 'SIZE(FC_CO)=',SIZE(FC_CO)
+         ENDIF
+
          SELECT_DIMENSION: SELECT CASE (TYPE_DIMENSION)
 
             !> ----------------- 2D ---------------
@@ -12563,10 +12928,13 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 
                      IC_CO = SLC%CCVAR(IX_CO, 1, IZ_CO, UNKH) 
 
-                     IC_FI(1) = (IZ_FI-2)*NX_FI + IX_FI - 1
-                     IC_FI(2) = (IZ_FI-2)*NX_FI + IX_FI
-                     IC_FI(3) = (IZ_FI-1)*NX_FI + IX_FI - 1
-                     IC_FI(4) = (IZ_FI-1)*NX_FI + IX_FI
+         IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) &
+            WRITE(LU_SCARC,*) 'PROCESSING: REST: ', IX_CO, IZ_CO, IX_FI, IZ_FI, IC_CO
+
+                     IC_FI(1) = SLF%CCVAR(IX_FI-1, 1, IZ_FI-1, UNKH) 
+                     IC_FI(2) = SLF%CCVAR(IX_FI-1, 1, IZ_FI  , UNKH) 
+                     IC_FI(3) = SLF%CCVAR(IX_FI  , 1, IZ_FI-1, UNKH) 
+                     IC_FI(4) = SLF%CCVAR(IX_FI  , 1, IZ_FI  , UNKH) 
 
                      FC_CO(IC_CO) = 0.25_EB * (  DC_FI(IC_FI(1)) &
                                                + DC_FI(IC_FI(2)) &
@@ -12843,7 +13211,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '1: HP(',I,',',J,',',K,')=
 
 ENDDO
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,'(6F18.10)') (((HP(I,J,K),I=0,5),J=1,1),K=5,0,-1)
 ENDIF
 
@@ -13307,11 +13675,14 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
                !ZSUM = VECTOR(SL%CCVAR(IX, IY, IZ, UNKH))
                !OS%SEND_REAL(LL) = ZSUM/REAL(OSL%NCPLR,EB)
 
-               OS%SEND_REAL(LL) = VECTOR(SL%CCVAR(IX, IY, IZ, UNKH))
-
-               !WRITE(LU_SCARC,'(a,i6,a,f12.6,a,i4,a,i4,a,4i4)') &
+               IF (PRES_ON_WHOLE_DOMAIN.OR.SL%CCVAR(IX, IY, IZ, CGSC) == IS_GASPHASE) THEN
+                  OS%SEND_REAL(LL) = VECTOR(SL%CCVAR(IX, IY, IZ, UNKH))
+               ELSE
+                  OS%SEND_REAL(LL) = -987654321.0_EB
+               ENDIF
+               !WRITE(LU_SCARC,'(a,i6,a,E20.10,a,i4,a,i4,a,4i4)') &
                !   'SEND_REAL(',LL,')=',OS%SEND_REAL(LL), &
-               !  ' : ICG=',ICG, ' : IWG=',IWG, ' : IX,IY,IZ,NOM',IX, IY, IZ
+               !  ' : IC=',SL%CCVAR(IX,IY,IZ,UNKH), ' : IWG=',IWG, ' : IX,IY,IZ,NOM',IX, IY, IZ
 
                LL = LL + 1
             ENDDO 
@@ -13388,7 +13759,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
             LL = 1
             IWW = 0
 
-            !WRITE(*,*) '!!!!! EXCHANGE_MATRIX_SUBDIAG, PACK: Achtung, hier nochmal checken f�r AMG !!!!'
+            WRITE(*,*) '!!!!! EXCHANGE_MATRIX_SUBDIAG, PACK: Achtung, hier nochmal checken  AMG !!!!'
 
             DO ICG=1,OSL%NCG
                IOR0 = ABS(OSL%WALL(ICG)%IOR)
@@ -13399,7 +13770,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
                DO ICPL = 1, OSL%NCPL
                   IC = SL%CCVAR(IX, IY, IZ, UNKH)
                   OS%SEND_REAL(LL) = SL%DI2(IOR0)
-                  !WRITE(LU_SCARC,*) 'PACK_MATRIX_SUBDIAG1: IC=',IC,': OS%SEND_REAL(',LL,')=', OS%SEND_REAL(LL)
+                  WRITE(LU_SCARC,*) 'PACK_MATRIX_SUBDIAG1: IC=',IC,': OS%SEND_REAL(',LL,')=', OS%SEND_REAL(LL)
                   LL = LL+1
                ENDDO
             ENDDO 
@@ -13426,6 +13797,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
 
             DO ICG=1, OSL%NCG
   
+            WRITE(*,*) '!!!!! EXCHANGE_MATRIX_STENCIL, PACK: Achtung, hier nochmal checken  AMG !!!!'
             !WRITE(LU_SCARC,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4)') 'EXCHANGE_MATRIX_STENCIL: ICG=',ICG,&
             !    ': OSL%NCG=',OSL%NCG,': SL%NC=',SL%NC,': OSL%NCPLR=',OSL%NCPLR,&
             !    ': OSL%NCPLS=',OSL%NCPLS,': OSL%NCPL=',OSL%NCPL
@@ -13476,6 +13848,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
             LL = 1
             OS%SEND_REAL = 0.0_EB
 
+            WRITE(*,*) '!!!!! EXCHANGE_MATRIX_SYSTEM, PACK: Achtung, hier nochmal checken  AMG !!!!'
             !> Pack first cell layer
             PACK_MATRIX_SYSTEM: DO ICG=1, OSL%NCG
                IF (OSL%WALL(ICG)%NOM/=NM) CYCLE PACK_MATRIX_SYSTEM
@@ -13535,6 +13908,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
            ! WRITE(LU_SCARC,*) 'MATRIX_PROL:'
 
             LL = 1
+            WRITE(*,*) '!!!!! EXCHANGE_MATRIX_PROL, PACK: Achtung, hier nochmal checken  AMG !!!!'
 
             PACK_MATRIX_PROL: DO ICG=1, OSL%NCG
                IF (OSL%WALL(ICG)%NOM/=NM) CYCLE PACK_MATRIX_PROL
@@ -13581,6 +13955,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
          !! ---------------------------------------------------------------------------------------
          CASE (NSCARC_EXCHANGE_MATRIX_REST)
 
+            WRITE(*,*) '!!!!! EXCHANGE_MATRIX_REST, PACK: Achtung, hier nochmal checken  AMG !!!!'
             LL = 1
             PACK_MATRIX_REST: DO ICG=1, OSL%NCG
                IF (OSL%WALL(IWG)%NOM/=NM) CYCLE PACK_MATRIX_REST
@@ -13869,24 +14244,31 @@ MESH_UNPACK_LOOP: DO NM = 1, NMESHES
 
                CALL POINT_TO_VECTOR (TYPE_VECTOR, NM, NL, VECTOR)
 
-               !WRITE(LU_SCARC,'(a,16f12.6)') 'RECV_REAL:',(RECV_REAL(ICG),ICG=1,OSL%NCG)
-               !WRITE(LU_SCARC,*) 'RECV_REAL:',(RECV_REAL(ICG),ICG=1,OSL%NCG)
+               !WRITE(LU_SCARC,'(a,16E14.6)') 'RECV_REAL:',(RECV_REAL(ICG),ICG=1,4)
 
                LL = 1
                UNPACK_VECTOR: DO IWL = 1, OSL%NWL
                   ZSUM = 0.0_EB
-                  !IWG = OSL%IWL_TO_IWG(IWL)
-                  ICO = OSL%IWL_TO_ICO(IWL)
+                  !ICO = OSL%IWL_TO_ICO(IWL)
+
+                  IWG = OSL%IWL_TO_IWG(IWL)
+                  IX = SL%WALL(IWG)%IXG
+                  IY = SL%WALL(IWG)%IYG
+                  IZ = SL%WALL(IWG)%IZG
+
+                  ICE = SL%WALL(IWG)%ICE(1)
+
+                  VECTOR(ICE) = RECV_REAL(LL)
+                  !WRITE(LU_SCARC,'(a,i4,a,i4,a,E20.10,a,3i4)') &
+                  !  'IWL=',IWL,':  UNPACK VECTOR(',ICE,')=',VECTOR(ICE), ' : IWG=', IWG
+
                   !ICO = SL%WALL(IWG)%ICO
                   !DO ICPL = 1, OSL%NCPL
                   !   ZSUM = ZSUM + RECV_REAL(LL)
                   !   LL = LL + 1
                   !ENDDO
                   !VECTOR(ICO) = ZSUM/REAL(OSL%NCPL,EB)
-                  VECTOR(ICO) = RECV_REAL(LL)
-                  !WRITE(LU_SCARC,'(a,i4,a,i4,a,f12.6,a,i4,a,i4)') &
-                  !  'IWL=',IWL,':  UNPACK VECTOR(',ICO,&
-                  !  ')=',VECTOR(ICO), ' : NCPL=',OSL%NCPL, ' : ICG=',ICG
+
                   LL = LL + 1
                ENDDO UNPACK_VECTOR
 
@@ -14151,36 +14533,36 @@ SELECT CASE (NTYPE)
          SL => SCARC(NM)%LEVEL(NL)
          WRITE(LU_SCARC,*) '----------- SHOWING FULL MATRIX ENTRIES'
          WRITE(LU_SCARC,*) 'NA =',SL%NA
-         WRITE(LU_SCARC,*) 'NC =',SL%NC
-         WRITE(LU_SCARC,*) 'SL%NC =',SL%NC
+         WRITE(LU_SCARC,*) 'NC =',SL%NCS
+         WRITE(LU_SCARC,*) 'SL%NCS =',SL%NCS
          WRITE(LU_SCARC,*) 'SIZE(A) =',SIZE(SL%A)
          WRITE(LU_SCARC,*) 'SIZE(A_COL) =',SIZE(SL%A_COL)
          WRITE(LU_SCARC,*) 'SIZE(A_ROW) =',SIZE(SL%A_ROW)
-         WRITE(LU_SCARC,*) '---------------------- A_ROW:', SL%NC
-         WRITE(LU_SCARC,'(4i9)') (SL%A_ROW(IC), IC=1,SL%NC+1)
+         WRITE(LU_SCARC,*) '---------------------- A_ROW:', SL%NCS
+         WRITE(LU_SCARC,'(4i9)') (SL%A_ROW(IC), IC=1,SL%NCS+1)
          WRITE(LU_SCARC,*) '---------------------- A_COL:'
-         DO IC = 1, SL%NC
+         DO IC = 1, SL%NCS
             WRITE(LU_SCARC,'(i5,a,20i9)') IC,':',(SL%A_COL(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
          ENDDO
          WRITE(LU_SCARC,*) '---------------------- A:', SL%A_ROW(IC+1)- SL%A_ROW(IC)
-         DO IC = 1, SL%NC
+         DO IC = 1, SL%NCS
             WRITE(LU_SCARC,'(i5,a,20f9.2)') IC,':',(SL%A(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
          ENDDO
 #ifdef WITH_MKL
          IF ((TYPE_METHOD == NSCARC_METHOD_MKL) .AND. (TYPE_MKL == NSCARC_MKL_GLOBAL)) THEN
             SM => SCARC(NM)%MKL(NL)
             WRITE(LU_SCARC,*) '---------------------- AG_COL:'
-            DO IC = 1, SL%NC
+            DO IC = 1, SL%NCS
                WRITE(LU_SCARC,'(i5,a,20i9)') IC,':',(SM%AG_COL(IP),IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1)
             ENDDO
          ENDIF
-         DO IC=1,SL%NC
+         DO IC=1,SL%NCS
             DO IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1
                 WRITE(LU_SCARC,'(2I8,F18.12)') IC,SL%A_COL(IP),SL%A(IP)
             ENDDO
             WRITE(LU_SCARC,*)
          ENDDO
-         DO IC=1,SL%NC
+         DO IC=1,SL%NCS
             DO IP=SL%A_ROW(IC),SL%A_ROW(IC+1)-1
                 IF (IC == SL%A_COL(IP)) WRITE(LU_SCARC,'(2I8,F18.12)') IC,SL%A_COL(IP),SL%A(IP)
             ENDDO
@@ -14188,9 +14570,9 @@ SELECT CASE (NTYPE)
      ENDDO
 #endif
 
-         !CALL SCARC_PRINT_MATRIX (SL%A, SL%A_ROW, SL%A_COL, SL%NC, SL%NC, NM, NL, 'A')
-         !CALL SCARC_PRINT_MATRIX2(SL%A, SL%A_ROW, SL%A_COL, SL%NC, SL%NC, SL%NX, SL%NY, SL%NZ, NM, NL, 'A')
-         !CALL SCARC_MATLAB_MATRIX(SL%A, SL%A_ROW, SL%A_COL, SL%NC, SL%NC, NM, NL, 'A')
+         !CALL SCARC_PRINT_MATRIX (SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, NM, NL, 'A')
+         !CALL SCARC_PRINT_MATRIX2(SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, SL%NX, SL%NY, SL%NZ, NM, NL, 'A')
+         !CALL SCARC_MATLAB_MATRIX(SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, NM, NL, 'A')
 
 #ifdef WITH_MKL
    !! ------------------------------------------------------------------------------------------------
@@ -14349,7 +14731,7 @@ SELECT CASE (NTYPE)
  !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_FACEINFO)
 
-      IF (TYPE_DEBUG < NSCARC_DEBUG_MUCH) RETURN
+      IF (TYPE_DEBUG < NSCARC_DEBUG_EXTREME) RETURN
       DO NM = 1, NMESHES
          IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
@@ -15780,7 +16162,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 
 
-   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+   IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
       WRITE(LU_SCARC,*) '============================================================='
       WRITE(LU_SCARC,*) '     SET_CCVAR - 1 - ', SL%NX, SL%NY, SL%NZ
       WRITE(LU_SCARC,*) '============================================================='
@@ -15853,7 +16235,7 @@ ENDIF
 
    SL%NCS = SL%NUNKH_LOC(NM)
 
-   IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
+   IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
       WRITE(LU_SCARC,*) '============================================================='
       WRITE(LU_SCARC,*) '     SET_CCVAR - 2 - ', SL%NX, SL%NY, SL%NZ
       WRITE(LU_SCARC,*) '============================================================='
@@ -15930,11 +16312,16 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          WRITE(LU_SCARC,'(10I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
          WRITE(LU_SCARC,*) 'NL=',NL,': CCVAR(.,.,.,UNKH)'
          WRITE(LU_SCARC,'(10I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
-      ELSE
+      ELSE IF (SL%NX == 4) THEN
          WRITE(LU_SCARC,*) 'NL=',NL,': CCVAR(.,.,.,CGSC)'
          WRITE(LU_SCARC,'(6I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
          WRITE(LU_SCARC,*) 'NL=',NL,': CCVAR(.,.,.,UNKH)'
          WRITE(LU_SCARC,'(6I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+      ELSE IF (SL%NX == 2) THEN
+         WRITE(LU_SCARC,*) 'NL=',NL,': CCVAR(.,.,.,CGSC)'
+         WRITE(LU_SCARC,'(4I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+         WRITE(LU_SCARC,*) 'NL=',NL,': CCVAR(.,.,.,UNKH)'
+         WRITE(LU_SCARC,'(4I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
       ENDIF
       WRITE(LU_SCARC,*) 'NUNKH_LOC=', SL%NUNKH_LOC
       WRITE(LU_SCARC,*) 'NUNKH_TOT=', SL%NUNKH_TOT

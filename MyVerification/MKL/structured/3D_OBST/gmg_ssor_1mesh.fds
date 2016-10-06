@@ -24,7 +24,7 @@
       SCARC_MULTIGRID_CYCLE      = 'V'
       SCARC_MULTIGRID_LEVEL      =  2
       SCARC_COARSE               = 'ITERATIVE'
-      SCARC_DEBUG                = 'NONE'
+      SCARC_DEBUG                = 'MUCH'
       SCARC_SMOOTH               = 'SSOR'
       SCARC_SMOOTH_ITERATIONS    =   5      /
 /      VELOCITY_TOLERANCE         = 1E-6
@@ -44,9 +44,8 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&OBST XB=0.6,0.8,0.3,0.5,0.3,0.5 /
-&OBST XB=0.3,0.5,0.6,0.8,0.3,0.5 /
-&OBST XB=0.3,0.5,0.3,0.5,0.6,0.8 /
+&OBST XB=0.6,0.8,0.6,0.8,0.6,0.8 /
+&OBST XB=0.2,0.4,0.2,0.4,0.2,0.4 /
 
 /&SLCF PBX=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
 /&SLCF PBX=0.4,QUANTITY='H' /

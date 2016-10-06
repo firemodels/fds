@@ -26,9 +26,7 @@
       SCARC_COARSE               = 'DIRECT'
       SCARC_SMOOTH               = 'SSOR'
       SCARC_SMOOTH_ITERATIONS    =   3     
-      SCARC_DEBUG                = 'NONE'    /
-/      VELOCITY_TOLERANCE         = 1E-6
-/      MAX_PRESSURE_ITERATIONS    =  100 /
+      SCARC_DEBUG                = 'NONE'     /
 
 &VENT XB=0.3,0.5,-0.01,0.01,0.0,0.0 SURF_ID='INFLOW1' /
 &VENT XB=0.0,0.0,-0.01,0.01,0.3,0.5 SURF_ID='INFLOW2' /
