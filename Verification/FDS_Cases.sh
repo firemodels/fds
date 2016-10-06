@@ -114,6 +114,7 @@ $QFDS -d Heat_Transfer ht3d_nz_40.fds
 $QFDS -d Heat_Transfer ht3d_nz_80.fds
 $QFDS -d Heat_Transfer ht3d_nz_160.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
+$QFDS -d Heat_Transfer ht3d_ibeam.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -122,10 +123,26 @@ $QFDS -d HVAC door_crack.fds
 $QFDS -d HVAC fan_test.fds
 $QFDS -d HVAC HVAC_aircoil.fds
 $QFDS -d HVAC HVAC_damper.fds
+$QFDS -d HVAC HVAC_energy_pressure.fds
 $QFDS -d HVAC HVAC_filter.fds
 $QFDS -d HVAC HVAC_flow_loss.fds
 $QFDS -d HVAC HVAC_mass_conservation.fds
-$QFDS -d HVAC HVAC_energy_pressure.fds
+$QFDS -d HVAC HVAC_mass_transport.fds
+$QFDS -d HVAC HVAC_mass_transport_1.fds
+$QFDS -d HVAC HVAC_mass_transport_2.fds
+$QFDS -d HVAC HVAC_mass_transport_3.fds
+$QFDS -d HVAC HVAC_mass_transport_4.fds
+$QFDS -d HVAC HVAC_mass_transport_branch.fds
+$QFDS -d HVAC HVAC_mass_transport_combine.fds
+$QFDS -d HVAC HVAC_mass_transport_conservation_1.fds
+$QFDS -d HVAC HVAC_mass_transport_conservation_2.fds
+$QFDS -d HVAC HVAC_mass_transport_conservation_3.fds
+$QFDS -d HVAC HVAC_mass_transport_conv_0020.fds
+$QFDS -d HVAC HVAC_mass_transport_conv_0040.fds
+$QFDS -d HVAC HVAC_mass_transport_conv_0080.fds
+$QFDS -d HVAC HVAC_mass_transport_conv_0160.fds
+$QFDS -d HVAC HVAC_mass_transport_conv_0320.fds
+$QFDS -d HVAC HVAC_mass_transport_energy.fds
 $QFDS -d HVAC HVAC_tee_loss_1.fds
 $QFDS -d HVAC HVAC_tee_loss_2.fds
 $QFDS -d HVAC leak_test_2.fds
@@ -214,6 +231,7 @@ $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
 
+$QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
 $QFDS -d Radiation droplet_absorption_cyl.fds
 $QFDS -d Radiation particle_absorption_cart_surf_cart.fds
@@ -453,6 +471,8 @@ $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 
 $QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+
+$QFDS -t -p 8 -d Atmospheric_Effects wind_example.fds
 
 #$QFDS -t -p 3 -d Evacuation evac_smv_testcase1.fds
 

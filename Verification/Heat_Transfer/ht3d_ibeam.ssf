@@ -1,0 +1,12 @@
+RENDERDIR
+..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+LOADINIFILE
+ht3d_ibeam.ini
+SETVIEWPOINT
+view 1
+LOADFILE
+ht3d_ibeam_01.bf
+SETTIMEVAL
+ 3600 
+RENDERONCE
+ht3d_ibeam_3600

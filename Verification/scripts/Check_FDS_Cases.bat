@@ -6,7 +6,7 @@
 
 cd ..
 set BASEDIR="%CD%"
-cd ..
+cd ..\..
 set SVNROOT="%CD%"
 cd %BASEDIR%
 

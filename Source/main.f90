@@ -35,9 +35,6 @@ USE MPI
 USE SCRC, ONLY: SCARC_SETUP, SCARC_SOLVER, SCARC_TIMINGS
 USE SOOT_ROUTINES, ONLY: CALC_AGGLOMERATION
 
-! dummy comment to force svn change - Thu Jun 25 21:56:37 EDT 2015
-! test git commit
-
 IMPLICIT NONE
 
 ! Miscellaneous declarations
@@ -811,11 +808,6 @@ ENDDO MAIN_LOOP
 !                                                     END OF TIME STEPPING LOOP
 !***********************************************************************************************************************************
 
-! Print out total elapased time to the .out file
-
-IF (MYID==0) CALL TIMINGS
-IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
-
 ! Finish unstructured geometry
 
 IF (N_FACE>0) THEN
@@ -1311,6 +1303,13 @@ IF (USE_MPI) THEN
 ENDIF
 
 IF (MYID==0) THEN
+
+   ! Print out device activation times to the .out file
+
+   CALL TIMINGS
+   IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
+
+   ! Print out stop status to .err and .out files
 
    SELECT CASE(STOP_STATUS)
       CASE(NO_STOP)
@@ -3247,7 +3246,7 @@ SUBROUTINE EVAC_MAIN_LOOP
 
 ! Call the evacuation routine and adjust the time steps for the evacuation meshes
 
-REAL(EB) :: T_FIRE, EVAC_DT
+REAL(EB) :: T_FIRE, EVAC_DT, DT_TMP
 INTEGER :: II
 
 EVACUATION_SKIP=.FALSE. ! Do not skip the flow calculation
@@ -3261,7 +3260,10 @@ IF (ICYC == 1) DT = DT_EVAC ! Initial fire dt that was read in
 IF (ICYC == 1) T  = T_BEGIN ! Initial fire t  that was read in
 IF (ICYC == 1) T_EVAC = T_BEGIN - 0.1_EB*MIN(EVAC_DT_FLOWFIELD,EVAC_DT_STEADY_STATE)
 IF (ICYC > 0) T_FIRE  = T
-IF (ICYC > 0) EVAC_DT = DT
+
+DT_TMP = DT
+IF ((T+DT)>=T_END) DT_TMP = MAX(MIN(EVAC_DT_STEADY_STATE,T_END-T_EVAC),1.E-10_EB)
+IF (ICYC > 0) EVAC_DT = DT_TMP
 
 DO NM = 1, NMESHES
    IF (EVACUATION_ONLY(NM).AND.EMESH_INDEX(NM)==0) EVACUATION_SKIP(NM) = .TRUE.
@@ -3312,7 +3314,7 @@ EVAC_TIME_STEP_LOOP: DO WHILE (T_EVAC < T_FIRE)
             MESHES(NM)%IMN = 0; MESHES(NM)%JMN = 0; MESHES(NM)%KMN = 0
          END IF
          IF (EMESH_INDEX(NM)>0) THEN
-            IF (PROCESS(NM)==MYID .AND. STOP_STATUS==NO_STOP) CALL EVACUATE_HUMANS(T_EVAC,DT,NM,ICYC)
+            IF (PROCESS(NM)==MYID .AND. STOP_STATUS==NO_STOP) CALL EVACUATE_HUMANS(T_EVAC,DT_TMP,NM,ICYC)
             IF (T_EVAC >= PART_CLOCK(NM)) THEN
                IF (PROCESS(NM)==MYID) CALL DUMP_EVAC(T_EVAC, NM)
                DO

@@ -7,5 +7,8 @@
 # to native line endings on checkout.
 *.csv text
 
+# Force dataplot input files to be LF
+Utilities/Matlab/*.csv text eol=lf
+
 # Submodules retain attributes of their respective repos
-/Validation/Submodules/* text=auto
+Validation/Submodules/* text=auto
