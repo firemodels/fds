@@ -636,6 +636,22 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 
 \subsection{NIST Reduced-Scale Enclosure (RSE) Experiments, 2007}
 
+In the simulations of the NIST RSE Experiments, it is assumed that the combustion can be simplified to two fast reactions, the first converting fuel to CO and soot, and the second converting CO to CO$_2$. The stoichiometry for the first reaction is given here:
+\begin{eqnarray*}
+   & \mathrm{Methane:}  \quad & \mathrm{CH_4      + 1.5 \,    O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
+   & \mathrm{Methanol:} \quad & \mathrm{CH_4O     +           O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
+   & \mathrm{Ethanol:}  \quad & \mathrm{C_2H_6O   + 1.9845 \, O_2} \rightarrow \mathrm{1.969 \, CO + 3 \, H_2O + 0.031 \, C} \quad ; \quad y_{\rm s} = 0.008 \\[.1in]
+   & \mathrm{Heptane:}  \quad & \mathrm{C_7H_{16} + 7.345  \, O_2} \rightarrow \mathrm{6.69 \,  CO + 8 \, H_2O + 0.31 \, C}  \quad ; \quad y_{\rm s} = 0.037 \\[.1in]
+   & \mathrm{Toluene:}  \quad & \mathrm{C_7H_8    + 4.8175 \, O_2} \rightarrow \mathrm{5.635 \, CO + 4 \, H_2O + 1.365 \, C} \quad ; \quad y_{\rm s} = 0.178 \\[.1in]
+   & \mathrm{Styrene:}  \quad & \mathrm{C_8H_8    + 5.233  \, O_2} \rightarrow \mathrm{6.466 \, CO + 4 \, H_2O + 1.534 \, C} \quad ; \quad y_{\rm s} = 0.177
+\end{eqnarray*}
+A single carbon atom serves as a surrogate for soot. Its stoichiometric coefficient is based on measured soot yields, $y_{\rm s}$, provided by Tewarson~\cite{SFPE:Tewarson}. The heats of combustion for the reactions are calculated directly from the heats of formation of the individual molecules.
+
+In the experiments, the heat release rate was measured via oxygen consumption calorimetry. In the simulations, the mass loss rate of fuel was specified by taking the measured HRR and dividing by the heats of combustion listed in Ref.~\cite{SFPE:Tewarson}.
+
+Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall.
+   
+
 
 \newpage
 
@@ -662,7 +678,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_HRR}
 \end{tabular*}
 \caption[Summary of Test 2, NIST RSE 2007]{Summary of Test 2, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_2}
 \end{figure}
 
 \begin{figure}[p]
@@ -675,7 +691,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_HRR}
 \end{tabular*}
 \caption[Summary of Test 3, NIST RSE 2007]{Summary of Test 3, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_3}
 \end{figure}
 
 \begin{figure}[p]
@@ -688,7 +704,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_HRR}
 \end{tabular*}
 \caption[Summary of Test 4, NIST RSE 2007]{Summary of Test 4, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_4}
 \end{figure}
 
 \begin{figure}[p]
@@ -701,7 +717,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_HRR}
 \end{tabular*}
 \caption[Summary of Test 5, NIST RSE 2007]{Summary of Test 5, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_5}
 \end{figure}
 
 \begin{figure}[p]
@@ -714,7 +730,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_HRR}
 \end{tabular*}
 \caption[Summary of Test 6, NIST RSE 2007]{Summary of Test 6, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_6}
 \end{figure}
 
 \begin{figure}[p]
@@ -727,33 +743,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_HRR}
 \end{tabular*}
 \caption[Summary of Test 7, NIST RSE 2007]{Summary of Test 7, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_CO} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_O2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_THC} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_temp} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_08_HRR}
-\end{tabular*}
-\caption[Summary of Test 8, NIST RSE 2007]{Summary of Test 8, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_CO} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_O2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_THC} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_temp} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_09_HRR}
-\end{tabular*}
-\caption[Summary of Test 9, NIST RSE 2007]{Summary of Test 9, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_7}
 \end{figure}
 
 \begin{figure}[p]
@@ -766,7 +756,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_HRR}
 \end{tabular*}
 \caption[Summary of Test 10, NIST RSE 2007]{Summary of Test 10, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_10}
 \end{figure}
 
 \begin{figure}[p]
@@ -779,7 +769,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_HRR}
 \end{tabular*}
 \caption[Summary of Test 11, NIST RSE 2007]{Summary of Test 11, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_11}
 \end{figure}
 
 \begin{figure}[p]
@@ -792,33 +782,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_HRR}
 \end{tabular*}
 \caption[Summary of Test 12, NIST RSE 2007]{Summary of Test 12, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_CO} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_O2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_THC} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_temp} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_13_HRR}
-\end{tabular*}
-\caption[Summary of Test 13, NIST RSE 2007]{Summary of Test 13, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_CO} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_O2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_THC} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_temp} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_14_HRR}
-\end{tabular*}
-\caption[Summary of Test 14, NIST RSE 2007]{Summary of Test 14, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_12}
 \end{figure}
 
 \begin{figure}[p]
@@ -831,7 +795,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_HRR}
 \end{tabular*}
 \caption[Summary of Test 15, NIST RSE 2007]{Summary of Test 15, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_15}
 \end{figure}
 
 \begin{figure}[p]
@@ -844,7 +808,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_HRR}
 \end{tabular*}
 \caption[Summary of Test 16, NIST RSE 2007]{Summary of Test 16, NIST RSE 2007.}
-\label{NIST_RSE_2007_1}
+\label{NIST_RSE_2007_16}
 \end{figure}
 
 
