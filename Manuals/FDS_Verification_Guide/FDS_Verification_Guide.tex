@@ -3356,19 +3356,19 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \end{figure}
 
 
-\chapter{Solid Heat Transfer 3D (Beta)}
-\label{ch:ht3d}
+\section{Solid Heat Transfer 3D (Beta)}
+\label{sec:ht3d}
 
-This chapter presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous chapter.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+This section presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
 
-\section{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
+\subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
 \label{sec:heat_diff}
 % list the cases associated with this section
 \label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
 \label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
 \label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
 
-This test case is an initial value problem for the heat equation on a 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
+This test case is an initial value problem for the heat equation in 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
 \begin{equation}
 \label{eq:expdecay}
 T(x,t) = T_0 + A \sin(\lambda(x-x_0)) \exp(-\lambda^2 \alpha t)
@@ -3387,7 +3387,7 @@ Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for ea
 \label{fig:ht3d_diff}
 \end{figure}
 
-\section{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
+\subsection{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
 \label{ht3d_slab}
 
 In this test case, we utilize the non-steady state conduction solution provided in Carslaw and Jaeger \cite{Carslaw:1} for a semi-infinite slab exposed to a constant ambient temperature, $T_\infty$, with a constant convective heat transfer coefficient, $h$, and no radiation (see also Drysdale \cite{Drysdale:1}, Eq.~(2.25)).  The initial temperature of the slab, $T_0$, is set to \SI{1000}{\degreeCelsius}. The thermal properties of the slab, $k=1$ \si{W/(m.K)}, $\rho=1000$ \si{kg/m^3}, and $c=0.001$ \si{kJ/(kg.K)}, are set to give a thermal diffusivity, $\alpha$, of 0.001 \si{m^2/s}. The analytical solution for this problem for the solid temperature, $T(x,t)$, is given by
@@ -3399,7 +3399,7 @@ where $\erfc = 1 - \erf(x)$.
 
 This is a 1D problem in depth into the solid.  In FDS, the problem is solved in 2D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
 
-The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface temperature, $T_s$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_s(t) \equiv T(0,t)$.
+The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface (wall) temperature, $T_{\rm w}$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_{\rm w}(t) \equiv T(0,t)$.
 
 \begin{figure}[ht]
 \centering
@@ -3408,9 +3408,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 \label{fig:ht3d_slab}
 \end{figure}
 
-\newpage
-
-\section{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
+\subsection{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
 \label{ht3d_ibeam}
 
 The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 1.7 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
