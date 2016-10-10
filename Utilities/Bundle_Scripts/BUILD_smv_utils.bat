@@ -1,0 +1,8 @@
+@echo off
+
+call BUILD_prog_all_platforms background
+call BUILD_prog_all_platforms dem2fds
+call BUILD_prog_all_platforms fds2ascii
+call BUILD_prog_all_platforms smokediff
+call BUILD_prog_all_platforms smokezip
+call BUILD_prog_all_platforms wind2fds
