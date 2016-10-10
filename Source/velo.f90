@@ -585,7 +585,7 @@ OMX => WORK4
 OMY => WORK5
 OMZ => WORK6
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO-1-01 ===================='
 !WRITE(77,*) 'UU:'
 !WRITE(77,'(6E18.10)')  (((UU(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
@@ -617,7 +617,7 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((OMZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 
 ! Compute vorticity and stress tensor components
@@ -636,15 +636,6 @@ DO K=0,KBAR
          OMX(I,J,K) = DWDY - DVDZ
          OMY(I,J,K) = DUDZ - DWDX
          OMZ(I,J,K) = DVDX - DUDY
-IF (I==4.AND.J==1.AND.K==2) THEN
-   !WRITE(77,*) 'UU(',I,',',J,',',K,')=',UU(I,J,K)
-   !WRITE(77,*) 'UU(',I,',',J,',',K+1,')=',UU(I,J,K+1)
-   !WRITE(77,*) 'WW(',I,',',J,',',K,')=',WW(I,J,K)
-   !WRITE(77,*) 'WW(',I+1,',',J,',',K,')=',WW(I+1,J,K)
-   !WRITE(77,*) 'DUDZ(',I,',',J,',',K,')=',DUDZ
-   !WRITE(77,*) 'DWDX(',I,',',J,',',K,')=',DWDX
-ENDIF
-
          MUX = 0.25_EB*(MU(I,J+1,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I,J+1,K+1))
          MUY = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1))
          MUZ = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J+1,K)+MU(I+1,J+1,K))
@@ -801,9 +792,9 @@ DO K=1,KBAR
          DTYZDZ= RDZ(K) *(TYZP-TYZM)
          VTRM  = DTXYDX + DTYYDY + DTYZDZ
          FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - GY(I) + RRHO*(GY(I)*RHO_0(K) - VTRM - FVEC(2))
-IF (I==1.AND.J==1.AND.K==4) THEN
+!IF (MYID == 123456.AND.I==1.AND.J==1.AND.K==4) THEN
 !WRITE(77,'(A,10E14.6)') 'FVX-PART: FVX(I,J,K)=',FVX(I,J,K), WOMX, UOMZ, DUDX, DWDZ, VTRM
-ENDIF
+!ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -863,9 +854,9 @@ DO K=0,KBAR
          DTZZDZ= RDZN(K)*(TZZP-TZZM)
          VTRM  = DTXZDX + DTYZDY + DTZZDZ
          FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - GZ(I) + RRHO*(GZ(I)*0.5_EB*(RHO_0(K)+RHO_0(K+1)) - VTRM - FVEC(3))
-IF (I==1.AND.J==1.AND.K==4) THEN
+!IF (MYID == 123456.AND.I==1.AND.J==1.AND.K==4) THEN
 !WRITE(77,'(A,10E14.6)') 'FVZ-PART: FVZ(I,J,K)=',FVZ(I,J,K), UOMY, VOMX, DUDX, DVDY, VTRM
-ENDIF
+!ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -919,11 +910,11 @@ WFDS_BNDRYFUEL_IF: IF (WFDS_BNDRYFUEL) THEN
    ENDDO
 ENDIF WFDS_BNDRYFUEL_IF
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO4 ===================='
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 ! Specified patch velocity
 
@@ -933,11 +924,11 @@ IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX(DT,NM)
 
 IF (N_FACE>0) CALL IBM_VELOCITY_FLUX(DT,NM)
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO5 ===================='
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 ! Source term in manufactured solution
 
@@ -1444,11 +1435,11 @@ NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC') THEN
 
 ENDIF NO_SCARC_IF
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO6 ===================='
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 ! Set FVX, FVY and FVZ to drive velocity components at solid boundaries within obstructions towards zero
 
@@ -1509,11 +1500,11 @@ OBST_LOOP: DO N=1,N_OBST
 
 ENDDO OBST_LOOP
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO7 ===================='
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 ! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (UW or UWS)
 
@@ -1610,11 +1601,11 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO8 ===================='
 !WRITE(77,*) 'FVZ:'
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 T_USED(4)=T_USED(4)+SECOND()-TNOW
 END SUBROUTINE NO_FLUX
@@ -1645,7 +1636,7 @@ ENDIF
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO A ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
@@ -1657,7 +1648,7 @@ IF (MYID == 0) THEN
 !WRITE(77,'(6E18.10)')  (((FVZ(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
 !WRITE(77,*) 'H:'
 !WRITE(77,'(6E18.10)')  (((H(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    US = U
@@ -1689,21 +1680,21 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO A1 ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 IF (.NOT.PRES_ON_WHOLE_DOMAIN) CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
 
 ENDIF FREEZE_VELOCITY_IF
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO B ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 ! Manufactured solution (debug)
 
@@ -1727,11 +1718,12 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
       ENDDO
    ENDDO
 ENDIF
-IF (MYID == 0) THEN
+
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO C ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 
 ! No vertical velocity in Evacuation meshes
@@ -1742,11 +1734,11 @@ IF (EVACUATION_ONLY(NM)) WS = 0._EB
 
 CALL CHECK_STABILITY(DT,DT_NEW,NM)
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO D ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 IF (DT_NEW(NM)<DT_INITIAL*LIMITING_DT_RATIO .AND. (T+DT_NEW(NM)<(T_END-TWO_EPSILON_EB))) STOP_STATUS = INSTABILITY_STOP
 
@@ -1784,12 +1776,6 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    W = WS
 ELSE FREEZE_VELOCITY_IF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== VELO E ===================='
-!WRITE(77,*) 'WS:'
-!WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
-
 IF (.NOT.PRES_ON_WHOLE_DOMAIN) CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.) ! Store U velocities on OBST surfaces.
 
 DO K=1,KBAR
@@ -1820,12 +1806,6 @@ IF (.NOT.PRES_ON_WHOLE_DOMAIN) CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.) ! Store U
 
 ENDIF FREEZE_VELOCITY_IF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== VELO F ===================='
-!WRITE(77,*) 'WS:'
-!WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
-
 ! Manufactured solution (debug)
 
 IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
@@ -1847,12 +1827,6 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
          ENDDO
       ENDDO
    ENDDO
-ENDIF
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== VELO G ===================='
-!WRITE(77,*) 'WS:'
-!WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
 ENDIF
 
 ! No vertical velocity in Evacuation meshes
@@ -1908,11 +1882,11 @@ ELSE
    RHOP => RHO
 ENDIF
 
-IF (MYID == 0) THEN
+!IF (MYID == 123456) THEN
 !WRITE(77,*) '==================== VELO H ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
 
 ! Set the boundary velocity place holder to some large negative number
@@ -1980,14 +1954,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
    JJO(2) = IJKE(15,IE)
    KKO(2) = IJKE(16,IE)
 
-IF (MYID == 0.AND.II>=4.AND.II<=4.AND.KK<=5.AND.JJ==1) THEN
+!IF (MYID == 123456.AND.II>=4.AND.II<=4.AND.KK<=5.AND.JJ==1) THEN
 !WRITE(77,*) '================================================='
 !WRITE(77,*) '=== PROCESSING EDGE ', IEC,' POS:', II, JJ, KK
 !WRITE(77,*) '================================================='
 !WRITE(77,*) '==================== VELO H1 ===================='
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
    ! Get the velocity components at the appropriate cell faces
 
@@ -2079,7 +2053,6 @@ ENDIF
             IWP  = WALL_INDEX(ICPP,-IOR)
             IWPI = WALL_INDEX(ICPP,-IS2)
          ENDIF
-!WRITE(77,*) II,JJ,KK,':IWM=',IWM,': IWP=',IWP
 
          ! If both adjacent wall cells are undefined, cycle out of the loop.
 
@@ -2354,11 +2327,11 @@ ENDIF
                ENDIF
             ENDIF VEL_T_IF
 
-IF (MYID == 0.AND.II>=4.AND.II<=4.AND.KK<=5.AND.JJ==1) THEN
+!IF (MYID == 123456.AND.II>=4.AND.II<=4.AND.KK<=5.AND.JJ==1) THEN
 !WRITE(77,*) '==================== VELO H2-1  NO INTERPOLATION ====================', I_SGN
 !WRITE(77,*) 'WS:'
 !WRITE(77,'(6E18.10)')  (((WS(III,JJJ,KKK),III=0,5),JJJ=1,1),KKK=5,0,-1)
-ENDIF
+!ENDIF
 
             ! Choose the appropriate boundary condition to apply
 

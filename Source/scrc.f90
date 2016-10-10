@@ -79,7 +79,7 @@ PUBLIC SCARC_CASE                              !> Predefined ScaRC case
 PUBLIC SCARC_DEBUG                             !> Debugging parameter
 PUBLIC SCARC_LAYER                             !> Number of layers for data exchange
 PUBLIC LU_SCARC                                !> Debug file unit
-PUBLIC PRES_ON_WHOLE_DOMAIN
+PUBLIC PRES_ON_WHOLE_DOMAIN_SCRC
 
 !> ------------------------------------------------------------------------------------------------
 !> Corresponding declarations (with default settings)
@@ -453,7 +453,7 @@ INTEGER,  PARAMETER :: IS_CGSC   = 1 ! Face media type: IS_GASPHASE, IS_SOLID or
 INTEGER,  PARAMETER :: IS_UNKH   = 2 ! H unknown number.
 INTEGER,  PARAMETER :: IS_NCVARS = 2 ! Number of face variables in MESHES(NM)%CCVAR.
 
-LOGICAL :: PRES_ON_WHOLE_DOMAIN = .TRUE.
+LOGICAL :: PRES_ON_WHOLE_DOMAIN_SCRC = .TRUE.
 
 ! Cartesian Cell centered variables, actual case initialized as CC_IBM=.FALSE.:
 INTEGER :: CGSC=IS_CGSC, UNKH=IS_UNKH, NCVARS=IS_NCVARS
@@ -916,7 +916,8 @@ SELECT CASE (TRIM(SCARC_DISCRETIZATION))
    CASE ('UNSTRUCTURED')
       TYPE_DISCRET = NSCARC_DISCRET_UNSTRUCTURED
 END SELECT
-PRES_ON_WHOLE_DOMAIN = (TYPE_DISCRET == NSCARC_DISCRET_STRUCTURED)
+PRES_ON_WHOLE_DOMAIN_SCRC = (TYPE_DISCRET == NSCARC_DISCRET_STRUCTURED)
+PRES_ON_WHOLE_DOMAIN = PRES_ON_WHOLE_DOMAIN_SCRC
 
 !> ------------------------------------------------------------------------------------------------
 !> set type of global solver
@@ -1974,26 +1975,26 @@ DO NM = 1, NMESHES
    DO NL = NLMIN, NLMAX
       IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) THEN
          SL => SCARC(NM)%LEVEL(NL)
-         WRITE(LU_SCARC,*) '============================================================='
-         WRITE(LU_SCARC,*) '     SETUP_CCVAR_EXCHANGE ', NL
-         WRITE(LU_SCARC,*) '============================================================='
+         WRITE(77,*) '============================================================='
+         WRITE(77,*) '     SETUP_CCVAR_EXCHANGE ', NL
+         WRITE(77,*) '============================================================='
          IF (SL%NX==8) THEN
-            WRITE(LU_SCARC,*) 'CCVAR(.,.,.,CGSC)'
-            WRITE(LU_SCARC,'(10I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
-            WRITE(LU_SCARC,*) 'CCVAR(.,.,.,UNKH)'
-            WRITE(LU_SCARC,'(10I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+            WRITE(77,*) 'CCVAR(.,.,.,CGSC)'
+            WRITE(77,'(10I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+            WRITE(77,*) 'CCVAR(.,.,.,UNKH)'
+            WRITE(77,'(10I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
          ELSE
-            WRITE(LU_SCARC,*) 'CCVAR(.,.,.,CGSC)'
-            WRITE(LU_SCARC,'(6I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
-            WRITE(LU_SCARC,*) 'CCVAR(.,.,.,UNKH)'
-            WRITE(LU_SCARC,'(6I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+            WRITE(77,*) 'CCVAR(.,.,.,CGSC)'
+            WRITE(77,'(6I6)') (((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
+            WRITE(77,*) 'CCVAR(.,.,.,UNKH)'
+            WRITE(77,'(6I6)') (((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=0, SL%NY+1), IZ=0, SL%NZ+1)
          ENDIF
-         WRITE(LU_SCARC,*) 'NUNKH_LOC=', SL%NUNKH_LOC
-         WRITE(LU_SCARC,*) 'NCS=', SL%NCS
-         WRITE(LU_SCARC,*) 'NX =', SL%NX
-         WRITE(LU_SCARC,*) 'NY =', SL%NY
-         WRITE(LU_SCARC,*) 'NZ =', SL%NZ
-      ENDIF
+         WRITE(77,*) 'NUNKH_LOC=', SL%NUNKH_LOC
+         WRITE(77,*) 'NCS=', SL%NCS
+         WRITE(77,*) 'NX =', SL%NX
+         WRITE(77,*) 'NY =', SL%NY
+         WRITE(77,*) 'NZ =', SL%NZ
+       ENDIF
    ENDDO
 
 ENDDO
@@ -2393,22 +2394,33 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
       ENDDO
       WRITE(LU_SCARC,*) 'M%N_OBST=',M%N_OBST
       WRITE(LU_SCARC,*) 'M%N_WALL_CELLS=',M%N_WALL_CELLS
-      WRITE(LU_SCARC,*) 'M%WALLX(.)%BOUNDARY_TYPE:'
+      WRITE(LU_SCARC,*) 'M%CELL_INDEX(.,.,.):'
+      WRITE(LU_SCARC,'(6i4)') (((M%CELL_INDEX(III,JJJ,KKK), III=0,5,1), JJJ=1,1,-1),KKK=5,0,-1)
+      WRITE(LU_SCARC,*) 'M%SOLID(.):'
+      WRITE(LU_SCARC,'(8i4)') (M%SOLID(IWG), IWG=1, SLF%NCS)
+      WRITE(LU_SCARC,*) 'M%WALL(.)%BOUNDARY_TYPE:'
       WRITE(LU_SCARC,'(8i4)') (M%WALL(IWG)%BOUNDARY_TYPE, IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-3):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-3), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-2):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-2), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,-1):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,-1), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,1):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,1), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,2):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,2), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,3):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,3), IWG=1, SLF%NW)
-      WRITE(LU_SCARC,*) 'M%WALL_INDEX(.,3):'
-      WRITE(LU_SCARC,'(8i4)') (M%WALL_INDEX(IWG,3), IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL(.)% II, JJ, KK:'
+      WRITE(LU_SCARC,'(i4,a,3i8)') ( IWG, ' : ', &
+                               M%WALL(IWG)%ONE_D%II,  &
+                               M%WALL(IWG)%ONE_D%JJ,  &
+                               M%WALL(IWG)%ONE_D%KK,  &
+                               IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL(.)% IIG, JJG, KKG:'
+      WRITE(LU_SCARC,'(i4,a,3i8)') ( IWG, ' : ', &
+                               M%WALL(IWG)%ONE_D%IIG,  &
+                               M%WALL(IWG)%ONE_D%JJG,  &
+                               M%WALL(IWG)%ONE_D%KKG,  &
+                               IWG=1, SLF%NW)
+      WRITE(LU_SCARC,*) 'M%WALL_INDEX:'
+      WRITE(LU_SCARC,'(i4,a,6i8)') ( IWG, ' : ', &
+                               M%WALL_INDEX(IWG, 1),  &
+                               M%WALL_INDEX(IWG,-1),  &
+                               M%WALL_INDEX(IWG, 2),  &
+                               M%WALL_INDEX(IWG,-2),  &
+                               M%WALL_INDEX(IWG, 3),  &
+                               M%WALL_INDEX(IWG,-3),  &
+                               IWG=1, SLF%NCS)
       WRITE(LU_SCARC,*) 'M%WALL(.)%ONE_D% IOR,II,JJ,KK:'
       DO IWG = 1, SLF%NW
          WRITE(LU_SCARC,'(5I6)') &
@@ -3108,7 +3120,7 @@ ALLOCATE(OSL%IWL_TO_ICO(NWL), STAT=IERR)
 CALL ChkMemErr('SCARC_SETUP_OMAPPINGS','IWL_TO_ICO',IERR)
 OSL%IWL_TO_ICO = 0
 
-IF (PRES_ON_WHOLE_DOMAIN) THEN
+IF (PRES_ON_WHOLE_DOMAIN_SCRC) THEN
    ALLOCATE(OSL%ICN_TO_ICE(1:OSL%NCS), STAT=IERR)             !> ACHTUNG: kann verbessert werden??? riesig!
    CALL ChkMemErr('SCARC_SETUP_OMAPPINGS','ICN_TO_ICE',IERR)
    OSL%ICN_TO_ICE = 0
@@ -4100,13 +4112,18 @@ END SUBROUTINE SCARC_SETUP_SYSTEM
 SUBROUTINE SCARC_SETUP_MATRIX (NM, NL)
 INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: IX, IY, IZ
-INTEGER :: IC, IP, IERR
+INTEGER :: ICNUM, ICTYPE, IWNUM, IWTYPE
+INTEGER :: IC, ICI, IP, IERR, IOR0
+INTEGER :: IWM1, IWP1, IWM2, IWP2, IWM3, IWP3
+INTEGER :: IBM1, IBP1, IBM2, IBP2, IBM3, IBP3
+TYPE (MESH_TYPE), POINTER :: M
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 #ifdef WITH_MKL
 TYPE (SCARC_MKL_TYPE), POINTER :: SM
 #endif
 
 SL => SCARC(NM)%LEVEL(NL)
+M => MESHES(NM)
 
 ALLOCATE (SL%A_ROW(SL%NCS+10), STAT=IERR)
 CALL CHKMEMERR ('SCARC_SETUP_MATRIX', 'SL%A_ROW', IERR)
@@ -4166,23 +4183,78 @@ SELECT CASE (TYPE_DIMENSION)
       DO IZ = 1, SL%NZ
          DO IX = 1, SL%NX
 
-            IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(IX, IY, IZ, CGSC)/=IS_GASPHASE) CYCLE
-            IC = SL%CCVAR(IX, IY, IZ, UNKH)
+            IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SL%CCVAR(IX, IY, IZ, CGSC)/=IS_GASPHASE) CYCLE
 
+            IC = SL%CCVAR(IX, IY, IZ, UNKH)
+            ICI = M%CELL_INDEX(IX, IY, IZ)
+
+            !> ACHTUNG, warum sind hier die IOR-Richtungen vertauscht ????
+            IWP1 = M%WALL_INDEX(ICI,  1)
+            IWM1 = M%WALL_INDEX(ICI, -1)
+
+            IWP3 = M%WALL_INDEX(ICI,  3)
+            IWM3 = M%WALL_INDEX(ICI, -3)
+
+            IBP1 = M%WALL(IWP1)%BOUNDARY_TYPE
+            IBM1 = M%WALL(IWM1)%BOUNDARY_TYPE
+
+            IBP3 = M%WALL(IWP3)%BOUNDARY_TYPE
+            IBM3 = M%WALL(IWM3)%BOUNDARY_TYPE
+
+            IWP2 = -99
+            IWM2 = -99
+
+            IBP2 = -99
+            IBM2 = -99
+
+            IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) &
+              WRITE(LU_SCARC,1001) IX,IY,IZ,IC,ICI,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IBP1,IBM1,IBP2,IBM2,IBP3,IBM3
             CALL SCARC_SETUP_MATRIX_MAINDIAG (IC, IP, IX, IY, IZ, NM, NL)
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 3
-            CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 3, IC, IP, IZ, &
-                 SL%CCVAR(IX, 1, IZ-1, CGSC), SL%CCVAR(IX, 1, IZ-1, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, 1
-            CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 1, IC, IP, IX, &
-                 SL%CCVAR(IX-1, 1, IZ, CGSC), SL%CCVAR(IX-1, 1, IZ, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -1
-            CALL SCARC_SETUP_MATRIX_SUBDIAG  (-1, IC, IP, IX, &
-                 SL%CCVAR(IX+1, 1, IZ, CGSC), SL%CCVAR(IX+1, 1, IZ, UNKH), NM, NL)
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) '=====>> SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC, -3
-            CALL SCARC_SETUP_MATRIX_SUBDIAG  (-3, IC, IP, IZ, &
-                 SL%CCVAR(IX, 1, IZ+1, CGSC), SL%CCVAR(IX, 1, IZ+1, UNKH), NM, NL)
+            !> IOR = 1
+            IOR0 = 1
+            IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+            IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+            IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+               ICNUM  = SL%CCVAR(IX-1, IY, IZ, UNKH)
+               ICTYPE = SL%CCVAR(IX-1, IY, IZ, CGSC)
+               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX-1,IY,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+               CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IX, ICTYPE, ICNUM, NM, NL)
+            ENDIF
+
+            !> IOR = -1
+            IOR0 = -1
+            IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+            IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+            IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+               ICNUM  = SL%CCVAR(IX+1, IY, IZ, UNKH)
+               ICTYPE = SL%CCVAR(IX+1, IY, IZ, CGSC)
+               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX+1,IY,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+               CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IX, ICTYPE, ICNUM, NM, NL)
+            ENDIF
+
+            !> IOR = 3
+            IOR0 = 3
+            IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+            IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+            IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+               ICNUM  = SL%CCVAR(IX, IY, IZ-1, UNKH)
+               ICTYPE = SL%CCVAR(IX, IY, IZ-1, CGSC)
+               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY,IZ-1,IOR0,IC,IWNUM,ICNUM,ICTYPE
+               CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IZ, ICTYPE, ICNUM, NM, NL)
+            ENDIF
+
+            !> IOR = -3
+            IOR0 = -3
+            IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+            IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+            IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+               ICNUM  = SL%CCVAR(IX, IY, IZ+1, UNKH)
+               ICTYPE = SL%CCVAR(IX, IY, IZ+1, CGSC)
+               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY,IZ+1,IOR0,IC,IWNUM,ICNUM,ICTYPE
+               CALL SCARC_SETUP_MATRIX_SUBDIAG  (IOR0, IC, IP, IZ, ICTYPE, ICNUM, NM, NL)
+            ENDIF
+
 
          ENDDO
       ENDDO
@@ -4197,24 +4269,100 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'SETTING UP MATRIX FOR UNS
          DO IY = 1, SL%NY
             DO IX = 1, SL%NX
 
-               IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(IX, IY, IZ, CGSC)/=IS_GASPHASE) CYCLE
-               IC = SL%CCVAR(IX, IY, IZ, UNKH)
+               IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SL%CCVAR(IX, IY, IZ, CGSC)/=IS_GASPHASE) CYCLE
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'SETTING UP MATRIX ENTRY FOR ',IX,IY,IZ,IC
+               IC  = SL%CCVAR(IX, IY, IZ, UNKH)
+               ICI = M%CELL_INDEX(IX, IY, IZ)
+
+               IWP1 = M%WALL_INDEX(ICI,  1)
+               IWM1 = M%WALL_INDEX(ICI, -1)
+
+               IWP2 = M%WALL_INDEX(ICI,  2)
+               IWM2 = M%WALL_INDEX(ICI, -2)
+
+               IWP3 = M%WALL_INDEX(ICI,  3)
+               IWM3 = M%WALL_INDEX(ICI, -3)
+
+               IBP1 = M%WALL(IWP1)%BOUNDARY_TYPE
+               IBM1 = M%WALL(IWM1)%BOUNDARY_TYPE
+
+               IBP2 = M%WALL(IWP2)%BOUNDARY_TYPE
+               IBM2 = M%WALL(IWM2)%BOUNDARY_TYPE
+
+               IBP3 = M%WALL(IWP3)%BOUNDARY_TYPE
+               IBM3 = M%WALL(IWM3)%BOUNDARY_TYPE
+
+               IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) &
+                 WRITE(LU_SCARC,1001) IX,IY,IZ,IC,ICI,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IBP1,IBM1,IBP2,IBM2,IBP3,IBM3
                CALL SCARC_SETUP_MATRIX_MAINDIAG (IC, IP, IX, IY, IZ, NM, NL)
 
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 3, IC, IP, IZ, &
-                    SL%CCVAR(IX, IY, IZ-1, CGSC), SL%CCVAR(IX, IY, IZ-1, UNKH), NM, NL)
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 2, IC, IP, IY, &
-                    SL%CCVAR(IX, IY-1, IZ, CGSC), SL%CCVAR(IX, IY-1, IZ, UNKH), NM, NL)
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  ( 1, IC, IP, IX, &
-                    SL%CCVAR(IX-1, IY, IZ, CGSC), SL%CCVAR(IX-1, IY, IZ, UNKH), NM, NL)
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  (-1, IC, IP, IX, &
-                    SL%CCVAR(IX+1, IY, IZ, CGSC), SL%CCVAR(IX+1, IY, IZ, UNKH), NM, NL)
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  (-2, IC, IP, IY, &
-                    SL%CCVAR(IX, IY+1, IZ, CGSC), SL%CCVAR(IX, IY+1, IZ, UNKH), NM, NL)
-               CALL SCARC_SETUP_MATRIX_SUBDIAG  (-3, IC, IP, IZ, &
-                    SL%CCVAR(IX, IY, IZ+1, CGSC), SL%CCVAR(IX, IY, IZ+1, UNKH), NM, NL)
+!! ACHTUNG, WARUM IST BEI WALL_INDEX DIE IOR-RICHTUNG VERTAUSCHT ???
+
+               !> IOR = 1
+               IOR0 = 1
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX-1, IY, IZ, UNKH)
+                  ICTYPE = SL%CCVAR(IX-1, IY, IZ, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX-1,IY,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IX, ICTYPE, ICNUM, NM, NL)
+               ENDIF
+
+               !> IOR = -1
+               IOR0 = -1
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX+1, IY, IZ, UNKH)
+                  ICTYPE = SL%CCVAR(IX+1, IY, IZ, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX+1,IY,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IX, ICTYPE, ICNUM, NM, NL)
+               ENDIF
+
+               !> IOR = 2
+               IOR0 = 2
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX, IY-1, IZ, UNKH)
+                  ICTYPE = SL%CCVAR(IX, IY-1, IZ, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY-1,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IY, ICTYPE, ICNUM, NM, NL)
+               ENDIF
+
+               !> IOR = -2
+               IOR0 = -2
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX, IY+1, IZ, UNKH)
+                  ICTYPE = SL%CCVAR(IX, IY+1, IZ, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY+1,IZ,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IY, ICTYPE, ICNUM, NM, NL)
+               ENDIF
+
+               !> IOR = 3
+               IOR0 = 3
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX, IY, IZ-1, UNKH)
+                  ICTYPE = SL%CCVAR(IX, IY, IZ-1, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY,IZ-1,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG(IOR0, IC, IP, IZ, ICTYPE, ICNUM, NM, NL)
+               ENDIF
+
+               !> IOR = -3
+               IOR0 = -3
+               IWNUM  = M%WALL_INDEX(ICI, -IOR0)
+               IWTYPE = M%WALL(IWNUM)%BOUNDARY_TYPE
+               IF (IWNUM==0.OR.IWTYPE==INTERPOLATED_BOUNDARY) THEN
+                  ICNUM  = SL%CCVAR(IX, IY, IZ+1, UNKH)
+                  ICTYPE = SL%CCVAR(IX, IY, IZ+1, CGSC)
+                  IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,1002) IX,IY,IZ+1,IOR0,IC,IWNUM,ICNUM,ICTYPE
+                  CALL SCARC_SETUP_MATRIX_SUBDIAG  (IOR0, IC, IP, IZ, ICTYPE, ICNUM, NM, NL)
+               ENDIF
 
             ENDDO
          ENDDO
@@ -4227,7 +4375,7 @@ SL%NAS             = IP -1                                   !> set correct numb
 
 
 IF (TYPE_DEBUG >= NSCARC_DEBUG_EXTREME) THEN
-   WRITE(LU_SCARC,*) ' IN SETUP_MATRIX with FULL ENTRIES'
+   WRITE(LU_SCARC,*) 'IN SETUP_MATRIX with FULL ENTRIES'
    WRITE(LU_SCARC,*) 'SETUP_MATRIX: SL%NC =',SL%NC
    WRITE(LU_SCARC,*) 'SETUP_MATRIX: SL%NCS=',SL%NCS
    WRITE(LU_SCARC,*) 'SETUP_MATRIX: SL%NA=',SL%NA
@@ -4237,6 +4385,9 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_EXTREME) THEN
    WRITE(LU_SCARC,*) 'SETUP_MATRIX: SIZE(SL%A_COL)=',SIZE(SL%A_COL)
 ENDIF
 
+1001 FORMAT('SETTING UP ENTRY FOR DIAG   : IX,IY,IZ=',3I4,': IC  =',I4,': ICI=',I4,': IWs=',6I4,': IBs=',6I4)
+1002 FORMAT('SETTING UP ENTRY FOR SUBDIAG: IX,IY,IZ=',3I4,': IOR = ',I4,' : IC=',I4,&
+            ': IWNUM=',I4,': ICNUM=',I4,': ICTYPE=',I4)
 END SUBROUTINE SCARC_SETUP_MATRIX
 
 
@@ -4302,7 +4453,7 @@ M  => MESHES(NM)
 DH1 = SL%FACE(IOR0)%DH(IPTR-1)
 DH2 = SL%FACE(IOR0)%DH(IPTR)
    
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,'(a,i3)') '------------- SETUP_MATRIX_SUBDIAG:', IOR0
    WRITE(LU_SCARC,'(5(a,i4))') 'IOR0=',IOR0,': IC=',IC,': IP=',IP,': IPTR=',IPTR,': NBR_TYPE=',NBR_TYPE
    WRITE(LU_SCARC,*) 'DH1 = ', DH1
@@ -4311,7 +4462,7 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,*) 'IPTR     = ', IPTR    
    WRITE(LU_SCARC,*) 'SL%FACE(',IOR0,')%NUM_NEIGHBORS=',SL%FACE(IOR0)%NUM_NEIGHBORS
    WRITE(LU_SCARC,*) 'SL%FACE(',IOR0,')%NFC          =',SL%FACE(IOR0)%NFC
-   WRITE(LU_SCARC,*) 'PRES_ON_WHOLE_DOMAIN = ', PRES_ON_WHOLE_DOMAIN
+   WRITE(LU_SCARC,*) 'PRES_ON_WHOLE_DOMAIN_SCRC = ', PRES_ON_WHOLE_DOMAIN_SCRC
 ENDIF
    
 !> set bounds and step sizes depending on orientation of face (lower or upper subdiagonal)
@@ -4323,23 +4474,23 @@ ELSE
    DSCAL = 2.0_EB/(DH2*(DH1+DH2))
 ENDIF
 
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'BINTERNAL: ',BINTERNAL
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'BINTERNAL: ',BINTERNAL
 
 !> if IC is an internal cell of the mesh, compute usual matrix contribution for corresponding subdiagonal
 IF (BINTERNAL) THEN
 
-   IF (PRES_ON_WHOLE_DOMAIN .OR. NBR_TYPE == IS_GASPHASE) THEN
+   IF (PRES_ON_WHOLE_DOMAIN_SCRC .OR. NBR_TYPE == IS_GASPHASE) THEN
    
       SL%A(IP)     = SL%A(IP) + DSCAL
       SL%A_COL(IP) = NBR_NUM
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': A_COL(',IP,') =',SL%A_COL(IP)
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': A_COL(',IP,') =',SL%A_COL(IP)
          
 #ifdef WITH_MKL
       IF ((TYPE_MKL == NSCARC_MKL_GLOBAL .AND. NL == NLEVEL_MIN) .OR. &
           (TYPE_MKL == NSCARC_MKL_COARSE .AND. NL == NLEVEL_MAX)) THEN
          SM => SCARC(NM)%MKL(NL)
          SM%AG_COL(IP)= SL%A_COL(IP) + NCS_OFFSET(NM, NL)
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': AG_COL(',IP,')=',SM%AG_COL(IP)
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': AG_COL(',IP,')=',SM%AG_COL(IP)
       ENDIF
       IP = IP + 1
 
@@ -4354,7 +4505,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: HAS NEIGHBOR???
       SL%A(IP)     = SL%A(IP) + DSCAL
       SL%A_COL(IP) = SL%WALL(IW)%ICE(1)
       !SL%A_COL(IP) = SL%WALL(IW)%ICO
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': A_COL(',IP,') =',SL%A_COL(IP)
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': A_COL(',IP,') =',SL%A_COL(IP)
          
 #ifdef WITH_MKL
       IF ((TYPE_MKL == NSCARC_MKL_GLOBAL .AND. NL == NLEVEL_MIN) .OR. &
@@ -4364,7 +4515,7 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': A_C
          IY = SL%WALL(IW)%IYG
          IZ = SL%WALL(IW)%IZG
          SM%AG_COL(IP) = SL%CCVAR(IX, IY, IZ, UNKH) + NCS_OFFSET(SL%WALL(IW)%NOM, NL)
-IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': AG_COL(',IP,')=',SM%AG_COL(IP)
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': AG_COL(',IP,')=',SM%AG_COL(IP)
       ENDIF
 #endif
          
@@ -4373,7 +4524,7 @@ IF (TYPE_DEBUG >= NSCARC_DEBUG_MUCH) WRITE(LU_SCARC,*) 'EXTERNAL: IC=',IC,': AG_
    
 ENDIF
 
-IF (TYPE_DEBUG >= NSCARC_DEBUG_EXTREME) THEN
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
    WRITE(LU_SCARC,'(a, 10f12.6)') 'DH=',SL%FACE(IOR0)%DH
    WRITE(LU_SCARC,*) 'DSCAL = ', DSCAL
    WRITE(LU_SCARC,*) 'IOR0 = ', IOR0
@@ -5229,7 +5380,7 @@ TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
 SL => SCARC(NM)%LEVEL(NL)
 
-IF (PRES_ON_WHOLE_DOMAIN) THEN
+IF (PRES_ON_WHOLE_DOMAIN_SCRC) THEN
    NW = SL%N_EXTERNAL_WALL_CELLS
 ELSE
    NW = SL%N_EXTERNAL_WALL_CELLS + SL%N_INTERNAL_WALL_CELLS
@@ -5280,7 +5431,7 @@ SELECT_DIMENSION: SELECT CASE (TYPE_DIMENSION)
 
          ITYPE = SL%CCVAR(I,J,K,CGSC)
 
-         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.ITYPE/=IS_GASPHASE) CYCLE
+         IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.ITYPE/=IS_GASPHASE) CYCLE
 
          SL%WALL(IW)%ICW = SL%CCVAR(I, J, K, UNKH)
          IC = SL%CCVAR(I, J, K, UNKH)
@@ -5324,7 +5475,7 @@ IF (TYPE_DEBUG > NSCARC_DEBUG_LESS)  WRITE(LU_SCARC,'(A,8i4)') &
          NOM  = SL%WALL(IW)%NOM
          ITYPE = SL%CCVAR(I,J,K,CGSC)
 
-         IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.ITYPE/=IS_GASPHASE) CYCLE
+         IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.ITYPE/=IS_GASPHASE) CYCLE
 
          SL%WALL(IW)%ICW = SL%CCVAR(I, J, K, UNKH)
          IC = SL%CCVAR(I, J, K, UNKH)
@@ -5396,14 +5547,14 @@ MESHES_LOOP: DO NM = 1, NMESHES
       SL => SCARC(NM)%LEVEL(NL)
 
  ! ACHTUNG: HIER CHECKEN !!
- !     IF (PRES_ON_WHOLE_DOMAIN) THEN
+ !     IF (PRES_ON_WHOLE_DOMAIN_SCRC) THEN
  !        NC = SL%NCE
  !     ELSE
  !        NC = SL%NCS
  !     ENDIF
       NC = SL%NCE
 
-IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'PRES_ON_WHOLE_DOMAIN=',PRES_ON_WHOLE_DOMAIN
+IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'PRES_ON_WHOLE_DOMAIN_SCRC=',PRES_ON_WHOLE_DOMAIN_SCRC
 IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'ALLOCATING VECTORS IN LENGTH ', NC, SL%NCE
 
       SELECT_METHOD: SELECT CASE (TRIM(SCARC_METHOD))
@@ -10783,7 +10934,7 @@ REAL(EB) FUNCTION SCARC_SCALAR_PRODUCT(NVECTOR1, NVECTOR2, NL)
 INTEGER, INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), DIMENSION(:)    , POINTER ::  V1, V2
 INTEGER , POINTER :: NC
-INTEGER  :: NM, IERR, NL0 
+INTEGER  :: NM, IERR, NL0 , IC
 #if defined(WITH_MKL)
 REAL(EB) :: DDOT
 EXTERNAL :: DDOT
@@ -10840,7 +10991,7 @@ REAL(EB) FUNCTION SCARC_L2NORM(NVECTOR1, NL)
 INTEGER, INTENT(IN):: NVECTOR1, NL
 REAL(EB), DIMENSION(:), POINTER ::  V
 INTEGER , POINTER :: NC
-INTEGER  :: NM, IERR
+INTEGER  :: NM, IERR, IC
 #if defined(WITH_MKL)
 REAL(EB) :: DDOT
 EXTERNAL :: DDOT
@@ -11390,7 +11541,7 @@ END SUBROUTINE SCARC_RESET_PARENT
 #ifdef WITH_MKL
 SUBROUTINE SCARC_METHOD_CLUSTER(NSCOPE, NVECTOR)
 INTEGER, INTENT(IN) :: NSCOPE, NVECTOR
-INTEGER ::  NM, NL, IC, IP
+INTEGER ::  NM, NL, IC, IP, IX, IY, IZ
 REAL (EB) :: TNOW
 REAL(EB), POINTER, DIMENSION(:) :: XS, FS
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
@@ -11419,6 +11570,7 @@ DO NM = 1, NMESHES
    CALL POINT_TO_VECTOR (MKL%X, NM, NL, XS)
    CALL POINT_TO_VECTOR (MKL%F, NM, NL, FS)
 
+   FS = 1.0_EB    
    IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS) THEN
       !WRITE(LU_SCARC,*) 'PT=',SM%PT
       WRITE(LU_SCARC,*) 'MAXFCT=',SM%MAXFCT
@@ -11430,16 +11582,60 @@ DO NM = 1, NMESHES
       WRITE(LU_SCARC,*) 'MSGLVL=',SM%MSGLVL
       WRITE(LU_SCARC,*) 'ERROR3=',SM%ERROR
       WRITE(LU_SCARC,*) 'SL%NCS=', SL%NCS
-      WRITE(LU_SCARC,*) 'SL%F='
-      WRITE(LU_SCARC,'(4F18.6)') FS
+      WRITE(LU_SCARC,*) 'LN4: SL%F='
+      WRITE(LU_SCARC,'(4F18.6)') (FS(IC),IC=1,SL%NCS)
       WRITE(LU_SCARC,*) 'SL%X='
-      WRITE(LU_SCARC,'(4F18.6)') XS
+      WRITE(LU_SCARC,'(4F18.6)') (XS(IC),IC=1,SL%NCS)
+      WRITE(LU_SCARC,*) 'SIZE(SM%ASYM)=',SIZE(SM%ASYM)
       DO IC=1,SL%NCS
          DO IP=SM%ASYM_ROW(IC),SM%ASYM_ROW(IC+1)-1
-             WRITE(LU_SCARC,'(2I8,F18.12)') IC,SM%ASYM_COL(IP),SM%ASYM(IP)
+             WRITE(LU_SCARC,'(2I8,F18.12)') IC,SM%ASYM_COL(IP),SM%ASYM(IP)/15.625_EB
          ENDDO
+         WRITE(LU_SCARC,*) 
       ENDDO
    ENDIF
+
+!IF (MYID == 0.AND.TYPE_DEBUG> NSCARC_DEBUG_NONE) THEN
+IF (MYID == 1234) THEN
+WRITE(77,*) '============================================================='
+WRITE(77,*) '     SETUP_CCVAR_EXCHANGE ', NL
+WRITE(77,*) '============================================================='
+WRITE(77,*) 'CCVAR(.,.,.,CGSC)'
+DO IZ = SL%NZ+1,1, -1
+WRITE(77,'(10I6)') ((SL%CCVAR(IX, IY, IZ, CGSC), IX=0, SL%NX+1), IY=SL%NY+1,0, -1)
+WRITE(77,*) 
+ENDDO
+WRITE(77,*) 'CCVAR(.,.,.,UNKH)'
+DO IZ = SL%NZ+1,1, -1
+WRITE(77,'(10I6)') ((SL%CCVAR(IX, IY, IZ, UNKH), IX=0, SL%NX+1), IY=SL%NY+1,0, -1)
+WRITE(77,*) 
+ENDDO
+WRITE(77,*) 'CALLING CLUSTER - inside'
+WRITE(77,*) 'LN4: '
+WRITE(77,*) 'F ', SL%NCS
+WRITE(77,'(8E14.6)') (FS(IC),IC=503,440,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=439,376,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=375,315,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=314,254,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=253,193,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=192,129,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=128,65,-1)
+WRITE(77,*) 'F '
+WRITE(77,'(8E14.6)') (FS(IC),IC=64,1,-1)
+DO IC=1,SL%NCS
+   DO IP=SM%ASYM_ROW(IC),SM%ASYM_ROW(IC+1)-1
+       WRITE(77,'(2I8,F18.12)') IC,SM%ASYM_COL(IP),-SM%ASYM(IP)/15.625_EB
+   ENDDO
+   WRITE(77,*) 
+ENDDO
+ENDIF
+   
    
    CALL SCARC_DEBUG_LEVEL (MKL%X, 'SCARC_METHOD_CLUSTER', 'X INIT', NL)
    CALL SCARC_DEBUG_LEVEL (MKL%F, 'SCARC_METHOD_CLUSTER', 'F INIT', NL)
@@ -11452,6 +11648,14 @@ DO NM = 1, NMESHES
    IF (SM%ERROR /= 0) THEN
       WRITE(LU_SCARC,*) 'The following ERROR was detected: ', SM%ERROR
    ENDIF
+
+!IF (MYID == 0.AND.TYPE_DEBUG> NSCARC_DEBUG_NONE) THEN
+IF (MYID == 1234) THEN
+WRITE(77,*) 'LN5: SL%F='
+WRITE(77,'(4E25.16)') (FS(IC),IC=1,SL%NCS)
+WRITE(77,*) 'SL%X='
+WRITE(77,'(4E25.16)') (XS(IC),IC=1,SL%NCS)
+ENDIF
 
    CALL SCARC_DEBUG_LEVEL (MKL%X, 'SCARC_METHOD_CLUSTER', 'X FINAL', NL)
    CALL SCARC_DEBUG_LEVEL (MKL%F, 'SCARC_METHOD_CLUSTER', 'F FINAL', NL)
@@ -11468,6 +11672,15 @@ DO NM = 1, NMESHES
       WRITE(LU_SCARC,*) 'SL%X='
       WRITE(LU_SCARC,'(4F18.6)') XS
    ENDIF
+
+!IF (MYID == 0.AND.TYPE_DEBUG> NSCARC_DEBUG_NONE) THEN
+IF (MYID == 1234) THEN
+WRITE(77,*) 'LN6: SL%F='
+WRITE(77,'(4E25.16)') FS
+WRITE(77,*) 'SL%X='
+WRITE(77,'(4E25.16)') XS
+ENDIF
+
 !WRITE(*,*) 'FINAL PARDISO: SCARC(1)%X:'
 !WRITE(*,'(8f15.6)') (SCARC(1)%LEVEL(NLEVEL_MIN)%X(I), I=1, SCARC(1)%LEVEL(NL)%NC)
 
@@ -11563,10 +11776,6 @@ DO NM = 1, NMESHES
       WRITE(LU_SCARC,*) 'SL%X='
       WRITE(LU_SCARC,'(4F18.6)') (XS(IC),IC=1,SL%NCS)
    ENDIF
-      !WRITE(77,*) 'LN5: SL%F='
-      !WRITE(77,'(4F18.6)') (FS(IC),IC=1,SL%NCS)
-      !WRITE(77,*) 'SL%X='
-      !WRITE(77,'(4F18.6)') (XS(IC),IC=1,SL%NCS)
 
    CALL SCARC_DEBUG_LEVEL (MKL%X, 'SCARC_METHOD_PARDISO', 'X FINAL', NL)
    CALL SCARC_DEBUG_LEVEL (MKL%F, 'SCARC_METHOD_PARDISO', 'F FINAL', NL)
@@ -11575,6 +11784,7 @@ DO NM = 1, NMESHES
       CALL SCARC_FINISH_SOLVER  (NLEVEL_MIN)
       CALL SCARC_UPDATE_GHOSTCELLS (NLEVEL_MIN)
    ENDIF
+
    IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS) THEN
       WRITE(LU_SCARC,*) '------------------- FINISH ---------------------'
       WRITE(LU_SCARC,*) 'SL%F='
@@ -12533,7 +12743,7 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
             DO K = 1, M%KBAR
                DO I = 1, M%IBAR
 
-                  IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%CCVAR(I,1,K,CGSC) /= IS_GASPHASE) CYCLE
+                  IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.SL%CCVAR(I,1,K,CGSC) /= IS_GASPHASE) CYCLE
                   IC = SL%CCVAR(I,1,K,UNKH)
 
                   SL%F(IC) = M%PRHS (I, 1, K)
@@ -12567,7 +12777,7 @@ ENDIF
 
                IOR0 = SL%WALL(IW)%IOR
 
-               IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(I,1,K,CGSC) /= IS_GASPHASE) CYCLE
+               IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SL%CCVAR(I,1,K,CGSC) /= IS_GASPHASE) CYCLE
                IC = SL%CCVAR(I,1,K,UNKH)
 
                !IC   = SL%WALL(IW)%ICW
@@ -12619,7 +12829,7 @@ ENDIF
             DO K = 1, M%KBAR
                DO J = 1, M%JBAR
                   DO I = 1, M%IBAR
-                     IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
+                     IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
                      IC = SL%CCVAR(I,J,K,UNKH)
                      SL%F(IC) = M%PRHS (I, J, K)
                      IF (PREDICTOR) THEN
@@ -12646,7 +12856,7 @@ ENDIF
 
                IOR0 = SL%WALL(IW)%IOR
 
-               IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
+               IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
                IC = SL%CCVAR(I,J,K,UNKH)
 
                SELECT CASE (IOR0)
@@ -12921,7 +13131,7 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
                DO IZ_CO = 1, NZ_CO
                   DO IX_CO = 1, NX_CO
 
-                     IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%CCVAR(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                     IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SLC%CCVAR(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
 
                      IX_FI = 2*IX_CO
                      IZ_FI = 2*IZ_CO
@@ -12951,7 +13161,7 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
                   DO IY_CO = 1, NY_CO
                      DO IX_CO = 1, NX_CO
 
-                        IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%CCVAR(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SLC%CCVAR(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
 
                         IX_FI = 2*IX_CO
                         IY_FI = 2*IY_CO
@@ -13072,7 +13282,7 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
                DO IZ_CO = 1, NZ_CO
                   DO IX_CO = 1, NX_CO
 
-                     IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%CCVAR(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                     IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.SLC%CCVAR(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
 
                      IX_FI = 2*IX_CO
                      IY_FI = 1
@@ -13102,7 +13312,7 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
                   DO IY_CO = 1, NY_CO
                      DO IX_CO = 1, NX_CO
 
-                        IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%CCVAR(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC.AND.SLC%CCVAR(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
 
                         IX_FI = 2*IX_CO
                         IY_FI = 2*IY_CO
@@ -13201,7 +13411,7 @@ DO NM = 1, NMESHES
    DO K = 1, M%KBAR
       DO J = 1, M%JBAR
          DO I = 1, M%IBAR
-            IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
+            IF (.NOT.PRES_ON_WHOLE_DOMAIN_SCRC .AND. SL%CCVAR(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
             IC = SL%CCVAR(I,J,K,UNKH)
             HP(I, J, K) = SL%X(IC)
 IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) '1: HP(',I,',',J,',',K,')=',HP(I,J,K)
@@ -13675,7 +13885,7 @@ MESH_PACK_LOOP: DO NM = 1, NMESHES
                !ZSUM = VECTOR(SL%CCVAR(IX, IY, IZ, UNKH))
                !OS%SEND_REAL(LL) = ZSUM/REAL(OSL%NCPLR,EB)
 
-               IF (PRES_ON_WHOLE_DOMAIN.OR.SL%CCVAR(IX, IY, IZ, CGSC) == IS_GASPHASE) THEN
+               IF (PRES_ON_WHOLE_DOMAIN_SCRC.OR.SL%CCVAR(IX, IY, IZ, CGSC) == IS_GASPHASE) THEN
                   OS%SEND_REAL(LL) = VECTOR(SL%CCVAR(IX, IY, IZ, UNKH))
                ELSE
                   OS%SEND_REAL(LL) = -987654321.0_EB
@@ -15218,7 +15428,7 @@ DO NM = 1, NMESHES
          DO KK = NZ8, 1, - 1
             DO II=1,NX8
                
-               IF (PRES_ON_WHOLE_DOMAIN.OR.&
+               IF (PRES_ON_WHOLE_DOMAIN_SCRC.OR.&
                   SCARC(NM)%LEVEL(NLEVEL_MIN)%CCVAR(II,JJ,KK,CGSC) == IS_GASPHASE) THEN
                   IC=SCARC(NM)%LEVEL(NLEVEL_MIN)%CCVAR(II,JJ,KK,UNKH)
                   IF (ABS(VC(IC))<1.0E-14_EB) THEN
@@ -15241,7 +15451,7 @@ DO NM = 1, NMESHES
                                         '----------------------------------------'
             DO JJ = NY8, 1, - 1
                DO II=1,NX8
-                  IF (PRES_ON_WHOLE_DOMAIN.OR.&
+                  IF (PRES_ON_WHOLE_DOMAIN_SCRC.OR.&
                      SCARC(NM)%LEVEL(NLEVEL_MIN)%CCVAR(II,JJ,KK,CGSC) == IS_GASPHASE) THEN
                      IF (ABS(VC(IC))<1.0E-14_EB) THEN
                         VALUES(II)=0.0_EB
@@ -16142,7 +16352,7 @@ MESHES_LOOP1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    SL%CCVAR = 0
 
    SL%CCVAR(:,:,:,CGSC) = IS_UNDEFINED
-   SL%CCVAR(0:SL%NX+1, 0:SL%NY+1, 0:SL%NZ+1, CGSC) = IS_GASPHASE 
+   SL%CCVAR(1:SL%NX, 1:SL%NY, 1:SL%NZ, CGSC) = IS_GASPHASE 
 
 ENDDO MESHES_LOOP1
 
@@ -16200,7 +16410,7 @@ MESHES_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    SL%CCVAR(:,:,:,UNKH) = IS_UNDEFINED
 
-   IF (PRES_ON_WHOLE_DOMAIN) THEN ! Classic IBM.
+   IF (PRES_ON_WHOLE_DOMAIN_SCRC) THEN ! Classic IBM.
 
       ! Loop on Cartesian cells, define cut cells and solid cells CGSC:
       DO K=1,SL%NZ
@@ -16326,7 +16536,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WRITE(LU_SCARC,*) 'NUNKH_LOC=', SL%NUNKH_LOC
       WRITE(LU_SCARC,*) 'NUNKH_TOT=', SL%NUNKH_TOT
       WRITE(LU_SCARC,*) 'NCS=', SL%NCS
-      !WRITE(LU_SCARC,*) SL%UNKH_IND
+      !WRITE(77,*) SL%UNKH_IND
    ENDIF
 
 ENDDO MESHES_LOOP
@@ -16365,7 +16575,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TYPE_DEBUG > NSCARC_DEBUG_LESS) WRITE(LU_SCARC,*) 'NSTEP=',NSTEP
 
 
-   IF (PRES_ON_WHOLE_DOMAIN) THEN
+   IF (PRES_ON_WHOLE_DOMAIN_SCRC) THEN
       DO IZ = 1, SLC%NZ
          IZF = (IZ-1)*NSTEP + 1
          DO IY = 1, SLC%NY
