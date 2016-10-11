@@ -431,6 +431,13 @@ gnu_win_64_db : obj = fds_gnu_win_64
 gnu_win_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
+gnu_linux_32 : FFLAGS = -O3 $(GITINFOGNU)
+gnu_linux_32 : FCOMPL = gfortran
+gnu_linux_32 : FOPENMPFLAGS = -fopenmp
+gnu_linux_32 : obj = fds_gnu_linux_32
+gnu_linux_32 : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 gnu_linux_64 : FFLAGS = -O3 $(GITINFOGNU)
 gnu_linux_64 : FCOMPL = gfortran
 gnu_linux_64 : FOPENMPFLAGS = -fopenmp
