@@ -499,7 +499,7 @@ for i=2:n_plots
 
             % Add version string if file is available, skips if 'f' switch (avoids overplotting)
             if ~ftest
-                addverstr(gca,VerStr_Filename,Plot_Type,Font_Name,Font_Interpreter)
+                addverstr(gca,VerStr_Filename,Plot_Type,VerStr_Scale_X,VerStr_Scale_Y,Font_Name,Font_Interpreter)
             end
 
             % Save plot file
