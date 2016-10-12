@@ -30,6 +30,7 @@ INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+LOGICAL :: THIN_OBSTRUCTION
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
 
@@ -127,19 +128,25 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
          END SELECT
       ENDIF
 
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK))) THEN
+         THIN_OBSTRUCTION = .TRUE.
+      ELSE
+         THIN_OBSTRUCTION = .FALSE.
+      ENDIF
+
       SELECT CASE(IOR)
          CASE( 1)
-            FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. UU(IIG-1,JJG,KKG)>=0._EB) FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
          CASE(-1)
-            FX(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. UU(IIG,JJG,KKG)<=0._EB)   FX(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
          CASE( 2)
-            FY(IIG,JJG-1,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. VV(IIG,JJG-1,KKG)>=0._EB) FY(IIG,JJG-1,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
          CASE(-2)
-            FY(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. VV(IIG,JJG,KKG)<=0._EB)   FY(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
          CASE( 3)
-            FZ(IIG,JJG,KKG-1,N) = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. WW(IIG,JJG,KKG-1)>=0._EB) FZ(IIG,JJG,KKG-1,N) = WC%RHO_F*WC%ZZ_F(N)
          CASE(-3)
-            FZ(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
+            IF (.NOT.THIN_OBSTRUCTION .OR. WW(IIG,JJG,KKG)<=0._EB)   FZ(IIG,JJG,KKG,N)   = WC%RHO_F*WC%ZZ_F(N)
       END SELECT
 
       ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
