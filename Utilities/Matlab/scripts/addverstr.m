@@ -11,8 +11,10 @@ Font_Interpreter = 'TeX';
 
 nvararg = length(varargin);
 
-if nvararg>=1; Font_Name        = varargin{1}; end
-if nvararg>=2; Font_Interpreter = varargin{2}; end
+if nvararg>=1; VerStr_Scale_X   = varargin{1}; end
+if nvararg>=2; VerStr_Scale_Y   = varargin{2}; end
+if nvararg>=3; Font_Name        = varargin{3}; end
+if nvararg>=4; Font_Interpreter = varargin{4}; end
 
 if exist(fn,'file')
     VerStr = importdata(fn);
