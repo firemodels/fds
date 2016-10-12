@@ -4,16 +4,15 @@
 
 function []=addverstr(ha,fn,pt,varargin)
 
-Font_Name = 'Times';
+VerStr_Scale_X   = 0.65;
+VerStr_Scale_Y   = 1.05;
+Font_Name        = 'Times';
 Font_Interpreter = 'TeX';
 
-if length(varargin)==0
-    VerStr_Scale_X = 0.65;
-    VerStr_Scale_Y = 1.05;
-else
-    VerStr_Scale_X = varargin{1};
-    VerStr_Scale_Y = varargin{2};
-end
+nvararg = length(varargin);
+
+if nvararg>=1; Font_Name        = varargin{1}; end
+if nvararg>=2; Font_Interpreter = varargin{2}; end
 
 if exist(fn,'file')
     VerStr = importdata(fn);
