@@ -3591,7 +3591,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ENDDO EQ_LOOP_1
 
-   ! Get equilibrium conidition
+   ! Get equilibrium condition
    DO KK=1,KBAR
       DO JJ=1,JBAR
          EQ_LOOP_2: DO II=1,IBAR
