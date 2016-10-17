@@ -63,109 +63,109 @@
 &RAMP ID='prof', Z= 98 F= 1.813222979 /
 &RAMP ID='prof', Z= 100 F= 1.820564203 /
 
-&RAMP ID='u-ramp', T= 0 F= 1  /
-&RAMP ID='u-ramp', T= 1 F= 0.992114715  /
-&RAMP ID='u-ramp', T= 2 F= 0.968583214  /
-&RAMP ID='u-ramp', T= 3 F= 0.929776603  /
-&RAMP ID='u-ramp', T= 4 F= 0.876306885  /
-&RAMP ID='u-ramp', T= 5 F= 0.809017306  /
-&RAMP ID='u-ramp', T= 6 F= 0.728969063  /
-&RAMP ID='u-ramp', T= 7 F= 0.637424562  /
-&RAMP ID='u-ramp', T= 8 F= 0.535827512  /
-&RAMP ID='u-ramp', T= 9 F= 0.425780156  /
-&RAMP ID='u-ramp', T= 10 F= 0.309018004  /
-&RAMP ID='u-ramp', T= 11 F= 0.187382461  /
-&RAMP ID='u-ramp', T= 12 F= 0.062791791  /
-&RAMP ID='u-ramp', T= 13 F= -0.062789142  /
-&RAMP ID='u-ramp', T= 14 F= -0.187379855  /
-&RAMP ID='u-ramp', T= 15 F= -0.30901548  /
-&RAMP ID='u-ramp', T= 16 F= -0.425777755  /
-&RAMP ID='u-ramp', T= 17 F= -0.535825271  /
-&RAMP ID='u-ramp', T= 18 F= -0.637422518  /
-&RAMP ID='u-ramp', T= 19 F= -0.728967247  /
-&RAMP ID='u-ramp', T= 20 F= -0.809015747  /
-&RAMP ID='u-ramp', T= 21 F= -0.876305606  /
-&RAMP ID='u-ramp', T= 22 F= -0.929775626  /
-&RAMP ID='u-ramp', T= 23 F= -0.968582554  /
-&RAMP ID='u-ramp', T= 24 F= -0.992114382  /
-&RAMP ID='u-ramp', T= 25 F= -1  /
-&RAMP ID='u-ramp', T= 26 F= -0.992115047  /
-&RAMP ID='u-ramp', T= 27 F= -0.968583874  /
-&RAMP ID='u-ramp', T= 28 F= -0.92977758  /
-&RAMP ID='u-ramp', T= 29 F= -0.876308163  /
-&RAMP ID='u-ramp', T= 30 F= -0.809018866  /
-&RAMP ID='u-ramp', T= 31 F= -0.72897088  /
-&RAMP ID='u-ramp', T= 32 F= -0.637426607  /
-&RAMP ID='u-ramp', T= 33 F= -0.535829752  /
-&RAMP ID='u-ramp', T= 34 F= -0.425782557  /
-&RAMP ID='u-ramp', T= 35 F= -0.309020528  /
-&RAMP ID='u-ramp', T= 36 F= -0.187385068  /
-&RAMP ID='u-ramp', T= 37 F= -0.062794439  /
-&RAMP ID='u-ramp', T= 38 F= 0.062786494  /
-&RAMP ID='u-ramp', T= 39 F= 0.187377248  /
-&RAMP ID='u-ramp', T= 40 F= 0.309012956  /
-&RAMP ID='u-ramp', T= 41 F= 0.425775354  /
-&RAMP ID='u-ramp', T= 42 F= 0.535823031  /
-&RAMP ID='u-ramp', T= 43 F= 0.637420473  /
-&RAMP ID='u-ramp', T= 44 F= 0.72896543  /
-&RAMP ID='u-ramp', T= 45 F= 0.809014187  /
-&RAMP ID='u-ramp', T= 46 F= 0.876304328  /
-&RAMP ID='u-ramp', T= 47 F= 0.929774649  /
-&RAMP ID='u-ramp', T= 48 F= 0.968581894  /
-&RAMP ID='u-ramp', T= 49 F= 0.992114049  /
-&RAMP ID='u-ramp', T= 50 F= 1  /
+&RAMP ID='u-ramp', T= 0, F= 1.000000000000000/
+&RAMP ID='u-ramp', T= 1, F= 0.992114701314478/
+&RAMP ID='u-ramp', T= 2, F= 0.968583161128631/
+&RAMP ID='u-ramp', T= 3, F= 0.929776485888251/
+&RAMP ID='u-ramp', T= 4, F= 0.876306680043864/
+&RAMP ID='u-ramp', T= 5, F= 0.809016994374947/
+&RAMP ID='u-ramp', T= 6, F= 0.728968627421412/
+&RAMP ID='u-ramp', T= 7, F= 0.637423989748690/
+&RAMP ID='u-ramp', T= 8, F= 0.535826794978997/
+&RAMP ID='u-ramp', T= 9, F= 0.425779291565073/
+&RAMP ID='u-ramp', T=10, F= 0.309016994374947/
+&RAMP ID='u-ramp', T=11, F= 0.187381314585725/
+&RAMP ID='u-ramp', T=12, F= 0.062790519529314/
+&RAMP ID='u-ramp', T=13, F=-0.062790519529313/
+&RAMP ID='u-ramp', T=14, F=-0.187381314585725/
+&RAMP ID='u-ramp', T=15, F=-0.309016994374947/
+&RAMP ID='u-ramp', T=16, F=-0.425779291565073/
+&RAMP ID='u-ramp', T=17, F=-0.535826794978997/
+&RAMP ID='u-ramp', T=18, F=-0.637423989748690/
+&RAMP ID='u-ramp', T=19, F=-0.728968627421411/
+&RAMP ID='u-ramp', T=20, F=-0.809016994374947/
+&RAMP ID='u-ramp', T=21, F=-0.876306680043864/
+&RAMP ID='u-ramp', T=22, F=-0.929776485888251/
+&RAMP ID='u-ramp', T=23, F=-0.968583161128631/
+&RAMP ID='u-ramp', T=24, F=-0.992114701314478/
+&RAMP ID='u-ramp', T=25, F=-1.000000000000000/
+&RAMP ID='u-ramp', T=26, F=-0.992114701314478/
+&RAMP ID='u-ramp', T=27, F=-0.968583161128631/
+&RAMP ID='u-ramp', T=28, F=-0.929776485888251/
+&RAMP ID='u-ramp', T=29, F=-0.876306680043864/
+&RAMP ID='u-ramp', T=30, F=-0.809016994374948/
+&RAMP ID='u-ramp', T=31, F=-0.728968627421412/
+&RAMP ID='u-ramp', T=32, F=-0.637423989748690/
+&RAMP ID='u-ramp', T=33, F=-0.535826794978996/
+&RAMP ID='u-ramp', T=34, F=-0.425779291565072/
+&RAMP ID='u-ramp', T=35, F=-0.309016994374948/
+&RAMP ID='u-ramp', T=36, F=-0.187381314585725/
+&RAMP ID='u-ramp', T=37, F=-0.062790519529313/
+&RAMP ID='u-ramp', T=38, F= 0.062790519529313/
+&RAMP ID='u-ramp', T=39, F= 0.187381314585724/
+&RAMP ID='u-ramp', T=40, F= 0.309016994374947/
+&RAMP ID='u-ramp', T=41, F= 0.425779291565072/
+&RAMP ID='u-ramp', T=42, F= 0.535826794978997/
+&RAMP ID='u-ramp', T=43, F= 0.637423989748689/
+&RAMP ID='u-ramp', T=44, F= 0.728968627421411/
+&RAMP ID='u-ramp', T=45, F= 0.809016994374947/
+&RAMP ID='u-ramp', T=46, F= 0.876306680043863/
+&RAMP ID='u-ramp', T=47, F= 0.929776485888251/
+&RAMP ID='u-ramp', T=48, F= 0.968583161128631/
+&RAMP ID='u-ramp', T=49, F= 0.992114701314478/
+&RAMP ID='u-ramp', T=50, F= 1.000000000000000/
 
-&RAMP ID='v-ramp', T= 0 F= 0  /
-&RAMP ID='v-ramp', T= 1 F= 0.125333128  /
-&RAMP ID='v-ramp', T= 2 F= 0.248689682  /
-&RAMP ID='v-ramp', T= 3 F= 0.368124257  /
-&RAMP ID='v-ramp', T= 4 F= 0.481753302  /
-&RAMP ID='v-ramp', T= 5 F= 0.587784823  /
-&RAMP ID='v-ramp', T= 6 F= 0.684546642  /
-&RAMP ID='v-ramp', T= 7 F= 0.770512769  /
-&RAMP ID='v-ramp', T= 8 F= 0.844327471  /
-&RAMP ID='v-ramp', T= 9 F= 0.904826646  /
-&RAMP ID='v-ramp', T= 10 F= 0.951056188  /
-&RAMP ID='v-ramp', T= 11 F= 0.982287032  /
-&RAMP ID='v-ramp', T= 12 F= 0.998026648  /
-&RAMP ID='v-ramp', T= 13 F= 0.998026815  /
-&RAMP ID='v-ramp', T= 14 F= 0.982287529  /
-&RAMP ID='v-ramp', T= 15 F= 0.951057008  /
-&RAMP ID='v-ramp', T= 16 F= 0.904827776  /
-&RAMP ID='v-ramp', T= 17 F= 0.844328892  /
-&RAMP ID='v-ramp', T= 18 F= 0.770514461  /
-&RAMP ID='v-ramp', T= 19 F= 0.684548576  /
-&RAMP ID='v-ramp', T= 20 F= 0.58778697  /
-&RAMP ID='v-ramp', T= 21 F= 0.481755627  /
-&RAMP ID='v-ramp', T= 22 F= 0.368126724  /
-&RAMP ID='v-ramp', T= 23 F= 0.248692252  /
-&RAMP ID='v-ramp', T= 24 F= 0.125335761  /
-&RAMP ID='v-ramp', T= 25 F= 2.65359E-06  /
-&RAMP ID='v-ramp', T= 26 F= -0.125330496  /
-&RAMP ID='v-ramp', T= 27 F= -0.248687111  /
-&RAMP ID='v-ramp', T= 28 F= -0.368121789  /
-&RAMP ID='v-ramp', T= 29 F= -0.481750977  /
-&RAMP ID='v-ramp', T= 30 F= -0.587782676  /
-&RAMP ID='v-ramp', T= 31 F= -0.684544707  /
-&RAMP ID='v-ramp', T= 32 F= -0.770511078  /
-&RAMP ID='v-ramp', T= 33 F= -0.844326049  /
-&RAMP ID='v-ramp', T= 34 F= -0.904825516  /
-&RAMP ID='v-ramp', T= 35 F= -0.951055368  /
-&RAMP ID='v-ramp', T= 36 F= -0.982286535  /
-&RAMP ID='v-ramp', T= 37 F= -0.998026482  /
-&RAMP ID='v-ramp', T= 38 F= -0.998026982  /
-&RAMP ID='v-ramp', T= 39 F= -0.982288026  /
-&RAMP ID='v-ramp', T= 40 F= -0.951057828  /
-&RAMP ID='v-ramp', T= 41 F= -0.904828905  /
-&RAMP ID='v-ramp', T= 42 F= -0.844330314  /
-&RAMP ID='v-ramp', T= 43 F= -0.770516152  /
-&RAMP ID='v-ramp', T= 44 F= -0.68455051  /
-&RAMP ID='v-ramp', T= 45 F= -0.587789117  /
-&RAMP ID='v-ramp', T= 46 F= -0.481757953  /
-&RAMP ID='v-ramp', T= 47 F= -0.368129191  /
-&RAMP ID='v-ramp', T= 48 F= -0.248694822  /
-&RAMP ID='v-ramp', T= 49 F= -0.125338394  /
-&RAMP ID='v-ramp', T= 50 F= -5.30718E-06  /
+&RAMP ID='v-ramp', T= 0, F=                 0/
+&RAMP ID='v-ramp', T= 1, F= 0.125333233564304/
+&RAMP ID='v-ramp', T= 2, F= 0.248689887164855/
+&RAMP ID='v-ramp', T= 3, F= 0.368124552684678/
+&RAMP ID='v-ramp', T= 4, F= 0.481753674101715/
+&RAMP ID='v-ramp', T= 5, F= 0.587785252292473/
+&RAMP ID='v-ramp', T= 6, F= 0.684547105928689/
+&RAMP ID='v-ramp', T= 7, F= 0.770513242775789/
+&RAMP ID='v-ramp', T= 8, F= 0.844327925502015/
+&RAMP ID='v-ramp', T= 9, F= 0.904827052466020/
+&RAMP ID='v-ramp', T=10, F= 0.951056516295153/
+&RAMP ID='v-ramp', T=11, F= 0.982287250728689/
+&RAMP ID='v-ramp', T=12, F= 0.998026728428272/
+&RAMP ID='v-ramp', T=13, F= 0.998026728428272/
+&RAMP ID='v-ramp', T=14, F= 0.982287250728689/
+&RAMP ID='v-ramp', T=15, F= 0.951056516295154/
+&RAMP ID='v-ramp', T=16, F= 0.904827052466019/
+&RAMP ID='v-ramp', T=17, F= 0.844327925502015/
+&RAMP ID='v-ramp', T=18, F= 0.770513242775789/
+&RAMP ID='v-ramp', T=19, F= 0.684547105928689/
+&RAMP ID='v-ramp', T=20, F= 0.587785252292473/
+&RAMP ID='v-ramp', T=21, F= 0.481753674101715/
+&RAMP ID='v-ramp', T=22, F= 0.368124552684678/
+&RAMP ID='v-ramp', T=23, F= 0.248689887164855/
+&RAMP ID='v-ramp', T=24, F= 0.125333233564305/
+&RAMP ID='v-ramp', T=25, F= 0.000000000000000/
+&RAMP ID='v-ramp', T=26, F=-0.125333233564304/
+&RAMP ID='v-ramp', T=27, F=-0.248689887164855/
+&RAMP ID='v-ramp', T=28, F=-0.368124552684678/
+&RAMP ID='v-ramp', T=29, F=-0.481753674101715/
+&RAMP ID='v-ramp', T=30, F=-0.587785252292473/
+&RAMP ID='v-ramp', T=31, F=-0.684547105928688/
+&RAMP ID='v-ramp', T=32, F=-0.770513242775789/
+&RAMP ID='v-ramp', T=33, F=-0.844327925502015/
+&RAMP ID='v-ramp', T=34, F=-0.904827052466020/
+&RAMP ID='v-ramp', T=35, F=-0.951056516295153/
+&RAMP ID='v-ramp', T=36, F=-0.982287250728689/
+&RAMP ID='v-ramp', T=37, F=-0.998026728428272/
+&RAMP ID='v-ramp', T=38, F=-0.998026728428272/
+&RAMP ID='v-ramp', T=39, F=-0.982287250728689/
+&RAMP ID='v-ramp', T=40, F=-0.951056516295154/
+&RAMP ID='v-ramp', T=41, F=-0.904827052466020/
+&RAMP ID='v-ramp', T=42, F=-0.844327925502015/
+&RAMP ID='v-ramp', T=43, F=-0.770513242775790/
+&RAMP ID='v-ramp', T=44, F=-0.684547105928689/
+&RAMP ID='v-ramp', T=45, F=-0.587785252292473/
+&RAMP ID='v-ramp', T=46, F=-0.481753674101716/
+&RAMP ID='v-ramp', T=47, F=-0.368124552684678/
+&RAMP ID='v-ramp', T=48, F=-0.248689887164855/
+&RAMP ID='v-ramp', T=49, F=-0.125333233564305/
+&RAMP ID='v-ramp', T=50, F= 0.000000000000000/
 
 &VENT PBX=-500, SURF_ID='OPEN' /
 &VENT PBX= 500, SURF_ID='OPEN' /
