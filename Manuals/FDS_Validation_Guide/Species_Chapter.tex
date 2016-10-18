@@ -21,7 +21,7 @@ Oxygen and carbon dioxide measurements were made at several locations in the one
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_03_CO2} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_03_O2} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_04_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_04_O2} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_04_O2}
 \end{tabular*}
 \caption{DelCo Trainers, CO$_2$ and O$_2$ concentration, Tests 2-4.}
 \label{DelCo_CO2_O2_1}
@@ -34,7 +34,7 @@ Oxygen and carbon dioxide measurements were made at several locations in the one
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_05_CO2} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_05_O2} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_06_CO2} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_06_O2} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/DelCo_Trainers/Test_06_O2}
 \end{tabular*}
 \caption{DelCo Trainers, CO$_2$ and O$_2$ concentration, Tests 5-6.}
 \label{DelCo_CO2_O2_2}
@@ -632,6 +632,188 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 
 \clearpage
 
+
+
+\subsection{NIST Reduced-Scale Enclosure (RSE) Experiments, 2007}
+
+In the simulations of the NIST RSE Experiments, it is assumed that the combustion can be simplified to two fast reactions, the first converting fuel to CO and soot, and the second converting CO to CO$_2$. The stoichiometry for the first reaction is given here:
+\begin{eqnarray*}
+   & \mathrm{Methane:}  \quad & \mathrm{CH_4      + 1.5 \,    O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
+   & \mathrm{Methanol:} \quad & \mathrm{CH_4O     +           O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
+   & \mathrm{Ethanol:}  \quad & \mathrm{C_2H_6O   + 1.9845 \, O_2} \rightarrow \mathrm{1.969 \, CO + 3 \, H_2O + 0.031 \, C} \quad ; \quad y_{\rm s} = 0.008 \\[.1in]
+   & \mathrm{Heptane:}  \quad & \mathrm{C_7H_{16} + 7.345  \, O_2} \rightarrow \mathrm{6.69 \,  CO + 8 \, H_2O + 0.31 \, C}  \quad ; \quad y_{\rm s} = 0.037 \\[.1in]
+   & \mathrm{Toluene:}  \quad & \mathrm{C_7H_8    + 4.8175 \, O_2} \rightarrow \mathrm{5.635 \, CO + 4 \, H_2O + 1.365 \, C} \quad ; \quad y_{\rm s} = 0.178 \\[.1in]
+   & \mathrm{Styrene:}  \quad & \mathrm{C_8H_8    + 5.233  \, O_2} \rightarrow \mathrm{6.466 \, CO + 4 \, H_2O + 1.534 \, C} \quad ; \quad y_{\rm s} = 0.177
+\end{eqnarray*}
+A single carbon atom serves as a surrogate for soot. Its stoichiometric coefficient is based on measured soot yields, $y_{\rm s}$, provided by Tewarson~\cite{SFPE:Tewarson}. The heats of combustion for the reactions are calculated directly from the heats of formation of the individual molecules.
+
+In the experiments, the heat release rate was measured via oxygen consumption calorimetry. In the simulations, the mass loss rate of fuel was specified by taking the measured HRR and dividing by the heats of combustion listed in Ref.~\cite{SFPE:Tewarson}.
+
+Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall.
+   
+
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_HRR}
+\end{tabular*}
+\caption[Summary of Test 1, NIST RSE 2007]{Summary of Test 1, NIST RSE 2007.}
+\label{NIST_RSE_2007_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_02_HRR}
+\end{tabular*}
+\caption[Summary of Test 2, NIST RSE 2007]{Summary of Test 2, NIST RSE 2007.}
+\label{NIST_RSE_2007_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_03_HRR}
+\end{tabular*}
+\caption[Summary of Test 3, NIST RSE 2007]{Summary of Test 3, NIST RSE 2007.}
+\label{NIST_RSE_2007_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_04_HRR}
+\end{tabular*}
+\caption[Summary of Test 4, NIST RSE 2007]{Summary of Test 4, NIST RSE 2007.}
+\label{NIST_RSE_2007_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_05_HRR}
+\end{tabular*}
+\caption[Summary of Test 5, NIST RSE 2007]{Summary of Test 5, NIST RSE 2007.}
+\label{NIST_RSE_2007_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_06_HRR}
+\end{tabular*}
+\caption[Summary of Test 6, NIST RSE 2007]{Summary of Test 6, NIST RSE 2007.}
+\label{NIST_RSE_2007_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_07_HRR}
+\end{tabular*}
+\caption[Summary of Test 7, NIST RSE 2007]{Summary of Test 7, NIST RSE 2007.}
+\label{NIST_RSE_2007_7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_10_HRR}
+\end{tabular*}
+\caption[Summary of Test 10, NIST RSE 2007]{Summary of Test 10, NIST RSE 2007.}
+\label{NIST_RSE_2007_10}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_11_HRR}
+\end{tabular*}
+\caption[Summary of Test 11, NIST RSE 2007]{Summary of Test 11, NIST RSE 2007.}
+\label{NIST_RSE_2007_11}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_12_HRR}
+\end{tabular*}
+\caption[Summary of Test 12, NIST RSE 2007]{Summary of Test 12, NIST RSE 2007.}
+\label{NIST_RSE_2007_12}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_15_HRR}
+\end{tabular*}
+\caption[Summary of Test 15, NIST RSE 2007]{Summary of Test 15, NIST RSE 2007.}
+\label{NIST_RSE_2007_15}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_CO2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_CO} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_THC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_16_HRR}
+\end{tabular*}
+\caption[Summary of Test 16, NIST RSE 2007]{Summary of Test 16, NIST RSE 2007.}
+\label{NIST_RSE_2007_16}
+\end{figure}
+
+
+\clearpage
+
 \subsection{NIST Full-Scale Enclosure (FSE) Experiments, 2008}
 
 The FSE experiments~\cite{Lock:1} were selected to assess CO production capability in under-ventilated compartment fires over a range of fuels types and fire sizes in a full-scale ISO 9705 enclosure. The 30 experiments (of which 27 were selected) featured 7 different fuels: heptane, natural gas, nylon, propylene, isopropanol, styrene, and toluene. Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Compartment ventilation was varied from a full 80~cm door opening to 40~cm, 20~cm, and 10~cm openings. The fuel sources in the experiments were either pool fires or spray burners, both of which were modeled. The fuel flow rates were specified in the experiments even though the fuel did not always burn.
@@ -995,6 +1177,9 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \caption[Summary of ISONG32, NIST FSE 2008]{Summary of ISONG32, NIST FSE 2008.}
 \label{NIST_FSE_1994_ISONG32}
 \end{figure}
+
+
+
 
 
 \clearpage

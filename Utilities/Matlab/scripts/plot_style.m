@@ -47,6 +47,9 @@ switch style
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
 
+        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_Y   = 1.05;
+
         % Paper properties
         Paper_Units     = 'inches';
         Paper_Width     = 6.5;
@@ -88,6 +91,9 @@ switch style
         Scat_Plot_X          = 0.75;
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
+
+        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_Y   = 1.05;
 
         % Paper properties
         Paper_Units     = 'inches'; %get(gcf,'paperunits')

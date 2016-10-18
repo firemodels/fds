@@ -11036,7 +11036,7 @@ CONTAINS
                JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
                IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
                   write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION'
-                  write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  write(lu_err,*)'*** ',TRIM(EVAC_EXITS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                END IF
             ELSE
                JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
