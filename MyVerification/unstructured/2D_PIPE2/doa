@@ -1,0 +1,6 @@
+sh dofds $1 fft
+sh dofds $1 cg_ssor
+sh dofds $1 cg_pardiso
+sh dofds $1 cg_cluster
+sh dofds $1 gmg_ssor
+sh dofds $1 gmg_mkl
