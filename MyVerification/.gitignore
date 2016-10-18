@@ -1,5 +1,16 @@
+<<<<<<< HEAD
 *.png
 ??
 *csv
 .*.swp
 
+=======
+*.scarc*
+*.csv
+*.sf
+*.end
+*.txt
+do*
+grep*
+pictures
+>>>>>>> origin/scarc

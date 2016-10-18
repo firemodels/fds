@@ -365,11 +365,19 @@ mpi_intel_osx_64 : setup $(obj_mpi)
 ifdef MKLROOT # This assumes the MKL library is available.
 ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 # Use cluster_sparse_solver with custom blacs
+<<<<<<< HEAD
 mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_osx_64_db : LFLAGSMKL =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
 else
 # Use pardiso, non-mpi OpenMP threaded version.
 mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+=======
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -diag-disable=6916,7025 -DWITH_CLUSTER_SPARSE_SOLVER -DWITH_MKL -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_osx_64_db : LFLAGSMKL =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
+else
+# Use pardiso, non-mpi OpenMP threaded version.
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -diag-disable=6916,7025 -DWITH_PARDISO -DWITH_MKL -I$(MKLROOT)/include $(GITINFO)
+>>>>>>> origin/scarc
 mpi_intel_osx_64_db : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 endif
 else # MKL is not available.
@@ -383,6 +391,7 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+<<<<<<< HEAD
 ifdef MKLROOT # This assumes the MKL library is available.
 # Use pardiso, non-mpi OpenMP threaded version.
 intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08 -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
@@ -391,6 +400,18 @@ else # MKL is not available.
 intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08 -no-wrap-margin $(GITINFO)
 intel_osx_64_dv : LFLAGSMKL =
 endif
+=======
+
+#mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO) 
+#mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
+#mpi_intel_osx_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static
+#mpi_intel_osx_64_db : FCOMPL = mpifort
+#mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
+#mpi_intel_osx_64_db : setup $(obj_mpi)
+#	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
+intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08 $(GITINFO) 
+>>>>>>> origin/scarc
 intel_osx_64_dv : LFLAGS = -static-intel
 intel_osx_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 intel_osx_64_dv : FCOMPL = ifort
