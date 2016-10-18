@@ -346,6 +346,16 @@ IF (PRES_METHOD /= 'SCARC') THEN
 
 END IF
 
+!WRITE(77,*) 'POIS: POIS: POIS'
+!WRITE(77,*) 'L,M,N=',L,M,N
+!DO K=1,N
+!DO J=1,M
+!DO I=1,L
+! WRITE(77, '(A,I4,A,I4,A,I4,A,E25.16)') 'F(',I,',',J,',',K,')=',F(I,J,N)
+!ENDDO
+!ENDDO
+!ENDDO
+
 PERTRB = 0._EB
 PERT   = 0._EB
 ISING = 0

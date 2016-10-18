@@ -1,0 +1,1 @@
+mpirun -np $1 /Volumes/Fettes_Brot/hhpberlin/01_FDS/FireModels_fork/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db $2_$1mesh.fds
