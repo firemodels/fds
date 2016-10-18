@@ -255,8 +255,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   end interface mpi_reduce
 
   interface mpi_allreduce
-    module procedure mpi_allreduce_int0    , mpi_allreduce_int1,  &
-                     mpi_allreduce_int11,    mpi_allreduce_int2,  &
+    module procedure mpi_allreduce_int0    , mpi_allreduce_int1,   &
                      mpi_allreduce_real0   , mpi_allreduce_real1,  &
                      mpi_allreduce_logical0, mpi_allreduce_logical1, mpi_allreduce_logical2
   end interface mpi_allreduce
@@ -802,17 +801,6 @@ subroutine mpi_allreduce_int1 ( data1, data2, n, datatype, operation, comm, ierr
   integer:: ierror
   integer:: operation
   dummy = data1(1) + data2 + n + datatype + operation + comm + ierror
-end subroutine
-subroutine mpi_allreduce_int11 ( data1, data2, n, datatype, operation, comm, ierror )
-  implicit none
-  integer:: n
-  integer:: comm
-  integer, dimension(:) :: data1
-  integer, dimension(:) :: data2
-  integer:: datatype
-  integer:: ierror
-  integer:: operation
-  dummy = data1(1) + data2(1) + n + datatype + operation + comm + ierror
 end subroutine
 subroutine mpi_allreduce_int2 ( data1, data2, n, datatype, operation, comm, ierror )
   implicit none

@@ -22,7 +22,6 @@ USE MASS, ONLY: SCALAR_FACE_VALUE
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC !,RHO_0_MMS,RHO_1_MMS
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, N_EXITS, N_CO_EXITS, N_DOORS
-USE COMPLEX_GEOMETRY, ONLY : SET_EXIMDIFFLX_3D,SET_DOMAINDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D
 
 ! Compute contributions to the divergence term
 
@@ -200,34 +199,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          END SELECT
       ENDDO WALL_LOOP
 
-      IF (CHECK_MASS_CONSERVE) THEN
-         ! When CHECK_MASS_CONSERVE make zero diffusive mass fluxes on open boundaries.
-         ! Using the open boundary mass fluxes leads to a small difference on the integrals done in this test.
-         DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            WC => WALL(IW)
-            IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
-               IIG = WC%ONE_D%IIG
-               JJG = WC%ONE_D%JJG
-               KKG = WC%ONE_D%KKG
-               IOR = WC%ONE_D%IOR
-               SELECT CASE(IOR)
-                  CASE( 1)
-                     RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
-                  CASE(-1)
-                     RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 2)
-                     RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
-                  CASE(-2)
-                     RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 3)
-                     RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
-                  CASE(-3)
-                     RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
-               END SELECT
-            ENDIF
-         ENDDO
-      ENDIF
-
    ENDDO DIFFUSIVE_FLUX_LOOP
 
    ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
@@ -248,9 +219,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
       ENDDO
    ENDDO
    !$OMP END PARALLEL DO
-
-   ! Store diffusive species flux on EXIM boundary faces if present:
-   IF (CC_IBM) CALL SET_EXIMDIFFLX_3D(NM,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ)
 
    ! Diffusive heat flux
 
@@ -358,9 +326,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    ENDDO SPECIES_LOOP
 
 ENDIF SPECIES_GT_1_IF
-
-! Store diffusive species flux at domain boundaries if true:
-IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINDIFFLX_3D(ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,.NOT.PREDICTOR)
 
 ! Get the specific heat
 
@@ -578,8 +543,6 @@ CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
       ENDDO
    ENDDO
 
-   IF(CC_IBM) CALL SET_EXIMRHOHSLIM_3D(NM) ! WORK2,WORK3,WORK4: Get flux limited \bar{rho Hs} on EXIM faces.
-
 ENDIF CONST_GAMMA_IF_1
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
@@ -617,9 +580,6 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
          ENDDO
       ENDDO
       !$OMP END PARALLEL DO
-
-      IF (CC_IBM) CALL SET_EXIMRHOZZLIM_3D(NM,N) ! WORK2,WORK3,WORK4: flux limited \bar{rho Za} on EXIM faces.
-
    ENDDO
 
 ENDIF CONST_GAMMA_IF_2
@@ -1457,8 +1417,6 @@ SUBROUTINE DIVERGENCE_PART_2(DT,NM)
 ! Finish computing the divergence of the flow, D, and then compute its time derivative, DDDT
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
-
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
@@ -1568,18 +1526,6 @@ SOLID_LOOP: DO IC=1,CELL_COUNT(NM)
    K = K_CELL(IC)
    DP(I,J,K) = 0._EB
 ENDDO SOLID_LOOP
-
-! Zero out CC_IBM solid cells:
-IF (CC_IBM) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
-            DP(I,J,K) = 0._EB
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
 
 ! Specify divergence in boundary cells to account for volume being generated at the walls
 
