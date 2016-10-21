@@ -268,7 +268,7 @@ INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
 ! Matrix vector building variables:
 
 LOGICAL, PARAMETER :: TRAP_CORR=.TRUE. ! Solve implicit corrector step with Trapezoidal Rule? If not implicit RK2 corr.
-                                       ! Which boils down to Backward Euler.
+                                        ! Which boils down to Backward Euler.
 REAL(EB),PARAMETER :: BRP1 = 0._EB ! If 0., Godunov for advective term; if 1., centered interp.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NUNKZ_LOC, NUNKZ_TOT, UNKZ_IND
@@ -358,6 +358,7 @@ LOGICAL, PARAMETER :: FORCE_REGC_FACE_NXT = .TRUE.
 !! Initial volume integral of species mass, for CHECK_MASS_CONSERVE
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLINT_SPEC_MASS_0,FLXTINT_SPEC_MASS,VOLINT_SPEC_MASS
 
+LOGICAL, PARAMETER :: DO_SYMM_SCALAR_DIFFLUXES = .FALSE.
 
 PRIVATE
 PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
@@ -469,8 +470,8 @@ SUBROUTINE INIT_CUTCELL_DATA
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 
 ! Local Variables:
-INTEGER :: NM,I,J,K,ICC,JCC,X1AXIS,NFACE,ICF
-REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF
+INTEGER :: NM,I,J,K,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
+REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF,RHOPV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
 
 ALLOCATE( ZZ_CC(1:N_TOTAL_SCALARS) )
@@ -542,6 +543,87 @@ MESH_LOOP : DO NM=1,NMESHES
       IBM_CUT_FACE(ICF)%VELS(1:NFACE) = VEL_CF
 
    ENDDO CUTFACE_LOOP
+
+
+   ! Populate PHOPVN in regular faces of CCIMPREGION:
+   ! IAXIS faces:
+   X1AXIS = IAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I+FCELL-1:I+FCELL  ,J,K)
+
+   ENDDO
+
+   ! JAXIS faces:
+   X1AXIS = JAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I,J+FCELL-1:J+FCELL  ,K)
+
+   ENDDO
+
+   ! KAXIS faces:
+   X1AXIS = KAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHOPVN(-1:0) = RHO(I,J,K+FCELL-1:K+FCELL  )
+
+   ENDDO
+
+   ! Now populate RCFACES:
+   DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+
+      I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            RHOPV(-1:0) = RHO(I+FCELL-1:I+FCELL,J,K)
+         CASE(JAXIS)
+            RHOPV(-1:0) = RHO(I,J+FCELL-1:J+FCELL,K)
+         CASE(KAXIS)
+            RHOPV(-1:0) = RHO(I,J,K+FCELL-1:K+FCELL)
+      ENDSELECT
+
+      IBM_RCFACE_Z(IFACE)%RHOPVN(-1:0) = RHOPV(-1:0)
+   ENDDO
+
+   ! Finally Cut-faces:
+   DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+      IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+
+      I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+      J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+      K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            RHOPV(-1:0) = RHO(I+FCELL-1:I+FCELL,J,K)
+         CASE(JAXIS)
+            RHOPV(-1:0) = RHO(I,J+FCELL-1:J+FCELL,K)
+         CASE(KAXIS)
+            RHOPV(-1:0) = RHO(I,J,K+FCELL-1:K+FCELL)
+      ENDSELECT
+
+      DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+         IBM_CUT_FACE(ICF)%RHOPVN(-1:0,IFACE) = RHOPV(-1:0)
+      ENDDO
+   ENDDO
 
 ENDDO MESH_LOOP
 
@@ -692,8 +774,8 @@ INTEGER :: N,I,J,K,X1AXIS,ISIDE,IFACE,ICC,JCC,ICF,IEXIM,LHFACE
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,RHOP,RTRM,CP,R_H_G,U_DOT_DEL_RHO_Z
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB) :: RDT,D_Z_N(0:5000),CCM1,CCP1,IDX,DIFF_FACE,VELD,D_Z_TEMP(-1:0),AF,TMP_G,H_S,&
-            ZZ_FACE(MAX_SPECIES),TNOW,RHOPV(-1:0),TMPV(-1:0),ZZPV(-1:0),X1F,PRFCT,PRFCTV, &
+REAL(EB) :: RDT,CCM1,CCP1,IDX,DIFF_FACE,AF,TMP_G,H_S,&
+            ZZ_FACE(MAX_SPECIES),TNOW,RHOPV(-1:0),TMPV(-1:0),X1F,PRFCT,PRFCTV, &
             ZZPV2(-1:0,1:MAX_SPECIES),CPV(-1:0),KPV(-1:0),KPDTDN,FCT
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
@@ -702,8 +784,9 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 REAL(EB) :: DIVVOL, MINVOL, DUMMY
 
 LOGICAL, PARAMETER :: DO_CONDUCTION_HEAT_FLUX=.TRUE.
-INTEGER, PARAMETER :: DIFFHFLX_IND = HIGH_IND
-INTEGER, PARAMETER :: JFLX_IND     = HIGH_IND
+INTEGER :: DIFFHFLX_IND, JFLX_IND
+! INTEGER, PARAMETER :: DIFFHFLX_IND = HIGH_IND
+! INTEGER, PARAMETER :: JFLX_IND     = HIGH_IND
 
 !REAL(EB):: XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC,CCVOL_THRES
 
@@ -714,7 +797,6 @@ LOGICAL, PARAMETER :: FIX_DIFF_FLUXES  = .TRUE.
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIVRG_VOL , VOLDVRG
 INTEGER :: INDZ
-INTEGER :: N_LOOKUP
 
 ! Definitions related to CHECK_AGAINST_DIVG
 #ifdef CHECK_AGAINST_DIVG
@@ -742,6 +824,15 @@ DUMMY = T
 IF (SOLID_PHASE_ONLY) RETURN
 
 TNOW=SECOND()
+
+IF (DO_SYMM_SCALAR_DIFFLUXES .OR. .NOT.DO_IMPLICIT_CCREGION) THEN
+   DIFFHFLX_IND = LOW_IND  ! -rho Da Grad(Za)
+   JFLX_IND     = LOW_IND
+ELSE
+   DIFFHFLX_IND = HIGH_IND ! -( Da Grad(rho Za) - Da Grad(rho)/rho (rho Za) )
+   JFLX_IND     = HIGH_IND
+ENDIF
+
 CALL POINT_TO_MESH(NM)
 
 RDT = 1._EB/DT
@@ -821,390 +912,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    ! In FV form: use faces to add corresponding face integral terms, for face k
    ! (sum_a{h_{s,a} rho D_a Grad z_a) dot \hat{n}_k A_k, where \hat{n}_k is the versor outside of cell
    ! at face k.
-   DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
-
-      ! Diffusivity lookup table for species N:
-      N_LOOKUP = N
-      D_Z_N(:) = D_Z(:,N_LOOKUP)
-
-#ifdef CHECK_AGAINST_DIVG
-      RHO_D = 0._EB
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP2)
-               RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP2
-            ENDDO
-         ENDDO
-      ENDDO
-#endif
-
-      ! First Regular faces connecting regular cells on scalar implicit region:
-      ! Linear interpolation coefficients:
-      CCM1 = 0.5_EB;  CCP1 = 0.5_EB ! Uniform Grid
-
-      ! IAXIS faces:
-      X1AXIS = IAXIS
-      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
-
-         I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
-         J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
-         K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
-
-         ! Face dx:
-         IDX= 1._EB/DXN(I)
-
-         ! Diffusive Part:
-         IF (DNS) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ELSE ! LES
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
-            ENDDO
-         ENDIF
-
-         ! One Term defined flux:
-         DIFF_FACE = CCM1*RHOP(I+FCELL-1,J,K)*D_Z_TEMP(-1) + CCP1*RHOP(I+FCELL  ,J,K)*D_Z_TEMP(0)
-         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
-         DIFF_FACE*IDX*(ZZP(I+FCELL  ,J,K,N) - ZZP(I+FCELL-1,J,K,N) ) ! rho D_a Grad(Y_a)
-
-         ! Two term defined flux:
-         DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
-         VELD = DIFF_FACE*2._EB*IDX*(RHOP(I+FCELL  ,J,K)-RHOP(I+FCELL-1,J,K))/ &
-                                    (RHOP(I+FCELL  ,J,K)+RHOP(I+FCELL-1,J,K))
-
-         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
-         ! Note: this is different than the flux evaluation done on scalar transport on the
-         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
-         ! Now add to Adiff corresponding coeff:
-         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
-                - VELD*0.5_EB*(RHOP(I+FCELL  ,J,K)*ZZP(I+FCELL  ,J,K,N)   + &
-                               RHOP(I+FCELL-1,J,K)*ZZP(I+FCELL-1,J,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
-                  DIFF_FACE*IDX*(RHOP(I+FCELL  ,J,K)*ZZP(I+FCELL  ,J,K,N) - &
-                                 RHOP(I+FCELL-1,J,K)*ZZP(I+FCELL-1,J,K,N) )   ! D_a Grad(rho Y_a)
-
-      ENDDO
-
-      ! JAXIS faces:
-      X1AXIS = JAXIS
-      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
-
-         I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
-         J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
-         K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
-
-         ! Face dx:
-         IDX= 1._EB/DYN(J)
-
-         ! Diffusive Part:
-         IF (DNS) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ELSE ! LES
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
-            ENDDO
-         ENDIF
-
-         ! One Term defined flux:
-         DIFF_FACE = CCM1*RHOP(I,J+FCELL-1,K)*D_Z_TEMP(-1) + CCP1*RHOP(I,J+FCELL  ,K)*D_Z_TEMP(0)
-         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
-         DIFF_FACE*IDX*(ZZP(I,J+FCELL  ,K,N) - ZZP(I,J+FCELL-1,K,N))   ! rho D_a Grad(Y_a)
-
-         ! Two Terms defined flux:
-         DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
-         VELD = DIFF_FACE*2._EB*IDX*(RHOP(I,J+FCELL  ,K)-RHOP(I,J+FCELL-1,K))/ &
-                                    (RHOP(I,J+FCELL  ,K)+RHOP(I,J+FCELL-1,K))
-
-         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
-         ! Note: this is different than the flux evaluation done on scalar transport on the
-         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
-         ! Now add to Adiff corresponding coeff:
-         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
-                - VELD*0.5_EB*(RHOP(I,J+FCELL  ,K)*ZZP(I,J+FCELL  ,K,N)   + &
-                               RHOP(I,J+FCELL-1,K)*ZZP(I,J+FCELL-1,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
-                  DIFF_FACE*IDX*(RHOP(I,J+FCELL  ,K)*ZZP(I,J+FCELL  ,K,N) - &
-                                 RHOP(I,J+FCELL-1,K)*ZZP(I,J+FCELL-1,K,N) )   ! D_a Grad(rho Y_a)
-
-      ENDDO
-
-      ! KAXIS faces:
-      X1AXIS = KAXIS
-      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
-
-         I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
-         J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
-         K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
-
-         ! Face dx:
-         IDX= 1._EB/DZN(K)
-
-         ! Diffusive Part:
-         IF (DNS) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ELSE ! LES
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
-            ENDDO
-         ENDIF
-
-         ! One Term defined flux:
-         DIFF_FACE = CCM1*RHOP(I,J,K+FCELL-1)*D_Z_TEMP(-1) + CCP1*RHOP(I,J,K+FCELL  )*D_Z_TEMP(0)
-         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
-         DIFF_FACE*IDX*(ZZP(I,J,K+FCELL  ,N) - ZZP(I,J,K+FCELL-1,N) )   ! + rho D_a Grad(Y_a)
-
-         ! Two Terms defined flux:
-         DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
-         VELD = DIFF_FACE*2._EB*IDX*(RHOP(I,J,K+FCELL  )-RHOP(I,J,K+FCELL-1))/ &
-                                    (RHOP(I,J,K+FCELL  )+RHOP(I,J,K+FCELL-1))
-
-         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
-         ! Note: this is different than the flux evaluation done on scalar transport on the
-         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
-         ! Now add to Adiff corresponding coeff:
-         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
-                - VELD*0.5_EB*(RHOP(I,J,K+FCELL  )*ZZP(I,J,K+FCELL  ,N)   + &
-                               RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
-                  DIFF_FACE*IDX*(RHOP(I,J,K+FCELL  )*ZZP(I,J,K+FCELL  ,N) - &
-                                 RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N) )   ! + D_a Grad(rho Y_a)
-
-      ENDDO
-
-
-      ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
-      DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
-
-         I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
-         J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
-         K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
-         X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
-
-         SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               AF = DY(J)*DZ(K)
-               X1F= MESHES(NM)%X(I)
-               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
-               ! Linear interpolation coefficients:
-               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
-               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
-
-               TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
-               RHOPV(-1:0) = RHOP(I+FCELL-1:I+FCELL,J,K)
-               ZZPV(-1:0)  = ZZP(I+FCELL-1:I+FCELL,J,K,N)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K) ! Here we use the cut-cells
-                                                                                     ! underlying Cartesian turb MU.
-               ENDDO
-               DO ISIDE=-1,0
-                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
-                  CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
-                     ! TMPV(ISIDE) = TMPV(ISIDE)
-                  CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
-                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
-                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
-                     TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
-                     RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
-                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
-                  CASE DEFAULT
-                     print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
-                     TMPV(ISIDE) = -1._EB
-                  END SELECT
-               ENDDO
-               ! Diffusion Velocity D/rho drho/dx
-               VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
-                          (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
-
-            CASE(JAXIS)
-               AF = DX(I)*DZ(K)
-               X1F= MESHES(NM)%Y(J)
-               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
-               ! Linear interpolation coefficients:
-               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
-               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
-
-               TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
-               RHOPV(-1:0) = RHOP(I,J+FCELL-1:J+FCELL,K)
-               ZZPV(-1:0)  = ZZP(I,J+FCELL-1:J+FCELL,K,N)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K) ! Here we use the cut-cells
-                                                                                     ! underlying Cartesian turb MU.
-               ENDDO
-               DO ISIDE=-1,0
-                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
-                  CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
-                     ! TMPV(ISIDE) = TMPV(ISIDE)
-                     ! RHOPV(ISIDE)= RHOPV(ISIDE)
-                  CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
-                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
-                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
-                     TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
-                     RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
-                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
-                  CASE DEFAULT
-                     print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
-                     TMPV(ISIDE) = -1._EB
-                  END SELECT
-               ENDDO
-               ! Diffusion Velocity D/rho drho/dy
-               VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
-                          (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
-
-            CASE(KAXIS)
-               AF = DX(I)*DY(J)
-               X1F= MESHES(NM)%Z(K)
-               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
-                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
-               ! Linear interpolation coefficients:
-               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
-               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
-
-               TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
-               RHOPV(-1:0) = RHOP(I,J,K+FCELL-1:K+FCELL)
-               ZZPV(-1:0)  = ZZP(I,J,K+FCELL-1:K+FCELL,N)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE) ! Here we use the cut-cells
-                                                                                     ! underlying Cartesian turb MU.
-               ENDDO
-               DO ISIDE=-1,0
-                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
-                  CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
-                     ! TMPV(ISIDE) = TMPV(ISIDE)
-                     ! RHOPV(ISIDE)= RHOPV(ISIDE)
-                  CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
-                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
-                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
-                     TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
-                     RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
-                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
-                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
-                  CASE DEFAULT
-                     print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
-                     TMPV(ISIDE) = -1._EB
-                  END SELECT
-               ENDDO
-               ! Diffusion Velocity D/rho drho/dz
-               VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
-                          (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
-
-         ENDSELECT
-
-         ! Interpolate D_Z to the face, linear interpolation:
-         IF (DNS) THEN
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-
-         ! One Term defined flux:
-         DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
-         IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) ) ! + rho D_a Grad(Y_a)
-
-         ! Two Terms defined flux:
-         DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
-         VELD = DIFF_FACE*VELD ! Complete Diffusion velocity.
-
-         IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
-           - VELD*(CCP1*RHOPV(0)*ZZPV(0)   + CCM1*RHOPV(-1)*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
-                DIFF_FACE*IDX*(RHOPV(0)*ZZPV(0) - RHOPV(-1)*ZZPV(-1) )     ! + D_a Grad(rho Y_a)
-
-      ENDDO
-
-
-      ! GASPHASE cut-faces:
-      DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
-
-         IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
-
-         I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
-         J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
-         K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
-         X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
-
-         SELECT CASE (X1AXIS)
-         CASE(IAXIS)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K) ! Here we use the cut-cells
-                                                                                  ! underlying Cartesian turb MU.
-            ENDDO
-         CASE(JAXIS)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K) ! Here we use the cut-cells
-                                                                                  ! underlying Cartesian turb MU.
-            ENDDO
-         CASE(KAXIS)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE) ! Here we use the cut-cells
-                                                                                  ! underlying Cartesian turb MU.
-            ENDDO
-         END SELECT
-         DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
-
-            !AF = IBM_CUT_FACE(ICF)%AREA(IFACE)
-            X1F= IBM_CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
-            IDX= 1._EB/ ( IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
-                          IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
-            CCM1= IDX*(IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
-            CCP1= IDX*(X1F-IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
-
-            ! Interpolate D_Z to the face, linear interpolation:
-            TMPV(-1:0)  = -1._EB; RHOPV(-1:0) = -1._EB; ZZPV(-1:0)  = -1._EB
-            DO ISIDE=-1,0
-               SELECT CASE(IBM_CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
-               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
-                  ICC = IBM_CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
-                  JCC = IBM_CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
-                  TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
-                  RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
-                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
-                  ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
-                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
-               CASE DEFAULT
-                  print*, 'IBM_CUT_FACE face not connected to CC cell',NM,IFACE
-                  TMPV(ISIDE) = -1._EB
-               END SELECT
-               IF (DNS) CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-
-            ! One Term defined flux:
-            DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
-            IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,LOW_IND,IFACE) = DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) ) ! rho D_a Grad(Y_a)
-
-            ! Two Terms defined flux:
-            DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
-            VELD = DIFF_FACE*IDX*(     RHOPV(0)-     RHOPV(-1))/ &
-                                 (CCP1*RHOPV(0)+CCM1*RHOPV(-1))
-
-            IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,HIGH_IND,IFACE) = &
-            - VELD*(CCP1*RHOPV(0)*ZZPV(0)   + CCM1*RHOPV(-1)*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
-                 DIFF_FACE*IDX*(RHOPV(0)*ZZPV(0) - RHOPV(-1)*ZZPV(-1) )     ! + D_a Grad(rho Y_a)
-
-         ENDDO ! IFACE
-
-      ENDDO ! ICF
-
-
-      ! Finally EXIM faces -> we use RHO_D_DZDX,Y,Z previously defined on divg.f90:
-      ! No need to do anything on this initial DIFFUSIVE_FLUX_LOOP, as consistency already enforced
-      ! on divg.f90.
-
-
-   ENDDO DIFFUSIVE_FLUX_LOOP
-
+   CALL CCREGION_DIFFUSIVE_FLUXES(NM)
 
    ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
    DIFF_FLUXES_COND : IF (FIX_DIFF_FLUXES) THEN
@@ -1267,6 +975,11 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                                                 ZZP(I,J,K+FCELL-1,1:N_TRACKED_SPECIES))
 
          N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+
+         ! IF(I==1 .AND. J==1 .AND. K==2) WRITE(0,*) &
+         ! 'FLX LOW',PREDICTOR,I,J,MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(1,JFLX_IND),&
+         ! MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(2,JFLX_IND),&
+         ! SUM(MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,JFLX_IND))
 
          MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
          -(SUM(MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND))- &
@@ -4298,6 +4011,462 @@ END SUBROUTINE CCENTHALPY_ADVECTION
 
 END SUBROUTINE CCREGION_DIVERGENCE_PART_1
 
+
+! ------------------------- CCREGION_DIFFUSIVE_FLUXES ---------------------------
+
+SUBROUTINE CCREGION_DIFFUSIVE_FLUXES(NM)
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: N,I,J,K,X1AXIS,ISIDE,IFACE,ICC,JCC,ICF
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB) :: D_Z_N(0:5000),CCM1,CCP1,IDX,DIFF_FACE,VELD,D_Z_TEMP(-1:0),MUV(-1:0), &
+            RHOPV(-1:0),RHOPVN(-1:0),TMPV(-1:0),ZZPV(-1:0),X1F,PRFCT
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
+INTEGER :: N_LOOKUP
+
+LOGICAL, PARAMETER :: IMP_REGION_FROM_MATRIX_DIFF=.FALSE.
+
+SELECT CASE(PREDICTOR)
+   CASE(.TRUE.)
+      ZZP => ZZS
+      RHOP => RHOS
+      PRFCT = 0._EB ! Use star cut-cell quantities.
+   CASE(.FALSE.)
+      ZZP => ZZ
+      RHOP => RHO
+      PRFCT = 1._EB ! Use end of step cut-cell quantities.
+END SELECT
+
+ALLOCATE(ZZ_GET(N_TRACKED_SPECIES))
+
+! 1. Diffusive Heat flux = - Grad dot (h_s rho D Grad Z_n):
+! In FV form: use faces to add corresponding face integral terms, for face k
+! (sum_a{h_{s,a} rho D_a Grad z_a) dot \hat{n}_k A_k, where \hat{n}_k is the versor outside of cell
+! at face k.
+DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
+
+   ! Diffusivity lookup table for species N:
+   N_LOOKUP = N
+   D_Z_N(:) = D_Z(:,N_LOOKUP)
+
+   ! First Regular faces connecting regular cells on scalar implicit region:
+   ! Linear interpolation coefficients:
+   CCM1 = 0.5_EB;  CCP1 = 0.5_EB ! Uniform Grid
+
+   ! IAXIS faces:
+   X1AXIS = IAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Face dx:
+      IDX= 1._EB/DXN(I)
+
+      ! Diffusive Part:
+      IF (DNS) THEN
+         ! Interpolate D_Z to the face:
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
+         ENDDO
+      ENDIF
+
+      ! One Term defined flux:
+      DIFF_FACE = CCM1*RHOP(I+FCELL-1,J,K)*D_Z_TEMP(-1) + CCP1*RHOP(I+FCELL  ,J,K)*D_Z_TEMP(0)
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      DIFF_FACE*IDX*(ZZP(I+FCELL  ,J,K,N) - ZZP(I+FCELL-1,J,K,N) ) ! rho D_a Grad(Y_a)
+
+      IF(DO_IMPLICIT_CCREGION) THEN
+         RHOPVN(-1:0)=MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHOPVN(-1:0)
+         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+         DIFF_FACE*IDX*(RHOP(I+FCELL  ,J,K)*ZZP(I+FCELL  ,J,K,N)/RHOPVN( 0) - &
+                        RHOP(I+FCELL-1,J,K)*ZZP(I+FCELL-1,J,K,N)/RHOPVN(-1) ) ! rho D_a Grad(Y_a)
+      ENDIF
+
+      ! Two term defined flux:
+      IF (.NOT.DO_IMPLICIT_CCREGION .OR. .NOT.IMP_REGION_FROM_MATRIX_DIFF) THEN
+         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N)=CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
+         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%VELD(N)= MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N)* &
+                                                       2._EB*IDX*(RHOP(I+FCELL  ,J,K)-RHOP(I+FCELL-1,J,K))/ &
+                                                                 (RHOP(I+FCELL  ,J,K)+RHOP(I+FCELL-1,J,K))
+      ENDIF
+      DIFF_FACE = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N)
+      VELD = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%VELD(N)
+
+      ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+      ! Note: this is different than the flux evaluation done on scalar transport on the
+      ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+      ! Now add to Adiff corresponding coeff:
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+             - VELD*0.5_EB*(RHOP(I+FCELL  ,J,K)*ZZP(I+FCELL  ,J,K,N)   + &
+                            RHOP(I+FCELL-1,J,K)*ZZP(I+FCELL-1,J,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+               DIFF_FACE*IDX*(RHOP(I+FCELL  ,J,K)*ZZP(I+FCELL  ,J,K,N) - &
+                              RHOP(I+FCELL-1,J,K)*ZZP(I+FCELL-1,J,K,N) )   ! D_a Grad(rho Y_a)
+
+   ENDDO
+
+   ! JAXIS faces:
+   X1AXIS = JAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Face dx:
+      IDX= 1._EB/DYN(J)
+
+      ! Diffusive Part:
+      IF (DNS) THEN
+         ! Interpolate D_Z to the face:
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
+         ENDDO
+      ENDIF
+
+      ! One Term defined flux:
+      DIFF_FACE = CCM1*RHOP(I,J+FCELL-1,K)*D_Z_TEMP(-1) + CCP1*RHOP(I,J+FCELL  ,K)*D_Z_TEMP(0)
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      DIFF_FACE*IDX*(ZZP(I,J+FCELL  ,K,N) - ZZP(I,J+FCELL-1,K,N))   ! rho D_a Grad(Y_a)
+
+      IF(DO_IMPLICIT_CCREGION) THEN
+         RHOPVN(-1:0)=MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHOPVN(-1:0)
+         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+         DIFF_FACE*IDX*(RHOP(I,J+FCELL  ,K)*ZZP(I,J+FCELL  ,K,N)/RHOPVN( 0) - &
+                        RHOP(I,J+FCELL-1,K)*ZZP(I,J+FCELL-1,K,N)/RHOPVN(-1) ) ! rho D_a Grad(Y_a)
+      ENDIF
+
+      ! Two Terms defined flux:
+      IF (.NOT.DO_IMPLICIT_CCREGION .OR. .NOT.IMP_REGION_FROM_MATRIX_DIFF) THEN
+         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N)=CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
+         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%VELD(N)= MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N)* &
+                                                       2._EB*IDX*(RHOP(I,J+FCELL  ,K)-RHOP(I,J+FCELL-1,K))/ &
+                                                                 (RHOP(I,J+FCELL  ,K)+RHOP(I,J+FCELL-1,K))
+      ENDIF
+      DIFF_FACE = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N)
+      VELD = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%VELD(N)
+
+      ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+      ! Note: this is different than the flux evaluation done on scalar transport on the
+      ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+      ! Now add to Adiff corresponding coeff:
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+             - VELD*0.5_EB*(RHOP(I,J+FCELL  ,K)*ZZP(I,J+FCELL  ,K,N)   + &
+                            RHOP(I,J+FCELL-1,K)*ZZP(I,J+FCELL-1,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+               DIFF_FACE*IDX*(RHOP(I,J+FCELL  ,K)*ZZP(I,J+FCELL  ,K,N) - &
+                              RHOP(I,J+FCELL-1,K)*ZZP(I,J+FCELL-1,K,N) )   ! D_a Grad(rho Y_a)
+
+   ENDDO
+
+   ! KAXIS faces:
+   X1AXIS = KAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Face dx:
+      IDX= 1._EB/DZN(K)
+
+      ! Diffusive Part:
+      IF (DNS) THEN
+         ! Interpolate D_Z to the face:
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
+         ENDDO
+      ENDIF
+
+      ! One Term defined flux:
+      DIFF_FACE = CCM1*RHOP(I,J,K+FCELL-1)*D_Z_TEMP(-1) + CCP1*RHOP(I,J,K+FCELL  )*D_Z_TEMP(0)
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      DIFF_FACE*IDX*(ZZP(I,J,K+FCELL  ,N) - ZZP(I,J,K+FCELL-1,N) )   ! + rho D_a Grad(Y_a)
+
+      IF(DO_IMPLICIT_CCREGION) THEN
+         RHOPVN(-1:0)=MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHOPVN(-1:0)
+         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+         DIFF_FACE*IDX*(RHOP(I,J,K+FCELL  )*ZZP(I,J,K+FCELL  ,N)/RHOPVN( 0) - &
+                        RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N)/RHOPVN(-1) ) ! rho D_a Grad(Y_a)
+         !IF(K==2) WRITE(0,*) PREDICTOR,I,J,K,RHOP(I,J,K),RHOPVN(-1),RHOP(I,J,K)/RHOPVN(-1)
+      ENDIF
+
+      ! Two Terms defined flux:
+      IF (.NOT.DO_IMPLICIT_CCREGION .OR. .NOT.IMP_REGION_FROM_MATRIX_DIFF) THEN
+         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N)=CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
+         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%VELD(N)= MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N)* &
+                                                       2._EB*IDX*(RHOP(I,J,K+FCELL  )-RHOP(I,J,K+FCELL-1))/ &
+                                                                 (RHOP(I,J,K+FCELL  )+RHOP(I,J,K+FCELL-1))
+      ENDIF
+      DIFF_FACE = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N)
+      VELD = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%VELD(N)
+
+      ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+      ! Note: this is different than the flux evaluation done on scalar transport on the
+      ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+      ! Now add to Adiff corresponding coeff:
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+             - VELD*0.5_EB*(RHOP(I,J,K+FCELL  )*ZZP(I,J,K+FCELL  ,N)   + &
+                            RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+               DIFF_FACE*IDX*(RHOP(I,J,K+FCELL  )*ZZP(I,J,K+FCELL  ,N) - &
+                              RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N) )   ! + D_a Grad(rho Y_a)
+
+   ENDDO
+
+
+   ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+   DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+
+      I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            X1F= MESHES(NM)%X(I)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
+            RHOPV(-1:0) = RHOP(I+FCELL-1:I+FCELL,J,K)
+            ZZPV(-1:0)  = ZZP(I+FCELL-1:I+FCELL,J,K,N)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+            ! Diffusion Velocity D/rho drho/dx
+            VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
+                       (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
+
+         CASE(JAXIS)
+            X1F= MESHES(NM)%Y(J)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
+            RHOPV(-1:0) = RHOP(I,J+FCELL-1:J+FCELL,K)
+            ZZPV(-1:0)  = ZZP(I,J+FCELL-1:J+FCELL,K,N)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+                  ! RHOPV(ISIDE)= RHOPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+            ! Diffusion Velocity D/rho drho/dy
+            VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
+                       (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
+
+         CASE(KAXIS)
+            X1F= MESHES(NM)%Z(K)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
+            RHOPV(-1:0) = RHOP(I,J,K+FCELL-1:K+FCELL)
+            ZZPV(-1:0)  = ZZP(I,J,K+FCELL-1:K+FCELL,N)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+                  ! RHOPV(ISIDE)= RHOPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+            ! Diffusion Velocity D/rho drho/dz
+            VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
+                       (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
+
+      ENDSELECT
+
+      ! Interpolate D_Z to the face, linear interpolation:
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ENDIF
+
+      ! One Term defined flux:
+      DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+      IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) ) ! + rho D_a Grad(Y_a)
+
+      IF(DO_IMPLICIT_CCREGION) THEN
+         RHOPVN(-1:0)=IBM_RCFACE_Z(IFACE)%RHOPVN(-1:0)
+         IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+         DIFF_FACE*IDX*(RHOPV( 0)*ZZPV( 0)/RHOPVN( 0) - RHOPV(-1)*ZZPV(-1)/RHOPVN(-1) ) ! rho D_a Grad(Y_a)
+      ENDIF
+
+      ! Two Terms defined flux:
+      IF (.NOT.DO_IMPLICIT_CCREGION .OR. .NOT.IMP_REGION_FROM_MATRIX_DIFF) THEN
+         IBM_RCFACE_Z(IFACE)%DIFF_FACE(N)=CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
+         IBM_RCFACE_Z(IFACE)%VELD(N)=IBM_RCFACE_Z(IFACE)%DIFF_FACE(N)*VELD
+      ENDIF
+      DIFF_FACE = IBM_RCFACE_Z(IFACE)%DIFF_FACE(N)
+      VELD = IBM_RCFACE_Z(IFACE)%VELD(N)
+
+      IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+        - VELD*(CCP1*RHOPV(0)*ZZPV(0)   + CCM1*RHOPV(-1)*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+             DIFF_FACE*IDX*(RHOPV(0)*ZZPV(0) - RHOPV(-1)*ZZPV(-1) )     ! + D_a Grad(rho Y_a)
+
+   ENDDO
+
+
+   ! GASPHASE cut-faces:
+   DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+
+      IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+
+      I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+      J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+      K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+
+         !AF = IBM_CUT_FACE(ICF)%AREA(IFACE)
+         X1F= IBM_CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
+         IDX= 1._EB/ ( IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
+                       IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+         CCM1= IDX*(IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
+         CCP1= IDX*(X1F-IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+
+         SELECT CASE (X1AXIS)
+         CASE(IAXIS)
+            MUV(-1:0) = MU(I+FCELL-1:I+FCELL  ,J,K)
+         CASE(JAXIS)
+            MUV(-1:0) = MU(I,J+FCELL-1:J+FCELL  ,K)
+         CASE(KAXIS)
+            MUV(-1:0) = MU(I,J,K+FCELL-1:K+FCELL  )
+         END SELECT
+
+         ! Interpolate D_Z to the face, linear interpolation:
+         TMPV(-1:0)  = -1._EB; RHOPV(-1:0) = -1._EB; ZZPV(-1:0)  = -1._EB
+         DO ISIDE=-1,0
+            SELECT CASE(IBM_CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
+            CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+               ICC = IBM_CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
+               JCC = IBM_CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
+               TMPV(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC)
+               RHOPV(ISIDE)=        PRFCT *IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                             (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%RHOS(JCC)
+               ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                             (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+            CASE DEFAULT
+               print*, 'IBM_CUT_FACE face not connected to CC cell',NM,IFACE
+               TMPV(ISIDE) = -1._EB
+            END SELECT
+            IF (DNS) THEN
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
+            ELSE
+               D_Z_TEMP(ISIDE) = MUV(ISIDE)*RSC/RHOPV(ISIDE)
+            ENDIF
+         ENDDO
+
+         ! One Term defined flux:
+         DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+         IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,LOW_IND,IFACE) = DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) ) ! rho D_a Grad(Y_a)
+
+         IF(DO_IMPLICIT_CCREGION) THEN
+            RHOPVN(-1:0)=IBM_CUT_FACE(ICF)%RHOPVN(-1:0,IFACE)
+            IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,LOW_IND,IFACE) = &
+            DIFF_FACE*IDX*(RHOPV( 0)*ZZPV( 0)/RHOPVN( 0) - RHOPV(-1)*ZZPV(-1)/RHOPVN(-1) ) ! rho D_a Grad(Y_a)
+         ENDIF
+
+         ! Two Terms defined flux:
+         IF (.NOT.DO_IMPLICIT_CCREGION .OR. .NOT.IMP_REGION_FROM_MATRIX_DIFF) THEN
+            IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE)=CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
+            IBM_CUT_FACE(ICF)%VELD(N,IFACE)=IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE)*IDX*(    RHOPV(0)-     RHOPV(-1))/&
+                                                                                     (CCP1*RHOPV(0)+CCM1*RHOPV(-1))
+         ENDIF
+         DIFF_FACE = IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE)
+         VELD = IBM_CUT_FACE(ICF)%VELD(N,IFACE)
+
+         IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,HIGH_IND,IFACE) = &
+         - VELD*(CCP1*RHOPV(0)*ZZPV(0)   + CCM1*RHOPV(-1)*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+              DIFF_FACE*IDX*(RHOPV(0)*ZZPV(0) - RHOPV(-1)*ZZPV(-1) )     ! + D_a Grad(rho Y_a)
+
+      ENDDO ! IFACE
+
+   ENDDO ! ICF
+
+
+   ! Finally EXIM faces -> we use RHO_D_DZDX,Y,Z previously defined on divg.f90:
+   ! No need to do anything on this initial DIFFUSIVE_FLUX_LOOP, as consistency already enforced
+   ! on divg.f90.
+
+
+ENDDO DIFFUSIVE_FLUX_LOOP
+
+DEALLOCATE(ZZ_GET)
+
+RETURN
+END SUBROUTINE CCREGION_DIFFUSIVE_FLUXES
+
 ! ---------------------------- CCREGION_COMBUSTION ------------------------------
 
 SUBROUTINE CCREGION_COMBUSTION(T,DT,NM)
@@ -5056,18 +5225,18 @@ DUMMYT = T
 
 ! First advance density equation:
 IF( (PREDICTOR.AND.FIRST_PASS) .OR. CORRECTOR) THEN
-! Compute advection matrix:
-CALL GET_ADVMATRIX_DENSITY_3D
+   ! Compute advection matrix:
+   CALL GET_ADVMATRIX_DENSITY_3D
 
-! RHS vector F_BC, derived from boundary conditions on immersed and domain Boundaries:
-F_RHO(:) = 0._EB
-CALL GET_ADVVECTOR_DENSITY_3D
+   ! RHS vector F_BC, derived from boundary conditions on immersed and domain Boundaries:
+   F_RHO(:) = 0._EB
+   CALL GET_ADVVECTOR_DENSITY_3D
 
-! Advective Flux vector F_EXIM in the EXIM boundary for density:
-CALL GET_EXIMVECTOR_DENSITY_3D
+   ! Advective Flux vector F_EXIM in the EXIM boundary for density:
+   CALL GET_EXIMVECTOR_DENSITY_3D
 
-! Get rho vector at step n:
-CALL GET_RHOVECTOR_3D
+   ! Get rho vector at step n:
+   CALL GET_RHOVECTOR_3D
 
 ENDIF
 
@@ -5085,127 +5254,88 @@ ENDIF
 
 ! Compute implicit discretization matrix, and store in D_MAT_RHO:
 ! D_MAT_RHO(i,j)= M_MAT_RHO(i,j) + DT*D_MAT_RHO(i,j); here we recycle M_MAT_Z as it is the same as M_MAT_RHO.
+IF (PREDICTOR) THEN
+   D_MAT_RHO(:,:) = DT*D_MAT_RHO(:,:)
+ELSE
+   D_MAT_RHO(:,:) = 0.5_EB*DT*D_MAT_RHO(:,:)
+ENDIF
 
-IF (DO_IMPLICIT_CCREGION) THEN
-
-   IF (PREDICTOR) THEN
-      D_MAT_RHO(:,:) = DT*D_MAT_RHO(:,:)
-   ELSE
-      D_MAT_RHO(:,:) = 0.5_EB*DT*D_MAT_RHO(:,:)
-   ENDIF
-
-   ! Solve implicit system of equations for density:
-   ! D_MAT_RHO RHO^(n+1) = M_MAT_RHO*RHO^n - DT*(F_EXIM+F_BC)   PREDICTOR
-   ! D_MAT_RHO RHO^(n+1) = M_MAT_RHO*RHO - 0.5_EB*(F_EXIM+F_BC) CORRECTOR
-   IF (PREDICTOR) THEN
-      IF (TRAP_CORR) THEN
-         TR_RHO(:) = 0._EB
-         DO IROW_LOC=1,NUNKZ_LOCAL
-            ! [M_MAT_RHO(:,:)-1/2*DT*D_MAT_RHO(:,:)] * RHO - 1/2*DT*F_RHO: PART of Trapezoidal corrector rhs.
-            DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
-               TR_RHO(IROW_LOC) = TR_RHO(IROW_LOC) - 0.5_EB*D_MAT_RHO(JCOL,IROW_LOC)*RZ_RHO(JD_MAT_Z(JCOL,IROW_LOC))
-            ENDDO
-            TR_RHO(IROW_LOC) = TR_RHO(IROW_LOC) + M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
-         ENDDO
-      ENDIF
+! Solve implicit system of equations for density:
+! D_MAT_RHO RHO^(n+1) = M_MAT_RHO*RHO^n - DT*(F_EXIM+F_BC)   PREDICTOR
+! D_MAT_RHO RHO^(n+1) = M_MAT_RHO*RHO - 0.5_EB*(F_EXIM+F_BC) CORRECTOR
+IF (PREDICTOR) THEN
+   IF (TRAP_CORR) THEN
+      TR_RHO(:) = 0._EB
       DO IROW_LOC=1,NUNKZ_LOCAL
-         F_RHO(IROW_LOC) = M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - DT*F_RHO(IROW_LOC)
-      ENDDO
-   ELSE
-      IF (TRAP_CORR) THEN
-          DO IROW_LOC=1,NUNKZ_LOCAL
-             F_RHO(IROW_LOC) = TR_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
-          ENDDO
-      ELSE
-         DO IROW_LOC=1,NUNKZ_LOCAL
-            F_RHO(IROW_LOC) = M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
+         ! [M_MAT_RHO(:,:)-1/2*DT*D_MAT_RHO(:,:)] * RHO - 1/2*DT*F_RHO: PART of Trapezoidal corrector rhs.
+         DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
+            TR_RHO(IROW_LOC) = TR_RHO(IROW_LOC) - 0.5_EB*D_MAT_RHO(JCOL,IROW_LOC)*RZ_RHO(JD_MAT_Z(JCOL,IROW_LOC))
          ENDDO
-      ENDIF
-   ENDIF
-
-   DO IROW_LOC=1,NUNKZ_LOCAL
-      JCOL=JM_MAT_Z(IROW_LOC)
-      D_MAT_RHO(JCOL,IROW_LOC) = D_MAT_RHO(JCOL,IROW_LOC) + M_MAT_Z(IROW_LOC)
-   ENDDO
-
-   ! Load into 3 vector CSR Format for Implicit rho matrix:
-   INNZ = 0
-   DO IROW_LOC=1,NUNKZ_LOCAL
-      IA_Z(IROW_LOC) = INNZ + 1
-      DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
-         IF ( D_MAT_RHO(JCOL,IROW_LOC) == 0._EB ) CYCLE ! Drop zero values.
-         INNZ = INNZ + 1
-         A_Z(INNZ)  =  D_MAT_RHO(JCOL,IROW_LOC)
-         JA_Z(INNZ) =   JD_MAT_Z(JCOL,IROW_LOC)
+         TR_RHO(IROW_LOC) = TR_RHO(IROW_LOC) + M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
       ENDDO
+   ENDIF
+   DO IROW_LOC=1,NUNKZ_LOCAL
+      F_RHO(IROW_LOC) = M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - DT*F_RHO(IROW_LOC)
    ENDDO
-   IA_Z(NUNKZ_LOCAL+1) = INNZ + 1
+ELSE
+   IF (TRAP_CORR) THEN
+       DO IROW_LOC=1,NUNKZ_LOCAL
+          F_RHO(IROW_LOC) = TR_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
+       ENDDO
+   ELSE
+      DO IROW_LOC=1,NUNKZ_LOCAL
+         F_RHO(IROW_LOC) = M_MAT_Z(IROW_LOC)*RZ_RHO(IROW_LOC) - 0.5_EB*DT*F_RHO(IROW_LOC)
+      ENDDO
+   ENDIF
+ENDIF
+
+DO IROW_LOC=1,NUNKZ_LOCAL
+   JCOL=JM_MAT_Z(IROW_LOC)
+   D_MAT_RHO(JCOL,IROW_LOC) = D_MAT_RHO(JCOL,IROW_LOC) + M_MAT_Z(IROW_LOC)
+ENDDO
+
+! Load into 3 vector CSR Format for Implicit rho matrix:
+INNZ = 0
+DO IROW_LOC=1,NUNKZ_LOCAL
+   IA_Z(IROW_LOC) = INNZ + 1
+   DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
+      IF ( D_MAT_RHO(JCOL,IROW_LOC) == 0._EB ) CYCLE ! Drop zero values.
+      INNZ = INNZ + 1
+      A_Z(INNZ)  =  D_MAT_RHO(JCOL,IROW_LOC)
+      JA_Z(INNZ) =   JD_MAT_Z(JCOL,IROW_LOC)
+   ENDDO
+ENDDO
+IA_Z(NUNKZ_LOCAL+1) = INNZ + 1
 
 #ifdef WITH_PARDISO
-   CALL SYMBLU_ZZ
-   ! Numerical Factorization and Solve.
-   PHASEZ = 23
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
-        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
+CALL SYMBLU_ZZ
+! Numerical Factorization and Solve.
+PHASEZ = 23
+CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+     A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
 
-   ! Release internal memory for scalar:
-   PHASEZ = -1
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
-        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
+! Release internal memory for scalar:
+PHASEZ = -1
+CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+     A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
 #elif WITH_CLUSTER_SPARSE_SOLVER
-   CALL SYMBLU_ZZ
-   ! Numerical Factorization and Solve.
-   PHASEZ = 23
-   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
-       A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
+CALL SYMBLU_ZZ
+! Numerical Factorization and Solve.
+PHASEZ = 23
+CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+    A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
 
-   ! Release internal memory for scalar:
-   PHASEZ = -1
-   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
-       A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
+! Release internal memory for scalar:
+PHASEZ = -1
+CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+    A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
 
 #else
-   WRITE(LU_ERR,*) 'Can not solve implicitly continuity on cut-cell region.'
-   WRITE(LU_ERR,*) 'PARDISO/CLUSTER_SPARSE_SOLVER solver compile flag was not defined.'
-   ! Some error - stop flag.
-   RETURN
+WRITE(LU_ERR,*) 'Can not solve implicitly continuity on cut-cell region.'
+WRITE(LU_ERR,*) 'PARDISO/CLUSTER_SPARSE_SOLVER solver compile flag was not defined.'
+! Some error - stop flag.
+RETURN
 #endif /* WITH_PARDISO */
-
-
-ELSE ! Do explicit advancement SSPRK2 as FDS, but using matrix-vector system
-
-   IF (PREDICTOR) THEN
-
-      ! Multiply D_MAT_RHO(:,:) * RZ_RHO and add to F_RHO: (Adv+Diff)*(rho z)^n + F^n
-      DO IROW_LOC=1,NUNKZ_LOCAL
-         DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
-            F_RHO(IROW_LOC) = F_RHO(IROW_LOC) + D_MAT_RHO(JCOL,IROW_LOC)*RZ_RHO(JD_MAT_Z(JCOL,IROW_LOC))
-         ENDDO
-      ENDDO
-
-      ! Advance with Explicit Euler: RZ_RHO = RZ_RHO - DT*M_MAT_Z^-1*F_RHO: where initially
-      ! RZ_RHO = (rho)^n, filled in GET_RHOVECTOR_DENSITY_3D
-      DO IROW_LOC=1,NUNKZ_LOCAL
-         RZ_RHO(IROW_LOC) = RZ_RHO(IROW_LOC) - DT * F_RHO(IROW_LOC) / M_MAT_Z(IROW_LOC)
-      ENDDO
-
-   ELSE ! CORRECTOR
-
-      ! Multiply D_MAT_RHO(:,:) * RZ_RHOS and add to F_RHO: (Adv+Diff)*(rho z)^* + F^*
-      DO IROW_LOC=1,NUNKZ_LOCAL
-         DO JCOL=1,NNZ_D_MAT_Z(IROW_LOC)
-            F_RHO(IROW_LOC) = F_RHO(IROW_LOC) + D_MAT_RHO(JCOL,IROW_LOC)*RZ_RHOS(JD_MAT_Z(JCOL,IROW_LOC))
-         ENDDO
-      ENDDO
-
-      ! Advance with Corrector SSPRK2: RZ_RHO = RZ_RHO - DT/2*M_MAT_Z^-1*F_RHO: where initially
-      ! RZ_RHO = 1/2*((rho)^n + (rho)^*)
-      DO IROW_LOC=1,NUNKZ_LOCAL
-         RZ_RHO(IROW_LOC) = RZ_RHO(IROW_LOC) - 0.5_EB * DT * F_RHO(IROW_LOC) / M_MAT_Z(IROW_LOC)
-      ENDDO
-   ENDIF
-
-ENDIF ! DO_IMPLICIT_CCREGION
 
 ! Copy back to RHOP and IBM_CUT_CELL:
 CALL PUT_RHOVECTOR_3D
@@ -5219,11 +5349,20 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 
    IF( (PREDICTOR.AND.FIRST_PASS) .OR. CORRECTOR) THEN
    ! Compute advection + diffusion matrix:
-   CALL GET_ADVDIFFMATRIX_SCALAR_3D(N)
+   IF (DO_SYMM_SCALAR_DIFFLUXES) THEN
+      CALL GET_ADVDIFFMATRIX_SCALAR_SYMM_3D(N)
+   ELSE
+      CALL GET_ADVDIFFMATRIX_SCALAR_3D(N)
+   ENDIF
 
    ! RHS vector F_BC, derived from boundary conditions on immersed and domain Boundaries:
    F_Z(:) = 0._EB
    CALL GET_ADVDIFFVECTOR_SCALAR_3D(N)
+
+   ! Here add the reaction source term M_DOT_PPP, treated explicitly:
+   IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) THEN
+      CALL GET_M_DOT_PPP_SCALAR_3D(N)
+   ENDIF
 
    ! Flux vector F_EXIM in the EXIM boundary for species N:
    CALL GET_EXIMVECTOR_SCALAR_3D(N)
@@ -5409,16 +5548,606 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
    ! Copy back to RHOZZP and IBM_CUT_CELL:
    CALL PUT_RHOZZVECTOR_SCALAR_3D(N)
 
-   ! Here add the reaction source term M_DOT_PPP, treated explicitly:
-   !!!!!!
-
 ENDDO SPECIES_LOOP
 
+! Compute correction diffusive flux for locally most abundant species on faces of CCIMPREG:
+!DO IROW_LOC=1,5
+!   CALL CORRECT_DIFFLUX_CCIMPREG_3D(DT)
+!ENDDO
+
 ! Recompute rho*ZZalpha for the most abundant alpha in each cell:
-CALL GET_ZZ_CCIMPREG_3D
+CALL GET_RHOZZ_CCIMPREG_3D
 
 RETURN
 END SUBROUTINE CCREGION_DENSITY_IMPLICIT
+
+! ---------------------------- CORRECT_DIFFLUX_CCIMPREG_3D -----------------------
+
+SUBROUTINE CORRECT_DIFFLUX_CCIMPREG_3D(DT)
+
+REAL(EB), INTENT(IN) :: DT
+
+! Local Variables:
+INTEGER :: NM,N,I,J,K,X1AXIS,IFACE,ICF,ICC,JCC,ISIDE,IROW,IROW_LOC,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND), &
+           LOCROW_1,LOCROW_2,ILOC
+REAL(EB):: PRFCT,IDX,DIFF_FACE,VELD,X1F,CCM1,CCP1,AF,ZZPV(-1:0),ZZPV2(-1:0,MAX_SPECIES), &
+           ZZ_FACE(MAX_SPECIES),FCT
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+
+
+! Compute correction diffusive flux for locally most abundant species on faces of CCIMPREG:
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
+   CALL POINT_TO_MESH(NM)
+
+   SELECT CASE(PREDICTOR)
+      CASE(.TRUE.)
+         ZZP => ZZS
+         PRFCT = 0._EB ! Use star cut-cell quantities.
+      CASE(.FALSE.)
+         ZZP => ZZ
+         PRFCT = 1._EB ! Use end of step cut-cell quantities.
+   END SELECT
+
+   DIFFUSIVE_FLUX_LOOP_1 : DO N=1,N_TOTAL_SCALARS
+
+      ! IAXIS faces:
+      X1AXIS = IAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Face dx:
+         IDX= 1._EB/DXN(I)
+         DIFF_FACE = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N)
+         VELD = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%VELD(N)
+         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+         ! Note: this is different than the flux evaluation done on scalar transport on the
+         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+         ! Now add to Adiff corresponding coeff:
+         MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+                - VELD*0.5_EB*(ZZP(I+FCELL  ,J,K,N) + ZZP(I+FCELL-1,J,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+                  DIFF_FACE*IDX*(ZZP(I+FCELL  ,J,K,N) - ZZP(I+FCELL-1,J,K,N) )   ! D_a Grad(rho Y_a)
+      ENDDO
+
+      ! JAXIS faces:
+      X1AXIS = JAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Face dx:
+         IDX= 1._EB/DYN(J)
+         DIFF_FACE = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N)
+         VELD = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%VELD(N)
+         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+         ! Note: this is different than the flux evaluation done on scalar transport on the
+         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+         ! Now add to Adiff corresponding coeff:
+         MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+                - VELD*0.5_EB*(ZZP(I,J+FCELL  ,K,N) + ZZP(I,J+FCELL-1,K,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+                  DIFF_FACE*IDX*(ZZP(I,J+FCELL  ,K,N) - ZZP(I,J+FCELL-1,K,N) )   ! D_a Grad(rho Y_a)
+      ENDDO
+
+      ! KAXIS faces:
+      X1AXIS = KAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Face dx:
+         IDX= 1._EB/DZN(K)
+         DIFF_FACE = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N)
+         VELD = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%VELD(N)
+         ! Here VelD and the Diff coefficient are evaluated with the end of step soln.
+         ! Note: this is different than the flux evaluation done on scalar transport on the
+         ! step, in the sense that DIFF_FACE and VELD are evaluated with end of step rho and ZZ.
+         ! Now add to Adiff corresponding coeff:
+         MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+                - VELD*0.5_EB*(ZZP(I,J,K+FCELL  ,N) + ZZP(I,J,K+FCELL-1,N) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+                  DIFF_FACE*IDX*(ZZP(I,J,K+FCELL  ,N) - ZZP(I,J,K+FCELL-1,N) )   ! + D_a Grad(rho Y_a)
+      ENDDO
+
+      ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+      DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+         I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+         J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+         K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+         X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               X1F= MESHES(NM)%X(I)
+               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+               ! Linear interpolation coefficients:
+               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+               ZZPV(-1:0)  = ZZP(I+FCELL-1:I+FCELL,J,K,N)
+               DO ISIDE=-1,0
+                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+                  CASE(IBM_FTYPE_RGGAS)
+                  CASE(IBM_FTYPE_CFGAS)
+                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+                  END SELECT
+               ENDDO
+            CASE(JAXIS)
+               X1F= MESHES(NM)%Y(J)
+               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+               ! Linear interpolation coefficients:
+               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+               ZZPV(-1:0)  = ZZP(I,J+FCELL-1:J+FCELL,K,N)
+               DO ISIDE=-1,0
+                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+                  CASE(IBM_FTYPE_RGGAS)
+                  CASE(IBM_FTYPE_CFGAS)
+                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+                  END SELECT
+               ENDDO
+            CASE(KAXIS)
+               X1F= MESHES(NM)%Z(K)
+               IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                               IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+               ! Linear interpolation coefficients:
+               CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+               CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+               ZZPV(-1:0)  = ZZP(I,J,K+FCELL-1:K+FCELL,N)
+               DO ISIDE=-1,0
+                  SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+                  CASE(IBM_FTYPE_RGGAS)
+                  CASE(IBM_FTYPE_CFGAS)
+                     ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                     JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                     ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                   (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+                  END SELECT
+               ENDDO
+         ENDSELECT
+         DIFF_FACE = IBM_RCFACE_Z(IFACE)%DIFF_FACE(N)
+         VELD = IBM_RCFACE_Z(IFACE)%VELD(N)
+         IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,HIGH_IND) = &
+           - VELD*(CCP1*ZZPV(0)   + CCM1*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+                DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) )     ! + D_a Grad(rho Y_a)
+      ENDDO
+
+      ! GASPHASE cut-faces:
+      DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+         IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+         I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+         J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+         K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+         DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+            !AF = IBM_CUT_FACE(ICF)%AREA(IFACE)
+            X1F= IBM_CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
+            IDX= 1._EB/ ( IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
+                          IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+            CCM1= IDX*(IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
+            CCP1= IDX*(X1F-IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+            ! Interpolate D_Z to the face, linear interpolation:
+            ZZPV(-1:0)  = -1._EB
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = IBM_CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
+                  JCC = IBM_CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
+                  ZZPV(ISIDE) =        PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                                (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+               END SELECT
+            ENDDO
+            DIFF_FACE = IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE)
+            VELD = IBM_CUT_FACE(ICF)%VELD(N,IFACE)
+            IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,HIGH_IND,IFACE) = &
+            - VELD*(CCP1*ZZPV(0)   + CCM1*ZZPV(-1) ) + & !-D_a/rho*Grad rho * (rho Y_a)
+                 DIFF_FACE*IDX*(ZZPV(0) - ZZPV(-1) )     ! + D_a Grad(rho Y_a)
+         ENDDO ! IFACE
+
+      ENDDO ! ICF
+
+   ENDDO DIFFUSIVE_FLUX_LOOP_1
+
+   ! Now Compute the correction on each face for the most abundant species flux:
+   ! IAXIS faces:
+   X1AXIS = IAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+      ZZ_FACE(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZP(I+FCELL  ,J,K,1:N_TRACKED_SPECIES) + &
+                                             ZZP(I+FCELL-1,J,K,1:N_TRACKED_SPECIES))
+      N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND) = 0._EB
+      ! Correction flux:
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      -SUM(MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,HIGH_IND))
+   ENDDO
+
+   ! JAXIS faces:
+   X1AXIS = JAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+      ZZ_FACE(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZP(I,J+FCELL  ,K,1:N_TRACKED_SPECIES) + &
+                                             ZZP(I,J+FCELL-1,K,1:N_TRACKED_SPECIES))
+      N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND) = 0._EB
+      ! Correction flux:
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      -SUM(MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,HIGH_IND))
+   ENDDO
+
+   ! KAXIS faces:
+   X1AXIS = KAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+      ZZ_FACE(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZP(I,J,K+FCELL  ,1:N_TRACKED_SPECIES) + &
+                                             ZZP(I,J,K+FCELL-1,1:N_TRACKED_SPECIES))
+      N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND) = 0._EB
+      ! Correction flux:
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = &
+      -SUM(MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,HIGH_IND))
+   ENDDO
+
+   ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+   DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+      I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            X1F= MESHES(NM)%X(I)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            ZZPV2(-1,1:N_TRACKED_SPECIES)  = ZZP(I+FCELL-1,J,K,1:N_TRACKED_SPECIES)
+            ZZPV2( 0,1:N_TRACKED_SPECIES)  = ZZP(I+FCELL  ,J,K,1:N_TRACKED_SPECIES)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  ZZPV2(ISIDE,1:N_TRACKED_SPECIES) =  &
+                         PRFCT *IBM_CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                  (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+               END SELECT
+            ENDDO
+         CASE(JAXIS)
+            X1F= MESHES(NM)%Y(J)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            ZZPV2(-1,1:N_TRACKED_SPECIES)  = ZZP(I,J+FCELL-1,K,1:N_TRACKED_SPECIES)
+            ZZPV2( 0,1:N_TRACKED_SPECIES)  = ZZP(I,J+FCELL  ,K,1:N_TRACKED_SPECIES)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  ZZPV2(ISIDE,1:N_TRACKED_SPECIES) =  &
+                         PRFCT *IBM_CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                  (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+               END SELECT
+            ENDDO
+         CASE(KAXIS)
+            X1F= MESHES(NM)%Z(K)
+            IDX = 1._EB / ( IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            ZZPV2(-1,1:N_TRACKED_SPECIES)  = ZZP(I,J,K+FCELL-1,1:N_TRACKED_SPECIES)
+            ZZPV2( 0,1:N_TRACKED_SPECIES)  = ZZP(I,J,K+FCELL  ,1:N_TRACKED_SPECIES)
+            DO ISIDE=-1,0
+               SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell
+                  ICC = IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  ZZPV2(ISIDE,1:N_TRACKED_SPECIES) =  &
+                         PRFCT *IBM_CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                  (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+               END SELECT
+            ENDDO
+      ENDSELECT
+      ZZ_FACE(1:N_TRACKED_SPECIES) = CCM1*ZZPV2(-1,1:N_TRACKED_SPECIES) + &
+                                     CCP1*ZZPV2( 0,1:N_TRACKED_SPECIES)
+      N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+      IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND) = 0._EB
+      ! Correction flux:
+      IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) = -SUM(IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(1:N_TRACKED_SPECIES,HIGH_IND))
+
+      IF(IFACE == 1) WRITE(0,*) 'IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND)=',N,IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND)
+   ENDDO
+
+   ! GASPHASE cut-faces:
+   DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+      IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+      I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+      J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+      K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+      DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+         X1F= IBM_CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
+         IDX= 1._EB/ ( IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
+                       IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+         CCM1= IDX*(IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
+         CCP1= IDX*(X1F-IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+         ! Interpolate D_Z to the face, linear interpolation:
+         ZZPV2(-1:0,1:N_TRACKED_SPECIES)  = -1._EB
+         DO ISIDE=-1,0
+            SELECT CASE(IBM_CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
+            CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+               ICC = IBM_CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
+               JCC = IBM_CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
+               ZZPV2(ISIDE,1:N_TRACKED_SPECIES) =  &
+                                    PRFCT *IBM_CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                             (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+            END SELECT
+         ENDDO
+         ZZ_FACE(1:N_TRACKED_SPECIES) = CCM1*ZZPV2(-1,1:N_TRACKED_SPECIES) + &
+                                        CCP1*ZZPV2( 0,1:N_TRACKED_SPECIES)
+         N=MAXLOC(ZZ_FACE(1:N_TRACKED_SPECIES),1)
+         IBM_CUT_FACE(ICF)%RHO_D_DZDN(1:N_TRACKED_SPECIES,LOW_IND,IFACE) = 0._EB
+         ! Correction flux:
+         IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,LOW_IND,IFACE) = &
+         -SUM(IBM_CUT_FACE(ICF)%RHO_D_DZDN(1:N_TRACKED_SPECIES,HIGH_IND,IFACE))
+      ENDDO ! IFACE
+   ENDDO ! ICF
+
+   NULLIFY(ZZP)
+
+ENDDO MESH_LOOP
+
+! Correct most abundant species locally:
+DIFFUSIVE_FLUX_LOOP_2 : DO N=1,N_TOTAL_SCALARS
+
+   ! Dump RHOZZ from regular cells and cut-cells into RZ_Z:
+   RZ_Z(:) = 0._EB
+   ! Loop meshes:
+   MESH_LOOP_2 : DO NM=1,NMESHES
+
+      IF (PROCESS(NM)/=MYID) CYCLE
+      CALL POINT_TO_MESH(NM)
+
+      SELECT CASE(PREDICTOR)
+         CASE(.TRUE.)
+            ZZP => ZZS
+            PRFCT = 0._EB ! Use star cut-cell quantities.
+         CASE(.FALSE.)
+            ZZP => ZZ
+            PRFCT = 1._EB ! Use end of step cut-cell quantities.
+      END SELECT
+
+      ! Loop on Cartesian Cells:
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE ! Cycle Reg cells not implicit, cut-cells
+                                                     ! underlying Cartesian cells and
+                                                     ! solid cells.
+               ! Cut-cells are surrounded by a layer of GASPHASE cells which is
+               ! also integrated implicitly.
+               IROW_LOC = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START)
+               RZ_Z(IROW_LOC) = ZZP(I,J,K,N) ! Known rho*zz
+            ENDDO
+         ENDDO
+      ENDDO
+      ! Now loop Cut-cells:
+      CUTCELL_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+         DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+            IROW_LOC = IBM_CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+            RZ_Z(IROW_LOC) =         PRFCT *IBM_CUT_CELL(ICC)%ZZ(N,JCC) + &
+                              (1._EB-PRFCT)*IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+         ENDDO
+      ENDDO CUTCELL_LOOP
+
+      NULLIFY(ZZP)
+
+   ENDDO MESH_LOOP_2
+
+   ! Now Build correction RHS:
+   F_Z(:) = 0._EB
+   ! Loop meshes:
+   MESH_LOOP_3 : DO NM=1,NMESHES
+
+      IF (PROCESS(NM)/=MYID) CYCLE
+      CALL POINT_TO_MESH(NM)
+
+      ! X direction bounds:
+      ILO_FACE = 0                    ! Low mesh boundary face index.
+      IHI_FACE = IBAR                 ! High mesh boundary face index.
+
+      ! Y direction bounds:
+      JLO_FACE = 0                    ! Low mesh boundary face index.
+      JHI_FACE = JBAR                 ! High mesh boundary face index.
+
+      ! Z direction bounds:
+      KLO_FACE = 0                    ! Low mesh boundary face index.
+      KHI_FACE = KBAR                 ! High mesh boundary face index.
+
+      ! IAXIS faces:
+      X1AXIS = IAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Unknowns on related cells:
+         IND(LOW_IND)  = CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
+         IND(HIGH_IND) = CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
+         IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+         AF = DY(J)*DZ(K)
+         ! Row ind(1),ind(2):
+         LOCROW_1 = LOW_IND
+         LOCROW_2 = HIGH_IND
+         IF ( I == ILO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+         IF ( I == IHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+            IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+            FCT=REAL(2*ILOC-3,EB)
+            F_Z(IROW) = F_Z(IROW) + FCT*MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) * AF
+         ENDDO
+      ENDDO
+
+      ! JAXIS faces:
+      X1AXIS = JAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Unknowns on related cells:
+         IND(LOW_IND)  = CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
+         IND(HIGH_IND) = CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
+         IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+         ! Face area and Velocity v:
+         AF = DX(I)*DZ(K)
+         ! Row ind(1),ind(2):
+         LOCROW_1 = LOW_IND
+         LOCROW_2 = HIGH_IND
+         IF ( J == JLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+         IF ( J == JHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+            IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+            FCT=REAL(2*ILOC-3,EB)
+            F_Z(IROW) = F_Z(IROW) + FCT*MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) * AF
+         ENDDO
+      ENDDO
+
+      ! KAXIS faces:
+      X1AXIS = KAXIS
+      DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+         I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+         J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+         K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+         ! Unknowns on related cells:
+         IND(LOW_IND)  = CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
+         IND(HIGH_IND) = CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
+         IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+         ! Face area and Velocity w:
+         AF = DX(I)*DY(J)
+         ! Row ind(1),ind(2):
+         LOCROW_1 = LOW_IND
+         LOCROW_2 = HIGH_IND
+         IF ( K == KLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+         IF ( K == KHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+            IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+            FCT=REAL(2*ILOC-3,EB)
+            F_Z(IROW) = F_Z(IROW) + FCT*MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) * AF
+         ENDDO
+      ENDDO
+
+      ! Regular faces connecting gasphase- cut-cells:
+      DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+         I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+         J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+         K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+         X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+         ! Unknowns on related cells:
+         IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
+         IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+         IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+         ! Row ind(1),ind(2):
+         LOCROW_1 = LOW_IND
+         LOCROW_2 = HIGH_IND
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               AF = DY(J)*DZ(K)
+               IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            CASE(JAXIS)
+               AF = DX(I)*DZ(K)
+               IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            CASE(KAXIS)
+               AF = DX(I)*DY(J)
+               IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         END SELECT
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+            IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+            FCT=REAL(2*ILOC-3,EB)
+            F_Z(IROW) = F_Z(IROW) + FCT*IBM_RCFACE_Z(IFACE)%RHO_D_DZDN(N,LOW_IND) * AF
+         ENDDO
+      ENDDO
+
+      ! GASPHASE cut-faces:
+      DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+         IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+         I = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+         J = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+         K = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+         ! Row ind(1),ind(2):
+         LOCROW_1 = LOW_IND
+         LOCROW_2 = HIGH_IND
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            CASE(JAXIS)
+               IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            CASE(KAXIS)
+               IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+               IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         ENDSELECT
+         DO IFACE=1,MESHES(NM)%IBM_CUT_FACE(ICF)%NFACE
+            ! Unknowns on related cells:
+            IND(LOW_IND)  = IBM_CUT_FACE(ICF)%UNKZ(LOW_IND,IFACE)
+            IND(HIGH_IND) = IBM_CUT_FACE(ICF)%UNKZ(HIGH_IND,IFACE)
+            IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+            IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+            AF = IBM_CUT_FACE(ICF)%AREA(IFACE)
+            DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+               IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+               FCT=REAL(2*ILOC-3,EB)
+               F_Z(IROW) = F_Z(IROW) + FCT*IBM_CUT_FACE(ICF)%RHO_D_DZDN(N,LOW_IND,IFACE) * AF
+            ENDDO
+         ENDDO ! IFACE
+      ENDDO ! ICF
+
+      ! No need to compute flux correction on EXIM faces, diffusive fluxes add to 0.
+
+   ENDDO MESH_LOOP_3
+
+   ! Correct Species N:
+   DO IROW_LOC=1,NUNKZ_LOCAL
+      RZ_Z(IROW_LOC) = RZ_Z(IROW_LOC) - DT * F_Z(IROW_LOC) / M_MAT_Z(IROW_LOC)
+   ENDDO
+
+   ! Copy back to RHOZZP and IBM_CUT_CELL:
+   CALL PUT_RHOZZVECTOR_SCALAR_3D(N)
+
+ENDDO DIFFUSIVE_FLUX_LOOP_2
+
+RETURN
+END SUBROUTINE CORRECT_DIFFLUX_CCIMPREG_3D
 
 ! --------------------------------- GET_ZZ_CCIMPREG_3D ---------------------------
 
@@ -5429,7 +6158,7 @@ INTEGER :: NM,N,I,J,K,ICC,JCC,NCELL
 REAL(EB), POINTER, DIMENSION(:,:,:)   :: RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB) :: VOLTOT
-LOGICAL, PARAMETER :: DO_LAST_SPEC=.TRUE.
+LOGICAL, PARAMETER :: DO_LAST_SPEC=.FALSE.
 ! Loop meshes:
 MESH_LOOP : DO NM=1,NMESHES
 
@@ -5471,11 +6200,13 @@ MESH_LOOP : DO NM=1,NMESHES
 
             ! Check bounds on z:
             DO N=1,N_TOTAL_SCALARS
-               IF ( (IBM_CUT_CELL(ICC)%ZZS(N,JCC)<(0._EB-GEOMEPS)) .OR. &
-                    (IBM_CUT_CELL(ICC)%ZZS(N,JCC)>(1._EB+GEOMEPS)) ) THEN
-                  WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D CC Pred:',ICC,JCC,N
-                  WRITE(LU_ERR,*) 'ZZP=',IBM_CUT_CELL(ICC)%ZZS(N,JCC)
-               ENDIF
+               !IF ( IBM_CUT_CELL(ICC)%ZZS(N,JCC)<0._EB ) IBM_CUT_CELL(ICC)%ZZ(N,JCC)=0._EB
+               !IF ( IBM_CUT_CELL(ICC)%ZZS(N,JCC)>1._EB ) IBM_CUT_CELL(ICC)%ZZ(N,JCC)=1._EB
+               ! IF ( (IBM_CUT_CELL(ICC)%ZZS(N,JCC)<(0._EB-GEOMEPS)) .OR. &
+               !      (IBM_CUT_CELL(ICC)%ZZS(N,JCC)>(1._EB+GEOMEPS)) ) THEN
+               !    WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D CC Pred:',ICC,JCC,N
+               !    WRITE(LU_ERR,*) 'ZZP=',IBM_CUT_CELL(ICC)%ZZS(N,JCC)
+               ! ENDIF
             ENDDO
 
             ! Clip passive scalars:
@@ -5536,11 +6267,13 @@ MESH_LOOP : DO NM=1,NMESHES
 
             ! Check bounds on z:
             DO N=1,N_TOTAL_SCALARS
-               IF ( (IBM_CUT_CELL(ICC)%ZZ(N,JCC)<(0._EB-GEOMEPS)) .OR. &
-                    (IBM_CUT_CELL(ICC)%ZZ(N,JCC)>(1._EB+GEOMEPS)) ) THEN
-                  WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D CC Corr:',ICC,JCC,N
-                  WRITE(LU_ERR,*) 'ZZP=',IBM_CUT_CELL(ICC)%ZZ(N,JCC)
-               ENDIF
+               !IF ( IBM_CUT_CELL(ICC)%ZZ(N,JCC)<0._EB ) IBM_CUT_CELL(ICC)%ZZ(N,JCC)=0._EB
+               !IF ( IBM_CUT_CELL(ICC)%ZZ(N,JCC)>1._EB ) IBM_CUT_CELL(ICC)%ZZ(N,JCC)=1._EB
+               ! IF ( (IBM_CUT_CELL(ICC)%ZZ(N,JCC)<(0._EB-GEOMEPS)) .OR. &
+               !      (IBM_CUT_CELL(ICC)%ZZ(N,JCC)>(1._EB+GEOMEPS)) ) THEN
+               !    WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D CC Corr:',ICC,JCC,N
+               !    WRITE(LU_ERR,*) 'ZZP=',IBM_CUT_CELL(ICC)%ZZ(N,JCC)
+               ! ENDIF
             ENDDO
 
             ! Clip passive scalars:
@@ -5591,9 +6324,9 @@ MESH_LOOP : DO NM=1,NMESHES
                N=MAXLOC(ZZP(I,J,K,1:N_TOTAL_SCALARS),1)
             ENDIF
 
-            IF (CORRECTOR .AND. (ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS))) > GEOMEPS) ) &
-               WRITE(0,*) 'RHO-DIFF=',I,J,K,RHOP(I,J,K),SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS)),&
-               ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS)))
+            ! IF (CORRECTOR .AND. (ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS))) > GEOMEPS) ) &
+            !    WRITE(0,*) 'RHO-DIFF=',I,J,K,RHOP(I,J,K),SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS)),&
+            !    ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS)))
 
             ! Modify max rho*ZZ s.t. sum(rho*ZZ) = rho:
             ZZP(I,J,K,N) = RHOP(I,J,K) - (SUM(ZZP(I,J,K,1:N_TOTAL_SCALARS))-ZZP(I,J,K,N))
@@ -5603,10 +6336,12 @@ MESH_LOOP : DO NM=1,NMESHES
 
             ! Check bounds on z:
             DO N=1,N_TOTAL_SCALARS
-               IF (ZZP(I,J,K,N)<(0._EB-GEOMEPS) .OR. ZZP(I,J,K,N)>(1._EB+GEOMEPS)) THEN
-                  WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D Cart:',I,J,K,N
-                  WRITE(LU_ERR,*) 'ZZP=',ZZP(I,J,K,N)
-               ENDIF
+               !IF (ZZP(I,J,K,N)<0._EB) ZZP(I,J,K,N)=0._EB
+               !IF (ZZP(I,J,K,N)>1._EB) ZZP(I,J,K,N)=1._EB
+               ! IF (ZZP(I,J,K,N)<(0._EB-GEOMEPS) .OR. ZZP(I,J,K,N)>(1._EB+GEOMEPS)) THEN
+               !    WRITE(LU_ERR,*) 'GET_ZZ_CCIMPREG_3D Cart:',I,J,K,N
+               !    WRITE(LU_ERR,*) 'ZZP=',ZZP(I,J,K,N)
+               ! ENDIF
             ENDDO
 
             ! Clip passive scalars:
@@ -5745,6 +6480,7 @@ MESH_LOOP : DO NM=1,NMESHES
                ! unwanted value.
                RZ_RHO(IROW_LOC) = 0.5_EB*(SUM(MESHES(NM)%RHO_ZZN(I,J,K,1:N_TOTAL_SCALARS))+RHOS(I,J,K))
 
+               !RZ_RHO(IROW_LOC) = SUM(MESHES(NM)%RHO_ZZN(I,J,K,1:N_TOTAL_SCALARS))
                RZ_RHOS(IROW_LOC)= RHOS(I,J,K)
 
             ENDDO
@@ -6425,6 +7161,14 @@ MESH_LOOP : DO NM=1,NMESHES
                                                              ! underlying Cartesian cells and
                                                              ! solid cells.
             ! Get rho = sum(rho*z_alpha)
+
+
+            ! IF ( RHOP(I,J,K) < 0.8) THEN
+            ! IF ( ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES))) > GEOMEPS) &
+            ! WRITE(0,*) PREDICTOR,I,J,K,RHOP(I,J,K),SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES)), &
+            ! ABS(RHOP(I,J,K)-SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES)))
+            ! ENDIF
+
             RHOP(I,J,K) = SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES))
 
             ! Check mass density for positivity
@@ -6666,7 +7410,6 @@ MESH_LOOP : DO NM=1,NMESHES
                !RZ_Z(IROW_LOC) = 0.5_EB*(RHO(I,J,K)*ZZ(I,J,K,N)+RHOS(I,J,K)*ZZS(I,J,K,N)) ! Known rho*zz
 
                RZ_Z(IROW_LOC) = 0.5_EB*(MESHES(NM)%RHO_ZZN(I,J,K,N)+RHOS(I,J,K)*ZZS(I,J,K,N))
-
                RZ_ZS(IROW_LOC)= RHOS(I,J,K)*ZZS(I,J,K,N)
 
             ENDDO
@@ -12905,10 +13648,10 @@ IF (DO_IMPLICIT_CCREGION) THEN
 
    ! Allocate rhs and solution arrays for density:
    ALLOCATE( F_RHO(1:NUNKZ_LOCAL) , F_RHO0(1:NUNKZ_LOCAL) , RZ_RHO(1:NUNKZ_LOCAL) , RZ_RHOS(1:NUNKZ_LOCAL) )
-
+   ALLOCATE( RZ_RHO0(1:NUNKZ_LOCAL) )
    IF (TRAP_CORR) THEN
       ALLOCATE( TR_Z(1:NUNKZ_LOCAL,1:N_TOTAL_SCALARS))
-      ALLOCATE( TR_RHO(1:NUNKZ_LOCAL), RZ_RHO0(1:NUNKZ_LOCAL) )
+      ALLOCATE( TR_RHO(1:NUNKZ_LOCAL) )
    ENDIF
 
    ! Total number of nonzeros for JD_MAT_Z, D_MAT_Z:
@@ -13729,6 +14472,605 @@ RETURN
 END SUBROUTINE ADD_INPLACE_NNZ_H_WHLDOM
 
 
+! ------------------------ GET_ADVDIFFMATRIX_SCALAR_SYMM_3D ------------------------------
+
+SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_SYMM_3D(N)
+
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+INTEGER, INTENT(IN) :: N
+
+! Local Variables:
+INTEGER :: NM
+INTEGER :: I,J,K
+REAL(EB):: PRFCT,D_Z_TEMP(-1:0),D_Z_N(0:5000),DIFF_FACE,X1F,TMPV(-1:0),RHOPV(-1:0),RHOPVN(-1:0),TMP_ISIDE
+INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ISIDE,ICF
+INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,IROW,JCOL,ICC,JCC
+REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_P1
+LOGICAL, PARAMETER :: ALL_GODUNOV = .FALSE. ! If false uses centered interpolation for diffusion velocity.
+REAL(EB),PARAMETER :: DO_ADV = 1._EB
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOPN=>NULL(),RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
+
+LOGICAL, PARAMETER :: END_OF_STEP_RHO=.FALSE.
+
+VELD = 0._EB
+
+! Set D_MAT_Z to zero for species N, will add implicit parts of diffusion + advection:
+D_MAT_Z = 0._EB
+
+! Diffusivity lookup table for species N:
+D_Z_N = D_Z(:,N)
+
+! 1. Regular gasphase faces, connecting regular cells:
+! Mesh Loop:
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
+
+   CALL POINT_TO_MESH(NM)
+
+   IF (PREDICTOR) THEN
+      IF (END_OF_STEP_RHO) THEN
+         RHOPN=> RHO
+         RHOP => RHOS
+         PRFCT= 0._EB
+      ELSE
+         RHOPN=> RHOS
+         RHOP => RHO
+         PRFCT= 1._EB
+      ENDIF
+      UP   => U
+      VP   => V
+      WP   => W
+   ELSE
+      IF (END_OF_STEP_RHO) THEN
+         RHOPN=> RHOS
+         RHOP => RHO
+         PRFCT= 1._EB
+      ELSE
+         RHOPN=> RHO
+         RHOP => RHOS
+         PRFCT= 0._EB
+      ENDIF
+      UP   => US
+      VP   => VS
+      WP   => WS
+   ENDIF
+
+   ! X direction bounds:
+   ILO_FACE = 0                    ! Low mesh boundary face index.
+   IHI_FACE = IBAR                 ! High mesh boundary face index.
+
+   ! Y direction bounds:
+   JLO_FACE = 0                    ! Low mesh boundary face index.
+   JHI_FACE = JBAR                 ! High mesh boundary face index.
+
+   ! Z direction bounds:
+   KLO_FACE = 0                    ! Low mesh boundary face index.
+   KHI_FACE = KBAR                 ! High mesh boundary face index.
+
+   ! IAXIS faces:
+   X1AXIS = IAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Unknowns on related cells:
+      IND(LOW_IND)  = CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
+
+      IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+      IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+
+      ! Face area and x and dx:
+      AF = DY(J)*DZ(K)
+      IDX= 1._EB/DXN(I)
+
+      ! Diffusive Part:
+      ! Linear interpolation coefficients:
+      CCM1 = 0.5_EB ! Uniform Grid
+      CCP1 = 0.5_EB
+
+      ! Interpolate D_Z to the face:
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
+         ENDDO
+      ENDIF
+      RHOPVN(-1:0)= RHOPN(I+FCELL-1:I+FCELL  ,J,K)
+      RHOPV(-1:0) =  RHOP(I+FCELL-1:I+FCELL  ,J,K)
+      DIFF_FACE   = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+
+      ! Now add to Adiff corresponding coeff:
+      BIJ   = DIFF_FACE*IDX*AF
+
+      ! Advective Part: Velocity u
+      VELC = UP(I,J,K)
+
+      ! Matrix coefficients:
+      ALPHAP1 = SIGN( 1._EB, VELC)
+      AM_P1 = 0.5_EB*(1._EB+ALPHAP1*(1._EB-BRP1))
+      AP_P1 = 0.5_EB*(1._EB-ALPHAP1*(1._EB-BRP1))
+      CIJM = DO_ADV*AM_P1*VELC*AF
+      CIJP = DO_ADV*AP_P1*VELC*AF
+
+      ! Now add to A corresponding advection and diffusion coeffs:
+      !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
+      KFACE(1,1) = BIJ/RHOPVN(-1)+CIJM; KFACE(2,1) =-BIJ/RHOPVN(-1)-CIJM
+      KFACE(1,2) =-BIJ/RHOPVN( 0)+CIJP; KFACE(2,2) = BIJ/RHOPVN( 0)-CIJP
+
+      ! Row ind(1),ind(2):
+      LOCROW_1 = LOW_IND
+      LOCROW_2 = HIGH_IND
+      IF ( I == ILO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+      IF ( I == IHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+
+      DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
+             IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+             JCOL=MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_Z
+             ! Add coefficient:
+             D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
+         ENDDO
+      ENDDO
+
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%VELD(N) = VELD
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%RHOPVN(-1:0)= RHOPVN(-1:0)
+
+   ENDDO
+
+   ! JAXIS faces:
+   X1AXIS = JAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Unknowns on related cells:
+      IND(LOW_IND)  = CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
+
+      IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+      IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+
+      ! Face area and x and dx:
+      AF = DX(I)*DZ(K)
+      IDX= 1._EB/DYN(J)
+
+      ! Linear interpolation coefficients:
+      CCM1 = 0.5_EB ! Uniform Grid
+      CCP1 = 0.5_EB
+
+      ! Interpolate D_Z to the face:
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
+         ENDDO
+      ENDIF
+      RHOPVN(-1:0) = RHOPN(I,J+FCELL-1:J+FCELL  ,K)
+      RHOPV(-1:0)  =  RHOP(I,J+FCELL-1:J+FCELL  ,K)
+      DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+
+      ! Now add to Adiff corresponding coeff:
+      BIJ   = DIFF_FACE*IDX*AF
+
+      ! Advective Part: Velocity v
+      VELC = VP(I,J,K)
+
+      ! Matrix coefficients:
+      ALPHAP1 = SIGN( 1._EB, VELC)
+      AM_P1 = 0.5_EB*(1._EB+ALPHAP1*(1._EB-BRP1))
+      AP_P1 = 0.5_EB*(1._EB-ALPHAP1*(1._EB-BRP1))
+      CIJM = DO_ADV*AM_P1*VELC*AF
+      CIJP = DO_ADV*AP_P1*VELC*AF
+
+      ! Now add to A corresponding advection and diffusion coeffs:
+      !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
+      KFACE(1,1) = BIJ/RHOPVN(-1)+CIJM; KFACE(2,1) =-BIJ/RHOPVN(-1)-CIJM
+      KFACE(1,2) =-BIJ/RHOPVN( 0)+CIJP; KFACE(2,2) = BIJ/RHOPVN( 0)-CIJP
+
+      ! Row ind(1),ind(2):
+      LOCROW_1 = LOW_IND
+      LOCROW_2 = HIGH_IND
+      IF ( J == JLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+      IF ( J == JHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+
+      DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
+             IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+             JCOL=MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_Z
+             ! Add coefficient:
+             D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
+         ENDDO
+      ENDDO
+
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%VELD(N) = VELD
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%RHOPVN(-1:0)= RHOPVN(-1:0)
+
+   ENDDO
+
+   ! KAXIS faces:
+   X1AXIS = KAXIS
+   DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
+
+      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+
+      ! Unknowns on related cells:
+      IND(LOW_IND)  = CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
+
+      IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+      IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+
+      ! Face area and x and dx:
+      AF = DX(I)*DY(J)
+      IDX= 1._EB/DZN(K)
+
+      ! Linear interpolation coefficients:
+      CCM1 = 0.5_EB ! Uniform Grid
+      CCP1 = 0.5_EB
+
+      ! Interpolate D_Z to the face:
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
+         ENDDO
+      ENDIF
+      RHOPVN(-1:0)= RHOPN(I,J,K+FCELL-1:K+FCELL  )
+      RHOPV(-1:0) =  RHOP(I,J,K+FCELL-1:K+FCELL  )
+      DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+
+      ! Now add to Adiff corresponding coeff:
+      BIJ   = DIFF_FACE*IDX*AF
+
+      ! Advective Part: Velocity w
+      VELC = WP(I,J,K)
+
+      ! Matrix coefficients:
+      ALPHAP1 = SIGN( 1._EB, VELC)
+      AM_P1 = 0.5_EB*(1._EB+ALPHAP1*(1._EB-BRP1))
+      AP_P1 = 0.5_EB*(1._EB-ALPHAP1*(1._EB-BRP1))
+      CIJM = AM_P1*DO_ADV*VELC*AF
+      CIJP = AP_P1*DO_ADV*VELC*AF
+
+      ! Now add to A corresponding advection and diffusion coeffs:
+      !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
+      KFACE(1,1) = BIJ/RHOPVN(-1)+CIJM; KFACE(2,1) =-BIJ/RHOPVN(-1)-CIJM
+      KFACE(1,2) =-BIJ/RHOPVN( 0)+CIJP; KFACE(2,2) = BIJ/RHOPVN( 0)-CIJP
+
+      ! Row ind(1),ind(2):
+      LOCROW_1 = LOW_IND
+      LOCROW_2 = HIGH_IND
+      IF ( K == KLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+      IF ( K == KHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+
+      DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
+         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
+             IROW=IND_LOC(ILOC)   ! Process Local Unknown number.
+             JCOL=MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_Z
+             ! Add coefficient:
+             D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
+         ENDDO
+      ENDDO
+
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%VELD(N) = VELD
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%RHOPVN(-1:0)= RHOPVN(-1:0)
+
+   ENDDO
+
+   ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
+   DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
+
+      I      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+
+      ! Unknowns on related cells:
+      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
+      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+
+      IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+      IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+
+      ! Row ind(1),ind(2):
+      LOCROW_1 = LOW_IND
+      LOCROW_2 = HIGH_IND
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            AF = DY(J)*DZ(K)
+            X1F= MESHES(NM)%X(I)
+            IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            IDX = 1._EB / ( MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
+            RHOPVN(-1:0)= RHOPN(I+FCELL-1:I+FCELL,J,K)
+            RHOPV(-1:0) = RHOP(I+FCELL-1:I+FCELL,J,K)
+            DO ISIDE=-1,0
+               SELECT CASE(MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = MESHES(NM)%IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  RHOPVN(ISIDE)=(1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                       PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+            ENDDO
+            ! Advective Part: Velocity u
+            VELC = UP(I,J,K)
+            DO ISIDE=-1,0
+               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+
+         CASE(JAXIS)
+            AF = DX(I)*DZ(K)
+            X1F= MESHES(NM)%Y(J)
+            IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            IDX = 1._EB / ( MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
+            RHOPVN(-1:0)= RHOPN(I,J+FCELL-1:J+FCELL,K)
+            RHOPV(-1:0) = RHOP(I,J+FCELL-1:J+FCELL,K)
+            DO ISIDE=-1,0
+               SELECT CASE(MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+                  ! RHOPV(ISIDE)= RHOPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = MESHES(NM)%IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  RHOPVN(ISIDE)=(1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                       PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+            ENDDO
+            ! Advective Part: Velocity v
+            VELC = VP(I,J,K)
+            DO ISIDE=-1,0
+               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+
+         CASE(KAXIS)
+            AF = DX(I)*DY(J)
+            X1F= MESHES(NM)%Z(K)
+            IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            IDX = 1._EB / ( MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND) - &
+                            MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND) )
+            ! Linear interpolation coefficients:
+            CCM1 = IDX*(MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,HIGH_IND)-X1F)
+            CCP1 = IDX*(X1F -MESHES(NM)%IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
+
+            TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
+            RHOPVN(-1:0)= RHOPN(I,J,K+FCELL-1:K+FCELL)
+            RHOPV(-1:0) = RHOP(I,J,K+FCELL-1:K+FCELL)
+            DO ISIDE=-1,0
+               SELECT CASE(MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
+               CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                  ! TMPV(ISIDE) = TMPV(ISIDE)
+                  ! RHOPV(ISIDE)= RHOPV(ISIDE)
+               CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+                  ICC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(2,ISIDE+2)
+                  JCC = MESHES(NM)%IBM_RCFACE_Z(IFACE)%CELL_LIST(3,ISIDE+2)
+                  TMPV(ISIDE) = MESHES(NM)%IBM_CUT_CELL(ICC)%TMP(JCC)
+                  RHOPV(ISIDE)=        PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                (1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  RHOPVN(ISIDE)=(1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                       PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+               CASE DEFAULT
+                  print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
+                  TMPV(ISIDE) = -1._EB
+               END SELECT
+            ENDDO
+            ! Advective Part: Velocity w
+            VELC = WP(I,J,K)
+            DO ISIDE=-1,0
+               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
+            ENDDO
+
+      ENDSELECT
+
+      ! Interpolate D_Z to the face, linear interpolation:
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ENDIF
+      DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+
+      ! Now add to Adiff corresponding coeff:
+      BIJ   = DIFF_FACE*IDX*AF
+
+      ! Matrix coefficients for advection:
+      ALPHAP1 = SIGN( 1._EB, VELC)
+      AM_P1 = 0.5_EB*(1._EB+ALPHAP1*(1._EB-BRP1))
+      AP_P1 = 0.5_EB*(1._EB-ALPHAP1*(1._EB-BRP1))
+      CIJM = DO_ADV*AM_P1*VELC*AF
+      CIJP = DO_ADV*AP_P1*VELC*AF
+
+      ! Now add to A corresponding advection and diffusion coeffs:
+      !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
+      KFACE(1,1) = BIJ/RHOPVN(-1)+CIJM; KFACE(2,1) =-BIJ/RHOPVN(-1)-CIJM
+      KFACE(1,2) =-BIJ/RHOPVN( 0)+CIJP; KFACE(2,2) = BIJ/RHOPVN( 0)-CIJP
+
+      DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
+             IROW=IND_LOC(ILOC)                                ! Process Local Unknown number.
+             JCOL=MESHES(NM)%IBM_RCFACE_Z(IFACE)%JD(ILOC,JLOC) ! Local position of coef in D_MAT_Z
+             ! Add coefficient:
+             D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
+         ENDDO
+      ENDDO
+
+      MESHES(NM)%IBM_RCFACE_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_RCFACE_Z(IFACE)%VELD(N) = VELD
+      MESHES(NM)%IBM_RCFACE_Z(IFACE)%RHOPVN(-1:0)= RHOPVN(-1:0)
+
+   ENDDO
+
+   ! Now Gasphase CUT_FACES:
+   DO ICF = 1,MESHES(NM)%IBM_NCUTFACE_MESH
+
+      IF ( MESHES(NM)%IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+
+      I = MESHES(NM)%IBM_CUT_FACE(ICF)%IJK(IAXIS)
+      J = MESHES(NM)%IBM_CUT_FACE(ICF)%IJK(JAXIS)
+      K = MESHES(NM)%IBM_CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = MESHES(NM)%IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      ! Row ind(1),ind(2):
+      LOCROW_1 = LOW_IND
+      LOCROW_2 = HIGH_IND
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         CASE(JAXIS)
+            IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+         CASE(KAXIS)
+            IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
+            IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+      ENDSELECT
+
+      DO IFACE=1,MESHES(NM)%IBM_CUT_FACE(ICF)%NFACE
+
+         !% Unknowns on related cells:
+         IND(LOW_IND)  = MESHES(NM)%IBM_CUT_FACE(ICF)%UNKZ(LOW_IND,IFACE)
+         IND(HIGH_IND) = MESHES(NM)%IBM_CUT_FACE(ICF)%UNKZ(HIGH_IND,IFACE)
+
+         IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
+
+         AF = MESHES(NM)%IBM_CUT_FACE(ICF)%AREA(IFACE)
+         X1F= MESHES(NM)%IBM_CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
+         IDX= 1._EB/ ( MESHES(NM)%IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
+                       MESHES(NM)%IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+         CCM1= IDX*(MESHES(NM)%IBM_CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
+         CCP1= IDX*(X1F-MESHES(NM)%IBM_CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+
+         ! Interpolate D_Z to the face, linear interpolation:
+         DO ISIDE=-1,0
+            SELECT CASE(MESHES(NM)%IBM_CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
+            CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from IBM_CUT_CELL data struct:
+               ICC = MESHES(NM)%IBM_CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
+               JCC = MESHES(NM)%IBM_CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
+               TMP_ISIDE = MESHES(NM)%IBM_CUT_CELL(ICC)%TMP(JCC)
+               RHOPV(ISIDE)=        PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                             (1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+               RHOPVN(ISIDE)=(1._EB-PRFCT)*MESHES(NM)%IBM_CUT_CELL(ICC)%RHO(JCC) + &
+                                    PRFCT *MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS(JCC)
+            CASE DEFAULT
+               print*, 'MESHES(NM)%IBM_CUT_FACE face not connected to CC cell',NM,IFACE
+               TMP_ISIDE = -1._EB
+            END SELECT
+            IF (DNS) CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
+         ENDDO
+         SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               DO ISIDE=-1,0
+                  D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                          ! underlying Cartesian turb MU.
+               ENDDO
+            CASE(JAXIS)
+               DO ISIDE=-1,0
+                  D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                          ! underlying Cartesian turb MU.
+               ENDDO
+            CASE(KAXIS)
+               DO ISIDE=-1,0
+                  D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                          ! underlying Cartesian turb MU.
+               ENDDO
+         ENDSELECT
+         DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
+
+         ! Now add to Adiff corresponding coeff:
+         BIJ   = DIFF_FACE*IDX*AF
+
+         ! Matrix coefficients for advection:
+         VELC =        PRFCT *MESHES(NM)%IBM_CUT_FACE(ICF)%VEL(IFACE) + &
+                (1._EB-PRFCT)*MESHES(NM)%IBM_CUT_FACE(ICF)%VELS(IFACE)
+
+         ALPHAP1 = SIGN( 1._EB, VELC)
+         AM_P1 = 0.5_EB*(1._EB+ALPHAP1*(1._EB-BRP1))
+         AP_P1 = 0.5_EB*(1._EB-ALPHAP1*(1._EB-BRP1))
+         CIJM = DO_ADV*AM_P1*VELC*AF
+         CIJP = DO_ADV*AP_P1*VELC*AF
+
+         ! Now add to A corresponding advection and diffusion coeffs:
+         !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
+         KFACE(1,1) = BIJ/RHOPVN(-1)+CIJM; KFACE(2,1) =-BIJ/RHOPVN(-1)-CIJM
+         KFACE(1,2) =-BIJ/RHOPVN( 0)+CIJP; KFACE(2,2) = BIJ/RHOPVN( 0)-CIJP
+
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+            DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
+                IROW=IND_LOC(ILOC)                                     ! Process Local Unknown number.
+                JCOL=MESHES(NM)%IBM_CUT_FACE(ICF)%JDZ(ILOC,JLOC,IFACE) ! Local position of coef in D_MAT_Z
+                ! Add coefficient:
+                D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
+            ENDDO
+         ENDDO
+
+         MESHES(NM)%IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+         MESHES(NM)%IBM_CUT_FACE(ICF)%VELD(N,IFACE) = VELD
+         MESHES(NM)%IBM_CUT_FACE(ICF)%RHOPVN(-1:0,IFACE)= RHOPVN(-1:0)
+
+      ENDDO
+
+   ENDDO
+
+ENDDO MESH_LOOP
+
+
+RETURN
+END SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_SYMM_3D
+
+
 ! ------------------------- GET_DIFFMATRIX_SCALAR_3D ------------------------------
 
 SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_3D(N)
@@ -13739,7 +15081,7 @@ INTEGER, INTENT(IN) :: N
 ! Local Variables:
 INTEGER :: NM
 INTEGER :: I,J,K
-REAL(EB):: PRFCT,D_Z_TEMP(-1:0),D_Z_N(0:5000),DIFF_FACE,X1F,TMPV(-1:0),RHOPV(-1:0),TMP_ISIDE
+REAL(EB):: PRFCT,D_Z_TEMP(-1:0),MUV(-1:0),D_Z_N(0:5000),DIFF_FACE,X1F,TMPV(-1:0),RHOPV(-1:0),TMP_ISIDE
 INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ISIDE,ICF
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,IROW,JCOL,ICC,JCC
 REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_P1
@@ -13824,9 +15166,15 @@ MESH_LOOP : DO NM=1,NMESHES
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      DO ISIDE=-1,0
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
-      ENDDO
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
+         ENDDO
+      ENDIF
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       ! Now add to Adiff corresponding coeff:
@@ -13871,6 +15219,9 @@ MESH_LOOP : DO NM=1,NMESHES
          ENDDO
       ENDDO
 
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%VELD(N) = VELD
+
    ENDDO
 
    ! JAXIS faces:
@@ -13897,9 +15248,15 @@ MESH_LOOP : DO NM=1,NMESHES
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      DO ISIDE=-1,0
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
-      ENDDO
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE ! LES
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
+         ENDDO
+      ENDIF
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       ! Now add to Adiff corresponding coeff:
@@ -13944,6 +15301,9 @@ MESH_LOOP : DO NM=1,NMESHES
          ENDDO
       ENDDO
 
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%VELD(N) = VELD
+
    ENDDO
 
    ! KAXIS faces:
@@ -13970,9 +15330,15 @@ MESH_LOOP : DO NM=1,NMESHES
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      DO ISIDE=-1,0
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
-      ENDDO
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ELSE
+         DO ISIDE=-1,0
+            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
+         ENDDO
+      ENDIF
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       ! Now add to Adiff corresponding coeff:
@@ -14016,6 +15382,9 @@ MESH_LOOP : DO NM=1,NMESHES
              D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
          ENDDO
       ENDDO
+
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%VELD(N) = VELD
 
    ENDDO
 
@@ -14065,6 +15434,8 @@ MESH_LOOP : DO NM=1,NMESHES
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
+               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
             ENDDO
             ! Advective Part: Velocity u+D/rho drho/dx
             VELC = UP(I,J,K)
@@ -14099,6 +15470,8 @@ MESH_LOOP : DO NM=1,NMESHES
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
+               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
             ENDDO
             ! Advective Part: Velocity v+D/rho drho/dy
             VELC = VP(I,J,K)
@@ -14133,6 +15506,8 @@ MESH_LOOP : DO NM=1,NMESHES
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
+               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
+                                                                       ! underlying Cartesian turb MU.
             ENDDO
             ! Advective Part: Velocity w+D/rho drho/dz
             VELC = WP(I,J,K)
@@ -14142,9 +15517,11 @@ MESH_LOOP : DO NM=1,NMESHES
       ENDSELECT
 
       ! Interpolate D_Z to the face, linear interpolation:
-      DO ISIDE=-1,0
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-      ENDDO
+      IF (DNS) THEN
+         DO ISIDE=-1,0
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
+         ENDDO
+      ENDIF
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       ! Now add to Adiff corresponding coeff:
@@ -14179,6 +15556,9 @@ MESH_LOOP : DO NM=1,NMESHES
          ENDDO
       ENDDO
 
+      MESHES(NM)%IBM_RCFACE_Z(IFACE)%DIFF_FACE(N) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+      MESHES(NM)%IBM_RCFACE_Z(IFACE)%VELD(N) = VELD
+
    ENDDO
 
    ! Now Gasphase CUT_FACES:
@@ -14196,12 +15576,15 @@ MESH_LOOP : DO NM=1,NMESHES
       LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
+            MUV(-1:0) = MU(I+FCELL-1:I+FCELL  ,J,K)
             IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
          CASE(JAXIS)
+            MUV(-1:0) = MU(I,J+FCELL-1:J+FCELL  ,K)
             IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
          CASE(KAXIS)
+            MUV(-1:0) = MU(I,J,K+FCELL-1:K+FCELL  )
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
       ENDSELECT
@@ -14235,7 +15618,11 @@ MESH_LOOP : DO NM=1,NMESHES
                print*, 'MESHES(NM)%IBM_CUT_FACE face not connected to CC cell',NM,IFACE
                TMP_ISIDE = -1._EB
             END SELECT
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
+            IF (DNS) THEN
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
+            ELSE
+               D_Z_TEMP(ISIDE)= MUV(ISIDE)*RSC/RHOPV(ISIDE)
+            ENDIF
          ENDDO
          DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
@@ -14277,6 +15664,9 @@ MESH_LOOP : DO NM=1,NMESHES
                 D_MAT_Z(JCOL,IROW) = D_MAT_Z(JCOL,IROW) + KFACE(ILOC,JLOC)
             ENDDO
          ENDDO
+
+         MESHES(NM)%IBM_CUT_FACE(ICF)%DIFF_FACE(N,IFACE) = DIFF_FACE ! Store diffusivities to use in CCDIVG.
+         MESHES(NM)%IBM_CUT_FACE(ICF)%VELD(N,IFACE) = VELD
 
       ENDDO
 
@@ -16137,9 +17527,9 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    IF (PERIODIC_TEST == 103) THEN
       WRITE(LU_ERR,*) 'In MATRIX_INDEXES, PERIODIC_TEST == 103'
-      VAL_TESTX = NXB/4
-      VAL_TESTY = NYB/4
-      VAL_TESTZ = NZB/4
+      VAL_TESTX = 0 !NXB/4
+      VAL_TESTY = 0 !NYB/4
+      VAL_TESTZ = 0 !NZB/4
       DO K=KLO+VAL_TESTZ,KHI-VAL_TESTZ
          DO J=JLO+VAL_TESTY,JHI-VAL_TESTY
             DO I=ILO+VAL_TESTX,IHI-VAL_TESTX
