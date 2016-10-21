@@ -1,6 +1,6 @@
 % McDermott
 % 6-8-2016
-% crank_1.m
+% ht3d_cond.m
 %
 % Analytical solution to 1D heat equation.
 % J. Crank, The Mathematics of Diffusion, 2nd Ed., Oxford, 1975.
@@ -13,26 +13,26 @@ x0 = -.5;
 L = 1;
 A = 100;
 T0 = 20;
-lamda = 2*pi/L;
+lambda = 2*pi/L;
 alpha = 1;
 
-T = @(x,t) T0 + A*sin(lamda*(x-x0))*exp(-lamda^2*alpha*t);
+T = @(x,t) T0 + A*sin(lambda*(x-x0))*exp(-lambda^2*alpha*t);
 
 nx = 256;
 dx = L/nx;
 xc = (x0+dx/2):dx:((x0+L)-dx/2);
 
-plot(xc,T(xc,0),'k:')
+hh(1)=plot(xc,T(xc,0),'k--');
 hold on
-plot(xc,T(xc,t_end),'k-')
+hh(2)=plot(xc,T(xc,t_end),'k-');
 
 % gather FDS results
 
-ddir = '/Volumes/rmcdermo/GitHub/FireModels_rmcdermo/fds/Verification/Heat_Transfer/';
+ddir = '../../Verification/Heat_Transfer/';
 fnx = {'ht3d_nx_10','ht3d_nx_20','ht3d_nx_40','ht3d_nx_80','ht3d_nx_160'};
 fny = {'ht3d_ny_10','ht3d_ny_20','ht3d_ny_40','ht3d_ny_80','ht3d_ny_160'};
 fnz = {'ht3d_nz_10','ht3d_nz_20','ht3d_nz_40','ht3d_nz_80','ht3d_nz_160'};
-plt_style = {'b--','r--','g--','c--','m--'};
+plt_style = {'b-o','r-^','g-*','c-sq','m.-'};
 
 erx = []; % initialize error norm vector
 dxx = []; % init dxx vector
@@ -64,19 +64,42 @@ end
 
 erz = []; % initialize error norm vector
 dzz = []; % init dxx vector
-for i=1:length(fny)
+for i=1:length(fnz)
     M = importdata([ddir,fnz{i},'_devc.csv'],',',2);
     T_fds = M.data(end,2:end);
     nx = length(T_fds);
     dx = L/nx;
     xc = (x0+dx/2):dx:((x0+L)-dx/2);
-    plot(xc,T_fds,plt_style{i})
+    hh(i+2)=plot(xc,T_fds,plt_style{i});
     e_vec = T_fds - T(xc,t_end);
     erz = [erz,norm(e_vec)/sqrt(length(e_vec))];
     dzz = [dzz,dx];
 end
 
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+
+xlabel('{\it x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+ylabel('{\it T} (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+legend(hh,'Initial Condition','Final Exact','FDS {\itnx}=10','FDS {\itnx}=20','FDS {\itnx}=40','FDS {\itnx}=80','FDS {\itnx}=160','location','northeast')
+legend('boxoff')
+
+% add version string if file is available
+
+Git_Filename = [ddir,'ht3d_nx_160_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
+% print to pdf
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_profile')
+
 figure
+clear hh
 
 hh(1)=loglog(dxx,erx,'k+-'); hold on
 hh(2)=loglog(dyy,ery,'rsq-');
@@ -93,17 +116,17 @@ set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('L2 error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS nx','FDS ny','FDS nz','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
+legend(hh,'FDS {\itnx}','FDS {\itny}','FDS {\itnz}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
 legend('boxoff')
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [ddir,'ht3d_nx_160_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
-% % print to pdf
-% set(gcf,'PaperUnits',Paper_Units);
-% set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-% set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_convergence')
+% print to pdf
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_convergence')
 

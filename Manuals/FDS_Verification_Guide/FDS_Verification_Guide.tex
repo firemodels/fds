@@ -153,6 +153,7 @@ The following individuals contributed to the verification process of FDS.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
+\item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
 \end{itemize}
 
 
@@ -3240,19 +3241,6 @@ lines are FDS results and the circles are the HEATING results. An example input 
 
 \clearpage
 
-\section{Heat Transfer through a Semi-Infinite Slab (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
-\label{ht3d_slab}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
-\caption[Results of the \textct{ht3d\_slab} test case]{Results of the \textct{ht3d\_slab} test case.}
-\label{ht3d_slab_fig}
-\end{figure}
-
-
-\clearpage
-
 \section{Convective Cooling (\texorpdfstring{\textct{convective\_cooling}}{convective\_cooling})}
 \label{convective_cooling}
 
@@ -3367,6 +3355,86 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \label{adiabatic_flux}
 \end{figure}
 
+
+\section{Solid Heat Transfer 3D (Beta)}
+\label{sec:ht3d}
+
+This section presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+
+\subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
+\label{sec:heat_diff}
+% list the cases associated with this section
+\label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
+\label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
+\label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
+
+This test case is an initial value problem for the heat equation in 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
+\begin{equation}
+\label{eq:expdecay}
+T(x,t) = T_0 + A \sin(\lambda(x-x_0)) \exp(-\lambda^2 \alpha t)
+\end{equation}
+where $\lambda = 2\pi/L$.
+
+Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for each coordinate direction.  The left plot shows the spatial profiles at the initial (dashed line) and final states for the various resolutions.  The grid spacing is $\Delta x = L/nx$.  The right plot shows second-order convergence of the L2 error.  Note that even though the time integration scheme is explicit Euler (first order in time) the spatial convergence remains second order by virtue of the Von Neumann time step restriction $\Delta t < \Delta x^2/(2\alpha)$.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
+\end{tabular*}
+\caption[The \textct{ht3d\_nx\_x} test cases]{One-dimensional heat diffusion in a square bar. (Left) Initial and final profiles for each case.  (Right) Spatial order-of-accuracy plot showing second-order convergence for all three spatial directions.}
+\label{fig:ht3d_diff}
+\end{figure}
+
+\subsection{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
+\label{ht3d_slab}
+
+In this test case, we utilize the non-steady state conduction solution provided in Carslaw and Jaeger \cite{Carslaw:1} for a semi-infinite slab exposed to a constant ambient temperature, $T_\infty$, with a constant convective heat transfer coefficient, $h$, and no radiation (see also Drysdale \cite{Drysdale:1}, Eq.~(2.25)).  The initial temperature of the slab, $T_0$, is set to \SI{1000}{\degreeCelsius}. The thermal properties of the slab, $k=1$ \si{W/(m.K)}, $\rho=1000$ \si{kg/m^3}, and $c=0.001$ \si{kJ/(kg.K)}, are set to give a thermal diffusivity, $\alpha$, of 0.001 \si{m^2/s}. The analytical solution for this problem for the solid temperature, $T(x,t)$, is given by
+\begin{equation}
+\label{eq:semiinfslab}
+\frac{T - T_0}{T_\infty - T_0} = \erfc\left(\frac{x}{2\sqrt{\alpha t}}\right) - \exp\left( \frac{xh}{k} + \frac{\alpha t}{(k/h)^2} \right) \erfc\left( \frac{x}{2\sqrt{\alpha t}} + \frac{\sqrt{\alpha t}}{k/h} \right)
+\end{equation}
+where $\erfc = 1 - \erf(x)$.
+
+This is a 1D problem in depth into the solid.  In FDS, the problem is solved in 2D, with the temperature varying in the $x$ coordinate direction; there is no variation in the vertical, $z$, direction.  While the solution is provided for a semi-infinite slab, FDS must use a finite thickness.  The slab is taken to be 0.5 m in depth, with $x=0$ m marking the interface location between the fluid and the solid.  The analytical solution for $T(x=0.5,t)$ is used as the ``back'' boundary condition of the slab.  The grid resolution is chosen to be 5 cm (10 cells covering 0.5 m).  The stability constraint for the time step in the heat equation is therefore, $\delta t \le \delta x^2/(2\alpha) = 1.25$ s.  This is set as the initial time step in FDS, since no gas phase solution is computed.
+
+The main purpose of this verification case is to check the accuracy of the continuous heat flux boundary condition used in the HT3D method (see the FDS Tech Guide \cite{FDS_Math_Guide} for details).  Figure \ref{fig:ht3d_slab} shows the surface (wall) temperature, $T_{\rm w}$, plotted as a function of time (the hot slab is cooling).  Note that the exact solution for the surface temperature is taken from Eq.~(\ref{eq:semiinfslab}) with $x=0$ m.  That is, $T_{\rm w}(t) \equiv T(0,t)$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
+\caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3D heat transfer.}
+\label{fig:ht3d_slab}
+\end{figure}
+
+\subsection{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
+\label{ht3d_ibeam}
+
+The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 1.7 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
+
+Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temperature contours from ANSYS (left) and FDS (right).  Below that, in Fig.~\ref{fig:ht3d_ibeam_time_history}, we show the time history of the surface temperatures for six locations on the bottom flange (positions may be identified from the image on the left).
+
+\begin{figure}[ht]
+\centering
+\vskip\baselineskip
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
+\includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left, courtesy Chao Zhang) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
+\label{fig:ht3d_ibeam_contours}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\end{tabular*}
+\caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
+\label{fig:ht3d_ibeam_time_history}
+\end{figure}
 
 
 
@@ -4676,7 +4744,7 @@ The case setup is identical to that of Section~\ref{HVAC_mass_transport_conserva
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_4}
-\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the CFD domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
+\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the FDS domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
 \label{fig_HVAC_mass_transport_conservation_4}
 \end{figure}
 
@@ -4704,7 +4772,7 @@ The left compartment is separated into two sub-compartments, A and B. These sub-
 
 \subsection{Energy conservation and pressure (\texorpdfstring{\textct{HVAC\_mass\_transport\_energy}}{HVAC\_mass\_transport\_energy})}
 \label{HVAC_mass_transport_energy}
-The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelcius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left the right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
+The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelsius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left the right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
 
 \begin{equation}
 h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})

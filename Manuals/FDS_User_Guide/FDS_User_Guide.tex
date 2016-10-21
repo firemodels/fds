@@ -1703,7 +1703,7 @@ Another limitation of the pressure solver is that at solid surfaces that are not
 
 If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
-By default, FDS will suspend the pressure iterations if the error is not reduced by at least 25~\% at each step. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or {\ct MAX\_PRESSURE\_ITERATIONS}.
+By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
@@ -2734,6 +2734,28 @@ prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat f
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
 
+\subsection{Solid Heat Transfer 3D (Beta)}
+\label{info:ht3d}
+
+The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
+
+{\ct HT3D} solves the 3D heat equation within an {\ct {OBST}} region of the domain.  You may connect multiple {\ct {OBST}} regions.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer much be at least one cell thick.  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements. {\ct HT3D} is not currently hooked up to the pyrolysis model.
+
+The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} should also have {\ct {HT3D=.TRUE.}}.  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}),
+\begin{equation}
+\label{eq:vnht3d}
+\delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
+\end{equation}
+
+Below is an example input file section:
+\begin{lstlisting}
+&MATL ID='steel', .../
+&SURF ID='s1', HT3D=.TRUE./
+&OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
+\end{lstlisting}
+
+
+\clearpage
 
 
 \section{Simple Pyrolysis Models}
@@ -9100,6 +9122,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct DEVC\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct EVACUATION}          & Logical             & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.} \\ \hline
+{\ct HT3D}                & Logical             & Section~\ref{info:ht3d}                   &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                 & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct MESH\_ID}            & Character           & Reference~\cite{FDS_Evac_Users_Guide}     &           &               \\ \hline
 {\ct MULT\_ID }           & Character           & Section~\ref{info:MULT}                   &           &               \\ \hline
@@ -9204,6 +9227,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
 {\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{info:PRES}           &               &                           \\ \hline
+{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
 {\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       & 1.                        \\ \hline
@@ -9571,6 +9595,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
+{\ct HT3D}                            & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline

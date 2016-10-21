@@ -2227,12 +2227,15 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
    FOUND_OTHER_MESH: IF (NOM>0) THEN
       MM=>MESHES(NOM)
       ALIGNED = .TRUE.
-      IF ( (ABS(IOR)==2 .OR. ABS(IOR)==3) .AND. MM%DX(IIO_MIN)<=M%DX(I) .AND. &
-            ABS( ((MM%X(IIO_MAX)-MM%X(IIO_MIN-1))-M%DX(I)) / MM%DX(IIO_MIN))>0.01 ) ALIGNED = .FALSE.
-      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==3) .AND. MM%DY(JJO_MIN)<=M%DY(J) .AND. &
-            ABS( ((MM%Y(JJO_MAX)-MM%Y(JJO_MIN-1))-M%DY(J)) / MM%DY(JJO_MIN))>0.01 ) ALIGNED = .FALSE.
-      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==2) .AND. MM%DZ(KKO_MIN)<=M%DZ(K) .AND. &
-            ABS( ((MM%Z(KKO_MAX)-MM%Z(KKO_MIN-1))-M%DZ(K)) / MM%DZ(KKO_MIN))>0.01 ) ALIGNED = .FALSE.
+      IF ( (ABS(IOR)==2 .OR. ABS(IOR)==3) .AND. MM%DX(IIO_MIN)<=M%DX(I) ) THEN
+         IF (ABS( ((MM%X(IIO_MAX)-MM%X(IIO_MIN-1))-(M%X(I)-M%X(I-1))) / MM%DX(IIO_MIN))>0.01 ) ALIGNED = .FALSE.
+      ENDIF
+      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==3) .AND. MM%DY(JJO_MIN)<=M%DY(J) ) THEN
+         IF (ABS( ((MM%Y(JJO_MAX)-MM%Y(JJO_MIN-1))-(M%Y(J)-M%Y(J-1))) / MM%DY(JJO_MIN))>0.01 ) ALIGNED = .FALSE.
+      ENDIF
+      IF ( (ABS(IOR)==1 .OR. ABS(IOR)==2) .AND. MM%DZ(KKO_MIN)<=M%DZ(K) ) THEN
+         IF (ABS( ((MM%Z(KKO_MAX)-MM%Z(KKO_MIN-1))-(M%Z(K)-M%Z(K-1))) / MM%DZ(KKO_MIN))>0.01 ) ALIGNED = .FALSE.
+      ENDIF
       IF (.NOT.ALIGNED) THEN
          WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',NOM
          STOP_STATUS = SETUP_STOP
