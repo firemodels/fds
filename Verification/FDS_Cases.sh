@@ -54,6 +54,8 @@ $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
 $QFDS -d Flowfields cyl_test_4.fds
 $QFDS -d Flowfields gas_filling.fds
+$QFDS -d Flowfields helium_1d_isothermal.fds
+$QFDS -d Flowfields helium_1d_const_gamma.fds
 $QFDS -d Flowfields helium_2d_isothermal.fds
 $QFDS -d Flowfields helium_air_jet_floor.fds
 $QFDS -d Flowfields hole.fds
