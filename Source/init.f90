@@ -2679,9 +2679,9 @@ OBST_LOOP: DO N=1,N_OBST
             CHECK_PARENT: IF (OB%DEVC_INDEX_O > 0 .OR. OB%CTRL_INDEX_O > 0) THEN
                !Parent OBST controllable, check state and if parent OBST is hidden, do not fill hole.
                IF (OB%DEVC_INDEX_O > 0) THEN
-                  IF (.NOT. DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+                  IF (DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
                ELSEIF(OB%CTRL_INDEX_O > 0) THEN
-                  IF (.NOT. CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+                  IF (CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
                ENDIF
                !If parent OBST is visible, check to see if hole needs to be made.
                IF (.NOT. REMOVE_OBST) THEN
@@ -2741,9 +2741,9 @@ OBST_LOOP: DO N=1,N_OBST
             CHECK_PARENT_2: IF (OB%DEVC_INDEX_O > 0 .OR. OB%CTRL_INDEX_O > 0) THEN
                !Parent OBST controllable, check state and if parent OBST is hidden, do not fill hole.
                IF (OB%DEVC_INDEX_O > 0) THEN
-                  IF (.NOT. DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+                  IF (DEVICE(OB%DEVC_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
                ELSEIF(OB%CTRL_INDEX_O > 0) THEN
-                  IF (.NOT. CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
+                  IF (CONTROL(OB%CTRL_INDEX_O)%CURRENT_STATE) REMOVE_OBST = .TRUE.
                ENDIF
                !If parent OBST is visible, check to see if hole needs to be made.
                IF (.NOT. REMOVE_OBST) THEN
