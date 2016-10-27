@@ -1,10 +1,10 @@
-&HEAD CHID='fire_const_gamma', TITLE='simple fire test with constant cp' /
+&HEAD CHID='fire_const_gamma', TITLE='simple fire test with constant cp/cv' /
 
 &MESH IJK=16,16,32, XB=-2,2,-2,2,0,8 /
 
 &TIME T_END=30.0/
 &MISC STRATIFICATION=.FALSE.,CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE./
-&DUMP MASS_FILE =.TRUE./
+&DUMP MASS_FILE =.TRUE., DT_DEVC=1./
 &RADI RADIATION=.FALSE. /
 
 &VENT XB=-0.5,0.5,-0.5,0.5,0,0, SURF_ID='FIRE'/
