@@ -455,7 +455,7 @@ MAIN_LOOP: DO
 
    ! Clip final time step
 
-   IF ((T+DT)>T_END) DT = MAX(T_END-T,1.E-10_EB)
+   IF ((T+DT)>T_END) DT = MAX(T_END-T,TWO_EPSILON_EB)
 
    ! Determine when to dump out diagnostics to the .out file
 
