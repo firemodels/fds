@@ -4147,6 +4147,30 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \end{figure}
 
 
+\subsection{Drag Caused by Vegetation (\texorpdfstring{\textct{vegetation\_drag}}{vegetation\_drag})}
+\label{vegetation_drag_1}
+
+Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 5000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 5 particles are inserted randomly in each grid cell, for a total of 5000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
+\be
+   C_{\rm d} = 10 \, \frac{0.6 + 0.4 \, \RE^{0.8}}{\RE} \approx 1.55 \quad ; \quad \RE = \frac{\rho \, u_0 \, D}{\mu_{\rm air}} \approx 132.9
+\ee
+The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s). The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
+\be
+   \Delta p=\frac{1}{2} \rho \frac{n_{\rm p} \, C_{\rm d} \, A_{\rm c} \, u_0^2} {A} = 18.88 \; {\rm Pa}  \quad ; \quad n_{\rm p}=\frac{m''' \, V}{\pi \, r^2 \, L \, \rho_{\rm p}} \approx 254648
+\ee
+where $A$ is the 1~m$^2$ cross-sectional area of the duct, $A_{\rm c}=LD$ is the cross sectional area of the cylindrical particle, and $\rho=1.196$~kg/m$^3$ is the density of air. The number of actual pine needles within the volume, $n_{\rm p}$, is the mass per unit volume, $m'''=2$~kg/m$^3$, times the volume, $V=1$~m$^3$, divided by the mass of an individual pine needle. The density of the needle is $\rho_{\rm p}=500$~kg/m$^3$.
+
+Comparisons of computed and analytical results are shown in Fig.~\ref{vegetation_drag_fig}. Differences between the ideal and computed results are due to the fact that the air velocity is not exactly 2~m/s within the volume filled with the particles. In particular, the duct filled randomly with particles exhibits the greatest deviation from the ideal because the velocity does not remain uniform within the volume.
+
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_1}
+\caption[The {\ct vegetation\_drag} test case]{Pressure drop in duct filled with pine needles for three different particle insertion methods.}
+\label{vegetation_drag_fig}
+\end{figure}
+
 
 \subsection{Mesh Screen in a Duct (\texorpdfstring{\textct{screen\_drag}}{screen\_drag})}
 \label{screen_drag_1}
