@@ -1,4 +1,4 @@
-&HEAD CHID='helium_1D_const_gamma', TITLE='Test helium-air mass transport with constant cp/cv'/
+&HEAD CHID='helium_1d_isothermal', TITLE='Test helium-air mass transport'/
 
 &MESH IJK=16,16,32, XB=-2,2,-2,2,0,8/
 
@@ -6,7 +6,7 @@
 
 &DUMP DT_DEVC=1/
 
-&MISC NOISE=F, GVEC(3)=0, STRATIFICATION=F, CONSTANT_SPECIFIC_HEAT_RATIO=T, TMPA=25/
+&MISC NOISE=F, GVEC(3)=0, STRATIFICATION=F, CONSTANT_SPECIFIC_HEAT_RATIO=F, TMPA=25/
 
 &RADI RADIATION=F/
 

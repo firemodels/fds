@@ -86,7 +86,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80) :: FN_UVW,FN_MMS,FN_SPEC
 LOGICAL :: L_READ_EFF
-INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END
+INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END, NN
 
 TNOW = SECOND()
 
@@ -132,53 +132,74 @@ ELSE
 
    IF (T>=PART_CLOCK(NM) .AND. PARTICLE_FILE) THEN
       CALL DUMP_PART(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_PART)
          PART_CLOCK(NM) = PART_CLOCK(NM) + DT_PART
-         IF (PART_CLOCK(NM)>=T) EXIT
+         IF (PART_CLOCK(NM)>=T) THEN
+            PART_CLOCK(NM) = MIN(PART_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=ISOF_CLOCK(NM)) THEN
       CALL DUMP_ISOF(T,DT,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_ISOF)
          ISOF_CLOCK(NM) = ISOF_CLOCK(NM) + DT_ISOF
-         IF (ISOF_CLOCK(NM)>=T) EXIT
+         IF (ISOF_CLOCK(NM)>=T) THEN
+            ISOF_CLOCK(NM) = MIN(ISOF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=SLCF_CLOCK(NM)) THEN
       CALL DUMP_SLCF(T,DT,NM,0)
       IF (SMOKE3D) CALL DUMP_SMOKE3D(T,DT,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_SLCF)
          SLCF_CLOCK(NM) = SLCF_CLOCK(NM) + DT_SLCF
-         IF (SLCF_CLOCK(NM)>=T) EXIT
+         IF (SLCF_CLOCK(NM)>=T) THEN
+            SLCF_CLOCK(NM) = MIN(SLCF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=SL3D_CLOCK(NM) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
       CALL DUMP_SLCF(T,DT,NM,2)
-      DO
+      DO NN=1,CEILING(DT/DT_SL3D)
          SL3D_CLOCK(NM) = SL3D_CLOCK(NM) + DT_SL3D
-         IF (SL3D_CLOCK(NM)>=T) EXIT
+         IF (SL3D_CLOCK(NM)>=T) THEN
+            SL3D_CLOCK(NM) = MIN(SL3D_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=BNDF_CLOCK(NM)) THEN
       CALL DUMP_BNDF(T,NM)
       IF (TERRAIN_CASE) CALL DUMP_BNDF_TO_SLCF(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_BNDF)
          BNDF_CLOCK(NM) = BNDF_CLOCK(NM) + DT_BNDF
-         IF (BNDF_CLOCK(NM)>=T) EXIT
+         IF (BNDF_CLOCK(NM)>=T) THEN
+            BNDF_CLOCK(NM) = MIN(BNDF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=PL3D_CLOCK(NM) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
       CALL DUMP_SLCF(T,DT,NM,1)
-      DO
+      DO NN=1,CEILING(DT/DT_PL3D)
          PL3D_CLOCK(NM) = PL3D_CLOCK(NM) + DT_PL3D
-         IF (PL3D_CLOCK(NM)>=T) EXIT
+         IF (PL3D_CLOCK(NM)>=T) THEN
+            PL3D_CLOCK(NM) = MIN(PL3D_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=PROF_CLOCK(NM)) THEN
       CALL DUMP_PROF(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_PROF)
          PROF_CLOCK(NM) = PROF_CLOCK(NM) + DT_PROF
-         IF (PROF_CLOCK(NM)>=T) EXIT
+         IF (PROF_CLOCK(NM)>=T) THEN
+            PROF_CLOCK(NM) = MIN(PROF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=UVW_TIMER(MESHES(NM)%IUVW)) THEN
@@ -201,7 +222,7 @@ ELSE
          IF (T>=MMS_TIMER .AND. NM==1) THEN
             WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
             CALL DUMP_MMS(NM,FN_MMS,T)
-            MMS_TIMER=1.E10_EB
+            MMS_TIMER=HUGE_EB
          ENDIF
       CASE(9)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
@@ -210,7 +231,7 @@ ELSE
             MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
          ENDIF
          IF (T>=TURB_INIT_CLOCK) THEN
-            TURB_INIT_CLOCK=HUGE(1._EB) ! only write ini_salsa.dat file once
+            TURB_INIT_CLOCK=HUGE_EB ! only write ini_salsa.dat file once
             CALL SANDIA_OUT(NM)
          ENDIF
    END SELECT PERIODIC_TEST_SELECT
