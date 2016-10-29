@@ -1324,6 +1324,18 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
    \label{bound_test}
 \end{figure}
 
+\subsection{Isothermal Helium Plume (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
+\label{helium_1d_isothermal}
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_isothermal} cases]{Results of the {\ct helium\_1d\_isothermal} cases.}
+   \label{fig_helium_1d_isothermal}
+\end{figure}
 
 \subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
 \label{helium_air_jet_floor}
@@ -1364,6 +1376,37 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
    \end{tabular*}
    \caption[Results of the {\ct tmp\_lower\_limit} cases]{Results of the {\ct tmp\_lower\_limit} cases.}
    \label{tmp_lower_limit_fig}
+\end{figure}
+
+\section{Constant Specific Heat Ratio}
+\label{const_gamma}
+
+
+\subsection{Helium Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
+\label{helium_1d_const_gamma}
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_const\_gamma} cases]{Results of the {\ct helium\_1d\_const\_gamma} cases.}
+   \label{fig_helium_1d_const_gamma}
+\end{figure}
+
+\subsection{Fire Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{fire\_const\_gamma}}{fire\_const\_gamma})}
+\label{fire_const_gamma}
+
+In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCelsius}. A 1000 MW propane fire with a 5 \% soot yield is placed at the bottom of the box for 20 s. All the compartment surfaces are adiabatic. The net change in enthalpy and pressure can be computed using the specific heat ratio based constant specific heat values for the air and product species along with the pressure work required to inject the fuel. The FDS predicted enthalpy and pressure change are shown in Fig \ref{fig_fire_const_gamma} compared with the predicted values.
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
+   \end{tabular*}
+   \caption[Results of the {\ct fire\_const\_gamma} case]{Results of the {\ct fire\_const\_gamma} case.}
+   \label{fig_fire_const_gamma}
 \end{figure}
 
 
