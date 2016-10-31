@@ -8563,16 +8563,10 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
    TEMP_XB(N,:) = XB
    ! Check for overlap if controlled
    IF (DEVC_ID/='null' .OR. CTRL_ID/='null') CONTROLLED(N) = .TRUE.
-   WRITE(*,*) XB
    IF (N>1) THEN
       DO NN = 1,N-1
          IF (TEMP_XB(NN,1) >= XB(2) .OR. TEMP_XB(NN,3) >= XB(4) .OR. TEMP_XB(NN,5) >= XB(6) .OR. &
              TEMP_XB(NN,2) <= XB(1) .OR. TEMP_XB(NN,4) <= XB(3) .OR. TEMP_XB(NN,6) <= XB(5)) CYCLE
-         WRITE(*,*) NN,CONTROLLED(N),CONTROLLED(NN)
-         WRITE(*,*) TEMP_XB(NN,:)
-         WRITE(*,*) (TEMP_XB(NN,1) <= XB(2) .AND. TEMP_XB(NN,2) >= XB(1)) , &
-             (TEMP_XB(NN,3) <= XB(4) .AND. TEMP_XB(NN,4) >= XB(3)) , &
-             (TEMP_XB(NN,5) <= XB(6) .AND. TEMP_XB(NN,6) >= XB(5))
          IF ((TEMP_XB(NN,1) <= XB(2) .AND. TEMP_XB(NN,2) >= XB(1)) .AND. &
              (TEMP_XB(NN,3) <= XB(4) .AND. TEMP_XB(NN,4) >= XB(3)) .AND. &
              (TEMP_XB(NN,5) <= XB(6) .AND. TEMP_XB(NN,6) >= XB(5))) THEN
