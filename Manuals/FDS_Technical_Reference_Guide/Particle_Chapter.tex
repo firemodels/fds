@@ -15,12 +15,11 @@ In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{
 It is obtained by summing the force transferred from each particle
 in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right] \label{part_force}
+    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right] \label{part_force}
 \ee
-where $C_{\rm d}$ is the drag coefficient, $A_{\rm p}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the
-gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
+where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
 \be
-    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p}}{m_{\rm p}} \,
+    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p,c}}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
 \ee
 The particle position, $\bx_{\rm p}$, is determined from the equation
@@ -44,6 +43,15 @@ where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindric
      \end{array} \right.
 \end{align}
 Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
+
+
+\subsection{Using Lagrangian Particles to Represent Vegetation}
+
+For some applications, it is convenient to use Lagrangian particles to represent stationary vegetation, like grasses or leaves, in which case the force term, $\bof_{\rm b}$, can be written in an alternative form:
+\be
+    {\bof_{\rm b}} = \ha \frac{A_{\rm p,c}}{A_{\rm p,s}} \, \rho \, C_{\rm d} \, \beta_{\rm b} \, \sigma_{\rm b} \, \bu |\bu|  \quad ; \quad \beta_{\rm b} \, \sigma_{\rm b} = \frac{1}{V} \sum A_{\rm p,s}  \label{part_force_veg}
+\ee
+Here, $\beta_{\rm b}$ is the ratio of the volume occupied by solid mass to the overall volume, sometimes referred to as the {\em packing ratio}; $A_{\rm p,s}$ is the surface area of a single particle, and $\sigma_{\rm b}$ is the surface area to volume ratio of the particle. 
 
 \subsection{Drag Reduction}
 \label{sec:threeway}
@@ -155,10 +163,10 @@ Liquid droplets can represent either discrete airborne spheres or elements of th
 
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
-\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
 \end{align}
-The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p,s}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
@@ -183,8 +191,8 @@ appropriate amount of vaporized liquid is added to the given mesh cell, and the 
 
 Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
 \be
-   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
-   A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
+   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p,s} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
+   A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
 \ee
 The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
@@ -197,12 +205,12 @@ where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obt
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_{\rm p} = - \dt \, A_{\rm p} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
+   \delta m_{\rm p} = - \dt \, A_{\rm p,s} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
    \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
 \ee
 The amount of heat transfer from the gas to the particle is
 \be
-   \delta q_{\rm p} = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
+   \delta q_{\rm p} = \dt \, A_{\rm p,s} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
 
