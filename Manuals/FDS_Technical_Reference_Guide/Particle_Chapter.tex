@@ -11,13 +11,13 @@ distribution, and mass, momentum and energy transfer to and from Lagrangian part
 
 \section{Particle Transport in the Gas Phase}
 
-In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas.
-It is obtained by summing the force transferred from each particle
-in a grid cell and dividing by the cell volume, $V$:
+In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas. It is obtained by summing the force transferred from each particle in a grid cell and dividing by the cell volume, $V$:
 \be
     {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right] \label{part_force}
 \ee
-where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
+where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The subscript ``b'' stands for ``bulk,'' meaning that the particles in the cell represent a bulk mass dragging on the gas.
+
+The particle acceleration is given by
 \be
     \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p,c}}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
@@ -47,11 +47,11 @@ Additional corrections are made to account for drag reduction due to the wake ef
 
 \subsection{Using Lagrangian Particles to Represent Vegetation}
 
-For some applications, it is convenient to use Lagrangian particles to represent stationary vegetation, like grasses or leaves, in which case the force term, $\bof_{\rm b}$, can be written in an alternative form:
+For some applications, it is convenient to use Lagrangian particles to represent quasi-stationary vegetation, like grasses or leaves. Typically, these different types of vegetation are grouped into different classes of fuel ``elements'', each of which contributes to the bulk force term:
 \be
-    {\bof_{\rm b}} = \ha \frac{A_{\rm p,c}}{A_{\rm p,s}} \, \rho \, C_{\rm d} \, \beta_{\rm b} \, \sigma_{\rm b} \, \bu |\bu|  \quad ; \quad \beta_{\rm b} \, \sigma_{\rm b} = \frac{1}{V} \sum A_{\rm p,s}  \label{part_force_veg}
+    {\bof_{\rm b,e}} = \rho \, f_{\rm e} \, C_{\rm d,e} \, \beta_{\rm e} \, \sigma_{\rm e} \, \bu |\bu|  \quad ; \quad \beta_{\rm e} \, \sigma_{\rm e} = \frac{1}{V} \sum_{{\rm p}\in {\rm e}} A_{\rm p,s}  \label{part_force_veg}
 \ee
-Here, $\beta_{\rm b}$ is the ratio of the volume occupied by solid mass to the overall volume, sometimes referred to as the {\em packing ratio}; $A_{\rm p,s}$ is the surface area of a single particle, and $\sigma_{\rm b}$ is the surface area to volume ratio of the particle. 
+where $A_{\rm p,s}$ is the surface area of a single particle. The terms with subscript ``e'' are effective values of a particular class of fuel elements and are determined geometrically or empirically. $\beta_{\rm b}$ is the ratio of the volume occupied by solid mass to the overall volume occupied by the particles, sometimes referred to as the {\em packing ratio}, and $\sigma_{\rm b}$ is the surface area to volume ratio of a single particle. The drag coefficient, $C_{\rm d,e}$, is typically empirically derived and takes into account both the geometry and shadowing effects of closely packed objects. The shape factor, $f_{\rm e}$, is here defined as one-half of the ratio of the particles' projected cross sectional area, $A_{\rm p,c}$, to its surface area, $A_{\rm p,s}$. A perfectly spherical particle has a shape factor of $0.5 \, \pi r^2/4 \pi r^2=1/8$, but for actual vegetation, like leaves, grasses, pine needles, etc., the shape factor is assigned an empirical value that accounts for both the shape and orientation of the objects. Pine needles, for example, present a different cross sectional area depending on their orientation.
 
 \subsection{Drag Reduction}
 \label{sec:threeway}
