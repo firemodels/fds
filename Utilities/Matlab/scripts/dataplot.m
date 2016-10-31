@@ -205,7 +205,7 @@ for i=2:n_plots
                 if strcmp(Metric,'max')
                     Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'min')
-                    Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col))-d1_Initial_Value;
+                    Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
                 elseif strcmp(Metric,'maxabs')
                     Save_Measured_Metric(i,j,1) = max(abs(M(indices,d1_Dep_Col)-d1_Initial_Value));
                 elseif strfind(Metric,'max_')
@@ -319,7 +319,7 @@ for i=2:n_plots
                 if strcmp(Metric,'max')
                     Save_Predicted_Metric(i,j,1) = max(M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'min')
-                    Save_Predicted_Metric(i,j,1) = min(M_Dep)-d2_Initial_Value;
+                    Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M_Dep);
                 elseif strcmp(Metric,'maxabs')
                     Save_Predicted_Metric(i,j,1) = max(abs(M_Dep-d2_Initial_Value));
                 elseif strfind(Metric,'max_')
