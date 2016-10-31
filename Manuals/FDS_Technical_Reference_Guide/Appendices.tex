@@ -6,7 +6,8 @@
 \label{nomenclature}
 
 \begin{tabbing}
-$A_{\rm p}$ \hspace{1in}  \= droplet/particle surface area \\
+$A_{\rm p,c}$ \hspace{1in}\= droplet/particle cross sectional area \\
+$A_{\rm p,s}$ \hspace{1in}\= droplet/particle surface area \\
 $A_{\alpha\beta}$         \> pre-exponential factor for solid phase Arrhenius reaction \\
 $B$                       \> emission source term \\
 $C$                       \> sprinkler C-factor; coefficient of natural convection \\
@@ -1291,24 +1292,24 @@ The trajectories of Lagrangian particles in FDS could be calculated with Forward
 Several effects are neglected in this formulation. One is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. A second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient would not improve accuracy beyond these uncertainties, but it would slow down the computation.
 
 \subsubsection*{Relative velocities}
-Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_\text{p}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
+Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_\text{p,c}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
 
 The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
 \begin{align}
     \label{particle_eom}
-    m_{\rm p} \frac{\d \mathbf{u}}{\d t} &= - \frac{1}{2} \rho C_\text{d} A_\text{p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| + m_{\rm p} \mathbf{g} \\[.1in]
+    m_{\rm p} \frac{\d \mathbf{u}}{\d t} &= - \frac{1}{2} \rho C_\text{d} A_\text{p,c} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| + m_{\rm p} \mathbf{g} \\[.1in]
     \label{fluid_eom}
-    M_{\rm p} \frac{\d \mathbf{U}}{\d t} &= \frac{1}{2} \rho C_\text{d} A_\text{p} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}|
+    M_{\rm p} \frac{\d \mathbf{U}}{\d t} &= \frac{1}{2} \rho C_\text{d} A_\text{p,c} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}|
 \end{align}
 The fluid Eq.\ (\ref{fluid_eom}) is a greatly simplified version of Eq.\ (\ref{momeq}). It exists to get a reasonable estimate of the momentum coupling between the fluid and particle phases. Because it neglects terms corresponding to the pressure gradient, viscosity, etc., it is at best first-order accurate when those effects exist. However, unlike first-order accurate Forward Euler, this approach is stable. Additional terms could be added to improve accuracy in certain verification test cases, however, the current approach would solve these with a Forward Euler like step, which can cause instabilities if these terms are not constant. Thus, for the moment these terms are neglected despite their potential utility.
 
 If we define $\mathbf{u}_\text{r} \equiv \mathbf{u} - \mathbf{U}$ as the relative velocity between the fluid and the particle, we can find a single equation for the relative velocity by dividing both equations by their respective masses (i.e., $m_{\rm p}$ and $M_{\rm p}$) and then subtracting the second from the first. This result is
 \begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho C_\text{d} A_\text{p,c} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
 \end{align}
 This equation can be written in compact form as follows:
 \begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
+    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_\text{p,c} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
 \end{align}
 This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. The velocities $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{d}(0) = \mathbf{u}_\text{r}(0) \equiv \mathbf{u}(0) - \mathbf{U}(0)$. And $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
 \begin{align}
