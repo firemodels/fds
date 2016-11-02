@@ -2551,6 +2551,15 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (SM%EVAPORATING) THEN
+      SS => SPECIES(SM%SINGLE_SPEC_INDEX)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Spec. Heat (J/kg/K) Melt ',INT(SS%TMP_MELT),' K: ', CP_Z(INT(SS%TMP_MELT),N)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', CP_Z(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),N)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',INT(SS%TMP_V),' K: ', CP_Z(INT(SS%TMP_V),N)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Heat of Vapor. (J/kg/K) Melt ',INT(SS%TMP_MELT),' K: ', SS%H_V(INT(SS%TMP_MELT))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', SS%H_V(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',INT(SS%TMP_V),' K: ', SS%H_V(INT(SS%TMP_V))
+   ENDIF
 ENDDO
 
 ! Print out Stoichiometric parameters for reactions
