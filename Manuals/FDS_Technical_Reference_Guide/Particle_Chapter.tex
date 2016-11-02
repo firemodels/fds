@@ -13,7 +13,7 @@ distribution, and mass, momentum and energy transfer to and from Lagrangian part
 
 In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas. It is obtained by summing the force transferred from each particle in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right] \label{part_force}
+    {\bof_{\rm b}} = \frac{\rho}{2 \, V} \sum  C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|  \label{part_force}
 \ee
 where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The subscript ``b'' stands for ``bulk,'' meaning that the particles in the cell represent a bulk mass dragging on the gas.
 
