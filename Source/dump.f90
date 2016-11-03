@@ -2554,10 +2554,12 @@ DO N=1,N_TRACKED_SPECIES
    IF (SM%EVAPORATING) THEN
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Spec. Heat (J/kg/K) Melt ',INT(SS%TMP_MELT),' K: ', SS%C_P_L(INT(SS%TMP_MELT))
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', SS%C_P_L(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', &
+                                                                             SS%C_P_L(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)))
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',INT(SS%TMP_V),' K: ', SS%C_P_L(INT(SS%TMP_V))
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Heat of Vapor. (J/kg/K) Melt ',INT(SS%TMP_MELT),' K: ', SS%H_V(INT(SS%TMP_MELT))
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', SS%H_V(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)))
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),' K: ', &
+                                                                             SS%H_V(INT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)))
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',INT(SS%TMP_V),' K: ', SS%H_V(INT(SS%TMP_V))
    ENDIF
 ENDDO
