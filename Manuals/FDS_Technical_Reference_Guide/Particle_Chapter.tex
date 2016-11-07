@@ -13,7 +13,7 @@ distribution, and mass, momentum and energy transfer to and from Lagrangian part
 
 In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas. It is obtained by summing the force transferred from each particle in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_{\rm b}} = \frac{\rho}{2 \, V} \sum  C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|  \label{part_force}
+    {\bof_{\rm b}} = \frac{1}{V} \sum  \left[ \frac{\rho}{2} \, C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t} \, (\bu_{\rm p}-\bu) \right] \label{part_force}
 \ee
 where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The subscript ``b'' stands for ``bulk,'' meaning that the particles in the cell represent a bulk mass dragging on the gas.
 
@@ -49,7 +49,7 @@ Additional corrections are made to account for drag reduction due to the wake ef
 
 For some applications, it is convenient to use Lagrangian particles to represent stationary vegetation, like grasses or leaves, or airborne vegetation, like burning brands. Typically, these different types of vegetation are grouped into different classes of fuel ``elements'', each of which contributes to the bulk force term:
 \be
-    {\bof_{\rm b,e}} = \rho \, C_{\rm s,e} \, C_{\rm d,e} \, \beta_{\rm e} \, \sigma_{\rm e} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|   \label{part_force_veg}
+    {\bof_{\rm b,e}} = \rho \, C_{\rm s,e} \, C_{\rm d,e} \, \beta_{\rm e} \, \sigma_{\rm e} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| + \sum \, \dot{m}_{\rm p}''' \, (\bu_{\rm p}-\bu)   \label{part_force_veg}
 \ee
 The terms with subscript ``e'' refer to a particular class of fuel \underline{e}lements and are determined geometrically or empirically.  The shape factor, $C_{\rm s,e}$, is the ratio of the particles' projected cross sectional area, $A_{\rm p,c}$, to its surface area, $A_{\rm p,s}$. A perfect sphere has a shape factor of $\pi r^2/4 \pi r^2=1/4$, but for actual vegetation, the shape factor is assigned an empirical value that accounts for both shape and orientation. Pine needles, for example, project a different cross sectional area depending on their orientation. The drag coefficient, $C_{\rm d,e}$, is empirically derived and takes into account both the geometry and shadowing effects of closely packed objects. Often, as here, it absorbs the factor of 1/2 found in Eq.~(\ref{part_force}).  $\beta_{\rm e}$ is the volume fraction; that is, the ratio of the volume occupied by solid mass to the overall volume of the vegetation, sometimes referred to as the {\em packing ratio}. $\sigma_{\rm e}$ is the surface to volume ratio of a single particle.
 
