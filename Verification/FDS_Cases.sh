@@ -390,6 +390,7 @@ $QFDS -d Sprinklers_and_Sprays screen_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays porous_media.fds
 $QFDS -d Sprinklers_and_Sprays vegetation_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays vegetation_drag_2.fds
+$QFDS -d Sprinklers_and_Sprays water_evap_1_const_gamma.fds
 
 $QFDS -d Scalar_Analytical_Solution pulsating_FL0_16.fds
 $QFDS -d Scalar_Analytical_Solution pulsating_FL0_32.fds
