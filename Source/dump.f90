@@ -2552,19 +2552,19 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
    IF (SM%EVAPORATING) THEN
+      WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
       ITMP = MIN(NINT(SS%TMP_MELT),5000)
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Spec. Heat (J/kg/K) Melt ',ITMP,' K: ', SS%C_P_L(ITMP)
       ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', &
-                                                                             SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%C_P_L(ITMP)
       ITMP = MIN(NINT(SS%TMP_V),5000)
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A)') ' '
       ITMP = MIN(NINT(SS%TMP_MELT),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Heat of Vapor. (J/kg/K) Melt ',ITMP,' K: ', SS%H_V(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Heat of Vapor. (J/kg)    Melt ',ITMP,' K: ', SS%H_V(ITMP)
       ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', &
-                                                                             SS%H_V(ITMP)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%H_V(ITMP)
       ITMP = MIN(NINT(SS%TMP_V),5000)
       WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%H_V(ITMP)
    ENDIF
