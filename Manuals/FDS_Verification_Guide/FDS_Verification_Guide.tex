@@ -1383,12 +1383,32 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
 \section{Constant Specific Heat Ratio}
 \label{const_gamma}
 
-The ratio $\gamma = C_{\rm p}/C_{\rm v}$ is called the ``ratio of specific heats''. For many simple gases, $\gamma = \mathrm{constant}$ is a good approximation.  When this assumption is viable, many terms in the energy equation drop out. For FDS this means that the divergence expression is greatly simplified, which speeds up the code.  These simplifications require that the sensible enthalpy of the gas is referenced to 0 K (see Sec of the FDS Tech Guide).  In this section, we examine three cases using the assumption of constant specific heat ratio: one tests mixing of two gases with different molecular weights, one tests fire conditions, and one tests evaporation of water droplets.  Each of these cases is a clone of cases we develop later in this guide for the default version of the code.
+The ratio $\gamma = c_p/c_v$ is called the ``ratio of specific heats''. For many simple gases, $\gamma = \mathrm{constant}$ is a good approximation.  The specific heat of species $\alpha$ in the gas phase is then given by
+\begin{equation}
+c_{p,\alpha} = \frac{R}{W_\alpha}\frac{\gamma_\alpha}{\gamma_\alpha-1}
+\end{equation}
+where $R$ is the ideal gas constant.  When this assumption is viable, many terms in the energy equation drop out, greatly simplifying the divergence expression and thus speeding up the code.  These simplifications require that the sensible enthalpy of the gas is referenced to 0 K (see the FDS Tech Guide \cite{FDS_Math_Guide}).  In this section, we examine three cases using the assumption of constant specific heat ratio: one tests mixing of two gases with different molecular weights ({\ct helium\_1d\_const\_gamma}), one tests fire conditions ({\ct fire\_const\_gamma}), and one tests evaporation of water droplets ({\ct water\_evap\_1\_const\_gamma}).  Each of these cases is a clone of cases we develop later in this guide for the default version of the code.
 
-\subsection{Helium Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
+\subsection{Helium Wave using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
 \label{helium_1d_const_gamma}
 
-\begin{figure}[h]
+In this problem, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation.  The ratio of specific heats is kept at the default value of $\gamma = 1.4$.  The molar weights, heat capacities, and enthalpies for both air and helium are given in Table \ref{tab:helium_1d_const_gamma}.  Notice that the sensible enthalpies, $h_{s,\alpha}=\rho_\alpha c_{p,\alpha} T$, are the same for both species.
+
+\begin{table}[ht]
+\centering
+\caption[Helium constant specific heat ratio]{Helium constant specific heat ratio parameters.}
+\begin{tabular}{lcccc}
+Species & $W_\alpha$ (kg/kmol) & $\rho_\alpha$ (\si{kg/m^3}) & $c_{p,\alpha}$ (kJ/kg/K) & $h_{s,\alpha}$ (\si{kJ/m^3}) \\
+\hline
+Air    & 28.73167 & 1.174 & 1.0128 & 355 \\
+Helium &  4.00260 & 0.164 & 7.2705 & 355 \\
+\end{tabular}
+\label{tab:helium_1d_const_gamma}
+\end{table}
+
+In Fig.~\ref{fig_helium_1d_const_gamma} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy should remain constant at 355 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
+
+\begin{figure}[ht!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
@@ -1403,7 +1423,7 @@ The ratio $\gamma = C_{\rm p}/C_{\rm v}$ is called the ``ratio of specific heats
 
 In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCelsius}. A 1000 MW propane fire with a 5 \% soot yield is placed at the bottom of the box for 20 s. All the compartment surfaces are adiabatic. The net change in enthalpy and pressure can be computed using the specific heat ratio based constant specific heat values for the air and product species along with the pressure work required to inject the fuel. The FDS predicted enthalpy and pressure change are shown in Fig \ref{fig_fire_const_gamma} compared with the predicted values.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
@@ -1412,14 +1432,12 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
    \label{fig_fire_const_gamma}
 \end{figure}
 
-\newpage
-
 \subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\textct{water\_evap\_1\_const\_gamma}}{water\_evap\_1\_const\_gamma})}
 \label{water_evap_1_const_gamma}
 
-This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and monodisperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.
+This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and monodisperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in {\ct water\_evap\_1\_const\_gamma.m} in the {\ct Utilities/Matlab/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
