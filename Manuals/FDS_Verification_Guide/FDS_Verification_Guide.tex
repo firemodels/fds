@@ -1378,14 +1378,17 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
    \label{tmp_lower_limit_fig}
 \end{figure}
 
+\clearpage
+
 \section{Constant Specific Heat Ratio}
 \label{const_gamma}
 
+The ratio $\gamma = C_{\rm p}/C_{\rm v}$ is called the ``ratio of specific heats''. For many simple gases, $\gamma = \mathrm{constant}$ is a good approximation.  When this assumption is viable, many terms in the energy equation drop out. For FDS this means that the divergence expression is greatly simplified, which speeds up the code.  These simplifications require that the sensible enthalpy of the gas is referenced to 0 K (see Sec of the FDS Tech Guide).  In this section, we examine three cases using the assumption of constant specific heat ratio: one tests mixing of two gases with different molecular weights, one tests fire conditions, and one tests evaporation of water droplets.  Each of these cases is a clone of cases we develop later in this guide for the default version of the code.
 
 \subsection{Helium Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
 \label{helium_1d_const_gamma}
 
-\begin{figure}[!ht]
+\begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
@@ -1400,7 +1403,7 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
 
 In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCelsius}. A 1000 MW propane fire with a 5 \% soot yield is placed at the bottom of the box for 20 s. All the compartment surfaces are adiabatic. The net change in enthalpy and pressure can be computed using the specific heat ratio based constant specific heat values for the air and product species along with the pressure work required to inject the fuel. The FDS predicted enthalpy and pressure change are shown in Fig \ref{fig_fire_const_gamma} compared with the predicted values.
 
-\begin{figure}[!ht]
+\begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
@@ -1409,22 +1412,25 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
    \label{fig_fire_const_gamma}
 \end{figure}
 
-\subsection{Water Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\textct{water\_evap\_1\_const\_gamma}}{water\_evap\_1\_const\_gamma})}
+\newpage
+
+\subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\textct{water\_evap\_1\_const\_gamma}}{water\_evap\_1\_const\_gamma})}
 \label{water_evap_1_const_gamma}
 
-This test case is a replica of {\ct water\_evaporation\_1} in Sec. using constant specific heat ratio in which the sensible enthalpy of the gas is referenced to zero Kelvin.
+This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and monodisperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.
 
-\begin{figure}[!ht]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} \\
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass} \\
-   \end{tabular*}
-   \caption[Results of the {\ct water\_evap\_1\_const\_gamma} case]{Results of the {\ct water\_evap\_1\_const\_gamma} case.}
-   \label{fig_water_evap_1_const_gamma}
+\begin{figure}[h]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass}
+\end{tabular*}
+\caption[Sample case \textct{water\_evap\_1\_const\_gamma}]{Output of the \textct{water\_evap\_1\_const\_gamma} test case.}
+\label{water_evap_1_const_gamma_plots}
 \end{figure}
 
 
