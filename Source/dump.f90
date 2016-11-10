@@ -4681,7 +4681,7 @@ SELECT CASE(IOR)
       IF (ABS(SUM)<=TWO_EPSILON_EB) THEN
          FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
       ELSE
-         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K)) + &
+         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K+1)) + &
                         A(I,J+1,K)*MAX(C(I,J+1,K),C(I+1,J+1,K)) + A(I,J+1,K+1)*MAX(C(I,J+1,K+1),C(I+1,J+1,K+1)) )/SUM
       ENDIF
    CASE(2)
