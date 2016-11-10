@@ -9817,9 +9817,12 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
    ENDDO
 
+   NNN = 0
    K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
       J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
+
+            NNN = NNN + 1  ! Counter for MULT INIT lines
 
             NN = NN + 1
             IN => INITIALIZATION(NN)
@@ -9842,12 +9845,17 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                IN%Z2 = XB(6) + MR%DZ0 + II*MR%DXB(6)
             ENDIF
 
+            IF (MR%N_COPIES>1) THEN
+               WRITE(IN%ID,'(A,A,I5.5)') TRIM(ID),'-',NNN
+            ELSE
+               IN%ID = ID
+            ENDIF
+
             IN%CELL_CENTERED = CELL_CENTERED
             IN%DIAMETER      = DIAMETER*1.E-6_EB
             IN%DX            = DX
             IN%DY            = DY
             IN%DZ            = DZ
-            IN%ID            = ID
             IN%CTRL_ID       = CTRL_ID
             IN%DEVC_ID       = DEVC_ID
             CALL SEARCH_CONTROLLER('INIT',IN%CTRL_ID,IN%DEVC_ID,IN%DEVC_INDEX,IN%CTRL_INDEX,N)
