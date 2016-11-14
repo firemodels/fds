@@ -359,8 +359,7 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND,1:IBM_MAXCFELEM_FACE)     ::  UNKH, UNKZ
    REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XCENLOW, XCENHIGH
    REAL(EB), DIMENSION(LOW_IND:HIGH_IND,1:IBM_MAXCFELEM_FACE)     ::  RHO
-   REAL(EB), DIMENSION(1:MAX_SPECIES,1:IBM_MAXCFELEM_FACE)        ::  DIFF_FACE, VELD
-   REAL(EB), DIMENSION(1:MAX_SPECIES,LOW_IND:HIGH_IND,1:IBM_MAXCFELEM_FACE) :: RHO_D
+   REAL(EB), DIMENSION(1:MAX_SPECIES,1:IBM_MAXCFELEM_FACE)        ::  DIFF_FACE, RHO_D, VELD
    REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND,1:IBM_MAXCFELEM_FACE)   :: RHO_D_DZDN
    REAL(EB), DIMENSION(MAX_SPECIES,1:IBM_MAXCFELEM_FACE)          :: H_RHO_D_DZDN
    REAL(EB), DIMENSION(1:IBM_MAXCFELEM_FACE)                      ::  VEL, VELS, DHDX, FN, VELNP1, VELINT
@@ -377,7 +376,7 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  DIMENSION(3,IBM_MAXCFELEM_FACE)                                ::  INBFC_CFCEN ! Inbound face BP belongs to.
    REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1,IBM_MAXCFELEM_FACE)        ::INTCOEF_CFCEN ! Interpo coefficients.
    REAL(EB), DIMENSION(-1:0,1:IBM_MAXCFELEM_FACE)   :: RHOPVN
-   
+
 END TYPE IBM_CUTFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
@@ -424,7 +423,7 @@ END TYPE IBM_REGFACE_TYPE
 TYPE IBM_REGFACEZ_TYPE
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, VELD
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, RHO_D, VELD
    REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               ::   RHO_D_DZDN
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN
@@ -443,7 +442,7 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, VELD
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, RHO_D, VELD
    REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN

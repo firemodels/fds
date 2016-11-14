@@ -32,7 +32,7 @@ USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3,SAAD_MMS_1
 USE COMPLEX_GEOMETRY, ONLY: INIT_IBM, INIT_CUTCELL_DATA, CCIBM_SET_DATA, CCIBM_END_STEP, FINISH_CCIBM, &
                             LINEARFIELDS_INTERP_TEST, CCREGION_DENSITY, CCREGION_DIVERGENCE_PART_1,    &
                             CHECK_SPEC_TRANSPORT_CONSERVE,MASS_CONSERVE_INIT,CCIBM_RHO0W_INTERP,&
-                            THREED_VORTEX, CCREGION_COMBUSTION
+                            THREED_VORTEX, CCREGION_COMBUSTION,IBM_UNKZ
 USE OPENMP
 USE MPI
 USE SCRC, ONLY: SCARC_SETUP, SCARC_SOLVER, SCARC_TIMINGS
@@ -73,6 +73,9 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: REAL_BUFFER_5,REAL_BUFFER_6,REAL_BU
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)   :: REAL_BUFFER_7,REAL_BUFFER_8
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: REAL_BUFFER_9
 LOGICAL, ALLOCATABLE, DIMENSION(:)        :: LOGICAL_BUFFER_1
+
+INTEGER :: ICF, ICC, J ,K
+LOGICAL, PARAMETER :: SKIP_CORRECTOR = .TRUE.
 
 ! Initialize MPI (First executable lines of code)
 
@@ -276,6 +279,13 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL COMPUTE_VISCOSITY(T_BEGIN,NM) ! needed here for KRES prior to mesh exchange
 ENDDO
 
+IF (SKIP_CORRECTOR) THEN
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL POINT_TO_MESH(NM)
+      ZZS(:,:,:,:)=ZZ(:,:,:,:)
+      RHOS(:,:,:)=RHO(:,:,:)
+   ENDDO
+ENDIF
 IF (CC_IBM) THEN
    CALL INIT_CUTCELL_DATA  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    IF (PERIODIC_TEST==101) CALL LINEARFIELDS_INTERP_TEST
@@ -645,6 +655,8 @@ MAIN_LOOP: DO
    !                                           Start of Corrector part of time step
    !================================================================================================================================
 
+   SKIP_CORRECTOR_COND : IF(.NOT.SKIP_CORRECTOR)THEN
+
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
 
@@ -757,6 +769,61 @@ MAIN_LOOP: DO
          IF (ICYC>1) EXIT
       ENDDO
    ENDIF
+
+  ELSE ! Skip corrector
+
+     CORRECTOR = .TRUE.
+     PREDICTOR = .FALSE.
+
+     IF (.NOT.CC_IBM) THEN
+     DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+     CALL POINT_TO_MESH(NM)
+     DO K=1,KBAR
+        DO J=1,JBAR
+           DO I=1,IBAR
+              IF (I==IBAR/2 .AND. J==KBAR/2 .AND. K==2) THEN
+                 WRITE(0,*) ''
+                 WRITE(0,*) 'SUM(rhoY/Wa)^n,^n+1    =',DOT_PRODUCT(MWR_Z(1:2),RHO(I,J,K)*ZZ(I,J,K,1:2)), &
+                                                       DOT_PRODUCT(MWR_Z(1:2),RHOS(I,J,K)*ZZS(I,J,K,1:2)),&
+                                                       ZZ(I,J,K,1:2),ZZS(I,J,K,1:2)
+                 WRITE(0,*) 'SUM(rhoY/Wa)^n,^n+1 I+1=',DOT_PRODUCT(MWR_Z(1:2),RHO(I+1,J,K)*ZZ(I+1,J,K,1:2)), &
+                                                       DOT_PRODUCT(MWR_Z(1:2),RHOS(I+1,J,K)*ZZS(I+1,J,K,1:2)),&
+                                                       ZZ(I+1,J,K,1:2),ZZS(I+1,J,K,1:2)
+                 WRITE(0,*) I,J,K,PBAR(K,PRESSURE_ZONE(I,J,K)),RSUM(I,J,K),RHOS(I,J,K),RSUM(I,J,K)*RHOS(I,J,K),TMP(I,J,K)
+                 WRITE(0,*) ''
+              ENDIF
+           ENDDO
+        ENDDO
+     ENDDO
+     ENDDO
+     ENDIF
+
+     DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+        MESHES(NM)%U = MESHES(NM)%US
+        MESHES(NM)%V = MESHES(NM)%VS
+        MESHES(NM)%W = MESHES(NM)%WS
+        IF (PROJECTION .AND. ICYC>1) THEN
+           MESHES(NM)%ZZ= MESHES(NM)%ZZS
+           MESHES(NM)%RHO = MESHES(NM)%RHOS
+        ENDIF
+        MESHES(NM)%H = MESHES(NM)%HS
+        MESHES(NM)%DDDT = MESHES(NM)%DS
+        MESHES(NM)%D = MESHES(NM)%DS
+        DO ICF=1,MESHES(NM)%IBM_NCUTFACE_MESH
+           MESHES(NM)%IBM_CUT_FACE(ICF)%VEL = MESHES(NM)%IBM_CUT_FACE(ICF)%VELS
+        ENDDO
+        DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+           IF (PROJECTION .AND. ICYC>1) THEN
+              MESHES(NM)%IBM_CUT_CELL(ICC)%ZZ = MESHES(NM)%IBM_CUT_CELL(ICC)%ZZS
+              MESHES(NM)%IBM_CUT_CELL(ICC)%RHO = MESHES(NM)%IBM_CUT_CELL(ICC)%RHOS
+           ENDIF
+           MESHES(NM)%IBM_CUT_CELL(ICC)%D = MESHES(NM)%IBM_CUT_CELL(ICC)%DS
+        ENDDO
+
+     ENDDO
+     IF (CHECK_MASS_CONSERVE) CALL CHECK_SPEC_TRANSPORT_CONSERVE(T,DT,DIAGNOSTICS)
+
+  ENDIF SKIP_CORRECTOR_COND
 
    ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
    IF (CC_IBM) CALL CCIBM_END_STEP(DIAGNOSTICS)
