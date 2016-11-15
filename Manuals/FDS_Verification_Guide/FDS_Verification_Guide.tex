@@ -1324,6 +1324,18 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
    \label{bound_test}
 \end{figure}
 
+\subsection{Isothermal Helium Plume (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
+\label{helium_1d_isothermal}
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_isothermal} cases]{Results of the {\ct helium\_1d\_isothermal} cases.}
+   \label{fig_helium_1d_isothermal}
+\end{figure}
 
 \subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
 \label{helium_air_jet_floor}
@@ -1364,6 +1376,79 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
    \end{tabular*}
    \caption[Results of the {\ct tmp\_lower\_limit} cases]{Results of the {\ct tmp\_lower\_limit} cases.}
    \label{tmp_lower_limit_fig}
+\end{figure}
+
+\clearpage
+
+\section{Constant Specific Heat Ratio}
+\label{const_gamma}
+
+The ratio $\gamma = c_p/c_v$ is called the ``ratio of specific heats''. For many simple gases, $\gamma = \mathrm{constant}$ is a good approximation.  The specific heat of species $\alpha$ in the gas phase is then given by
+\begin{equation}
+c_{p,\alpha} = \frac{R}{W_\alpha}\frac{\gamma_\alpha}{\gamma_\alpha-1}
+\end{equation}
+where $R$ is the ideal gas constant.  When this assumption is viable, many terms in the energy equation drop out, greatly simplifying the divergence expression and thus speeding up the code.  These simplifications require that the sensible enthalpy of the gas is referenced to 0 K (see the FDS Tech Guide \cite{FDS_Math_Guide}).  In this section, we examine three cases using the assumption of constant specific heat ratio: one tests mixing of two gases with different molecular weights ({\ct helium\_1d\_const\_gamma}), one tests fire conditions ({\ct fire\_const\_gamma}), and one tests evaporation of water droplets ({\ct water\_evap\_1\_const\_gamma}).  Each of these cases is a clone of cases we develop later in this guide for the default version of the code.
+
+\subsection{Helium Wave using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
+\label{helium_1d_const_gamma}
+
+In this problem, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation.  The ratio of specific heats is kept at the default value of $\gamma = 1.4$.  The molar weights, heat capacities, and enthalpies for both air and helium are given in Table \ref{tab:helium_1d_const_gamma}.  Notice that the sensible enthalpies, $h_{s,\alpha}=\rho_\alpha c_{p,\alpha} T$, are the same for both species.
+
+\begin{table}[ht]
+\centering
+\caption[Helium constant specific heat ratio]{Helium constant specific heat ratio parameters.}
+\begin{tabular}{lcccc}
+Species & $W_\alpha$ (kg/kmol) & $\rho_\alpha$ (\si{kg/m^3}) & $c_{p,\alpha}$ (kJ/kg/K) & $h_{s,\alpha}$ (\si{kJ/m^3}) \\
+\hline
+Air    & 28.73167 & 1.174 & 1.0128 & 355 \\
+Helium &  4.00260 & 0.164 & 7.2705 & 355 \\
+\end{tabular}
+\label{tab:helium_1d_const_gamma}
+\end{table}
+
+In Fig.~\ref{fig_helium_1d_const_gamma} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy should remain constant at 355 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
+
+\begin{figure}[ht!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_const\_gamma} cases]{Results of the {\ct helium\_1d\_const\_gamma} cases.}
+   \label{fig_helium_1d_const_gamma}
+\end{figure}
+
+\subsection{Fire Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{fire\_const\_gamma}}{fire\_const\_gamma})}
+\label{fire_const_gamma}
+
+In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCelsius}. A 1000 MW propane fire with a 5 \% soot yield is placed at the bottom of the box for 20 s. All the compartment surfaces are adiabatic. The net change in enthalpy and pressure can be computed using the specific heat ratio based constant specific heat values for the air and product species along with the pressure work required to inject the fuel. The FDS predicted enthalpy and pressure change are shown in Fig \ref{fig_fire_const_gamma} compared with the predicted values.
+
+\begin{figure}[ht!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
+   \end{tabular*}
+   \caption[Results of the {\ct fire\_const\_gamma} case]{Results of the {\ct fire\_const\_gamma} case.}
+   \label{fig_fire_const_gamma}
+\end{figure}
+
+\subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\textct{water\_evap\_1\_const\_gamma}}{water\_evap\_1\_const\_gamma})}
+\label{water_evap_1_const_gamma}
+
+This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and monodisperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in {\ct water\_evap\_1\_const\_gamma.m} in the {\ct Utilities/Matlab/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
+
+\begin{figure}[ht!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass}
+\end{tabular*}
+\caption[Sample case \textct{water\_evap\_1\_const\_gamma}]{Output of the \textct{water\_evap\_1\_const\_gamma} test case.}
+\label{water_evap_1_const_gamma_plots}
 \end{figure}
 
 
@@ -4104,21 +4189,52 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \end{figure}
 
 
+\subsection{Drag Caused by Vegetation (\texorpdfstring{\textct{vegetation\_drag}}{vegetation\_drag})}
+\label{vegetation_drag_1}
+\label{vegetation_drag_2}
+
+Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 5000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 5 particles are inserted randomly in each grid cell, for a total of 5000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
+\be
+   C_{\rm d} = 10 \, \frac{0.6 + 0.4 \, \RE^{0.8}}{\RE} \approx 1.55 \quad ; \quad \RE = \frac{\rho \, u_0 \, D}{\mu_{\rm air}} \approx 132.9
+\ee
+The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s). The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
+\be
+   \Delta p=-\frac{1}{2} \rho \frac{n_{\rm p} \, C_{\rm d} \, A_{\rm c} \, u_0^2} {A} = -18.88 \; {\rm Pa}  \quad ; \quad n_{\rm p}=\frac{m''' \, V}{\pi \, r^2 \, L \, \rho_{\rm p}} \approx 254648
+\ee
+where $A$ is the 1~m$^2$ cross-sectional area of the duct, $A_{\rm c}=LD$ is the cross sectional area of the cylindrical particle, and $\rho=1.196$~kg/m$^3$ is the density of air. The number of actual pine needles within the volume, $n_{\rm p}$, is the mass per unit volume, $m'''=2$~kg/m$^3$, times the volume, $V=1$~m$^3$, divided by the mass of an individual pine needle. The density of the needle is $\rho_{\rm p}=500$~kg/m$^3$. Comparisons of computed and analytical pressure drops are shown in the left plot of Fig.~\ref{vegetation_drag_fig}. Differences between the ideal and computed results are due to the fact that the air velocity is not exactly 2~m/s within the volume filled with the particles. In particular, the duct filled randomly with particles exhibits the greatest deviation from the ideal because the velocity does not remain uniform within the volume.
+
+Using this same basic configuration, a second test is performed where the cylindrical particles now exert no drag force on the air flow, but instead generate additional air at a rate of 0.1~kg/(m$^2 \cdot$s). The surface area of each of the 254648 particles is $6.28 \times 10^{-5}$~m$^2$, resulting in a total air injection rate of $\dot{m}=1.6$~kg/s. The momentum equation becomes one-dimensional and time-independent:
+\be
+   \frac{\d}{\d x} \left( \frac{p}{\rho} + \frac{u^2}{2} \right) = - \frac{1}{\rho} \frac{\dot{m}}{V} \, u  \label{simmom}
+\ee
+Using the subscript 1 to denote the upstream region of the duct, and 2 the downstream, the air velocity increases as it passes through the particles: $u_2=u_1+\dot{m}/(\rho \, A)$. Multiplying Eq.~(\ref{simmom}) by the constant density, $\rho$, and integrating both sides over the length of the duct containing the particles:
+\be
+   \Delta p \equiv p_2-p_1 =  - \rho \, \frac{u_2+u_1}{2} \, (u_2-u_1) - \frac{\dot{m}}{A} \, \frac{u_2+u_1}{2} = -8.534  \; {\rm Pa}
+\ee
+The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} for the various different methods of representing the particles in the model.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_2}
+\caption[The {\ct vegetation\_drag} test cases]{Pressure drop in duct filled with pine needles for three different particle insertion methods.}
+\label{vegetation_drag_fig}
+\end{figure}
+
 
 \subsection{Mesh Screen in a Duct (\texorpdfstring{\textct{screen\_drag}}{screen\_drag})}
 \label{screen_drag_1}
 \label{screen_drag_2}
 
-These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
+These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the $y$- and $z$-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
 \be
-   \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen}
+   \Delta p \;= \; \left( \frac{\mu}{K} u \; + \; \rho \frac{Y}{\sqrt{K}} u^2 \right) \Delta x_{\rm screen}
 \ee
-where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
+where $K$ and $Y$ are empirical constants defined in the FDS User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2}
-\caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.}
+\caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.  The three cases represent different values of \textct{FREE\_AREA\_FRACTION} (0.1, 0.4, and 0.8) within the channel.}
 \label{screen_drag_plots}
 \end{figure}
 

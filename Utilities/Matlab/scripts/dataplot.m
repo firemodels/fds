@@ -56,7 +56,7 @@
 
 function [saved_data,drange] = dataplot(varargin)
 
-if nargin<4||nargin>5; 
+if nargin<4||nargin>5;
     display('Error in argument list')
 end
 if nargin>=4
@@ -109,7 +109,7 @@ for i=2:n_plots
     if i>n_plots; break; end
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
-   
+
     otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
 
     if otest
@@ -121,15 +121,15 @@ for i=2:n_plots
        drange = [drange i];
     end
 end
-   
+
 % Process the "d" or "o" lines one by one
 for i=2:n_plots
-    
+
     if i>length(A); break; end
 
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
-    
+
     % Check for shortname specification instead of numeric drange
     if strcmp(dstring,'null')
         itest = ismember(i,drange);
@@ -140,13 +140,13 @@ for i=2:n_plots
             drange(drange_index) = i;
         end
     end
-    
+
     % Check to see if d line has been activated in configuration file
     dtest = strcmp(parameters(strcmp(headers,'switch_id')),'d');
 
     % Check to see if o line has been activated in configuration file
     otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
-    
+
     % Check to see if f line has been activated in configuration file
     ftest = strcmp(parameters(strcmp(headers,'switch_id')),'f'); % used for multiple lines on same plot
 
@@ -166,9 +166,9 @@ for i=2:n_plots
             K_save = K;
             d2_Key_save = d2_Key;
         end
-        
+
         define_drow_variables
-        
+
         % Save for scatter plots
         Q1                      = parsepipe(Quantity);
         Save_Quantity(i,1:length(Q1))        = Q1;
@@ -180,7 +180,7 @@ for i=2:n_plots
         Save_Dep_Title(i)       = Stat_Dep_Title;
         Save_Error_Tolerance(i) = Error_Tolerance;
         Save_Metric_Type(i)     = {Metric};
-                
+
         % Plot the experimental data or analytical solution (d1)
         if ~exist(d1_Filename,'file')
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
@@ -280,7 +280,7 @@ for i=2:n_plots
                 '); check syntax of analytical/expected/experimental (d1) columns. Skipping case.'])
             continue
         end
-        
+
         % Plot the FDS or model data (d2)
         if ~exist(d2_Filename,'file')
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
@@ -298,7 +298,7 @@ for i=2:n_plots
                 if strcmp(char(style(j)),'none')
                     continue
                 end
-                
+
                 % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
                 Save_Predicted_Quantity(i,j) = S2(j);
@@ -410,7 +410,7 @@ for i=2:n_plots
                 '); check syntax of FDS/model results (d2) columns. Skipping case.'])
             continue
         end
-        
+
         % Wrap entire plot/save routine in try loop
         % Skips case upon any Matlab error
         try
@@ -442,7 +442,7 @@ for i=2:n_plots
 
             set(gca,'FontName',Font_Name)
             set(gca,'FontSize',Label_Font_Size)
-            
+
             % Inserts title, skips if 'f' switch (avoids overplotting)
             if ~ftest
                 if strcmp(Flip_Axis,'no')
@@ -515,8 +515,8 @@ for i=2:n_plots
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
                 '); check syntax of plot/save settings. Skipping case.'])
             continue
-        end    
-        
+        end
+
     end
     clear S1 S2 style H M X Y P parameters
 end
