@@ -8469,6 +8469,8 @@ LOGICAL :: EVACUATION
 INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN,DEVC_INDEX_O,CTRL_INDEX_O
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,TRANSPARENCY
 NAMELIST /HOLE/ COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,ID,MESH_ID,MULT_ID,RGB,TRANSPARENCY,XB
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TEMP_XB
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: CONTROLLED
 TYPE(OBSTRUCTION_TYPE), ALLOCATABLE, DIMENSION(:) :: TEMP_OBST
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: TEMP_HOLE_EVAC
@@ -8505,6 +8507,11 @@ COUNT_LOOP: DO
    ENDIF
 ENDDO COUNT_LOOP
 1 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+
+ALLOCATE (TEMP_XB(N_HOLE_O,6))
+TEMP_XB = 0._EB
+ALLOCATE (CONTROLLED(N_HOLE_O))
+CONTROLLED = .FALSE.
 
 CALL DEFINE_EVACUATION_HOLES(1)
 ! TEMP_HOLE_EVAC(:) indicates if the given HOLE is to be used in the EVACUATION routine
@@ -8553,6 +8560,24 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
    ! Re-order coordinates, if necessary
 
    CALL CHECK_XB(XB)
+   TEMP_XB(N,:) = XB
+   ! Check for overlap if controlled
+   IF (DEVC_ID/='null' .OR. CTRL_ID/='null') CONTROLLED(N) = .TRUE.
+   IF (N>1) THEN
+      DO NN = 1,N-1
+         IF (TEMP_XB(NN,1) >= XB(2) .OR. TEMP_XB(NN,3) >= XB(4) .OR. TEMP_XB(NN,5) >= XB(6) .OR. &
+             TEMP_XB(NN,2) <= XB(1) .OR. TEMP_XB(NN,4) <= XB(3) .OR. TEMP_XB(NN,6) <= XB(5)) CYCLE
+         IF ((TEMP_XB(NN,1) <= XB(2) .AND. TEMP_XB(NN,2) >= XB(1)) .AND. &
+             (TEMP_XB(NN,3) <= XB(4) .AND. TEMP_XB(NN,4) >= XB(3)) .AND. &
+             (TEMP_XB(NN,5) <= XB(6) .AND. TEMP_XB(NN,6) >= XB(5))) THEN
+            IF (CONTROLLED(N) .OR. CONTROLLED(NN)) THEN
+               WRITE(MESSAGE,'(A,I5,A,I5)')  'ERROR: Cannot overlap HOLEs with a DEVC_ID or CTRL_ID. HOLE number',N_HOLE_O+1,&
+                                             ', line number',INPUT_FILE_LINE_NUMBER
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDIF
 
    ! Loop over all the meshes to determine where the HOLE is
 
@@ -8829,6 +8854,8 @@ REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 IF(ANY(EVACUATION_ONLY)) DEALLOCATE(TEMP_HOLE_EVAC)
 DEALLOCATE(TEMP_OBST)
+DEALLOCATE (CONTROLLED)
+DEALLOCATE (TEMP_XB)
 
 CONTAINS
 
@@ -9790,9 +9817,12 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
    ENDDO
 
+   NNN = 0
    K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
       J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
+
+            NNN = NNN + 1  ! Counter for MULT INIT lines
 
             NN = NN + 1
             IN => INITIALIZATION(NN)
@@ -9815,12 +9845,17 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                IN%Z2 = XB(6) + MR%DZ0 + II*MR%DXB(6)
             ENDIF
 
+            IF (MR%N_COPIES>1) THEN
+               WRITE(IN%ID,'(A,A,I5.5)') TRIM(ID),'-',NNN
+            ELSE
+               IN%ID = ID
+            ENDIF
+
             IN%CELL_CENTERED = CELL_CENTERED
             IN%DIAMETER      = DIAMETER*1.E-6_EB
             IN%DX            = DX
             IN%DY            = DY
             IN%DZ            = DZ
-            IN%ID            = ID
             IN%CTRL_ID       = CTRL_ID
             IN%DEVC_ID       = DEVC_ID
             CALL SEARCH_CONTROLLER('INIT',IN%CTRL_ID,IN%DEVC_ID,IN%DEVC_INDEX,IN%CTRL_INDEX,N)
