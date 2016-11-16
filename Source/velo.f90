@@ -1977,34 +1977,38 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
-         ! OPEN boundary conditions, both varieties, with (MEAN_FORCING) and without a wind
+         ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
                                (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
 
-            IF (WIND_BOUNDARY) THEN  ! For a wind open boundary, determine the diretion of the normal component of velocity
+            IF (WCM%IS_WIND_BOUNDARY .OR. WCP%IS_WIND_BOUNDARY) THEN
+
+               ! For a wind open boundary, determine the direction of the normal component of velocity
 
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
                END SELECT
 
             ELSE
 
-               TWOUN = -REAL(IOR,EB)  ! For non-wind case, always use free-slip tangential BCs
+               ! For non-wind case, always use free-slip tangential BCs
+
+               TWOUN = -REAL(IOR,EB)
 
             ENDIF
 
