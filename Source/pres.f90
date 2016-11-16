@@ -168,7 +168,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
          ENDIF
 
-         IF (WIND_BOUNDARY) THEN
+         IF (WC%IS_WIND_BOUNDARY) THEN
             UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
@@ -460,7 +460,7 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
    !                (P(I,J,K)/RHOP(I,J,K)-P(I,J,K-1)/RHOP(I,J,K-1))*RDZN(K-1)       )*RDZ(K)        &
                  + ((KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)*R(I) - (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)      - (KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
-                 + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)        
+                 + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
             !    + (FVX_B(I,J,K)*R(I) - FVX_B(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
             !    + (FVY_B(I,J,K)      - FVY_B(I,J-1,K)       )*RDY(J)        &
             !    + (FVZ_B(I,J,K)      - FVZ_B(I,J,K-1)       )*RDZ(K)
@@ -799,7 +799,7 @@ EXTERNAL_SOLID_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          CASE(-1)
             AXF_SUM  = AXF_SUM + DY(JJ)*DZ(KK)
          CASE( 2)
-            AYS_SUM  = AYS_SUM + DX(II)*DZ(KK) 
+            AYS_SUM  = AYS_SUM + DX(II)*DZ(KK)
          CASE(-2)
             AYF_SUM  = AYF_SUM + DX(II)*DZ(KK)
          CASE( 3)
@@ -987,7 +987,7 @@ IF (CHECK_POISSON) THEN
             LAPLACE_ERR = MAX(ABS(LHSS),LAPLACE_ERR)
          ENDDO
       ENDDO
-   ENDDO 
+   ENDDO
 
    ! IF (PREDICTOR) THEN
    !    WRITE(0,*) 'PREDICTOR, MESH:',NM
