@@ -1892,10 +1892,11 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
 
    IF (BETA>TWO_EPSILON_EB) THEN
       ! fluid momentum source term
-      MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
-      LP%ACCEL_X = LP%ACCEL_X + MPOM*(U_OLD-LP%U)/DT
-      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(V_OLD-LP%V)/DT
-      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(W_OLD-LP%W)/DT
+      MPOM = LP%PWT*RVC/RHO_G
+      LP%ACCEL_X = LP%ACCEL_X + MPOM*(LP%MASS*(U_OLD-LP%U)/DT + LP%M_DOT*UREL)
+      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(LP%MASS*(V_OLD-LP%V)/DT + LP%M_DOT*VREL)
+      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(LP%MASS*(W_OLD-LP%W)/DT + LP%M_DOT*WREL)
+
       ! semi-analytical solution for PARTICLE position
       ALBO = ALPHA*LOG(OBDT)/(BETA*OPA)
       LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GX_LOC*HALF_DT2
@@ -1938,7 +1939,7 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
 
    SELECT CASE (LPC%DRAG_LAW)
       CASE DEFAULT
-         BETA = 0.5_EB*LP%PWT*RVC*C_DRAG*A_DRAG*QREL
+         BETA = LP%PWT*RVC*(0.5_EB*C_DRAG*A_DRAG*QREL + LP%M_DOT/RHO_G)
          LP%ACCEL_X = -UBAR*BETA
          LP%ACCEL_Y = -VBAR*BETA
          LP%ACCEL_Z = -WBAR*BETA
@@ -2534,6 +2535,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             DELTA_H_G = H_S_B - H_S
             D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
             M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
+            LP%M_DOT = M_VAP/DT
 
                ! Add energy losses and gains to overall energy budget array
 
@@ -2904,6 +2906,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DELTA_H_G = H_S_B - H_S
                D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
+               LP%M_DOT = M_VAP/DT
 
                ! Add energy losses and gains to overall energy budget array
 
@@ -3049,7 +3052,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
-                     B_COL(2) = 1+DTGOP-DADYDTHV
+                     B_COL(2) = 1._EB+DTGOP-DADYDTHV
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTGOP*TMP_G+(1-DTGOP+DADYDTHV)*TMP_DROP-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+2._EB*DTOP*Q_DOT_RAD
                      TMP_DROP_NEW = -(A_COL(2)*D_VEC(1)-A_COL(1)*D_VEC(2))/(A_COL(1)*B_COL(2)-B_COL(1)*A_COL(2))
@@ -3060,7 +3063,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
-                     B_COL(2) = 1+DTGOP+DTWOP-DADYDTHV
+                     B_COL(2) = 1._EB+DTGOP+DTWOP-DADYDTHV
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+2._EB*DTWOP*TMP_WALL-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+&
                                 2._EB*DTOP*Q_DOT_RAD
@@ -3077,7 +3080,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      B_COL(2) = -DTWOW
                      C_COL(2) = 1._EB+DTWOW
                      A_COL(3) = -DTGOP
-                     B_COL(3) = 1+DTGOP+DTWOP-DADYDTHV
+                     B_COL(3) = 1._EB+DTGOP+DTWOP-DADYDTHV
                      C_COL(3) = -DTWOP
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTWOW*TMP_DROP+(1._EB-DTWOW)*TMP_WALL
@@ -3221,7 +3224,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_G_NEW = TMP_G_I
                ENDDO ITERATE_TEMP
                TMP_G_NEW = MAX(TMP_G_NEW,TMPMIN)
-               IF (TMP_G_NEW > 2000._EB .OR. TMP_G_NEW <200._EB) STOP
+
                ! Limit gas temperature change
 
                IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
@@ -3263,6 +3266,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + &
                                     (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
+               LP%M_DOT = M_VAP/DT
 
                ! Add energy losses and gains to overall energy budget array
 
@@ -3591,7 +3595,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ENDDO EQ_LOOP_1
 
-   ! Get equilibrium conidition
+   ! Get equilibrium condition
    DO KK=1,KBAR
       DO JJ=1,JBAR
          EQ_LOOP_2: DO II=1,IBAR
@@ -3730,6 +3734,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       Q_CON_GAS = H_L_NEW - H_L - Q_D_1 + M_VAP * (H_V + H_L_OLD)
       D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*(H_S_B - H_S) - Q_CON_GAS)/H_G) / DT
       M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC/DT
+      LP%M_DOT = M_VAP/DT
 
       ! Add energy losses and gains to overall energy budget array
       Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_D_1)/DT ! Q_PART  !!!!Q_CON_WALL
