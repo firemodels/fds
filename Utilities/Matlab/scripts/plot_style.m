@@ -47,6 +47,9 @@ switch style
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
 
+        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_Y   = 1.05;
+
         % Paper properties
         Paper_Units     = 'inches';
         Paper_Width     = 6.5;
@@ -75,19 +78,22 @@ switch style
 
         % Plot properties
         Plot_Units      = 'normalized'; %get(gca,'units')
-        Pos             = [0.1300    0.1100    0.7750    0.8150]; %get(gca,'position') % [left bottom width height]
+        Pos             = [0.1500    0.1200    0.7750    0.8150]; %get(gca,'position') % [left bottom width height]
         YLabel_Offset   = -0.05; % normalized units
-        XLabel_Offset   = -0.09; % normalized units
+        XLabel_Offset   = -0.05; % normalized units
         Plot_X          = Pos(1);
-        Plot_Y          = Pos(2) - 0.35*XLabel_Offset;
+        Plot_Y          = Pos(2);
         Plot_Width      = Pos(3);
-        Plot_Height     = Pos(4)*.95; % use for exponential notation on y-axis tick labels
+        Plot_Height     = Pos(4); %*.95; % use for exponential notation on y-axis tick labels
 
         Scat_Plot_Width      = 4.75;
         Scat_Plot_Height     = 4.75;
         Scat_Plot_X          = 0.75;
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
+
+        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_Y   = 1.05;
 
         % Paper properties
         Paper_Units     = 'inches'; %get(gcf,'paperunits')

@@ -47,6 +47,7 @@ $QFDS -d Fires HoC_NonIdeal.fds
 $QFDS -d Fires tmp_lower_limit_simple.fds
 $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
+$QFDS -d Fires fire_const_gamma.fds
 
 $QFDS -d Flowfields divergence_test.fds
 $QFDS -d Flowfields cyl_test_1.fds
@@ -54,6 +55,8 @@ $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
 $QFDS -d Flowfields cyl_test_4.fds
 $QFDS -d Flowfields gas_filling.fds
+$QFDS -d Flowfields helium_1d_isothermal.fds
+$QFDS -d Flowfields helium_1d_const_gamma.fds
 $QFDS -d Flowfields helium_2d_isothermal.fds
 $QFDS -d Flowfields helium_air_jet_floor.fds
 $QFDS -d Flowfields hole.fds
@@ -114,6 +117,7 @@ $QFDS -d Heat_Transfer ht3d_nz_40.fds
 $QFDS -d Heat_Transfer ht3d_nz_80.fds
 $QFDS -d Heat_Transfer ht3d_nz_160.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
+$QFDS -d Heat_Transfer ht3d_ibeam.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -384,6 +388,9 @@ $QFDS -d Sprinklers_and_Sprays water_fuel_sprays.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays porous_media.fds
+$QFDS -d Sprinklers_and_Sprays vegetation_drag_1.fds
+$QFDS -d Sprinklers_and_Sprays vegetation_drag_2.fds
+$QFDS -d Sprinklers_and_Sprays water_evap_1_const_gamma.fds
 
 $QFDS -d Scalar_Analytical_Solution pulsating_FL0_16.fds
 $QFDS -d Scalar_Analytical_Solution pulsating_FL0_32.fds

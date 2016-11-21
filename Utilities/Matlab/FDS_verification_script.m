@@ -3,7 +3,7 @@
 % FDS_verification_script.m
 %
 % If you author a section in the verification guide, create a script
-% that generates all the graphics (in pdf format) in that section and 
+% that generates all the graphics (in pdf format) in that section and
 % store the script in the 'scripts' directory.  For example, wall_model.m
 % creates all the pdfs for the section on the Werner and Wengle wall
 % model.  Also, add your script to the master list below.
@@ -36,6 +36,7 @@ cat_propane_depo
 burke_schumann
 convective_cooling_convergence
 random_walk_soln
+water_evap_1_const_gamma
 
 % Dataplot and scatplot options
 
@@ -68,7 +69,7 @@ scatplot(saved_data, drange, ...
          'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
 % Special cases
- 
+
 turb_model
 jet_decay
 wall_model
@@ -94,5 +95,6 @@ saad_mms_temporal_error
 shunn_mms_temporal_error
 scaling_tests
 hvac_mass_transport
+ht3d_cond
 
 display('verification scripts completed successfully!')

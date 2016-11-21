@@ -44,7 +44,7 @@ MODULE EVAC
        EMESH_INDEX, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
   PUBLIC NO_EVAC_MESHES, INPUT_EVAC_GRIDS
   !
-  CHARACTER(255):: EVAC_VERSION = '2.5.1'
+  CHARACTER(255):: EVAC_VERSION = '2.5.2'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
 
@@ -11036,7 +11036,7 @@ CONTAINS
                JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
                IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
                   write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION'
-                  write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  write(lu_err,*)'*** ',TRIM(EVAC_EXITS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                END IF
             ELSE
                JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
@@ -15271,7 +15271,7 @@ CONTAINS
     IF (ABS(i_r2-i_r1)+ABS(j_r2-j_r1) < 1) RETURN
 
     ! Choose the main direction:
-    IF (ABS(i_r2-i_r1) < ABS(j_r2-j_r1)) THEN
+    IF (ABS(r2_x-r1_x)/M%DX(1) < ABS(r2_y-r1_y)/M%DY(1)) THEN
        ! Now y is the main direction
        i_old = i_r1 ; j_old = j_r1
        y = 0.0_EB
@@ -15379,7 +15379,6 @@ CONTAINS
     i_r2 = MAX(1,MIN(i_r2,MFF%IBAR))
     j_r1 = MAX(1,MIN(j_r1,MFF%JBAR))
     j_r2 = MAX(1,MIN(j_r2,MFF%JBAR))
-
     ! Same cell: sees always each other
     IF (ABS(i_r2-i_r1)+ABS(j_r2-j_r1) < 1) THEN
        ave_K = EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
@@ -15388,7 +15387,7 @@ CONTAINS
     END IF
 
     ! Choose the main direction:
-    IF (ABS(i_r2-i_r1) < ABS(j_r2-j_r1)) THEN
+    IF (ABS(r2_x-r1_x)/MFF%DX(1) < ABS(r2_y-r1_y)/MFF%DY(1)) THEN
        ! Now y is the main direction
 
        ! Add the last cell (r1) to the average
@@ -16115,9 +16114,11 @@ CONTAINS
           IF (ABS(DOOR_IOR)==1)THEN
              Y1 = Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
              Y2 = Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
+             X1 = X_XYZ ; X2 = X_XYZ
           ELSE
              X1 = X_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
              X2 = X_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
+             Y1 = Y_XYZ ; Y2 = Y_XYZ
           END IF
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x1, y1)
           Is_BeeLine_Door(i,2) = PP_see_door
@@ -16143,7 +16144,7 @@ CONTAINS
           END IF
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x11, y11)
           Is_BeeLine_Door(i,1) = PP_see_door
-          PP_see_door = See_door(nm_tmp, x1_old, y1_old, x11, y11, ave_K, max_fed)
+          PP_see_door   = See_door(nm_tmp, x1_old, y1_old, x11, y11, ave_K, max_fed)
           PP_see_doorXB = See_door(nm_tmp, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2) .AND. PP_correct_side
           IF (PP_see_doorXB .AND. .NOT.PP_see_door) THEN
              max_fed = max_fed2 ; ave_K = ave_K2
@@ -16152,6 +16153,7 @@ CONTAINS
              max_fed = MIN(max_fed, max_fed2) ; ave_K = MIN(ave_K, ave_K2)
           END IF
           PP_see_door = PP_see_door .OR. (PP_see_doorXB .AND. PP_correct_side)
+             
           FED_max_Door(i) = max_fed
           K_ave_Door(i) = ave_K
           IF (FED_DOOR_CRIT < TWO_EPSILON_EB) THEN
