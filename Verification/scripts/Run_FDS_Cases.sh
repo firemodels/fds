@@ -15,6 +15,8 @@ BACKGROUND=
 BACKGROUND_DELAY=2
 BACKGROUND_LOAD=75
 JOBPREFIX=
+REGULAR=1
+BENCHMARK=1
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -26,6 +28,7 @@ echo "                   -s -r resource_manager ]"
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
+echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-j - job prefix"
@@ -38,6 +41,7 @@ echo "     other options: fire70s, vis"
 echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
+echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
@@ -51,9 +55,17 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'B:c:dD:hj:L:m:o:q:r:sw:' OPTION
+while getopts 'bB:c:dD:hj:L:m:o:q:r:Rsw:' OPTION
 do
 case $OPTION in
+  b)
+   BENCHMARK=1
+   REGULAR=
+   ;;
+  R)
+   BENCHMARK=
+   REGULAR=1
+   ;;
   d)
    DEBUG=_db
    ;;
@@ -132,8 +144,17 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
-cd ..
-./FDS_Cases.sh
-cd $CURDIR
 
-echo FDS cases submitted
+cd ..
+if [ "$BENCHMARK" == "1" ]; then
+  ./FDS_Benchmark_Cases.sh
+  echo FDS benchmark cases submitted
+fi
+
+cd $CURDIR
+cd ..
+if [ "$REGULAR" == "1" ]; then
+  ./FDS_Cases.sh
+  echo FDS non-benchmark cases submitted
+fi
+cd $CURDIR
