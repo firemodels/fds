@@ -139,6 +139,7 @@ fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
+fds_benchamrk_cases=$fds_smvroot/fds/Verification/FDS_Benchmark_Cases.sh
 smv_cases=$fds_smvroot/smv/Verification/scripts/SMV_Cases.sh
 wui_cases=$fds_smvroot/smv/Verification/scripts/WUI_Cases.sh
 copyfdscase=$fds_smvroot/fds/Utilities/Scripts/copyfdscase.sh
@@ -296,6 +297,7 @@ echo "--- copying example files ---"
 echo ""
 cd $FDSExamplesDirectory
 $fds_cases
+$fds_benchmark_cases
 cd $SMVExamplesDirectory
 $wui_cases
 $smv_cases
