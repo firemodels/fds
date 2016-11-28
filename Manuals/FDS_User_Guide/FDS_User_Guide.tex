@@ -1367,6 +1367,7 @@ This feature is typically used together with periodic boundaries.  To specify a 
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
 \end{lstlisting}
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on {\ct MISC}.
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
@@ -8964,14 +8965,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
-%{\ct AEROSOL\_AL2O3}                                     & Logical       &                                                       &               & {\ct .FALSE.}    \\ \hline
+%{\ct AEROSOL\_AL2O3}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                & $^\circ$C     &                   \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}      \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
-{\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
+{\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
+{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
+{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
@@ -8979,11 +8982,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CHECK\_REALIZABILITY}                      & Logical       & Strict check of ZZ>0 \& SUM(ZZ)=1                     &               & {\ct .FALSE.}     \\ \hline
 {\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
-{\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
-{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
-{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
+{\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
-{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                                       &               & 0.                \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
@@ -9025,6 +9027,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct PROJECTION}                                & Logical       & Formal projection                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
+{\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
+{\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
+{\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
