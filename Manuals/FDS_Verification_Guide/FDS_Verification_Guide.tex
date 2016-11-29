@@ -1340,8 +1340,10 @@ The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2
    \label{fig:bound_test_2}
 \end{figure}
 
-\subsection{Isothermal Helium Plume (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
+\subsection{Isothermal Helium Wave (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
 \label{helium_1d_isothermal}
+
+This is a test of isothermal advection and mixing of gases with different molecular weights using the default algorithm.  A companion case using a simplified algorithm for {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} is given below in Sec.~\ref{helium_1d_const_gamma}.  In the present case, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation. In Fig.~\ref{fig_helium_1d_isothermal} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy, which is referenced to 25 \si{\degreeCelsius}, should remain at 0 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
