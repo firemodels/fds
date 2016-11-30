@@ -96,6 +96,10 @@ SELECT CASE(PREDICTOR)
       ZZP => ZZ
 END SELECT
 
+! Save the largest value of the material and thermal diffusion coefficients for use in Von Neumann stability constraint
+
+IF (CHECK_VN) D_Z_MAX = 0._EB
+
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
 SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
@@ -111,7 +115,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ENDIF
    ENDIF
-   IF (CHECK_VN) D_Z_MAX = 0._EB
 
    DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
 

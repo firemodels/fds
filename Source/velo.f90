@@ -694,7 +694,7 @@ DO K=1,KBAR
          DTXYDY= RDY(J) *(TXYP-TXYM)
          DTXZDZ= RDZ(K) *(TXZP-TXZM)
          VTRM  = DTXXDX + DTXYDY + DTXZDZ
-         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - GX(I) + RRHO*(GX(I)*RHO_0(K) - VTRM - FVEC(1))
+         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - GX(I) + RRHO*(GX(I)*RHO_0(K) - VTRM)
       ENDDO
    ENDDO
 ENDDO
@@ -753,7 +753,7 @@ DO K=1,KBAR
          DTYYDY= RDYN(J)*(TYYP-TYYM)
          DTYZDZ= RDZ(K) *(TYZP-TYZM)
          VTRM  = DTXYDX + DTYYDY + DTYZDZ
-         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - GY(I) + RRHO*(GY(I)*RHO_0(K) - VTRM - FVEC(2))
+         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - GY(I) + RRHO*(GY(I)*RHO_0(K) - VTRM)
       ENDDO
    ENDDO
 ENDDO
@@ -812,7 +812,7 @@ DO K=0,KBAR
          DTYZDY= RDY(J) *(TYZP-TYZM)
          DTZZDZ= RDZN(K)*(TZZP-TZZM)
          VTRM  = DTXZDX + DTYZDY + DTZZDZ
-         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - GZ(I) + RRHO*(GZ(I)*0.5_EB*(RHO_0(K)+RHO_0(K+1)) - VTRM - FVEC(3))
+         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - GZ(I) + RRHO*(GZ(I)*0.5_EB*(RHO_0(K)+RHO_0(K+1)) - VTRM)
       ENDDO
    ENDDO
 ENDDO
@@ -824,57 +824,19 @@ IF (EVACUATION_ONLY(NM)) THEN
    RETURN
 END IF
 
-! Mean forcing
+! Additional force terms
 
-IF (ANY(MEAN_FORCING)) CALL MOMENTUM_NUDGING
-
-! Coriolis force
-
-IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE()
-
-! Surface vegetation drag
-
-WFDS_BNDRYFUEL_IF: IF (WFDS_BNDRYFUEL) THEN
-   VEG_DRAG(0,:) = VEG_DRAG(1,:)
-   K=1
-   DO J=1,JBAR
-      DO I=0,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=2._EB*KRES(I,J,K)
-         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
-      ENDDO
-   ENDDO
-
-   VEG_DRAG(:,0) = VEG_DRAG(:,1)
-   DO J=0,JBAR
-      DO I=1,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
-      ENDDO
-   ENDDO
-
-   DO J=1,JBAR
-      DO I=1,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
-      ENDDO
-   ENDDO
-ENDIF WFDS_BNDRYFUEL_IF
-
-! Specified patch velocity
-
-IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX(DT,NM)
-
-! Direct-forcing Immersed Boundary Method
-
-IF (CC_IBM) THEN
+IF (ANY(MEAN_FORCING))             CALL MOMENTUM_NUDGING           ! Mean forcing
+IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
+IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
+IF (WFDS_BNDRYFUEL)                CALL VEGETATION_DRAG            ! Surface vegetation drag
+IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX(DT,NM) ! Specified patch velocity
+IF (CC_IBM) THEN ! Direct-forcing Immersed Boundary Method
    CALL CCIBM_VELOCITY_FLUX(DT,NM)
 ELSEIF (N_FACE>0) THEN
-   CALL IBM_VELOCITY_FLUX(DT,NM)
+   CALL IBM_VELOCITY_FLUX(DT,NM) ! (DEPRECATED)
 ENDIF
-
-! Source term in manufactured solution
-
-IF (PERIODIC_TEST==7) CALL MMS_VELOCITY_FLUX(NM,T)
+IF (PERIODIC_TEST==7)              CALL MMS_VELOCITY_FLUX(NM,T)    ! Source term in manufactured solution
 
 CONTAINS
 
@@ -1078,6 +1040,47 @@ ENDIF MEAN_FORCING_Z
 
 END SUBROUTINE MOMENTUM_NUDGING
 
+SUBROUTINE DIRECT_FORCE()
+REAL(EB) :: TIME_RAMP_FACTOR
+
+TIME_RAMP_FACTOR = EVALUATE_RAMP(T,DUMMY,I_RAMP_FVX_T)
+!$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         RRHO = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
+         FVX(I,J,K) = FVX(I,J,K) - RRHO*FVEC(1)*TIME_RAMP_FACTOR
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END PARALLEL DO
+
+TIME_RAMP_FACTOR = EVALUATE_RAMP(T,DUMMY,I_RAMP_FVY_T)
+!$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         RRHO = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
+         FVY(I,J,K) = FVY(I,J,K) - RRHO*FVEC(2)*TIME_RAMP_FACTOR
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END PARALLEL DO
+
+TIME_RAMP_FACTOR = EVALUATE_RAMP(T,DUMMY,I_RAMP_FVZ_T)
+!$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         RRHO = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
+         FVZ(I,J,K) = FVZ(I,J,K) - RRHO*FVEC(3)*TIME_RAMP_FACTOR
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END PARALLEL DO
+
+END SUBROUTINE DIRECT_FORCE
+
 SUBROUTINE CORIOLIS_FORCE()
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP=>NULL(),VP=>NULL(),WP=>NULL()
@@ -1094,6 +1097,7 @@ UP=0._EB
 VP=0._EB
 WP=0._EB
 
+!$OMP PARALLEL DO SCHEDULE(static)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -1104,6 +1108,7 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 DO IW=1,N_EXTERNAL_WALL_CELLS
    WC=>WALL(IW)
@@ -1117,6 +1122,7 @@ ENDDO
 
 ! x momentum
 
+!$OMP PARALLEL DO PRIVATE(VBAR,WBAR) SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -1126,9 +1132,11 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! y momentum
 
+!$OMP PARALLEL DO PRIVATE(UBAR,WBAR) SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
@@ -1138,9 +1146,11 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! z momentum
 
+!$OMP PARALLEL DO PRIVATE(UBAR,VBAR) SCHEDULE(STATIC)
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -1150,8 +1160,37 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 END SUBROUTINE CORIOLIS_FORCE
+
+SUBROUTINE VEGETATION_DRAG()
+
+   VEG_DRAG(0,:) = VEG_DRAG(1,:)
+   K=1
+   DO J=1,JBAR
+      DO I=0,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=2._EB*KRES(I,J,K)
+         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
+      ENDDO
+   ENDDO
+
+   VEG_DRAG(:,0) = VEG_DRAG(:,1)
+   DO J=0,JBAR
+      DO I=1,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
+         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
+      ENDDO
+   ENDDO
+
+   DO J=1,JBAR
+      DO I=1,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
+         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
+      ENDDO
+   ENDDO
+
+END SUBROUTINE VEGETATION_DRAG
 
 END SUBROUTINE VELOCITY_FLUX
 
@@ -1736,7 +1775,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VB
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
-           BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI
+           BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
@@ -1955,34 +1994,40 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
-         ! OPEN boundary conditions, both varieties, with (MEAN_FORCING) and without a wind
+         ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
                                (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
 
-            IF (WIND_BOUNDARY) THEN  ! For a wind open boundary, determine the diretion of the normal component of velocity
+            VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
+            VT => VENTS(VENT_INDEX)
+            IF (VT%IS_WIND_BOUNDARY .OR. ANY(MEAN_FORCING)) THEN
+
+               ! For a wind open boundary, determine the direction of the normal component of velocity
 
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II,JJ+1,KK)
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK)+WW(II+1,JJ,KK)
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
+                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
+                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK)+UU(II,JJ+1,KK)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK)+VV(II+1,JJ,KK)
+                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
+                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
+                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
+                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
                END SELECT
 
             ELSE
 
-               TWOUN = -REAL(IOR,EB)  ! For non-wind case, always use free-slip tangential BCs
+               ! For non-wind case, always use free-slip tangential BCs
+
+               TWOUN = -REAL(IOR,EB)
 
             ENDIF
 
