@@ -1067,19 +1067,19 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNX,END=17,ERR=18,IOSTAT=IOS)
-               IF (MESH_NUMBER/=NM) CYCLE TRNLOOP
+               IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(2)
                CALL CHECKREAD('TRNY',LU_INPUT,IOS)
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNY,END=17,ERR=18,IOSTAT=IOS)
-               IF (MESH_NUMBER/=NM) CYCLE TRNLOOP
+               IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(3)
                CALL CHECKREAD('TRNZ',LU_INPUT,IOS)
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNZ,END=17,ERR=18,IOSTAT=IOS)
-               IF (MESH_NUMBER/=NM) CYCLE TRNLOOP
+               IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
          END SELECT
          T%NOC(N) = T%NOC(N) + 1
          18 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with TRN* line') ; RETURN ; ENDIF
@@ -1111,7 +1111,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT NLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,TRNX,END=1,ERR=2)
-               IF (MESH_NUMBER==NM) EXIT LOOP1
+               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
             ENDDO LOOP1
          ENDIF
          IF (IC==2) THEN
@@ -1120,7 +1120,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT NLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,TRNY,END=1,ERR=2)
-               IF (MESH_NUMBER==NM) EXIT LOOP2
+               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
             ENDDO LOOP2
          ENDIF
          IF (IC==3) THEN
@@ -1129,7 +1129,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT NLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,TRNZ,END=1,ERR=2)
-               IF (MESH_NUMBER==NM) EXIT LOOP3
+               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
             ENDDO LOOP3
          ENDIF
          T%CCSTORE(N,IC) = CC
