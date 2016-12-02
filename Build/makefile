@@ -173,7 +173,7 @@ intel_linux_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -mt_mpi -traceback $(GITINFO) 
-impi_intel_linux_64 : LFLAGS = -static-intel -lnl
+impi_intel_linux_64 : LFLAGS = -static-intel
 impi_intel_linux_64 : FCOMPL = mpiifort
 impi_intel_linux_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 impi_intel_linux_64 : obj = fds_impi_intel_linux_64
@@ -189,7 +189,7 @@ impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO) 
-mpi_intel_linux_64 : LFLAGS = -static-intel -lnl
+mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpifort
 mpi_intel_linux_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
@@ -197,7 +197,7 @@ mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO) 
-mpi_intel_linux_64ib : LFLAGS = -static-intel -lnl
+mpi_intel_linux_64ib : LFLAGS = -static-intel
 mpi_intel_linux_64ib : FCOMPL = mpifort
 mpi_intel_linux_64ib : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
@@ -205,7 +205,7 @@ mpi_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
-mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel -lnl
+mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel
 mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi mpifort
 mpi_intel_linux_64ib_scorep : FOPENMPFLAGS =
 mpi_intel_linux_64ib_scorep : obj = fds_mpi_intel_linux_64ib_scorep
