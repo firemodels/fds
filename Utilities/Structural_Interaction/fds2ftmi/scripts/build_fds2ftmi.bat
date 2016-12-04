@@ -26,7 +26,7 @@ cd %FIREBOT_DIR%/SCRIPT_FIGURES
 del *.pdf
 
 :: Compile fds_win_64
-cd %FDS_GITROOT%/FDS_Compilation/intel_win_64
+cd %FDS_GITROOT%/build/intel_win_64
 echo Y | make_fds.bat
 
 :: Compile fds2ftmi_win_64
