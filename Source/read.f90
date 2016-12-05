@@ -10394,6 +10394,17 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
+   ! Make ORIENTATION consistent with IOR
+
+   SELECT CASE(IOR)
+      CASE( 1) ; ORIENTATION=(/ 1._EB, 0._EB, 0._EB/)
+      CASE(-1) ; ORIENTATION=(/-1._EB, 0._EB, 0._EB/)
+      CASE( 2) ; ORIENTATION=(/ 0._EB, 1._EB, 0._EB/)
+      CASE(-2) ; ORIENTATION=(/ 0._EB,-1._EB, 0._EB/)
+      CASE( 3) ; ORIENTATION=(/ 0._EB, 0._EB, 1._EB/)
+      CASE(-3) ; ORIENTATION=(/ 0._EB, 0._EB,-1._EB/)
+   END SELECT
+
    ! Add ORIENTATION to global list
 
    NEW_ORIENTATION_VECTOR = .TRUE.
