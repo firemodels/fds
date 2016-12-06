@@ -1326,7 +1326,7 @@ The first case, {\ct bound\_test\_1}, consists of two independent reactions, one
    \label{fig:bound_test_1}
 \end{figure}
 
-The second test case, {\ct bound\_test\_2}, is more challenging---we add a third reaction that uses the same fuel species as first and the same air species as the second.  The reaction scheme is as follows:
+The second test case, {\ct bound\_test\_2}, is more challenging---we add a third reaction that uses the same fuel species as the first and the same air species as the second.  The reaction scheme is as follows:
 \begin{align}
 \mathrm{F1} + \mathrm{A1} &\rightarrow 2\,\mathrm{P1} \\
 \mathrm{F2} + \mathrm{A2} &\rightarrow 2\,\mathrm{P2} \\
@@ -1355,8 +1355,10 @@ This is a test of isothermal advection and mixing of gases with different molecu
    \label{fig_helium_1d_isothermal}
 \end{figure}
 
-\subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
+\subsection{Temperature Bounds for Isothermal Helium Jet (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
 \label{helium_air_jet_floor}
+
+In this test, a jet of helium is generated from a floor vent.  The mass flux is ramped up from 0 m/s to 1 m/s in 1 s.  The flow field should remain isothermal at 20 \si{\degreeCelsius}.  The results are shown in Fig.~\ref{helium_air_jet}.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
