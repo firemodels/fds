@@ -5355,14 +5355,25 @@ If multiple fuels are present, e.g., one fuel for cardboard and one fuel for pol
 
 \paragraph{Time variation of radiative fraction}
 
-Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line.
+Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line. The results of running the {\ct ramp\_chi\_r} test case containing the {\ct RAMP} given below is shown in Fig.~\ref{ramp_chi}.
 
 \begin{lstlisting}
-&REAC ..., RADIATIVE_FRACTION = 0.23, RAMP_CHI_R = 'chi_r'/
-&RAMP ID = 'chi_r', T =  0.0, F = 1.0/
-&RAMP ID = 'chi_r', T =  5.0, F = 1.0/
-&RAMP ID = 'chi_r', T = 60.0, F = 0.1/
+&REAC FUEL='METHANE', RADIATIVE_FRACTION=1.0, RAMP_CHI_R='CHI_R RAMP' /
+&RAMP ID='CHI_R RAMP', T= 0.0, F=0.238 /
+&RAMP ID='CHI_R RAMP', T= 2.0, F=0.238 /
+&RAMP ID='CHI_R RAMP', T= 4.0, F=0.182 /
+&RAMP ID='CHI_R RAMP', T= 6.0, F=0.158 /
+&RAMP ID='CHI_R RAMP', T= 8.0, F=0.140 /
+&RAMP ID='CHI_R RAMP', T= 10.0, F=0.140 /
 \end{lstlisting}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/ramp_chi_r}
+\caption[Results of the {\ct ramp\_chi\_r} test case]{Results of the {\ct  ramp\_chi\_r} test case.}
+\label{ramp_chi}
+\end{center}
+\end{figure}
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
