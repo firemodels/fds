@@ -2120,6 +2120,8 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Fig.~\ref{mass_heat_wall_device} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
@@ -2131,7 +2133,7 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
-\caption[The \textct{wall\_device\_test} cases]{The \textct{wall\_device\_test} cases.}
+\caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
 \label{mass_heat_wall_device}
 \end{figure}
 
