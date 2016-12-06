@@ -4,12 +4,16 @@ FED=
 MOVIE=
 RUNSCRIPT=
 ssffile=
+dummy=
 
-while getopts 'Ad:fmt' OPTION
+while getopts 'Ad:fl:mt' OPTION
 do
 case $OPTION in
   d)
    dir="$OPTARG"
+   ;;
+  l)
+   dummy="$OPTARG"
    ;;
   f)
    FED="-fed"
