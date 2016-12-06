@@ -28,6 +28,7 @@ then
   echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
+  echo " -i use installed fds"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -n n - number of MPI processes per node [default: 1]"
@@ -74,7 +75,7 @@ nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
 nopenmp_threads=1
-use_repository=0
+use_installed=0
 use_debug=0
 dir=.
 benchmark=no
@@ -98,7 +99,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:j:l:m:Nn:o:p:q:rstw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -125,6 +126,10 @@ case $OPTION  in
    ;;
   f)
    FDSROOT="$OPTARG"
+   ;;
+  i)
+   use_installed=1
+   use_repository=0
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -180,15 +185,25 @@ fi
 
 # define executables if the repository is used
 
-if [ $use_repository -eq 1 ] ; then
 # use fds from repository (-e was not specified)
-# if [ $nmpi_processes -gt 1 ] ; then
-# use mpi version of fds 
+if [ $use_repository -eq 1 ]; then
   exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
-# else
-# use non-mpi version of fds 
-#  exe=$FDSROOT/fds/Build/intel_linux_64$DB/fds_intel_linux_64$DB
-# fi
+fi
+
+if [ $use_installed -eq 1 ]; then
+  notfound=`echo | fds |& tail -1 | grep "not found" | wc -l`
+  if [ $notfound -eq 1 ]; then
+    echo "fds is not installed. Run aborted."
+    ABORTRUN=y
+    exe=
+  else
+    fdspath=`which fds`
+    fdsdir=$(dirname "${fdspath}")
+    curdir=`pwd`
+    cd $fdsdir
+    exe=`pwd`/fds
+    cd $curdir
+  fi
 fi
 
 #define input file
@@ -295,10 +310,12 @@ if [ $STOPFDS ]; then
  touch $stopfile
  exit
 fi
-if ! [ -e "$exe" ]; then
-  if [ "$showinput" == "0" ] ; then
-    echo "The program, $exe, does not exist. Run aborted."
-    ABORTRUN=y
+if [ "$exe" != "" ]; then
+  if ! [ -e "$exe" ]; then
+    if [ "$showinput" == "0" ] ; then
+      echo "The program, $exe, does not exist. Run aborted."
+      ABORTRUN=y
+    fi
   fi
 fi
 if [ -e $outlog ]; then
