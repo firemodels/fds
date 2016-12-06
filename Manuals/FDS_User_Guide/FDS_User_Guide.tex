@@ -9308,14 +9308,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
-{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$   & 100.      \\ \hline
+{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &           \\ \hline
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
 {\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
-{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
-{\ct SPRAY\_PATTERN\_BETA}              & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 5          \\ \hline
-{\ct SPRAY\_PATTERN\_MU}                & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
+{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.        \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.        \\ \hline
 {\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &           \\ \hline
@@ -9339,7 +9339,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
-{\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
+{\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         & $\mu$m            &                   \\ \hline
 {\ct INITIAL\_RADIATION\_ITERATIONS}& Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
