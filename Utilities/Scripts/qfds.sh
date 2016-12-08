@@ -80,6 +80,7 @@ max_processes_per_node=1
 nopenmp_threads=1
 use_installed=0
 use_debug=0
+use_devel=0
 dir=.
 benchmark=no
 showinput=0
