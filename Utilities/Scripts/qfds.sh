@@ -16,19 +16,21 @@ then
   echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
   echo ""
   echo "qfds.sh runs FDS using an executable specified with the -e option or"
-  echo "from the respository if -e is not specified (the -r option is no longer" 
+  echo "from the respository if -e is not specified (the -r option is no longer"
   echo "used).  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
   echo " -A     - used by timing scripts"
   echo " -b     - use debug version of FDS"
   echo " -B     - location of background program"
+  echo " -c     - strip extension"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
   echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
+  echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -n n - number of MPI processes per node [default: 1]"
@@ -40,8 +42,9 @@ then
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
+  echo " -u   - use development version of FDS"
   echo " -v   - output generated script to standard output"
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo "input_file - input file"
   echo ""
   exit
@@ -77,6 +80,7 @@ max_processes_per_node=1
 nopenmp_threads=1
 use_installed=0
 use_debug=0
+use_devel=0
 dir=.
 benchmark=no
 showinput=0
@@ -99,7 +103,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -164,11 +168,14 @@ case $OPTION  in
   t)
    benchmark="yes"
    ;;
-  w)
-   walltime="$OPTARG"
+  u)
+   use_devel=1
    ;;
   v)
    showinput=1
+   ;;
+  w)
+   walltime="$OPTARG"
    ;;
 esac
 done
@@ -178,9 +185,12 @@ shift $(($OPTIND-1))
 
 if [ "$nodelist" != "" ] ; then
   nodelist="-l nodes=$nodelist"
-fi 
+fi
 if [ "$use_debug" == "1" ] ; then
   DB=_db
+fi
+if [ "$use_devel" == "1" ] ; then
+  DB=_dv
 fi
 
 # define executables if the repository is used
@@ -349,7 +359,7 @@ if [ "$queue" == "terminal" ] ; then
   MPIRUN=
 fi
 
-# use the queue none and the program background on systems 
+# use the queue none and the program background on systems
 # without a queing system
 
 if [ "$queue" == "none" ]; then
@@ -380,7 +390,7 @@ walltimestring_slurm=
 if [ "$walltime" != "" ] ; then
   walltimestring_pbs="-l walltime=$walltime"
   walltimestring_slurm="-t $walltime"
-fi 
+fi
 
 # create a random script file for submitting jobs
 scriptfile=`mktemp /tmp/script.$$.XXXXXX`
