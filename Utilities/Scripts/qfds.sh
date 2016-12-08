@@ -103,7 +103,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
