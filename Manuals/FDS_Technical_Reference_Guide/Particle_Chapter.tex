@@ -30,11 +30,11 @@ The exact solution procedure of the above model is presented in Appendix~\ref{pa
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      24/\RE_D                                          & \RE_D < 1    \\[0.1in]
-     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \label{sphere_drag}\\[0.1in]
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles,
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$~\cite{Crowe:1}\footnote{Note that the 0.85 in the second line of Eq.~(\ref{sphere_drag}) has been inserted to ensure continuity of the functional relationship at $\RE_D=1$.}. For cylindrical particles, the following correlation was derived from data presented by Schlichting~\cite{Schlichting:1}:
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
