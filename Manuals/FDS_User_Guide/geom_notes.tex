@@ -4,7 +4,6 @@
 \usepackage{tikz,tikz-3dplot}
 \usetikzlibrary{arrows}
 
-
 \newenvironment{myfont}{\fontfamily{\ttdefault}\selectfont}{\par}
 
 \begin{document}
@@ -422,7 +421,7 @@ Consider the triangle with vertices $v_1$,$v_2$ and $v_3$ as illustrated in Figu
 \noindent Triangle area: $||(v_3-v_1)\times (v_2-v_1)||/2$ . \\
 Triangle Median: $(v_1+v_2+v_3)$/3 .
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/triangle_setup}
 \end{center}
@@ -436,7 +435,7 @@ Consider the tetrahedron T with vertices $v_1$,$v_2$,$v_3$ and $v_4$ as illustra
 \noindent Tetrahedron volume: $||((v_3-v_1)\times (v_2-v_1))\cdot (v_4-v_1)||/6$ .\\
 Tetrahedron median: $(v_1+v_2+v_3+v_4)$/4.
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/tetrahedron_setup}
 \end{center}
@@ -528,7 +527,7 @@ These bounding boxes do not over lap if any of the following are true:
 \mbox{box\_bounds}(5)<\mbox{tetra\_bounds}(4)
 \end{eqnarray*}
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/box_setup}
 \end{center}
@@ -628,7 +627,7 @@ Figure \ref{figure:facelist}.
 \label{table:facelist}
 \end{table}
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \includegraphics[width=4.0in]{../SMV_Technical_Reference_Guide/FIGURES/icosahedron_setup}
 \end{center}
@@ -662,7 +661,7 @@ SURF_ID='surf1'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_simple}
@@ -693,7 +692,7 @@ FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
@@ -724,7 +723,7 @@ FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
@@ -754,7 +753,7 @@ FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
@@ -775,7 +774,7 @@ a {\ct \&OBST}\ or {\ct \&VENT}\ line.
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_obst}
@@ -804,8 +803,7 @@ sphere produced with {\ct LEVEL=n-1}.
 The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify
 the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
 
-
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{cc}
  \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1a}&
@@ -827,7 +825,7 @@ the size and location of the sphere.  This discretization technique results in e
 Figure \ref{fig:geom_sphere2a} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct \&GEOM}\ namelist
 to split a sphere in latitudinal (north/south) and longitudinal (east/west) direcions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{cc}
  \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3a}&
@@ -850,7 +848,7 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 \subsection{geom\_terrain.fds}
 Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[height=\figheightD]{SCRIPT_FIGURES/geom_terrain}
@@ -875,7 +873,7 @@ FACES=1,2,3,SURF_ID='surf1'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture}
@@ -905,7 +903,7 @@ FACES=1,2,3,SURF_ID='surf2'/
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_texture2}
@@ -939,7 +937,7 @@ is applied to the object using spherical coordinates.
 
 
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{cc}
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture3a}&
@@ -958,7 +956,7 @@ is applied to the object using spherical coordinates.
 \subsection{geom\_arch.fds}
 Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
  \includegraphics[width=4.0in]{SCRIPT_FIGURES/geom_arch}
@@ -983,7 +981,7 @@ the azimuthal angle changes, in this  case 0.36 deg/s.
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
  \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time_050}&
@@ -1021,7 +1019,7 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \end{verbatim}
 }
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
  \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time2_050}&
@@ -1034,7 +1032,7 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \label{fig:geom_time2}
 \end{figure}
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
  \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time3_050}&
@@ -1047,7 +1045,7 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \label{fig:geom_time3}
 \end{figure}
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
  \includegraphics[width=2.0in]{SCRIPT_FIGURES/geom_time4_050}&
@@ -1085,7 +1083,7 @@ EXCLUDEGEOM&ignore immersed geometry when generating a slice file\\
 \label{table:slicetype}
 \end{table}
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{cc}
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_slice_slice_000}&
@@ -1097,11 +1095,10 @@ EXCLUDEGEOM&ignore immersed geometry when generating a slice file\\
 \label{fig:geom_slice}
 \end{figure}
 
-
 \subsection{geom\_sphere2.fds}
 Figure \ref{fig:geom_sphere2b} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\ct SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\ct XYZ=10.0,0.5,1.0}, translated to the left and down using {\ct XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\ct GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\ct GAXIS=0.0,1.0,0.0}.
 
-\begin{figure}[\figoptions]
+\begin{figure}
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_sphere2_000}\\
@@ -1119,43 +1116,43 @@ Figure \ref{fig:geom_sphere2b} tests motion of a scaled,  moving, rotating spher
 \subsection{geom\_sphere\_fire.fds}
 Figure \ref{fig:geom_sphere_fire} tests visualization of a boundary file data on a sphere.
 
-\begin{figure}[\figoptions]
-\begin{center}
-%\begin{tabular}{cc}
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_000}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_020}\\
-% \SI{0.0}{s}&\SI{2.0}{s}\\
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_040}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_060}\\
-% \SI{4.0}{s}&\SI{6.0}{s}\\
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_080}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_100}\\
-% \SI{8.0}{s}&\SI{10.0}{s}\\
-%  \end{tabular}
-\end{center}
- \caption{Boundary file data visualized on a sphere.  Case: geom\_sphere\_fire.fds}
-\label{fig:geom_sphere_fire}
-\end{figure}
+%\begin{figure}
+%\begin{center}
+%%\begin{tabular}{cc}
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_000}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_020}\\
+%% \SI{0.0}{s}&\SI{2.0}{s}\\
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_040}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_060}\\
+%% \SI{4.0}{s}&\SI{6.0}{s}\\
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_080}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere_fire_100}\\
+%% \SI{8.0}{s}&\SI{10.0}{s}\\
+%%  \end{tabular}
+%\end{center}
+% \caption{Boundary file data visualized on a sphere.  Case: geom\_sphere\_fire.fds}
+%\label{fig:geom_sphere_fire}
+%\end{figure}
 
 Figure \ref{fig:geom_sphere2_fire} tests visualization of a boundary file data on a moving sphere.
 
-\begin{figure}[\figoptions]
-\begin{center}
-%\begin{tabular}{cc}
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_000}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_020}\\
-% \SI{0.0}{s}&\SI{2.0}{s}\\
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_040}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_060}\\
-% \SI{4.0}{s}&\SI{6.0}{s}\\
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_080}&
-% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_100}\\
-% \SI{8.0}{s}&\SI{10.0}{s}\\
-%  \end{tabular}
-%\end{center}
- \caption{Boundary file data visualized on a moving sphere.  Case: geom\_sphere2\_fire.fds}
-\label{fig:geom_sphere2_fire}
-\end{figure}
+%\begin{figure}
+%\begin{center}
+%%\begin{tabular}{cc}
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_000}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_020}\\
+%% \SI{0.0}{s}&\SI{2.0}{s}\\
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_040}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_060}\\
+%% \SI{4.0}{s}&\SI{6.0}{s}\\
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_080}&
+%% \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_sphere2_fire_100}\\
+%% \SI{8.0}{s}&\SI{10.0}{s}\\
+%%  \end{tabular}
+%%\end{center}
+% \caption{Boundary file data visualized on a moving sphere.  Case: geom\_sphere2\_fire.fds}
+%\label{fig:geom_sphere2_fire}
+%\end{figure}
 
 \clearpage
 
