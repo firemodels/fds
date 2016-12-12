@@ -397,7 +397,10 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       :: RHO, RHOS ! Cut cells densities.
    REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       ::  RSUM,TMP ! Cut cells temperatures.
    REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       ::    D,  DS ! Cut cell thermodynamic divg.
-   REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       ::  D_SOURCE ! Thermo divg component due to reaction.
+   REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       ::Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
+   REAL(EB), DIMENSION(1:IBM_MAXCCELEM_CELL)                       :: CHI_R,AIT,MIX_TIME ! Cut-cell combustion
+   REAL(EB), DIMENSION(1:MAX_REACTIONS,1:IBM_MAXCCELEM_CELL)       ::    Q_REAC          ! variables.
+   REAL(EB), DIMENSION(1:MAX_SPECIES,1:IBM_MAXCCELEM_CELL)         :: REAC_SOURCE_TERM   !
    REAL(EB), DIMENSION(1:MAX_SPECIES,1:IBM_MAXCCELEM_CELL)         ::   ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
                                                                                 ! fractions and rho*D_z,reaction source.
    INTEGER,  DIMENSION(1:IBM_MAXCCELEM_CELL)                       :: UNKH,UNKZ ! Unknown number for pressure H,

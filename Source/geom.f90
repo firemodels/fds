@@ -349,7 +349,7 @@ LOGICAL, PARAMETER :: FORCE_GAS_FACE      = .TRUE.
 LOGICAL, PARAMETER :: INTERP_TO_CARTFACE  = .FALSE. ! If True => direct interpolation to cut-face
                                                     ! Cartesian Centroid in forcing, if False => flux average.
 LOGICAL, PARAMETER :: FORCE_REGC_FACE     = .TRUE.
-LOGICAL, PARAMETER :: FORCE_REGC_FACE_NXT = .TRUE.
+LOGICAL, SAVE :: FORCE_REGC_FACE_NXT = .TRUE.
 
 
 ! End Variable declaration for CC_IBM.
@@ -362,11 +362,13 @@ LOGICAL, PARAMETER :: DO_SYMM_SCALAR_DIFFLUXES   =.FALSE. ! Experimental: Use sy
                                                           ! Ja=-rho^n Da d(rho^n+1 Ya/rho^n) in Implicit CC integration.
 LOGICAL, PARAMETER :: IMP_REGION_FROM_MATRIX_DIFF=.FALSE. ! IF .FALSE. use scalars diffusion from divg computation.
 
+INTEGER :: VAL_TESTX,VAL_TESTY,VAL_TESTZ
+
 PRIVATE
 PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_RHO0W_INTERP, &
           CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
-          CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CCREGION_COMBUSTION,CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
+          CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
           INIT_IBM,SET_CUTCELLS_3D,TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CUTCELL_FH,GET_CUTCELL_HP, &
           GETU,GETGRAD,GET_VELO_IBM,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
@@ -379,10 +381,38 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           FCELL,IBM_SOLID,IBM_CGSC,IBM_FGSC,IBM_IDCF,IBM_UNKZ,IBM_GASPHASE,IBM_CUTCFE,IBM_FTYPE_CFGAS, &
           IBM_NCVARS, IBM_UNKH,NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
           NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
-          JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, THREED_VORTEX
+          JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, THREED_VORTEX, CCCOMPUTE_RADIATION
 
 
 CONTAINS
+
+
+! ----------------------------- CCCOMPUTE_RADIATION --------------------------------
+
+SUBROUTINE CCCOMPUTE_RADIATION(T,NM,ITER)
+
+! This is a temporary container where to add QR=-CHI_R*Q
+
+INTEGER, INTENT(IN) :: NM,ITER
+REAL(EB), INTENT(IN) :: T
+
+! Local Variables:
+INTEGER ICC, JCC
+
+IF(.NOT.RADIATION) THEN
+   RADIATION_COMPLETED = .TRUE.
+   IF (N_REACTIONS>0) THEN
+      DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+         DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+            IBM_CUT_CELL(ICC)%QR(JCC) = -IBM_CUT_CELL(ICC)%CHI_R(JCC)*IBM_CUT_CELL(ICC)%Q(JCC)
+         ENDDO
+      ENDDO
+   ENDIF
+ENDIF
+
+
+RETURN
+END SUBROUTINE CCCOMPUTE_RADIATION
 
 
 ! -------------------------------- CCIBM_SET_DATA ----------------------------------
@@ -472,7 +502,7 @@ SUBROUTINE INIT_CUTCELL_DATA
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 
 ! Local Variables:
-INTEGER :: NM,I,J,K,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
+INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
 REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF,RHOPV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
 
@@ -502,11 +532,16 @@ MESH_LOOP : DO NM=1,NMESHES
          IBM_CUT_CELL(ICC)%RHO(JCC) = RHO_CC
          IBM_CUT_CELL(ICC)%RHOS(JCC)= RHO_CC
          IBM_CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC) = ZZ_CC(1:N_TOTAL_SCALARS)
-         IBM_CUT_CELL(ICC)%ZZS(1:N_TOTAL_SCALARS,JCC)= ZZ_CC(1:N_TOTAL_SCALARS)
+         DO N=1,N_TRACKED_SPECIES
+            IBM_CUT_CELL(ICC)%ZZS(N,JCC) = SPECIES_MIXTURE(N)%ZZ0
+         ENDDO
          CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_CC(1:N_TRACKED_SPECIES),IBM_CUT_CELL(ICC)%RSUM(JCC))
          IBM_CUT_CELL(ICC)%D(JCC)        = 0._EB
          IBM_CUT_CELL(ICC)%DS(JCC)       = 0._EB
          IBM_CUT_CELL(ICC)%D_SOURCE(JCC) = 0._EB
+         IBM_CUT_CELL(ICC)%Q(JCC)        = 0._EB
+         IBM_CUT_CELL(ICC)%QR(JCC)       = 0._EB
+         IBM_CUT_CELL(ICC)%M_DOT_PPP(:,JCC) = 0._EB
       ENDDO
    ENDDO
 
@@ -1994,6 +2029,36 @@ CONDUCTION_HEAT_IF : IF( DO_CONDUCTION_HEAT_FLUX ) THEN
 
 ENDIF CONDUCTION_HEAT_IF
 
+
+! Add \dot{q}''' and QR to DP:
+! Regular cells:
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
+         ! Add \dot{q}''' and QR to DP*Vii:
+         DP(I,J,K) = DP(I,J,K) + (Q(I,J,K) + QR(I,J,K)) * DX(I)*DY(J)*DZ(K)
+      ENDDO
+   ENDDO
+ENDDO
+
+! HERE Cut-cells \dot{q}''' and QR:
+IF (PREDICTOR) THEN
+   DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+      DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+         IBM_CUT_CELL(ICC)%DS(JCC) = IBM_CUT_CELL(ICC)%DS(JCC) + &
+         (IBM_CUT_CELL(ICC)%Q(JCC)+IBM_CUT_CELL(ICC)%QR(JCC)) * IBM_CUT_CELL(ICC)%VOLUME(JCC)
+      ENDDO
+   ENDDO
+ELSE
+   DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+      DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+         IBM_CUT_CELL(ICC)%D(JCC) = IBM_CUT_CELL(ICC)%D(JCC) + &
+         (IBM_CUT_CELL(ICC)%Q(JCC)+IBM_CUT_CELL(ICC)%QR(JCC)) * IBM_CUT_CELL(ICC)%VOLUME(JCC)
+      ENDDO
+   ENDDO
+ENDIF
+
 ! 3. Enthalpy advection term = - \bar{ u dot Grad (rho h_s) }:
 ! R_H_G = 1/(Cp * T)
 ! RTRM  = 1/(rho * Cp * T)
@@ -2014,23 +2079,6 @@ ENDIF
 CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    CALL CCENTHALPY_ADVECTION ! Compute u dot grad rho h_s in FV form and add to DP in regular + cut-cells.
 ENDIF CONST_GAMMA_IF_1
-
-! Add \dot{q}''' and QR to DP:
-! Regular cells:
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
-         ! Add \dot{q}''' and QR to DP*Vii:
-         DP(I,J,K) = DP(I,J,K) + (Q(I,J,K) + QR(I,J,K)) * DX(I)*DY(J)*DZ(K)
-      ENDDO
-   ENDDO
-ENDDO
-
-! HERE Cut-cells \dot{q}''' and QR:
-!!!! Work HERE !!!!
-
-
 
 
 ! Loop through regular cells in the implicit region, as well as cut-cells and compute R_H_G, and RTRM:
@@ -2156,13 +2204,15 @@ IF (N_REACTIONS > 0 .OR. N_LP_ARRAY_INDICES>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITIN
    IF (PREDICTOR) THEN
       DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
          DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
-            IBM_CUT_CELL(ICC)%DS(JCC) = IBM_CUT_CELL(ICC)%DS(JCC) + IBM_CUT_CELL(ICC)%D_SOURCE(JCC)
+            IBM_CUT_CELL(ICC)%DS(JCC) = IBM_CUT_CELL(ICC)%DS(JCC) + &
+                                        IBM_CUT_CELL(ICC)%D_SOURCE(JCC)*IBM_CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
       ENDDO
    ELSE
       DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
          DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
-            IBM_CUT_CELL(ICC)%D(JCC)  = IBM_CUT_CELL(ICC)%D(JCC)  + IBM_CUT_CELL(ICC)%D_SOURCE(JCC)
+            IBM_CUT_CELL(ICC)%D(JCC)  = IBM_CUT_CELL(ICC)%D(JCC)  + &
+                                        IBM_CUT_CELL(ICC)%D_SOURCE(JCC)*IBM_CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
       ENDDO
    ENDIF
@@ -2182,7 +2232,7 @@ IF (STRATIFICATION) THEN
       ENDDO
    ENDDO
 
-   If (PREDICTOR) THEN
+   IF (PREDICTOR) THEN
 
       DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
          DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
@@ -3684,36 +3734,6 @@ DEALLOCATE(ZZ_GET)
 RETURN
 END SUBROUTINE CCREGION_DIFFUSIVE_FLUXES
 
-! ---------------------------- CCREGION_COMBUSTION ------------------------------
-
-SUBROUTINE CCREGION_COMBUSTION(T,DT,NM)
-
-REAL(EB), INTENT(IN) :: T, DT
-INTEGER, INTENT(IN) :: NM
-
-! Local Variables:
-INTEGER :: I,J,K
-REAL(EB) :: DUMMY1, DUMMY2
-
-DUMMY1 = T
-DUMMY2 = DT
-
-CALL POINT_TO_MESH(NM)
-
-! Set to zero Reaction, Radiation sources of heat and thermodynamic div:
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (CCVAR(I,J,K,IBM_CGSC) == IBM_GASPHASE) CYCLE
-         Q(I,J,K) = 0._EB
-         QR(I,J,K)= 0._EB
-         D_SOURCE(I,J,K)= 0._EB
-      ENDDO
-   ENDDO
-ENDDO
-
-RETURN
-END SUBROUTINE CCREGION_COMBUSTION
 
 ! ------------------------------ CCREGION_DENSITY -------------------------------
 
@@ -6405,6 +6425,7 @@ REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC, VALW(1:5),
 ! It is used when stratification is .TRUE.
 
 IF (.NOT. STRATIFICATION) RETURN
+IF (PERIODIC_TEST == 103) RETURN
 
 MESH_LOOP : DO NM=1,NMESHES
 
@@ -6553,6 +6574,15 @@ MESH_LOOP : DO NM=1,NMESHES
       I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
       J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
       K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+
+      IF(PERIODIC_TEST == 103) THEN
+         IF (PREDICTOR) THEN
+            IBM_CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K)
+         ELSE
+            IBM_CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
+         ENDIF
+         CYCLE
+      ENDIF
 
       ! First Cartesian centroid:
       PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
@@ -6739,6 +6769,8 @@ MESH_LOOP : DO NM=1,NMESHES
 
    ENDDO CUTFACE_LOOP
 
+   ! In case of PERIODIC_TEST = 103, there are no immersed bodies.
+   IF(PERIODIC_TEST == 103) CYCLE
 
    ! Then INBOUNDARY cut-faces:
    ! This is only required in the case the pressure solve is done on the whole domain, i.e. FFT solver.
@@ -6835,7 +6867,8 @@ REAL(EB):: U_INT,V_INT,W_INT
 
 ! This is the CCIBM forcing routine for momentum eqns.
 
-IF( FREEZE_VELOCITY ) RETURN
+IF ( FREEZE_VELOCITY ) RETURN
+IF (PERIODIC_TEST == 103) RETURN
 
 IF (PREDICTOR) THEN
    UU => U
@@ -8836,6 +8869,9 @@ INTEGER :: IGAS,NCCELL,IADD,JADD,KADD,IRCELL,ICC2,TESTVAR
 
 DO_GASNXT_CUTFACE = .FALSE.
 DO_GASNXT_CARTCELL= .FALSE.
+
+IF (PERIODIC_TEST == 103) FORCE_REGC_FACE_NXT=.FALSE.
+
 IF (FORCE_REGC_FACE_NXT) THEN
    DO_GASNXT_CUTFACE = .TRUE.
    DO_GASNXT_CARTCELL= .TRUE.
@@ -9363,6 +9399,10 @@ ENDDO MESHES_LOOP
 !                            MESHES(NM)%CCVAR(I,J,K,IBM_CCNC):
 
 !!! ---
+
+
+! Case of periodic test 103, return. No IBM interpolation needed as there are no immersed Bodies:
+IF(PERIODIC_TEST == 103) RETURN
 
 ! Then, second mesh loop:
 IF( ASSOCIATED(X1FACEP)) NULLIFY(X1FACEP)
@@ -16058,6 +16098,192 @@ ENDIF FLAG12_COND
 RETURN
 END SUBROUTINE NUMBER_UNKH_CUTCELLS
 
+! ---------------- DEFINE_REGULAR_CUTFACES --------------------------
+
+SUBROUTINE DEFINE_REGULAR_CUTFACES(NM)
+
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI,X1AXIS,NVERT,NFACE,I,J,K,DI,DJ,DK,NCUTFACE
+
+
+CALL POINT_TO_MESH(NM)
+
+! Mesh sizes:
+NXB=IBAR
+NYB=JBAR
+NZB=KBAR
+
+! Test Sizes:
+VAL_TESTX = NXB/4
+VAL_TESTY = NYB/4
+VAL_TESTZ = NZB/4
+
+
+! X direction bounds:
+ILO_FACE = 0                    ! Low mesh boundary face index.
+IHI_FACE = IBAR                 ! High mesh boundary face index.
+ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
+IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
+
+! Y direction bounds:
+JLO_FACE = 0                    ! Low mesh boundary face index.
+JHI_FACE = JBAR                 ! High mesh boundary face index.
+JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
+JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
+
+! Z direction bounds:
+KLO_FACE = 0                    ! Low mesh boundary face index.
+KHI_FACE = KBAR                 ! High mesh boundary face index.
+KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
+KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
+
+DI  = (IHI_FACE/2-VAL_TESTX)/2
+DJ  = (JHI_FACE/2-VAL_TESTY)/2
+DK  = (KHI_FACE/2-VAL_TESTZ)/2
+
+! First tag and define Gasphase cut-faces in X,Y,Z directions.
+! X direction:
+ILO = ILO_FACE+VAL_TESTX+DI+1; IHI = IHI_FACE-VAL_TESTX-DI-1
+JLO = JLO_CELL+VAL_TESTY+DJ; JHI = JHI_CELL-VAL_TESTY-DJ
+KLO = KLO_CELL+VAL_TESTZ+DK; KHI = KHI_CELL-VAL_TESTZ-DK
+X1AXIS=IAXIS
+NVERT = 4
+NFACE = 1
+DO I=ILO,IHI
+   DO J=JLO,JHI
+      DO K=KLO,KHI
+         FCVAR(I,J,K,IBM_FGSC,X1AXIS)=IBM_CUTCFE
+         NCUTFACE = MESHES(NM)%IBM_NCUTFACE_MESH + 1
+         MESHES(NM)%IBM_NCUTFACE_MESH = NCUTFACE
+         FCVAR(I,J,K,IBM_IDCF,X1AXIS) = NCUTFACE
+         IBM_CUT_FACE(NCUTFACE)%NVERT  = NVERT
+         IBM_CUT_FACE(NCUTFACE)%NFACE  = NFACE
+         IBM_CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+         IBM_CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+
+         ! Vertices:
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ X(I), Y(J-1), Z(K-1) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ X(I), Y(J  ), Z(K-1) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ X(I), Y(J  ), Z(K  ) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ X(I), Y(J-1), Z(K  ) /)
+
+         ! Centroid:
+         IBM_CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB*(/ X(I  )+X(I  ), Y(J-1)+Y(J  ), Z(K-1)+Z(K  ) /)
+
+         ! Load Ordered nodes to CFELEM and geom properties:
+         IBM_CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+         IBM_CUT_FACE(NCUTFACE)%AREA(NFACE) = DY(J)*DZ(K)
+
+         ! Fields for cut-cell volume/centroid computation:
+         ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXAREA(NFACE)   =   X(I)*IBM_CUT_FACE(NCUTFACE)%AREA(NFACE)
+         ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) =   X(I)**2._EB*IBM_CUT_FACE(NCUTFACE)%AREA(NFACE)
+         ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
+         IBM_CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
+         ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
+      ENDDO
+   ENDDO
+ENDDO
+
+! Y direction:
+ILO = ILO_CELL+VAL_TESTX+DI; IHI = IHI_CELL-VAL_TESTX-DI
+JLO = JLO_FACE+VAL_TESTY+DJ+1; JHI = JHI_FACE-VAL_TESTY-DJ-1
+KLO = KLO_CELL+VAL_TESTZ+DK; KHI = KHI_CELL-VAL_TESTZ-DK
+X1AXIS=JAXIS
+NVERT = 4
+NFACE = 1
+DO I=ILO,IHI
+   DO J=JLO,JHI
+      DO K=KLO,KHI
+         FCVAR(I,J,K,IBM_FGSC,X1AXIS)=IBM_CUTCFE
+         NCUTFACE = MESHES(NM)%IBM_NCUTFACE_MESH + 1
+         MESHES(NM)%IBM_NCUTFACE_MESH = NCUTFACE
+         FCVAR(I,J,K,IBM_IDCF,X1AXIS) = NCUTFACE
+         IBM_CUT_FACE(NCUTFACE)%NVERT  = NVERT
+         IBM_CUT_FACE(NCUTFACE)%NFACE  = NFACE
+         IBM_CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+         IBM_CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+
+         ! Vertices:
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ X(I-1), Y(J), Z(K-1) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ X(I-1), Y(J), Z(K  ) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ X(I  ), Y(J), Z(K  ) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ X(I  ), Y(J), Z(K-1) /)
+
+         ! Centroid:
+         IBM_CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB*(/ X(I-1)+X(I  ), Y(J  )+Y(J  ), Z(K-1)+Z(K  ) /)
+
+         ! Load Ordered nodes to CFELEM and geom properties:
+         IBM_CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+         IBM_CUT_FACE(NCUTFACE)%AREA(NFACE) = DX(I)*DZ(K)
+
+         ! Fields for cut-cell volume/centroid computation:
+         ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
+         ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
+         ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
+         IBM_CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = Y(J)**2._EB*IBM_CUT_FACE(NCUTFACE)%AREA(NFACE)
+         ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
+      ENDDO
+   ENDDO
+ENDDO
+
+! Z direction:
+ILO = ILO_CELL+VAL_TESTX+DI; IHI = IHI_CELL-VAL_TESTX-DI
+JLO = JLO_CELL+VAL_TESTY+DJ; JHI = JHI_CELL-VAL_TESTY-DJ
+KLO = KLO_FACE+VAL_TESTZ+DK+1; KHI = KHI_FACE-VAL_TESTZ-DK-1
+X1AXIS=KAXIS
+NVERT = 4
+NFACE = 1
+DO I=ILO,IHI
+   DO J=JLO,JHI
+      DO K=KLO,KHI
+         FCVAR(I,J,K,IBM_FGSC,X1AXIS)=IBM_CUTCFE
+         NCUTFACE = MESHES(NM)%IBM_NCUTFACE_MESH + 1
+         MESHES(NM)%IBM_NCUTFACE_MESH = NCUTFACE
+         FCVAR(I,J,K,IBM_IDCF,X1AXIS) = NCUTFACE
+         IBM_CUT_FACE(NCUTFACE)%NVERT  = NVERT
+         IBM_CUT_FACE(NCUTFACE)%NFACE  = NFACE
+         IBM_CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+         IBM_CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+
+         ! Vertices:
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ X(I-1), Y(J-1), Z(K) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ X(I  ), Y(J-1), Z(K) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ X(I  ), Y(J  ), Z(K) /)
+         IBM_CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ X(I-1), Y(J  ), Z(K) /)
+
+         ! Centroid:
+         IBM_CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB*(/ X(I-1)+X(I  ), Y(J-1)+Y(J  ), Z(K  )+Z(K  ) /)
+
+         ! Load Ordered nodes to CFELEM and geom properties:
+         IBM_CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+         IBM_CUT_FACE(NCUTFACE)%AREA(NFACE) = DX(I)*DY(J)
+
+         ! Fields for cut-cell volume/centroid computation:
+         ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
+         ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
+         ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
+         IBM_CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
+         ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
+         IBM_CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = Z(K)**2._EB*IBM_CUT_FACE(NCUTFACE)%AREA(NFACE)
+      ENDDO
+   ENDDO
+ENDDO
+
+
+WRITE(LU_ERR,*) 'IN DEFINE_REGULAR_CUTFACES, total REGULAR cut-faces=',MESHES(NM)%IBM_NCUTFACE_MESH
+RETURN
+END SUBROUTINE DEFINE_REGULAR_CUTFACES
+
 ! ------------------ GET_MATRIX_INDEXES_Z ---------------------------
 SUBROUTINE GET_MATRIX_INDEXES_Z
 USE MPI
@@ -16069,7 +16295,6 @@ INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
 INTEGER :: I,J,K,ICC,JCC,NCELL,INGH,JNGH,KNGH,IERR,IPT
 INTEGER, PARAMETER :: IMPADD = 1
 INTEGER, PARAMETER :: SHFTM(1:3,1:6) = RESHAPE((/-1,0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,1/),(/3,6/))
-INTEGER :: VAL_TESTX, VAL_TESTY, VAL_TESTZ
 LOGICAL :: CRTCELL_FLG
 
 INTEGER :: X1AXIS,LOWHIGH,ILH,IFC,IFACE,IFC2,IFACE2,IRC,ICC2,JCC2,VAL_UNKZ
@@ -16122,21 +16347,15 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    KLO = KLO_CELL; KHI = KHI_CELL
 
    IF (PERIODIC_TEST == 103) THEN
-      WRITE(LU_ERR,*) 'In MATRIX_INDEXES, PERIODIC_TEST == 103'
-      VAL_TESTX = 0 !NXB/4
-      VAL_TESTY = 0 !NYB/4
-      VAL_TESTZ = 0 !NZB/4
       DO K=KLO+VAL_TESTZ,KHI-VAL_TESTZ
          DO J=JLO+VAL_TESTY,JHI-VAL_TESTY
             DO I=ILO+VAL_TESTX,IHI-VAL_TESTX
-
+               IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
                NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
                CCVAR(I,J,K,IBM_UNKZ) = NUNKZ_LOC(NM)
-
             ENDDO
          ENDDO
       ENDDO
-      CYCLE
    ENDIF
 
    ! Loop on Cartesian cells, define cut cells and solid cells IBM_CGSC:
@@ -19654,6 +19873,13 @@ REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  INXAREA, INXSQAREA
 INTEGER,  DIMENSION(IBM_MAXCFELEM_FACE) :: FINFACE
 INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE):: CFE
+
+
+! Build a set of regular cut-cells in the middle of the domain to do testing.
+IF (PERIODIC_TEST == 103 ) THEN
+   CALL DEFINE_REGULAR_CUTFACES(NM)
+   RETURN
+ENDIF
 
 ! Main Loop on block NM:
 XIAXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
