@@ -2509,17 +2509,20 @@ REAL(EB), INTENT(IN) :: RE
 
 SELECT CASE(DRAG_LAW)
 
+   ! see J.P. Holman 7th Ed. Fig. 6-10
    CASE(SPHERE_DRAG)
       IF (RE<=TWO_EPSILON_EB) THEN
          DRAG = 100._EB
       ELSEIF (RE<=1._EB) THEN
          DRAG = 24._EB/RE
       ELSEIF (RE<1000._EB) THEN
-         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE
+         !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE ! see Crowe, Sommerfeld, Tsuji, 1998, Eq. (4.51)
+         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! matches Stokes drag at RE=1 (RJM)
       ELSEIF (RE>=1000._EB) THEN
          DRAG = 0.44_EB
       ENDIF
 
+   ! see J.P. Holman 7th Ed. Fig. 6-9
    CASE(CYLINDER_DRAG)
       IF (RE<=1._EB) THEN
          DRAG = 10._EB/(RE**0.8_EB)
