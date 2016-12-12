@@ -30,11 +30,11 @@ The exact solution procedure of the above model is presented in Appendix~\ref{pa
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      24/\RE_D                                          & \RE_D < 1    \\[0.1in]
-     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \label{sphere_drag}\\[0.1in]
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles,
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$~\cite{Crowe:1}\footnote{Note that the 0.85 in the second line of Eq.~(\ref{sphere_drag}) has been inserted to ensure continuity of the functional relationship at $\RE_D=1$.}. For cylindrical particles, the following correlation was derived from data presented by Schlichting~\cite{Schlichting:1}:
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
@@ -288,23 +288,21 @@ Note that $a$ is an empirical constant that is dependent on the material propert
 
 \section{Using Lagrangian Particles to Model Complex Objects}
 
-There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
-to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot
-be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the
-movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can
-be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface
-type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be
-thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either
-a cylindrical, spherical or cartesian coordinate system.
+There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or cartesian coordinate system.
 
-It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
-equation. For a grid cell with indices $ijk$, the source term is:
-\be \label{eq:qr} \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) \ee
+It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation equation. For a grid cell with indices $ijk$, the source term is:
+\be \label{eq:qr} 
+   \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) 
+\ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
-\be \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} \ee
-where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell.
-The net radiative heat flux onto the surface of the particle is
-\be \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) \ee
+\be 
+   \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} 
+\ee
+where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell. The net radiative heat flux onto the surface of the particle is
+\be 
+   \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) 
+\ee
+
 
 \subsection{Porous Media (Filters, Screens, Metal Meshes, and Similar Materials)}
 

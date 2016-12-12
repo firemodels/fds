@@ -192,7 +192,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 impi_intel_linux_64_db : LFLAGS = -static-intel
 impi_intel_linux_64_db : FCOMPL = mpiifort
 impi_intel_linux_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
@@ -296,14 +296,23 @@ mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
 mpi_intel_linux_64ib_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback $(GITINFO)
+mpi_intel_linux_64ib_dv : LFLAGS = -static-intel
+mpi_intel_linux_64ib_dv : FCOMPL = mpifort
+mpi_intel_linux_64ib_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+mpi_intel_linux_64ib_dv : obj = fds_mpi_intel_linux_64ib_dv
+mpi_intel_linux_64ib_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
+
 # OSX
 
 ifdef MKLROOT # This assumes the MKL library is available.
 # Use pardiso, non-mpi OpenMP threaded version.
-intel_osx_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+intel_osx_64 : FFLAGS = -m64 -O2 -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 intel_osx_64 : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 else # MKL is not available.
-intel_osx_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO)
+intel_osx_64 : FFLAGS = -m64 -O2 -no-wrap-margin $(GITINFO)
 intel_osx_64 : LFLAGSMKL =
 endif
 intel_osx_64 : LFLAGS = -static-intel
@@ -331,15 +340,15 @@ intel_osx_64_db : setup $(obj_serial)
 ifdef MKLROOT # This assumes the MKL library is available.
 ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 # Use cluster_sparse_solver with custom blacs
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -no-wrap-margin -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_osx_64 : LFLAGSMKL = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
 else
 # Use pardiso, non-mpi OpenMP threaded version.
-mpi_intel_osx_64 : FFLAGS = -m65 -O2 -ipo -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -no-wrap-margin -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_osx_64 : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 endif
 else # MKL is not available.
-mpi_intel_osx_64 : FFLAGS = -m65 -O2 -ipo -no-wrap-margin $(GITINFO)
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -no-wrap-margin $(GITINFO)
 mpi_intel_osx_64 : LFLAGSMKL =
 endif
 mpi_intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel

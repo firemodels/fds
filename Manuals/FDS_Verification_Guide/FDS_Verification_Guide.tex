@@ -1326,7 +1326,7 @@ The first case, {\ct bound\_test\_1}, consists of two independent reactions, one
    \label{fig:bound_test_1}
 \end{figure}
 
-The second test case, {\ct bound\_test\_2}, is more challenging---we add a third reaction that uses the same fuel species as first and the same air species as the second.  The reaction scheme is as follows:
+The second test case, {\ct bound\_test\_2}, is more challenging---we add a third reaction that uses the same fuel species as the first and the same air species as the second.  The reaction scheme is as follows:
 \begin{align}
 \mathrm{F1} + \mathrm{A1} &\rightarrow 2\,\mathrm{P1} \\
 \mathrm{F2} + \mathrm{A2} &\rightarrow 2\,\mathrm{P2} \\
@@ -1355,8 +1355,10 @@ This is a test of isothermal advection and mixing of gases with different molecu
    \label{fig_helium_1d_isothermal}
 \end{figure}
 
-\subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
+\subsection{Temperature Bounds for Isothermal Helium Jet (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
 \label{helium_air_jet_floor}
+
+In this test, a jet of helium is generated from a floor vent.  The mass flux is ramped up from 0 m/s to 1 m/s in 1 s.  The flow field should remain isothermal at 20 \si{\degreeCelsius}.  The results are shown in Fig.~\ref{helium_air_jet}.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2118,6 +2120,8 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Fig.~\ref{mass_heat_wall_device} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
@@ -2129,7 +2133,7 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
-\caption[The \textct{wall\_device\_test} cases]{The \textct{wall\_device\_test} cases.}
+\caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
 \label{mass_heat_wall_device}
 \end{figure}
 

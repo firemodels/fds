@@ -1,0 +1,66 @@
+&HEAD CHID='MaplinSands34', TITLE='MaplinSands34 test simulation'/
+
+&MESH IJK=100,100,32, XB=-20,80,-50,50,0,32, MULT_ID='mesh' /
+&MULT ID='mesh', DX=100, DY=100, I_LOWER=-1, I_UPPER=6, J_LOWER=-1, J_UPPER=1 /
+
+&TRNZ IDERIV=1, CC=0, PC=0.25, MESH_NUMBER=0 /
+
+&TIME T_BEGIN=-200., T_END=200. /
+
+&MISC U0=9.0, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='wind profile', DT_MEAN_FORCING=1., TMPA=15.1, P_INF=101325, LAPSE_RATE=-0.015,  HUMIDITY=90., PROCESS_ALL_MESHES=.TRUE.  /
+&RAMP ID='wind profile', Z= 0, F=0.000 /
+&RAMP ID='wind profile', Z= 1, F=0.872 /
+&RAMP ID='wind profile', Z= 2, F=0.900 /
+&RAMP ID='wind profile', Z= 3, F=0.917 /
+&RAMP ID='wind profile', Z= 4, F=0.929 /
+&RAMP ID='wind profile', Z= 5, F=0.938 /
+&RAMP ID='wind profile', Z= 6, F=0.946 /
+&RAMP ID='wind profile', Z= 7, F=0.952 /
+&RAMP ID='wind profile', Z= 8, F=0.958 /
+&RAMP ID='wind profile', Z= 9, F=0.963 /
+&RAMP ID='wind profile', Z=10, F=0.968 /
+&RAMP ID='wind profile', Z=15, F=0.986 /
+&RAMP ID='wind profile', Z=20, F=0.998 /
+&RAMP ID='wind profile', Z=30, F=1.017 /
+&RAMP ID='wind profile', Z=40, F=1.030 /
+&RAMP ID='wind profile', Z=50, F=1.040 /
+
+&RADI RADIATION=.FALSE. /
+
+&SPEC ID='METHANE' /
+
+&VENT XB=-7,7,-7,7,0,0, XYZ=0.,0.,0., RADIUS=6.41, SURF_ID='LNG_SOURCE' / 
+
+&VENT MB='ZMIN', SURF_ID='OCEAN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT PBY=-150, SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBY= 150, SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=-120, SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX= 680, SURF_ID='PERIODIC', WIND=.TRUE. /
+
+&SURF ID ='OCEAN', COLOR='BLUE', ROUGHNESS=0.0006, TMP_FRONT=16.69 / .0006 Roughness based on wind profile, assuming z_o=0.00002, see Blocken et. al., Atm. Env. 41 (2007)
+
+&SURF ID='LNG_SOURCE', MASS_FLUX(1)=0.167, SPEC_ID(1)='METHANE', RAMP_MF(1)='LNG_ramp', TMP_FRONT=-161.55, RAMP_T='LNG_ramp'/ 
+  High Mass Flux (From FERC evaluation of DEGADIS according to Guide to LNG Database)
+
+&RAMP ID='LNG_ramp', T=  0., F=0.0/
+&RAMP ID='LNG_ramp', T=  6., F=1.0/
+&RAMP ID='LNG_ramp', T= 95., F=1.0/
+&RAMP ID='LNG_ramp', T=101., F=0.0/
+
+&SLCF PBY=0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0, QUANTITY='VELOCITY' /
+&SLCF PBY=0, QUANTITY='VOLUME FRACTION', SPEC_ID='METHANE' /
+&SLCF PBZ=1, QUANTITY='VOLUME FRACTION', SPEC_ID='METHANE' /
+
+&DUMP DT_DEVC=3. /
+
+&DEVC ID        ='C1a00'        ,       XYZ=    88.5    ,       -9.3    ,       0.9     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+&DEVC ID        ='C1a01'        ,       XYZ=    88.5    ,       -9.3    ,       1.3     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+&DEVC ID        ='C1a02'        ,       XYZ=    88.5    ,       -9.3    ,       2.3     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+&DEVC ID        ='C2a00'        ,       XYZ=    179.0   ,       -18.8   ,       1.0     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+&DEVC ID        ='C2a01'        ,       XYZ=    179.0   ,       -18.8   ,       1.5     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+&DEVC ID        ='C2a02'        ,       XYZ=    179.0   ,       -18.8   ,       2.4     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+
+&TAIL /
+
