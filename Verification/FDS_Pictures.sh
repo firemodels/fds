@@ -6,6 +6,7 @@ $RUNSMV -d Detectors objects_dynamic
 $RUNSMV -d Fires couch
 $RUNSMV -d Flowfields helium_2d_isothermal
 $RUNSMV -d Flowfields symmetry_test
+$RUNSMV -d Flowfields symmetry_test_2
 $RUNSMV -d Flowfields symmetry_test_mpi
 $RUNSMV -d Flowfields jet_fan
 $RUNSMV -d Flowfields velocity_bc_test
