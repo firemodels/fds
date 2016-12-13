@@ -63,6 +63,7 @@ $QFDS -d Flowfields hole.fds
 $QFDS -d Flowfields no_hole.fds
 $QFDS -d Flowfields jet_fan.fds
 $QFDS -d Flowfields symmetry_test.fds
+$QFDS -d Flowfields symmetry_test_2.fds
 $QFDS -d Flowfields tangential_velocity.fds
 $QFDS -d Flowfields velocity_bc_test.fds
 $QFDS -d Flowfields blasius_16.fds
