@@ -6782,7 +6782,7 @@ CONTAINS
 
     WRITE (LU_EVACOUT,FMT='(/A)') ' EVAC: Initial positions of the agents'
     WRITE (LU_EVACOUT,FMT='(A,A)') ' Agent      X       Y       Z    Tpre    Tdet  ', &
-         ' Dia    V0   Tau   I_gr I_ff'
+         ' Dia    V0   Tau   I_gr I_ff I_Color'
 
     ! Initialize the GROUP_I_FFIELDS
     I_EGRID = 0
@@ -6824,7 +6824,7 @@ CONTAINS
           J = MAX(0,HR%GROUP_ID)
           GROUP_LIST(J)%IEL = HR%IEL
 
-          WRITE (LU_EVACOUT,FMT='(I6,5F8.2,3F6.2,I6,I4,I4)') HR%ILABEL, &
+          WRITE (LU_EVACOUT,FMT='(I6,5F8.2,3F6.2,I6,I4,I7)') HR%ILABEL, &
                HR%X, HR%Y, HR%Z, HR%TPRE, HR%TDET,2.0_EB*HR%RADIUS, &
                HR%SPEED, HR%TAU, HR%GROUP_ID, HR%I_FFIELD, HR%COLOR_INDEX
        END DO
