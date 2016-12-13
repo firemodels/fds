@@ -2142,13 +2142,17 @@ To obtain tight mass and energy balances it is important to output the actual va
 
 This chapter presents a number of cases that are designed to check whether or not various algorithms have been programmed properly. A good way to do this is to simulate simple flows, particularly ones with symmetric features. Errors in coding are easily identified in such cases.
 
-\section{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
+\section{Symmetry Tests}
+
+These examples are very simple test cases that are used to determine if there are coding errors in the basic flow solver. In the absence of a small amount of ``noise'' that FDS uses to initialize the velocity field, a symmetric geometry ought to produce symmetric patterns of velocity, temperature, etc.
+
+\subsection{Counter-Flowing Jets (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
 \label{symmetry_test}
 \label{symmetry_test_mpi}
 
-These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test_fig}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
+A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test_fig}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
@@ -2159,9 +2163,24 @@ These examples are very simple tests to determine if there are coding errors in 
 \label{symmetry_test_fig}
 \end{figure}
 
-\clearpage
+\subsection{Fire in a Thin-Walled Pan (\texorpdfstring{\textct{symmetry\_test\_2}}{symmetry\_test\_2})}
+\label{symmetry_test_2}
 
-\section{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
+In this case, a steel pan is placed inside a small compartment with a small door at one end. The pan has thin walls (zero cells thick) which is particularly challenging for a symmetry test because boundary conditions must be applied on opposite sides of the thin wall. The case also involves a fire and multiple species. Radiation is not tested here. Figure~\ref{symmetry_test_2_fig} displays the temperature field in a slice plane across the pan, and at two points equidistant from the centerline.
+
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2_plot} 
+\end{tabular*}
+\caption[The \textct{symmetry\_test\_2} case]{Flow field (left) and temperature plot (right) for the \textct{symmetry\_test\_2} case.}
+\label{symmetry_test_2_fig}
+\end{figure}
+
+
+
+\subsection{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
 \label{cyl_test}
 
 FDS has an option to perform an axially-symmetric calculation, which can be useful for simulating a laminar diffusion flame, like a bunsen burner or candle. When invoking this option, the user still specifies three coordinates, $x$, $y$, and $z$, but it is understood that $x$ is the radial coordinate, $r$, and $z$ is the vertical coordinate. The coordinate, $y$, is used only by Smokeview to draw the domain, and it should not influence the calculation at all. However, since FDS is primarily a three-dimensional, cartesian code, there is a possibility that a coding error might cause the specification of the $y$ dimension to have an effect on the result. Figure~\ref{cyl_test_fig} displays results of two sets of axially-symmetric simulations. On the left is an LES simulation in which the lateral size of the cells, $\delta y$, is 2~mm and 2~cm. The two curves ought to lie exactly upon each other, which is indicated by a single red curve. On the right is a DNS simulation of a laminar diffusion flame, with $\delta y$ equal to 2~mm and 4~mm.
