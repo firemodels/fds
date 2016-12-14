@@ -133,7 +133,7 @@ REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
-REAL(EB), PARAMETER :: GEOMEPS = 1.E-12_EB
+REAL(EB), SAVE :: GEOMEPS = 1.E-12_EB
 
 INTEGER,  PARAMETER :: NGUARD= 2 ! Two layers of guard-cells.
 INTEGER,  PARAMETER :: FCELL = 1 ! Right face index.
@@ -207,6 +207,8 @@ INTEGER, PARAMETER :: NODS_WSEL = 3 ! Three nodes per wet surface element (i.e. 
 
 INTEGER, PARAMETER :: EDGS_WSEL = 3 ! Three edges per wet surface element.
 
+INTEGER, PARAMETER :: NODS_VLEL = 4 ! Nodes of volume element (tetrahedra).
+
 ! Intersection Body-plane data structure:
 TYPE BODINT_PLANE_TYPE
    INTEGER :: NNODS     ! Number of intersection vertices.
@@ -257,7 +259,7 @@ REAL(EB), POINTER, DIMENSION(:) :: X1FACEP,X2FACEP,X3FACEP,X1CELLP,  &
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:) :: GEOM_XYZ
 
 ! x2 Intersection data containers:
-INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 48
+INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 512
 INTEGER,  SAVE :: IBM_N_CRS
 REAL(EB), SAVE :: IBM_SVAR_CRS(IBM_MAXCROSS_X2)
 INTEGER,  SAVE :: IBM_IS_CRS(IBM_MAXCROSS_X2)
@@ -423,6 +425,30 @@ END SUBROUTINE CCCOMPUTE_RADIATION
 ! -------------------------------- CCIBM_SET_DATA ----------------------------------
 
 SUBROUTINE CCIBM_SET_DATA
+
+USE MPI
+
+! Local Variables:
+INTEGER :: NM,IERR
+REAL(EB):: LX,LY,LZ,MAX_DIST,MAX_DIST_AUX
+
+MAX_DIST=0._EB
+! Loop Meshes:
+DO NM=1,LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   LX=MESHES(NM)%XF-MESHES(NM)%XS
+   LY=MESHES(NM)%YF-MESHES(NM)%YS
+   LZ=MESHES(NM)%ZF-MESHES(NM)%ZS
+   MAX_DIST=MAX(MAX_DIST,LX,LY,LZ)
+ENDDO
+
+! All Reduce Max:
+IF (N_MPI_PROCESSES > 1) THEN
+   MAX_DIST_AUX=MAX_DIST
+   CALL MPI_ALLREDUCE(MAX_DIST_AUX, MAX_DIST, 1, MPI_DOUBLE_PRECISION, MPI_MAX, MPI_COMM_WORLD, IERR)
+ENDIF
+
+! Set relative epsilon for cut-cell definition:
+GEOMEPS = GEOMEPS*MAX_DIST
 
 CALL SET_CUTCELLS_3D                    ! Defines CUT_CELL data for each mesh.
 CALL GET_CRTCFCC_INTERPOLATION_STENCILS ! Computes interpolation stencils for face and cell centers.
@@ -9602,7 +9628,6 @@ MESHES_LOOP2 : DO NM=1,NMESHES
                   INBFC_LOC = MESHES(NM)%IBM_CUT_CELL(ICC)%FACE_LIST(5,ICFC)
 
                   CALL GET_CLSPT_INBCF(NM,XYZ,INBFC,INBFC_LOC,XYZ_IP,DIST,FOUNDPT,INSEG)
-                  !print*, "XYZ_IP=",ICF,IFACE,XYZ_IP(IAXIS:KAXIS)
                   IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
                       IF (INSEG) THEN
                           BODTRI(1:2)  = MESHES(NM)%IBM_CUT_FACE(INBFC)%BODTRI(1:2,INBFC_LOC)
@@ -9620,28 +9645,28 @@ MESHES_LOOP2 : DO NM=1,NMESHES
                           ENDIF
                       ENDIF
                       DISTANCE = DIST
-                      !print*, "FOUND POINT DIST=",DIST
                       XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
                       FOUND_INBFC(1:3) = (/ IBM_FTYPE_CFINB, INBFC, INBFC_LOC /) ! Inbound cut-face in CUT_FACE.
                       FOUND_POINT = .TRUE.
                   ENDIF
 
                ENDDO
-            ENDDO ! ICF2
 
-            ! If point not found, all cut-faces boundary of the icc, jcc volume
-            ! are GASPHASE. There must be a SOLID point in the boundary of the
-            ! underlying Cartesian cell. this is the closest point:
-            IF (.NOT.FOUND_POINT) THEN
-                ! Search for for CUT_CELL(icc) vertex points or other solid points:
-                CALL GET_CLOSEPT_CCVT(NM,XYZ,ICC,XYZ_IP,DIST,FOUNDPT,IFCPT,IFCPT_LOC)
-                IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
-                   DISTANCE = DIST
-                   XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
-                   FOUND_INBFC(1:3) = (/ IBM_FTYPE_SVERT, IFCPT, IFCPT_LOC /) ! SOLID vertex in CUT_FACE.
-                   FOUND_POINT = .TRUE.
-                ENDIF
-            ENDIF
+               ! If point not found, all cut-faces boundary of the icc, jcc volume
+               ! are GASPHASE. There must be a SOLID point in the boundary of the
+               ! underlying Cartesian cell. this is the closest point:
+               IF (.NOT.FOUND_POINT) THEN
+                   ! Search for for CUT_CELL(icc) vertex points or other solid points:
+                   CALL GET_CLOSEPT_CCVT(NM,XYZ,ICC,XYZ_IP,DIST,FOUNDPT,IFCPT,IFCPT_LOC)
+                   IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
+                      DISTANCE = DIST
+                      XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
+                      FOUND_INBFC(1:3) = (/ IBM_FTYPE_SVERT, IFCPT, IFCPT_LOC /) ! SOLID vertex in CUT_FACE.
+                      FOUND_POINT = .TRUE.
+                   ENDIF
+               ENDIF
+
+            ENDDO ! ICF2
 
          ENDDO ! LOWHIGH
 
@@ -16702,6 +16727,13 @@ REAL(EB):: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
 
+!#define WRITE_GEOM_DEBUG
+#ifdef WRITE_GEOM_DEBUG
+INTEGER :: ING,INOD,IWSEL,IEL
+CHARACTER(30) :: FILENAME
+#endif
+
+
 ! Reset variables:
 IBM_NEDGECROSS = 0
 IBM_NCUTEDGE   = 0
@@ -16715,6 +16747,56 @@ IF (FIRST_CALL) THEN
    FIRST_CALL = .FALSE.
 
 ENDIF
+
+#ifdef WRITE_GEOM_DEBUG
+
+! Write meshes file:
+WRITE(FILENAME,'(A)') "./GEOMETRY_MESHES.dat"
+OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
+
+   ! Mesh sizes:
+   NXB=MESHES(NM)%IBAR
+   NYB=MESHES(NM)%JBAR
+   NZB=MESHES(NM)%KBAR
+
+   WRITE(33,'(4I8,6F16.8)') NM,NXB,NYB,NZB,MESHES(NM)%X(0),MESHES(NM)%X(NXB),&
+                                           MESHES(NM)%Y(0),MESHES(NM)%Y(NYB),&
+                                           MESHES(NM)%Z(0),MESHES(NM)%Z(NZB)
+ENDDO MESH_LOOP
+CLOSE(33)
+
+! Write geometry file:
+GEOM_LOOP : DO ING=1,N_GEOMETRY
+
+   ! Write Vertices:
+   WRITE(FILENAME,'(A,I4.4,A)') "./GEOMETRY_",ING,"_VERTS.dat"
+   OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+   DO INOD=1,GEOMETRY(ING)%N_VERTS
+      WRITE(33,'(3F22.14)') GEOMETRY(ING)%VERTS(MAX_DIM*(INOD-1)+1:MAX_DIM*INOD)
+   ENDDO
+   CLOSE(33)
+
+   ! Write faces:
+   WRITE(FILENAME,'(A,I4.4,A)') "./GEOMETRY_",ING,"_FACES.dat"
+   OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+   DO IWSEL=1,GEOMETRY(ING)%N_FACES
+      WRITE(33,'(3I10)') GEOMETRY(ING)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+   ENDDO
+   CLOSE(33)
+
+   ! Write Volumes:
+   WRITE(FILENAME,'(A,I4.4,A)') "./GEOMETRY_",ING,"_VOLUS.dat"
+   OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+   DO IEL=1,GEOMETRY(ING)%N_VOLUS
+      WRITE(33,'(4I10)') GEOMETRY(ING)%VOLUS(NODS_VLEL*(IEL-1)+1:NODS_VLEL*IEL)
+   ENDDO
+   CLOSE(33)
+
+ENDDO GEOM_LOOP
+#endif
 
 ! Main Loop over Meshes
 MAIN_MESH_LOOP : DO NM=1,NMESHES
@@ -18615,7 +18697,10 @@ IBM_N_CRS = IBM_N_CRS + 1
 
 ! Test maximum crossings defined:
 ! IF ( IBM_N_CRS > IBM_MAXCROSS_X2) THEN
-!    print*, "Error INSERT_RAY_CROSS: IBM_N_CRS > IBM_MAXCROSS_X2."
+!    WRITE(LU_ERR,*) "Error INSERT_RAY_CROSS: IBM_N_CRS > IBM_MAXCROSS_X2."
+!    DO IDUM = 1,IBM_N_CRS
+!       WRITE(LU_ERR,*) IDUM,IBM_SVAR_CRS(IDUM)
+!    ENDDO
 ! ENDIF
 
 ! Add in place, ascending value order:
@@ -21505,8 +21590,18 @@ DO K=KLO,KHI
                CTR = CTR + 1
 
                ! Plot cell and cut-faces if there is no convergence:
-               IF ( CTR > NSEG_FACE**3 ) &
-                      PRINT*, "Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,",I,J,K
+               IF ( CTR > NSEG_FACE**3 ) THEN
+                      WRITE(LU_ERR,*) NSEG_LEFT
+                      ! DO IDUM=1,COUNTR
+                      !    WRITE(LU_ERR,*) 'SEG_FACE2=',IDUM,SEG_FACE2(NOD1:NOD2,IDUM)
+                      ! ENDDO
+                      ! DO IDUM=1,ISEG_FACE
+                      !    WRITE(LU_ERR,*) 'SEG_FACE=',IDUM,SEG_FACE(NOD1:NOD2,IDUM)
+                      ! ENDDO
+                      WRITE(LU_ERR,*) "Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,",I,J,K,NCUTFACE,&
+                      MESHES(NM)%IBM_CUT_FACE(NCUTFACE)%NFACE
+                      ! PAUSE
+               ENDIF
 
             enddo INF_LOOP
             IF ( COUNTR /= NSEG_FACE) &
