@@ -6488,8 +6488,8 @@ MESH_LOOP : DO NM=1,NMESHES
          INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
 
          ! Now values:
-         ! First RHO_0 -> Consider dRHO_0/dxn = 0. for interpolation.
-         VAL(1) = 0._EB
+         ! First RHO_0
+         VAL(1) = RHO_0(K)
          VAL(2) = RHO_0(PTS(KAXIS,NOD1))
          VAL(3) = RHO_0(PTS(KAXIS,NOD2))
          VAL(4) = RHO_0(PTS(KAXIS,NOD3))
@@ -6512,7 +6512,6 @@ MESH_LOOP : DO NM=1,NMESHES
             VAL_CC = VAL_CC + INTCOEF(II)* VAL(II)
             VAL_CCW= VAL_CCW+ INTCOEF(II)*VALW(II)
          ENDDO
-         VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dRHO_0/dxn = 0., cut-cell centroid never lays in boundary pt.
 
          IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
          IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
@@ -7576,7 +7575,6 @@ MESHES_LOOP : DO NM=1,NMESHES
 
                DIVVOL = DIV*DX(I)*DY(J)*DZ(K)
                IF (DIVVOL >= DIVVOLMNX(HIGH_IND,NM)) THEN
-                  IF (DIVVOL > 1._EB) WRITE(LU_ERR,*) 'DIVVOL=',NM,DIV,DX(I),DY(J),DZ(K),DIVVOL
                   DIVVOLMNX(HIGH_IND,NM) = DIVVOL
                   DIVVOLIJKMNX(IAXIS:KAXIS,HIGH_IND,NM) = (/ I,J,K /)
                ENDIF
