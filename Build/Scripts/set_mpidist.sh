@@ -5,6 +5,11 @@
 export MPITYPE=$1
 export MPIDIST=$2
 
+if [ "$MPIFORT" == "" ]; then
+  MPIFORT=mpifort
+fi
+export MPIFORT
+
 if [[ "$MPIDIST" == "" ]]; then
   if [[ "$MPITYPE" == "ib" ]]; then
     if [[ -d /shared/openmpi_64ib ]]; then
