@@ -283,10 +283,10 @@ for j=2:length(Q);
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(1+2*Sigma_E),'k--')
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]/(1+2*Sigma_E),'k--')
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta,'r-')
-            if delta > 2*Sigma_M
+         %  if delta > 2*Sigma_M
                plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta*(1+2*Sigma_M),'r--')
                plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta/(1+2*Sigma_M),'r--')
-            end
+         %  end
         end
         
         % Format the legend and axis labels
@@ -333,14 +333,14 @@ for j=2:length(Q);
         [B I] = unique(C);
         
         if size(Key_Position) > 0
-            legend_handle = legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter);
+            legend_handle = legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter,'Units',Plot_Units);
             if strcmp(Key_Position,'EastOutside')
                pos = get(legend_handle,'position');
-               set(legend_handle,'position',[Scat_Paper_Width pos(2:4)])
+               set(legend_handle,'position',[Scat_Plot_X+Scat_Plot_Width pos(2:4)])
             end
             if strcmp(Key_Position,'SouthEastOutside')
                pos = get(legend_handle,'position');
-               set(legend_handle,'position',[Scat_Paper_Width 0.5 pos(3:4)])
+               set(legend_handle,'position',[Scat_Plot_X+Scat_Plot_Width Scat_Plot_Y pos(3:4)])
             end
             set(legend_handle,'Interpreter',Font_Interpreter);
             set(legend_handle,'Fontsize',Key_Font_Size);

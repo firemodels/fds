@@ -7,23 +7,43 @@
 
 &TIME T_BEGIN=-200., T_END=200. /
 
-&MISC U0=10.0, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='wind profile', DT_MEAN_FORCING=1., TMPA=33.6, P_INF=94000, LAPSE_RATE=-0.02,  HUMIDITY=0.0, PROCESS_ALL_MESHES=.TRUE.  /
-&RAMP ID='wind profile', Z= 0, F=0.000 /
-&RAMP ID='wind profile', Z= 1, F=0.789 /
-&RAMP ID='wind profile', Z= 2, F=0.834 /
-&RAMP ID='wind profile', Z= 3, F=0.861 /
-&RAMP ID='wind profile', Z= 4, F=0.881 /
-&RAMP ID='wind profile', Z= 5, F=0.897 /
-&RAMP ID='wind profile', Z= 6, F=0.911 /
-&RAMP ID='wind profile', Z= 7, F=0.922 /
-&RAMP ID='wind profile', Z= 8, F=0.932 /
-&RAMP ID='wind profile', Z= 9, F=0.941 /
-&RAMP ID='wind profile', Z=10, F=0.948 /
-&RAMP ID='wind profile', Z=15, F=0.980 /
-&RAMP ID='wind profile', Z=20, F=1.003 /
-&RAMP ID='wind profile', Z=30, F=1.036 /
-&RAMP ID='wind profile', Z=40, F=1.060 /
-&RAMP ID='wind profile', Z=50, F=1.079 /
+&MISC U0=1.0, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', RAMP_TMP0_Z='T profile', DT_MEAN_FORCING=1., TMPA=33.6, P_INF=95246, HUMIDITY=7.4, PROCESS_ALL_MESHES=.TRUE.  /
+
+&RAMP ID='u profile', Z= 0.001 , F= 1.4602  /
+&RAMP ID='u profile', Z= 0.100 , F= 5.6355  /
+&RAMP ID='u profile', Z= 0.500 , F= 7.0833  /
+&RAMP ID='u profile', Z= 1.000 , F= 7.6973  /
+&RAMP ID='u profile', Z= 1.900 , F= 8.2541  /
+&RAMP ID='u profile', Z= 3.000 , F= 8.6395  /
+&RAMP ID='u profile', Z= 4.000 , F= 8.8759  /
+&RAMP ID='u profile', Z= 5.000 , F= 9.0551  /
+&RAMP ID='u profile', Z= 6.000 , F= 9.1986  /
+&RAMP ID='u profile', Z= 7.000 , F= 9.3175  /
+&RAMP ID='u profile', Z= 8.000 , F= 9.4188  /
+&RAMP ID='u profile', Z= 9.000 , F= 9.5066  /
+&RAMP ID='u profile', Z= 10.000 , F= 9.5840  /
+&RAMP ID='u profile', Z= 15.000 , F= 9.8704  /
+&RAMP ID='u profile', Z= 20.000 , F= 10.0622  /
+&RAMP ID='u profile', Z= 25.000 , F= 10.2041  /
+&RAMP ID='u profile', Z= 30.000 , F= 10.3156  /
+
+&RAMP ID='T profile', Z= 0.001 , F= 1.0049  /
+&RAMP ID='T profile', Z= 0.100 , F= 1.0016  /
+&RAMP ID='T profile', Z= 0.500 , F= 1.0005  /
+&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
+&RAMP ID='T profile', Z= 1.900 , F= 0.9995  /
+&RAMP ID='T profile', Z= 3.000 , F= 0.9992  /
+&RAMP ID='T profile', Z= 4.000 , F= 0.9990  /
+&RAMP ID='T profile', Z= 5.000 , F= 0.9989  /
+&RAMP ID='T profile', Z= 6.000 , F= 0.9987  /
+&RAMP ID='T profile', Z= 7.000 , F= 0.9986  /
+&RAMP ID='T profile', Z= 8.000 , F= 0.9985  /
+&RAMP ID='T profile', Z= 9.000 , F= 0.9984  /
+&RAMP ID='T profile', Z= 10.000 , F= 0.9984  /
+&RAMP ID='T profile', Z= 15.000 , F= 0.9980  /
+&RAMP ID='T profile', Z= 20.000 , F= 0.9978  /
+&RAMP ID='T profile', Z= 25.000 , F= 0.9975  /
+&RAMP ID='T profile', Z= 30.000 , F= 0.9973  /
 
 &RADI RADIATION=.FALSE. /
 
@@ -38,7 +58,7 @@
 &VENT PBX=-120, SURF_ID='PERIODIC', WIND=.TRUE. /
 &VENT PBX= 680, SURF_ID='PERIODIC', WIND=.TRUE. /
 
-&SURF ID ='GROUND', COLOR='TAN', ROUGHNESS=0.006, TMP_FRONT=36.21 / .006 Roughness based on wind profile, assuming z_o=0.0002, see Blocken et. al., Atm. Env. 41 (2007)
+&SURF ID ='GROUND', COLOR='TAN', ROUGHNESS=0.006, CONVECTIVE_HEAT_FLUX=0.041 / .006 Roughness based on wind profile, assuming z_o=0.0002, see Blocken et. al., Atm. Env. 41 (2007)
 
 &SURF ID='LNG_SOURCE', MASS_FLUX(1)=0.167, SPEC_ID(1)='METHANE', RAMP_MF(1)='LNG_ramp', TMP_FRONT=-161.55, RAMP_T='LNG_ramp'/ 
   High Mass Flux (From FERC evaluation of DEGADIS according to Guide to LNG Database)
