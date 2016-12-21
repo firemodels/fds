@@ -5,7 +5,25 @@ PROCESS()
   case=$1
   curdir=`pwd`
   cd $case
-  ./Process_Output.sh 
+  nout=`ls -l Current_Results/*.out |& grep -v cannot | wc -l`
+  nfds=`ls -l Current_Results/*.fds |& grep -v cannot | wc -l`
+  nsuccess=`tail Current_Results/*.out |& grep successfully | wc -l`
+  status="cases not run"
+  if [ $nfds -gt 0 ] && [ $nfds -gt $nout ]; then
+    status="some cases not run or not complete"
+  else
+    if [ $nout -gt 0 ] && [ $nout -gt $nsuccess ]; then
+      status="some cases failed"
+    else
+      if [ $nout -gt 0 ] ; then
+      status="processing output"
+      ./Process_Output.sh 
+      fi
+    fi
+  fi
+  if [ $nfds -gt 0 ]; then
+    echo "$case: cases=$nfds finished=$nout successful=$nsuccess status=$status"
+  fi
   cd $curdir
 }
 
