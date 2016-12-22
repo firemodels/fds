@@ -1,9 +1,9 @@
-&HEAD CHID='7p1_cm_methane_2mm_16mesh', TITLE='Purdue 7.1 cm methane burner' / Y. Xin et al. Combustion and Flame 141 (2005) 329-335
+&HEAD CHID='7p1_cm_methane_4mm_16mesh', TITLE='Purdue 7.1 cm methane burner' / Y. Xin et al. Combustion and Flame 141 (2005) 329-335
 
 MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 / 4 mm single mesh
 
 &MULT ID='mesh array', DX=.1,DY=.1,DZ=.1, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
-&MESH IJK=50,50,50, XB=-.1,0,-.1,0,0,.1, MULT_ID='mesh array' / 2 mm 16 mesh
+&MESH IJK=25,25,25, XB=-.1,0,-.1,0,0,.1, MULT_ID='mesh array' / 4 mm 16 mesh
 
 &TIME T_END=20/
 
