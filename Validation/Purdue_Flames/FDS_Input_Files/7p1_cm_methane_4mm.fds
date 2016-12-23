@@ -36,7 +36,10 @@
 &VENT MB='YMAX', SURF_ID='OPEN'/
 &VENT MB='ZMAX', SURF_ID='OPEN'/
 
-! synthetic turbulence to break symmetry
+&SURF ID='symmetry break', COLOR='BLACK'/
+&OBST XB=.092,.096,.040,.044,0,.004, SURF_ID='symmetry break'/
+
+! add synthetic turbulence to break symmetry
 &VENT XB=-.0355,.0355,-.0355,.0355,0,0
       XYZ=0,0,0, RADIUS=0.0355, SPREAD_RATE=1000
       SURF_ID='FLAME', N_EDDY=100, L_EDDY=0.01775, VEL_RMS=0.003 /
