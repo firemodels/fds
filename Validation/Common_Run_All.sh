@@ -27,6 +27,7 @@ echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
 echo "-h - display this message"
+echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
 echo "-q queue_name - run cases using the queue queue_name"
@@ -39,7 +40,7 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bho:q:sxy' OPTION
+while getopts 'bhm:o:q:sxy' OPTION
 do
 case $OPTION in
   b)
@@ -47,6 +48,9 @@ case $OPTION in
    ;;
   h)
   usage;
+   ;;
+  m)
+   export STOPFDSMAXITER="$OPTARG"
    ;;
   o)
    INDIR="$OPTARG"
