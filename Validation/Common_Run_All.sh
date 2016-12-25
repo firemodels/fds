@@ -19,6 +19,7 @@ cd $CURDIR
 
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+JOB_PREFIX=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -27,6 +28,7 @@ echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
 echo "-h - display this message"
+echo "-j job_prefix - specify job prefix"
 echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
@@ -40,7 +42,7 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bhm:o:q:sxy' OPTION
+while getopts 'bhj:m:o:q:sxy' OPTION
 do
 case $OPTION in
   b)
@@ -48,6 +50,9 @@ case $OPTION in
    ;;
   h)
   usage;
+   ;;
+  j)
+   JOBPREFIX="-j $OPTARG"
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
@@ -73,6 +78,7 @@ done
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
 fi
+DEBUG="$DEBUG $JOBPREFIX"
 
 ##############################################################
 
