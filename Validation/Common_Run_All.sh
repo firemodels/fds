@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Common_Run_All.sh
-# Kristopher Overholt
-# 12/4/2013
-
 # This is a common script that is sourced by all of the individual
 # Run_All.sh scripts for each validation case. To avoid code duplication,
 # this script contains options and functions that are global to all of
@@ -20,6 +16,7 @@ cd $CURDIR
 export BASEDIR=`pwd`
 export INDIR=Current_Results
 JOB_PREFIX=
+export STOPFDSMAXITER=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
