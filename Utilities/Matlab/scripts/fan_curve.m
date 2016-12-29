@@ -28,8 +28,6 @@ for dp=-1000:200:1000
     rampy(i) = dp;
 end
 K(3)=plot(rampx,rampy,'b-','LineWidth',2);
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'XGrid','on')

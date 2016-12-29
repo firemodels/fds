@@ -82,14 +82,12 @@ for n = 1:nt_fds
 end
 
 for i_plot=1:2
-    
+
     close all
-    
+
     plot_style
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Units',Plot_Units)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'b--',t_fds,dmax,'r--');
@@ -105,18 +103,18 @@ for i_plot=1:2
        ylabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
-    
+
     % Plot attributes
-    
+
     set(gca,'FontName',Font_Name)
-    
+
     % add Git revision if file is available
-  
+
     Git_Filename = ['pcm_slab_git.txt'];
     addverstr(gca,Git_Filename,'linear')
-    
+
     % Create the PDF files
-    
+
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -126,5 +124,5 @@ for i_plot=1:2
     else
         print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_T')
     end
-    
+
 end

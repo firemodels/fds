@@ -35,45 +35,39 @@ Qdot=[151 303 756 1513 3025 7564 15127 30255 75636 151273 302545 756363 1512725 
 
 for i=1:16 % hrr loop
     for j=1:3 % resolution loop
-        
+
         M = csvread([outdir,filename{i,j}],2,0);
         z = M(:,1); dz = z(2)-z(1);
         hrrpul = M(:,2);
         Qdot_line = sum(hrrpul)*dz;
         Qstar(i) = Qdot(i)/(rho_inf*cp*T_inf*sqrt(g)*D^(5/2));
-        
+
         % determine flame height
         for n=1:length(z)
             hrr(n) = sum(hrrpul(1:n))*dz*Qdot(i)/Qdot_line; % cummulative heat release
         end
 
         k = find(hrr>(0.99)*Qdot(i),1);
-        if (k>1) 
+        if (k>1)
             L_99(i,j) = z(k-1)+dz*((0.99)*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
         else
             L_99(i,j) = dz*(0.99)*Qdot(i)/hrr(k);
         end
-        
+
         k = find(hrr>(0.95)*Qdot(i),1);
-        if (k>1) 
+        if (k>1)
             L_95(i,j) = z(k-1)+dz*((0.95)*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
         else
             L_95(i,j) = dz*(0.95)*Qdot(i)/hrr(k);
         end
-        
+
     end % resolution loop
-    
+
 end % hrr loop
 
 fclose('all');
 
 plot_style
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 M=importdata([expdir,'flame_lengths.csv'],',',1);
 Steward             = M.data(:,5);
@@ -134,7 +128,7 @@ legend_handle=legend(H,...
                     'Max FDS 99%',...
                     'Min FDS 95%',...
                     'Location','SoutheastOutside');
-                
+
 set(legend_handle,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 set(legend_handle,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
@@ -168,7 +162,7 @@ Paper_Width=1.4*Paper_Width;
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]); 
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 display('Printing plot Flame_Height2...')
 print -dpdf '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2'
 

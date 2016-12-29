@@ -67,12 +67,12 @@ for n=1:length(filename)
     for j=1:ny(n)
         for i=1:nx(n)
             p = p+1;
-            
+
             rho = M.data(p,1);
             rho_mms = vd1d_mms_rho(xc(i),T,U(n));
             rho_error(i,j) = rho - rho_mms;
             e_r_vec(p) = rho_error(i,j);
-            
+
             z = M.data(p,2);
             z_mms = vd1d_mms_z(xc(i),T,U(n));
             z_error(i,j) = z - z_mms;
@@ -89,8 +89,6 @@ sqrt(e_z(end-1)/e_z(end))
 sqrt(e_r(end-1)/e_r(end))
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 

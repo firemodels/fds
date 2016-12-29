@@ -23,9 +23,6 @@ end
 
 figure
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 semilogx(zp,up,'b-'); hold on
 semilogy(zp,uu,'r--')
 set(gca,'FontName',Font_Name)
@@ -45,7 +42,7 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/lawofthewall')
 
 % % check FDS parameters
-% 
+%
 % alpha = (1-B)/2*A^((1+B)/(1-B))
 % beta = 1+B
 % eta = (1+B)/A
@@ -57,7 +54,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/la
 % mu = 1.81e-5;
 % nu = mu/rho;
 % nu_over_dz = nu/dz
-% 
+%
 % u1 = 8.311075e-2;
 % tau_w = ( alpha*nu_over_dz^beta + eta*nu_over_dz^B*abs(u1) )^gamma
 % zplus = dz*sqrt(tau_w)/nu
