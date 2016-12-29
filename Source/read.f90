@@ -3118,7 +3118,8 @@ RHOA = P_INF/(TMPA*RSUM0)
 
 ! Compute constant-temperature specific heats
 
-CP_GAMMA = SPECIES_MIXTURE(1)%RCON*GAMMA/(GAMMA-1._EB)
+GM1OG = (GAMMA-1._EB)/GAMMA
+CP_GAMMA = SPECIES_MIXTURE(1)%RCON/GM1OG
 CPOPR = CP_GAMMA/PR
 
 ! Compute gas properties for primitive species 1 to N_SPECIES.

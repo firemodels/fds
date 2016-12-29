@@ -63,8 +63,8 @@ for s = 1:N_Agents
    FDS_Y(f,s) = fds_data(i_last,2);
 
    Exp_X(f,s) = exp_data(1,(f-1)*N_Agents+s);
-   Exp_Y(f,s) = exp_data(2,(f-1)*N_Agents+s);   
-   
+   Exp_Y(f,s) = exp_data(2,(f-1)*N_Agents+s);
+
 end
 end
 
@@ -99,10 +99,7 @@ ymax = xmax;
 plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Measured MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Predicted MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hX,XLegendStr,'Location','NorthWest')
@@ -145,10 +142,7 @@ plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(hf(2),'DefaultLineLineWidth',Line_Width)
 xlabel('Measured MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Predicted MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 legend(hY,YLegendStr,'Location','NorthWest')

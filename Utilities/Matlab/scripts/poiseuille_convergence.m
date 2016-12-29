@@ -25,8 +25,6 @@ H(2)=loglog(dz,.05*dz,'k--','Linewidth',1.);
 H(3)=loglog(dz,.4*dz.^2,'k-','Linewidth',1.);
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00005 0.01])

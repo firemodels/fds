@@ -199,8 +199,8 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
-                  THETA_1 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K),I,J,K,NM)
-                  THETA_2 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K+1),I,J,K+1,NM)
+                  THETA_1 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K),ZC(K))
+                  THETA_2 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K+1),ZC(K+1))
                   DTDZ(I,J,K) = (THETA_2-THETA_1)*RDZN(K)
                ENDDO
             ENDDO
@@ -214,7 +214,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                   KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
                   DTDZBAR = 0.5_EB*(DTDZ(I,J,K)+DTDZ(I,J,K+1))
                   IF (DTDZBAR>0._EB) THEN
-                     THETA_0 = GET_POTENTIAL_TEMPERATURE(TMP_0(K),I,J,K,NM)
+                     THETA_0 = GET_POTENTIAL_TEMPERATURE(TMP_0(K),ZC(K))
                      LS = C_LS*SQRT(KSGS)/SQRT(ABS(GVEC(3))/THETA_0*DTDZBAR) ! von Schoenberg Eq. (3.19)
                   ENDIF
                   NU_EDDY = C_DEARDORFF*MIN(LS,DELTA)*SQRT(KSGS)

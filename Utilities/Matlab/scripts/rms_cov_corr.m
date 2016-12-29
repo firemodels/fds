@@ -59,10 +59,8 @@ else
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
@@ -91,10 +89,8 @@ else
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
@@ -123,10 +119,8 @@ else
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
