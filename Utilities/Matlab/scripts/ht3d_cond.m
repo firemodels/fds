@@ -77,8 +77,6 @@ for i=1:length(fnz)
 end
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -109,8 +107,6 @@ hh(4)=loglog(dxx,100*dxx,'k--');
 hh(5)=loglog(dxx,500*dxx.^2,'k-');
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 

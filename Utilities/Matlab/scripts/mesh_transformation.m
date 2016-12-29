@@ -89,8 +89,6 @@ ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 % print to pdf
 
@@ -116,8 +114,6 @@ ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 % print to pdf
 

@@ -12,12 +12,10 @@ clear all
 addpath('../../Verification/Pyrolysis')
 
 close all
-    
+
 plot_style
 set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 skip_case = 0;
 if ~exist('water_ice_water_devc.csv')
@@ -38,7 +36,7 @@ wiw_m = csvread('water_ice_water_prof_01.csv',2);
 h=plot(wiw_M(1:500,3),wiw_m(1:500,5),'b-',wiw_M(501:1000,3),wiw_m(501:1000,5),'r-');
 
 % Plot attributes
-    
+
 set(gca,'FontName',Font_Name)
 xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Liquid concentration (kg/m^3)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
