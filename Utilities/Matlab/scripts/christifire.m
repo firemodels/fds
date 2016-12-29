@@ -13,7 +13,7 @@ expdir = '../../../exp/CHRISTIFIRE/';
 outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
 
 close all
-    
+
 plot_style
 
 skip_case = 0;
@@ -105,11 +105,8 @@ plot(S_tga_air(:,1),S_tga_air(:,2),'k--')
 plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, '--', ...
     S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100, '--')
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp (N2)','FDS v1 (N2)', 'FDS v2 (N2)', 'Exp (air)','FDS v1 (air)', 'FDS v2 (air)')
@@ -153,11 +150,8 @@ plot(S_mcc_v1(:,2),S_mcc_v1(:,5), '--',  ...
     S_mcc_v2(:,2),S_mcc_v2(:,5), '--')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('HRR (kW/kg)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -201,11 +195,8 @@ plot(I_tga_N2_v1(:,2),I_tga_N2_v1(:,4)./max(I_tga_N2_v1(:,4)).*100, '--', ...
     I_tga_N2_v2(:,2),I_tga_N2_v2(:,4)./max(I_tga_N2_v2(:,4)).*100, '--')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2')
@@ -249,11 +240,8 @@ plot(I_mcc_v1(:,2),I_mcc_v1(:,5), '--',  ...
     I_mcc_v2(:,2),I_mcc_v2(:,5), '--')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('HRR (kW/kg)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -304,11 +292,8 @@ plot(C_cone_50_v1(:,1),C_cone_50_v1(:,3)./0.01, '--',  ...
     C_cone_50_v2(:,1),C_cone_50_v2(:,3)./0.01, '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -346,11 +331,8 @@ plot(C_cone_25_v1(:,1),C_cone_25_v1(:,3)./0.01, '--', ...
     C_cone_25_v2(:,1),C_cone_25_v2(:,3)./0.01, '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2', 'Location', 'East')
@@ -388,11 +370,8 @@ plot(C_cone_75_v1(:,1),C_cone_75_v1(:,3)./0.01, '--', ...
     C_cone_75_v2(:,1),C_cone_75_v2(:,3)./0.01, '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -430,11 +409,8 @@ plot(C_cone_50_v1(:,1),-gradient(C_cone_50_v1(:,2),C_cone_50_v1(:,1)), '--', ...
     C_cone_50_v2(:,1),-gradient(C_cone_50_v2(:,2),C_cone_50_v2(:,1)), '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -472,11 +448,8 @@ plot(C_cone_25_v1(:,1),-gradient(C_cone_25_v1(:,2),C_cone_25_v1(:,1)), '--', ...
     C_cone_25_v2(:,1),-gradient(C_cone_25_v2(:,2),C_cone_25_v2(:,1)), '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -514,11 +487,8 @@ plot(C_cone_75_v1(:,1),-gradient(C_cone_75_v1(:,2),C_cone_75_v1(:,1)), '--', ...
     C_cone_75_v2(:,1),-gradient(C_cone_75_v2(:,2),C_cone_75_v2(:,1)), '--'); %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -556,11 +526,8 @@ plot(C_cone_50_v1(:,1),C_cone_50_v1(:,3)./0.01./-gradient(C_cone_50_v1(:,2),C_co
     C_cone_50_v2(:,1),C_cone_50_v2(:,3)./0.01./-gradient(C_cone_50_v2(:,2),C_cone_50_v2(:,1)), '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'NorthWest')
@@ -598,11 +565,8 @@ plot(C_cone_25_v1(:,1),C_cone_25_v1(:,3)./0.01./-gradient(C_cone_25_v1(:,2),C_co
     C_cone_25_v2(:,1),C_cone_25_v2(:,3)./0.01./-gradient(C_cone_25_v2(:,2),C_cone_25_v2(:,1)), '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')
@@ -640,11 +604,8 @@ plot(C_cone_75_v1(:,1),C_cone_75_v1(:,3)./0.01./-gradient(C_cone_75_v1(:,2),C_co
     C_cone_75_v2(:,1),C_cone_75_v2(:,3)./0.01./-gradient(C_cone_75_v2(:,2),C_cone_75_v2(:,1)), '--') %scaled with the area
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
 ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'East')

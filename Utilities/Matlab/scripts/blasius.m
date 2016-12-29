@@ -64,10 +64,8 @@ H(4)=plot(u_64,z_64,'g-');
 
 axis([0 1.1 0 0.15])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 xlabel('{\it u} (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 ylabel('{\it z} (m)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -97,23 +95,23 @@ err(2) = 0;
 err(3) = 0;
 
 % get error(n=16)
-for i=1:length(u_16)   
-    err(1)=err(1)+(abs(u_16(i)-u_blasius(9+(i-1)*16)))^2;    
-end    
+for i=1:length(u_16)
+    err(1)=err(1)+(abs(u_16(i)-u_blasius(9+(i-1)*16)))^2;
+end
 err(1)=err(1)/16;
 err(1)=sqrt(err(1));
 
 % get error(n=32)
-for i=1:length(u_32)    
-    err(2)=err(2)+(abs(u_32(i)-u_blasius(5+(i-1)*8)))^2 ;   
-end   
+for i=1:length(u_32)
+    err(2)=err(2)+(abs(u_32(i)-u_blasius(5+(i-1)*8)))^2 ;
+end
 err(2)=err(2)/32;
 err(2)=sqrt(err(2));
 
 % get error(n=64)
-for i=1:length(u_64)    
-    err(3)=err(3)+(abs(u_64(i)-u_blasius(3+(i-1)*4)))^2;    
-end   
+for i=1:length(u_64)
+    err(3)=err(3)+(abs(u_64(i)-u_blasius(3+(i-1)*4)))^2;
+end
 err(3)=err(3)/64;
 err(3)=sqrt(err(3));
 
@@ -123,8 +121,6 @@ dz(2)=abs(z_32(10)-z_32(9));
 dz(3)=abs(z_64(10)-z_64(9));
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 H(1)=loglog(dz, err,'b*-','LineWidth',Line_Width); hold on
 H(2)=loglog(dz, 10*dz,'k--','LineWidth',Line_Width);

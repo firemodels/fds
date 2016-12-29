@@ -43,8 +43,6 @@ loglog(f(kk),slope_scale*f(kk).^(-5/3),'k-','LineWidth',1)
 loglog([f_puff,f_puff],[min(pave(k)),max(pave(k))],'k--','LineWidth',2);
 %loglog([.5/dt,.5/dt],[min(pave(k)),1e-3*max(pave(k))],nyquist_style,'LineWidth',2);
 
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 

@@ -99,10 +99,7 @@ ylim([0.01 300]);
 legend([h1 h2 h3 h4 h5 h6],'C3H6 Low SF','C3H6 High SF','C3H6 Low HA','C3H6 High SF','Cable Low SF','Cable High SF','Location','southeast')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured Soot Concentration (mg/m^3)'];
 ytitle = ['Predicted Soot Concentration (mg/m^3)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -118,7 +115,7 @@ set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot'];
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 
 filename = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex';
 fid = fopen(filename,'wt');
