@@ -642,14 +642,14 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \section{Analytical Solution to the Continuity Equation}
 
-Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.  However, to our knowledge, there are no similar (i.e., time dependent and periodic in space) analytical solutions for the compressible NS equations, which could be used for verification of both compressible and variable-density low-Mach flow solvers.
+Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.
 
-The aim of the present work is to take a small step toward developing such analytical solutions.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
+The aim of the present work is to develop analytical solutions for the compressible NS equations that can be used for verification of both compressible and variable-density low-Mach flow solvers.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
 \begin{equation}
 \label{eqn_continuity}
 \frac{\partial \ln \rho}{\partial t} + \mathbf{u} \cdot \nabla \ln \rho + \nabla\cdot \mathbf{u} = 0 \,\mbox{.}
 \end{equation}
-Further, for certain, simple specifications of the velocity, this PDE can be solved using the method of characteristics.
+Further, for certain simple specifications of the velocity this PDE can be solved using the method of characteristics.
 
 In what follows we present 1D and 2D solutions to (\ref{eqn_continuity}) for two basic irrotational flow fields.  All the solutions are periodic in space.  The first configuration is a pulsating flow that cycles between compressing the fluid toward the center and then the corners of the domain.  In the second configuration, time periodicity is achieved by using a constant and uniform advection velocity in combination with the compression waves.  This results in a solution with a qualitatively different character than the first.
 
@@ -667,7 +667,7 @@ where $B$ is a constant amplitude and $\omega$ is the frequency of the compressi
 \frac{\partial u}{\partial x} = B \cos(x) \cos(\omega t) \,\mbox{.}
 \end{equation}
 
-Let $q \equiv \ln \rho$ (this notation is used through out this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
+Let $q \equiv \ln \rho$ (this notation is used throughout this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
 \begin{equation}
 \label{eqn_cont1d}
 \frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \cos(x) \cos(\omega t) = 0 \,\mbox{,}
