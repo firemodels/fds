@@ -48,6 +48,7 @@ PROCESS DelCo_Trainers
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
 PROCESS Fleury_Heat_Flux
+PROCESS FM_FPRF_Datacenter
 PROCESS FM_Parallel_Panels
 PROCESS FM_SNL
 PROCESS Hamins_Gas_Burners
@@ -55,6 +56,7 @@ PROCESS Harrison_Spill_Plumes
 PROCESS Heskestad_Flame_Height
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
+PROCESS LNG_Dispersion
 PROCESS McCaffrey_Plume
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
