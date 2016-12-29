@@ -10,11 +10,6 @@ addpath('../../Verification/Radiation')
 % set the plot style parameters
 
 plot_style
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Collect data
 
@@ -70,7 +65,7 @@ if skip_case
     return
 end
 
-%2D 
+%2D
 M = csvread('plate_view_factor_2D_30_devc.csv',2,0);
 Flux_2D(1) = max(M(:,2));
 M = csvread('plate_view_factor_2D_60_devc.csv',2,0);

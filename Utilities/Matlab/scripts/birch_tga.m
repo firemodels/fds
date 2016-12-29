@@ -8,10 +8,6 @@ clear all
 addpath('../../Verification/Pyrolysis')
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gca,'FontName',Font_Name)
 
 TGA_20_N2 = csvread('birch_tga_20_exp.csv',34,0);
 TGA_2_N2 = csvread('birch_tga_2_exp.csv',34,0);

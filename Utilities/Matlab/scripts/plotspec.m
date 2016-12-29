@@ -17,8 +17,6 @@ close all
 
 % set FDS standard plot format
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 
 L = 9*2*pi/100; % box length (m)
@@ -122,7 +120,7 @@ set(anno_obj_handle,'FontName',Font_Name)
 %     E2(j) = G(j)*G(j)*E2(j);
 %     E3(j) = G(j)*G(j)*E3(j);
 % end
-% 
+%
 % % Plot the filtered CBC data
 % loglog(k,E1,'ko','Linewidth',2)
 % loglog(k,E2,'ro','Linewidth',2)
@@ -139,4 +137,4 @@ set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',chid,'_spectra'])
-    
+
