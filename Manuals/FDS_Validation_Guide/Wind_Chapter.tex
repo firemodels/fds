@@ -2,11 +2,13 @@
 
 \chapter{Wind Engineering and Atmospheric Dispersion}
 
+This chapter presents results of simulations of wind over structures and atmospheric dispersion, all involving a simplified atmospheric boundary layer model in FDS.
+
 %Computational fluid dynamics (CFD) has the potential of replacing wind tunnel testing in many wind engineering applications. Validated CFD software could enable structural engineers and builders to calculate wind effects on buildings for which no aerodynamic information is currently available. However, the use of CFD for structural engineering applications is limited mainly because of its prohibitive computational resource requirements. This is due in part to the need to simulate the imperfect spatial coherence of the low-frequency turbulent fluctuations in the incoming atmospheric boundary layer (ABL) flow.  A methodology is needed that would remove this barrier. In addition, it is desirable to develop software capable of readily incorporating features specific to the simulation of aerodynamic effects on bluff bodies. For this reason FDS is being adapted for wind engineering applications.
 %
 %In a first phase of this research, FDS has been used to compare data obtained from University of Western Ontario (UWO) wind tunnel tests on a 1:100 scale model of the Texas Tech University Wind Engineering Field Research Laboratory building (prototype dimensions: 9.1 m ($L$) $\times$ 13.7 m ($B$) $\times$ 4 m ($H$)). Pressure taps or ports along four lines on the model are chosen for comparison with FDS output. FDS is used to simulate flow in the wind tunnel and compare pressures on the building at several locations for varying angles of attack. Mesh refinement is also varied in the numerical simulation. Overall, the results from the FDS simulations fit the experimental data well.
 %
-%This chapter discusses in detail the validation of wind pressure results, as well as issues being addressed to incorporate simplified ABL flow simulations in FDS. Additional issues such as modeling of non-orthogonal building surfaces and numerical issues associated with modeling flow in the wind tunnel are discussed.
+
 
 
 %\section{FDS Model of the Wind Tunnel Tests}
@@ -104,6 +106,73 @@
 
 \section{LNG Dispersion Experiments}
 \label{Atmospheric Dispersion}
+
+The simulations of liquified natural gas (LNG) dispersion experiments that are described in this section were originally designed by Jeffrey Engerer and Anay Luketa of Sandia National Laboratories on behalf of the Pipeline and Hazardous Materials Safety Administration of the U.S. Department of Transportation.
+
+\subsubsection{Atmospheric Boundary Layer}
+
+The atmospheric boundary layer is modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $\theta=T(p_0/p)^{R/c_p}$, where $p_0$ is typically the ground level pressure and $R/c_p=0.286$  for air.}, $\theta$, vary with height, $z$, according to:
+\begin{eqnarray}
+   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.1in]
+   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
+\end{eqnarray}
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the surface roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
+\begin{eqnarray}
+   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+\end{eqnarray}
+The Monin-Obukhov length indicates the thermal stratification of the atmosphere.  When the Monin-Obukhov length is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as the Monin-Obukhov length nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Monin-Obukhov length. Generally, low stability corresponds to decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Cases with low stability are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
+
+Field experiments like those discussed in this section typically characterize the atmospheric conditions via the Monin-Obukhov length, $L$, friction velocity, $u_*$, and ground level temperature, $T_0=\theta_0$. From these, the scaling potential temperature can be obtained from the relation:
+\be
+   L = \frac{u_*^2 \, \theta_0}{g \, \kappa \, \theta_*}
+\ee
+Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. 
+
+\subsubsection{Surface Roughness}
+
+The default rough wall model used in FDS, in the ``fully rough'' limit, is given by log law model:
+\be 
+   \frac{u(z)}{u_*} = \frac{1}{\kappa} \ln \left( \frac{z}{s} \right) + 8.5  \label{u_FDS}
+\ee
+The roughness length used here, $s$, is not the same as the roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
+\be
+   s = z_0 \, {\rm e}^{8.5 \, \kappa} = 30 \, z_0
+\ee
+
+\subsubsection{Surface Heat Flux}
+
+The ground temperature relative to the air temperature is an important consideration in these experiments because the natural gas that readily evaporates from the pool of spilled LNG is cold and remains near the ground as it is swept downwind. In the simulation, one can either specify a ground temperature or equivalent heat flux based on a measured or computed sensible heat flux from the field experiments. According to Monin-Obukhov theory, the heat flux is given by
+\be
+   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above. 
+
+\subsubsection{Source Model}
+
+In the various experiments, a fixed mass of LNG was spilled onto water, forming a pool of increasing radius. For modeling purposes, it was assumed that the mass flux of natural gas from the circular pool is fixed at 0.167~kg/(m$^2 \cdot$s), and the temperature of the gas is -162~$^\circ$C, as suggested in the testing protocols. The diameter of the pool is calculated using the assumed mass flux per unit area and the reported spill rate of LNG. 
+
+
+
+\subsubsection{Results}
+
+The plots on the following pages compare measured and predicted downwind concentrations of natural gas originating from spills of liquified natural gas (LNG) on water. In each case, the measured values are averages of sensors positioned in arcs at discrete distances downwind of the spill site. The sensors were generally located a few meters off the relatively dry, flat terrain.
+   
+
+\begin{sidewaystable}[p]
+\caption{Summary of NIST Reduced-Scale Experiments, 2007.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Series      & \multicolumn{4}{|c|}{Burro}       & \multicolumn{3}{|c|}{Coyote}  & \multicolumn{3}{|c|}{Falcon} & \multicolumn{3}{|c|}{Maplin Sands}          \\ \hline
+Number      & 3      & 7      & 8      & 9      &  3     & 5      & 6           &  1     & 3      & 4          &  27     & 34     & 35      \\ \hline \hline
+$L$ (m)     & -9.06  & -114   & 16.5   & -141   & -6.32  & -26.5  & 73.5        & 4.96   & -422   & 69.4       & -22.3   & -71.5  & -54.0   \\ \hline
+$u_*$ (m/s) & 0.25   & 0.375  & 0.074  & 0.25   & 0.28   & 0.442  & 0.20        & 0.061  & 0.305  & 0.369      & 0.220   & 0.275  & 0.275   \\ \hline
+$z_0$ (m)   & 0.0002 & 0.0002 & 0.0002 & 0.0002 & 0.0002 & 0.0002 & 0.0002      & 0.008  & 0.008  & 0.008      & 0.0003  & 0.0003 & 0.0003  \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:LNG_Dispersion}
+\end{sidewaystable}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
