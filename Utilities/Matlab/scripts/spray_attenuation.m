@@ -57,7 +57,7 @@ for p = 1:8
 
    FDS_File = [outdir,'BRE_Spray_' Nozzle{n} '_' int2str(p) '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
-   
+
    % Collect data
    % initial flux between t = 0.1 and 1.0 s
    i1 = find(fds_data(:,1)>=0.1,1,'first');
@@ -113,7 +113,7 @@ xmax = amax;
 ymax = amax;
 plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
-  
+
 end
 
 % Format the plots
@@ -202,12 +202,12 @@ for p = 1:5
 
    FDS_File = [outdir 'LEMTA_Spray_' int2str(p) '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
-   
+
    % Collect data
    % initial flux between t = 1 and 10 s
    i1 = find(fds_data(:,1)>1.0,1,'first');
    i2 = find(fds_data(:,1)<=10.0,1,'last');
-   
+
    FDS_Flux_0(n,p) = mean(fds_data(i1:i2,2));
    % Final flux as mean between t=10 and 15 s
    i1 = find(fds_data(:,1)>10,1,'first');
@@ -232,11 +232,9 @@ hold on
 
 figure(hf(3))
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(3),'DefaultLineLineWidth',Line_Width)
 xlabel('Exp. Attenuation (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('FDS Attenuation (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)

@@ -36,10 +36,8 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 hfig1(2)=semilogx(yp_up_mean,up_mean,'ro'); hold on
 axis([1e0 1e3 0 30])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it u}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
@@ -53,10 +51,8 @@ semilogx(yp_Tp_mean(range),Tp_mean_Pr0p71(range),'bo')
 semilogx(yp_Tp_mean(range),Tp_mean_Pr2p00(range),'bo')
 axis([1e0 1e3 0 30])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it T}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
@@ -81,36 +77,36 @@ devcfile = {'heated_channel_Pr_0p10_32_devc.csv', ...
             'heated_channel_Pr_0p71_32_devc.csv', ...
             'heated_channel_Pr_1p00_32_devc.csv', ...
             'heated_channel_Pr_2p00_32_devc.csv'};
-     
+
 linefile = {'heated_channel_Pr_0p10_32_line.csv', ...
             'heated_channel_Pr_0p71_32_line.csv', ...
             'heated_channel_Pr_1p00_32_line.csv', ...
             'heated_channel_Pr_2p00_32_line.csv'};
 
 skip_case = 0;
-        
+
 for i = [1,2,3,4]
-    
+
     if ~exist([outdir,devcfile{i}])
         display(['Error: File ' [outdir,devcfile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
-    
+
     M = importdata([outdir,devcfile{i}],',',2);
     q_w = mean(M.data(3,2:3));
     T_tau = q_w/(rho*u_tau*cp);
-    
+
     if ~exist([outdir,linefile{i}])
         display(['Error: File ' [outdir,linefile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
-    
+
     M = importdata([outdir,linefile{i}],',',2);
-    
+
     zp = M.data(1:16,1)/delta_nu;
-    
+
     if (i==3)
         u1 = mean(M.data(1:16,38:2:72),2);     % bottom wall
         u2 = mean(M.data(32:-1:17,38:2:72),2); % top wall
@@ -164,7 +160,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_ch
 
 
 % % Compute pressure gradient from Re_tau
-% 
+%
 % mu=1.8216e-5
 % rho=101325*28.84852/(8314.5*293.15)
 % Re_tau=590

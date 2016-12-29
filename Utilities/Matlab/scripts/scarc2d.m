@@ -7,8 +7,6 @@ clear all
 
 figure
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 data_dir = '../../Verification/Pressure_Solver/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
@@ -84,7 +82,7 @@ addverstr(gca,SVN_Filename,'linear')
 % end
 
 % Create the PDF files
- 
+
 PDF_Paper_Width = 1.55*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);

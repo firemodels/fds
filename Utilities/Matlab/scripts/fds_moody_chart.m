@@ -29,7 +29,7 @@ for i=1:length(RR)
         M(j,1) = Re(j);
         M(j,i+1) = f(j);
     end
-    
+
     if i==1; loglog(Re,f,'k-'); hold on; end
     if i==2; loglog(Re,f,'b-'); end
     if i==3; loglog(Re,f,'r-'); end
@@ -42,11 +42,7 @@ f_DNS = (24./Re_DNS);
 loglog(Re_DNS,f_DNS,'k-')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-%set(gca,'Position',[0.75,0.75,4.5,3.45])
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 
 axis([1e2 1e8 .005 .2]) % based on MYO
 xlabel('Re_{\it H}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)

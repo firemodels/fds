@@ -38,8 +38,6 @@ H(1)=plot(ncores,time64,'b^--'); hold on
 H(2)=plot(ncores,time128,'rsq--');
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([1 8 0 100])

@@ -138,18 +138,18 @@ for f = 1:N_Fuels
       for ns = 1:N_Species
          ExpPlot(f,s,ns) = exp_data(s,(f-1)*N_Species+ns);
          FDSPlot(f,s,ns) = mean(fds_data(n_fds-60:n_fds,1+ns));
-      end   
+      end
    end
 end
 Xmax = [0.25 0.2 0.2 0.2 0.07 0.04];
 for ns = 1:N_Species
    hf(ns)=figure(ns);
-   %n = 0; 
+   %n = 0;
    %Xmax = max(max(FDSPlot(:,:,ns)));
    %Xmax = max(max(max(ExpPlot(:,:,ns))),Xmax);
    %Xmax = ceil(Xmax*10)/10;
    for f = 1:N_Fuels
-      for s = 1:NumPoints(f)      
+      for s = 1:NumPoints(f)
          XLegendStr{f} = [Fuel{f}];
          %n = n + 1;
          hX(f) = plot(ExpPlot(f,s,ns),FDSPlot(f,s,ns));
@@ -162,7 +162,7 @@ for ns = 1:N_Species
         hold on
       end
    end
-   
+
    xmin = 0;
    ymin = 0;
    xmax = Xmax(ns);
@@ -171,10 +171,7 @@ for ns = 1:N_Species
    axis([xmin xmax ymin ymax])
 
    plot_style
-   set(gca,'Units',Plot_Units)
    set(gca,'FontName',Font_Name)
-   set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-   set(hf(1),'DefaultLineLineWidth',Line_Width)
    xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
    ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
    xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -193,7 +190,7 @@ for ns = 1:N_Species
    set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
    plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
    print(gcf,'-dpdf',plotname);
-   
+
    clear hX
 
 end

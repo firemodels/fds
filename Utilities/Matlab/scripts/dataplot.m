@@ -69,12 +69,12 @@ end
 % Read in global plot options
 plot_style
 
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+% set(gcf,'DefaultLineLineWidth',Line_Width)
+% WPos = get(gcf,'Position');
+% set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
+% set(gca,'FontName',Font_Name)
+% set(gca,'Units',Plot_Units)
+% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Read configuration file
 A = importdata(Dataplot_Inputs_File);

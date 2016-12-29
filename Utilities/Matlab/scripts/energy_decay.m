@@ -71,9 +71,6 @@ end
 
 figure(1)
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 
 if strcmp(chid,'csmag_32')
     if ~exist('mu0_32_devc.csv')
@@ -84,7 +81,7 @@ if strcmp(chid,'csmag_32')
     t = M(:,1);
     ke = M(:,2);
     H(1)=plot(t,ke,'k-.'); hold on
-    
+
     if ~exist('csmag0_32_devc.csv')
         display('Error: File csmag0_32_devc.csv does not exist. Skipping case.')
         return
@@ -120,19 +117,10 @@ else
     legend(H(3:4),'FDS','Filtered CBC data','Location','NorthEast')
 end
 
-% add SVN if file is available
+% add version string if file is available
 
-SVN_Filename = [chid,'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [chid,'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);

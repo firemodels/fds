@@ -59,10 +59,8 @@ end
 
 % Mass fraction plot settings
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 xlabel('Time (s)')
 ylabel('Mass fraction (kg/kg)')
@@ -82,12 +80,10 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC_mass
 
 % Plot L1 norm error convergence
 figure
-hh(1)=loglog(dxx,L1e,'ksq-'); 
+hh(1)=loglog(dxx,L1e,'ksq-');
 hold on
 hh(2)=loglog(dxx,dxx/10,'k--');
 
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -108,12 +104,10 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC_mass
 
 % Plot L2 error convergence
 figure
-hh(1)=loglog(dxx,L2e,'ksq-'); 
+hh(1)=loglog(dxx,L2e,'ksq-');
 hold on
 hh(2)=loglog(dxx,dxx/10,'k--');
 
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
