@@ -564,7 +564,9 @@ By examining movies of the simulation results we can see a qualitative differenc
 \section{Purdue 7.1 cm Methane Flame}
 \label{Purdue_Flames}
 
-Figures \ref{Purdue_7p1_CH4_mixture_fraction}-\ref{Purdue_7p1_CH4_vel_rms} show results for the Purdue 7.1 cm methane flame \cite{Xin:CF2005} at two grid resolutions.
+Figures \ref{Purdue_7p1_CH4_mixture_fraction}-\ref{Purdue_7p1_CH4_vel_rms} show results for the Purdue 7.1 cm methane flame \cite{Xin:CF2005}.  Three sets of results are presented: two coarse (4 mm) cases and one fine (2 mm) case.  The fine mesh case is run with MPI on 16 meshes.  The coarse cases are run two ways: a single mesh case (dashed lines) and a 16 mesh case (dotted lines).  As should be the case, the single- and multi-mesh cases yield the same results.  This gives confidence in the domain decomposition strategy for open plume flows with FDS.
+
+The discrepancy at the centerline for mixture fraction and vertical velocity may be attributed to out not accounting for (1) the slight divergence of the flow at the burner exit and (2) the asymmetries and fluctuations in the burner exit velocity and ambient air.  Examination of the FDS output shows the solution remains very symmetric, preventing large gulps of air from penetrating the centerline of the plume, which would tend to smooth out the profiles near the center reducing the bimodal vertical velocity profile and centerline mixture fraction.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
