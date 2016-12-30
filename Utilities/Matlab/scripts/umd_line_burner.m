@@ -157,7 +157,7 @@ axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 lh = legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
-set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -221,7 +221,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -285,7 +286,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.125 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -349,7 +351,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
