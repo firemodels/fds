@@ -85,10 +85,6 @@ end
 
 figure(1)
 
-set(gca, 'Units', Plot_Units)
-set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
-
 H(1) = loglog(dtvec, errvec, '-*k');
 hold on
 H(2) = loglog(dtvec, dtvec, '--k');
@@ -100,13 +96,14 @@ erro = errvec((length(errvec) - 1):length(errvec));
 %fprintf('order of accuracy: %f\n', a(1))
 
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
+set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Terminal Velocity Error','FontSize',Label_Font_Size)
+ylabel('Terminal Velocity Error (m/s)','FontSize',Label_Font_Size)
 h = legend(H, 'FDS', 'O({\it \deltat})',...
     'O({\it \deltat}^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
+set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
@@ -123,10 +120,6 @@ close all
 clear H
 figure(1)
 
-set(gca, 'Units', Plot_Units)
-set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
-
 H(1) = loglog(dtvec, Linf, '-*k');
 hold on
 H(2) = loglog(dtvec, 50 * dtvec, '--k');
@@ -138,13 +131,14 @@ erro = Linf((length(Linf) - 1):length(Linf));
 %fprintf('order of accuracy: %f\n', a(1))
 
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
+set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Position Error','FontSize',Label_Font_Size)
+ylabel('Position Error (m)','FontSize',Label_Font_Size)
 h = legend(H, 'FDS', 'O({\it \deltat})',...
     'O({\it \deltat}^2)', 'Location', 'Southeast');
 set(h,'Interpreter', Font_Interpreter)
+set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);

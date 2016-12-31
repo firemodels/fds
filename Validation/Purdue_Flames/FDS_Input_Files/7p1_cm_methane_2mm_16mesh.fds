@@ -30,7 +30,7 @@ MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 / 4 mm single mesh
 
 &SURF ID='FLAME'
       COLOR='ORANGE'
-      VEL=-.0314, TAU_V=0, MASS_FRACTION(1)=1., SPEC_ID(1) = 'natural gas',
+      VEL=-.0314, TAU_V=0, MASS_FRACTION(1)=1., SPEC_ID(1)='natural gas'
       FREE_SLIP=.TRUE./ ! MASS_FLUX(1) = 0.02129
 
 &VENT PBX=-.1, SURF_ID='OPEN'/
@@ -39,13 +39,10 @@ MESH IJK=50,50,100, XB=-.1,.1,-.1,.1,0,0.4 / 4 mm single mesh
 &VENT PBY= .1, SURF_ID='OPEN'/
 &VENT PBZ= .4, SURF_ID='OPEN'/
 
-&SURF ID='symmetry break', COLOR='BLACK'/
-&OBST XB=.092,.096,.040,.044,0,.004, SURF_ID='symmetry break'/
-
 ! add synthetic turbulence to break symmetry
 &VENT XB=-.0355,.0355,-.0355,.0355,0,0
       XYZ=0,0,0, RADIUS=0.0355, SPREAD_RATE=1000
-      SURF_ID='FLAME', N_EDDY=100, L_EDDY=0.01775, VEL_RMS=0.003 /
+      SURF_ID='FLAME', N_EDDY=100, L_EDDY=0.008875, VEL_RMS=0.006 /
 
 &VENT PBZ=0, SURF_ID='OPEN'/
 
