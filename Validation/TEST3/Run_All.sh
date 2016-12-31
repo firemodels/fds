@@ -7,5 +7,6 @@ source $SVNROOT/Validation/Common_Run_All.sh
 
 $QFDS $DEBUG $QUEUE -d $INDIR test3a.fds 
 $QFDS $DEBUG $QUEUE -d $INDIR test3b.fds 
+$QFDS $DEBUG $QUEUE -d $INDIR test3c.fds 
 
 echo FDS cases submitted
