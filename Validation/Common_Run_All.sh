@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Common_Run_All.sh
-# Kristopher Overholt
-# 12/4/2013
-
 # This is a common script that is sourced by all of the individual
 # Run_All.sh scripts for each validation case. To avoid code duplication,
 # this script contains options and functions that are global to all of
@@ -19,6 +15,8 @@ cd $CURDIR
 
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+JOB_PREFIX=
+export STOPFDSMAXITER=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -27,6 +25,8 @@ echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
 echo "-h - display this message"
+echo "-j job_prefix - specify job prefix"
+echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
 echo "-q queue_name - run cases using the queue queue_name"
@@ -39,7 +39,7 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bho:q:sxy' OPTION
+while getopts 'bhj:m:o:q:sxy' OPTION
 do
 case $OPTION in
   b)
@@ -47,6 +47,12 @@ case $OPTION in
    ;;
   h)
   usage;
+   ;;
+  j)
+   JOBPREFIX="-j $OPTARG"
+   ;;
+  m)
+   export STOPFDSMAXITER="$OPTARG"
    ;;
   o)
    INDIR="$OPTARG"
@@ -69,6 +75,7 @@ done
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
 fi
+DEBUG="$DEBUG $JOBPREFIX"
 
 ##############################################################
 
