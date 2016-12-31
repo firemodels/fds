@@ -8,9 +8,13 @@
 
 CURDIR=`pwd`
 
+cd $SVNROOT/..
+REPO=`pwd`
+
 cd $SVNROOT/Utilities/Scripts/
 SCRIPTDIR=`pwd`
-export QFDS=$SCRIPTDIR/qfds.sh
+
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO "
 cd $CURDIR
 
 export BASEDIR=`pwd`
