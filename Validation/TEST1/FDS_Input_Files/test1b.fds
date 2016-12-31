@@ -1,8 +1,5 @@
 &HEAD CHID='test1b',TITLE='Plume whirl case' /
 
-  same as plume5a except there is a blockage in the middle of the scene to block the flow
-  The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
-
 &MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 
 &MISC HRRPUV_MAX_SMV=1300.0,IBLANK_SMV=.TRUE. /
@@ -72,4 +69,6 @@
    SAMPLING_FACTOR=10 /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
 
+&DEVC XYZ=1.2,0.8,0.0 QUANTITY='U-VELOCITY' /
+                                                             
 &TAIL /
