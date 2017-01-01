@@ -267,14 +267,26 @@ CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
-if [ ! "$INTELLIB" == "" ]; then
-if [ -d $INTELLIB ]; then
 
-echo ""
-echo "--- copying run time libraries ---"
-echo ""
-CPDIR $INTELLIB $bundledir/bin/$DESTLIB
+if [ ! "$COMPFROM" == "" ]; then
+  COMPLIBFROM=~/$COMPFROM
+  if [ -d $COMPLIBFROM ]; then
+
+    echo ""
+    echo "--- copying compiler run time libraries ---"
+    echo ""
+    CPDIR $COMPLIBFROM $bundledir/bin/$COMPTO
+  fi
 fi
+if [ ! "$MISCFROM" == "" ]; then
+  MISCLIBFROM=~/$MISCFROM
+  if [ -d $MISCLIBFROM ]; then
+
+    echo ""
+    echo "--- copying miscellaneous run time libraries ---"
+    echo ""
+    CPDIR $MISCLIBFROM $bundledir/bin/$MISCTO
+  fi
 fi
 
 echo ""

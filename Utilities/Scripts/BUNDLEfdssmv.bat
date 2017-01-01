@@ -32,7 +32,7 @@ if "%platform%" == "windows" (
 )
 if "%platform%" == "linux" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux64
-  plink %linux_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version% %compiler_dir%
+  plink %linux_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version% %compiler_dir% %misc_dir%
 
   set manifest=%svn_root%\fds\Utilities\uploads\manifest_linux_64.html
   echo Downloading manifest
