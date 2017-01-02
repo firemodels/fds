@@ -63,6 +63,9 @@ CPDIR ()
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist"
   else
+    echo "*******************************"
+    echo copying directory from $FROMDIR to $TODIR
+    echo "*******************************"
     cp -r $FROMDIR $TODIR
   fi
   if [ -e $TODIR ]; then
