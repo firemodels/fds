@@ -19,6 +19,6 @@ export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
 export INTELLIB=~/FIRE-LOCAL/LIBS/LINUX/LIB64
 export MISCTO=LIB64
-export COMPTO=COMPLIB
+export COMPTO=INTELLIBS
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh
