@@ -374,7 +374,13 @@ export MPIDIST FDSNETWORK
 
 # Update $LDLIBPATH and PATH
 
+BASH
+if [ "$ostype" == "LINUX" ]
+cat << BASH > \$BASHFDS
 $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+BASH
+fi
+cat << BASH > \$BASHFDS
 PATH=\\\$FDSBINDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
   $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
