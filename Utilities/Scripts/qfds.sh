@@ -33,6 +33,7 @@ then
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
+  echo " -M mpidist  - specify mpi distribution location"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -103,7 +104,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:M:Nn:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -143,6 +144,9 @@ case $OPTION  in
    ;;
   m)
    max_processes_per_node="$OPTARG"
+   ;;
+  M)
+   MPIDIST="$OPTARG"
    ;;
   N)
    nosocket="1"
@@ -216,6 +220,11 @@ if [ $use_installed -eq 1 ]; then
   fi
 fi
 
+if [[ "$MPIDIST" != "" && ! -d $MPIDIST ]]; then
+  echo "The OpenMPI distribution location $MPIDIST does not exist. Run aborted."
+  ABORTRUN=y
+fi
+
 #define input file
 
 in=$1
@@ -286,13 +295,11 @@ fi
 
 # use mpirun if there is more than 1 process
 
-#if [ $nmpi_processes -gt 1 ] ; then
   MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
   esac
-#fi
 
 cd $dir
 fulldir=`pwd`
@@ -442,6 +449,7 @@ echo \`date\`
 echo "Input file: $in"
 echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
+echo "   MPIDIST: $MPIDIST"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
@@ -464,6 +472,7 @@ if [ "$queue" != "none" ] ; then
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
+  echo "            MPIDIST:$MPIDIST"
 fi
 
 # run script
