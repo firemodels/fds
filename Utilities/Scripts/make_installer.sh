@@ -375,7 +375,7 @@ export MPIDIST FDSNETWORK
 # Update $LDLIBPATH and PATH
 
 BASH
-if [ "$ostype" == "LINUX" ]
+if [ "$ostype" == "LINUX" ] ; then
 cat << BASH > \$BASHFDS
 $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
