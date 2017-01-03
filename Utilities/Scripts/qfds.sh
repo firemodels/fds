@@ -1,17 +1,6 @@
 #!/bin/bash
 
-FDSROOT=~/FDS-SMV
-if [ "$FIREMODELS" != "" ] ; then
-  FDSROOT=$FIREMODELS
-fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  walltime=99-99:99:99
-else
-  walltime=999:0:0
-fi
-
-if [ $# -lt 1 ]
-then
+function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
   echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
   echo ""
@@ -29,25 +18,47 @@ then
   echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
-  echo " -i use installed fds"
+  echo " -h     - display this message"
+  echo " -i     - use installed fds"
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
-  echo " -m m - reserve m processes per node [default: 1]"
+  echo " -m m   - reserve m processes per node [default: 1]"
+if [ "$IFORT_COMPILER_LIB" == "" ]; then
+  echo " -I inteldist  - specify Intel library location";
+else
+  echo " -I inteldist  - specify Intel library location [default: $IFORT_COMPILER_LIB]";
+fi
   echo " -M mpidist  - specify mpi distribution location"
-  echo " -n n - number of MPI processes per node [default: 1]"
-  echo " -N   - do not use socket or report binding options"
-  echo " -o o - number of OpenMP threads per process [default: 1]"
-  echo " -p p - number of MPI processes [default: 1] "
-  echo " -q q - name of queue. [default: batch]"
-  echo "        If queue is terminal then casename.fds is run in the foreground on the local computer"
-  echo " -r   - report bindings"
-  echo " -s   - stop job"
-  echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -u   - use development version of FDS"
-  echo " -v   - output generated script to standard output"
+  echo " -n n   - number of MPI processes per node [default: 1]"
+  echo " -N     - do not use socket or report binding options"
+  echo " -o o   - number of OpenMP threads per process [default: 1]"
+  echo " -p p   - number of MPI processes [default: 1] "
+  echo " -q q   - name of queue. [default: batch]"
+  echo "          If queue is terminal then casename.fds is run in the foreground on the local computer"
+  echo " -r     - report bindings"
+  echo " -s     - stop job"
+  echo " -t     - used for timing studies, run a job alone on a node"
+  echo " -u     - use development version of FDS"
+  echo " -v     - output generated script to standard output"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo "input_file - input file"
   echo ""
+  exit
+}
+
+FDSROOT=~/FDS-SMV
+if [ "$FIREMODELS" != "" ] ; then
+  FDSROOT=$FIREMODELS
+fi
+if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
+  walltime=99-99:99:99
+else
+  walltime=999:0:0
+fi
+
+if [ $# -lt 1 ]
+then
+  usage
   exit
 fi
 
@@ -91,6 +102,7 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
+INTEL_COMPILER_LIB=$IFORT_COMPILER_LIB
 
 if [ "$BACKGROUND" == "" ]; then
    BACKGROUND=background
@@ -104,7 +116,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:M:Nn:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:hiI:j:l:m:M:Nn:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -132,9 +144,15 @@ case $OPTION  in
   f)
    FDSROOT="$OPTARG"
    ;;
+  h)
+   usage
+   ;;
   i)
    use_installed=1
    use_repository=0
+   ;;
+  I)
+   INTEL_COMPILER_LIB="$OPTARG"
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -220,6 +238,11 @@ if [ $use_installed -eq 1 ]; then
   fi
 fi
 
+if [[ "$IFORT_COMPILER_LIB" != "" && ! -d $IFORT_COMPILER_LIB ]]; then
+   echo "The Intel compiler shared library $IFORT_COMPILER_LIB does not exist."
+   echo "Run aborted"
+   ABORTRUN=y
+fi
 if [[ "$MPIDIST" != "" && ! -d $MPIDIST ]]; then
   echo "The OpenMPI distribution location $MPIDIST does not exist. Run aborted."
   ABORTRUN=y
@@ -473,6 +496,7 @@ if [ "$queue" != "none" ] ; then
     echo "Threads per process:$nopenmp_threads"
   fi
   echo "            MPIDIST:$MPIDIST"
+  echo " Intel compiler lib:$INTEL_COMPILER_LIB"
 fi
 
 # run script
