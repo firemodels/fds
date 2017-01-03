@@ -8,15 +8,18 @@
 
 CURDIR=`pwd`
 
+cd $SVNROOT/..
+REPO=`pwd`
+
 cd $SVNROOT/Utilities/Scripts/
 SCRIPTDIR=`pwd`
-export QFDS=$SCRIPTDIR/qfds.sh
 cd $CURDIR
 
 export BASEDIR=`pwd`
 export INDIR=Current_Results
 JOB_PREFIX=
 export STOPFDSMAXITER=
+DV=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -33,13 +36,14 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "-u - use development version of FDS"
 echo "-x - do not copy FDS input files"
 echo "-y - overwrite existing files"
 exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bhj:m:o:q:sxy' OPTION
+while getopts 'bhIj:m:o:q:suxy' OPTION
 do
 case $OPTION in
   b)
@@ -63,6 +67,9 @@ case $OPTION in
   s)
    export STOPFDS=1
    ;;
+  u)
+  DV="-u"
+   ;;
   x)
    export DONOTCOPY=1
    ;;   
@@ -71,6 +78,8 @@ case $OPTION in
    ;;   
 esac
 done
+
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV "
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
