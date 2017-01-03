@@ -134,6 +134,9 @@ for j=2:length(Q);
     clear Predicted_Metric
 
     figure
+    set(gca,'PlotBoxAspectRatio',[1 1 1])
+    set(gca,'Units','inches')
+    set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
 
     k = 0;
     for i=drange
@@ -351,9 +354,12 @@ for j=2:length(Q);
         PDF_Paper_Width = Paper_Width_Factor * Scat_Paper_Width;
 
         set(gcf,'Visible','on');
+        set(gcf,'Resize','off')
         set(gcf,'PaperUnits','inches');
         set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
+        %set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
+        Paper_Pos=get(gcf,'PaperPosition');
+        set(gca,'Position',[Scat_Plot_X-Paper_Pos(1)  Scat_Plot_Y-Paper_Pos(2) Scat_Plot_Width Scat_Plot_Height])
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
 
