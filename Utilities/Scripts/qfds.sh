@@ -295,8 +295,9 @@ fi
 
 if [[ "$QFDS_COMPILER" != "" && ! -d $QFDS_COMPILER ]]; then
    echo "The Intel compiler shared library directory $QFDS_COMPILER"
-   echo "does not exist. Run aborted"
-   ABORTRUN=y
+#   echo "does not exist. Run aborted"
+   echo "does not exist."
+#   ABORTRUN=y
 fi
 if [[ "$QFDS_MPIDIST" != "" && ! -d $QFDS_MPIDIST ]]; then
   echo "The OpenMPI directory $QFDS_MPIDIST does not exist. Run aborted."
