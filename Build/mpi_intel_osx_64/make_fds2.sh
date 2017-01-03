@@ -2,7 +2,7 @@
 platform=intel64
 dir=`pwd`
 target=${dir##*/}
-source $IFORT_COMPILER/bin/compilervars.sh $platform
+source $IFORT_COMPILER/../bin/compilervars.sh $platform
 source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
 
 echo Building $target
