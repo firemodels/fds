@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#--------------------------------------------------------
+#  usage
+#--------------------------------------------------------
+
 function usage {
   echo "Usage: qfds.sh [options] casename.fds"
   echo ""
@@ -12,7 +16,6 @@ function usage {
   echo "--------------"
   echo " -e exe - full path of FDS used to run case"
   echo " -p p   - number of MPI processes [default: 1] "
-  echo "          If queue is terminal then casename.fds is run in the foreground on the local computer"
   echo " -v     - output generated script to standard output"
   echo "Other options"
   echo "-------------"
@@ -26,30 +29,79 @@ function usage {
   echo "          [default: $FDSROOT]"
   echo " -h     - display this message"
   echo " -i     - use installed fds"
-if [ "$IFORT_COMPILER_LIB" == "" ]; then
+if [ "$QFDS_COMPILER" == "" ]; then
   echo " -I inteldist  - specify Intel library location";
 else
-  echo " -I inteldist  - specify Intel library location [default: $IFORT_COMPILER_LIB]";
+  echo " -I inteldist  - specify Intel library location [default: $QFDS_COMPILER]";
 fi
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m   - reserve m processes per node [default: 1]"
+if [ "$QFDS_MPIDIST" == "" ]; then
   echo " -M mpidist  - specify mpi distribution location"
+else
+  echo " -M mpidist  - specify mpi distribution location [default: $QFDS_MPIDIST]"
+fi
   echo " -n n   - number of MPI processes per node [default: 1]"
   echo " -N     - do not use socket or report binding options"
   echo " -o o   - number of OpenMP threads per process [default: 1]"
-  echo " -p p   - number of MPI processes [default: 1] "
   echo " -q q   - name of queue. [default: batch]"
+  echo "          If queue is terminal then casename.fds is run in the foreground"
   echo " -r     - report bindings"
   echo " -s     - stop job"
   echo " -t     - used for timing studies, run a job alone on a node"
   echo " -u     - use development version of FDS"
   echo " -v     - output generated script to standard output"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. "
+  echo "          [default: $walltime]"
   echo ""
   exit
 }
 
+#--------------------------------------------------------
+#  IS_DIR_IN_LDPATH
+#--------------------------------------------------------
+
+IS_DIR_IN_LDPATH(){
+  dir=$1
+  case ":$LD_LIBRARY_PATH:" in
+    *:"$dir":*)
+      echo 1
+      ;;
+    *)
+      echo 0
+      ;;
+  esac
+}
+
+#--------------------------------------------------------
+#  GETABSDIR
+#--------------------------------------------------------
+
+GETABSDIR(){
+  local curdir=`pwd`
+  local filepath=$1
+  local filedir=$(dirname $filepath)
+  if [ -e $filedir ]; then
+    cd $filedir
+    filedir=`pwd`
+  fi
+  echo $filedir
+  cd $curdir
+}
+
+#--------------------------------------------------------
+#  GETFILENAME
+#--------------------------------------------------------
+
+GETFILENAME(){
+  local filepath=$1
+  local filename=$(filename $filepath)
+  echo $filaname
+}
+
+QFDS_COMPILER=$IFORT_COMPILER_LIB
+QFDS_MPIDIST=$MPIDIST
 FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ] ; then
   FDSROOT=$FIREMODELS
@@ -106,7 +158,6 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
-INTEL_COMPILER_LIB=$IFORT_COMPILER_LIB
 
 if [ "$BACKGROUND" == "" ]; then
    BACKGROUND=background
@@ -139,7 +190,7 @@ case $OPTION  in
    dir="$OPTARG"
    ;;
   e)
-   exe="$OPTARG"
+   fdsexe="$OPTARG"
    use_repository=0
    ;;
   E)
@@ -156,7 +207,7 @@ case $OPTION  in
    use_repository=0
    ;;
   I)
-   INTEL_COMPILER_LIB="$OPTARG"
+   QFDS_COMPILER="$OPTARG"
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -168,7 +219,7 @@ case $OPTION  in
    max_processes_per_node="$OPTARG"
    ;;
   M)
-   MPIDIST="$OPTARG"
+   QFDS_MPIDIST="$OPTARG"
    ;;
   N)
    nosocket="1"
@@ -223,7 +274,7 @@ fi
 
 # use fds from repository (-e was not specified)
 if [ $use_repository -eq 1 ]; then
-  exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
+  fdsexe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
 fi
 
 if [ $use_installed -eq 1 ]; then
@@ -231,24 +282,24 @@ if [ $use_installed -eq 1 ]; then
   if [ $notfound -eq 1 ]; then
     echo "fds is not installed. Run aborted."
     ABORTRUN=y
-    exe=
+    fdsexe=
   else
     fdspath=`which fds`
     fdsdir=$(dirname "${fdspath}")
     curdir=`pwd`
     cd $fdsdir
-    exe=`pwd`/fds
+    fdsexe=`pwd`/fds
     cd $curdir
   fi
 fi
 
-if [[ "$IFORT_COMPILER_LIB" != "" && ! -d $IFORT_COMPILER_LIB ]]; then
-   echo "The Intel compiler shared library location, $IFORT_COMPILER_LIB,"
+if [[ "$QFDS_COMPILER" != "" && ! -d $QFDS_COMPILER ]]; then
+   echo "The Intel compiler shared library directory $QFDS_COMPILER"
    echo "does not exist. Run aborted"
    ABORTRUN=y
 fi
-if [[ "$MPIDIST" != "" && ! -d $MPIDIST ]]; then
-  echo "The OpenMPI distribution location $MPIDIST does not exist. Run aborted."
+if [[ "$QFDS_MPIDIST" != "" && ! -d $QFDS_MPIDIST ]]; then
+  echo "The OpenMPI directory $QFDS_MPIDIST does not exist. Run aborted."
   ABORTRUN=y
 fi
 
@@ -322,7 +373,7 @@ fi
 
 # use mpirun if there is more than 1 process
 
-  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
+  MPIRUN="$QFDS_MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
   TITLE="$infile(MPI)"
   case $FDSNETWORK in
     "infiniband") TITLE="$infile(MPI_IB)"
@@ -354,10 +405,10 @@ if [ $STOPFDS ]; then
  touch $stopfile
  exit
 fi
-if [ "$exe" != "" ]; then
-  if ! [ -e "$exe" ]; then
+if [ "$fdsexe" != "" ]; then
+  if ! [ -e "$fdsexe" ]; then
     if [ "$showinput" == "0" ] ; then
-      echo "The program, $exe, does not exist. Run aborted."
+      echo "The program, $fdsexe, does not exist. Run aborted."
       ABORTRUN=y
     fi
   fi
@@ -370,6 +421,12 @@ if [ "$ABORTRUN" == "y" ] ; then
   if [ "$showinput" == "0" ] ; then
     exit
   fi
+fi
+fdsdir=`GETABSDIR $fdsexe`
+fdsname=`GETFILENAME $fdsexe`
+is_fdsinstalled=0
+if [[ "$FDSBINDIR" != "" && "$FDSBINDIR/fds" == "$fdsdir/$fdsname" ]]; then
+  is_fdsinstalled=1
 fi
 if [ "$STOPFDSMAXITER" != "" ]; then
   echo "creating delayed stop file: $infile"
@@ -476,8 +533,13 @@ echo \`date\`
 echo "Input file: $in"
 echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
-echo "   MPIDIST: $MPIDIST"
-$MPIRUN $exe $in $OUT2ERROR
+if [ "$QFDS_MPIDIST" != "" ]; then
+  echo "   OpenMPI: $QFDS_MPIDIST"
+if
+if [ "$QFDS_COMPILER" != "" ]; then
+  echo "  Compiler:$QFDS_COMPILER"
+fi
+$MPIRUN $fdsexe $in $OUT2ERROR
 EOF
 
 # if requested, output script file to screen
@@ -491,7 +553,7 @@ fi
 
 if [ "$queue" != "none" ] ; then
   echo "         Input file:$in"
-  echo "         Executable:$exe"
+  echo "         Executable:$fdsexe"
   echo "              Queue:$queue"
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
@@ -499,8 +561,12 @@ if [ "$queue" != "none" ] ; then
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
-  echo "            MPIDIST:$MPIDIST"
-  echo " Intel compiler lib:$INTEL_COMPILER_LIB"
+  if [ "$QFDS_MPIDIST" != "" ]; then
+    echo "            OpenMPI: $QFDS_MPIDIST"
+  fi
+  if [ "$QFDS_COMPILER" != "" ]; then
+    echo "           Compiler:$QFDS_COMPILER"
+  fi
 fi
 
 # run script
