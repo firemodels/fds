@@ -359,7 +359,7 @@ unalias smokediff6 >& /dev/null
 
 # FDS location
 
-FDSBINDIR=\`pwd\`/bin
+export FDSBINDIR=\`pwd\`/bin
 
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
@@ -374,7 +374,13 @@ export MPIDIST FDSNETWORK
 
 # Update $LDLIBPATH and PATH
 
-$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
+BASH
+if [ "$ostype" == "LINUX" ] ; then
+cat << BASH >> \$BASHFDS
+$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+BASH
+fi
+cat << BASH >> \$BASHFDS
 PATH=\\\$FDSBINDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
   $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
