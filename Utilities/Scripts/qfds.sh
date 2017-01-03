@@ -1,47 +1,51 @@
 #!/bin/bash
 
 function usage {
-  echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
-  echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
+  echo "Usage: qfds.sh [options] casename.fds"
   echo ""
-  echo "qfds.sh runs FDS using an executable specified with the -e option or"
-  echo "from the respository if -e is not specified (the -r option is no longer"
-  echo "used).  A parallel version of FDS is invoked by using -p to specify the"
-  echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
+  echo "qfds.sh runs FDS using an executable specified by the -e option or from"
+  echo "the respository if -e is not specified.  A parallel version of FDS is "
+  echo "invoked by usingg -p to specify the number of MPI processes and/or -o to"
+  echo "specify the number of OpenMP threads."
   echo ""
+  echo "Common options"
+  echo "--------------"
+  echo " -e exe - full path of FDS used to run case"
+  echo " -p p   - number of MPI processes [default: 1] "
+  echo "          If queue is terminal then casename.fds is run in the foreground on the local computer"
+  echo " -v     - output generated script to standard output"
+  echo "Other options"
+  echo "-------------"
   echo " -A     - used by timing scripts"
   echo " -b     - use debug version of FDS"
   echo " -B     - location of background program"
   echo " -c     - strip extension"
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -e exe - full path of FDS used to run case"
   echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: $FDSROOT]"
+  echo "          [default: $FDSROOT]"
   echo " -h     - display this message"
   echo " -i     - use installed fds"
-  echo " -j job - job prefix"
-  echo " -l node1+node2+...+noden - specify which nodes to run job on"
-  echo " -m m   - reserve m processes per node [default: 1]"
 if [ "$IFORT_COMPILER_LIB" == "" ]; then
   echo " -I inteldist  - specify Intel library location";
 else
   echo " -I inteldist  - specify Intel library location [default: $IFORT_COMPILER_LIB]";
 fi
+  echo " -j job - job prefix"
+  echo " -l node1+node2+...+noden - specify which nodes to run job on"
+  echo " -m m   - reserve m processes per node [default: 1]"
   echo " -M mpidist  - specify mpi distribution location"
   echo " -n n   - number of MPI processes per node [default: 1]"
   echo " -N     - do not use socket or report binding options"
   echo " -o o   - number of OpenMP threads per process [default: 1]"
   echo " -p p   - number of MPI processes [default: 1] "
   echo " -q q   - name of queue. [default: batch]"
-  echo "          If queue is terminal then casename.fds is run in the foreground on the local computer"
   echo " -r     - report bindings"
   echo " -s     - stop job"
   echo " -t     - used for timing studies, run a job alone on a node"
   echo " -u     - use development version of FDS"
   echo " -v     - output generated script to standard output"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
-  echo "input_file - input file"
   echo ""
   exit
 }
@@ -239,8 +243,8 @@ if [ $use_installed -eq 1 ]; then
 fi
 
 if [[ "$IFORT_COMPILER_LIB" != "" && ! -d $IFORT_COMPILER_LIB ]]; then
-   echo "The Intel compiler shared library $IFORT_COMPILER_LIB does not exist."
-   echo "Run aborted"
+   echo "The Intel compiler shared library location, $IFORT_COMPILER_LIB,"
+   echo "does not exist. Run aborted"
    ABORTRUN=y
 fi
 if [[ "$MPIDIST" != "" && ! -d $MPIDIST ]]; then
