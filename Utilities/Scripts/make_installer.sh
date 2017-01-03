@@ -359,7 +359,7 @@ unalias smokediff6 >& /dev/null
 
 # FDS location
 
-FDSBINDIR=\`pwd\`/bin
+export FDSBINDIR=\`pwd\`/bin
 
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
