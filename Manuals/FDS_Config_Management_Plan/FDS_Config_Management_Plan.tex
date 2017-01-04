@@ -308,21 +308,24 @@ The central location is known as the {\em Repository}.
 
 FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  Only Team Members described in the previous chapter can commit changes to the repository. All others must submit a ``pull request.''
 
-The current location of the FDS repository is \href{https://github.com/firemodels/fds-smv}{\textct{https://github.com/firemodels/fds-smv}}. The repository contains the following files:
-\begin{enumerate}
-\item Compiled FDS and Smokeview executables
-\item FDS and Smokeview source code files
-\item FDS and Smokeview documentation
-\item Input files for software testing, verification testing, and validation testing
-\item Experimental data files used for validation testing
-\item Scripts and post-processing utilities used for software testing
-\item Web pages and wikis containing notes and other information
-\end{enumerate}
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{\textct{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
+
+\vskip\baselineskip
+\begin{tabular}{ll}
+fds & FDS source code, verification and validation tests, wikis, and documentation \\
+smv & Smokeview source code, integration tests, and documentation \\
+exp & Experimental data repository for FDS validation \\
+out & FDS output results for validation \\
+bot & Firebot (continuous integration system) source \\
+fds-smv & Web page html source
+\end{tabular}
+\vskip\baselineskip
+
 In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site. 
 
 \subsection{Version Identification}
 
-At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each official release of FDS is tagged with a specific version number (e.g., 5.0.1), there may be many commits of source code, documentation, or other files to the FDS repository before a new version is released.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the revision tag of the most recently committed source file. This is accomplished by using source file tagging. When FDS is compiled, the following lines in the main routine ({\ct main.f90}) are updated with the current repository information:
+At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each official release of FDS is tagged with a specific version number (e.g., 6.5.3), there may be many commits of source code, documentation, or other files to the FDS repository before a new version is released.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the revision tag of the most recently committed source file. This is accomplished by using source file tagging. When FDS is compiled, the following lines in the main routine ({\ct main.f90}) are updated with the current repository information:
 \begin{lstlisting}
 CHARACTER(255), PARAMETER :: GREVISION='$Revision$'
 CHARACTER(255), PARAMETER :: GREVISION_DATE='$RevisionDate: unknown $'
@@ -335,7 +338,7 @@ Upon compiling, these strings will be stored in the executable file. If the pers
 
 \section{Development Process}
 
-Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 5.2.12 to 5.2.13, for example. This happens every few weeks. A change from 5.2 to 5.3 might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
+Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 6.2.12 to 6.2.13, for example. This happens every few weeks. A change from 6.2 to 6.3 might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
 
 There is no formal process by which FDS is updated. Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A suite of simple verification calculations (included in this document) are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations (also included here) are run with each significant upgrade. Significant changes to FDS are made based on the following criteria, in no particular order:
 \begin{description}
@@ -414,7 +417,7 @@ The decision to change versions of the software is made by consensus of the deve
 
 \subsection{Version Number}
 
-New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS~5.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
+New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS~6.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
 
 
