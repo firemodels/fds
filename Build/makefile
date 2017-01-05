@@ -10,6 +10,8 @@
 # The variable VPATH defines where the source code is relative to the current directory
 
 VPATH = ../Source
+MPIFORT=mpifort
+
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -202,7 +204,7 @@ impi_intel_linux_64_db : setup $(obj_mpi)
 
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
 mpi_intel_linux_64 : LFLAGS = -static-intel
-mpi_intel_linux_64 : FCOMPL = mpifort
+mpi_intel_linux_64 : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
@@ -223,7 +225,7 @@ mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
 mpi_intel_linux_64ib : LFLAGSMKL =
 endif
 mpi_intel_linux_64ib : LFLAGS = -static-intel
-mpi_intel_linux_64ib : FCOMPL = mpifort
+mpi_intel_linux_64ib : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
 mpi_intel_linux_64ib : setup $(obj_mpi)
@@ -231,7 +233,7 @@ mpi_intel_linux_64ib : setup $(obj_mpi)
 
 mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
 mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel
-mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi mpifort
+mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi $(MPIFORT)
 mpi_intel_linux_64ib_scorep : FOPENMPFLAGS =
 mpi_intel_linux_64ib_scorep : obj = fds_mpi_intel_linux_64ib_scorep
 mpi_intel_linux_64ib_scorep : setup $(obj_mpi)
@@ -261,7 +263,7 @@ intel_linux_64_inspect : setup $(obj_serial)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 mpi_intel_linux_64_db : LFLAGS = -static-intel
-mpi_intel_linux_64_db : FCOMPL = mpifort
+mpi_intel_linux_64_db : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
@@ -269,7 +271,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none $(GITINFO)
 mpi_intel_linux_64_inspect : LFLAGS = -static-intel
-mpi_intel_linux_64_inspect : FCOMPL = mpifort
+mpi_intel_linux_64_inspect : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64_inspect : obj = fds_mpi_intel_linux_64_inspect
 mpi_intel_linux_64_inspect : setup $(obj_mpi)
@@ -290,7 +292,7 @@ mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -trace
 mpi_intel_linux_64ib_db : LFLAGSMKL =
 endif
 mpi_intel_linux_64ib_db : LFLAGS = -static-intel
-mpi_intel_linux_64ib_db : FCOMPL = mpifort
+mpi_intel_linux_64ib_db : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
 mpi_intel_linux_64ib_db : setup $(obj_mpi)
@@ -298,7 +300,7 @@ mpi_intel_linux_64ib_db : setup $(obj_mpi)
 
 mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback $(GITINFO)
 mpi_intel_linux_64ib_dv : LFLAGS = -static-intel
-mpi_intel_linux_64ib_dv : FCOMPL = mpifort
+mpi_intel_linux_64ib_dv : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib_dv : obj = fds_mpi_intel_linux_64ib_dv
 mpi_intel_linux_64ib_dv : setup $(obj_mpi)

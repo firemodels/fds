@@ -248,7 +248,7 @@ The VTT experiments consisted of liquid fuel pan fires positioned in the middle 
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Temperature}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Temperature}
 \end{tabular}
 \end{center}
 \caption[Summary of plume temperature predictions]
@@ -313,7 +313,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=4.5in]{SCRIPT_FIGURES/Heskestad/Flame_Height}
+\includegraphics[height=3in]{SCRIPT_FIGURES/Heskestad/Flame_Height}
 \end{center}
 \caption[Summary of flame height predictions, Heskestad correlation]
 {Comparison of FDS predictions of flame height from a 1~m square pan fire for $Q^*$ values ranging from
@@ -322,7 +322,9 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \end{figure}
 
 \begin{figure}[!h]
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/Heskestad/Flame_Height2}
+\begin{center}
+\includegraphics[height=3in]{SCRIPT_FIGURES/Heskestad/Flame_Height2}
+\end{center}
 \caption[Flame height uncertainty, multiple correlations and flame height definitions]
 {Flame height predictions from various correlations compared with FDS predictions using two different flame height definitions.  Uncertainty (maximum variation) at $Q^*>1$ is $\pm$15~\%.  At $Q^*=0.1$, the uncertainty is approximately $\pm$65~\%. Correlation references: Steward \cite{Steward:1970}, Becker and Liang \cite{Becker:1978}, Cox and Chitty \cite{Cox:1985}, Heskestad \cite{SFPE:Heskestad}, Hasemi and Tokunaga \cite{Hasemi:1984}, Cetegen \cite{Cetegen:1984}, Delichatsios \cite{Delichatsios:1984}.}
 \label{Flame_Height2}
@@ -564,7 +566,9 @@ By examining movies of the simulation results we can see a qualitative differenc
 \section{Purdue 7.1 cm Methane Flame}
 \label{Purdue_Flames}
 
-Figures \ref{Purdue_7p1_CH4_mixture_fraction}-\ref{Purdue_7p1_CH4_vel_rms} show results for the Purdue 7.1 cm methane flame \cite{Xin:CF2005} at two grid resolutions.
+Figures \ref{Purdue_7p1_CH4_mixture_fraction}-\ref{Purdue_7p1_CH4_vel_rms} show results for the Purdue 7.1 cm methane flame \cite{Xin:CF2005}.  Three sets of results are presented: two coarse (4 mm) cases and one fine (2 mm) case.  The fine mesh case is run with MPI on 16 meshes.  The coarse cases are run two ways: a single mesh case (dashed lines) and a 16 mesh case (dotted lines).  As should be the case, the single- and multi-mesh cases yield the same results.  This gives confidence in the domain decomposition strategy for open plume flows with FDS.
+
+The discrepancy at the centerline for mixture fraction and vertical velocity may be attributed to our not accounting for (1) the slight divergence of the flow at the burner exit  (7\si{\degree} \cite{Xin:CF2005}) and (2) the asymmetries and fluctuations in the burner exit and ambient environment.  Examination of the FDS output shows the solution remains very symmetric, preventing large gulps of air from penetrating the centerline of the plume, which would tend to smooth out the profiles near the center reducing the bimodal vertical velocity profile and centerline mixture fraction.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

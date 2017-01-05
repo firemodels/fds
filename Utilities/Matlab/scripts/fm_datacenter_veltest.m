@@ -41,10 +41,8 @@ xlim([-2 2])
 ylim([-2 2])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured U-Velocity (m/s)'];
 ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -57,10 +55,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -71,10 +70,8 @@ xlim([-5 5])
 ylim([-5 5])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured V-Velocity (m/s)'];
 ytitle = ['Predicted V-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -86,10 +83,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -100,10 +98,8 @@ xlim([-1 3])
 ylim([-1 3])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured W-Velocity (m/s)'];
 ytitle = ['Predicted W-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -115,10 +111,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -129,10 +126,8 @@ xlim([0 5])
 ylim([0 5])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured Total Velocity (m/s)'];
 ytitle = ['Predicted Total Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -144,10 +139,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off  
+hold off
 clear hX
 
 % Low flow test
@@ -177,10 +173,8 @@ xlim([-0.6 0.6])
 ylim([-0.6 0.6])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured U-Velocity (m/s)'];
 ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -193,10 +187,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -207,10 +202,8 @@ xlim([-1.5 1.5])
 ylim([-1.5 1.5])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured V-Velocity (m/s)'];
 ytitle = ['Predicted V-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -222,10 +215,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -236,10 +230,8 @@ xlim([-0.4 0.8])
 ylim([-0.4 0.8])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured W-Velocity (m/s)'];
 ytitle = ['Predicted W-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -251,10 +243,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off   
+hold off
 clear hX
 
 hX=plot(x_err,x_err,'k-',x_err,y_err_p,'k--',x_err,y_err_m,'k--');
@@ -265,10 +258,8 @@ xlim([0 1.4])
 ylim([0 1.4])
 
 plot_style
-set(gca,'Units',Plot_Units)
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(figure(1),'DefaultLineLineWidth',Line_Width)
 xtitle = ['Measured Total Velocity (m/s)'];
 ytitle = ['Predicted Total Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
@@ -280,10 +271,11 @@ addverstr(gca,git_file,'linear')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
-hold off  
+hold off
 clear hX
 
 

@@ -13,6 +13,8 @@ export FDSEDITION=$4
 export FDSVERSION=$5
 export SMVVERSION=$6
 export MAJOR=$7
+export COMPLIBFROM=
+export MISCLIBFROM=
 
 export FDSOS=_osx_64
 export INSTALLDIR=FDS/$FDSEDITION

@@ -69,12 +69,12 @@ end
 % Read in global plot options
 plot_style
 
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+% set(gcf,'DefaultLineLineWidth',Line_Width)
+% WPos = get(gcf,'Position');
+% set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
+% set(gca,'FontName',Font_Name)
+% set(gca,'Units',Plot_Units)
+% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Read configuration file
 A = importdata(Dataplot_Inputs_File);
@@ -166,6 +166,8 @@ for i=2:n_plots
             K_save = K;
             d2_Key_save = d2_Key;
         end
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
         define_drow_variables
 
@@ -506,10 +508,14 @@ for i=2:n_plots
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
             set(gcf,'Visible',Figure_Visibility);
+            set(gcf,'Resize','off')
             set(gcf,'PaperUnits',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
+            % set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
+            Paper_Pos=get(gcf,'PaperPosition');
+            set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
             display(['Printing plot ',num2str(i),'...'])
+            warning('off','MATLAB:print:FigureTooLargeForPage') % this is part of the hack that seems necessary for Matlab 2016b
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...

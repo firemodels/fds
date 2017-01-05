@@ -43,10 +43,8 @@ plot(yp_exact,yp_exact,'ro'); hold on
 plot(yp_exact,yp,'b--')
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 
 xlabel('{\it y}^+ specified','Interpreter',Font_Interpreter,'Fontname',Font_Name),

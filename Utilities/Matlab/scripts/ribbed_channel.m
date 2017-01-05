@@ -52,11 +52,11 @@ for i=1:lnx
     I = find(x<0);
     x(I) = x(I) + 1;
     [x I] = sort(x);
-    
+
     j = find(strcmp(M{i}.colheaders,'u_strm_bot'));
     u_fds = M{i}.data(:,j);
     u_fds = u_fds(I);
-    
+
     H(1+i)=plot(x/h,u_fds,fds_marker{i});
 end
 
@@ -67,10 +67,8 @@ axis([0 10 -0.8 0.8])
 set(gca,'YTick',-0.8:0.4:0.8)
 set(gca,'YTickLabel',-0.8:0.4:0.8)
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
@@ -104,11 +102,11 @@ for i=1:lnx
     I = find(x<0);
     x(I) = x(I) + 1;
     [x I] = sort(x);
-    
+
     j = find(strcmp(M{i}.colheaders,'urms_strm_bot'));
     urms_fds = M{i}.data(:,j);
     urms_fds = urms_fds(I);
-    
+
     H(1+i)=plot(x/h,urms_fds,fds_marker{i});
 end
 
@@ -118,10 +116,8 @@ set(yh,'Position',[-0.8194-.2    0.2963-.025    1.0001])
 
 axis([0 10 0 0.6])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
@@ -152,10 +148,10 @@ H(1)=plot(u_data,yoh,'bo'); hold on
 for i=1:lnx
     j = find(strcmp(M{i}.colheaders,'u_prof_rib-z'));
     y = M{i}.data(:,j);
-    
+
     j = find(strcmp(M{i}.colheaders,'u_prof_rib'));
     u_fds = M{i}.data(:,j);
-    
+
     H(1+i)=plot(u_fds,y/h,fds_marker{i});
 end
 
@@ -164,10 +160,8 @@ xlabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Lab
 
 axis([0 2 1 3])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
@@ -199,10 +193,10 @@ H(1)=plot(urms_data,yoh,'bo'); hold on
 for i=1:lnx
     j = find(strcmp(M{i}.colheaders,'urms_prof_rib-z'));
     y = M{i}.data(:,j);
-    
+
     j = find(strcmp(M{i}.colheaders,'urms_prof_rib'));
     urms_fds = M{i}.data(:,j);
-    
+
     H(1+i)=plot(urms_fds,y/h,fds_marker{i});
 end
 
@@ -211,10 +205,8 @@ xlabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize'
 
 axis([0 1 1 3])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northeast');
 set(lh,'Interpreter',Font_Interpreter)

@@ -10,4 +10,4 @@ if [ "$MPIDIST" == "" ]; then
 fi
 
 echo Building $target
-make -j4 VPATH="../../Source" -f ../makefile $target
+make -j4 MPIFORT="$MPIFORT" VPATH="../../Source" -f ../makefile $target

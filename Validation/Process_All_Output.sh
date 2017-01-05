@@ -5,7 +5,25 @@ PROCESS()
   case=$1
   curdir=`pwd`
   cd $case
-  ./Process_Output.sh 
+  nout=`ls -l Current_Results/*.out |& grep -v cannot | wc -l`
+  nfds=`ls -l Current_Results/*.fds |& grep -v cannot | wc -l`
+  nsuccess=`tail Current_Results/*.out |& grep successfully | wc -l`
+  status="***error: $case cases not run"
+  if [ $nfds -gt 0 ] && [ $nfds -gt $nout ]; then
+    status="***error: some $case cases did not run or are not complete"
+  else
+    if [ $nout -gt 0 ] && [ $nout -gt $nsuccess ]; then
+      status="some $case cases failed"
+    else
+      if [ $nout -gt 0 ] ; then
+      status="processing output"
+      ./Process_Output.sh 
+      fi
+    fi
+  fi
+  if [ $nfds -gt 0 ]; then
+    echo "$case: cases=$nfds finished=$nout successful=$nsuccess status=$status"
+  fi
   cd $curdir
 }
 
@@ -19,6 +37,7 @@ PROCESS Arup_Tunnel
 PROCESS ATF_Corridors
 PROCESS Backward_Facing_Step
 PROCESS Beyler_Hood
+PROCESS Bouchair_Solar_Chimney
 PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
@@ -29,6 +48,7 @@ PROCESS DelCo_Trainers
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
 PROCESS Fleury_Heat_Flux
+PROCESS FM_FPRF_Datacenter
 PROCESS FM_Parallel_Panels
 PROCESS FM_SNL
 PROCESS Hamins_Gas_Burners
@@ -36,6 +56,7 @@ PROCESS Harrison_Spill_Plumes
 PROCESS Heskestad_Flame_Height
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
+PROCESS LNG_Dispersion
 PROCESS McCaffrey_Plume
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
