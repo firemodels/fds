@@ -73,8 +73,12 @@ sp5 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 
 figure(1)
 plot_style
-axes_position
-plot_position
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 %%%Exp Data%%%
 
@@ -153,8 +157,12 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cf'])
 
 figure(2)
 plot_style
-axes_position
-plot_position
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 %%%Exp Data%%%
 j = find(strcmp(D.colheaders,'Cp-x/h'));
@@ -212,7 +220,10 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cp'])
 
 hx = figure(3);
 plot_style
-plot_position
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -289,7 +300,10 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_U'])
 
 hx = figure(4);
 plot_style
-plot_position
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -363,7 +377,10 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_W'])
 
 hx = figure(5);
 plot_style
-plot_position
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -439,7 +456,10 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_uu'])
 
 hx = figure(6);
 plot_style
-plot_position
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -516,7 +536,10 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_ww'])
 
 hx = figure(7);
 plot_style
-plot_position
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
     j = find(strcmp(D.colheaders,strcat({'z '},x_loc{i})));
