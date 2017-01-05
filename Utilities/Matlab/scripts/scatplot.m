@@ -136,7 +136,7 @@ for j=2:length(Q);
     figure
     set(gca,'PlotBoxAspectRatio',[1 1 1])
     set(gca,'Units','inches')
-    set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
+    set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
     k = 0;
     for i=drange
@@ -337,11 +337,11 @@ for j=2:length(Q);
             legend_handle = legend(K(I),C(I),'Location',Key_Position,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter,'Units',Plot_Units);
             if strcmp(Key_Position,'EastOutside')
                pos = get(legend_handle,'position');
-               set(legend_handle,'position',[Scat_Plot_X+Scat_Plot_Width pos(2:4)])
+               set(legend_handle,'position',[Scat_Paper_Width pos(2:4)])
             end
             if strcmp(Key_Position,'SouthEastOutside')
                pos = get(legend_handle,'position');
-               set(legend_handle,'position',[Scat_Plot_X+Scat_Plot_Width Scat_Plot_Y pos(3:4)])
+               set(legend_handle,'position',[Scat_Paper_Width pos(2:4)])
             end
             set(legend_handle,'Interpreter',Font_Interpreter);
             set(legend_handle,'Fontsize',Key_Font_Size);
@@ -353,13 +353,10 @@ for j=2:length(Q);
         % Print to pdf
         PDF_Paper_Width = Paper_Width_Factor * Scat_Paper_Width;
 
-        set(gcf,'Visible','on');
-        set(gcf,'Resize','off')
-        set(gcf,'PaperUnits','inches');
+        set(gcf,'Visible',Figure_Visibility);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
-        %set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Scat_Paper_Height]);
-        Paper_Pos=get(gcf,'PaperPosition');
-        set(gca,'Position',[Scat_Plot_X-Paper_Pos(1)  Scat_Plot_Y-Paper_Pos(2) Scat_Plot_Width Scat_Plot_Height])
+        set(gcf,'Position',[0 0 PDF_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
 
