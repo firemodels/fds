@@ -1,7 +1,7 @@
 &HEAD CHID='Burro7', TITLE='Burro7 test simulation'/
 
 &MESH IJK=100,100,32, XB=-20,80,-50,50,0,32, MULT_ID='mesh' /
-&MULT ID='mesh', DX=100, DY=100, I_LOWER=-1, I_UPPER=6, J_LOWER=-1, J_UPPER=1 /
+&MULT ID='mesh', DX=100, DY=100, I_LOWER=-1, I_UPPER=8, J_LOWER=-1, J_UPPER=1 /
 
 &TRNZ IDERIV=1, CC=0, PC=0.25, MESH_NUMBER=0 /
 
@@ -56,7 +56,7 @@
 &VENT PBY=-150, SURF_ID='PERIODIC', WIND=.TRUE. /
 &VENT PBY= 150, SURF_ID='PERIODIC', WIND=.TRUE. /
 &VENT PBX=-120, SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBX= 680, SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX= 880, SURF_ID='PERIODIC', WIND=.TRUE. /
 
 &SURF ID ='GROUND', COLOR='TAN', ROUGHNESS=0.006, CONVECTIVE_HEAT_FLUX=0.041 / .006 Roughness based on wind profile, assuming z_o=0.0002, see Blocken et. al., Atm. Env. 41 (2007)
 
@@ -165,6 +165,9 @@
 &DEVC ID      ='G18a01'       ,       XYZ=    795.4   ,       88.4    ,       1       ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID      ='G18a03'       ,       XYZ=    795.4   ,       88.4    ,       3       ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID      ='G18a08'       ,       XYZ=    795.4   ,       88.4    ,       8       ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+
+&DEVC ID='u', QUANTITY='VELOCITY',    POINTS=60, XB=300,300,125,125,0.2,31, Z_ID='z' /
+&DEVC ID='T', QUANTITY='TEMPERATURE', POINTS=60, XB=300,300,125,125,0.2,31, HIDE_COORDINATES=.TRUE. /
 
 &TAIL /
 
