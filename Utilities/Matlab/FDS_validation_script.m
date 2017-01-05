@@ -38,6 +38,7 @@ layer_height
 combine_csiro
 fm_datacenter_scatter
 LNG_Dispersion
+LNG_wind_profiles
 
 % Dataplot and scatplot options
 

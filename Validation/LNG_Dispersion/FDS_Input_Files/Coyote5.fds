@@ -160,4 +160,7 @@
 &DEVC ID      ='G21a03'       ,       XYZ=    497.2   ,       -53.9   ,       3       ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID      ='G21a08'       ,       XYZ=    497.2   ,       -53.9   ,       8       ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 
+&DEVC ID='u', QUANTITY='VELOCITY',    POINTS=60, XB=300,300,125,125,0.2,31, Z_ID='z' /
+&DEVC ID='T', QUANTITY='TEMPERATURE', POINTS=60, XB=300,300,125,125,0.2,31, HIDE_COORDINATES=.TRUE. /
+
 &TAIL /
