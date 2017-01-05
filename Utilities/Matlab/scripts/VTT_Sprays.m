@@ -20,7 +20,7 @@ if ~exist([outdir,'LN02_4_line.csv'])
     display('Error: File LN02_4_line.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if skip_case 
+if skip_case
     return
 end
 
@@ -54,10 +54,8 @@ exp62flux  =strcmp('Flux62',edata.colheaders);
 
 figure(1)
 
-
 set(gca, 'Units', Plot_Units)
-set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
+set(gca, 'Position', [Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(edata.data(:,exp40x),-edata.data(:,exp40velo),'ko');
 hold on
@@ -66,32 +64,31 @@ plot(L2.data(:,fds40velox),-L2.data(:,fds40velo),'b-');
 plot(L4.data(:,fds40velox),-L4.data(:,fds40velo),'r-');
 axis([ -0.3 0.3 0 7]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Velocity (m/s)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Northeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
+set(gcf,'Resize','off')
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_40.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40');
 
 figure(2)
 
 set(gca, 'Units', Plot_Units)
 set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
 
 plot(edata.data(:,exp40x),edata.data(:,exp40diam)*1e6,'ko');
 hold on
@@ -100,32 +97,32 @@ plot(L2.data(:,fds40diamx),L2.data(:,fds40diam)*1e6,'b-');
 plot(L4.data(:,fds40diamx),L4.data(:,fds40diam)*1e6,'r-');
 axis([ -0.3 0.3 0 160]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Diameter d_{32} ({\mu}m)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Southeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
+set(gcf,'Resize','off')
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40');
 
 figure(3)
 
 set(gca, 'Units', Plot_Units)
 set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
+%set(gcf, 'DefaultLineLineWidth', Line_Width)
 
 plot(edata.data(:,exp40x),edata.data(:,exp40flux),'ko');
 hold on
@@ -134,25 +131,24 @@ plot(L2.data(:,fds40fluxx),-L2.data(:,fds40flux),'b-');
 plot(L4.data(:,fds40fluxx),-L4.data(:,fds40flux),'r-');
 axis([ -0.3 0.3 0 0.4]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet Flux (kg/m^2/s)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Northeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40');
 
 
@@ -160,7 +156,6 @@ figure(4)
 
 set(gca, 'Units', Plot_Units)
 set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
 
 plot(edata.data(:,exp62x),-edata.data(:,exp62velo),'ko');
 hold on
@@ -169,32 +164,31 @@ plot(L2.data(:,fds62velox),-L2.data(:,fds62velo),'b-');
 plot(L4.data(:,fds62velox),-L4.data(:,fds62velo),'r-');
 axis([ -0.3 0.3 0 7]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Velocity (m/s)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Northeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
+set(gcf,'Resize','off')
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_62.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62');
 
 figure(5)
 
 set(gca, 'Units', Plot_Units)
 set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
 
 plot(edata.data(:,exp62x),edata.data(:,exp62diam)*1e6,'ko');
 hold on
@@ -203,32 +197,31 @@ plot(L2.data(:,fds62diamx),L2.data(:,fds62diam)*1e6,'b-');
 plot(L4.data(:,fds62diamx),L4.data(:,fds62diam)*1e6,'r-');
 axis([ -0.3 0.3 0 160]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Diameter d_{32} ({\mu}m)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Southeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
+set(gcf,'Resize','off')
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62');
 
 figure(6)
 
 set(gca, 'Units', Plot_Units)
 set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-set(gcf, 'DefaultLineLineWidth', Line_Width)
 
 plot(edata.data(:,exp62x),edata.data(:,exp62flux),'ko');
 hold on
@@ -237,25 +230,25 @@ plot(L2.data(:,fds62fluxx),-L2.data(:,fds62flux),'b-');
 plot(L4.data(:,fds62fluxx),-L4.data(:,fds62flux),'r-');
 axis([ -0.3 0.3 0 0.4]);
 set(gca,'XTick',[-.3:.1:.3]);
-
 set(gca, 'FontName', Font_Name)
-set(gca, 'FontSize', Key_Font_Size)
-
 xlabel('Radial position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Droplet Flux (kg/m^2/s)','FontSize',Label_Font_Size)
 h = legend({'Experiment','FDS 1 cm','FDS 2 cm','FDS 4 cm'}, 'Location', 'Northeast');
-
 set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
+set(gcf,'Resize','off')
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+%set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+Paper_Pos=get(gcf,'PaperPosition');
+set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
 
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62');
 
 
