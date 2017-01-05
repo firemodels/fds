@@ -96,9 +96,14 @@ h6=loglog(exp_data(21:23),fds_out(21:23),'g+');
 xlim([0.01 300]);
 ylim([0.01 300]);
 
-legend([h1 h2 h3 h4 h5 h6],'C3H6 Low SF','C3H6 High SF','C3H6 Low HA','C3H6 High SF','Cable Low SF','Cable High SF','Location','southeast')
-
 plot_style
+
+lh=legend([h1 h2 h3 h4 h5 h6],...
+    'C3H6 Low SF','C3H6 High SF','C3H6 Low HA','C3H6 High SF','Cable Low SF','Cable High SF',...
+    'Location','southeast');
+set(lh,'FontSize',Key_Font_Size)
+
+set(gca,'PlotBoxAspectRatio',[1 1 1])
 set(gca,'FontName',Font_Name)
 xtitle = ['Measured Soot Concentration (mg/m^3)'];
 ytitle = ['Predicted Soot Concentration (mg/m^3)'];
@@ -112,8 +117,9 @@ addverstr(gca,git_file,'loglog')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+%set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot'];
+warning('off','MATLAB:print:FigureTooLargeForPage')
 print(gcf,'-dpdf',plotname);
 hold off
 

@@ -116,7 +116,7 @@ The atmospheric boundary layer is modeled using Monin-Obukhov similarity theory.
    u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.1in]
    \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
 \end{eqnarray}
-where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the surface roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
 \begin{eqnarray}
    \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
    \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
@@ -135,7 +135,7 @@ The default rough wall model used in FDS, in the ``fully rough'' limit, is given
 \be
    \frac{u(z)}{u_*} = \frac{1}{\kappa} \ln \left( \frac{z}{s} \right) + 8.5  \label{u_FDS}
 \ee
-The roughness length used here, $s$, is not the same as the roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
+The \emph{sandgrain} roughness length used here, $s$, is not the same as the \emph{aerodynamic} roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
 \be
    s = z_0 \, {\rm e}^{8.5 \, \kappa} = 30 \, z_0
 \ee
@@ -160,7 +160,7 @@ The plots on the following pages compare measured and predicted downwind concent
 
 
 \begin{sidewaystable}[p]
-\caption{Summary of NIST Reduced-Scale Experiments, 2007.}
+\caption{Summary of LNG Dispersion Experiments.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
