@@ -167,7 +167,7 @@ for i=2:n_plots
             d2_Key_save = d2_Key;
         end
         set(gca,'Units',Plot_Units)
-        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
         define_drow_variables
 
