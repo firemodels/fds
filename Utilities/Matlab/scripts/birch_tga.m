@@ -28,11 +28,16 @@ end
 M_2 = csvread('birch_tga_1step_2_devc.csv',2,0);
 M_20 = csvread('birch_tga_1step_20_devc.csv',2,0);
 
+figure
+
 h=plot(TGA_2_N2(:,1),TGA_2_N2(:,2)/100,TGA_20_N2(:,1),TGA_20_N2(:,2)/100,M_2(:,3),M_2(:,2)/M_2(1,2),M_20(:,3),M_20(:,2)/M_20(1,2));
-hold on
+
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 axis([0 800 0 1.1])
+
 xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(h([1 3]),'Color','b')

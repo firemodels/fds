@@ -56,6 +56,11 @@ u_blasius=fp*u0;
 
 %plot whole velocity profile
 range = 1:4:length(u_blasius);
+
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(u_blasius(range),z_blasius(range),'bo');
 hold on
 H(2)=plot(u_16,z_16,'r--');
@@ -65,7 +70,7 @@ H(4)=plot(u_64,z_64,'g-');
 axis([0 1.1 0 0.15])
 
 set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+set(gca,'FontSize',Label_Font_Size)
 
 xlabel('{\it u} (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 ylabel('{\it z} (m)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -80,14 +85,16 @@ addverstr(gca,Git_Filename,'linear')
 
 % print to pdf for whole velocity profile
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/blasius_profile')
 
 
 %%%%%%%get error comparing with analytic solution(blasius)%%%%%%%%%%
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 clear H
 
 err(1) = 0;
@@ -142,9 +149,9 @@ addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/blasius_convergence')
 
 
