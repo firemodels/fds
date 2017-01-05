@@ -125,8 +125,8 @@ marker{5} = 'v';
 marker{6} = '>';
 marker{7} = '<';
 
-MarkerSize = 7;
-LineWidth = 1.5;
+plot_style
+Marker_Size = 7;
 
 % Collect data
 
@@ -154,10 +154,10 @@ for ns = 1:N_Species
          %n = n + 1;
          hX(f) = plot(ExpPlot(f,s,ns),FDSPlot(f,s,ns));
          set(hX(f),'Marker',marker{f},...
-        'MarkerSize',MarkerSize,...
+        'MarkerSize',Marker_Size,...
         'MarkerEdgeColor',color{f},...
         'MarkerFaceColor','none',...
-        'LineWidth',LineWidth,...
+        'LineWidth',Line_Width,...
         'LineStyle','none');
         hold on
       end
@@ -170,13 +170,14 @@ for ns = 1:N_Species
    plot([xmin xmax],[ymin ymax],'k-')
    axis([xmin xmax ymin ymax])
 
-   plot_style
+   set(gca,'PlotBoxAspectRatio',[1 1 1])
    set(gca,'FontName',Font_Name)
    xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
    ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
    xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
    ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
-   legend(hX,XLegendStr,'Location','NorthWest')
+   lh=legend(hX,XLegendStr,'Location','NorthWest');
+   set(lh,'FontSize',Key_Font_Size)
 
    % add VerStr if file is available
 
@@ -187,8 +188,9 @@ for ns = 1:N_Species
    set(gcf,'Visible',Figure_Visibility);
    set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-   set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+   %set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
    plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
+   warning('off','MATLAB:print:FigureTooLargeForPage')
    print(gcf,'-dpdf',plotname);
 
    clear hX
