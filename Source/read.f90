@@ -590,7 +590,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(LU_ERR,'(A,I6,A,I6)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
-            ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchainged value
+            ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
               WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
               CALL SHUTDOWN(MESSAGE) ; RETURN

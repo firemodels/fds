@@ -1468,7 +1468,7 @@ END SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 SUBROUTINE INITIALIZE_MESH_EXCHANGE_1(NM)
 
-! Create arrays by which info is to exchanged across meshes
+! Create arrays by which info is to be exchanged across meshes
 
 INTEGER :: IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS,IIO,JJO,KKO,NIC_R,II,JJ,KK
 INTEGER, INTENT(IN) :: NM
