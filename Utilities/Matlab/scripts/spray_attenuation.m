@@ -136,7 +136,7 @@ end
 set(d_ax(2:3),'YTickLabel',[])
 set(d_ax(1),'XTick',[0 2 4 6 8])
 set(d_ax(2:3),'XTick',[2 4 6 8])
-ylabel(d_ax(1),'Mean diameter ($\mu$m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel(d_ax(1),'Mean diameter (\mum)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
