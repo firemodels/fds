@@ -119,8 +119,8 @@ for q = 1:lnx
 
     h_leg(q) = plot(x(1:round(length(x)/15):end)/h, Cf_fds(1:round(length(Cf_fds)/15):end), char(symbol_vect_noleg(q)), 'Color', line_color_vect{q}, 'LineWidth', 1, 'MarkerSize', 10);
 
-    yh = ylabel('{\it C_f}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
-    xh = xlabel('{\it x/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+    yh = ylabel('{\it C_f}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
+    xh = xlabel('{\it x/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
     % if q == 1
     %     set(xh,'Units','Pixels')
@@ -140,7 +140,7 @@ axis([0 20 -4E-3 4E-3])
 
 lh = legend([h_dat,h_leg([1:length(h_leg)])], ['J&D',fds_key([1:length(h_leg)])], 'Location', 'SouthEast');
 set(lh,'box','off')
-%set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+%set(lh,'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
 % add Git revision if file is available
 
@@ -195,8 +195,8 @@ for q = 1:lnx
 
     h_leg2(q) = plot(x(1:round(length(x)/15):end)/h, Cp_fds(1:round(length(Cp_fds)/15):end), char(symbol_vect_noleg(q)), 'Color', line_color_vect{q}, 'LineWidth', 1, 'MarkerSize', 10);
 
-    yh = ylabel('{\it C_p}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
-    xh = xlabel('\it x/h','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+    yh = ylabel('{\it C_p}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
+    xh = xlabel('\it x/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
     Pos=get(yh, 'Position');
     set(yh, 'Position',[Pos(1)*.93 Pos(2) Pos(3)]);
@@ -269,16 +269,15 @@ for i = 1:4
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
         if i == 1
-            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{\it <u>/U_0}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
+            xh=xlabel('{\it <u>/U_0}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
         else
             set(gca,'XTickLabel',[])
             set(gca,'YTickLabel',[])
         end
         if q == 1
-            th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
-            tpos = get(th,'Position');
-            tpos(2) = tpos(2) * .90;
+            tpos = [0.01 3.2]; % from get(th,'Position') where th is a title handle
+            th = text(tpos(1),tpos(2),strcat('{\itx/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
             set(th,'Position',tpos)
         end
     end
@@ -343,22 +342,21 @@ for i = 1:4
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
         if i == 1
-            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{\it <w>/U_0}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
+            xh=xlabel('{\it <w>/U_0}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
         else
             set(gca,'XTickLabel',[])
             set(gca,'YTickLabel',[])
         end
 
         if q == 1
-            th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
-            tpos = get(th,'Position');
-            tpos(2) = tpos(2) * .90;
+            tpos = [0.01 3.2]; % from get(th,'Position') where th is a title handle
+            th = text(tpos(1),tpos(2),strcat('{\itx/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
             set(th,'Position',tpos)
         end
     end
 
-    th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name, 'HorizontalAlignment', 'Left');
+    %th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name, 'HorizontalAlignment', 'Left');
 
 end
 
@@ -424,16 +422,15 @@ for i = 1:4
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
         if i == 1
-            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
-            xh=xlabel('{\it <uu>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
+            xh=xlabel('{\it <uu>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
         end
         if q == 1
-            th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
-            tpos = get(th,'Position');
-            tpos(2) = tpos(2) * .90;
+            tpos = [0.01 3.2]; % from get(th,'Position') where th is a title handle
+            th = text(tpos(1),tpos(2),strcat('{\itx/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
             set(th,'Position',tpos)
         end
     end
@@ -504,17 +501,16 @@ for i = 1:4
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
         if i == 1
-            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name)
-            xh=xlabel('{\it <ww>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+            xh=xlabel('{\it <ww>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
         end
 
         if q == 1
-            th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
-            tpos = get(th,'Position');
-            tpos(2) = tpos(2) * .90;
+            tpos = [0.01 3.2]; % from get(th,'Position') where th is a title handle
+            th = text(tpos(1),tpos(2),strcat('{\itx/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
             set(th,'Position',tpos)
         end
     end
@@ -582,24 +578,20 @@ for i = 1:4
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
-        th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
-
         if i == 1
-            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name)
-            xh=xlabel('{\it -<uw>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
+            ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+            xh=xlabel('{\it -<uw>/U_0^2}','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
         else
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
         end
 
         if q == 1
-            tpos = get(th,'Position');
-            tpos(2) = tpos(2) * .90;
+            tpos = [0.01 3.2]; % from get(th,'Position') where th is a title handle
+            th = text(tpos(1),tpos(2),strcat('{\itx/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
             set(th,'Position',tpos)
         end
     end
-
-    th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
 end
 

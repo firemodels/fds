@@ -45,7 +45,7 @@ set(hh,'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size)
 
 % add version if file is available
 
-Git_Filename = 'Qs=1_RI=05_git.txt';
+Git_Filename = [outdir,'Qs=1_RI=05_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
