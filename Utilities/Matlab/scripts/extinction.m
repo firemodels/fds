@@ -239,35 +239,30 @@ simple_temp = [273.15 1600];
 %-----------------------
 % Plotting
 %-----------------------
-figure(1)
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
+
 h=plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',0.5,'MarkerSize',4);
 set(h([1]),'LineWidth',1)
 set(h([2 4]),'MarkerSize',7)
 axis([273.15 1900 0 0.23])
-plot_style
 set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Scat_Label_Font_Size)
 xlabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Mass Fraction Oxygen','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast')
+lh=legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast');
+set(lh,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add Git if file is available
 
-svn_file = 'extinction_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = 'extinction_git.txt';
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');
