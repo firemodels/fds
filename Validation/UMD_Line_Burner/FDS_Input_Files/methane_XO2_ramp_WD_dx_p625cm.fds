@@ -146,30 +146,3 @@
 &DEVC XB=0,0,0.003125,0.24688,0.250,0.250, POINTS=40, TIME_HISTORY=T, QUANTITY='HRRPUV REAC', REAC_ID='R3', ID='QR3-250', HIDE_COORDINATES=T /
 
 &TAIL /
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
