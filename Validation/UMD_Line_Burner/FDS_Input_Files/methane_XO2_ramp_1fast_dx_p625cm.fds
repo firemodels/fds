@@ -96,30 +96,3 @@
 &DEVC XB=0,0,0.003125,0.24688,0.250,0.250, POINTS=40, TIME_HISTORY=T, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', ID='XO2-250', HIDE_COORDINATES=T /
 
 &TAIL /
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
