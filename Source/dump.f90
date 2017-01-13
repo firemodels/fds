@@ -4819,14 +4819,14 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    IF (.NOT.PLOT3D) THEN
       SL => SLICE(IQ)
+      STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
       IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
-         STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
          OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ,NM)) STIME
          WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          CLOSE(LU_SLCF(IQ,NM))
       ELSE
-      ! write geometry for slice file
+         ! write geometry for slice file
          IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
          ! geometry and data file at first time step
             OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
