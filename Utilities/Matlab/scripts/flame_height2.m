@@ -68,6 +68,9 @@ end % hrr loop
 fclose('all');
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M=importdata([expdir,'flame_lengths.csv'],',',1);
 Steward             = M.data(:,5);
@@ -128,6 +131,9 @@ legend_handle=legend(H,...
 
 set(legend_handle,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 set(legend_handle,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
+set(legend_handle,'Units',Paper_Units)
+pos = get(legend_handle,'position');
+set(legend_handle,'position',[Paper_Width pos(2:4)])
 
 set(gca,'YTick',[1e-1 1e0 1e1 1e2 1e3])
 set(gca,'XTick',[1e-1 1e0 1e1 1e2 1e3 1e4])
@@ -142,9 +148,9 @@ addverstr(gca,git_file,'loglog')
 Paper_Width=1.35*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 display('Printing plot Flame_Height2...')
 print -dpdf '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2'
 

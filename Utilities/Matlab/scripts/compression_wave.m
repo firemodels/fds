@@ -5,9 +5,6 @@
 close all
 clear all
 
-figure
-plot_style
-
 data_dir = '../../Verification/Scalar_Analytical_Solution/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
@@ -155,6 +152,10 @@ rho_FL5_32 = compression_wave_soln(rho_fds_FL5_32(1),x-L/64,y-L/64,a,c,t_FL5_32)
 rho_FL5_64 = compression_wave_soln(rho_fds_FL5_64(1),x-L/128,y-L/128,a,c,t_FL5_64);    error_FL5_64 = norm(rho_fds_FL5_64-rho_FL5_64)/length(t_FL5_64);
 rho_FL5_128 = compression_wave_soln(rho_fds_FL5_128(1),x-L/256,y-L/256,a,c,t_FL5_128); error_FL5_128 = norm(rho_fds_FL5_128-rho_FL5_128)/length(t_FL5_128);
 
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(5)=plot(t_FL4_128,rho_FL4_128,'k-','LineWidth',Line_Width); hold on
 H(1)=plot(t_FL4_16,rho_fds_FL4_16,'c--','LineWidth',Line_Width); hold on
@@ -178,16 +179,17 @@ Git_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPositionMode','manual');
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'compression_wave_time_series'])
 
 % convergence plot
 
 figure
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 h = 2*pi./[16 32 64 128];
 e_FL0 = [error_FL0_16 error_FL0_32 error_FL0_64 error_FL0_128];
@@ -217,9 +219,9 @@ Git_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'compression_wave_convergence'])
 
 

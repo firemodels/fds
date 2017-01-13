@@ -11,21 +11,21 @@
 
 &RAMP ID='u profile', Z= 0.001 , F= 0.9892  /
 &RAMP ID='u profile', Z= 0.100 , F= 3.8180  /
-&RAMP ID='u profile', Z= 0.500 , F= 4.8003  /
-&RAMP ID='u profile', Z= 1.000 , F= 5.2180  /
-&RAMP ID='u profile', Z= 1.900 , F= 5.5981  /
-&RAMP ID='u profile', Z= 3.000 , F= 5.8624  /
-&RAMP ID='u profile', Z= 4.000 , F= 6.0250  /
-&RAMP ID='u profile', Z= 5.000 , F= 6.1487  /
-&RAMP ID='u profile', Z= 6.000 , F= 6.2479  /
-&RAMP ID='u profile', Z= 7.000 , F= 6.3304  /
-&RAMP ID='u profile', Z= 8.000 , F= 6.4007  /
-&RAMP ID='u profile', Z= 9.000 , F= 6.4618  /
-&RAMP ID='u profile', Z= 10.000 , F= 6.5157  /
-&RAMP ID='u profile', Z= 15.000 , F= 6.7159  /
-&RAMP ID='u profile', Z= 20.000 , F= 6.8505  /
-&RAMP ID='u profile', Z= 25.000 , F= 6.9504  /
-&RAMP ID='u profile', Z= 30.000 , F= 7.0290  /
+&RAMP ID='u profile', Z= 0.500 , F= 4.8004  /
+&RAMP ID='u profile', Z= 1.000 , F= 5.2182  /
+&RAMP ID='u profile', Z= 1.900 , F= 5.5986  /
+&RAMP ID='u profile', Z= 3.000 , F= 5.8630  /
+&RAMP ID='u profile', Z= 4.000 , F= 6.0258  /
+&RAMP ID='u profile', Z= 5.000 , F= 6.1496  /
+&RAMP ID='u profile', Z= 6.000 , F= 6.2490  /
+&RAMP ID='u profile', Z= 7.000 , F= 6.3316  /
+&RAMP ID='u profile', Z= 8.000 , F= 6.4020  /
+&RAMP ID='u profile', Z= 9.000 , F= 6.4632  /
+&RAMP ID='u profile', Z= 10.000 , F= 6.5172  /
+&RAMP ID='u profile', Z= 15.000 , F= 6.7178  /
+&RAMP ID='u profile', Z= 20.000 , F= 6.8527  /
+&RAMP ID='u profile', Z= 25.000 , F= 6.9528  /
+&RAMP ID='u profile', Z= 30.000 , F= 7.0317  /
 
 &RAMP ID='T profile', Z= 0.001 , F= 1.0019  /
 &RAMP ID='T profile', Z= 0.100 , F= 1.0006  /
@@ -58,7 +58,7 @@
 &VENT PBX=-120, SURF_ID='PERIODIC', WIND=.TRUE. /
 &VENT PBX= 880, SURF_ID='PERIODIC', WIND=.TRUE. /
 
-&SURF ID ='GROUND', COLOR='TAN', ROUGHNESS=0.006, CONVECTIVE_HEAT_FLUX=0.010 / .006 Roughness based on wind profile, assuming z_o=0.0002, see Blocken et. al., Atm. Env. 41 (2007)
+&SURF ID ='GROUND', COLOR='TAN', ROUGHNESS=0.006, CONVECTIVE_HEAT_FLUX=0.010 /
 
 &SURF ID='LNG_SOURCE', MASS_FLUX(1)=0.167, SPEC_ID(1)='METHANE', RAMP_MF(1)='LNG_ramp', TMP_FRONT=-161.55, RAMP_T='LNG_ramp'/ 
   High Mass Flux (From FERC evaluation of DEGADIS according to Guide to LNG Database)
