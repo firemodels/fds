@@ -69,8 +69,10 @@ for j = 1:length(k)-1
    E3_bar = E3_bar + 0.5*(E3(j)+E3(j+1))*dk;
 end
 
-figure(1)
+figure
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 if strcmp(chid,'csmag_32')
     if ~exist('mu0_32_devc.csv')
@@ -124,7 +126,7 @@ addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',chid,'_decay'])

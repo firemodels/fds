@@ -6,14 +6,26 @@
 %
 % Usage: When creating a new figure use the following:
 %
-% figure
 % plot_style
+% figure
+% set(gca,'Units',Plot_Units)
+% set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+%
+% ==>> plot(X,Y,etc)
+% ==>> xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+% ==>> ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+%
 % set(gca,'FontName',Font_Name)
 % set(gca,'FontSize',Label_Font_Size)
+%
+% ==>> lh=legend(...);
+% ==>> set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+%
 % set(gcf,'Visible',Figure_Visibility);
-% set(gcf,'PaperUnits',Paper_Units);
+% set(gcf,'Units',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-% set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+% print(gcf,'-dpdf',plotname);
 
 style = 'fds'; % set to 'fds', 'paper', etc., as needed (default 'fds')
 

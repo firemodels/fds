@@ -5,9 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 18 $QUEUE -d $INDIR heated_channel_Pr_0p10_32.fds
-$QFDS $DEBUG -p 18 $QUEUE -d $INDIR heated_channel_Pr_0p71_32.fds
-$QFDS $DEBUG -p 18 $QUEUE -d $INDIR heated_channel_Pr_1p00_32.fds
-$QFDS $DEBUG -p 18 $QUEUE -d $INDIR heated_channel_Pr_2p00_32.fds
+#$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Askervein.fds
 
 echo FDS cases submitted

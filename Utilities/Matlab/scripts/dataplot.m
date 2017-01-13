@@ -167,7 +167,7 @@ for i=2:n_plots
             d2_Key_save = d2_Key;
         end
         set(gca,'Units',Plot_Units)
-        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
         define_drow_variables
 
@@ -470,16 +470,16 @@ for i=2:n_plots
                     legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key_save),parsepipe(d2_Key)],'Location',Key_Position);
                     d2_Key = [d2_Key_save,'|',d2_Key];
                 end
-                % % The latest version of Matlab (R2015b) apparently get this correct, but I will
-                % % leave this commented code for a bit until we are sure this is working on blaze.
-                % if strcmp(Key_Position,'EastOutside')
-                %    pos = get(legend_handle,'position');
-                %    set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
-                % end
-                % if strcmp(Key_Position,'SouthEastOutside')
-                %    pos = get(legend_handle,'position');
-                %    set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
-                % end
+                if strcmp(Key_Position,'EastOutside')
+                   set(legend_handle,'Units',Paper_Units)
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                end
+                if strcmp(Key_Position,'SouthEastOutside')
+                   set(legend_handle,'Units',Paper_Units)
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                end
                 set(legend_handle,'Interpreter',Font_Interpreter);
                 set(legend_handle,'Fontsize',Key_Font_Size);
                 set(legend_handle,'Box','on');
@@ -508,14 +508,10 @@ for i=2:n_plots
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
             set(gcf,'Visible',Figure_Visibility);
-            set(gcf,'Resize','off')
-            set(gcf,'PaperUnits',Paper_Units);
+            set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            % set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
-            Paper_Pos=get(gcf,'PaperPosition');
-            set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
+            set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
             display(['Printing plot ',num2str(i),'...'])
-            warning('off','MATLAB:print:FigureTooLargeForPage') % this is part of the hack that seems necessary for Matlab 2016b
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
