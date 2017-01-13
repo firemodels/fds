@@ -9,10 +9,9 @@ set fdsmpidir=%svn_root%\fds\Build\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%userprofile%\FDS_Guides
-set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\fds\Utilities\fds2ascii
 set in_setpath=%svn_root%\smv\Build\set_path\intel_win_64
-set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
+set in_shortcut=%userprofile%\fire-notes\INSTALL\repoexes
 set in_smokediff=%svn_root%\smv\Build\smokediff
 set in_smokezip=%svn_root%\smv\Build\smokezip
 set in_dem2fds=%svn_root%\smv\Build\dem2fds
@@ -23,7 +22,7 @@ set in_background=%svn_root%\smv\Build\background
 set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\smv\for_bundle
 set in_sh2bat=%svn_root%\smv\Build\sh2bat\intel_win_64
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
+set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
 set uploads=%svn_root%\fds\Utilities\uploads
 set basedir=%uploads%\%basename%
@@ -98,7 +97,6 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 
 CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
 
-CALL :COPY %in_impi%\impi.dll          %out_bin%\impi.dll
 CALL :COPY %in_impi%\mpiexec.hydra.exe %out_bin%\mpiexec.exe
 CALL :COPY %in_impi%\pmi_proxy.exe     %out_bin%\pmi_proxy.exe
 CALL :COPY %in_impi%\hydra_service.exe %out_bin%\hydra_service2.exe
@@ -110,10 +108,6 @@ echo --- copying auxillary files ---
 echo.
 CALL :COPY  %in_for_bundle%\objects.svo            %out_smv%\.
 CALL :COPY  %in_for_bundle%\volrender.ssf          %out_smv%\.
-
-CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
-CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_smv%\.
-CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_smv%\.
 
 CALL :COPY  %in_for_bundle%\smokeview.ini          %out_smv%\.
 
@@ -158,7 +152,7 @@ CALL :COPY %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
 CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
 
 echo.
-echo --- copying starup shortcuts ---
+echo --- copying startup shortcuts ---
 echo.
  
 CALL :COPY "%svn_root%\webpages\smv_readme.html" "%out_guides%\Smokeview_release_notes.html"
