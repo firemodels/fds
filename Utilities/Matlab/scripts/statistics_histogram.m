@@ -47,10 +47,10 @@ if strcmp(Stats_Output, 'Validation')
 
             PDF_Paper_Width = Paper_Width;
 
-            set(gcf,'Visible','on');
-            set(gcf,'PaperUnits','inches');
+            set(gcf,'Visible',Figure_Visibility);
+            set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
+            set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
             print(gcf,Image_File_Type,[Manuals_Dir,[Plot_Filename, '_Histogram']])
             hold off
             % Add histogram name to array for LaTeX output later

@@ -111,12 +111,12 @@ The simulations of liquified natural gas (LNG) dispersion experiments that are d
 
 \subsubsection{Atmospheric Boundary Layer}
 
-The atmospheric boundary layer is modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically the ground level pressure and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+The atmospheric boundary layer is modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
 \begin{eqnarray}
    u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.1in]
    \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
 \end{eqnarray}
-where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the surface roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
 \begin{eqnarray}
    \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
    \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
@@ -127,7 +127,7 @@ Field experiments like those discussed in this section typically characterize th
 \be
    L = \frac{u_*^2 \, \theta_0}{g \, \kappa \, \theta_*}
 \ee
-Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}.
+Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. Figure~\ref{LNG_Dispersion_Burro_profiles} through Fig.~\ref{LNG_Dispersion_MaplinSands_profiles} display the measured velocity and temperature profiles, the corresponding Monin-Obukhov profiles that serve as initial and boundary conditions for FDS, and the resulting time-averaged profiles from the FDS simulations. 
 
 \subsubsection{Surface Roughness}
 
@@ -135,7 +135,7 @@ The default rough wall model used in FDS, in the ``fully rough'' limit, is given
 \be
    \frac{u(z)}{u_*} = \frac{1}{\kappa} \ln \left( \frac{z}{s} \right) + 8.5  \label{u_FDS}
 \ee
-The roughness length used here, $s$, is not the same as the roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
+The \emph{sandgrain} roughness length used here, $s$, is not the same as the \emph{aerodynamic} roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
 \be
    s = z_0 \, {\rm e}^{8.5 \, \kappa} = 30 \, z_0
 \ee
@@ -154,13 +154,13 @@ In the various experiments, a fixed mass of LNG was spilled onto water, forming 
 
 
 
-\subsubsection{Results}
+\subsubsection{Comparison of Measured and Predicted Downwind Gas Concentrations}
 
-The plots on the following pages compare measured and predicted downwind concentrations of natural gas originating from spills of liquified natural gas (LNG) on water. In each case, the measured values are averages of sensors positioned in arcs at discrete distances downwind of the spill site. The sensors were generally located a few meters off the relatively dry, flat terrain.
+Figures~\ref{LNG_Dispersion_1}--\ref{LNG_Dispersion_2} compare measured and predicted downwind concentrations of natural gas originating from spills of liquified natural gas (LNG) on water. In each case, the measured values are averages of sensors positioned in arcs at discrete distances downwind of the spill site. The sensors were generally located a few meters off the relatively dry, flat terrain.
 
 
 \begin{sidewaystable}[p]
-\caption{Summary of NIST Reduced-Scale Experiments, 2007.}
+\caption{Summary of LNG Dispersion Experiments.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
@@ -176,6 +176,7 @@ $p_0$ (mbar)             & 948    & 940    & 941    & 940    & 936    & 939    &
 $T_0$ ($^\circ$C)        & 34.5   & 33.8   & 32.9   & 35.4   & 39.6   & 29.3   & 24.1        & 32.2        & 35.0        & 30.8              & 14.9            & 15.2           & 16.1    \\ \hline
 RH (\%)                  & 5.2    & 7.4    & 4.5    & 14.4   & 11.3   & 22.1   & 22.8        & ---         & 4.0         & 12.0              & 53              & 90             & 77      \\ \hline
 \multicolumn{14}{|c|}{Computed parameters} \\ \hline
+$\theta_*$ (K)           & -0.521 & -0.092 & 0.025  & -0.035 & -0.964 & -0.542 & 0.039       & 0.058       & -0.018      & 0.152             & -0.155          & -0.076         & -0.101  \\ \hline
 $\dot{q}''$ (W/m$^2$)    & -154   & -41    & 2      & -10    & -314   & -284   & 9           & 4           & -5          & 58                & -39             & -24            & -32     \\ \hline
 $D$ (m)                  & 25.9   & 27.5   & 29.9   & 32.2   & 27.7   & 31.4   & 30.6        & 19.5$^\dag$ & 16.0$^\dag$ & 10.8$^\dag$       & 13.3            & 12.8           & 14.4    \\ \hline
 \end{tabular}
@@ -185,6 +186,60 @@ $^\ddag$ The roughness length was changed to 0.00002~m to better match the measu
 $^\dag$ The Falcon experiments involved 4 separated spills
 \label{tab:LNG_Dispersion}
 \end{sidewaystable}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro3_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro3_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro7_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro7_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro8_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro8_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro9_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Burro9_tmp}
+\end{tabular*}
+\caption[LNG Dispersion experiments, Burro velocity and temperature profiles]{LNG Dispersion experiments, Burro velocity and temperature profiles.}
+\label{LNG_Dispersion_Burro_profiles}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote3_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote3_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote5_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote5_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote6_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Coyote6_tmp}
+\end{tabular*}
+\caption[LNG Dispersion experiments, Coyote velocity and temperature profiles]{LNG Dispersion experiments, Coyote velocity and temperature profiles.}
+\label{LNG_Dispersion_Coyote_profiles}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon1_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon1_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon3_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon3_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon4_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/Falcon4_tmp}
+\end{tabular*}
+\caption[LNG Dispersion experiments, Falcon velocity and temperature profiles]{LNG Dispersion experiments, Falcon velocity and temperature profiles.}
+\label{LNG_Dispersion_Falcon_profiles}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands27_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands27_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands34_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands34_tmp} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands35_vel} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LNG_Dispersion/MaplinSands35_tmp}
+\end{tabular*}
+\caption[LNG Dispersion experiments, Maplin Sands velocity and temperature profiles]{LNG Dispersion experiments, Maplin Sands velocity and temperature profiles.}
+\label{LNG_Dispersion_MaplinSands_profiles}
+\end{figure}
 
 
 \begin{figure}[p]
