@@ -30,11 +30,11 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh Utilities/uploads FDS_%fds_version%-SMV_%smv_version%_linux64.sh y
+  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/uploads FDS_%fds_version%-SMV_%smv_version%_linux64.sh y
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh Utilities/uploads FDS_%fds_version%-SMV_%smv_version%_osx64.sh y
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/uploads FDS_%fds_version%-SMV_%smv_version%_osx64.sh y
   goto eof
 )
 
