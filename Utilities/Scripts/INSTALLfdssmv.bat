@@ -25,7 +25,7 @@ echo   Installing FDS-Smokeview bundle on %platform%
 Title  Installing FDS-Smokeview bundle on %platform%
 
 if "%platform%" == "windows" (
-  cd %svn_root%\Utilities\uploads
+  cd %svn_root%\fds\Utilities\uploads
   call FDS_%fds_version%-SMV_%smv_version%_win64.exe
   goto eof
 )
