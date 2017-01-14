@@ -180,6 +180,7 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHFDS=/tmp/bashrc_fds.\$\$
+BASHUNINSTALL=/tmp/uninstall_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -328,6 +329,7 @@ echo ""
 echo "Installation beginning"
  
 MKDIR \$FDS_root 1
+MKDIR \$FDS_root/Uninstall 1
 
 #--- copy installation files into the FDS_root directory
 
@@ -336,6 +338,67 @@ echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
+
+#--- create uninstall file
+
+cat << BASH > \$BASHUNINSTALL
+#/bin/bash
+FDSDIR=\$FDS_root
+RMDIR=
+RMENTRY=
+BASH
+if [ "$ostype" == "OSX" ] ; then
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bash_profile
+BASH
+else
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bashrc
+BASH
+fi
+cat << BASH >> \$BASHUNINSTALL
+while true; do
+  read -p "Do you wish to remove the directory \\\$FDSDIR? (yes/no) " yn
+  case \$yn in
+      [Yy]* ) RMDIR=1;break;;
+      [Nn]* ) break;;
+      * ) echo "Please answer yes or no.";;
+  esac
+done
+if [[ "\\\$RMDIR" == "1" ]]; then
+  if [[ -d \\\$FDSDIR ]]; then
+    echo removing \\\$FDSDIR
+    rm -r \\\$FDSDIR
+  else
+    echo "***warning: The directory \\\$FDSDIR does not exist."
+  fi
+fi
+
+BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
+
+while true; do
+  read -p "Do you wish to remove FDS entries from \\\$BASHRC ? (yes/no) " yn
+  case \$yn in
+      [Yy]* ) RMENTRY=1;break;;
+      [Nn]* ) break;;
+      * ) echo "Please answer yes or no.";;
+  esac
+done
+if [[ "\\\$RMENTRY" == "1" ]]; then
+  if [[ -e \\\$BASHRC ]]; then
+    echo removing FDS entries from \\\$BASHRC
+    grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
+    mv \\\$BASHRC ~/.bashrc\\\$BAK
+    mv ~/.bashrc_new \\\$BASHRC
+  else
+    echo "***warning: the file \\\$BASHRC does not exist."
+  fi
+fi
+echo uninstall of FDS and Smokeview complete
+BASH
+
+chmod +x \$BASHUNINSTALL
+mv \$BASHUNINSTALL \$FDS_root/Uninstall/uninstall_fds.sh
 
 #--- create BASH startup file
 
@@ -419,7 +482,7 @@ cat << EOF >> $INSTALLER
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
-  echo "# --------------------------------------------" >> \$BASHSTARTUP
+  echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
