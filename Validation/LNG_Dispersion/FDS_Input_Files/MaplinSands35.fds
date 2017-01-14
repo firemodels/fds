@@ -5,9 +5,9 @@
 
 &TRNZ IDERIV=1, CC=0, PC=0.25, MESH_NUMBER=0 /
 
-&TIME T_BEGIN=-200., T_END=200. /
+&TIME T_BEGIN=-200., T_END=400. /
 
-&MISC U0=1., MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', RAMP_TMP0_Z='T profile', DT_MEAN_FORCING=1., TMPA=16.1, P_INF=101325, HUMIDITY=77., PROCESS_ALL_MESHES=.TRUE.  /
+&MISC U0=1., V0=1., MEAN_FORCING(1)=.TRUE., MEAN_FORCING(2)=.TRUE., RAMP_U0_Z='u profile', RAMP_V0_Z='u profile', RAMP_U0_T='u time', RAMP_V0_T='v time', RAMP_TMP0_Z='T profile', DT_MEAN_FORCING=1., TMPA=16.1, P_INF=101325, HUMIDITY=77., PROCESS_ALL_MESHES=.TRUE.  /
 
 &RAMP ID='u profile', Z= 0.001 , F= 3.0055  /
 &RAMP ID='u profile', Z= 0.100 , F= 6.5399  /
@@ -44,6 +44,44 @@
 &RAMP ID='T profile', Z= 20.000 , F= 0.9982  /
 &RAMP ID='T profile', Z= 25.000 , F= 0.9980  /
 &RAMP ID='T profile', Z= 30.000 , F= 0.9978  /
+
+&RAMP ID='u time', T= 0 , F= 0.9397  /
+&RAMP ID='u time', T= 10 , F= 0.9063  /
+&RAMP ID='u time', T= 20 , F= 0.9397  /
+&RAMP ID='u time', T= 30 , F= 0.9848  /
+&RAMP ID='u time', T= 40 , F= 1.0000  /
+&RAMP ID='u time', T= 50 , F= 1.0000  /
+&RAMP ID='u time', T= 60 , F= 0.9962  /
+&RAMP ID='u time', T= 70 , F= 0.9986  /
+&RAMP ID='u time', T= 80 , F= 1.0000  /
+&RAMP ID='u time', T= 90 , F= 0.9994  /
+&RAMP ID='u time', T= 100 , F= 0.9962  /
+&RAMP ID='u time', T= 110 , F= 0.9962  /
+&RAMP ID='u time', T= 120 , F= 0.9962  /
+&RAMP ID='u time', T= 130 , F= 1.0000  /
+&RAMP ID='u time', T= 140 , F= 0.9994  /
+&RAMP ID='u time', T= 150 , F= 0.9962  /
+&RAMP ID='u time', T= 160 , F= 0.9962  /
+&RAMP ID='u time', T= 170 , F= 0.9962  /
+    
+&RAMP ID='v time', T= 0 , F= -0.3420  /
+&RAMP ID='v time', T= 10 , F= -0.4225  /
+&RAMP ID='v time', T= 20 , F= -0.3420  /
+&RAMP ID='v time', T= 30 , F= -0.1736  /
+&RAMP ID='v time', T= 40 , F= 0.0000  /
+&RAMP ID='v time', T= 50 , F= 0.0000  /
+&RAMP ID='v time', T= 60 , F= -0.0871  /
+&RAMP ID='v time', T= 70 , F= -0.0523  /
+&RAMP ID='v time', T= 80 , F= 0.0000  /
+&RAMP ID='v time', T= 90 , F= 0.0349  /
+&RAMP ID='v time', T= 100 , F= 0.0871  /
+&RAMP ID='v time', T= 110 , F= 0.0871  /
+&RAMP ID='v time', T= 120 , F= 0.0871  /
+&RAMP ID='v time', T= 130 , F= 0.0000  /
+&RAMP ID='v time', T= 140 , F= -0.0349  /
+&RAMP ID='v time', T= 150 , F= -0.0871  /
+&RAMP ID='v time', T= 160 , F= -0.0871  /
+&RAMP ID='v time', T= 170 , F= -0.0871  /
 
 &RADI RADIATION=.FALSE. /
 
