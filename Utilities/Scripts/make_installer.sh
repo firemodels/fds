@@ -180,6 +180,7 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHFDS=/tmp/bashrc_fds.\$\$
+BASHUNINSTALL=/tmp/uninstall_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -337,6 +338,13 @@ cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
+#--- create uninstall file
+
+cat << BASH > \$BASHUNINSTALL
+#/bin/bash
+BASH
+cp \$BASHUNINSTALL \`pwd\`/bin/uninstall_fds.sh
+
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
@@ -419,7 +427,7 @@ cat << EOF >> $INSTALLER
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
-  echo "# --------------------------------------------" >> \$BASHSTARTUP
+  echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF

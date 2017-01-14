@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# this script is called by bundle_platform_size.csh
-# where platform may be linux or osx and size may be 32 or 64
+# this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
+
 errlog=/tmp/errlog.$$
+
+# -------------------- SCP -------------------
 
 SCP ()
 {
@@ -19,6 +21,8 @@ SCP ()
     echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
   fi
 }
+
+# -------------------- CP -------------------
 
 CP ()
 {
@@ -38,6 +42,8 @@ CP ()
   fi
 }
 
+# -------------------- CP2 -------------------
+
 CP2 ()
 {
   FROMDIR=$1
@@ -55,6 +61,8 @@ CP2 ()
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
   fi
 }
+
+# -------------------- CPDIR -------------------
 
 CPDIR ()
 {
@@ -75,6 +83,7 @@ CPDIR ()
   fi
 }
 
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 manifest=manifest$FDSOS.html
 OUT=$MAJOR$FDSOS
