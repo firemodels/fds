@@ -344,8 +344,7 @@ echo "Copy complete."
 cat << BASH > \$BASHUNINSTALL
 #/bin/bash
 FDSDIR=\$FDS_root
-RMDIR=
-RMENTRY=
+UNINSTALL=
 BASH
 if [ "$ostype" == "OSX" ] ; then
 cat << BASH >> \$BASHUNINSTALL
@@ -358,34 +357,26 @@ BASH
 fi
 cat << BASH >> \$BASHUNINSTALL
 while true; do
-  read -p "Do you wish to remove the directory \\\$FDSDIR? (yes/no) " yn
-  case \$yn in
-      [Yy]* ) RMDIR=1;break;;
-      [Nn]* ) break;;
-      * ) echo "Please answer yes or no.";;
+  read -p "Do you wish to remove \\\$FDSDIR, .bashrc_fds and remove FDS entries from .bashrc? (yes/no) " yn
+  case \\\$yn in
+      [Yy]* ) 
+        UNINSTALL=1
+        break;;
+      [Nn]* ) 
+        break;;
+      * ) 
+        echo "Please answer yes or no.";;
   esac
 done
-if [[ "\\\$RMDIR" == "1" ]]; then
+if [[ "\\\$UNINSTALL" == "1" ]]; then
   if [[ -d \\\$FDSDIR ]]; then
     echo removing \\\$FDSDIR
     rm -r \\\$FDSDIR
   else
     echo "***warning: The directory \\\$FDSDIR does not exist."
   fi
-fi
-
-BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
-
-while true; do
-  read -p "Do you wish to remove FDS entries from \\\$BASHRC and .bashrc_fds? (yes/no) " yn
-  case \$yn in
-      [Yy]* ) RMENTRY=1;break;;
-      [Nn]* ) break;;
-      * ) echo "Please answer yes or no.";;
-  esac
-done
-if [[ "\\\$RMENTRY" == "1" ]]; then
   if [[ -e \\\$BASHRC ]]; then
+    BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
     echo removing FDS entries from \\\$BASHRC
     grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
     mv \\\$BASHRC ~/.bashrc\\\$BAK
@@ -397,8 +388,10 @@ if [[ "\\\$RMENTRY" == "1" ]]; then
   else
     echo "***warning: the file \\\$BASHRC does not exist."
   fi
+  echo "Uninstall of FDS and Smokeview complete."
+else
+  echo "Uninstall of FDS and Smokeview cancelled."
 fi
-echo uninstall of FDS and Smokeview complete
 BASH
 
 chmod +x \$BASHUNINSTALL
