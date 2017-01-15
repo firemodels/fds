@@ -357,7 +357,7 @@ BASH
 fi
 cat << BASH >> \$BASHUNINSTALL
 while true; do
-  read -p "Do you wish to remove \\\$FDSDIR, .bashrc_fds and remove FDS entries from .bashrc? (yes/no) " yn
+  read -p "Do you wish to remove \\\$FDSDIR, .bashrc_fds and FDS entries from \\\$BASHRC? (yes/no) " yn
   case \\\$yn in
       [Yy]* ) 
         UNINSTALL=1
