@@ -381,7 +381,6 @@ if [[ "\\\$UNINSTALL" == "1" ]]; then
     grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
     mv \\\$BASHRC ~/.bashrc\\\$BAK
     mv ~/.bashrc_new \\\$BASHRC
-    echo removing ~/.bashrc_fds
   else
     echo "***warning: the file \\\$BASHRC does not exist."
   fi
