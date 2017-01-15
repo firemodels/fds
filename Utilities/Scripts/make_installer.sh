@@ -382,11 +382,14 @@ if [[ "\\\$UNINSTALL" == "1" ]]; then
     mv \\\$BASHRC ~/.bashrc\\\$BAK
     mv ~/.bashrc_new \\\$BASHRC
     echo removing ~/.bashrc_fds
-    if [ -e ~/.bashrc_fds ]; then
-      rm ~/.bashrc_fds
-    fi
   else
     echo "***warning: the file \\\$BASHRC does not exist."
+  fi
+  if [ -e ~/.bashrc_fds ]; then
+    echo removing ~/.bashrc_fds
+    rm ~/.bashrc_fds
+  else
+    echo "***warning: the file ~/.bashrc_fds does not exist."
   fi
   echo "Uninstall of FDS and Smokeview complete."
 else
