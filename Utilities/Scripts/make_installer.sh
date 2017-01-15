@@ -377,7 +377,7 @@ fi
 BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
 
 while true; do
-  read -p "Do you wish to remove FDS entries from \\\$BASHRC ? (yes/no) " yn
+  read -p "Do you wish to remove FDS entries from \\\$BASHRC and .bashrc_fds? (yes/no) " yn
   case \$yn in
       [Yy]* ) RMENTRY=1;break;;
       [Nn]* ) break;;
@@ -390,6 +390,10 @@ if [[ "\\\$RMENTRY" == "1" ]]; then
     grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
     mv \\\$BASHRC ~/.bashrc\\\$BAK
     mv ~/.bashrc_new \\\$BASHRC
+    echo removing ~/.bashrc_fds
+    if [ -e ~/.bashrc_fds ]; then
+      rm ~/.bashrc_fds
+    fi
   else
     echo "***warning: the file \\\$BASHRC does not exist."
   fi
@@ -519,6 +523,10 @@ EOF
 cat << EOF >> $INSTALLER
 if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
   echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
+else
+  if [ "\\\$IFORT_COMPILER" != "" ]; then
+    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
+  fi
 fi
 EOF
 cat << EOF >> $INSTALLER
