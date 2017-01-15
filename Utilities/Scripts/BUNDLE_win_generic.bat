@@ -23,7 +23,7 @@ set in_background=%svn_root%\smv\Build\background
 set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\smv\for_bundle
 set in_sh2bat=%svn_root%\smv\Build\sh2bat\intel_win_64
-set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
+set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL17
 
 set uploads=%svn_root%\fds\Utilities\uploads
 set basedir=%uploads%\%basename%
@@ -98,10 +98,11 @@ CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe    
 
 CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
 
-CALL :COPY %in_impi%\impi.dll                %out_bin%\.
-CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\.
+CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
+
+CALL :COPY %in_impi%\impi.dll                %out_bin%\impi.dll
 CALL :COPY %in_impi%\mpiexec.hydra.exe       %out_bin%\mpiexec.exe
-CALL :COPY %in_impi%\pmi_proxy.exe           %out_bin%\pmi_proxy.exe
+CALL :COPY %in_impi%\pmi_proxy.exe           %out_bin%\pmi_proxy.exe 
 CALL :COPY %in_impi%\hydra_service.exe       %out_bin%\hydra_service2.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
