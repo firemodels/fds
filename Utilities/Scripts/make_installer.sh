@@ -353,6 +353,7 @@ cat << BASH > \$BASHFDS
 # MPI distribution location
 
 export MPIDIST=\\\$1
+FDSLIB=\\\$2
 
 # unalias application names used by FDS
 
@@ -374,25 +375,37 @@ if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   MPIDIST=
 fi
 
+# FDS network type
+
 FDSNETWORK=
 if [[ "\\\$MPIDIST" == *ib ]] ; then
   FDSNETWORK=infiniband
 fi
-export MPIDIST FDSNETWORK
+export FDSNETWORK
 
-# Update $LDLIBPATH and PATH
+# Update $LDLIBPATH
 
 BASH
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHFDS
-$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+if [ "\\\$FDSLIB" == "" ]; then
+  $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+else
+  $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSLIB:\\\$$LDLIBPATH
+fi
 BASH
 fi
 cat << BASH >> \$BASHFDS
-PATH=\\\$FDSBINDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
   $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
-  PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+
+# Update PATH
+
+if [ "\\\$MPIDIST" == "" ]; then
+  PATH=\\\$FDSBINDIR:\\\$PATH
+else
+  PATH=\\\$MPIDIST/bin:\\\$FDSBINDIR:\\\$PATH
 fi
 export $LDLIBPATH PATH
 
