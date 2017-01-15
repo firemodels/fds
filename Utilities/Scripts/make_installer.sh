@@ -409,7 +409,7 @@ cat << BASH > \$BASHFDS
 
 export FDSBINDIR=\`pwd\`/bin
 
-# MPI distribution location
+# OpenMPI location
 
 export MPIDIST=\\\$1
 
@@ -493,6 +493,7 @@ cat << EOF >> $INSTALLER
   cd \$THISDIR
   echo "Updating .bash_profile"
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
@@ -510,9 +511,10 @@ cat << EOF >> $INSTALLER
   cd \$THISDIR
   echo "Updating .bashrc"
   grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
-  echo "MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
-  echo "MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
+  echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
+  echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
 EOF
 cat << EOF >> $INSTALLER
 if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
