@@ -33,6 +33,9 @@ f_puff = 1/dt_puff;
 dt_out = 19/1000;
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 kk = find(f>5 & f<90);
 H(1)=loglog(f,pave(k),spectrum_style); hold on
@@ -71,9 +74,10 @@ text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'
 addverstr(gca,git_file,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',spectrum_file)
 
 
