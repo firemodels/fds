@@ -23,8 +23,10 @@ set in_background=%svn_root%\smv\Build\background
 set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\smv\for_bundle
 set in_sh2bat=%svn_root%\smv\Build\sh2bat\intel_win_64
+
 :: files from mpi version 17 update 1 (doesn't work)
-%set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL17
+::set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL17
+
 :: files we got from intel that fixed a problem we reported (does work)
 set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
