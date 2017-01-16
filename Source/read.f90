@@ -1890,6 +1890,9 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
       CASE ('EXTINCTION 4')
          ! Vaidya Sankaran, UTRC, 2014
          EXTINCT_MOD = EXTINCTION_4
+      CASE ('EXTINCTION 5')
+         !Two-step fuel -> CO, CO-> CO2
+         EXTINCT_MOD = EXTINCTION_5
       CASE DEFAULT
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXTINCTION_MODEL, ',TRIM(EXTINCTION_MODEL),', is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
