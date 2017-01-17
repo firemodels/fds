@@ -57,7 +57,7 @@ set(h,'FontSize',Key_Font_Size)
 % add version string if file is available
 
 git_file = [dir,'openmp_test64a_git.txt'];
-addverstr(gca,svn_file,'linear')
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
