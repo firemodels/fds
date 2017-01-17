@@ -89,8 +89,9 @@ sqrt(e_z(end-1)/e_z(end))
 sqrt(e_r(end-1)/e_r(end))
 
 plot_style
+figure
 set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+set(gca,'FontSize',Label_Font_Size)
 
 hh(1)=loglog(dx,e_r,'ko-');
 hold on
@@ -99,10 +100,11 @@ hh(3)=loglog(dx,dx,'k--');
 hh(4)=loglog(dx,dx.^2,'k-');
 %axis([10^-3 10^-1 10^-7 10^-1])
 
-xlabel('{\it \Delta x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('L2 Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS {\it \rho}','FDS {\it Z}','{\it O(\Delta x)}','{\it O(\Delta x^2)}','location','northwest')
-legend('boxoff')
+xlabel('{\it \Delta x} (m)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+ylabel('L2 Error','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+lh=legend(hh,'FDS {\it \rho}','FDS {\it Z}','{\it O(\Delta x)}','{\it O(\Delta x^2)}','location','northwest')
+set(lh,'FontSize',Key_Font_Size)
+set(lh,'Interpreter',Font_Interpreter)
 
 % add version string if file is available
 
@@ -110,9 +112,9 @@ Git_Filename = [datadir,'saad_256_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/saad_mms_convergence')
 
 % check errors
