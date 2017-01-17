@@ -19,8 +19,10 @@ for predc={'Prescribed','Predicted'},
 
     for z=[2:2:20,30],
         %Mean Radial Velocity
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Up',num2str(z)];
         r = F1.data(:,1)*100;
@@ -37,7 +39,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('Radial Velocity (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -48,9 +50,9 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
@@ -58,10 +60,12 @@ for predc={'Prescribed','Predicted'},
         outfile = ['Waterloo_Methanol_',pred,'_',var];
         print(gcf,'-dpdf',[pltdir,outfile])
         close
-        
+
         %Mean Vertical Velocity
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Wp',num2str(z)];
         r = F1.data(:,1)*100;
@@ -78,7 +82,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('Vertical Velocity (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -89,9 +93,9 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
@@ -99,10 +103,12 @@ for predc={'Prescribed','Predicted'},
         outfile = ['Waterloo_Methanol_',pred,'_',var];
         print(gcf,'-dpdf',[pltdir,outfile])
         close
-        
+
         %Mean Temperature
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Tp',num2str(z)];
         r = F1.data(:,1)*100;
@@ -119,7 +125,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('Temperature (\circC)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -130,23 +136,25 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         % print to pdf
         outfile = ['Waterloo_Methanol_',pred,'_',var];
         print(gcf,'-dpdf',[pltdir,outfile])
         close
-        
+
         %%%%%%%%%%
         %%%% RMS values
         %%%%%%%%%%
-        
+
         %RMS Radial Velocity
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Urms',num2str(z)];
         r = F1.data(:,1)*100;
@@ -163,7 +171,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('RMS Radial Velocity (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -174,9 +182,9 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
@@ -184,10 +192,12 @@ for predc={'Prescribed','Predicted'},
         outfile = ['Waterloo_Methanol_',pred,'_',var];
         print(gcf,'-dpdf',[pltdir,outfile])
         close
-        
+
         %RMS Vertical Velocity
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Wrms',num2str(z)];
         r = F1.data(:,1)*100;
@@ -204,7 +214,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('RMS Vertical Velocity (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -215,9 +225,9 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
@@ -225,10 +235,12 @@ for predc={'Prescribed','Predicted'},
         outfile = ['Waterloo_Methanol_',pred,'_',var];
         print(gcf,'-dpdf',[pltdir,outfile])
         close
-        
+
         %RMS Temperature
-        figure;
-        plot_style;
+        figure
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         % load data
         var = ['Trms',num2str(z)];
         r = F1.data(:,1)*100;
@@ -245,7 +257,7 @@ for predc={'Prescribed','Predicted'},
         H(2) = plot(r,ubar1,'r-.','LineWidth',Line_Width); % dx = 1 cm
         H(3) = plot(r,ubar2,'m--','LineWidth',Line_Width); % dx = 0.5 cm
         H(4) = plot(r,ubar3,'b-','LineWidth',Line_Width);  % dx = 0.25 cm
-        
+
         xlabel('Radial Position (cm)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         ylabel('RMS Temperature (\circC)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
         lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
@@ -256,9 +268,9 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontName',Font_Name)
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
-        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         text(.05,.84,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
         % print to pdf
