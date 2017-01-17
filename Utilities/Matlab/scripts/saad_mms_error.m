@@ -104,10 +104,10 @@ ylabel('L2 Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fon
 legend(hh,'FDS {\it \rho}','FDS {\it Z}','{\it O(\Delta x)}','{\it O(\Delta x^2)}','location','northwest')
 legend('boxoff')
 
-% add SVN if file is available
+% add version string if file is available
 
-SVN_Filename = [datadir,'saad_256_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
+Git_Filename = [datadir,'saad_256_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
