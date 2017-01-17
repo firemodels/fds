@@ -109,10 +109,10 @@ set(gca,'XTick',-0.04:0.02:0.04);
 set(gca,'YTick',-0.04:0.02:0.04);
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gcf,'PaperUnits',Paper_Units);
+
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Width]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Width]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Width]);
 
 % Save plot to file
 print(gcf,'-dpdf',[plot_dir,'vort2d_diagram']);
