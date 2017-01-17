@@ -126,7 +126,9 @@ if skip_case
     return
 end
 
-figure(1)
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 h = legend(hfig1,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'FontSize',Key_Font_Size)
@@ -144,7 +146,9 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
 
-figure(2)
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 h = legend(hfig2,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'FontSize',Key_Font_Size)
