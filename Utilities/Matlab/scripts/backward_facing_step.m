@@ -595,7 +595,7 @@ for i = 1:4
 
 end
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
 addverstr(gca,Git_Filename,'linear',0,1.05)
