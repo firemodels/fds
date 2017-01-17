@@ -46,10 +46,10 @@ set(h([3 4]),'LineStyle','--')
 lh=legend('Exp. 2 K/min','Exp. 20 K/min','FDS 2 K/min','FDS 20 K/min');
 set(lh,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
-SVN_Filename = ['birch_tga_1step_2_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
+Git_Filename = ['birch_tga_1step_2_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
