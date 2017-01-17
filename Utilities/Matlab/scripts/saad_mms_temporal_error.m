@@ -64,16 +64,16 @@ Z_3 = M3.data(ii,2);
 p_rho = log( abs(rho_3-rho_2)./abs(rho_2-rho_1) )./log(r);
 p_Z = log( abs(Z_3-Z_2)./abs(Z_2-Z_1) )./log(r);
 
-disp('Saad temporal order')
-disp(' ')
-disp(['L1 p rho = ',num2str( norm(p_rho,1)/nx )])
-disp(['L2 p rho = ',num2str( norm(p_rho,2)/sqrt(nx) )])
-disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
-disp(' ')
-disp(['L1 p Z = ',num2str( norm(p_Z,1)/nx )])
-disp(['L2 p Z = ',num2str( norm(p_Z,2)/sqrt(nx) )])
-disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
-disp(' ')
+% disp('Saad temporal order')
+% disp(' ')
+% disp(['L1 p rho = ',num2str( norm(p_rho,1)/nx )])
+% disp(['L2 p rho = ',num2str( norm(p_rho,2)/sqrt(nx) )])
+% disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
+% disp(' ')
+% disp(['L1 p Z = ',num2str( norm(p_Z,1)/nx )])
+% disp(['L2 p Z = ',num2str( norm(p_Z,2)/sqrt(nx) )])
+% disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
+% disp(' ')
 
 % flag errors
 
@@ -97,17 +97,17 @@ fclose(fid);
 p1_rho_saad = log( norm(rho_3-rho_2,1)./norm(rho_2-rho_1,1) )./log(r);
 p2_rho_saad = log( norm(rho_3-rho_2,2)./norm(rho_2-rho_1,2) )./log(r);
 pinf_rho_saad = log( norm(rho_3-rho_2,inf)./norm(rho_2-rho_1,inf) )./log(r);
-disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
-disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
-disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
-disp(' ')
+% disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
+% disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
+% disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
+% disp(' ')
 p1_Z_saad = log( norm(Z_3-Z_2,1)./norm(Z_2-Z_1,1) )./log(r);
 p2_Z_saad = log( norm(Z_3-Z_2,2)./norm(Z_2-Z_1,2) )./log(r);
 pinf_Z_saad = log( norm(Z_3-Z_2,inf)./norm(Z_2-Z_1,inf) )./log(r);
-disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
-disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
-disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
-disp(' ')
+% disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
+% disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
+% disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
+% disp(' ')
 
 figure
 set(gca,'Units',Plot_Units)

@@ -68,33 +68,33 @@ scatplot(saved_data, drange, ...
          'NRC_Options', NRC_Options, ...
          'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
-% Special cases
+Special cases
 
-turb_model
-jet_decay
-wall_model
-pyrolysis
-birch_tga
-water_ice_water
-pcm_slab
-pulsating
-compression_wave
-plate_view_factor
-terminal_velocity_convergence
-fluid_part
-extinction
-fan_curve
-mesh_transformation
-synthetic_eddy_method
-shunn_mms_error
-openmp_timing_benchmarks
-rms_cov_corr
-hot_layer_collapse
-radiating_polygon
-saad_mms_temporal_error
-shunn_mms_temporal_error
-scaling_tests
-hvac_mass_transport
-ht3d_cond
+disp('turb_model...');                    turb_model
+disp('jet_decay...');                     jet_decay
+disp('wall_model...');                    wall_model
+disp('pyrolysis...');                     pyrolysis
+disp('birch_tga...');                     birch_tga
+disp('water_ice_water...');               water_ice_water
+disp('pcm_slab...');                      pcm_slab
+disp('pulsating...');                     pulsating
+disp('compression_wave...');              compression_wave
+disp('plate_view_factor...');             plate_view_factor
+disp('terminal_velocity_convergence...'); terminal_velocity_convergence
+disp('fluid_part...');                    fluid_part
+disp('extinction...');                    extinction
+disp('fan_curve...');                     fan_curve
+disp('mesh_transformation...');           mesh_transformation
+disp('synthetic_eddy_method...');         synthetic_eddy_method
+disp('shunn_mms_error...');               shunn_mms_error
+disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
+disp('rms_cov_corr...');                  rms_cov_corr
+disp('hot_layer_collapse...');            hot_layer_collapse
+disp('radiating_polygon...');             radiating_polygon
+disp('saad_mms_temporal_error...');       saad_mms_temporal_error
+disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
+disp('scaling_tests...');                 scaling_tests
+disp('hvac_mass_transport...');           hvac_mass_transport
+disp('ht3d_cond...');                     ht3d_cond
 
 display('verification scripts completed successfully!')
