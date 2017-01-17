@@ -84,6 +84,8 @@ if Linf(5) > 1e-6
 end
 
 figure(1)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(1) = loglog(dtvec, errvec, '-*k');
 hold on
@@ -106,9 +108,9 @@ set(h,'Interpreter', Font_Interpreter)
 set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
-set(gcf, 'PaperUnits', Paper_Units);
+set(gcf, 'Units', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
 Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
@@ -118,7 +120,9 @@ print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/termina
 
 close all
 clear H
-figure(1)
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(1) = loglog(dtvec, Linf, '-*k');
 hold on
@@ -141,9 +145,9 @@ set(h,'Interpreter', Font_Interpreter)
 set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
-set(gcf, 'PaperUnits', Paper_Units);
+set(gcf, 'Units', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
+set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
 Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
