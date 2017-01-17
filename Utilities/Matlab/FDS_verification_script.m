@@ -68,7 +68,7 @@ scatplot(saved_data, drange, ...
          'NRC_Options', NRC_Options, ...
          'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
-Special cases
+% Special cases
 
 disp('turb_model...');                    turb_model
 disp('jet_decay...');                     jet_decay
