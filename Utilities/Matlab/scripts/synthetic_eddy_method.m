@@ -5,6 +5,8 @@
 close all
 clear all
 
+plot_style
+
 datadir='../../Verification/Turbulence/';
 plotdir='../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 
@@ -13,9 +15,8 @@ error_tolerance = 0.01;
 % Flat profile
 % ------------
 figure
-plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 if ~exist([datadir,'sem_flat_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_flat_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -46,16 +47,19 @@ urms = M.data(:,k);
 H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northwest');
-set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
+set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 Git_Filename = [datadir,'sem_flat_leddy_p2_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_flat_leddy_p2'])
@@ -65,7 +69,7 @@ umean_error = norm(umean-uprof)/u0/length(umean);
 if umean_error>error_tolerance
     display(['Matlab Warning: sem_flat_leddy_p2.fds umean_error = ',umean_error])
 end
-    
+
 urms_error = norm(umean+urms-1.1*uprof)/u0/length(umean);
 if urms_error>error_tolerance
     display(['Matlab Warning: sem_flat_leddy_p2.fds urms_error = ',urms_error])
@@ -75,9 +79,8 @@ end
 % Parabolic profile
 % -----------------
 figure
-plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 if ~exist([datadir,'sem_par_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_par_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -110,6 +113,9 @@ urms = M.data(:,k);
 H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','west');
 set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
@@ -117,9 +123,9 @@ Git_Filename = [datadir,'sem_par_leddy_p2_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_par_leddy_p2'])
@@ -138,9 +144,8 @@ end
 % Atmospheric profile
 % -------------------
 figure
-plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 if ~exist([datadir,'sem_atm_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_atm_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -173,6 +178,9 @@ urms = M.data(:,k);
 H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northwest');
 set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
@@ -180,9 +188,9 @@ Git_Filename = [datadir,'sem_atm_leddy_p2_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_atm_leddy_p2'])
@@ -201,9 +209,8 @@ end
 % RAMP profile
 % -------------------
 figure
-plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 if ~exist([datadir,'sem_ramp_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_ramp_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -241,6 +248,9 @@ urms = M.data(:,k);
 H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northeast');
 set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
@@ -248,9 +258,9 @@ Git_Filename = [datadir,'sem_ramp_leddy_p2_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_ramp_leddy_p2'])
