@@ -5,6 +5,8 @@
 close all
 clear all
 
+plot_style
+
 dir = '../../Verification/Timing_Benchmarks/';
 
 ncores = [1,2,3,4,5,6,7,8];
@@ -34,10 +36,13 @@ for i=1:length(a)
 end
 time128 = time128/time128(1) * 100;
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(ncores,time64,'b^--'); hold on
 H(2)=plot(ncores,time128,'rsq--');
 
-plot_style
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([1 8 0 100])
@@ -47,25 +52,18 @@ ylabel('Relative clock time (%)')
 
 h=legend(H,'64^3','128^3');
 set(h,'Interpreter',Font_Interpreter)
+set(h,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
-svn_file = [dir,'openmp_test64a_git.txt'];
+git_file = [dir,'openmp_test64a_git.txt'];
 addverstr(gca,svn_file,'linear')
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/openmp_timing_benchmarks')
 
 % check errors
