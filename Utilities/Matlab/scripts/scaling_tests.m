@@ -7,6 +7,8 @@
 clear all
 close all
 
+plot_style
+
 outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1) = importdata([outdir,'strong_scaling_test_001_cpu.csv'],',',1);
@@ -28,7 +30,9 @@ for j=1:15
    end
 end
 
-plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H1(1) = loglog(r2,2*t2,'k:'); hold on
 H1(2) = loglog(r2,t2,'k:'); hold on
@@ -41,15 +45,15 @@ H1(8) = loglog(r2,t2/64,'k:'); hold on
 H1(9) = loglog(r2,t2/128,'k:'); hold on
 H1(10) = loglog(r2,t2/256,'k:'); hold on
 
-H(1) = loglog(r,t(:,15),'k-o'); 
-H(2) = loglog(r,t(:,3),'r-o'); 
-H(3) = loglog(r,t(:,4),'b-o'); 
-H(4) = loglog(r,t(:,5),'m-o'); 
-H(5) = loglog(r,t(:,6),'c-o'); 
-H(6) = loglog(r,t(:,12),'g-o'); 
-H(7) = loglog(r,t(:,10),'y-o'); 
-H(8) = loglog(r,t(:,2),'k-s'); 
- 
+H(1) = loglog(r,t(:,15),'k-o');
+H(2) = loglog(r,t(:,3),'r-o');
+H(3) = loglog(r,t(:,4),'b-o');
+H(4) = loglog(r,t(:,5),'m-o');
+H(5) = loglog(r,t(:,6),'c-o');
+H(6) = loglog(r,t(:,12),'g-o');
+H(7) = loglog(r,t(:,10),'y-o');
+H(8) = loglog(r,t(:,2),'k-s');
+
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -73,9 +77,9 @@ git_file = [outdir,'strong_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'loglog')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
 
 clear all
@@ -102,7 +106,9 @@ for i=1:11
    t2(i) = 1.;
 end
 
-plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(1) = semilogx(r,t,'ko'); hold on
 H(2) = semilogx(r,t2,'k--');
@@ -128,8 +134,8 @@ git_file = [outdir,'weak_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'semilogx')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/weak_scaling_test'])
 
