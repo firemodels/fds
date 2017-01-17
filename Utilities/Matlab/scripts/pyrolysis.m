@@ -29,8 +29,6 @@ show_fds = 1;
 
 for i_plot=1:2
 
-    close all
-
     figure
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
@@ -133,7 +131,7 @@ for i_plot=1:2
     % Add vertical lines to indicate the temperature peaks
 
     for i=1:n_components-1
-        axes(AX(2));
+        set(gcf,'CurrentAxes',AX(2))
         line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*(1-residue(i))*1000],'LineStyle','-','Color','black','LineWidth',1)
     end
 

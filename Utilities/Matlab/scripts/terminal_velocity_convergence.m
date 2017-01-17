@@ -115,7 +115,6 @@ set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
-display('Printing plot terminal_velocity_convergence.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
 
 close all
@@ -152,6 +151,5 @@ set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
-display('Printing plot position_convergence.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
 
