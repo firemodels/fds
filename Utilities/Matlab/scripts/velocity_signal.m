@@ -13,6 +13,9 @@ t = M(range,1);
 W = M(range,devc_col);
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(t,W,vel_style)
 
@@ -40,8 +43,8 @@ set(gca,'XTick',tmin:1:tmax)
 addverstr(gca,git_file,'linear')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',signal_file)
 
