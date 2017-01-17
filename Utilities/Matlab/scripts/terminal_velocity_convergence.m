@@ -83,7 +83,7 @@ if Linf(5) > 1e-6
    display(['Matlab Warning: The position in the terminal_velocity* cases is out of tolerance.'])
 end
 
-figure(1)
+figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
