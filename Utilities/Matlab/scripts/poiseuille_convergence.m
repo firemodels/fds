@@ -5,6 +5,8 @@
 close all
 clear all
 
+plot_style
+
 dpdx = -1;
 L = 1;
 N = [8,16,32,64];
@@ -20,11 +22,15 @@ outdir = '../../../out/Moody_Chart/FDS_Output_Files/';
 
 dz = L./N;
 error = abs(f-24./Re);
+
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=loglog(dz,error,'b*-','Linewidth',1.); hold on
 H(2)=loglog(dz,.05*dz,'k--','Linewidth',1.);
 H(3)=loglog(dz,.4*dz.^2,'k-','Linewidth',1.);
 
-plot_style
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00005 0.01])
@@ -40,7 +46,8 @@ Git_Filename = [outdir,'poiseuille_N8_mu025_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/poiseuille_convergence')

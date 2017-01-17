@@ -8,6 +8,8 @@
 close all
 clear all
 
+plot_style
+
 t_end = 0.01;
 x0 = -.5;
 L = 1;
@@ -21,6 +23,10 @@ T = @(x,t) T0 + A*sin(lambda*(x-x0))*exp(-lambda^2*alpha*t);
 nx = 256;
 dx = L/nx;
 xc = (x0+dx/2):dx:((x0+L)-dx/2);
+
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hh(1)=plot(xc,T(xc,0),'k--');
 hold on
@@ -76,14 +82,13 @@ for i=1:length(fnz)
     dzz = [dzz,dx];
 end
 
-plot_style
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('{\it T} (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'Initial Condition','Final Exact','FDS {\itnx}=10','FDS {\itnx}=20','FDS {\itnx}=40','FDS {\itnx}=80','FDS {\itnx}=160','location','northeast')
-legend('boxoff')
+lh=legend(hh,'Initial Condition','Final Exact','FDS {\itnx}=10','FDS {\itnx}=20','FDS {\itnx}=40','FDS {\itnx}=80','FDS {\itnx}=160','location','northeast');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
@@ -91,12 +96,15 @@ Git_Filename = [ddir,'ht3d_nx_160_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_profile')
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 clear hh
 
 hh(1)=loglog(dxx,erx,'k+-'); hold on
@@ -106,14 +114,13 @@ hh(3)=loglog(dzz,erz,'bo-');
 hh(4)=loglog(dxx,100*dxx,'k--');
 hh(5)=loglog(dxx,500*dxx.^2,'k-');
 
-plot_style
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('L2 error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS {\itnx}','FDS {\itny}','FDS {\itnz}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
-legend('boxoff')
+lh=legend(hh,'FDS {\itnx}','FDS {\itny}','FDS {\itnz}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
@@ -121,8 +128,8 @@ Git_Filename = [ddir,'ht3d_nx_160_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_convergence')
 
