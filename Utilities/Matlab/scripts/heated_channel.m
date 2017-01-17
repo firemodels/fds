@@ -30,31 +30,35 @@ Tp_mean_Pr0p71  = M.data(:,find(strcmp(M.colheaders,'Tp_mean_Pr0p71')));
 Tp_mean_Pr2p00  = M.data(:,find(strcmp(M.colheaders,'Tp_mean_Pr2p0')));
 range = 1:3:length(yp_up_mean);
 
-figure(1)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+f1=figure;
+a1=gca;
+set(f1,'Visible',Figure_Visibility);
+set(a1,'Units',Plot_Units)
+set(a1,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hfig1(2)=semilogx(yp_up_mean,up_mean,'ro'); hold on
 axis([1e0 1e3 0 30])
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+set(a1,'FontName',Font_Name)
+set(a1,'FontSize',Title_Font_Size)
 
 xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it u}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 
-figure(2)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+f2=figure;
+a2=gca;
+set(f2,'Visible',Figure_Visibility);
+set(a2,'Units',Plot_Units)
+set(a2,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hfig2(2)=semilogx(yp_Tp_mean(range),Tp_mean_Pr0p10(range),'bo'); hold on
 semilogx(yp_Tp_mean(range),Tp_mean_Pr0p71(range),'bo')
 semilogx(yp_Tp_mean(range),Tp_mean_Pr2p00(range),'bo')
 axis([1e0 1e3 0 30])
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
+set(a2,'FontName',Font_Name)
+set(a2,'FontSize',Label_Font_Size)
 
 xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it T}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
@@ -113,12 +117,14 @@ for i = [1,2,3,4]
         u1 = mean(M.data(1:16,38:2:72),2);     % bottom wall
         u2 = mean(M.data(32:-1:17,38:2:72),2); % top wall
         up = 0.5*(u1+u2)/u_tau;
-        figure(1); hfig1(1)=semilogx(zp,up,'ksq-');
+        set(groot,'CurrentFigure',f1);
+        hfig1(1)=semilogx(zp,up,'ksq-');
     else
         T1 = mean(M.data(1:16,2:2:36),2);      % bottom wall
         T2 = mean(M.data(32:-1:17,2:2:36),2);  % top wall
         Tp = (0.5*(T1+T2)-T_w)/T_tau;
-        figure(2); hfig2(1)=semilogx(zp,Tp,'ksq-');
+        set(groot,'CurrentFigure',f2);
+        hfig2(1)=semilogx(zp,Tp,'ksq-');
     end
 end
 
@@ -126,45 +132,39 @@ if skip_case
     return
 end
 
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
+set(groot,'CurrentFigure',f1);
 h = legend(hfig1,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
 Git_Filename = [outdir,'heated_channel_Pr_1p00_32_git.txt'];
-addverstr(gca,Git_Filename,'semilogx')
+addverstr(a1,Git_Filename,'semilogx')
 
 % print pdf
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units)
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
+set(f1,'Visible',Figure_Visibility);
+set(f1,'Units',Paper_Units)
+set(f1,'PaperSize',[Paper_Width Paper_Height]);
+set(f1,'Position',[0 0 Paper_Width Paper_Height]);
+print(f1,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
 
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
+set(groot,'CurrentFigure',f2);
 h = legend(hfig2,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
 Git_Filename = [outdir,'heated_channel_Pr_0p71_32_git.txt'];
-addverstr(gca,Git_Filename,'semilogx')
+addverstr(a2,Git_Filename,'semilogx')
 
 % print pdf
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units)
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
+set(f2,'Visible',Figure_Visibility);
+set(f2,'Units',Paper_Units)
+set(f2,'PaperSize',[Paper_Width Paper_Height]);
+set(f2,'Position',[0 0 Paper_Width Paper_Height]);
+print(f2,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
 
 
 % % Compute pressure gradient from Re_tau
