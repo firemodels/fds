@@ -57,24 +57,24 @@ p_Z = log( abs(Z_3-Z_2)./abs(Z_2-Z_1) )./log(r);
 p_U = log( abs(U_3-U_2)./abs(U_2-U_1) )./log(r);
 p_H = log( abs(H_3-H_2)./abs(H_2-H_1) )./log(r);
 
-disp('Shunn 3 temporal order')
-disp(' ')
-disp(['L1 p rho = ',num2str( norm(p_rho,1)/(nx*nx) )])
-disp(['L2 p rho = ',num2str( norm(p_rho,2)/nx )])
-disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
-disp(' ')
-disp(['L1 p Z = ',num2str( norm(p_Z,1)/(nx*nx) )])
-disp(['L2 p Z = ',num2str( norm(p_Z,2)/nx )])
-disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
-disp(' ')
-disp(['L1 p U = ',num2str( norm(p_U,1)/(nx*nx) )])
-disp(['L2 p U = ',num2str( norm(p_U,2)/nx )])
-disp(['Linf p U = ',num2str( norm(p_U,-inf) )])
-disp(' ')
-disp(['L1 p H = ',num2str( norm(p_H,1)/(nx*nx) )])
-disp(['L2 p H = ',num2str( norm(p_H,2)/nx )])
-disp(['Linf p H = ',num2str( norm(p_H,-inf) )])
-disp(' ')
+% disp('Shunn 3 temporal order')
+% disp(' ')
+% disp(['L1 p rho = ',num2str( norm(p_rho,1)/(nx*nx) )])
+% disp(['L2 p rho = ',num2str( norm(p_rho,2)/nx )])
+% disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
+% disp(' ')
+% disp(['L1 p Z = ',num2str( norm(p_Z,1)/(nx*nx) )])
+% disp(['L2 p Z = ',num2str( norm(p_Z,2)/nx )])
+% disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
+% disp(' ')
+% disp(['L1 p U = ',num2str( norm(p_U,1)/(nx*nx) )])
+% disp(['L2 p U = ',num2str( norm(p_U,2)/nx )])
+% disp(['Linf p U = ',num2str( norm(p_U,-inf) )])
+% disp(' ')
+% disp(['L1 p H = ',num2str( norm(p_H,1)/(nx*nx) )])
+% disp(['L2 p H = ',num2str( norm(p_H,2)/nx )])
+% disp(['Linf p H = ',num2str( norm(p_H,-inf) )])
+% disp(' ')
 
 % flag errors
 
@@ -92,30 +92,30 @@ end
 p1_rho_saad = log( norm(rho_3-rho_2,1)./norm(rho_2-rho_1,1) )./log(r);
 p2_rho_saad = log( norm(rho_3-rho_2,2)./norm(rho_2-rho_1,2) )./log(r);
 pinf_rho_saad = log( norm(rho_3-rho_2,inf)./norm(rho_2-rho_1,inf) )./log(r);
-disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
-disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
-disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
-disp(' ')
+% disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
+% disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
+% disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
+% disp(' ')
 p1_Z_saad = log( norm(Z_3-Z_2,1)./norm(Z_2-Z_1,1) )./log(r);
 p2_Z_saad = log( norm(Z_3-Z_2,2)./norm(Z_2-Z_1,2) )./log(r);
 pinf_Z_saad = log( norm(Z_3-Z_2,inf)./norm(Z_2-Z_1,inf) )./log(r);
-disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
-disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
-disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
-disp(' ')
+% disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
+% disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
+% disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
+% disp(' ')
 p1_U_saad = log( norm(U_3-U_2,1)./norm(U_2-U_1,1) )./log(r);
 p2_U_saad = log( norm(U_3-U_2,2)./norm(U_2-U_1,2) )./log(r);
 pinf_U_saad = log( norm(U_3-U_2,inf)./norm(U_2-U_1,inf) )./log(r);
-disp(['L1 p U Saad = ',num2str( p1_U_saad )])
-disp(['L2 p U Saad = ',num2str( p2_U_saad )])
-disp(['Linf p U Saad = ',num2str( pinf_U_saad )])
-disp(' ')
+% disp(['L1 p U Saad = ',num2str( p1_U_saad )])
+% disp(['L2 p U Saad = ',num2str( p2_U_saad )])
+% disp(['Linf p U Saad = ',num2str( pinf_U_saad )])
+% disp(' ')
 p1_H_saad = log( norm(H_3-H_2,1)./norm(H_2-H_1,1) )./log(r);
 p2_H_saad = log( norm(H_3-H_2,2)./norm(H_2-H_1,2) )./log(r);
 pinf_H_saad = log( norm(H_3-H_2,inf)./norm(H_2-H_1,inf) )./log(r);
-disp(['L1 p H Saad = ',num2str( p1_H_saad )])
-disp(['L2 p H Saad = ',num2str( p2_H_saad )])
-disp(['Linf p H Saad = ',num2str( pinf_H_saad )])
+% disp(['L1 p H Saad = ',num2str( p1_H_saad )])
+% disp(['L2 p H Saad = ',num2str( p2_H_saad )])
+% disp(['Linf p H Saad = ',num2str( pinf_H_saad )])
 
 %surf(reshape(p_U,[nx,nx]),'EdgeColor','none','LineStyle','none','FaceLighting','phong')
 
