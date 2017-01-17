@@ -175,7 +175,6 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
-display('Printing plot fluid_part_momentum.pdf...')
 
 print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
 
@@ -223,11 +222,10 @@ set(legend_handle,'position',[Paper_Width pos(2:4)])
 Git_Filename = [ddir,'fluid_part_mom_x_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
-set(gcf,'Visible','on');
+set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
-display('Printing plot fluid_part_velocity.pdf...')
 
 print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
 
