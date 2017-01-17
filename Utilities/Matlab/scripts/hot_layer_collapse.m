@@ -87,12 +87,14 @@ for j=1:5
 end
 
 figure(1)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
-legend(H,legend_entries,'location','southwest')
-legend boxoff
+lh=legend(H,legend_entries,'location','southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
 addverstr(gca,Git_Filename,'linear')
@@ -100,9 +102,9 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_temp_1'])
 
 % compute temperature error at tau(5)
@@ -123,14 +125,16 @@ if Error>error_tolerance
 end
 
 figure(2)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-200 0 0 1.2])
-legend(H2,legend_entries,'location','southwest')
-legend boxoff
+lh=legend(H2,legend_entries,'location','southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
 addverstr(gca,Git_Filename,'linear')
@@ -138,9 +142,9 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_vel_1'])
 
 % compute velocity error at tau(5)
@@ -179,14 +183,16 @@ for j=6:10
 end
 
 figure(3)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
-legend(H3,legend_entries_2,'location','northeast')
-legend boxoff
+lh=legend(H3,legend_entries_2,'location','northeast');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
 addverstr(gca,Git_Filename,'linear')
@@ -194,9 +200,9 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_temp_2'])
 
 % compute temperature error at tau(10)
@@ -217,14 +223,16 @@ if Error>error_tolerance
 end
 
 figure(4)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-60 0 0 1.6])
-legend(H4,legend_entries_2,'location','northwest')
-legend boxoff
+lh=legend(H4,legend_entries_2,'location','northwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
 addverstr(gca,Git_Filename,'linear')
@@ -232,9 +240,9 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_vel_2'])
 
 % compute velocity error at tau(10)
