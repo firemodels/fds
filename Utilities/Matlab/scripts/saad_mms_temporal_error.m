@@ -6,6 +6,8 @@
 close all
 clear all
 
+plot_style
+
 % Problem 1 parameters
 r = 0.5;
 nx = 512;
@@ -108,7 +110,8 @@ disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
 disp(' ')
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,p_rho)
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -119,13 +122,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_rho'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,p_Z)
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -135,13 +139,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_Z'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,rho,'r--'); hold on
 plot(x,rho_3,'r-')
@@ -154,13 +159,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_rho'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,f,'b--'); hold on
 plot(x,Z_3,'b-')
@@ -173,13 +179,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_Z'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,rho_3-rho_2,'b-'); hold on
 plot(x,rho_2-rho_1,'r-')
@@ -192,8 +199,8 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility)
-set(gcf,'PaperUnits',Paper_Units)
+set(gcf,'Units',Paper_Units)
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height])
+set(gcf,'Position',[0 0 Paper_Width Paper_Height])
 print(gcf,'-dpdf',[plotdir,'saad_rho_diff'])
 
