@@ -23,22 +23,26 @@ end
 
 figure
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 semilogx(zp,up,'b-'); hold on
 semilogy(zp,uu,'r--')
 set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
-text(1.5,8,'{\itu}^+ = {\itz}^+','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
-text(200,15,'{\itu}^+ = 2.4 ln {\itz}^+ + 5.2','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Color',[1 0 0])
-text(500,30,'{\itu}^+ = A({\itz}^+)^B','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Color',[0 0 1])
+set(gca,'FontSize',Label_Font_Size)
+text(1.5,8,'{\itu}^+ = {\itz}^+','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+text(200,15,'{\itu}^+ = 2.4 ln {\itz}^+ + 5.2','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'Color',[1 0 0])
+text(500,30,'{\itu}^+ = A({\itz}^+)^B','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'Color',[0 0 1])
 line([11.81 11.81],[0 20],'LineStyle','--','Color',[0 0 0])
-text(15,5,'{\itz}^+ = 11.81','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
-xlabel('{\itz}^+','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('{\itu}^+','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(15,5,'{\itz}^+ = 11.81','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
+xlabel('{\itz}^+','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('{\itu}^+','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/lawofthewall')
 
 % % check FDS parameters

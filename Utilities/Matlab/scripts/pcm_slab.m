@@ -5,11 +5,11 @@
 % This script reads and post-processes the output from
 % a phase-change verification test pcm_slab.fds
 % and plots comparisons against the analytical results
-%
-
 
 close all
 clear all
+
+plot_style
 
 % Calculate analytical result
 
@@ -85,10 +85,6 @@ for i_plot=1:2
 
     close all
 
-    plot_style
-    set(gca,'FontName',Font_Name)
-    set(gca,'FontSize',Label_Font_Size)
-
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'b--',t_fds,dmax,'r--');
        xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
@@ -104,9 +100,13 @@ for i_plot=1:2
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
 
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
     % Plot attributes
 
     set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
 
     % add Git revision if file is available
 
@@ -116,9 +116,9 @@ for i_plot=1:2
     % Create the PDF files
 
     set(gcf,'Visible',Figure_Visibility);
-    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     if i_plot==1
         print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_xf')
     else
