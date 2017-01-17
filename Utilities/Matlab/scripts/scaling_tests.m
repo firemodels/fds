@@ -82,6 +82,10 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
 
+close all
+clear all
+plot_style
+
 outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1)  = importdata([outdir,'weak_scaling_test_001_cpu.csv'],',',1);
