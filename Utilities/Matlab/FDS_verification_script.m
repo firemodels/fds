@@ -24,19 +24,19 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-radiation_box
-radiation_plane_layer
-ns2d
-vort2d
-wall_internal_radiation
-ashrae_7
-flame_species
-EDC_species
-cat_propane_depo
-burke_schumann
-convective_cooling_convergence
-random_walk_soln
-water_evap_1_const_gamma
+disp('radiation_box...');                  radiation_box
+disp('radiation_plane_layer...');          radiation_plane_layer
+disp('ns2d...');                           ns2d
+disp('vort2d...');                         vort2d
+disp('wall_internal_radiation...');        wall_internal_radiation
+disp('ashrae_7...');                       ashrae_7
+disp('flame_species...');                  flame_species
+disp('EDC_species...');                    EDC_species
+disp('cat_propane_depo...');               cat_propane_depo
+disp('burke_schumann...');                 burke_schumann
+disp('convective_cooling_convergence...'); convective_cooling_convergence
+disp('random_walk_soln...');               random_walk_soln
+disp('water_evap_1_const_gamma...');       water_evap_1_const_gamma
 
 % Dataplot and scatplot options
 
