@@ -32,16 +32,6 @@ f_2 = f_2/sum(f_2*dz); % normalize
 % sum(f_2*dz)
 % return
 
-% figure(1)
-% plot(z,f_1,'ko'); hold on
-% xlabel('Position (m)')
-% ylabel('Normalized Number Density')
-
-% figure(2)
-% plot(z,f_2,'ko'); hold on
-% xlabel('Position (m)')
-% ylabel('Normalized Number Density')
-
 % print expected results to data directory
 
 fid = fopen([datadir,'random_walk.csv'],'wt','n');
