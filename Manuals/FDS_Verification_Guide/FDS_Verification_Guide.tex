@@ -4867,42 +4867,42 @@ A sensitivity analysis is carried out to verify that results are not sensitive t
 
 \subsection{Mass conservation 1 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_1}}{HVAC\_mass\_transport\_conservation\_1})}
 \label{HVAC_mass_transport_conservation_1}
-The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} presents the species~1 and 2 masses in the left and right compartments.
+The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1a} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_1b} presents the species~1 and 2 masses in the left and right compartments.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1a}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Total mass in the FDS domain and total mass in the left and right compartments.}
-\label{fig_HVAC_mass_transport_conservation_1}
+\label{fig_HVAC_mass_transport_conservation_1a}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
+\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1b}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Species~1 and 2 masses in the left and right compartments.}
-\label{fig_HVAC_mass_transport_conservation_2}
+\label{fig_HVAC_mass_transport_conservation_1b}
 \end{figure}
 
 \subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
 \label{HVAC_mass_transport_conservation_2}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} shows the total masses of species~1 and 2.
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_2} test case.]{Total species~1 and 2 masses in the FDS domain. The initial equilibrium is prior to species~1 entering duct~B and species~2 entering duct~A.}
-\label{fig_HVAC_mass_transport_conservation_3}
+\label{fig_HVAC_mass_transport_conservation_2}
 \end{figure}
 
 \subsection{Mass conservation 3 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_3}}{HVAC\_mass\_transport\_conservation\_3})}
 \label{HVAC_mass_transport_conservation_3}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_4} presents the ideal and FDS total masses of species~1 and 2.
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} presents the ideal and FDS total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_4}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
 \caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the FDS domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
-\label{fig_HVAC_mass_transport_conservation_4}
+\label{fig_HVAC_mass_transport_conservation_3}
 \end{figure}
 
 \subsection{Transient transport through branching ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_branch}}{HVAC\_mass\_transport\_branch})}
