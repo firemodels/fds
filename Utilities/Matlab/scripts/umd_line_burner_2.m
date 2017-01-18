@@ -61,7 +61,7 @@ h=errorbar(XO2(subr),eta(subr),-S_eta(subr),S_eta(subr),-S_XO2(subr),S_XO2(subr)
 set(h,'Color',steel_blue)
 H(2)=plot(XO2_FDS_2,eta_FDS_2,'k-.');
 H(3)=plot(XO2_FDS,eta_FDS,'k--');
-H(4)=plot(XO2_FDS_3,eta_FDS_3,'k-');
+H(4)=plot(XO2_FDS_3,eta_FDS_3,'k-','LineWidth',2);
 axis([0.09 0.21 0 1.1 ])
 xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('\eta','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -71,6 +71,9 @@ set(gca,'FontSize',Label_Font_Size)
 
 lh=legend(H,'Exp','FDS {\it\deltax}=12.5 mm','FDS {\it\deltax}=6.25 mm','FDS {\it\deltax}=3.125 mm','Location','SouthEast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+
+git_file=[outdir,'methane_XO2_ramp_dx_p3125cm_git.txt'];
+addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);

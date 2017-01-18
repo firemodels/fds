@@ -71,7 +71,7 @@ XMinorTick = 0.1:0.1:1.4;
 
 figure
 set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 plot(cx,x,'k-','LineWidth',2); hold on
 for i=1:length(XMinorTick)
@@ -104,7 +104,7 @@ print(gcf,'-dpdf',[plotdir,'piece_wise_linear_trnx'])
 
 figure
 set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 plot(cy,y,'k-','LineWidth',2); hold on
 for i=1:length(XMinorTick)
