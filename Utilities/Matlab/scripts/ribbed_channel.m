@@ -44,6 +44,9 @@ j = find(strcmp(D.colheaders,'U strm'));
 u_data = D.data(:,j);
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(xoh,u_data,'bo'); hold on
 
 for i=1:lnx
@@ -81,9 +84,9 @@ addverstr(gca,Git_Filename,'linear')
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'ribbed_channel_u_strm'])
 
 % streamwise urms along bottom of channel
@@ -94,6 +97,9 @@ j = find(strcmp(D.colheaders,'urms strm'));
 urms_data = D.data(:,j);
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(xoh,urms_data,'bo'); hold on
 
 for i=1:lnx
@@ -130,9 +136,9 @@ addverstr(gca,Git_Filename,'linear')
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'ribbed_channel_urms_strm'])
 
 % streamwise U profile at x/h=0 (center of rib)
@@ -143,6 +149,9 @@ j = find(strcmp(D.colheaders,'U prof'));
 u_data = D.data(:,j);
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(u_data,yoh,'bo'); hold on
 
 for i=1:lnx
@@ -174,9 +183,9 @@ addverstr(gca,Git_Filename,'linear')
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 print(gcf,'-dpdf',[plotdir,'ribbed_channel_u_prof'])
 
@@ -188,6 +197,9 @@ j = find(strcmp(D.colheaders,'urms prof'));
 urms_data = D.data(:,j);
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 H(1)=plot(urms_data,yoh,'bo'); hold on
 
 for i=1:lnx
@@ -219,9 +231,9 @@ addverstr(gca,Git_Filename,'linear')
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'ribbed_channel_urms_prof'])
 
 

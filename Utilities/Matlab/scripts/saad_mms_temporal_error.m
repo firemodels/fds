@@ -6,6 +6,8 @@
 close all
 clear all
 
+plot_style
+
 % Problem 1 parameters
 r = 0.5;
 nx = 512;
@@ -62,16 +64,16 @@ Z_3 = M3.data(ii,2);
 p_rho = log( abs(rho_3-rho_2)./abs(rho_2-rho_1) )./log(r);
 p_Z = log( abs(Z_3-Z_2)./abs(Z_2-Z_1) )./log(r);
 
-disp('Saad temporal order')
-disp(' ')
-disp(['L1 p rho = ',num2str( norm(p_rho,1)/nx )])
-disp(['L2 p rho = ',num2str( norm(p_rho,2)/sqrt(nx) )])
-disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
-disp(' ')
-disp(['L1 p Z = ',num2str( norm(p_Z,1)/nx )])
-disp(['L2 p Z = ',num2str( norm(p_Z,2)/sqrt(nx) )])
-disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
-disp(' ')
+% disp('Saad temporal order')
+% disp(' ')
+% disp(['L1 p rho = ',num2str( norm(p_rho,1)/nx )])
+% disp(['L2 p rho = ',num2str( norm(p_rho,2)/sqrt(nx) )])
+% disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
+% disp(' ')
+% disp(['L1 p Z = ',num2str( norm(p_Z,1)/nx )])
+% disp(['L2 p Z = ',num2str( norm(p_Z,2)/sqrt(nx) )])
+% disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
+% disp(' ')
 
 % flag errors
 
@@ -95,20 +97,21 @@ fclose(fid);
 p1_rho_saad = log( norm(rho_3-rho_2,1)./norm(rho_2-rho_1,1) )./log(r);
 p2_rho_saad = log( norm(rho_3-rho_2,2)./norm(rho_2-rho_1,2) )./log(r);
 pinf_rho_saad = log( norm(rho_3-rho_2,inf)./norm(rho_2-rho_1,inf) )./log(r);
-disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
-disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
-disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
-disp(' ')
+% disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
+% disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
+% disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
+% disp(' ')
 p1_Z_saad = log( norm(Z_3-Z_2,1)./norm(Z_2-Z_1,1) )./log(r);
 p2_Z_saad = log( norm(Z_3-Z_2,2)./norm(Z_2-Z_1,2) )./log(r);
 pinf_Z_saad = log( norm(Z_3-Z_2,inf)./norm(Z_2-Z_1,inf) )./log(r);
-disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
-disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
-disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
-disp(' ')
+% disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
+% disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
+% disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
+% disp(' ')
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,p_rho)
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -119,13 +122,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_rho'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,p_Z)
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -135,13 +139,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_Z'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,rho,'r--'); hold on
 plot(x,rho_3,'r-')
@@ -154,13 +159,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_rho'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,f,'b--'); hold on
 plot(x,Z_3,'b-')
@@ -173,13 +179,14 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_Z'])
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(x,rho_3-rho_2,'b-'); hold on
 plot(x,rho_2-rho_1,'r-')
@@ -192,8 +199,8 @@ addverstr(gca,Git_Filename,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility)
-set(gcf,'PaperUnits',Paper_Units)
+set(gcf,'Units',Paper_Units)
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height])
+set(gcf,'Position',[0 0 Paper_Width Paper_Height])
 print(gcf,'-dpdf',[plotdir,'saad_rho_diff'])
 
