@@ -735,11 +735,11 @@ Note that the initial condition $q_0(x,y,t)$ is restricted to cases where $\frac
 An example of the solution to (\ref{eqn_2dsoln}) is shown in Fig.~\ref{fig_pulsating 2D wave}. The initial condition for the density is specified as $\rho(\mathbf{x},0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.  FDS is run with three scalar transport schemes: central differencing, Superbee, and the CHARM flux limiter. The solution at $(x,y) = (3\pi/2, 3\pi/2)$ for successively finer grid resolutions is plotted as a time series on the left and may be compared with the analytical solution (black line). On the right, we confirm second-order convergence for the FDS implementation.  Central differencing and the CHARM limiter outperform Superbee for this problem because the solution is relatively smooth.
 
 \begin{figure}[ht]
-    \begin{tabular}{rl}
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence}
-   \end{tabular}
-         \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
+   \end{tabular*}
+   \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
 \end{figure}
 
@@ -820,10 +820,10 @@ Note that $z_0 \Rightarrow x_0$ for $i=1$ and $z_0 \Rightarrow y_0$ for $i=2$.  
 An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_compression_wave}.  In this case we set $c_1 = 2$ and $c_2 = 3$ to create an asymmetry in the flow.  The periodicity in time depends on the choices of $c_1$ and $c_2$; it is possible that no periodicity exists. We have not found a case that generates a singularity. The analytical time series of the density at the position $(x,y) = (3\pi/2, 3\pi/2)$ is shown as the solid black line. FDS is run with the CHARM flux limiter scheme (as this is a DNS flow field).  The solution at successively finer grid resolutions is plotted and compared with the analytical solution, demonstrating convergence of the scheme.  On the right side of the figure we demonstrate second-order convergence of the central, Superbee, and CHARM limiter schemes in FDS.
 
 \begin{figure}[ht]
-   \begin{tabular}{rl}
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence}
-   \end{tabular}
+   \end{tabular*}
    \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
 \end{figure}
@@ -1321,7 +1321,7 @@ The first case, {\ct bound\_test\_1}, consists of two independent reactions, one
 
 \begin{figure}[!ht]
    \centering
-   \includegraphics[height=2in]{SCRIPT_FIGURES/bound_test_1}
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_1}
    \caption[Results of the {\ct bound\_test\_1} case]{Results of the {\ct bound\_test\_1} case.}
    \label{fig:bound_test_1}
 \end{figure}
@@ -1335,7 +1335,7 @@ The second test case, {\ct bound\_test\_2}, is more challenging---we add a third
 The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2}.  As discussed in the FDS Tech Guide \cite{FDS_Math_Guide}, the right-hand-side of the chemistry ODE is set up assuming a large Arrhenius constant and no activation energy and (in this case) second-order concentration dependence for each reaction.  It can be shown through numerical experiments that this assumption is equivalent to applying Curl's mixing model (Coalescence-Dispersion) \cite{Curl:1} in a batch reactor with infinitely fast chemistry.
 \begin{figure}[!ht]
    \centering
-   \includegraphics[height=2in]{SCRIPT_FIGURES/bound_test_2}
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_2}
    \caption[Results of the {\ct bound\_test\_2} case]{Results of the {\ct bound\_test\_2} case.}
    \label{fig:bound_test_2}
 \end{figure}
@@ -3556,7 +3556,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
 \label{fig:ht3d_ibeam_time_history}
