@@ -140,6 +140,9 @@ for n=1:length(filename)
 end
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hh(1)=loglog(dx,e_r,'ko-');
 hold on
@@ -157,7 +160,6 @@ xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpr
 ylabel('{\it L_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 lh=legend(hh,'FDS {\it \rho}','FDS {\it Z}','FDS {\it u}','FDS {\it H}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-legend('boxoff')
 
 % add Git version if file is available
 
@@ -165,9 +167,10 @@ Git_Filename = [datadir,'shunn3_256_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
 
 % check errors

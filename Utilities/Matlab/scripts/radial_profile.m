@@ -18,7 +18,7 @@
 
 function []=radial_profile(varargin)
 
-if nargin<1|nargin>100; 
+if nargin<1|nargin>100;
     display('Error in argument list')
 end
 if nargin>=1
@@ -81,8 +81,10 @@ if nargin>=1
     end
 end
 
-figure
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 % experimental data
 M = csvread(exp_file,1,0);
@@ -202,7 +204,7 @@ if nfds>=3
         urange = devc_col(1):devc_col(2);
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
-        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
         W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
@@ -276,7 +278,7 @@ if nfds>=5
         urange = devc_col(1):devc_col(2);
         vrange = devc_col(3):devc_col(4);
         u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
-        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
         W = mean(0.5*(u.*u+v.*v),1);
     elseif strcmp(data_format,'col_tke')
         R = M(:,1);
@@ -295,8 +297,6 @@ xt = xmin + .05*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
 text(xt,yt,text_label,'FontName',Font_Name,'FontSize',14,'Interpreter',Font_Interpreter)
 
-plot_style
-
 xlabel(xaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
 ylabel(yaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
 set(gca,'FontName',Font_Name)
@@ -313,18 +313,18 @@ if nfds==1; h = legend(H,exp_label,fds_label1,'Location',legend_pos); end
 if nfds==2; h = legend(H,exp_label,fds_label1,fds_label2,'Location',legend_pos); end
 if nfds==3; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,'Location',legend_pos); end
 if nfds==4; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,'Location',legend_pos); end
-if nfds==5; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,fds_label5,'Location',legend_pos); end    
+if nfds==5; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,fds_label5,'Location',legend_pos); end
 set(h,'Interpreter',Font_Interpreter)
-legend boxoff
+set(h,'FontSize',Key_Font_Size)
 
 % add Git revision if file is available
 
 addverstr(gca,git_file,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',plot_file)

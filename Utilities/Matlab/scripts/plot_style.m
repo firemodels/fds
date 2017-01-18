@@ -70,7 +70,7 @@ switch style
         Scat_Paper_Width  = 6.0;
 
         % Print properties
-        Figure_Visibility = 'on';
+        Figure_Visibility = 'off';
         Image_File_Type = '-dpdf';
 
     case 'paper'

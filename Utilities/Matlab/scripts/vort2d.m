@@ -90,6 +90,8 @@ for m = 1:4
     %-----------------------------------------------------------------%
 
     figure
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
     % Define plot range
     Z0 = STEPSIZE(m)/2;
@@ -157,10 +159,11 @@ for m = 1:4
     % Set standard plotting parameters
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Title_Font_Size)
-    set(gcf,'DefaultLineLineWidth',Line_Width)
-    set(gcf,'PaperUnits',Paper_Units);
+
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
     % Label axes
     xlabel('z-coordinate (m)','FontSize',Title_Font_Size,...
@@ -240,10 +243,11 @@ for m = 1:4
     % Set standard plotting parameters
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Title_Font_Size)
-    set(gcf,'DefaultLineLineWidth',Line_Width)
-    set(gcf,'PaperUnits',Paper_Units);
+
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
     % Label axes
     xlabel('Time (s)','FontSize',Title_Font_Size,...
