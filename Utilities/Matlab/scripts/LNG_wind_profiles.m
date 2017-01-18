@@ -26,9 +26,9 @@ p_0 = 1000;
 
 z = [0.001 0.1 0.5 1 1.9 3 4 5 6 7 8 9 10 15 20 25 30];
 
-u_star =     [ 0.270  0.372  0.074  0.252  0.310  0.480  0.210  0.0605  0.3053 0.3694  0.19    0.280   0.315];
-theta_star = [-1.022 -0.097  0.026 -0.035 -0.890 -0.520  0.039  0.0577 -0.0175 0.1521 -0.180  -0.0745 -0.0879];
-L =          [-5.34  -110.8  16.2  -142.  -8.56  -33.2   82.5   4.963  -422.2  69.38  -14.4   -75.5   -81.15];
+u_star =     [ 0.255  0.372  0.074  0.252  0.310  0.480  0.210  0.0605  0.3053 0.3694  0.19    0.280   0.315];
+theta_star = [-0.532 -0.097  0.026 -0.035 -0.890 -0.520  0.039  0.0577 -0.0175 0.1521 -0.180  -0.0745 -0.0879];
+L =          [-9.49  -110.8  16.2  -142.  -8.56  -33.2   82.5   4.963  -422.2  69.38  -14.4   -75.5   -81.15];
 p_r =        [ 948    940    941    940.   936    939    942    908.9   900.8  906.3   1000.   1000.   1000.];
 z_0 =        [ 0.0002 0.0002 0.0002 0.0002 0.0002 0.0002 0.0002 0.008   0.008  0.008   0.00002 0.00002 0.00002];
 z_r =   [1 1 1 1 0.5 0.5 0.5 1 1 1 1.9 1.9 1.9];
@@ -37,6 +37,8 @@ i_z_r = [4 4 4 4 3   3   3   4 4 4 5   5   5];
 for i=1:13
 
 figure(2*i-1)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M = importdata([expdir,test{i},'_profile.csv'],',',2);
 S = importdata([outdir,test{i},'_line.csv'],',',2);
@@ -57,9 +59,6 @@ theta_0 = theta_r(1) - (theta_star(i)/kappa)*(log(z_r(i)/z_0(i)) - psi_h(i_z_r(i
 theta = theta_0 + (theta_star(i)/kappa)*(log(z/z_0(i)) - psi_h);
 T = theta*(p_0/p_r(i))^-0.285 - (g/cp)*(z-z_r(i));
 
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 plot(M.data(:,2),M.data(:,1),'ko'); hold on
 plot(u,z,'k-'); hold on
 plot(S.data(:,2),S.data(:,1),'k--'); hold on
@@ -73,19 +72,15 @@ xlabel('Velocity (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interprete
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Resize','off')
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-Paper_Pos=get(gcf,'PaperPosition');
-set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
-warning('off','MATLAB:print:FigureTooLargeForPage') % this is part of the hack that seems necessary for Matlab 2016b
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,test{i},'_vel'])
 
 figure(2*i)
-
 set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 plot(M.data(:,3),M.data(:,1),'ko'); hold on
 plot(T-273.15,z,'k-'); hold on
 plot(S.data(:,3),S.data(:,1),'k--'); hold on
@@ -99,12 +94,9 @@ xlabel('Temperature (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Inte
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Resize','off')
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-Paper_Pos=get(gcf,'PaperPosition');
-set(gca,'Position',[Plot_X-Paper_Pos(1) Plot_Y-Paper_Pos(2) Plot_Width Plot_Height])
-warning('off','MATLAB:print:FigureTooLargeForPage') % this is part of the hack that seems necessary for Matlab 2016b
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,test{i},'_tmp'])
 
 % Print out the FDS RAMP lines for velocity and temperature profiles. This is only needed if the M-O parameters change.

@@ -5,7 +5,6 @@
 close all
 clear all
 
-figure
 plot_style
 
 data_dir = '../../Verification/Scalar_Analytical_Solution/';
@@ -124,6 +123,9 @@ rho_FL0_32 = section2_soln(rho_fds_FL0_32(1),x-L/64,y-L/64,B,w,t_FL0_32);      e
 rho_FL0_64 = section2_soln(rho_fds_FL0_64(1),x-L/128,y-L/128,B,w,t_FL0_64);    error_FL0_64 = norm(rho_fds_FL0_64-rho_FL0_64)/length(t_FL0_64);
 rho_FL0_128 = section2_soln(rho_fds_FL0_128(1),x-L/256,y-L/256,B,w,t_FL0_128); error_FL0_128 = norm(rho_fds_FL0_128-rho_FL0_128)/length(t_FL0_128);
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(5)=plot(t_FL2_128,rho_FL2_128,'k-','LineWidth',Line_Width); hold on
 H(1)=plot(t_FL2_16,rho_fds_FL2_16,'c--','LineWidth',Line_Width); hold on
@@ -147,15 +149,17 @@ Git_Filename = [data_dir,'pulsating_FL2_16_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'pulsating_time_series'])
 
 % convergence plot
 
 figure
-plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 h = 2*pi./[16 32 64 128];
 e_FL2 = [error_FL2_16 error_FL2_32 error_FL2_64 error_FL2_128];
@@ -184,9 +188,10 @@ Git_Filename = [data_dir,'pulsating_FL2_16_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'pulsating_convergence'])
 
 

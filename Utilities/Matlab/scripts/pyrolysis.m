@@ -23,15 +23,15 @@ global residue
 
 addpath('../../Verification/Pyrolysis')
 
+plot_style
+
 show_fds = 1;
 
 for i_plot=1:2
 
-    close all
-
-    plot_style
-    set(gcf,'DefaultLineLineWidth',Line_Width)
-    set(gca,'FontName',Font_Name)
+    figure
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
     dTdt = 5./60.;
     R0 = 8314.3;
@@ -113,6 +113,7 @@ for i_plot=1:2
     % Plot attributes
 
     set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
     xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     set(AX(2),'XTickMode','manual')
     set(AX(2),'XTick',[])
@@ -130,11 +131,11 @@ for i_plot=1:2
     % Add vertical lines to indicate the temperature peaks
 
     for i=1:n_components-1
-        axes(AX(2));
+        set(gcf,'CurrentAxes',AX(2))
         line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*(1-residue(i))*1000],'LineStyle','-','Color','black','LineWidth',1)
     end
 
-    % add SVN if file is available
+    % add version string if file is available
 
     if i_plot==1
         chid = 'pyrolysis_1';
@@ -148,9 +149,9 @@ for i_plot=1:2
     % Create the PDF files
 
     set(gcf,'Visible',Figure_Visibility);
-    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width*1.1 Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width*1.1 Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width*1.1 Paper_Height]);
     if i_plot==1
         print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_1')
     else

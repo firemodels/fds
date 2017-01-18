@@ -180,6 +180,7 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHFDS=/tmp/bashrc_fds.\$\$
+BASHUNINSTALL=/tmp/uninstall_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -328,6 +329,7 @@ echo ""
 echo "Installation beginning"
  
 MKDIR \$FDS_root 1
+MKDIR \$FDS_root/Uninstall 1
 
 #--- copy installation files into the FDS_root directory
 
@@ -337,14 +339,85 @@ cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
 echo "Copy complete."
 
+#--- create uninstall file
+
+cat << BASH > \$BASHUNINSTALL
+#/bin/bash
+FDSDIR=\$FDS_root
+UNINSTALL=
+BASH
+if [ "$ostype" == "OSX" ] ; then
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bash_profile
+BASH
+else
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bashrc
+BASH
+fi
+cat << BASH >> \$BASHUNINSTALL
+while true; do
+  read -p "Do you wish to remove \\\$FDSDIR, .bashrc_fds and FDS entries from \\\$BASHRC? (yes/no) " yn
+  case \\\$yn in
+      [Yy]* ) 
+        UNINSTALL=1
+        break;;
+      [Nn]* ) 
+        break;;
+      * ) 
+        echo "Please answer yes or no.";;
+  esac
+done
+if [[ "\\\$UNINSTALL" == "1" ]]; then
+  if [[ -d \\\$FDSDIR ]]; then
+    echo removing \\\$FDSDIR
+    rm -r \\\$FDSDIR
+  else
+    echo "***warning: The directory \\\$FDSDIR does not exist."
+  fi
+  if [[ -e \\\$BASHRC ]]; then
+    BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
+    echo removing FDS entries from \\\$BASHRC
+    grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
+    mv \\\$BASHRC ~/.bashrc\\\$BAK
+    mv ~/.bashrc_new \\\$BASHRC
+  else
+    echo "***warning: the file \\\$BASHRC does not exist."
+  fi
+  if [ -e ~/.bashrc_fds ]; then
+    echo removing ~/.bashrc_fds
+    rm ~/.bashrc_fds
+  else
+    echo "***warning: the file ~/.bashrc_fds does not exist."
+  fi
+  echo "Uninstall of FDS and Smokeview complete."
+else
+  echo "Uninstall of FDS and Smokeview cancelled."
+fi
+BASH
+
+chmod +x \$BASHUNINSTALL
+mv \$BASHUNINSTALL \$FDS_root/Uninstall/uninstall_fds.sh
+
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# MPI distribution location
+# FDS location
+
+export FDSBINDIR=\`pwd\`/bin
+
+# OpenMPI location
 
 export MPIDIST=\\\$1
+
+# Intel shared library location
+
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS16
+if [ "\\\$2" != "" ]; then
+  INTEL_SHARELIB=\\\$2
+fi
 
 # unalias application names used by FDS
 
@@ -357,34 +430,38 @@ unalias smokeview6 >& /dev/null
 unalias smokezip6 >& /dev/null
 unalias smokediff6 >& /dev/null
 
-# FDS location
-
-export FDSBINDIR=\`pwd\`/bin
-
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
   MPIDIST=
 fi
 
+# FDS network type
+
 FDSNETWORK=
 if [[ "\\\$MPIDIST" == *ib ]] ; then
   FDSNETWORK=infiniband
 fi
-export MPIDIST FDSNETWORK
+export FDSNETWORK
 
-# Update $LDLIBPATH and PATH
+# Update $LDLIBPATH
 
 BASH
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHFDS
-$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$INTEL_SHARELIB:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHFDS
-PATH=\\\$FDSBINDIR:\\\$PATH
 if [ "\\\$MPIDIST" != "" ]; then
   $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
-  PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+
+# Update PATH
+
+if [ "\\\$MPIDIST" == "" ]; then
+  PATH=\\\$FDSBINDIR:\\\$PATH
+else
+  PATH=\\\$MPIDIST/bin:\\\$FDSBINDIR:\\\$PATH
 fi
 export $LDLIBPATH PATH
 
@@ -414,12 +491,13 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
-  echo "# --------------------------------------------" >> \$BASHSTARTUP
+  echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -431,10 +509,28 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
+EOF
+cat << EOF >> $INSTALLER
+if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
+  echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
+else
+  if [ "\\\$IFORT_COMPILER" != "" ]; then
+    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
+  fi
+fi
+EOF
+cat << EOF >> $INSTALLER
+  echo "#FDS                               "          >> \$BASHSTARTUP
+  echo "#FDS source ~/.bashrc_fds arg1 arg2"          >> \$BASHSTARTUP
+  echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
+  echo "#FDS arg2: Intel shared library location"          >> \$BASHSTARTUP
+  echo "#FDS       (only needed if a non-installed fds is used and was built"  >> \$BASHSTARTUP
+  echo "#FDS        with a Fortran compiler other than Intel version 16)"  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
