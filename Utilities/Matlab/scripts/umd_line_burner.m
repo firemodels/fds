@@ -5,6 +5,9 @@
 close all
 clear all
 
+plot_style
+Marker_Size = 10;
+
 % % compute N2 ramp
 
 % format long
@@ -113,8 +116,8 @@ F3 = importdata([outdir,'methane_dx_p3125cm_line.csv'],',',2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
@@ -166,9 +169,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
@@ -178,8 +181,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
@@ -231,9 +234,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
@@ -243,8 +246,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
@@ -296,9 +299,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
@@ -308,8 +311,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
@@ -361,9 +364,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p250'])
