@@ -20,51 +20,55 @@ lines_per_angle = length(line_pos)/length(str_angle);
 height = 0.0396; % building height in meters
 
 for ind1 = 1:length(str_mesh) % cycles through meshes
-    
+
     mesh = str_mesh{ind1};
-    
+
     for ind2 = 1:length(str_angle) % cycles through angles
-        
+
         col = 1;
         angle = str_angle{ind2};
-        
+
         for ind3 = 1:lines_per_angle % cycles through lines
-            
+
             line_file = line_pos{1,(ind3+4*(ind2-1))};
             line_plot = line_pos{2,(ind3+4*(ind2-1))};
-            
+
             M = importdata([res_dir,'UWO_test7_case1_',angle,'_',mesh,'_line.csv'],',',2);
             N = importdata([exp_dir,'UWO_exp_',angle,'_',line_file,'.csv'],',',1);
-            
+
             x_exp = N.data(:,1);
             cp_mean_exp = N.data(:,2);
             cp_rms_exp = N.data(:,3);
-            
+
             if ind3 < lines_per_angle
-                
+
                 x = cell(3,1);
                 cp = cell(3,1);
-                
+
                 for ind4 = 1:3 % cycles from windward wall to roof to leeward wall
-                    
+
                     x{ind4} = M.data(:,col);
                     cp{ind4} = M.data(:,col+1);
-                    
+
                     col = col+4;
-                    
+
                 end
-                
+
                 x_1 = x{1};
                 x_2 = height + x{2} - min(x{2});
                 x_3 = max(x_2) + height - x{3};
-                
+
                 x_max_plot = ceil(max([x_3;x_exp])*100)/100;
-                
+
+                set(gca,'Units',Plot_Units)
+                set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
                 plot(x_1,cp{1},'bo-'); hold on
                 plot(x_2,cp{2},'go-');
                 plot(x_3,cp{3},'ro-');
                 errorbar(x_exp,cp_mean_exp,cp_rms_exp,'ko');
                 hold off
+                set(gca,'FontName',Font_Name)
+                set(gca,'FontSize',Label_Font_Size)
                 axis([0,x_max_plot,-1.7,1.5])
                 xlabel('Position along line (m)')
                 ylabel('Mean C_p')
@@ -75,22 +79,31 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 git_file = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_git.txt'];
                 addverstr(gca,git_file,'linear')
 
-                legend('FDS (Windward Wall)','FDS (Roof)','FDS (Leeward Wall)', 'Exp','Location', 'NorthEast')
-                legend boxoff
-                                               
+                lh=legend('FDS (Windward Wall)','FDS (Roof)','FDS (Leeward Wall)', 'Exp','Location', 'NorthEast');
+                set(lh,'FontSize',Key_Font_Size)
+                set(lh,'Interpreter',Font_Interpreter)
+
+                set(gcf,'Visible',Figure_Visibility);
+                set(gcf,'Units',Paper_Units);
+                set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+                set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
                 print('-dpdf',[plt_dir,'cp_mean_',angle,'_',mesh,'_',line_file])
-                
+
             else
                 % side wall
                 x = M.data(:,col);
                 x = x - min(x);
                 cp = M.data(:,col+1);
-                
+
                 x_max_plot = ceil(max([x;x_exp])*100)/100;
-                
+
+                set(gca,'Units',Plot_Units)
+                set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
                 plot(x,cp,'bo-'); hold on
                 errorbar(x_exp,cp_mean_exp,cp_rms_exp,'ko');
                 hold off
+                set(gca,'FontName',Font_Name)
+                set(gca,'FontSize',Label_Font_Size)
                 axis([0,x_max_plot,-1.7,1.5])
                 xlabel('Position along line (m)')
                 ylabel('Mean C_p')
@@ -104,18 +117,23 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 git_file = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_git.txt'];
                 addverstr(gca,git_file,'linear')
 
-                legend('FDS','Exp','Location', 'NorthEast')
-                legend boxoff
-                               
+                lh=legend('FDS','Exp','Location', 'NorthEast');
+                set(lh,'FontSize',Key_Font_Size)
+                set(lh,'Interpreter',Font_Interpreter)
+
+                set(gcf,'Visible',Figure_Visibility);
+                set(gcf,'Units',Paper_Units);
+                set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+                set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
                 print('-dpdf',[plt_dir,'cp_mean_',angle,'_',mesh,'_',line_file])
-                
+
             end
-            
+
             clear x x_1 x_2 x_3 cp M N x_exp cp_mean_exp cp_rms_exp
-            
+
         end
-        
+
     end
-    
+
 end
 
