@@ -447,6 +447,7 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  INBFC_CCCEN ! Inbound face BP belongs to.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::INTCOEF_CCCEN ! Interpo coefficients.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z, U_DOT_DEL_RHO_Z
+   INTEGER :: NOMICC(2)=0
 END TYPE IBM_CUTCELL_TYPE
 
 
