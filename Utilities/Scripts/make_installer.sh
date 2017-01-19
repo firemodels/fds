@@ -307,7 +307,7 @@ while true; do
    echo ""
    echo "Installation directory: \$FDS_root"
    if [ "\$mpipath" == "" ] ; then
-     echo "         MPI directory: none"
+     echo "         MPI directory: none found"
    else
      echo "         MPI directory: \$mpipath"
    fi

@@ -42,6 +42,29 @@ CP ()
   fi
 }
 
+# -------------------- UNTAR -------------------
+
+UNTAR ()
+{
+  FROMDIR=$1
+  FROMFILE=$2
+  TODIR=$3
+  TODIR2=$4
+  if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the compressed file $FROMFILE does not exist"
+  else
+    curdir=`pwd`
+    cd $TODIR
+    tar xvf $FROMDIR/$FROMFILE
+    cd $curdir
+  fi
+  if [ -e $TODIR/$TODIR2 ]; then
+    echo "$FROMFILE untar'd"
+  else
+    echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
+  fi
+}
+
 # -------------------- CP2 -------------------
 
 CP2 ()
@@ -145,11 +168,10 @@ webpagesdir=$fds_smvroot/webpages
 for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
+fdsforbundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
-fullmanifestdir=$uploaddir/$bundledir/bin
-fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
@@ -218,44 +240,6 @@ if [ "$PLATFORM" == "OSX64" ]; then
    openmpifile=openmpi_1.8.4_osx_64.tar.gz
 fi
 
-cat <<EOF > $fullmanifest
-<html>
-<head>
-<TITLE>FDS-SMV Bundle Manifest</TITLE>
-</HEAD>
-<BODY BGCOLOR="#FFFFFF" >
-<pre>
-EOF
-echo ""
-echo "--- Creating Manifest ---"
-echo ""
-echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
-date >> $fullmanifest
-echo  >> $fullmanifest
-echo Versions:>> $fullmanifest
-echo  >> $fullmanifest
-echo ------fds-------------------- >> $fullmanifest
-echo 0 | $bundledir/bin/$fdsmpiout >> $fullmanifest 2>&1 
-
-echo  >> $fullmanifest
-echo ------fds2ascii-------------------- >> $fullmanifest
-$bundledir/bin/$fds2asciiout -v >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokeview-------------------- >> $fullmanifest
-$bundledir/bin/$smokeviewout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokediff-------------------- >> $fullmanifest
-$bundledir/bin/$smokediffout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokezip-------------------- >> $fullmanifest
-$bundledir/bin/$smokezipout -v  >> $fullmanifest
-
-echo ------dem2fds-------------------- >> $fullmanifest
-$bundledir/bin/$dem2fdsout -v  >> $fullmanifest
-
 echo ""
 echo "--- copying configuration files ---"
 echo ""
@@ -264,18 +248,20 @@ if [ "$OSXBUNDLE" == "yes" ]; then
   CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
 
+CP $fdsforbundle README_OPENMPI $bundledir/bin README_OPENMPI
+
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
 CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile $bundledir/bin $openmpifile
+CP $openmpidir $openmpifile $bundledir/bin openmpi_1.8.4.tar.gz
 
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
+#CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
@@ -315,7 +301,7 @@ CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.
 CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-CP2 $for_bundle readme_examples.html $bundledir/Examples
+# CP2 $for_bundle readme_examples.html $bundledir/Examples
 
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
@@ -333,22 +319,7 @@ $wui_cases
 $smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
-echo >> $fullmanifest
-echo ------file listing---------------------------------- >> $fullmanifest
-set curdir=`pwd`
-cd $uploaddir/$bundledir
-find . -print >> $fullmanifest
 cd $curdir
-
-cat <<EOF>>$fullmanifest
-</pre>
-</body>
-</html>
-EOF
-
-CP $fullmanifestdir $manifest $uploaddir $manifest
-
-cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo ""
 echo "--- building archive ---"
