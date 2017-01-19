@@ -853,7 +853,7 @@ Validation Suite} removed for clarity.
 ...
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 ...
-&DEVC XYZ=6.04,0.28,3.65, QUANTITY='OXYGEN', ID='EO2_FDS' /
+&DEVC XYZ=6.04,0.28,3.65, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', ID='EO2_FDS' /
 ...
 &TAIL / End of file.
 \end{lstlisting}
@@ -6073,9 +6073,9 @@ A useful sample case to demonstrate various features of droplet motion on solid 
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{lcr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_3}
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_1} &
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_2} &
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_3}
 \end{tabular}
 \end{center}
 \caption[Example of water cascading over solid obstructions]{Smokeview rendering of the {\ct cascade} test case.}
@@ -6243,7 +6243,7 @@ Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note t
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/bucket_test_2}
 \caption[Results of the {\ct bucket\_test\_2} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_2} case.}
 \label{bucket_test_2_fig}
 \end{figure}
@@ -6486,7 +6486,7 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.in]{SCRIPT_FIGURES/aspiration_detector}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aspiration_detector}
 \end{center}
 \caption[Results of the {\ct aspiration\_detector} test case]{Output of {\ct aspiration\_detector} test case.}
 \label{aspiration_detector_fig}
@@ -9832,18 +9832,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \chapter{The FDS/Smokeview Repository}
 
 For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.'' All project documents are maintained using the online utility \href{https://github.com/}{{GitHub}}, a free service that supports software development for open source applications.  GitHub uses Git version control software. Under this system, a centralized repository containing all project files resides on a GitHub server.  Anyone can obtain a copy of the repository or retrieve a specific revision of the repository.  However, only the FDS and Smokeview developers can commit changes directly to the repository. Others must submit a ``pull request.'' Detailed instructions for checking out the FDS repository can be found at
-\href{https://github.com/firemodels/fds-smv}{{https://github.com/firemodels/fds-smv}}.
+\href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 
-The repository contains the following files:
-\begin{enumerate}
-\item FDS and Smokeview source code files
-\item FDS and Smokeview documentation
-\item Input files for software testing (Examples), verification testing, and validation testing
-\item Experimental data files used for validation testing
-\item Scripts and post-processing utilities used for software testing
-\item Web pages and Wiki Pages
-\end{enumerate}
-The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
+
+\vskip\baselineskip
+\begin{tabular}{ll}
+fds & FDS source code, verification and validation tests, wikis, and documentation \\
+smv & Smokeview source code, integration tests, and documentation \\
+exp & Experimental data repository for FDS validation \\
+out & FDS output results for validation \\
+bot & Firebot (continuous integration system) source \\
+fds-smv & Web page html source
+\end{tabular}
+\vskip\baselineskip
+
+\noindent The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
 
 
 

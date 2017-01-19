@@ -78,6 +78,7 @@
 &DEVC ID        ='C1a00'        ,       XYZ=    88.5    ,       -9.3    ,       0.9     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID        ='C1a01'        ,       XYZ=    88.5    ,       -9.3    ,       1.3     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID        ='C1a02'        ,       XYZ=    88.5    ,       -9.3    ,       2.3     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
+
 &DEVC ID        ='C2a00'        ,       XYZ=    179.0   ,       -18.8   ,       1.0     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID        ='C2a01'        ,       XYZ=    179.0   ,       -18.8   ,       1.5     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
 &DEVC ID        ='C2a02'        ,       XYZ=    179.0   ,       -18.8   ,       2.4     ,       QUANTITY='VOLUME FRACTION'      ,        SPEC_ID='METHANE' /
