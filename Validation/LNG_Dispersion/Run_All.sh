@@ -7,7 +7,7 @@ source $SVNROOT/Validation/Common_Run_All.sh
 
 $QFDS $DEBUG -p 30 $QUEUE -d $INDIR Burro3.fds
 $QFDS $DEBUG -p 30 $QUEUE -d $INDIR Burro7.fds
-$QFDS $DEBUG -p 30 $QUEUE -d $INDIR Burro8.fds
+$QFDS $DEBUG -p 50 $QUEUE -d $INDIR Burro8.fds
 $QFDS $DEBUG -p 30 $QUEUE -d $INDIR Burro9.fds
 $QFDS $DEBUG -p 24 $QUEUE -d $INDIR Coyote3.fds
 $QFDS $DEBUG -p 24 $QUEUE -d $INDIR Coyote5.fds
