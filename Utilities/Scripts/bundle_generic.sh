@@ -117,6 +117,8 @@ fdsdir=intel$FDSOS
 fds=fds_intel$FDSOS
 fdsout=fds$OUT
 
+openmpidir=~/FDS_Guides
+
 fdsmpidir=mpi_intel$FDSOS
 fdsmpi=fds_mpi_intel$FDSOS
 fdsmpiout=fds$MAJOR\_mpi$FDSOS
@@ -208,10 +210,12 @@ SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiou
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_linux_64.tar.gz
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_osx_64.tar.gz
 fi
 
 cat <<EOF > $fullmanifest
@@ -265,6 +269,8 @@ CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
+
+CP $openmpidir $openmpifile $bundledir/bin $openmpifile
 
 echo ""
 echo "--- copying documentation ---"
