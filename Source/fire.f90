@@ -436,7 +436,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
                CHEM_SUBIT_OUT = 0
                REAC_SOURCE_TERM_OUT(:) = 0._EB
                Q_REAC_OUT(:) = 0._EB
-            ENDIF  
+            ENDIF
       END SELECT
    ELSE
       EXIT CO_EXTINCT
@@ -1443,7 +1443,7 @@ REAL(EB) :: AIT_P,ZETA_P
 LOGICAL  :: Q_EXISTS_CC
 TYPE (REACTION_TYPE), POINTER :: RN
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-LOGICAL  :: DO_REACTION,REALIZABLE
+LOGICAL  :: DO_REACTION,REALIZABLE,DEBUG
 LOGICAL :: Q_EXISTS
 
 ! Set to zero Reaction, Radiation sources of heat and thermodynamic div:
@@ -1470,6 +1470,7 @@ IF (REAC_SOURCE_CHECK) THEN
 ENDIF
 
 ZETA_P = 0._EB
+DEBUG  = .FALSE.
 
 ICC_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
    I     = IBM_CUT_CELL(ICC)%IJK(IAXIS)
@@ -1514,7 +1515,7 @@ ICC_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
                              IBM_CUT_CELL(ICC)%TMP(JCC),IBM_CUT_CELL(ICC)%RHO(JCC),MU(I,J,K),KRES(I,J,K),&
                              ZETA_P,AIT_P,PBAR(K,PRESSURE_ZONE(I,J,K)),&
                              LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K)),&
-                             IBM_CUT_CELL(ICC)%VOLUME(JCC) )
+                             IBM_CUT_CELL(ICC)%VOLUME(JCC), DEBUG )
       !***************************************************************************************
       IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
           IBM_CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TRACKED_SPECIES,JCC)=REAC_SOURCE_TERM_TMP(1:N_TRACKED_SPECIES)

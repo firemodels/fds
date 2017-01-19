@@ -12320,7 +12320,12 @@ END SUBROUTINE GET_BOUNDFACE_GEOM_INFO_H
 ! ----------------------- FILL_UNKZ_GUARDCELLS ---------------------------------
 SUBROUTINE FILL_UNKZ_GUARDCELLS
 
-! Stub for the time being :)
+! Local Variables:
+
+
+
+
+
 
 RETURN
 END SUBROUTINE FILL_UNKZ_GUARDCELLS
@@ -17385,44 +17390,174 @@ CONTAINS
 SUBROUTINE SET_GC_CUTCELLS_3D
 
 ! Local Variables:
+INTEGER :: IW,II,JJ,KK,IOR,IIO,JJO,KKO,IIF,JJF,KKF,IIOF,JJOF,KKOF,ICF,ICOF,IFACE,AXIS,ICC,NMICC
+REAL(EB):: DXYZCEN(IAXIS:KAXIS), DIFF
+TYPE (WALL_TYPE), POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+LOGICAL :: TWINMATCH
+
+! Meshes Loop:
+! First Mesh Loop:
+! Define links among the NM assigned external cut-faces and NOM mesh cut-faces:
+MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   EXTERNAL_WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
+
+      WC=>WALL(IW)
+      EWC=>EXTERNAL_WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1
+
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+      NOM = EWC%NOM
+
+      IF ((EWC%IIO_MAX+EWC%JJO_MAX+EWC%KKO_MAX- &
+          (EWC%IIO_MIN+EWC%JJO_MIN+EWC%KKO_MIN)) > 0) THEN ! There is an OMESH on finer refinement level, not allowed.
+      WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.'
+      ENDIF
+
+      IIO = EWC%IIO_MIN
+      JJO = EWC%JJO_MIN
+      KKO = EWC%KKO_MIN
+
+      ! Define underlying Cartesian faces indexes:
+      SELECT CASE(IOR)
+      CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
+         IIF = II    ; JJF = JJ    ; KKF = KK
+         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side I boundary face has the same index as the high boundary cell
+      CASE(-IAXIS) ! Higher X boundary for Mesh NM, Lower for mesh NOM.
+         IIF = II - 1; JJF = JJ    ; KKF = KK
+         IIOF= IIO- 1; JJOF= JJO   ; KKOF= KKO
+      CASE( JAXIS) ! Lower Y boundary for Mesh NM, Higher for mesh NOM.
+         IIF = II    ; JJF = JJ    ; KKF = KK
+         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side J boundary face has the same index as the high boundary cell
+      CASE(-JAXIS) ! Higher Y boundary for Mesh NM, Lower for mesh NOM.
+         IIF = II    ; JJF = JJ - 1; KKF = KK
+         IIOF= IIO   ; JJOF= JJO- 1; KKOF= KKO
+      CASE( KAXIS) ! Lower Z boundary for Mesh NM, Higher for mesh NOM.
+         IIF = II    ; JJF = JJ    ; KKF = KK
+         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side K boundary face has the same index as the high boundary cell
+      CASE(-KAXIS) ! Higher Z boundary for Mesh NM, Lower for mesh NOM.
+         IIF = II    ; JJF = JJ    ; KKF = KK - 1
+         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO- 1
+      END SELECT
+
+      ! Now Obtain the IBM_CUT_FACE for the same face on NM-NOM:
+      AXIS=ABS(IOR)
+
+      IF(MESHES( NM)%FCVAR(IIF ,JJF , KKF,IBM_FGSC,AXIS) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1
+
+      ICF = MESHES( NM)%FCVAR(IIF ,JJF , KKF,IBM_IDCF,AXIS)
+      ICOF= MESHES(NOM)%FCVAR(IIOF,JJOF,KKOF,IBM_IDCF,AXIS)
+
+      ! Test that centroids match:
+      TWINMATCH=.TRUE.
+      DO IFACE=1,MESHES(NM)%IBM_CUT_FACE(ICF)%NFACE
+         DXYZCEN(IAXIS:KAXIS) = MESHES( NM)%IBM_CUT_FACE( ICF)%XYZCEN(IAXIS:KAXIS,IFACE)   - &
+                                MESHES(NOM)%IBM_CUT_FACE(ICOF)%XYZCEN(IAXIS:KAXIS,IFACE)
+         DIFF=SQRT(DXYZCEN(IAXIS)**2._EB+DXYZCEN(JAXIS)**2._EB+DXYZCEN(KAXIS)**2._EB)
+         IF (DIFF > GEOMEPS) TWINMATCH=.FALSE.
+      ENDDO
+
+      IF (TWINMATCH) THEN
+         !MESHES(NM)%IBM_CUT_FACE(ICF)%TWINFACE(1:2)=(/ NOM, ICOF /) ! This might be not deeded.
+         MESHES(NOM)%IBM_CUT_FACE(ICOF)%NOMICF(1:2)=(/ NM, ICF /)
+      ELSE
+         WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: MESH=',NM,', IBM_CUT_FACE=',ICF,' does not match OMESH=',&
+                         NOM,', IBM_CUT_FACE=',ICOF
+      ENDIF
+
+   ENDDO EXTERNAL_WALL_LOOP_1
+
+ENDDO MESH_LOOP_1
 
 
-! ! Meshes Loop:
-! MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!
-!    EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
-!
-!       WC=>WALL(IW)
-!       EWC=>EXTERNAL_WALL(IW)
-!       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
-!
-!       II  = WC%ONE_D%II
-!       JJ  = WC%ONE_D%JJ
-!       KK  = WC%ONE_D%KK
-!       IOR = WC%ONE_D%IOR
-!       NOM = EWC%NOM
-!
-!       IF ((EWC%IIO_MAX+EWC%JJO_MAX+EWC%KKO_MAX- &
-!           (EWC%IIO_MIN+EWC%JJO_MIN+EWC%KKO_MIN)) > 0) THEN ! There is an OMESH on finer refinement level, not allowed.
-!       WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.'
-!       ENDIF
-!
-!       IIO = EWC%IIO_MIN
-!       JJO = EWC%JJO_MIN
-!       KKO = EWC%KKO_MIN
-!
-!       ! Copy CCVAR(II,JJ,KK,IBM_CGSC) to guard cell:
-!       MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) = MESHES(NOM)%CCVAR(IIO,JJO,KKO,IBM_CGSC)
-!
-!       ! If this is an IBM_CUTCFE cell copy from NM to MESHES(NM)%IBM_CUT_CELL and link through NOMICC field:
-!       IF (MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) == IBM_CUTCFE) THEN
-!
-!
-!       ENDIF
-!
-!    ENDDO EXTERNAL_WALL_LOOP
-!
-! ENDDO
+! Second mesh loop:
+! Copy cut-cell data to guardcell region of assigned NM meshes and allocate IBM_CUT_CELL fields:
+MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   EXTERNAL_WALL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
+
+      WC=>WALL(IW)
+      EWC=>EXTERNAL_WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_2
+
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+      NOM = EWC%NOM
+
+      IIO = EWC%IIO_MIN
+      JJO = EWC%JJO_MIN
+      KKO = EWC%KKO_MIN
+
+      ! Copy CCVAR(II,JJ,KK,IBM_CGSC) to guard cell:
+      MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) = MESHES(NOM)%CCVAR(IIO,JJO,KKO,IBM_CGSC)
+
+      ! If this is an IBM_CUTCFE cell, copy from NM to MESHES(NM)%IBM_CUT_CELL and link through NOMICC field:
+      IF (MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) == IBM_CUTCFE) THEN
+
+         MESHES(NM)%IBM_NGCCUTCELL_MESH = MESHES(NM)%IBM_NGCCUTCELL_MESH + 1
+
+         ! Add Guard-cell cut-cell index:
+         NMICC = MESHES(NM)%IBM_NCUTCELL_MESH + MESHES(NM)%IBM_NGCCUTCELL_MESH
+         MESHES(NM)%CCVAR(II,JJ,KK,IBM_IDCC) = NMICC
+
+         ! Other mesh cut-cell index:
+         ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,IBM_IDCC)
+
+         ! Populate new cut-cell entry fields:
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%NOMICC = (/ NOM, ICC /)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%IJK(IAXIS:KAXIS) = (/ II, JJ, KK /)
+
+         NCELL = MESHES(NOM)%IBM_CUT_CELL(ICC)%NCELL
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%NCELL = NCELL
+
+         ! Volume:
+         ALLOCATE(MESHES(NM)%IBM_CUT_CELL(NMICC)%VOLUME(1:NCELL))
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%VOLUME(1:NCELL) = &
+         MESHES(NOM)%IBM_CUT_CELL(ICC)%VOLUME(1:NCELL)
+
+         ! XYZCen:
+         ALLOCATE(MESHES(NM)%IBM_CUT_CELL(NMICC)%XYZCEN(IAXIS:KAXIS,1:NCELL))
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%XYZCEN(IAXIS:KAXIS,1:NCELL) = &
+         MESHES(NOM)%IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,1:NCELL)
+
+         ! Don't allocate and copy CCELEM, FACE_LIST, they can be retreived from NOM, ICC on NOM local numeration.
+
+         ! Allocate work variables: RHO, RHOS, ZZ, ZZS, H, HS, TMP:
+         ALLOCATE(MESHES(NM)%IBM_CUT_CELL(NMICC)%RHO(1:NCELL),MESHES(NM)%IBM_CUT_CELL(NMICC)%RHOS(1:NCELL), &
+                  MESHES(NM)%IBM_CUT_CELL(NMICC)%ZZ(1:MAX_SPECIES,1:NCELL),  &
+                  MESHES(NM)%IBM_CUT_CELL(NMICC)%ZZS(1:MAX_SPECIES,1:NCELL), &
+                  MESHES(NM)%IBM_CUT_CELL(NMICC)%TMP(1:NCELL), &
+                  MESHES(NM)%IBM_CUT_CELL(NMICC)%H(1:NCELL),MESHES(NM)%IBM_CUT_CELL(NMICC)%HS(1:NCELL))
+
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%RHO(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%RHO(1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%RHOS(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%RHOS(1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%ZZ(1:MAX_SPECIES,1:NCELL)=&
+         MESHES(NOM)%IBM_CUT_CELL(ICC)%ZZ(1:MAX_SPECIES,1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%ZZS(1:MAX_SPECIES,1:NCELL)=&
+         MESHES(NOM)%IBM_CUT_CELL(ICC)%ZZS(1:MAX_SPECIES,1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%TMP(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%TMP(1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%H(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%H(1:NCELL)
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%HS(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%HS(1:NCELL)
+
+         ! Allocate unknown numbering vars:
+         ALLOCATE(MESHES(NM)%IBM_CUT_CELL(NMICC)%UNKZ(1:NCELL)) ! UNKH
+         MESHES(NM)%IBM_CUT_CELL(NMICC)%UNKZ(1:NCELL)=MESHES(NOM)%IBM_CUT_CELL(ICC)%UNKZ(1:NCELL)
+
+      ENDIF
+
+   ENDDO EXTERNAL_WALL_LOOP_2
+
+ENDDO MESH_LOOP_2
 
 
 RETURN
@@ -22386,6 +22521,7 @@ DO K=KLO,KHI
          MESHES(NM)%CCVAR(I,J,K,IBM_IDCC)            = NCUTCELL
          MESHES(NM)%IBM_CUT_CELL(NCUTCELL)%IJK(IAXIS:KAXIS) = (/ I, J, K /)
          MESHES(NM)%IBM_CUT_CELL(NCUTCELL)%NCELL     = NCELL
+         MESHES(NM)%IBM_CUT_CELL(NCUTCELL)%NFACE_CELL= NFACE_CELL
          NCFACE_CUTCELL = MAXVAL(CCELEM(1,1:NCELL)) + 1
          CALL NEW_CELL_ALLOC(NM,NCUTCELL,NCELL,NFACE_CELL,NCFACE_CUTCELL)
          MESHES(NM)%IBM_CUT_CELL(NCUTCELL)%CCELEM(1:NCFACE_CUTCELL,1:NCELL) = CCELEM(1:NCFACE_CUTCELL,1:NCELL)

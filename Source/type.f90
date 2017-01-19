@@ -406,6 +406,7 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                           ::  INBFC_CFCEN ! Inbound face BP belongs to.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::INTCOEF_CFCEN ! Interpo coefficients.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: RHOPVN
+   INTEGER :: NOMICF(2)=0  ! [NOM icf]
 END TYPE IBM_CUTFACE_TYPE
 
 
@@ -419,7 +420,7 @@ INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL= 96 ! Size definition parameter.
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
 
 TYPE IBM_CUTCELL_TYPE
-   INTEGER :: NCELL
+   INTEGER :: NCELL, NFACE_CELL
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
