@@ -318,7 +318,7 @@ else
 fi
 if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
   eval MPIDIST_FDS=\$FDS_root/bin
-  mpiused=\$FDS_root/bin
+  mpiused=\$FDS_root/bin/openmpi_64
 else
   eval MPIDIST_FDS=
 fi
