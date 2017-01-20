@@ -447,7 +447,7 @@ cat << BASH > \$BASHFDS
 
 # FDS location
 
-export FDSBINDIR=\`pwd\`/bin
+export FDSBINDIR=\$FDS_root/bin
 
 # OpenMPI location
 
