@@ -582,9 +582,6 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
-  echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
-  echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
-  echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
 EOF
 cat << EOF >> $INSTALLER
 if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
@@ -604,6 +601,9 @@ cat << EOF >> $INSTALLER
   echo "#FDS arg2: Intel shared library location"          >> \$BASHSTARTUP
   echo "#FDS        Only needed if a non-installed fds is used and was built"  >> \$BASHSTARTUP
   echo "#FDS        with a Fortran compiler other than Intel version 16."  >> \$BASHSTARTUP
+  echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
+  echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
+  echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
