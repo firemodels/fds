@@ -69,6 +69,7 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
+OPENMPIFILE=openmpi_1.8.4_${PLATFORM}_64.tar.gz
 
 size2=64
 
@@ -296,7 +297,7 @@ while true; do
   echo "Which OpenMPI would you like to use?"
   echo "  Press 1 to install OpenMPI after this installation completes by typing: [default]"
   echo "     cd full_directory_path"
-  echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.$PLATFORM.tar.gz"
+  echo "     tar xvf \$FDS_root/bin/$OPENMPIFILE"
   #echo "  Press 2 to use \$FDS_root/bin/openmpi_64 "
   mpipath=
   mpipatheth=
@@ -396,7 +397,7 @@ tail -n +\$SKIP \$THISSCRIPT | tar -xz
 #if [ "\$MPIDIST_FDSROOT" != "" ]; then
 #  echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
 #  cd \$MPIDIST_FDSROOT
-#  tar xvf openmpi_1.8.4.$PLATFORM.tar.gz >& /dev/null
+#  tar xvf $OPENMPIFILE >& /dev/null
 #fi
 echo "Copy complete."
 
@@ -594,7 +595,7 @@ cat << EOF >> $INSTALLER
 
 echo ""
 echo "If you wish to use OpenMPI untar "
-echo "\$FDS_root/bin/openmpi_1.8.4.$PLATFORM.tar.gz"
+echo "\$FDS_root/bin/$OPENMPIFILE"
 echo "and update the 'source ~/.bashrc_fds' line in $BASHRC2 to point to this location."
 echo "Finally, log out and log back in so changes will take effect"
 echo ""

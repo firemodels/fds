@@ -255,7 +255,7 @@ CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile $bundledir/bin openmpi_1.8.4.tar.gz
+CP $openmpidir $openmpifile $bundledir/bin $openmpifile
 
 echo ""
 echo "--- copying documentation ---"
