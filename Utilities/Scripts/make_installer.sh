@@ -374,6 +374,10 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
+if [ "\$MPIDIST_FDS" != "" ]; then
+  cd \$MPIDIST_FDS
+  tar xvf openmpi_1.8.4.tar.gz >& /dev/null
+fi
 echo "Copy complete."
 
 #--- create uninstall file
