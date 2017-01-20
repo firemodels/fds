@@ -317,7 +317,8 @@ else
   read answer
 fi
 if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
-  eval MPIDIST_FDS=\$FDS_root/openmpi_64
+  eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+  eval MPIDIST_FDSROOT=\$FDS_root/bin
   mpiused=\$FDS_root/bin/openmpi_64
 else
   eval MPIDIST_FDS=
@@ -334,7 +335,7 @@ fi
 mpipathfds=
 if [ "\$MPIDIST_FDS" != "" ]; then
    mpipathfds=\$MPIDIST_FDS
-   mpipath=\$MPIDIST_FDS/openmpi_64
+   mpipath=\$MPIDIST_FDS
    mpipath2=\\\$MPIDIST_FDS
 fi
 
@@ -374,8 +375,8 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
-if [ "\$MPIDIST_FDS" != "" ]; then
-  cd \$MPIDIST_FDS
+if [ "\$MPIDIST_FDSROOT" != "" ]; then
+  cd \$MPIDIST_FDSROOT
   tar xvf openmpi_1.8.4.tar.gz >& /dev/null
 fi
 echo "Copy complete."
