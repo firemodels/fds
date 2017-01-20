@@ -61,10 +61,11 @@ echo "*** fatal error: installer not specified"
 exit 0
 fi
 
+BASHRC2=.bashrc
 LDLIBPATH=LD_LIBRARY_PATH
-if [ "$ostype" == "OSX" ]
-then
-LDLIBPATH=DYLD_LIBRARY_PATH
+if [ "$ostype" == "OSX" ]; then
+  LDLIBPATH=DYLD_LIBRARY_PATH
+  BASHRC2=.bash_profile
 fi
 
 size2=64
@@ -294,9 +295,10 @@ while true; do
 #  echo "  Press 1 to install OpenMPI after this installation completes by typing: [default]"
 #  echo "     cd full_directory_path"
 #  echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
-  echo "  To install OpenMPI after this installation completes type:"
+  echo "  To install OpenMPI after this installation completes:"
   echo "     cd full_directory_path"
   echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
+  echo "     edit the 'source .bashrc_fds' line in $BASHRC2 to point to 'full_directory_path'"
   #echo "  Press 2 to use \$FDS_root/bin/openmpi_64 "
   mpipath=
   mpipatheth=
@@ -327,6 +329,7 @@ while true; do
 #  else
     eval MPIDIST_FDS=
 #  fi
+   eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
   if [[ "\$answer" == "3" ]]; then
      mpipath2=\\\$MPIDIST_ETH
      mpiused=\$mpipatheth
@@ -354,6 +357,8 @@ if [ "\$MPIDIST_FDS" != "" ]; then
    mpipath=\$MPIDIST_FDS
    mpipath2=\\\$MPIDIST_FDS
 fi
+# set mpipath2 to blank until we allow user to unpack or specify openmpi location
+mpipath2=
 
 #--- do we want to proceed
 
@@ -391,10 +396,11 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
-if [ "\$MPIDIST_FDSROOT" != "" ]; then
-  cd \$MPIDIST_FDSROOT
-  tar xvf openmpi_1.8.4.tar.gz >& /dev/null
-fi
+#if [ "\$MPIDIST_FDSROOT" != "" ]; then
+#  echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
+#  cd \$MPIDIST_FDSROOT
+#  tar xvf openmpi_1.8.4.tar.gz >& /dev/null
+#fi
 echo "Copy complete."
 
 #--- create uninstall file
@@ -407,12 +413,10 @@ BASH
 if [ "$ostype" == "OSX" ] ; then
 cat << BASH >> \$BASHUNINSTALL
 BASHRC=~/.bash_profile
-BASHRC2=.bash_profile
 BASH
 else
 cat << BASH >> \$BASHUNINSTALL
 BASHRC=~/.bashrc
-BASHRC2=.bashrc
 BASH
 fi
 cat << BASH >> \$BASHUNINSTALL
@@ -555,6 +559,10 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
+  echo "#FDS source ~/.bashrc_fds arg1"          >> \$BASHSTARTUP
+  echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
+  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi1.8.4.tar.gz"          >> \$BASHSTARTUP
+  echo "#FDS       located in \$FDS_root/bin and point to it."          >> \$BASHSTARTUP
   echo "export MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
@@ -591,9 +599,11 @@ cat << EOF >> $INSTALLER
   echo "#FDS                               "          >> \$BASHSTARTUP
   echo "#FDS source ~/.bashrc_fds arg1 arg2"          >> \$BASHSTARTUP
   echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
+  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi1.8.4.tar.gz"          >> \$BASHSTARTUP
+  echo "#FDS       located in \$FDS_root/bin and point to it."          >> \$BASHSTARTUP
   echo "#FDS arg2: Intel shared library location"          >> \$BASHSTARTUP
-  echo "#FDS       (only needed if a non-installed fds is used and was built"  >> \$BASHSTARTUP
-  echo "#FDS        with a Fortran compiler other than Intel version 16)"  >> \$BASHSTARTUP
+  echo "#FDS        Only needed if a non-installed fds is used and was built"  >> \$BASHSTARTUP
+  echo "#FDS        with a Fortran compiler other than Intel version 16."  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
