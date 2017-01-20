@@ -561,7 +561,7 @@ cat << EOF >> $INSTALLER
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
   echo "#FDS source ~/.bashrc_fds arg1"          >> \$BASHSTARTUP
   echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
-  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi1.8.4.tar.gz"          >> \$BASHSTARTUP
+  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi_1.8.4.tar.gz"          >> \$BASHSTARTUP
   echo "#FDS       located in \$FDS_root/bin and point to it."          >> \$BASHSTARTUP
   echo "export MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
@@ -585,7 +585,7 @@ cat << EOF >> $INSTALLER
   echo "#FDS                               "          >> \$BASHSTARTUP
   echo "#FDS source ~/.bashrc_fds arg1 arg2"          >> \$BASHSTARTUP
   echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
-  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi1.8.4.tar.gz"          >> \$BASHSTARTUP
+  echo "#FDS       Specify an existing OpenMPI library location or untar openmpi_1.8.4.tar.gz"          >> \$BASHSTARTUP
   echo "#FDS       located in \$FDS_root/bin and point to it."          >> \$BASHSTARTUP
   echo "#FDS arg2: Intel shared library location"          >> \$BASHSTARTUP
   echo "#FDS        Only needed if a non-installed fds is used and was built"  >> \$BASHSTARTUP
@@ -609,6 +609,11 @@ fi
 
 cat << EOF >> $INSTALLER
 
+echo ""
+echo "If you wish to use OpenMPI untar "
+echo "\$FDS_root/bin/openmpi_1.8.4.tar.gz"
+echo "and update the 'source ~/.bashrc_fds' line in $BASHRC2 to point to this location."
+echo "Finally, log out and log back in so changes will take effect"
 echo ""
 echo "Installation complete."
 exit 0
