@@ -245,10 +245,9 @@ echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-  CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
 
-CP $fdsforbundle README_OPENMPI $bundledir/bin README_OPENMPI
+CP $for_bundle README.html $bundledir/bin README.html
 
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
