@@ -290,50 +290,54 @@ cat << EOF >> $INSTALLER
 valid_answer=
 while true; do
   echo ""
-  echo "Which OpenMPI would you like to use?"
-  #echo "  Press 1 to use \$FDS_root/bin/openmpi_64 [default]"
+#  echo "Which OpenMPI would you like to use?"
+#  echo "  Press 1 to install OpenMPI after this installation completes by typing: [default]"
+#  echo "     cd full_directory_path"
+#  echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
+  echo "  To install OpenMPI after this installation completes type:"
+  echo "     cd full_directory_path"
+  echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
+  #echo "  Press 2 to use \$FDS_root/bin/openmpi_64 "
   mpipath=
   mpipatheth=
   mpiused=
   if [ -d /shared/openmpi_64 ] ; then
      mpipath=\$MPIDIST_ETH
      mpipatheth=/shared/openmpi_64
-     echo "  Press 2 to use /shared/openmpi_64"
+#     echo "  Press 3 to use /shared/openmpi_64"
   fi
   mpipathib=
   if [ -d /shared/openmpi_64ib ] ; then
      mpipathib=/shared/openmpi_64ib
      mpipath=\$MPIDIST_IB
-     echo "  Press 3 to use /shared/openmpi_64ib"
+#     echo "  Press 4 to use /shared/openmpi_64ib"
   fi
-  echo "  Press 4 to install OpenMPI after this installation completes by typing:"
-  echo "     cd full_directory_path"
-  echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
 
-  if [ "\$OVERRIDE" == "y" ]
-  then
-    answer="4"
-  else
-    read answer
-  fi
-#  if [[ "\$answer" == "1" ]]; then
+#  if [ "\$OVERRIDE" == "y" ]
+#  then
+#    answer="1"
+#  else
+#    read answer
+#  fi
+   answer="1"
+#  if [[ "\$answer" == "2" ]]; then
 #    eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
 #    eval MPIDIST_FDSROOT=\$FDS_root/bin
 #    mpiused=\$FDS_root/bin/openmpi_64
 #  else
     eval MPIDIST_FDS=
 #  fi
-  if [[ "\$answer" == "2" ]]; then
+  if [[ "\$answer" == "3" ]]; then
      mpipath2=\\\$MPIDIST_ETH
      mpiused=\$mpipatheth
      valid_answer=1
   fi
-  if [[ "\$answer" == "3" ]]; then
+  if [[ "\$answer" == "4" ]]; then
      mpipath2=\\\$MPIDIST_IB
      mpiused=\$mpipathib
      valid_answer=1
   fi
-  if [[ "\$answer" == "4" ]]; then
+  if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
      valid_answer=1
   fi
   if [[ "\$valid_answer" == "" ]]; then
