@@ -1,0 +1,6 @@
+To install OpenMPI
+
+1.  copy openmpi_1.8.4.tar.gz to desired directory location 
+2.  type: tar xvf openmpi_1.8.4.tar.gz
+3.  edit following line in .bashrc (or .bash_profile on the mac) 
+    source ./bashrc_fds path_to_openmpi_location
