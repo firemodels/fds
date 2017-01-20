@@ -18,7 +18,7 @@ SCP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
   else
-    echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
   fi
 }
 
