@@ -407,10 +407,12 @@ BASH
 if [ "$ostype" == "OSX" ] ; then
 cat << BASH >> \$BASHUNINSTALL
 BASHRC=~/.bash_profile
+BASHRC2=.bash_profile
 BASH
 else
 cat << BASH >> \$BASHUNINSTALL
 BASHRC=~/.bashrc
+BASHRC2=.bashrc
 BASH
 fi
 cat << BASH >> \$BASHUNINSTALL
@@ -490,6 +492,7 @@ unalias smokediff6 >& /dev/null
 
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
+  echo "      check the 'source ./bashrc_fds' line in your $BASHRC2 startup file"
   MPIDIST=
 fi
 
