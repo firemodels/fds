@@ -238,12 +238,12 @@ EOF
 if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
-    echo "  Press 1 to install in /Applications/$INSTALLDIR"
+    echo "  Press 1 to install in /Applications/$INSTALLDIR [default]"
     echo "  Press 2 to install in \$HOME/$INSTALLDIR"
 EOF
   else
 cat << EOF >> $INSTALLER
-    echo "  Press 1 to install in \$HOME/$INSTALLDIR"
+    echo "  Press 1 to install in \$HOME/$INSTALLDIR [default]"
     echo "  Press 2 to install in /opt/$INSTALLDIR"
     echo "  Press 3 to install in /usr/local/bin/$INSTALLDIR"
 EOF
@@ -287,18 +287,55 @@ fi
 #--- specify MPI location
 
 cat << EOF >> $INSTALLER
+echo ""
+echo "Which OpenMPI would you like to use?"
+echo "  Press 1 to use \$FDS_root/bin/openmpi_64 [default]"
 mpipath=
 mpipatheth=
-mpipathib=
+mpiused=
 if [ -d /shared/openmpi_64 ] ; then
-   mpipatheth=/shared/openmpi_64
    mpipath=\$MPIDIST_ETH
-   mpipath2=\\\$MPIDIST_ETH
+   mpipatheth=/shared/openmpi_64
+   echo "  Press 2 to use /shared/openmpi_64"
 fi
+mpipathib=
 if [ -d /shared/openmpi_64ib ] ; then
    mpipathib=/shared/openmpi_64ib
    mpipath=\$MPIDIST_IB
+   echo "  Press 3 to use /shared/openmpi_64ib"
+fi
+echo ""
+echo "  Press any other key to install OpenMPI after this"
+echo "  installation completes by typing:"
+echo "     cd full_directory_path"
+echo "     tar xvf \$FDS_root/bin/openmpi_1.8.4.tar.gz"
+
+if [ "\$OVERRIDE" == "y" ]
+then
+  answer="1"
+else
+  read answer
+fi
+if [[ "\$answer" == "1" || "\$answer" == "" ]]; then
+  eval MPIDIST_FDS=\$FDS_root/bin
+  mpiused=\$FDS_root/bin
+else
+  eval MPIDIST_FDS=
+fi
+if [[ "\$answer" == "2" ]]; then
+   mpipath2=\\\$MPIDIST_ETH
+   mpiused=\$mpipatheth
+fi
+if [[ "\$answer" == "3" ]]; then
    mpipath2=\\\$MPIDIST_IB
+   mpiused=\$mpipathib
+fi
+
+mpipathfds=
+if [ "\$MPIDIST_FDS" != "" ]; then
+   mpipathfds=\$MPIDIST_FDS
+   mpipath=\$MPIDIST_FDS/openmpi_64
+   mpipath2=\\\$MPIDIST_FDS
 fi
 
 #--- do we want to proceed
@@ -306,10 +343,10 @@ fi
 while true; do
    echo ""
    echo "Installation directory: \$FDS_root"
-   if [ "\$mpipath" == "" ] ; then
-     echo "         MPI directory: none found"
+   if [ "\$mpiused" == "" ] ; then
+     echo "     OpenMPI directory: none specified" 
    else
-     echo "         MPI directory: \$mpipath"
+     echo "     OpenMPI directory: \$mpiused"
    fi
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
@@ -378,7 +415,7 @@ if [[ "\\\$UNINSTALL" == "1" ]]; then
   if [[ -e \\\$BASHRC ]]; then
     BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
     echo removing FDS entries from \\\$BASHRC
-    grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > ~/.bashrc_new
+    grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > ~/.bashrc_new
     mv \\\$BASHRC ~/.bashrc\\\$BAK
     mv ~/.bashrc_new \\\$BASHRC
   else
@@ -494,6 +531,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
+  echo "export MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
@@ -509,9 +547,10 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
+  echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
 EOF
