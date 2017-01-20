@@ -582,17 +582,6 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS" >> \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
-EOF
-cat << EOF >> $INSTALLER
-if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
-  echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
-else
-  if [ "\\\$IFORT_COMPILER" != "" ]; then
-    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
-  fi
-fi
-EOF
-cat << EOF >> $INSTALLER
   echo "#FDS                               "          >> \$BASHSTARTUP
   echo "#FDS source ~/.bashrc_fds arg1 arg2"          >> \$BASHSTARTUP
   echo "#FDS arg1: OpenMPI library location"          >> \$BASHSTARTUP
@@ -604,6 +593,13 @@ cat << EOF >> $INSTALLER
   echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
+if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
+  echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
+else
+  if [ "\\\$IFORT_COMPILER" != "" ]; then
+    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
+  fi
+fi
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
