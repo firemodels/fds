@@ -74,15 +74,10 @@ if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 mkdir "%FDSSTART%"
 
 mkdir "%FDSSTART%\FDS on the Web"
-copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"      "%FDSSTART%\FDS on the Web\Software Updates.url"      > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url" "%FDSSTART%\FDS on the Web\Documentation Updates.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS on the Web\FDS Home Page.url"         > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"         "%FDSSTART%\FDS on the Web\Issue Tracker.url"         > Nul
 
 mkdir "%FDSSTART%\Guides and Release Notes"
-"%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Config Management Plan.lnk"   /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Config_Management_Plan.pdf" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Config Management Plan.lnk"          /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Config_Management_Plan.pdf" /A:C >NUL
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS User Guide.lnk"                      /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_User_Guide.pdf" /A:C >NUL
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Technical Reference Guide.lnk"       /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Technical_Reference_Guide.pdf" /A:C >NUL
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Validation Guide.lnk"                /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Validation_Guide.pdf" /A:C >NUL
@@ -93,7 +88,6 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview Verification Guide.lnk"        /T:"%CD%\Documentation\Guides_and_Release_Notes\SMV_Verification_Guide.pdf" /A:C >NUL
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk"             /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
-"%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
 
 erase "%CD%"\set_path.exe
