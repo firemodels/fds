@@ -18,7 +18,7 @@ SCP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
   else
-    echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
   fi
 }
 
@@ -245,10 +245,9 @@ echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-  CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
 
-CP $fdsforbundle README_OPENMPI $bundledir/bin README_OPENMPI
+CP $for_bundle README.html $bundledir/bin README.html
 
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
@@ -256,7 +255,7 @@ CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile $bundledir/bin openmpi_1.8.4.tar.gz
+CP $openmpidir $openmpifile $bundledir/bin $openmpifile
 
 echo ""
 echo "--- copying documentation ---"
