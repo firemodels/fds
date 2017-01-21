@@ -73,8 +73,7 @@ if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 
 mkdir "%FDSSTART%"
 
-mkdir "%FDSSTART%\FDS on the Web"
-copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS on the Web\FDS Home Page.url"         > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS Home Page.url"         > Nul
 
 mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Config Management Plan.lnk"          /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Config_Management_Plan.pdf" /A:C >NUL
