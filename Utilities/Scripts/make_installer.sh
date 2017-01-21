@@ -299,13 +299,11 @@ while true; do
   OPTION3=
   OPTION4=
   echo ""
-  echo "Which OpenMPI would you like to use?"
+  echo "OpenMPI options"
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION1=\$OPTION
   echo "  Press \$OPTION1 to install OpenMPI manually [default]"
-  echo "     To put OpenMPI in the fds bin directory, type:"
-  echo "       cd \$FDS_root/bin"
-  echo "       tar xvf $OPENMPIFILE"
+  echo "     See \$FDS_root/bin/README.html for details"
 #  OPTION=\$(echo \$OPTION + 1 | bc)
 #  OPTION2=\$OPTION
   #echo "  Press \$OPTION2 to use \$FDS_root/bin/openmpi_64 "
