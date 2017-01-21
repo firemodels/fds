@@ -353,6 +353,7 @@ while true; do
      valid_answer=1
   fi
   if [[ "\$answer" == "\$OPTION1" || "\$answer" == "" ]]; then
+     answer=\$OPTION1
      valid_answer=1
   fi
   if [[ "\$valid_answer" == "" ]]; then
