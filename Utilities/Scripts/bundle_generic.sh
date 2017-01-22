@@ -22,7 +22,9 @@ hash2file=MD5/${FILE}_${PLATSIZE}.md5
 
 $md5hash $FILE
 if [ -e $hashfile ]; then
-  mv $hashfile $hash2file
+  if [ -d MD5 ]; then
+    mv $hashfile $hash2file
+  fi
 fi
 cd $curdir
 }
@@ -348,6 +350,9 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
+MD5HASH $FDSVERSION . $bundlebase.sh
+echo mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
+mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
 
 if [ -e $errlog ]; then
   numerrs=`cat $errlog | wc -l `
