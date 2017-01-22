@@ -13,4 +13,3 @@ fi
 
 echo Building $target with $MPIDIST
 make -j4 MPIFORT="$MPIFORT" VPATH="../../Source" -f ../makefile $target
-../../Utilities/Scripts/md5hash.sh fds_mpi_intel_linux_64
