@@ -102,17 +102,17 @@ CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                       
 
 set curdir=%CD%
 cd %out_bin%
-certutil -hashfile fds.exe         md5 >  MD5\fds_%fds_version%.exe.md5
-certutil -hashfile fds2ascii.exe   md5 >  MD5\fds2ascii_%fds_version%.exe.md5
-certutil -hashfile background.exe  md5 >  MD5\background_%fds_version%.exe.md5
-certutil -hashfile test_mpi.exe    md5 >  MD5\test_mpi_%fds_version%.exe.md5
+certutil -hashfile fds.exe         MD5 >  MD5\fds_%fds_version%.exe.md5
+certutil -hashfile fds2ascii.exe   MD5 >  MD5\fds2ascii_%fds_version%.exe.md5
+certutil -hashfile background.exe  MD5 >  MD5\background_%fds_version%.exe.md5
+certutil -hashfile test_mpi.exe    MD5 >  MD5\test_mpi_%fds_version%.exe.md5
 
 cd %out_smv%
-certutil -hashfile smokeview.exe md5 >  MD5\smokeview_%smv_version%.exe.md5
-certutil -hashfile smokediff.exe md5 >  MD5\smokediff_%smv_version%.exe.md5
-certutil -hashfile smokezip.exe  md5 >  MD5\smokezip_%smv_version%.exe.md5
-certutil -hashfile dem2fds.exe   md5 >  MD5\dem2fds_%smv_version%.exe.md5
-certutil -hashfile wind2fds.exe  md5 >  MD5\wind2fds_%smv_version%.exe.md5
+certutil -hashfile smokeview.exe MD5 >  MD5\smokeview_%smv_version%.exe.md5
+certutil -hashfile smokediff.exe MD5 >  MD5\smokediff_%smv_version%.exe.md5
+certutil -hashfile smokezip.exe  MD5 >  MD5\smokezip_%smv_version%.exe.md5
+certutil -hashfile dem2fds.exe   MD5 >  MD5\dem2fds_%smv_version%.exe.md5
+certutil -hashfile wind2fds.exe  MD5 >  MD5\wind2fds_%smv_version%.exe.md5
 
 cd %curdir%
 CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
