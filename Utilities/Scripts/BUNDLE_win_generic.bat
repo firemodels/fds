@@ -35,6 +35,7 @@ set basedir=%uploads%\%basename%
 
 set out_bundle=%basedir%\firemodels
 set out_bin=%out_bundle%\%fdsversion%\bin
+set out_fdsmd5=%out_bundle%\%fdsversion%\bin\MD5
 set out_uninstall=%out_bundle%\%fdsversion%\Uninstall
 set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
@@ -44,6 +45,7 @@ set out_examples2=%svn_root%\fds\Verification
 
 set out_smv=%out_bundle%\%smvversion%
 set out_textures=%out_smv%\textures
+set out_smvmd5=%out_smv%\MD5
 
 set fds_casessh=%svn_root%\fds\Verification\FDS_Cases.sh
 set fds_casesbat=%svn_root%\fds\Verification\FDS_Cases.bat
@@ -73,6 +75,9 @@ mkdir %out_web%
 mkdir %out_examples%
 mkdir %out_uninstall%
 
+mkdir %out_fdsmd5%
+mkdir %out_smvmd5%
+
 set release_version=%fdssmv_major_version%_win_%platform%
 set release_version=
 
@@ -84,25 +89,32 @@ echo.
 copy %in_for_bundle%\*.po                                                        %out_bin%\.>Nul
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe                               %out_bin%\fds.exe
-
+CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
+CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
 CALL :COPY  %in_testmpi%\test_mpi.exe                                            %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe                                %out_smv%\smokeview.exe
-
 CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_smv%\smokediff.exe
-
 CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
-
 CALL :COPY  %in_dem2fds%\intel_win_%platform%\dem2fds_win_%platform%.exe         %out_smv%\dem2fds.exe 
-
-CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                        %out_smv%\jp2conv.bat 
-
 CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
+CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                        %out_smv%\jp2conv.bat
 
-CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
+set curdir=%CD%
+cd %out_bin%
+certutil -hashfile fds.exe         MD5 >  MD5\fds_%fds_version%.exe.md5
+certutil -hashfile fds2ascii.exe   MD5 >  MD5\fds2ascii_%fds_version%.exe.md5
+certutil -hashfile background.exe  MD5 >  MD5\background_%fds_version%.exe.md5
+certutil -hashfile test_mpi.exe    MD5 >  MD5\test_mpi_%fds_version%.exe.md5
 
-CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
+cd %out_smv%
+certutil -hashfile smokeview.exe MD5 >  MD5\smokeview_%smv_version%.exe.md5
+certutil -hashfile smokediff.exe MD5 >  MD5\smokediff_%smv_version%.exe.md5
+certutil -hashfile smokezip.exe  MD5 >  MD5\smokezip_%smv_version%.exe.md5
+certutil -hashfile dem2fds.exe   MD5 >  MD5\dem2fds_%smv_version%.exe.md5
+certutil -hashfile wind2fds.exe  MD5 >  MD5\wind2fds_%smv_version%.exe.md5
 
+cd %curdir%
 CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
 
 CALL :COPY %in_impi%\impi.dll                %out_bin%\impi.dll
@@ -170,22 +182,8 @@ CALL :COPY "%bundleinfo%\Overview.html"                "%out_doc%\Overview.html"
 
 CALL :COPY "%bundleinfo%\FDS_Web_Site.url"             "%out_web%\Official_Web_Site.url"
 
-CALL :COPY "%bundleinfo%\Updates.url"                  "%out_web%\Software_Updates.url"
-
-CALL :COPY "%bundleinfo%\Docs.url"                     "%out_web%\Documentation_Updates.url"
-
-CALL :COPY "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
-
-CALL :COPY "%bundleinfo%\discussion_group.url"         "%out_web%\Discussion_Group.url"
-
-CALL :COPY "%bundleinfo%\issue_tracker.url"            "%out_web%\Issue_Tracker.url"
-
- 
-CALL :COPY %bundleinfo%\readme_examples.html           "%out_examples%\Examples notes.html"
-
 echo.
 echo --- copying example files ---
-echo.
 
 set outdir=%out_examples%
 set QFDS=call %copyFDScases%
@@ -196,7 +194,6 @@ cd %out_examples2%
 %in_sh2bat%\sh2bat %fds_casessh% %fds_casesbat%
 call %fds_casesbat%>Nul
 
-echo.
 cd %out_examples2%
 %in_sh2bat%\sh2bat %smv_casessh% %smv_casesbat%
 call %smv_casesbat%>Nul
@@ -217,7 +214,6 @@ CALL :COPY  "%in_setpath%\set_path64.exe"           "%out_bundle%\%fdsversion%\s
 
 echo.
 echo --- compressing distribution ---
-echo.
 
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
@@ -228,7 +224,6 @@ wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * ..\%smvversion% > Nul
 
 echo.
 echo --- creating installer ---
-echo.
 
 cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
@@ -238,7 +233,6 @@ wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_versi
 
 echo.
 echo --- installer built ---
-echo.
 
 cd %CURDIR%>Nul
 
