@@ -106,6 +106,7 @@ certutil -hashfile fds.exe         MD5 >  MD5\fds_%fds_version%.exe.md5
 certutil -hashfile fds2ascii.exe   MD5 >  MD5\fds2ascii_%fds_version%.exe.md5
 certutil -hashfile background.exe  MD5 >  MD5\background_%fds_version%.exe.md5
 certutil -hashfile test_mpi.exe    MD5 >  MD5\test_mpi_%fds_version%.exe.md5
+cat MD5\*.md5 > MD5\md5_win_fds_%fds_version%
 
 cd %out_smv%
 certutil -hashfile smokeview.exe MD5 >  MD5\smokeview_%smv_version%.exe.md5
@@ -113,6 +114,8 @@ certutil -hashfile smokediff.exe MD5 >  MD5\smokediff_%smv_version%.exe.md5
 certutil -hashfile smokezip.exe  MD5 >  MD5\smokezip_%smv_version%.exe.md5
 certutil -hashfile dem2fds.exe   MD5 >  MD5\dem2fds_%smv_version%.exe.md5
 certutil -hashfile wind2fds.exe  MD5 >  MD5\wind2fds_%smv_version%.exe.md5
+
+cat MD5\*.md5 > %out_smv%\MD5\md5_win_smv_%smv_version%
 
 cd %curdir%
 CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
@@ -230,6 +233,7 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
+certutil -hashfile %basename%.exe    MD5 >>  %out_bin%\MD5\md5_win_fds_%fds_version%
 
 echo.
 echo --- installer built ---
