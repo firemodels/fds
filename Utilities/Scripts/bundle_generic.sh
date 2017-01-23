@@ -252,12 +252,16 @@ if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
    openmpifile=openmpi_1.8.4_linux_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/md5_linux_fdssmv_$FDSVERSION
+   cat $bundledir/bin/MD5/*.md5 > $bundledir/bin/MD5/md5_linux_fdssmv_$FDSVERSION
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
    openmpifile=openmpi_1.8.4_osx_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/md5_osx_fdssmv_$FDSVERSION
 fi
+cat $bundledir/bin/MD5/*.md5 > $MD5SUMMARY
 
 echo ""
 echo "--- copying configuration files ---"
