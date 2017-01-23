@@ -111,7 +111,7 @@ The simulations of liquified natural gas (LNG) dispersion experiments that are d
 
 \subsubsection{Atmospheric Boundary Layer}
 
-The atmospheric boundary layer is modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+The input parameters to FDS allow one to specify an initial velocity and temperature profile for the atmospheric boundary layer. Periodic boundaries at the four sides of the computational domain then allow the flow field to develop naturally. The initial velocity and temperature profiles are modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
 \begin{eqnarray}
    u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.1in]
    \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
@@ -127,7 +127,9 @@ Field experiments like those discussed in this section typically characterize th
 \be
    L = \frac{u_*^2 \, \theta_0}{g \, \kappa \, \theta_*}
 \ee
-Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. Figure~\ref{LNG_Dispersion_Burro_profiles} through Fig.~\ref{LNG_Dispersion_MaplinSands_profiles} display the measured velocity and temperature profiles, the corresponding Monin-Obukhov profiles that serve as initial and boundary conditions for FDS, and the resulting time-averaged profiles from the FDS simulations.
+Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. In some cases, values of the Monin-Obukhov parameters are taken directly from the test reports. However, for some of the experiments, these parameters were not derived using the same similarity functions as those presented above, in which case the parameters have been recomputed to best fit the measured velocity and temperature profiles.
+
+Figure~\ref{LNG_Dispersion_Burro_profiles} through Fig.~\ref{LNG_Dispersion_MaplinSands_profiles} display the measured velocity and temperature profiles, the corresponding Monin-Obukhov profiles that serve as initial and boundary conditions for FDS, and the resulting time-averaged profiles from the FDS simulations.
 
 \subsubsection{Surface Roughness}
 
@@ -161,7 +163,7 @@ The values of $D$ are given in Table~\ref{tab:LNG_Dispersion}.
 
 \subsubsection{Comparison of Measured and Predicted Downwind Gas Concentrations}
 
-Figures~\ref{LNG_Dispersion_1}--\ref{LNG_Dispersion_2} compare measured and predicted downwind concentrations of natural gas originating from spills of liquified natural gas (LNG) on water. In each case, the measured values are averages of sensors positioned in arcs at discrete distances downwind of the spill site. The sensors were generally located a few meters off the relatively dry, flat terrain.
+Figures~\ref{LNG_Dispersion_1}--\ref{LNG_Dispersion_2} compare measured and predicted downwind concentrations of natural gas originating from spills of liquified natural gas (LNG) on water. In each case, the measured values are short-time (1~s to 3~s) averages of sensors positioned in arcs at discrete distances downwind of the spill site. For each arc, the maximum value is chosen. The processing of the FDS results follows the same procedure. The sensors were generally located a few meters off the relatively dry, flat terrain.
 
 
 \begin{sidewaystable}[p]
@@ -280,7 +282,7 @@ $^\dag$ The Falcon experiments involved 4 separated spills
 \includegraphics[width=6.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Atmospheric_Dispersion}
 \end{tabular}
 \end{center}
-\caption[Summary of LNG Dispersion predictions]{Summary of LNG Dispersion predictions.}
+\caption[Summary of LNG Dispersion predictions]{Summary of LNG Dispersion predictions. Note that the dashed black lines denote plus/minus a factor of two from the measured values. The red dashed lines represent two relative standard deviations about the solid red line, the model average.}
 \label{Summary_LNG_Dispersion}
 \end{figure}
 
