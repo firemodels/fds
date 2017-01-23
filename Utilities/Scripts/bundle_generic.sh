@@ -4,6 +4,31 @@
 
 errlog=/tmp/errlog.$$
 
+# -------------------- MD5HASH ----------------
+
+MD5HASH ()
+{
+local PLATSIZE=$1
+local DIR=$2
+local FILE=$3
+
+local curdir=`pwd`
+
+md5hash=$fds_smvroot/fds/Utilities/Scripts/md5hash.sh
+
+cd $DIR
+hashfile=${FILE}.md5
+hash2file=MD5/${FILE}_${PLATSIZE}.md5
+
+$md5hash $FILE
+if [ -e $hashfile ]; then
+  if [ -d MD5 ]; then
+    mv $hashfile $hash2file
+  fi
+fi
+cd $curdir
+}
+
 # -------------------- SCP -------------------
 
 SCP ()
@@ -18,7 +43,7 @@ SCP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
   else
-    echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
   fi
 }
 
@@ -39,6 +64,29 @@ CP ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
+  fi
+}
+
+# -------------------- UNTAR -------------------
+
+UNTAR ()
+{
+  FROMDIR=$1
+  FROMFILE=$2
+  TODIR=$3
+  TODIR2=$4
+  if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the compressed file $FROMFILE does not exist"
+  else
+    curdir=`pwd`
+    cd $TODIR
+    tar xvf $FROMDIR/$FROMFILE
+    cd $curdir
+  fi
+  if [ -e $TODIR/$TODIR2 ]; then
+    echo "$FROMFILE untar'd"
+  else
+    echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
   fi
 }
 
@@ -117,6 +165,8 @@ fdsdir=intel$FDSOS
 fds=fds_intel$FDSOS
 fdsout=fds$OUT
 
+openmpidir=~/FDS_Guides
+
 fdsmpidir=mpi_intel$FDSOS
 fdsmpi=fds_mpi_intel$FDSOS
 fdsmpiout=fds$MAJOR\_mpi$FDSOS
@@ -143,11 +193,10 @@ webpagesdir=$fds_smvroot/webpages
 for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
+fdsforbundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
-fullmanifestdir=$uploaddir/$bundledir/bin
-fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
@@ -163,6 +212,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
+mkdir $bundledir/bin/MD5
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
@@ -170,95 +220,53 @@ mkdir $bundledir/bin/textures
 echo ""
 echo "--- copying programs ---"
 echo ""
-# background
-
-SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
 
 # smokeview
 
-SCP $smvhost $smvbindir $smokeview $bundledir/bin $smokeviewout
+SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
+SCP $smvhost $smvbindir                     $smokeview  $bundledir/bin $smokeviewout
+SCP $fdshost $smokediffroot/$smokediffdir   $smokediff  $bundledir/bin $smokediffout
+SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin $smokezipout
+SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin $dem2fdsout
+SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin $wind2fdsout
 
-# textures
+MD5HASH $SMVVERSION $bundledir/bin $backgroundout 
+MD5HASH $SMVVERSION $bundledir/bin $smokeviewout
+MD5HASH $SMVVERSION $bundledir/bin $smokediffout
+MD5HASH $SMVVERSION $bundledir/bin $smokezipout
+MD5HASH $SMVVERSION $bundledir/bin $dem2fdsout
+MD5HASH $SMVVERSION $bundledir/bin $wind2fdsout
 
-CPDIR $texturedir $bundledir/bin/textures
-
-# smokediff
-
-SCP $fdshost $smokediffroot/$smokediffdir $smokediff $bundledir/bin $smokediffout
-
-# smokezip
-
-SCP $fdshost $smokeziproot/$smokezipdir $smokezip $bundledir/bin $smokezipout
-
-# dem2fds
-
-SCP $fdshost $dem2fdsroot/$dem2fdsdir $dem2fds $bundledir/bin $dem2fdsout
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
-
-# wind2fds
-
-SCP $fdshost $wind2fdsroot/$wind2fdsdir $wind2fds $bundledir/bin $wind2fdsout
+CPDIR $texturedir $bundledir/bin/textures
 
 # FDS 
 
-SCP $fdshost $fdsroot/$fdsmpidir $fdsmpi $bundledir/bin $fdsmpiout
-
+SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin $fdsmpiout
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
+
+MD5HASH $FDSVERSION $bundledir/bin $fdsmpiout
+MD5HASH $FDSVERSION $bundledir/bin $fds2asciiout
 
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_linux_64.tar.gz
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_osx_64.tar.gz
 fi
-
-cat <<EOF > $fullmanifest
-<html>
-<head>
-<TITLE>FDS-SMV Bundle Manifest</TITLE>
-</HEAD>
-<BODY BGCOLOR="#FFFFFF" >
-<pre>
-EOF
-echo ""
-echo "--- Creating Manifest ---"
-echo ""
-echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
-date >> $fullmanifest
-echo  >> $fullmanifest
-echo Versions:>> $fullmanifest
-echo  >> $fullmanifest
-echo ------fds-------------------- >> $fullmanifest
-echo 0 | $bundledir/bin/$fdsmpiout >> $fullmanifest 2>&1 
-
-echo  >> $fullmanifest
-echo ------fds2ascii-------------------- >> $fullmanifest
-$bundledir/bin/$fds2asciiout -v >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokeview-------------------- >> $fullmanifest
-$bundledir/bin/$smokeviewout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokediff-------------------- >> $fullmanifest
-$bundledir/bin/$smokediffout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokezip-------------------- >> $fullmanifest
-$bundledir/bin/$smokezipout -v  >> $fullmanifest
-
-echo ------dem2fds-------------------- >> $fullmanifest
-$bundledir/bin/$dem2fdsout -v  >> $fullmanifest
 
 echo ""
 echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-  CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
+
+CP $for_bundle README.html $bundledir/bin README.html
 
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
@@ -266,10 +274,11 @@ CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
 
+CP $openmpidir $openmpifile $bundledir/bin $openmpifile
+
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
@@ -309,7 +318,7 @@ CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.
 CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-CP2 $for_bundle readme_examples.html $bundledir/Examples
+# CP2 $for_bundle readme_examples.html $bundledir/Examples
 
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
@@ -327,22 +336,7 @@ $wui_cases
 $smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
-echo >> $fullmanifest
-echo ------file listing---------------------------------- >> $fullmanifest
-set curdir=`pwd`
-cd $uploaddir/$bundledir
-find . -print >> $fullmanifest
 cd $curdir
-
-cat <<EOF>>$fullmanifest
-</pre>
-</body>
-</html>
-EOF
-
-CP $fullmanifestdir $manifest $uploaddir $manifest
-
-cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo ""
 echo "--- building archive ---"
@@ -356,6 +350,9 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
+MD5HASH $FDSVERSION . $bundlebase.sh
+echo mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
+mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
 
 if [ -e $errlog ]; then
   numerrs=`cat $errlog | wc -l `
