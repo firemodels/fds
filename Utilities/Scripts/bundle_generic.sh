@@ -4,11 +4,6 @@
 
 errlog=/tmp/errlog.$$
 
-MD5=md5sum
-if [ "`uname`" == "Darwin" ] ; then
-  MD5=md5
-fi
-
 # ---------------- MDHASH -----------------
 
 MD5HASH ()
@@ -19,7 +14,13 @@ local FILE=$2
 local curdir=`pwd`
 cd $DIR
 
-$MD5 $FILE
+if [ "`uname`" == "Darwin" ] ; then
+  hash=`cat $FILE | md5`
+  echo "$hash   $FILE"
+else
+  md5sum $FILE
+fi
+
 cd $curdir
 }
 
