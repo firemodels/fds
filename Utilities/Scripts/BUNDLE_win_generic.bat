@@ -108,7 +108,7 @@ call %md5hash% fds.exe        >  MD5\fds_%fds_version%.exe.md5
 call %md5hash% fds2ascii.exe  >  MD5\fds2ascii_%fds_version%.exe.md5
 call %md5hash% background.exe >  MD5\background_%fds_version%.exe.md5
 call %md5hash% test_mpi.exe   >  MD5\test_mpi_%fds_version%.exe.md5
-cat MD5\*.md5 > MD5\md5_win_fds_%fds_version%
+cat MD5\*.md5 > MD5\fds_%fds_version%_win_bundle.md5s
 
 cd %out_smv%
 call %md5hash% smokeview.exe >  MD5\smokeview_%smv_version%.exe.md5
@@ -116,8 +116,7 @@ call %md5hash% smokediff.exe >  MD5\smokediff_%smv_version%.exe.md5
 call %md5hash% smokezip.exe  >  MD5\smokezip_%smv_version%.exe.md5
 call %md5hash% dem2fds.exe   >  MD5\dem2fds_%smv_version%.exe.md5
 call %md5hash% wind2fds.exe  >  MD5\wind2fds_%smv_version%.exe.md5
-
-cat MD5\*.md5 > %out_smv%\MD5\md5_win_smv_%smv_version%
+cat MD5\*.md5 > %out_smv%\MD5\smv_%smv_version%_win_bundle.md5s
 
 cd %curdir%
 CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
