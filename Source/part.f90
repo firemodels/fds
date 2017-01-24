@@ -3034,13 +3034,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                AGHRHO = A_DROP*WGT*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
-
                SELECT CASE (ARRAY_CASE)
                   CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
-                     B_COL(2) = 1._EB+DTGOP-DADYDTHV
+                     B_COL(2) = 1._EB+DTGOP+DADYDTHV
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTGOP*TMP_G+(1-DTGOP+DADYDTHV)*TMP_DROP-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+2._EB*DTOP*Q_DOT_RAD
                      TMP_DROP_NEW = -(A_COL(2)*D_VEC(1)-A_COL(1)*D_VEC(2))/(A_COL(1)*B_COL(2)-B_COL(1)*A_COL(2))
@@ -3051,7 +3050,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
-                     B_COL(2) = 1._EB+DTGOP+DTWOP-DADYDTHV
+                     B_COL(2) = 1._EB+DTGOP+DTWOP+DADYDTHV
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+2._EB*DTWOP*TMP_WALL-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+&
                                 2._EB*DTOP*Q_DOT_RAD
@@ -3068,7 +3067,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      B_COL(2) = -DTWOW
                      C_COL(2) = 1._EB+DTWOW
                      A_COL(3) = -DTGOP
-                     B_COL(3) = 1._EB+DTGOP+DTWOP-DADYDTHV
+                     B_COL(3) = 1._EB+DTGOP+DTWOP+DADYDTHV
                      C_COL(3) = -DTWOP
                      D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
                      D_VEC(2) = DTWOW*TMP_DROP+(1._EB-DTWOW)*TMP_WALL
@@ -3079,7 +3078,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_WALL_NEW = (D_VEC(3)-B_COL(2)*TMP_DROP_NEW)/C_COL(2)
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                END SELECT
-
                M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO/WGT * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
 
                ! Compute the total amount of heat extracted from the gas, wall and radiative fields
