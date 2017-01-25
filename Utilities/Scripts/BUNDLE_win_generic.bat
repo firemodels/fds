@@ -234,7 +234,7 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
-call %md5hash% %basename%.exe   >>  %out_bin%\MD5\md5_win_fds_%fds_version%
+call %md5hash% %basename%.exe   >>  %out_bin%\MD5\fds_%fds_version%_win_bundle.md5s
 
 echo.
 echo --- installer built ---
