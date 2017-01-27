@@ -2698,7 +2698,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),TMP_WALL_INTERIM=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
-            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
+            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,H_MASS_FAC,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD, &
             Y_DROP,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
@@ -2707,7 +2707,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD, &
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
             T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2
+            M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,B_M
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
@@ -2742,6 +2742,7 @@ SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
 NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
 SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
 NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
+H_MASS_FAC             = 0.3_EB*PR_AIR**ONTH  ! See Li&Chow FT 2008, Eq. 12
 
 TMP_WALL_INTERIM=>WALL_WORK1
 
@@ -2820,7 +2821,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       N_SUBSTEPS = 1
       DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB)
       DT_SUM = 0._EB
-      WGT      = LP%PWT
+      WGT    = LP%PWT
 
       TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
 
@@ -2828,7 +2829,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Gas conditions
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-            CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL) 
+            CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
             Y_GAS = Y_ALL(Y_INDEX)
             TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
@@ -2915,7 +2916,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H_L = H_L*TMP_DROP
                H_D_OLD  = H_L*M_DROP
                DHOR     = H_V*MW_DROP/R0
-               
+
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
                MW_GAS = 0._EB
                IF (ABS(Y_GAS-1._EB) > TWO_EPSILON_EB) THEN
@@ -2996,13 +2997,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      END SELECT DIRECTION2
                      H_WALL   = NUSSELT*SS%K_LIQUID/LENGTH
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-      !               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+                     ! NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
                   ELSE
                      LENGTH   = 1._EB
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
 
-                     !Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
+                     ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
                      H_WALL    = H_SOLID
@@ -3013,16 +3014,21 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ELSE SOLID_OR_GAS_PHASE_2
 
                   NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(LP%RE)
-                  SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE)
+                  SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE) ! Sh matches Li&Chow FT 2008
                   H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
                   H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
+                  IF (H_MASS_B_NUMBER) THEN
+                     B_M = (Y_DROP-Y_GAS)/(1._EB-Y_DROP) ! LC Eq.(7)
+                     H_MASS = SHERWOOD*PI*(2._EB*R_DROP)*(K_AIR/CP)*LOG(1+B_M) / ( A_DROP*WGT*RHO_G*(Y_DROP-Y_GAS) )
+                  ENDIF
+                  IF (H_MASS_CORRECTION) H_MASS = H_MASS * (1._EB + H_MASS_FAC*SQRT(LP%RE))
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
                IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
 
-              !Build and solve implicit arrays for updating particle, gas, and wall temperatures
+               ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
@@ -3031,7 +3037,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DTOG = DT_SUBSTEP/(2._EB*M_GAS*CP)
                DTGOG = DT_SUBSTEP*A_DROP*WGT*H_HEAT/(2._EB*M_GAS*CP)
                DTGOP = DT_SUBSTEP*A_DROP*H_HEAT/(2._EB*M_DROP*C_DROP)
-               AGHRHO = A_DROP*WGT*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
+               AGHRHO = A_DROP*WGT*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS)
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
                SELECT CASE (ARRAY_CASE)
