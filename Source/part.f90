@@ -2042,7 +2042,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_D_OLD,H_G, &
             H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
             T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD
+            M_GAS_OLD,TMP_G_OLD,TMP_FILM
 
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
@@ -2191,30 +2191,21 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             MW_RATIO = MW_GAS/MW_DROP
 
             ! Initialize PARTICLE thermophysical data
+
             R_DROP   = LP%ONE_D%X(1)
             FTPR     = FOTHPI * LP%ONE_D%RHO(1,1)
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = LP%ONE_D%TMP(1)
 
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-            IF (H_V < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
-               CALL SHUTDOWN(MESSAGE)
-               RETURN
-            ENDIF
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
             H_L = H_L*TMP_DROP+H_L_REF
             H_D_OLD  = H_L*M_DROP
-            WGT      = LP%PWT
-            DHOR     = H_V*MW_DROP/R0
 
             ! Gas conditions
 
             TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
-            D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
             M_GAS  = RHO_G/RVC
             IF (DT_SUM <= TWO_EPSILON_EB) THEN
                TMP_G_OLD = TMP_G
@@ -2223,8 +2214,22 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H_G_OLD = CP * TMP_G * M_GAS
             ENDIF
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
-            !K_AIR  = CPOPR*MU_AIR
-            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_G)
+
+            ! Fluid properties evaluated at film temperature
+
+            TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
+            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_FILM)
+            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_FILM)
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_FILM,H_V)
+            IF (H_V < 0._EB) THEN
+               WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
+               CALL SHUTDOWN(MESSAGE)
+               RETURN
+            ENDIF
+            WGT      = LP%PWT
+            DHOR     = H_V*MW_DROP/R0
+
             IF (Y_INDEX>=0) THEN
                CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_GAS)
             ELSE
@@ -2839,15 +2844,28 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          KILL_RADIUS_CHECK: IF (LP%ONE_D%X(1)>LPC%KILL_RADIUS) THEN
 
             ! Gas conditions
+
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
             CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
             Y_GAS = Y_ALL(Y_INDEX)
             TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
 
-            D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
-            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_G)
+            ! Initialize PARTICLE thermophysical data
+
+            R_DROP   = LP%ONE_D%X(1)
+            FTPR     = FOTHPI * LP%ONE_D%RHO(1,1)
+            M_DROP   = FTPR*R_DROP**3
+            TMP_DROP = LP%ONE_D%TMP(1)
+
+            ! Fluid properties evaluated at film temperature
+
+            TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_FILM,H_V)
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
+            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_FILM)
+            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_FILM)
+
             M_GAS  = RHO_G/RVC
             IF (DT_SUM <= TWO_EPSILON_EB) THEN
                TMP_G_OLD = TMP_G
@@ -2861,15 +2879,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
-
-            ! Initialize PARTICLE thermophysical data
-
-            R_DROP   = LP%ONE_D%X(1)
-            FTPR     = FOTHPI * LP%ONE_D%RHO(1,1)
-            M_DROP   = FTPR*R_DROP**3
-            TMP_DROP = LP%ONE_D%TMP(1)
-            TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_FILM,H_V)
 
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
@@ -3628,7 +3637,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
       IF (Y_DROP>Y_GAS) THEN
          SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE)
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),0.5_EB*(TMP_DROP+TMP(II,JJ,KK)),D_AIR)
+         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
          H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
          OMEGA(II,JJ,KK) = OMEGA(II,JJ,KK)+A_DROP*H_MASS*(Y_GAS-Y_DROP)
       ENDIF
