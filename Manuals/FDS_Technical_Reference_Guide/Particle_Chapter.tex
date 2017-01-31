@@ -11,16 +11,15 @@ distribution, and mass, momentum and energy transfer to and from Lagrangian part
 
 \section{Particle Transport in the Gas Phase}
 
-In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas.
-It is obtained by summing the force transferred from each particle
-in a grid cell and dividing by the cell volume, $V$:
+In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas. It is obtained by summing the force transferred from each particle in a grid cell and dividing by the cell volume, $V$:
 \be
-    {\bof_{\rm b}} = \frac{1}{V} \sum \left[ \ha \rho C_{\rm d} \, A_{\rm p} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t}(\bu_{\rm p}-\bu) \right] \label{part_force}
+    {\bof_{\rm b}} = \frac{1}{V} \sum  \left[ \frac{\rho}{2} \, C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t} \, (\bu_{\rm p}-\bu) \right] \label{part_force}
 \ee
-where $C_{\rm d}$ is the drag coefficient, $A_{\rm p}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the
-gas velocity, and $\rho$ is the gas density. The particle acceleration is given by
+where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The subscript ``b'' stands for ``bulk,'' meaning that the particles in the cell represent a bulk mass dragging on the gas.
+
+The particle acceleration is given by
 \be
-    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p}}{m_{\rm p}} \,
+    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p,c}}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
 \ee
 The particle position, $\bx_{\rm p}$, is determined from the equation
@@ -31,11 +30,11 @@ The exact solution procedure of the above model is presented in Appendix~\ref{pa
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      24/\RE_D                                          & \RE_D < 1    \\[0.1in]
-     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \label{sphere_drag}\\[0.1in]
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles,
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$~\cite{Crowe:1}\footnote{Note that the 0.85 in the second line of Eq.~(\ref{sphere_drag}) has been inserted to ensure continuity of the functional relationship at $\RE_D=1$.}. For cylindrical particles, the following correlation was derived from data presented by Schlichting~\cite{Schlichting:1}:
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
@@ -44,6 +43,21 @@ where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindric
      \end{array} \right.
 \end{align}
 Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
+
+
+\subsection{Using Lagrangian Particles to Represent Vegetation}
+
+For some applications, it is convenient to use Lagrangian particles to represent stationary vegetation, like grasses or leaves, or airborne vegetation, like burning brands. Typically, these different types of vegetation are grouped into different classes of fuel ``elements'', each of which is represented by a single representative particle in each grid cell. Each representative particle contributes to the bulk force term:
+\be
+    {\bof_{\rm b}} = \sum_{\rm e} {\bof_{\rm b,e}} \quad ; \quad {\bof_{\rm b,e}} = \rho \, C_{\rm s,e} \, C_{\rm d,e} \, \beta_{\rm e} \, \sigma_{\rm e} \, (\bu_{\rm p,e}-\bu) |\bu_{\rm p,e}-\bu| + \dot{m}_{\rm p,e}''' \, (\bu_{\rm p,e}-\bu)   \label{part_force_veg}
+\ee
+The terms with subscript ``e'' refer to a particular class of fuel \underline{e}lements and are determined geometrically or empirically.  The shape factor, $C_{\rm s,e}$, is the ratio of the particles' projected cross sectional area, $A_{\rm p,c}$, to its surface area, $A_{\rm p,s}$. A perfect sphere has a shape factor of $\pi r^2/4 \pi r^2=1/4$, but for actual vegetation, the shape factor is assigned an empirical value that accounts for both shape and orientation. Pine needles, for example, project a different cross sectional area depending on their orientation. The drag coefficient, $C_{\rm d,e}$, is empirically derived and takes into account both the geometry and shadowing effects of closely packed objects. Often, as here, it absorbs the factor of 1/2 found in Eq.~(\ref{part_force}).  $\beta_{\rm e}$ is the volume fraction; that is, the ratio of the volume occupied by solid mass to the overall volume of the vegetation, sometimes referred to as the {\em packing ratio}. $\sigma_{\rm e}$ is the surface to volume ratio of a single particle. $\dot{m}_{\rm p,e}'''$ is the mass generation rate per unit volume of that particular vegetation element.
+
+A convenient way to describe the geometric properties of vegetation is by specifying the surface to volume ratio, $\sigma_{\rm e}$, the volume (packing) ratio, $\beta_{\rm e}$, and an assumed shape, like a sphere or cylinder. The volume fraction is sometimes expressed as a mass per unit volume, or {\em bulk density}, $m'''=\rho_{\rm e} \, \beta_{\rm e}$, where $\rho_{\rm e}$ is the density of the solid. With this information, and the following relations:
+\be
+   C_{\rm s,e} = \frac{A_{\rm p,c}}{A_{\rm p,s}} \quad ; \quad C_{\rm d,e}=\frac{C_{\rm d}}{2} \quad ; \quad \beta_{\rm e}=\frac{n_{\rm p,e} \, V_{\rm p}}{V}  \quad ; \quad \sigma_{\rm e}=\frac{A_{\rm p,s}}{V_{\rm p}}
+\ee
+we can convert the drag force expression in Eq.~(\ref{part_force_veg}) to its equivalent in Eq.~(\ref{part_force}) where the single particle element is represented as $n_{\rm p,e}$ spheres or cylinders occupying a grid cell volume, $V$. In the model, it is sufficient to have only one weighted particle per grid cell per fuel element to represent all of the actual particles of that vegetation class.
 
 \subsection{Drag Reduction}
 \label{sec:threeway}
@@ -155,10 +169,10 @@ Liquid droplets can represent either discrete airborne spheres or elements of th
 
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
-\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
 \end{align}
-The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p,s}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
@@ -183,8 +197,8 @@ appropriate amount of vaporized liquid is added to the given mesh cell, and the 
 
 Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
 \be
-   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
-   A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
+   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p,s} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
+   A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
 \ee
 The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
@@ -197,12 +211,12 @@ where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obt
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_{\rm p} = - \dt \, A_{\rm p} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
+   \delta m_{\rm p} = - \dt \, A_{\rm p,s} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
    \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
 \ee
 The amount of heat transfer from the gas to the particle is
 \be
-   \delta q_{\rm p} = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
+   \delta q_{\rm p} = \dt \, A_{\rm p,s} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
 
@@ -274,23 +288,21 @@ Note that $a$ is an empirical constant that is dependent on the material propert
 
 \section{Using Lagrangian Particles to Model Complex Objects}
 
-There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
-to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot
-be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the
-movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can
-be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface
-type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be
-thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either
-a cylindrical, spherical or cartesian coordinate system.
+There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or cartesian coordinate system.
 
-It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
-equation. For a grid cell with indices $ijk$, the source term is:
-\be \label{eq:qr} \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) \ee
+It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation equation. For a grid cell with indices $ijk$, the source term is:
+\be \label{eq:qr} 
+   \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) 
+\ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
-\be \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} \ee
-where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell.
-The net radiative heat flux onto the surface of the particle is
-\be \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) \ee
+\be 
+   \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} 
+\ee
+where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell. The net radiative heat flux onto the surface of the particle is
+\be 
+   \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) 
+\ee
+
 
 \subsection{Porous Media (Filters, Screens, Metal Meshes, and Similar Materials)}
 

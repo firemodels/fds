@@ -1,4 +1,4 @@
-@echo off
+echo off
 
 set fdsversion=%fds_edition%
 set smvversion=SMV6
@@ -9,10 +9,10 @@ set fdsmpidir=%svn_root%\fds\Build\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%userprofile%\FDS_Guides
-set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
+set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL17
 set in_fds2ascii=%svn_root%\fds\Utilities\fds2ascii
 set in_setpath=%svn_root%\smv\Build\set_path\intel_win_64
-set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
+set in_shortcut=%userprofile%\fire-notes\INSTALL\repoexes
 set in_smokediff=%svn_root%\smv\Build\smokediff
 set in_smokezip=%svn_root%\smv\Build\smokezip
 set in_dem2fds=%svn_root%\smv\Build\dem2fds
@@ -23,13 +23,21 @@ set in_background=%svn_root%\smv\Build\background
 set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\smv\for_bundle
 set in_sh2bat=%svn_root%\smv\Build\sh2bat\intel_win_64
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
+set md5hash=%svn_root%\fds\Utilities\Scripts\md5hash.bat
+
+
+:: files from mpi version 17 update 1 (doesn't work)
+::set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL17
+
+:: files we got from intel that fixed a problem we reported (does work)
+set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
 set uploads=%svn_root%\fds\Utilities\uploads
 set basedir=%uploads%\%basename%
 
 set out_bundle=%basedir%\firemodels
 set out_bin=%out_bundle%\%fdsversion%\bin
+set out_fdsmd5=%out_bundle%\%fdsversion%\bin\MD5
 set out_uninstall=%out_bundle%\%fdsversion%\Uninstall
 set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
@@ -39,6 +47,7 @@ set out_examples2=%svn_root%\fds\Verification
 
 set out_smv=%out_bundle%\%smvversion%
 set out_textures=%out_smv%\textures
+set out_smvmd5=%out_smv%\MD5
 
 set fds_casessh=%svn_root%\fds\Verification\FDS_Cases.sh
 set fds_casesbat=%svn_root%\fds\Verification\FDS_Cases.bat
@@ -68,6 +77,9 @@ mkdir %out_web%
 mkdir %out_examples%
 mkdir %out_uninstall%
 
+mkdir %out_fdsmd5%
+mkdir %out_smvmd5%
+
 set release_version=%fdssmv_major_version%_win_%platform%
 set release_version=
 
@@ -79,29 +91,40 @@ echo.
 copy %in_for_bundle%\*.po                                                        %out_bin%\.>Nul
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe                               %out_bin%\fds.exe
-
+CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
+CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
 CALL :COPY  %in_testmpi%\test_mpi.exe                                            %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe                                %out_smv%\smokeview.exe
-
 CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_smv%\smokediff.exe
-
 CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
-
 CALL :COPY  %in_dem2fds%\intel_win_%platform%\dem2fds_win_%platform%.exe         %out_smv%\dem2fds.exe 
-
-CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                        %out_smv%\jp2conv.bat 
-
 CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
+CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                        %out_smv%\jp2conv.bat
 
-CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
+set curdir=%CD%
+cd %out_bin%
+call %md5hash% fds.exe        >  MD5\fds_%fds_version%.exe.md5
+call %md5hash% fds2ascii.exe  >  MD5\fds2ascii_%fds_version%.exe.md5
+call %md5hash% background.exe >  MD5\background_%fds_version%.exe.md5
+call %md5hash% test_mpi.exe   >  MD5\test_mpi_%fds_version%.exe.md5
+cat MD5\*.md5 > MD5\fds_%fds_version%_win_bundle.md5s
 
-CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
+cd %out_smv%
+call %md5hash% smokeview.exe >  MD5\smokeview_%smv_version%.exe.md5
+call %md5hash% smokediff.exe >  MD5\smokediff_%smv_version%.exe.md5
+call %md5hash% smokezip.exe  >  MD5\smokezip_%smv_version%.exe.md5
+call %md5hash% dem2fds.exe   >  MD5\dem2fds_%smv_version%.exe.md5
+call %md5hash% wind2fds.exe  >  MD5\wind2fds_%smv_version%.exe.md5
+cat MD5\*.md5 > %out_smv%\MD5\smv_%smv_version%_win_bundle.md5s
 
-CALL :COPY %in_impi%\impi.dll          %out_bin%\impi.dll
-CALL :COPY %in_impi%\mpiexec.hydra.exe %out_bin%\mpiexec.exe
-CALL :COPY %in_impi%\pmi_proxy.exe     %out_bin%\pmi_proxy.exe
-CALL :COPY %in_impi%\hydra_service.exe %out_bin%\hydra_service2.exe
+cd %curdir%
+CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
+
+CALL :COPY %in_impi%\impi.dll                %out_bin%\impi.dll
+CALL :COPY %in_impi%\mpiexec.hydra.exe       %out_bin%\mpiexec.exe
+CALL :COPY %in_impi%\pmi_proxy.exe           %out_bin%\pmi_proxy.exe 
+CALL :COPY %in_impi%\hydra_service.exe       %out_bin%\hydra_service2.exe
 
 CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
@@ -110,10 +133,6 @@ echo --- copying auxillary files ---
 echo.
 CALL :COPY  %in_for_bundle%\objects.svo            %out_smv%\.
 CALL :COPY  %in_for_bundle%\volrender.ssf          %out_smv%\.
-
-CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
-CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_smv%\.
-CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_smv%\.
 
 CALL :COPY  %in_for_bundle%\smokeview.ini          %out_smv%\.
 
@@ -158,7 +177,7 @@ CALL :COPY %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
 CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
 
 echo.
-echo --- copying starup shortcuts ---
+echo --- copying startup shortcuts ---
 echo.
  
 CALL :COPY "%svn_root%\webpages\smv_readme.html" "%out_guides%\Smokeview_release_notes.html"
@@ -167,22 +186,8 @@ CALL :COPY "%bundleinfo%\Overview.html"                "%out_doc%\Overview.html"
 
 CALL :COPY "%bundleinfo%\FDS_Web_Site.url"             "%out_web%\Official_Web_Site.url"
 
-CALL :COPY "%bundleinfo%\Updates.url"                  "%out_web%\Software_Updates.url"
-
-CALL :COPY "%bundleinfo%\Docs.url"                     "%out_web%\Documentation_Updates.url"
-
-CALL :COPY "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
-
-CALL :COPY "%bundleinfo%\discussion_group.url"         "%out_web%\Discussion_Group.url"
-
-CALL :COPY "%bundleinfo%\issue_tracker.url"            "%out_web%\Issue_Tracker.url"
-
- 
-CALL :COPY %bundleinfo%\readme_examples.html           "%out_examples%\Examples notes.html"
-
 echo.
 echo --- copying example files ---
-echo.
 
 set outdir=%out_examples%
 set QFDS=call %copyFDScases%
@@ -193,7 +198,6 @@ cd %out_examples2%
 %in_sh2bat%\sh2bat %fds_casessh% %fds_casesbat%
 call %fds_casesbat%>Nul
 
-echo.
 cd %out_examples2%
 %in_sh2bat%\sh2bat %smv_casessh% %smv_casesbat%
 call %smv_casesbat%>Nul
@@ -214,7 +218,6 @@ CALL :COPY  "%in_setpath%\set_path64.exe"           "%out_bundle%\%fdsversion%\s
 
 echo.
 echo --- compressing distribution ---
-echo.
 
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
@@ -225,17 +228,16 @@ wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * ..\%smvversion% > Nul
 
 echo.
 echo --- creating installer ---
-echo.
 
 cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
+call %md5hash% %basename%.exe   >>  %out_bin%\MD5\fds_%fds_version%_win_bundle.md5s
 
 echo.
 echo --- installer built ---
-echo.
 
 cd %CURDIR%>Nul
 

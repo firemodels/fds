@@ -5,6 +5,8 @@
 close all
 clear all
 
+plot_style
+
 datadir='../../Verification/Controls/';
 
 % load experimental data and FDS prediction
@@ -55,14 +57,13 @@ else
     maxval=ceil(2*urms*100)/100;
 
     figure
-    plot_style
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
@@ -73,9 +74,9 @@ else
 
     % print to pdf
     set(gcf,'Visible',Figure_Visibility);
-    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
     print(gcf,'-dpdf',plotname);
 
@@ -87,14 +88,13 @@ else
     maxval=ceil(2*uwcov*100)/100;
 
     figure
-    plot_style
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
@@ -105,9 +105,9 @@ else
 
     % print to pdf
     set(gcf,'Visible',Figure_Visibility);
-    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
     print(gcf,'-dpdf',plotname);
 
@@ -119,14 +119,13 @@ else
     maxval=ceil(2*uwcorr*100)/100;
 
     figure
-    plot_style
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
     h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-');
 
-    set(gca,'Units',Plot_Units)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
@@ -137,9 +136,9 @@ else
 
     % print to pdf
     set(gcf,'Visible',Figure_Visibility);
-    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'Units',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
     print(gcf,'-dpdf',plotname);
 

@@ -13,7 +13,7 @@ Fire Characteristics
 &SURF ID='fire', HRRPUA=791./
 &OBST XB=-0.44,-0.3,1.13,1.27,0.0,0.025, SURF_IDS='fire','INERT','INERT',COLOR='RED' /
 
-&REAC FUEL='ETHANOL'/
+&REAC FUEL='ETHANOL', SOOT_YIELD=0.01 /
 
 Boundary Characteristics
 &VENT MB='XMIN' , SURF_ID='OPEN' /Open domain boundary

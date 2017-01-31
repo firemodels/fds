@@ -5,6 +5,9 @@
 close all
 clear all
 
+plot_style
+Marker_Size = 10;
+
 % % compute N2 ramp
 
 % format long
@@ -113,8 +116,8 @@ F3 = importdata([outdir,'methane_dx_p3125cm_line.csv'],',',2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
@@ -157,7 +160,7 @@ axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 lh = legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
-set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -166,9 +169,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
@@ -178,8 +181,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
@@ -221,7 +224,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -230,9 +234,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
@@ -242,8 +246,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
@@ -285,7 +289,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.125 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -294,9 +299,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
@@ -306,8 +311,8 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style
-Marker_Size = 10;
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
@@ -349,7 +354,8 @@ text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Fo
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+lh=legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available
 git_file = [outdir,'methane_dx_1p25cm_git.txt'];
@@ -358,9 +364,9 @@ addverstr(gca,git_file,'linear')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p250'])

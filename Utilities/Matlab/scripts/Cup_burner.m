@@ -63,8 +63,8 @@ for s = 1:N_Agents
    FDS_Y(f,s) = fds_data(i_last,2);
 
    Exp_X(f,s) = exp_data(1,(f-1)*N_Agents+s);
-   Exp_Y(f,s) = exp_data(2,(f-1)*N_Agents+s);   
-   
+   Exp_Y(f,s) = exp_data(2,(f-1)*N_Agents+s);
+
 end
 end
 
@@ -76,7 +76,10 @@ Ymax = max(max(max(Exp_Y)),Ymax);
 Ymax = ceil(Ymax*10)/10;
 
 % plot X
-hf(1)=figure(1);
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
+
 n = 0;
 for f = 1:N_Fuels
 for s = 1:N_Agents
@@ -99,13 +102,12 @@ ymax = xmax;
 plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
 
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
+set(gca,'FontSize',Scat_Label_Font_Size)
 xlabel('Measured MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Predicted MEC (volume fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-legend(hX,XLegendStr,'Location','NorthWest')
+lh=legend(hX,XLegendStr,'Location','NorthWest');
+set(lh,'FontSize',Key_Font_Size)
 
 % add VerStr if file is available
 
@@ -114,14 +116,17 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_volfrac');
 
 % plot Y
 
-hf(2)=figure(2);
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
+
 n = 0;
 for f = 1:N_Fuels
 for s = 1:N_Agents
@@ -145,13 +150,12 @@ plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
 
 plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
-set(hf(2),'DefaultLineLineWidth',Line_Width)
+set(gca,'FontSize',Scat_Label_Font_Size)
 xlabel('Measured MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Predicted MEC (mass fraction)','FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-legend(hY,YLegendStr,'Location','NorthWest')
+lh=legend(hY,YLegendStr,'Location','NorthWest');
+set(lh,'FontSize',Key_Font_Size)
 
 % add VerStr if file is available
 
@@ -160,9 +164,8 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_massfrac');
 
-%close all

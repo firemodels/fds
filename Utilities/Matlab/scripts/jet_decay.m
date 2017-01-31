@@ -45,6 +45,9 @@ for j=1:length(x)
 end
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(1)=plot(x/h,u_1/u_0,'k--'); hold on
 H(2)=plot(x/h,u_2/u_0,'k-');
@@ -62,8 +65,6 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'XTick',[0 5 10 15 20 25])
 set(gca,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
-Paper_Width=1.4*Paper_Width;
-Plot_Width =1.4*Plot_Width;
 
 text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'FontName',Font_Name)
 
@@ -76,9 +77,12 @@ legend_handle = legend(H,'analytical, {\it m}=0.12','analytical, {\it m}=0.20',.
                          'Vreman, {\it h/\deltax}=8','Vreman, {\it h/\deltax}=16',...
                          'Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter);
-set(legend_handle,'FontSize',Label_Font_Size);
+set(legend_handle,'FontSize',Key_Font_Size);
 set(legend_handle,'FontName',Font_Name);
 set(legend_handle,'Box','on');
+set(legend_handle,'Units',Paper_Units)
+pos = get(legend_handle,'position');
+set(legend_handle,'position',[Paper_Width pos(2:4)])
 
 % add Git revision if file is available
 
@@ -86,11 +90,13 @@ Git_Filename = [outdir,'jet_dsmag_dx5cm_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
+Paper_Width_Factor = 1.4;
+PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/jet_decay'])
 
 

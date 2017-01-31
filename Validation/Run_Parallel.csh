@@ -6,7 +6,9 @@
 cd Arup_Tunnel;  ./Run_All.sh -y; cd ..
 cd ATF_Corridors;  ./Run_All.sh -y; cd ..
 cd Backward_Facing_Step;  ./Run_All.sh -y; cd ..
+cd Bouchair_Solar_Chimney;  ./Run_All.sh -y; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh -y; cd ..
+cd DelCo_Trainers;  ./Run_All.sh -y; cd ..
 cd FAA_Cargo_Compartments;  ./Run_All.sh -y; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh -y; cd ..
 cd FM_SNL;  ./Run_All.sh -y; cd ..
@@ -16,6 +18,7 @@ cd NBS_Multi-Room;  ./Run_All.sh -y; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh -y; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh -y; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh -y; cd ..
+cd NRCC_Smoke_Tower;  ./Run_All.sh -y; cd ..
 cd Purdue_Flames;  ./Run_All.sh -y; cd ..
 cd Sandia_Plumes;  ./Run_All.sh -y; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh -y; cd ..

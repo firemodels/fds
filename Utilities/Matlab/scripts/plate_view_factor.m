@@ -10,11 +10,6 @@ addpath('../../Verification/Radiation')
 % set the plot style parameters
 
 plot_style
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Collect data
 
@@ -70,7 +65,7 @@ if skip_case
     return
 end
 
-%2D 
+%2D
 M = csvread('plate_view_factor_2D_30_devc.csv',2,0);
 Flux_2D(1) = max(M(:,2));
 M = csvread('plate_view_factor_2D_60_devc.csv',2,0);
@@ -94,6 +89,10 @@ Flux_cyl(3) = max(M(:,2));
 
 % Plot data
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 h=plot(NRA,Exact_Flux_2D*[1 1 1],'r-',NRA,Flux_2D,'ro');
 hold on
 h=plot(NRA,Exact_Flux_cart*[1 1 1],'b-',NRA,Flux_cart,'bs');
@@ -111,25 +110,16 @@ leg=legend('Exact 2D','FDS 2D','Exact cart.','FDS cart.','Exact cyl.','FDS cyl.'
    'Location','SouthEast');
 set(leg,'FontSize',Key_Font_Size);
 
-% add SVN if file is available
+% add version string if file is available
 
-SVN_Filename = 'plate_view_factor_2D_30_git.txt';
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = 'plate_view_factor_2D_30_git.txt';
+addverstr(gca,Git_Filename,'linear')
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/plate_view_factor')
 
 %close

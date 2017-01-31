@@ -642,14 +642,14 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \section{Analytical Solution to the Continuity Equation}
 
-Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.  However, to our knowledge, there are no similar (i.e., time dependent and periodic in space) analytical solutions for the compressible NS equations, which could be used for verification of both compressible and variable-density low-Mach flow solvers.
+Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.
 
-The aim of the present work is to take a small step toward developing such analytical solutions.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
+The aim of the present work is to develop analytical solutions for the compressible NS equations that can be used for verification of both compressible and variable-density low-Mach flow solvers.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
 \begin{equation}
 \label{eqn_continuity}
 \frac{\partial \ln \rho}{\partial t} + \mathbf{u} \cdot \nabla \ln \rho + \nabla\cdot \mathbf{u} = 0 \,\mbox{.}
 \end{equation}
-Further, for certain, simple specifications of the velocity, this PDE can be solved using the method of characteristics.
+Further, for certain simple specifications of the velocity this PDE can be solved using the method of characteristics.
 
 In what follows we present 1D and 2D solutions to (\ref{eqn_continuity}) for two basic irrotational flow fields.  All the solutions are periodic in space.  The first configuration is a pulsating flow that cycles between compressing the fluid toward the center and then the corners of the domain.  In the second configuration, time periodicity is achieved by using a constant and uniform advection velocity in combination with the compression waves.  This results in a solution with a qualitatively different character than the first.
 
@@ -667,7 +667,7 @@ where $B$ is a constant amplitude and $\omega$ is the frequency of the compressi
 \frac{\partial u}{\partial x} = B \cos(x) \cos(\omega t) \,\mbox{.}
 \end{equation}
 
-Let $q \equiv \ln \rho$ (this notation is used through out this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
+Let $q \equiv \ln \rho$ (this notation is used throughout this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
 \begin{equation}
 \label{eqn_cont1d}
 \frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \cos(x) \cos(\omega t) = 0 \,\mbox{,}
@@ -735,11 +735,11 @@ Note that the initial condition $q_0(x,y,t)$ is restricted to cases where $\frac
 An example of the solution to (\ref{eqn_2dsoln}) is shown in Fig.~\ref{fig_pulsating 2D wave}. The initial condition for the density is specified as $\rho(\mathbf{x},0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.  FDS is run with three scalar transport schemes: central differencing, Superbee, and the CHARM flux limiter. The solution at $(x,y) = (3\pi/2, 3\pi/2)$ for successively finer grid resolutions is plotted as a time series on the left and may be compared with the analytical solution (black line). On the right, we confirm second-order convergence for the FDS implementation.  Central differencing and the CHARM limiter outperform Superbee for this problem because the solution is relatively smooth.
 
 \begin{figure}[ht]
-    \begin{tabular}{rl}
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence}
-   \end{tabular}
-         \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
+   \end{tabular*}
+   \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
 \end{figure}
 
@@ -820,10 +820,10 @@ Note that $z_0 \Rightarrow x_0$ for $i=1$ and $z_0 \Rightarrow y_0$ for $i=2$.  
 An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_compression_wave}.  In this case we set $c_1 = 2$ and $c_2 = 3$ to create an asymmetry in the flow.  The periodicity in time depends on the choices of $c_1$ and $c_2$; it is possible that no periodicity exists. We have not found a case that generates a singularity. The analytical time series of the density at the position $(x,y) = (3\pi/2, 3\pi/2)$ is shown as the solid black line. FDS is run with the CHARM flux limiter scheme (as this is a DNS flow field).  The solution at successively finer grid resolutions is plotted and compared with the analytical solution, demonstrating convergence of the scheme.  On the right side of the figure we demonstrate second-order convergence of the central, Superbee, and CHARM limiter schemes in FDS.
 
 \begin{figure}[ht]
-   \begin{tabular}{rl}
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence}
-   \end{tabular}
+   \end{tabular*}
    \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
 \end{figure}
@@ -1311,22 +1311,54 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
 
 \section{Boundedness Tests}
 
-\subsection{Species Bounds (\texorpdfstring{\textct{bound\_test}}{bound\_test})}
+\subsection{Species Bounds (\texorpdfstring{\textct{bound\_test\_*}}{bound\_test\_*})}
 \label{bound_test_1}
 \label{bound_test_2}
 
+When multiple infinitely fast reactions are present it is not trivial to correctly partition the limiting reactant and maintain species bounds.  FDS uses a special subcycling algorithm by Kahaner \cite{Kahaner:1989} to maintain boundedness for species when time integrating the ODEs for the chemical reaction step (the method is further discussed in the FDS Tech Guide \cite{FDS_Math_Guide}).  In this section, we examine two test cases designed to verify the time integration method.
+
+The first case, {\ct bound\_test\_1}, consists of two independent reactions, one with air as the limiting reactant, one with fuel as the limiting reactant.  The stoichiometry of each reaction is the same: $\mathrm{F} + \mathrm{A} \rightarrow 2\,\mathrm{P}$.  The initial volume fractions of determine which species are limiting.  The results are shown in Fig.~\ref{fig:bound_test_1}.  For the first reaction, $X_{\rm F1}$ is initially 0.3 and $X_{\rm A1}$ is initially 0.2.  Therefore, all the A1 is converted to P1, which has a final volume fraction of $X_{\rm P1}=0.4$.  In the second reaction, the initial fuel volume fraction is $X_{\rm F2}=0.1$ (limiting) and the initial air volume fraction is $X_{\rm A2}=0.4$.  As can be see in Fig.~\ref{fig:bound_test_1}, the resulting final values give a product volume fraction of twice the limiting reactant, $X_{\rm P2}=0.2$.
+
 \begin{figure}[!ht]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_1} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_2}
-   \end{tabular*}
-   \caption[Results of the {\ct bound\_test} cases]{Results of the {\ct bound\_test} cases.}
-   \label{bound_test}
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_1}
+   \caption[Results of the {\ct bound\_test\_1} case]{Results of the {\ct bound\_test\_1} case.}
+   \label{fig:bound_test_1}
 \end{figure}
 
+The second test case, {\ct bound\_test\_2}, is more challenging---we add a third reaction that uses the same fuel species as the first and the same air species as the second.  The reaction scheme is as follows:
+\begin{align}
+\mathrm{F1} + \mathrm{A1} &\rightarrow 2\,\mathrm{P1} \\
+\mathrm{F2} + \mathrm{A2} &\rightarrow 2\,\mathrm{P2} \\
+\mathrm{F1} + \mathrm{A2} &\rightarrow 2\,\mathrm{P3}
+\end{align}
+The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2}.  As discussed in the FDS Tech Guide \cite{FDS_Math_Guide}, the right-hand-side of the chemistry ODE is set up assuming a large Arrhenius constant and no activation energy and (in this case) second-order concentration dependence for each reaction.  It can be shown through numerical experiments that this assumption is equivalent to applying Curl's mixing model (Coalescence-Dispersion) \cite{Curl:1} in a batch reactor with infinitely fast chemistry.
+\begin{figure}[!ht]
+   \centering
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_2}
+   \caption[Results of the {\ct bound\_test\_2} case]{Results of the {\ct bound\_test\_2} case.}
+   \label{fig:bound_test_2}
+\end{figure}
 
-\subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
+\subsection{Isothermal Helium Wave (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
+\label{helium_1d_isothermal}
+
+This is a test of isothermal advection and mixing of gases with different molecular weights using the default algorithm.  A companion case using a simplified algorithm for {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} is given below in Sec.~\ref{helium_1d_const_gamma}.  In the present case, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation. In Fig.~\ref{fig_helium_1d_isothermal} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy, which is referenced to 25 \si{\degreeCelsius}, should remain at 0 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_isothermal} cases]{Results of the {\ct helium\_1d\_isothermal} cases.}
+   \label{fig_helium_1d_isothermal}
+\end{figure}
+
+\subsection{Temperature Bounds for Isothermal Helium Jet (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
 \label{helium_air_jet_floor}
+
+In this test, a jet of helium is generated from a floor vent.  The mass flux is ramped up from 0 m/s to 1 m/s in 1 s.  The flow field should remain isothermal at 20 \si{\degreeCelsius}.  The results are shown in Fig.~\ref{helium_air_jet}.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1364,6 +1396,79 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
    \end{tabular*}
    \caption[Results of the {\ct tmp\_lower\_limit} cases]{Results of the {\ct tmp\_lower\_limit} cases.}
    \label{tmp_lower_limit_fig}
+\end{figure}
+
+\clearpage
+
+\section{Constant Specific Heat Ratio}
+\label{const_gamma}
+
+The ratio $\gamma = c_p/c_v$ is called the ``ratio of specific heats''. For many simple gases, $\gamma = \mathrm{constant}$ is a good approximation.  The specific heat of species $\alpha$ in the gas phase is then given by
+\begin{equation}
+c_{p,\alpha} = \frac{R}{W_\alpha}\frac{\gamma_\alpha}{\gamma_\alpha-1}
+\end{equation}
+where $R$ is the ideal gas constant.  When this assumption is viable, many terms in the energy equation drop out, greatly simplifying the divergence expression and thus speeding up the code.  These simplifications require that the sensible enthalpy of the gas is referenced to 0 K (see the FDS Tech Guide \cite{FDS_Math_Guide}).  In this section, we examine three cases using the assumption of constant specific heat ratio: one tests mixing of two gases with different molecular weights ({\ct helium\_1d\_const\_gamma}), one tests fire conditions ({\ct fire\_const\_gamma}), and one tests evaporation of water droplets ({\ct water\_evap\_1\_const\_gamma}).  Each of these cases is a clone of cases we develop later in this guide for the default version of the code.
+
+\subsection{Helium Wave using Constant Specific Heat Ratio (\texorpdfstring{\textct{helium\_1d\_const\_gamma}}{helium\_1d\_const\_gamma})}
+\label{helium_1d_const_gamma}
+
+In this problem, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation.  The ratio of specific heats is kept at the default value of $\gamma = 1.4$.  The molar weights, heat capacities, and enthalpies for both air and helium are given in Table \ref{tab:helium_1d_const_gamma}.  Notice that the sensible enthalpies, $h_{s,\alpha}=\rho_\alpha c_{p,\alpha} T$, are the same for both species.
+
+\begin{table}[ht]
+\centering
+\caption[Helium constant specific heat ratio]{Helium constant specific heat ratio parameters.}
+\begin{tabular}{lcccc}
+Species & $W_\alpha$ (kg/kmol) & $\rho_\alpha$ (\si{kg/m^3}) & $c_{p,\alpha}$ (kJ/kg/K) & $h_{s,\alpha}$ (\si{kJ/m^3}) \\
+\hline
+Air    & 28.73167 & 1.174 & 1.0128 & 355 \\
+Helium &  4.00260 & 0.164 & 7.2705 & 355 \\
+\end{tabular}
+\label{tab:helium_1d_const_gamma}
+\end{table}
+
+In Fig.~\ref{fig_helium_1d_const_gamma} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy should remain constant at 355 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
+
+\begin{figure}[ht!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_W}}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_1d\_const\_gamma} cases]{Results of the {\ct helium\_1d\_const\_gamma} cases.}
+   \label{fig_helium_1d_const_gamma}
+\end{figure}
+
+\subsection{Fire Plume using Constant Specific Heat Ratio (\texorpdfstring{\textct{fire\_const\_gamma}}{fire\_const\_gamma})}
+\label{fire_const_gamma}
+
+In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCelsius}. A 1000 MW propane fire with a 5 \% soot yield is placed at the bottom of the box for 20 s. All the compartment surfaces are adiabatic. The net change in enthalpy and pressure can be computed using the specific heat ratio based constant specific heat values for the air and product species along with the pressure work required to inject the fuel. The FDS predicted enthalpy and pressure change are shown in Fig \ref{fig_fire_const_gamma} compared with the predicted values.
+
+\begin{figure}[ht!]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
+   \end{tabular*}
+   \caption[Results of the {\ct fire\_const\_gamma} case]{Results of the {\ct fire\_const\_gamma} case.}
+   \label{fig_fire_const_gamma}
+\end{figure}
+
+\subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\textct{water\_evap\_1\_const\_gamma}}{water\_evap\_1\_const\_gamma})}
+\label{water_evap_1_const_gamma}
+
+This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and monodisperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in {\ct water\_evap\_1\_const\_gamma.m} in the {\ct Utilities/Matlab/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
+
+\begin{figure}[ht!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass}
+\end{tabular*}
+\caption[Sample case \textct{water\_evap\_1\_const\_gamma}]{Output of the \textct{water\_evap\_1\_const\_gamma} test case.}
+\label{water_evap_1_const_gamma_plots}
 \end{figure}
 
 
@@ -2015,6 +2120,8 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Fig.~\ref{mass_heat_wall_device} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
@@ -2026,7 +2133,7 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
-\caption[The \textct{wall\_device\_test} cases]{The \textct{wall\_device\_test} cases.}
+\caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
 \label{mass_heat_wall_device}
 \end{figure}
 
@@ -2035,13 +2142,17 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 
 This chapter presents a number of cases that are designed to check whether or not various algorithms have been programmed properly. A good way to do this is to simulate simple flows, particularly ones with symmetric features. Errors in coding are easily identified in such cases.
 
-\section{Finite difference errors (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
+\section{Symmetry Tests}
+
+These examples are very simple test cases that are used to determine if there are coding errors in the basic flow solver. In the absence of a small amount of ``noise'' that FDS uses to initialize the velocity field, a symmetric geometry ought to produce symmetric patterns of velocity, temperature, etc.
+
+\subsection{Counter-Flowing Jets (\texorpdfstring{\textct{symmetry\_test}}{symmetry\_test})}
 \label{symmetry_test}
 \label{symmetry_test_mpi}
 
-These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test_fig}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
+A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test_fig}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
@@ -2052,9 +2163,24 @@ These examples are very simple tests to determine if there are coding errors in 
 \label{symmetry_test_fig}
 \end{figure}
 
-\clearpage
+\subsection{Fire in a Thin-Walled Pan (\texorpdfstring{\textct{symmetry\_test\_2}}{symmetry\_test\_2})}
+\label{symmetry_test_2}
 
-\section{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
+In this case, a steel pan is placed inside a small compartment with a small door at one end. The pan has thin walls (zero cells thick) which is particularly challenging for a symmetry test because boundary conditions must be applied on opposite sides of the thin wall. The case also involves a fire and multiple species. Radiation is not tested here. Figure~\ref{symmetry_test_2_fig} displays the temperature field in a slice plane across the pan, and at two points equidistant from the centerline.
+
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2_plot} 
+\end{tabular*}
+\caption[The \textct{symmetry\_test\_2} case]{Flow field (left) and temperature plot (right) for the \textct{symmetry\_test\_2} case.}
+\label{symmetry_test_2_fig}
+\end{figure}
+
+
+
+\subsection{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
 \label{cyl_test}
 
 FDS has an option to perform an axially-symmetric calculation, which can be useful for simulating a laminar diffusion flame, like a bunsen burner or candle. When invoking this option, the user still specifies three coordinates, $x$, $y$, and $z$, but it is understood that $x$ is the radial coordinate, $r$, and $z$ is the vertical coordinate. The coordinate, $y$, is used only by Smokeview to draw the domain, and it should not influence the calculation at all. However, since FDS is primarily a three-dimensional, cartesian code, there is a possibility that a coding error might cause the specification of the $y$ dimension to have an effect on the result. Figure~\ref{cyl_test_fig} displays results of two sets of axially-symmetric simulations. On the left is an LES simulation in which the lateral size of the cells, $\delta y$, is 2~mm and 2~cm. The two curves ought to lie exactly upon each other, which is indicated by a single red curve. On the right is a DNS simulation of a laminar diffusion flame, with $\delta y$ equal to 2~mm and 4~mm.
@@ -3430,7 +3556,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
 \label{fig:ht3d_ibeam_time_history}
@@ -4104,21 +4230,52 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \end{figure}
 
 
+\subsection{Drag Caused by Vegetation (\texorpdfstring{\textct{vegetation\_drag}}{vegetation\_drag})}
+\label{vegetation_drag_1}
+\label{vegetation_drag_2}
+
+Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particles with flat, cylindrical, or spherical geometries. In this test case. cylindrical particles represent pine needles. Consider a 4~m long duct with a 1~m square cross section, fixed air velocity of $u_0=2$~m/s, and free-slip walls. Three ducts are stacked vertically, each with a 10~cm uniform mesh and a 1~m by 1~m by 1~m volume filled with particles spanning the duct near its center. The cylindrical particles are $D=1$~mm in diameter and $L=2$~cm long. In the lowest duct, 5000 particles are inserted randomly throughout the volume. In the middle duct, 1 particle is inserted at the center of each grid cell within the volume containing the pine needles. In the top duct, 5 particles are inserted randomly in each grid cell, for a total of 5000 particles. The drag coefficient for each cylindrical particle is given by the empirical relation:
+\be
+   C_{\rm d} = 10 \, \frac{0.6 + 0.4 \, \RE^{0.8}}{\RE} \approx 1.55 \quad ; \quad \RE = \frac{\rho \, u_0 \, D}{\mu_{\rm air}} \approx 132.9
+\ee
+The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s). The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
+\be
+   \Delta p=-\frac{1}{2} \rho \frac{n_{\rm p} \, C_{\rm d} \, A_{\rm c} \, u_0^2} {A} = -18.88 \; {\rm Pa}  \quad ; \quad n_{\rm p}=\frac{m''' \, V}{\pi \, r^2 \, L \, \rho_{\rm p}} \approx 254648
+\ee
+where $A$ is the 1~m$^2$ cross-sectional area of the duct, $A_{\rm c}=LD$ is the cross sectional area of the cylindrical particle, and $\rho=1.196$~kg/m$^3$ is the density of air. The number of actual pine needles within the volume, $n_{\rm p}$, is the mass per unit volume, $m'''=2$~kg/m$^3$, times the volume, $V=1$~m$^3$, divided by the mass of an individual pine needle. The density of the needle is $\rho_{\rm p}=500$~kg/m$^3$. Comparisons of computed and analytical pressure drops are shown in the left plot of Fig.~\ref{vegetation_drag_fig}. Differences between the ideal and computed results are due to the fact that the air velocity is not exactly 2~m/s within the volume filled with the particles. In particular, the duct filled randomly with particles exhibits the greatest deviation from the ideal because the velocity does not remain uniform within the volume.
+
+Using this same basic configuration, a second test is performed where the cylindrical particles now exert no drag force on the air flow, but instead generate additional air at a rate of 0.1~kg/(m$^2 \cdot$s). The surface area of each of the 254648 particles is $6.28 \times 10^{-5}$~m$^2$, resulting in a total air injection rate of $\dot{m}=1.6$~kg/s. The momentum equation becomes one-dimensional and time-independent:
+\be
+   \frac{\d}{\d x} \left( \frac{p}{\rho} + \frac{u^2}{2} \right) = - \frac{1}{\rho} \frac{\dot{m}}{V} \, u  \label{simmom}
+\ee
+Using the subscript 1 to denote the upstream region of the duct, and 2 the downstream, the air velocity increases as it passes through the particles: $u_2=u_1+\dot{m}/(\rho \, A)$. Multiplying Eq.~(\ref{simmom}) by the constant density, $\rho$, and integrating both sides over the length of the duct containing the particles:
+\be
+   \Delta p \equiv p_2-p_1 =  - \rho \, \frac{u_2+u_1}{2} \, (u_2-u_1) - \frac{\dot{m}}{A} \, \frac{u_2+u_1}{2} = -8.534  \; {\rm Pa}
+\ee
+The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} for the various different methods of representing the particles in the model.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_2}
+\caption[The {\ct vegetation\_drag} test cases]{Pressure drop in duct filled with pine needles for three different particle insertion methods.}
+\label{vegetation_drag_fig}
+\end{figure}
+
 
 \subsection{Mesh Screen in a Duct (\texorpdfstring{\textct{screen\_drag}}{screen\_drag})}
 \label{screen_drag_1}
 \label{screen_drag_2}
 
-These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
+These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the $y$- and $z$-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
 \be
-   \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen}
+   \Delta p \;= \; \left( \frac{\mu}{K} u \; + \; \rho \frac{Y}{\sqrt{K}} u^2 \right) \Delta x_{\rm screen}
 \ee
-where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
+where $K$ and $Y$ are empirical constants defined in the FDS User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2}
-\caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.}
+\caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.  The three cases represent different values of \textct{FREE\_AREA\_FRACTION} (0.1, 0.4, and 0.8) within the channel.}
 \label{screen_drag_plots}
 \end{figure}
 
@@ -4710,42 +4867,42 @@ A sensitivity analysis is carried out to verify that results are not sensitive t
 
 \subsection{Mass conservation 1 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_1}}{HVAC\_mass\_transport\_conservation\_1})}
 \label{HVAC_mass_transport_conservation_1}
-The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} presents the species~1 and 2 masses in the left and right compartments.
+The two compartments are connected by two ducts, A and B, each being \SI{10}{\meter} long. Duct~A is initialized with species~1 and has a flow from left to right and duct~B is initialized with species~2 and has a flow from right to left. The total mass in the FDS domain and in both compartments is expected to remain the same. The mass of species~1 in the left compartment is expected to decrease from \SI{0.5}{\kilogram} to \SI{0.25}{\kilogram} and in the right compartment it is expected to increase from \SI{0}{\kilogram} to \SI{0.25}{\kilogram}. The spatially mirrored behavior is expected of species~2. Fig.~\ref{fig_HVAC_mass_transport_conservation_1a} shows mass in the left compartment, right compartment and in the whole FDS domain. Fig.~\ref{fig_HVAC_mass_transport_conservation_1b} presents the species~1 and 2 masses in the left and right compartments.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1a}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Total mass in the FDS domain and total mass in the left and right compartments.}
-\label{fig_HVAC_mass_transport_conservation_1}
+\label{fig_HVAC_mass_transport_conservation_1a}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
+\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1b}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Species~1 and 2 masses in the left and right compartments.}
-\label{fig_HVAC_mass_transport_conservation_2}
+\label{fig_HVAC_mass_transport_conservation_1b}
 \end{figure}
 
 \subsection{Mass conservation 2 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_2}}{HVAC\_mass\_transport\_conservation\_2})}
 \label{HVAC_mass_transport_conservation_2}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} shows the total masses of species~1 and 2.
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} with the exception of the length of duct~A is reduced to \SI{5}{\meter} and the length of duct~B is increased to \SI{20}{\meter}. This gives a total FDS and HVAC domain \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.44 \colon 0.56\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_2} shows the total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_2} test case.]{Total species~1 and 2 masses in the FDS domain. The initial equilibrium is prior to species~1 entering duct~B and species~2 entering duct~A.}
-\label{fig_HVAC_mass_transport_conservation_3}
+\label{fig_HVAC_mass_transport_conservation_2}
 \end{figure}
 
 \subsection{Mass conservation 3 (\texorpdfstring{\textct{HVAC\_mass\_transport\_conservation\_3}}{HVAC\_mass\_transport\_conservation\_3})}
 \label{HVAC_mass_transport_conservation_3}
-The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_4} presents the ideal and FDS total masses of species~1 and 2.
+The case setup is identical to that of Section~\ref{HVAC_mass_transport_conservation_1} except that both ducts~A and B have a length of \SI{12.5}{\meter} and are initialized with species~2. This gives a total domain (FDS and HVAC) \(\text{species}\ 1 \colon \text{species}\ 2\) mass ratio of \(0.4 \colon 0.6\). We expect that the species~1 and 2 masses within the FDS domain will come to equilibrium at this ratio. Fig.~\ref{fig_HVAC_mass_transport_conservation_3} presents the ideal and FDS total masses of species~1 and 2.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_4}
-\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the CFD domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
-\label{fig_HVAC_mass_transport_conservation_4}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the FDS domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
+\label{fig_HVAC_mass_transport_conservation_3}
 \end{figure}
 
 \subsection{Transient transport through branching ducts (\texorpdfstring{\textct{HVAC\_mass\_transport\_branch}}{HVAC\_mass\_transport\_branch})}

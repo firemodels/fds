@@ -39,22 +39,24 @@ u_tau = sqrt(tau_w/rho);
 d_nu = (mu/rho)/u_tau;
 yp_exact = y/d_nu;
 
+plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 plot(yp_exact,yp_exact,'ro'); hold on
 plot(yp_exact,yp,'b--')
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
 
 xlabel('{\it y}^+ specified','Interpreter',Font_Interpreter,'Fontname',Font_Name),
 ylabel('{\it y}^+ predicted','Interpreter',Font_Interpreter,'Fontname',Font_Name),
 leg = legend('exact','FDS');
 set(leg,'Location','SouthEast')
 set(leg,'Interpreter',Font_Interpreter)
-set(leg,'Fontname',Font_Name)
+set(leg,'FontName',Font_Name)
+set(leg,'FontSize',Key_Font_Size)
 
 % add git version if file is available
 
@@ -63,7 +65,8 @@ addverstr(gca,git_file,'linear')
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/yplus')
 

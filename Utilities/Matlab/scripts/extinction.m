@@ -28,14 +28,14 @@ volume = 0.001;         % volume [m^3]
 R = 8.3145;             % gas constnat [J/mol K]
 
 seed = 0.05:0.1:.95;
-for ii = 1:10    
+for ii = 1:10
     for jj = 1:10
         fuel_seed(jj+10*(ii-1)) = seed(ii);
     end
 end
 
 seed2 = 300:175:2035;
-for ii = 1:10    
+for ii = 1:10
     for jj = 1:10
         temp_seed(jj+10*(ii-1)) = seed2(jj);
     end
@@ -56,7 +56,7 @@ nu = [0; -1; -2; 1; 2]; % stoichiometric coefficients
 y_MW = [28.0134; 16.042460; 31.9988; 44.0095; 18.01528]; % [g/mol]
 y_hf = [0.0; -74873; 0.0; -393522; -241826]; % [J/mol]
 pres_0 = 1.013253421185575e+05; % initial presure [Pa]
-    
+
 %-----------------------
 % Determine max change in species
 %-----------------------
@@ -92,7 +92,7 @@ for jj = 1:num_samp
         d_phi(jj,i) = nu(i)*y_MW(i)/(abs(nu(ILR))*y_MW(ILR))*phi(jj,ILR);
     end
     phi_new(jj,:) = phi(jj,:) + d_phi(jj,:);
-    
+
     %-----------------------
     % Determine Extinction
     %-----------------------
@@ -104,16 +104,16 @@ for jj = 1:num_samp
         coeff_ref(:,2) = [-0.703029;108.4773;-42.52157;5.862788;0.678565;-76.84376;-74.87310];
         coeff_ref(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0];
         coeff_ref(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];
-        coeff_ref(:,5) = [30.09200;6.832514;6.793435;-2.534480;0.082139;-250.8810;-241.8264];   
-        
+        coeff_ref(:,5) = [30.09200;6.832514;6.793435;-2.534480;0.082139;-250.8810;-241.8264];
+
         %initial temperature coeffs
         %nitrogen cp coeffs [J/mol K]
         if T0(jj) <=500
-            coeff0(:,1) = [28.98641;1.853978;-9.647459;16.63537;0.000117;-8.671914;0.0]; 
+            coeff0(:,1) = [28.98641;1.853978;-9.647459;16.63537;0.000117;-8.671914;0.0];
         elseif 500 < T0(jj) <= 2000
-            coeff0(:,1) = [19.50583;19.88705;-8.598535;1.369784;0.527601;-4.935202;0.0]; 
-        else 
-            coeff0(:,1) = [35.51872;1.128728;-0.196103;0.014662;-4.553760;-18.97091;0.0]; 
+            coeff0(:,1) = [19.50583;19.88705;-8.598535;1.369784;0.527601;-4.935202;0.0];
+        else
+            coeff0(:,1) = [35.51872;1.128728;-0.196103;0.014662;-4.553760;-18.97091;0.0];
         end
         %methane cp coeffs [J/mol K]
         if T0(jj) <= 1300
@@ -123,33 +123,33 @@ for jj = 1:num_samp
         end
         %oxygen cp coeffs [J/mol K]
         if T0(jj) <=700
-            coeff0(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0]; 
+            coeff0(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0];
         elseif 700 < T0(jj) <= 2000
-            coeff0(:,3) = [30.03235;8.772972;-3.988133;0.788313;-0.741599;-11.32468;0.0]; 
-        else 
-            coeff0(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0]; 
+            coeff0(:,3) = [30.03235;8.772972;-3.988133;0.788313;-0.741599;-11.32468;0.0];
+        else
+            coeff0(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0];
         end
         %carbon dooxide cp coeffs [J/mol K]
         if T0(jj) <= 1200
-            coeff0(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];    
-        else    
+            coeff0(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];
+        else
             coeff0(:,4) = [58.16639;2.720074;-0.492289;0.038844;-6.447293;-425.9186;-393.5224];
-        end    
-        %water vapor cp coeffs [J/mol K] 
+        end
+        %water vapor cp coeffs [J/mol K]
         if T0(jj) <= 1700
             coeff0(:,5) = [30.09200;6.832514;6.793435;-2.534480;0.082139;-250.8810;-241.8264];
         else
             coeff0(:,5) = [41.96246;8.622053;-1.499780;0.098199;-11.15764;-272.1797;-241.8264];
         end
-        
+
         %critical temperature coeffs
         %nitrogen cp coeffs [J/mol K]
         if T_crit <=500
-            coeff(:,1) = [28.98641;1.853978;-9.647459;16.63537;0.000117;-8.671914;0.0]; 
+            coeff(:,1) = [28.98641;1.853978;-9.647459;16.63537;0.000117;-8.671914;0.0];
         elseif 500 < T_crit <= 2000
-            coeff(:,1) = [19.50583;19.88705;-8.598535;1.369784;0.527601;-4.935202;0.0]; 
-        else 
-            coeff(:,1) = [35.51872;1.128728;-0.196103;0.014662;-4.553760;-18.97091;0.0]; 
+            coeff(:,1) = [19.50583;19.88705;-8.598535;1.369784;0.527601;-4.935202;0.0];
+        else
+            coeff(:,1) = [35.51872;1.128728;-0.196103;0.014662;-4.553760;-18.97091;0.0];
         end
         %methane cp coeffs [J/mol K]
         if T_crit <= 1300
@@ -159,19 +159,19 @@ for jj = 1:num_samp
         end
         %oxygen cp coeffs [J/mol K]
         if T_crit <=700
-            coeff(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0]; 
+            coeff(:,3) = [31.32234;-20.23531;57.86644;-36.50624;-0.007374;-8.903471;0.0];
         elseif 700 < T_crit <= 2000
-            coeff(:,3) = [30.03235;8.772972;-3.988133;0.788313;-0.741599;-11.32468;0.0]; 
-        else 
-            coeff(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0]; 
+            coeff(:,3) = [30.03235;8.772972;-3.988133;0.788313;-0.741599;-11.32468;0.0];
+        else
+            coeff(:,3) = [20.91111;10.72071;-2.020498;0.146449;9.245722;5.337651;0.0];
         end
         %carbon dooxide cp coeffs [J/mol K]
         if T_crit <= 1200
-            coeff(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];    
-        else    
+            coeff(:,4) = [24.99735;55.18696;-33.69137;7.948387;-0.136638;-403.6075;-393.5224];
+        else
             coeff(:,4) = [58.16639;2.720074;-0.492289;0.038844;-6.447293;-425.9186;-393.5224];
-        end    
-        %water vapor cp coeffs [J/mol K] 
+        end
+        %water vapor cp coeffs [J/mol K]
         if T_crit <= 1700
             coeff(:,5) = [30.09200;6.832514;6.793435;-2.534480;0.082139;-250.8810;-241.8264];
         else
@@ -191,12 +191,12 @@ for jj = 1:num_samp
             Q(jj) = Q(jj) - y_hf(i)*d_phi(jj,i)/y_MW(i);
             h0 = h0 +phi(jj,i).*del_h_init(i)/y_MW(i);
             h = h + phi(jj,i).*del_h(i)/y_MW(i);
-        end           
-    
+        end
+
     if h0 + Q(jj)  > h
         ignite(jj,:) = [T0(jj);phi(jj,3)];
     else
-        extinct_o2(jj,:) = [T0(jj);phi(jj,3)];  
+        extinct_o2(jj,:) = [T0(jj);phi(jj,3)];
     end
 end
 
@@ -239,37 +239,30 @@ simple_temp = [273.15 1600];
 %-----------------------
 % Plotting
 %-----------------------
-figure(1)
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
+
 h=plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',0.5,'MarkerSize',4);
 set(h([1]),'LineWidth',1)
 set(h([2 4]),'MarkerSize',7)
 axis([273.15 1900 0 0.23])
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
-set(gca,'Position',[Scat_Plot_X,Scat_Plot_Y,Scat_Plot_Width,Scat_Plot_Height])
+set(gca,'FontSize',Scat_Label_Font_Size)
 xlabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Mass Fraction Oxygen','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast')
+lh=legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast');
+set(lh,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add Git if file is available
 
-svn_file = 'extinction_git.txt';
-addverstr(gca,svn_file,'linear')
-
-% if exist(svn_file,'file')
-%     SVN = importdata(svn_file);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+git_file = 'extinction_git.txt';
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');

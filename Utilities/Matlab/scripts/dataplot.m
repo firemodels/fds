@@ -56,7 +56,7 @@
 
 function [saved_data,drange] = dataplot(varargin)
 
-if nargin<4||nargin>5; 
+if nargin<4||nargin>5;
     display('Error in argument list')
 end
 if nargin>=4
@@ -68,13 +68,6 @@ end
 
 % Read in global plot options
 plot_style
-
-set(gcf,'DefaultLineLineWidth',Line_Width)
-WPos = get(gcf,'Position');
-set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
-set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Read configuration file
 A = importdata(Dataplot_Inputs_File);
@@ -109,7 +102,7 @@ for i=2:n_plots
     if i>n_plots; break; end
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
-   
+
     otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
 
     if otest
@@ -121,15 +114,15 @@ for i=2:n_plots
        drange = [drange i];
     end
 end
-   
+
 % Process the "d" or "o" lines one by one
 for i=2:n_plots
-    
+
     if i>length(A); break; end
 
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
-    
+
     % Check for shortname specification instead of numeric drange
     if strcmp(dstring,'null')
         itest = ismember(i,drange);
@@ -140,13 +133,13 @@ for i=2:n_plots
             drange(drange_index) = i;
         end
     end
-    
+
     % Check to see if d line has been activated in configuration file
     dtest = strcmp(parameters(strcmp(headers,'switch_id')),'d');
 
     % Check to see if o line has been activated in configuration file
     otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
-    
+
     % Check to see if f line has been activated in configuration file
     ftest = strcmp(parameters(strcmp(headers,'switch_id')),'f'); % used for multiple lines on same plot
 
@@ -166,9 +159,11 @@ for i=2:n_plots
             K_save = K;
             d2_Key_save = d2_Key;
         end
-        
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
         define_drow_variables
-        
+
         % Save for scatter plots
         Q1                      = parsepipe(Quantity);
         Save_Quantity(i,1:length(Q1))        = Q1;
@@ -180,7 +175,7 @@ for i=2:n_plots
         Save_Dep_Title(i)       = Stat_Dep_Title;
         Save_Error_Tolerance(i) = Error_Tolerance;
         Save_Metric_Type(i)     = {Metric};
-                
+
         % Plot the experimental data or analytical solution (d1)
         if ~exist(d1_Filename,'file')
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
@@ -280,7 +275,7 @@ for i=2:n_plots
                 '); check syntax of analytical/expected/experimental (d1) columns. Skipping case.'])
             continue
         end
-        
+
         % Plot the FDS or model data (d2)
         if ~exist(d2_Filename,'file')
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
@@ -298,7 +293,7 @@ for i=2:n_plots
                 if strcmp(char(style(j)),'none')
                     continue
                 end
-                
+
                 % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
                 Save_Predicted_Quantity(i,j) = S2(j);
@@ -410,7 +405,7 @@ for i=2:n_plots
                 '); check syntax of FDS/model results (d2) columns. Skipping case.'])
             continue
         end
-        
+
         % Wrap entire plot/save routine in try loop
         % Skips case upon any Matlab error
         try
@@ -442,7 +437,7 @@ for i=2:n_plots
 
             set(gca,'FontName',Font_Name)
             set(gca,'FontSize',Label_Font_Size)
-            
+
             % Inserts title, skips if 'f' switch (avoids overplotting)
             if ~ftest
                 if strcmp(Flip_Axis,'no')
@@ -468,16 +463,16 @@ for i=2:n_plots
                     legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key_save),parsepipe(d2_Key)],'Location',Key_Position);
                     d2_Key = [d2_Key_save,'|',d2_Key];
                 end
-                % % The latest version of Matlab (R2015b) apparently get this correct, but I will
-                % % leave this commented code for a bit until we are sure this is working on blaze.
-                % if strcmp(Key_Position,'EastOutside')
-                %    pos = get(legend_handle,'position');
-                %    set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
-                % end
-                % if strcmp(Key_Position,'SouthEastOutside')
-                %    pos = get(legend_handle,'position');
-                %    set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
-                % end
+                if strcmp(Key_Position,'EastOutside')
+                   set(legend_handle,'Units',Paper_Units)
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                end
+                if strcmp(Key_Position,'SouthEastOutside')
+                   set(legend_handle,'Units',Paper_Units)
+                   pos = get(legend_handle,'position');
+                   set(legend_handle,'position',[Paper_Width pos(2:4)])
+                end
                 set(legend_handle,'Interpreter',Font_Interpreter);
                 set(legend_handle,'Fontsize',Key_Font_Size);
                 set(legend_handle,'Box','on');
@@ -506,17 +501,17 @@ for i=2:n_plots
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
             set(gcf,'Visible',Figure_Visibility);
-            set(gcf,'PaperUnits',Paper_Units);
+            set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
+            set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
             display(['Printing plot ',num2str(i),'...'])
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
                 '); check syntax of plot/save settings. Skipping case.'])
             continue
-        end    
-        
+        end
+
     end
     clear S1 S2 style H M X Y P parameters
 end
