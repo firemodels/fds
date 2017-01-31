@@ -11439,18 +11439,18 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ALLOCATE(DV%K_PATH(MAXCELLS))
          ALLOCATE(DV%D_PATH(MAXCELLS))
          DV%D_PATH    = 0._EB
-         DV%I_PATH = INT(GINV(DV%X1-M%XS,1,NM)*M%RDXI)   + 1
-         DV%J_PATH = INT(GINV(DV%Y1-M%YS,2,NM)*M%RDETA)  + 1
-         DV%K_PATH = INT(GINV(DV%Z1-M%ZS,3,NM)*M%RDZETA) + 1
-         DV%N_PATH    = 1
+         DV%I_PATH = MIN(M%IBAR , INT(GINV(DV%X1-M%XS,1,NM)*M%RDXI)   + 1)
+         DV%J_PATH = MIN(M%JBAR , INT(GINV(DV%Y1-M%YS,2,NM)*M%RDETA)  + 1)
+         DV%K_PATH = MIN(M%KBAR , INT(GINV(DV%Z1-M%ZS,3,NM)*M%RDZETA) + 1)
+         DV%N_PATH = 1
          NN = 1
          DO NNN=1,10000
             XX = XX + DX
-            I = INT(GINV(XX-M%XS,1,NM)*M%RDXI)   + 1
+            I = MIN(M%IBAR , INT(GINV(XX-M%XS,1,NM)*M%RDXI)   + 1)
             YY = YY + DY
-            J = INT(GINV(YY-M%YS,2,NM)*M%RDETA)  + 1
+            J = MIN(M%JBAR , INT(GINV(YY-M%YS,2,NM)*M%RDETA)  + 1)
             ZZ = ZZ + DZ
-            K = INT(GINV(ZZ-M%ZS,3,NM)*M%RDZETA) + 1
+            K = MIN(M%KBAR , INT(GINV(ZZ-M%ZS,3,NM)*M%RDZETA) + 1)
             IF (I==DV%I_PATH(NN) .AND. J==DV%J_PATH(NN) .AND. K==DV%K_PATH(NN)) THEN
                DV%D_PATH(NN) = DV%D_PATH(NN) + SCANDISTANCE
             ELSE
@@ -11462,9 +11462,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                YY1 = DY
                ZZ1 = DZ
                IF (PROCESS(DV%MESH)==MYID) THEN
-                  IF (I/=DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1))
-                  IF (J/=DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1))
-                  IF (K/=DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1))
+                  IF (I<DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1)-1)
+                  IF (I>DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1))
+                  IF (J<DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1)-1)
+                  IF (J>DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1))
+                  IF (K<DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1)-1)
+                  IF (K>DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1))
                ENDIF
                DV%D_PATH(NN)   = SCANDISTANCE - SQRT(XX1**2+YY1**2+ZZ1**2)
                DV%D_PATH(NN-1) = DV%D_PATH(NN-1) + SCANDISTANCE - DV%D_PATH(NN)
