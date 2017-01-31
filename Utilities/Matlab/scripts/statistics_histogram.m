@@ -38,21 +38,19 @@ if strcmp(Stats_Output, 'Validation')
             set(gca,'YLim',y_lim);
             xlabel('Interval Number','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
             ylabel('Number of Data Points','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-            set(gca,'Units','inches')
             set(gca,'FontName',Font_Name)
             set(gca,'FontSize',12)
             set(gca,'XTick',xout,'XTickLabel',{'1','2','3','4','5','6','7','8','9','10'})
-            set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
             text(0.03, 0.90,Scatter_Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
             text(0.03, 0.82,'Normality Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
             text(0.03, 0.74,['p-value = ',num2str(pval,'%4.2f')],'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter,'Units','normalized')
 
             PDF_Paper_Width = Paper_Width;
 
-            set(gcf,'Visible','on');
-            set(gcf,'PaperUnits','inches');
+            set(gcf,'Visible',Figure_Visibility);
+            set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
+            set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
             print(gcf,Image_File_Type,[Manuals_Dir,[Plot_Filename, '_Histogram']])
             hold off
             % Add histogram name to array for LaTeX output later

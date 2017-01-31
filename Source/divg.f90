@@ -96,6 +96,10 @@ SELECT CASE(PREDICTOR)
       ZZP => ZZ
 END SELECT
 
+! Save the largest value of the material and thermal diffusion coefficients for use in Von Neumann stability constraint
+
+IF (CHECK_VN) D_Z_MAX = 0._EB
+
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
 SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
@@ -111,7 +115,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ENDIF
    ENDIF
-   IF (CHECK_VN) D_Z_MAX = 0._EB
 
    DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
 
@@ -865,21 +868,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ENDIF
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX_H_S(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY_H_S(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ_H_S(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
-   END SELECT
-
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
       CASE DEFAULT
          IOR_SELECT: SELECT CASE(IOR)
@@ -909,16 +897,22 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                    ! FDS Tech Guide (B.13)
-         DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                  ! FDS Tech Guide (B.14)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) ! FDS Tech Guide (B.12)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+1)==0) DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)   ! FDS Tech Guide (B.13)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-1)==0) DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K) ! FDS Tech Guide (B.14)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I)                         ! FDS Tech Guide (B.12)
 
-         DU_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+2)==0) DU_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-2)==0) DU_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         DU_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+3)==0) DU_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-3)==0) DU_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
@@ -935,8 +929,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_ZZ=>NULL(),FY_ZZ=>NULL(),FZ_ZZ=>NULL()
 FX_ZZ=>WORK2
 FY_ZZ=>WORK3
 FZ_ZZ=>WORK4
-
 RHO_Z_P=>WORK6
+
 U_DOT_DEL_RHO_Z=>WORK7
 U_DOT_DEL_RHO_Z=0._EB
 
@@ -1058,21 +1052,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ENDIF OFF_WALL_IF_2
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX_ZZ(II-1,JJ,KK) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY_ZZ(II,JJ-1,KK) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ_ZZ(II,JJ,KK-1) = RHO_Z_P(IIG,JJG,KKG)
-   END SELECT
-
    ! Correct U_DOT_DEL_RHO_Z at the boundary
 
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
@@ -1103,16 +1082,22 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
-         DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+1)==0) DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-1)==0) DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
 
-         DU_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+2)==0) DU_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-2)==0) DU_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         DU_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+3)==0) DU_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-3)==0) DU_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO

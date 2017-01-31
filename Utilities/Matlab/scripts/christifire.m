@@ -12,10 +12,6 @@ clear all
 expdir = '../../../exp/CHRISTIFIRE/';
 outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
 
-close all
-    
-plot_style
-
 skip_case = 0;
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
@@ -96,23 +92,26 @@ end
 [S_tga_N2_v2] = csvread([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'],2);
 [S_tga_air_v2] = csvread([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'],2);
 
-hf = figure(1);
-hX = plot(S_tga_N2(:,1),S_tga_N2(:,2),'k');
+figure
+
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(S_tga_N2(:,1),S_tga_N2(:,2),'k');
 hold on
 plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, ...
     S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100)
 plot(S_tga_air(:,1),S_tga_air(:,2),'k--')
 plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, '--', ...
     S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100, '--')
-plot_style
-set(gca,'Units',Plot_Units)
+
+xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp (N2)','FDS v1 (N2)', 'FDS v2 (N2)', 'Exp (air)','FDS v1 (air)', 'FDS v2 (air)');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('Mass (%)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp (N2)','FDS v1 (N2)', 'FDS v2 (N2)', 'Exp (air)','FDS v1 (air)', 'FDS v2 (air)')
 
 xlim([0,800])
 ylim([0,100])
@@ -130,9 +129,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_tga';
 print(gcf,'-dpdf',plotname);
 
@@ -146,21 +145,24 @@ close all
 [S_mcc_v1] = csvread([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'],2);
 [S_mcc_v2] = csvread([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'],2);
 
-hf = figure(2);
-hX = plot(S_mcc(:,1),S_mcc(:,2),'k');
+figure
+
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(S_mcc(:,1),S_mcc(:,2),'k');
 hold on
 plot(S_mcc_v1(:,2),S_mcc_v1(:,5), '--',  ...
     S_mcc_v2(:,2),S_mcc_v2(:,5), '--')
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('HRR (kW/kg)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+
+xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([100,600])
 ylim([0,250])
@@ -178,9 +180,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_mcc';
 print(gcf,'-dpdf',plotname);
 
@@ -194,21 +196,22 @@ close all
 [I_tga_N2_v1] = csvread([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'],2);
 [I_tga_N2_v2] = csvread([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'],2);
 
-hf = figure(3);
-hX = plot(I_tga_N2(:,1),I_tga_N2(:,2),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(I_tga_N2(:,1),I_tga_N2(:,2),'k');
 hold on
 plot(I_tga_N2_v1(:,2),I_tga_N2_v1(:,4)./max(I_tga_N2_v1(:,4)).*100, '--', ...
     I_tga_N2_v2(:,2),I_tga_N2_v2(:,4)./max(I_tga_N2_v2(:,4)).*100, '--')
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('Mass (%)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2')
+xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,800])
 ylim([0,100])
@@ -226,9 +229,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_tga';
 print(gcf,'-dpdf',plotname);
 
@@ -242,21 +245,22 @@ close all
 [I_mcc_v1] = csvread([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'],2);
 [I_mcc_v2] = csvread([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'],2);
 
-hf = figure(4);
-hX = plot(I_mcc(:,1),I_mcc(:,2),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(I_mcc(:,1),I_mcc(:,2),'k');
 hold on
 plot(I_mcc_v1(:,2),I_mcc_v1(:,5), '--',  ...
     I_mcc_v2(:,2),I_mcc_v2(:,5), '--')
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Temperature (\circC)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('HRR (kW/kg)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([100,600])
 ylim([0,250])
@@ -274,9 +278,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_mcc';
 print(gcf,'-dpdf',plotname);
 
@@ -297,21 +301,22 @@ close all
 [C_cone_75_v2] = csvread([outdir,'CHRISTIFIRE_C701_cone_75_v2_devc.csv'],2);
 
 %plot HRR 50 kW/m2
-hf = figure(5);
-hX = plot(C_cone_50(:,1),C_cone_50(:,2),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_50(:,1),C_cone_50(:,2),'k');
 hold on
 plot(C_cone_50_v1(:,1),C_cone_50_v1(:,3)./0.01, '--',  ...
     C_cone_50_v2(:,1),C_cone_50_v2(:,3)./0.01, '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,1500])
 ylim([0,350])
@@ -329,9 +334,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_50';
 print(gcf,'-dpdf',plotname);
 
@@ -339,21 +344,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot HRR 25 kW/m2
-hf = figure(6);
-hX = plot(C_cone_25(:,1),C_cone_25(:,2),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_25(:,1),C_cone_25(:,2),'k');
 hold on
 plot(C_cone_25_v1(:,1),C_cone_25_v1(:,3)./0.01, '--', ...
     C_cone_25_v2(:,1),C_cone_25_v2(:,3)./0.01, '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2', 'Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2', 'Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,2500])
 ylim([0,250])
@@ -371,9 +377,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_25';
 print(gcf,'-dpdf',plotname);
 
@@ -381,21 +387,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot HRR 75 kW/m2
-hf = figure(7);
-hX = plot(C_cone_75(:,1),C_cone_75(:,2),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_75(:,1),C_cone_75(:,2),'k');
 hold on
 plot(C_cone_75_v1(:,1),C_cone_75_v1(:,3)./0.01, '--', ...
     C_cone_75_v2(:,1),C_cone_75_v2(:,3)./0.01, '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,1500])
 ylim([0,450])
@@ -413,9 +420,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_75';
 print(gcf,'-dpdf',plotname);
 
@@ -423,21 +430,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot MLR 50 kW/m2
-hf = figure(8);
-hX = plot(C_cone_50(:,1),C_cone_50(:,3),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_50(:,1),C_cone_50(:,3),'k');
 hold on
 plot(C_cone_50_v1(:,1),-gradient(C_cone_50_v1(:,2),C_cone_50_v1(:,1)), '--', ...
     C_cone_50_v2(:,1),-gradient(C_cone_50_v2(:,2),C_cone_50_v2(:,1)), '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,1500])
 ylim([0,0.016])
@@ -455,9 +463,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50';
 print(gcf,'-dpdf',plotname);
 
@@ -465,21 +473,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot MLR 25 kW/m2
-hf = figure(9);
-hX = plot(C_cone_25(:,1),C_cone_25(:,3),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_25(:,1),C_cone_25(:,3),'k');
 hold on
 plot(C_cone_25_v1(:,1),-gradient(C_cone_25_v1(:,2),C_cone_25_v1(:,1)), '--', ...
     C_cone_25_v2(:,1),-gradient(C_cone_25_v2(:,2),C_cone_25_v2(:,1)), '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,2500])
 ylim([0,0.015])
@@ -497,9 +506,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_25';
 print(gcf,'-dpdf',plotname);
 
@@ -507,21 +516,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot MLR 75 kW/m2
-hf = figure(10);
-hX = plot(C_cone_75(:,1),C_cone_75(:,3),'k');
+figure(10)
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_75(:,1),C_cone_75(:,3),'k');
 hold on
 plot(C_cone_75_v1(:,1),-gradient(C_cone_75_v1(:,2),C_cone_75_v1(:,1)), '--', ...
     C_cone_75_v2(:,1),-gradient(C_cone_75_v2(:,2),C_cone_75_v2(:,1)), '--'); %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,1500])
 ylim([0,0.03])
@@ -539,9 +549,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_75';
 print(gcf,'-dpdf',plotname);
 
@@ -549,20 +559,20 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot EHC (effective heat of combustion) 50 kW/m2
-hf = figure(11);
-hX = plot(C_cone_50(:,1),C_cone_50(:,4),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_50(:,1),C_cone_50(:,4),'k');
 hold on
 plot(C_cone_50_v1(:,1),C_cone_50_v1(:,3)./0.01./-gradient(C_cone_50_v1(:,2),C_cone_50_v1(:,1)), '--', ...
     C_cone_50_v2(:,1),C_cone_50_v2(:,3)./0.01./-gradient(C_cone_50_v2(:,2),C_cone_50_v2(:,1)), '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('EHC (kJ/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 legend('Exp','FDS v1', 'FDS v2','Location', 'NorthWest')
 
 xlim([0,1500])
@@ -581,9 +591,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50';
 print(gcf,'-dpdf',plotname);
 
@@ -591,21 +601,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot EHC 25 kW/m2
-hf = figure(12);
-hX = plot(C_cone_25(:,1),C_cone_25(:,4),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_25(:,1),C_cone_25(:,4),'k');
 hold on
 plot(C_cone_25_v1(:,1),C_cone_25_v1(:,3)./0.01./-gradient(C_cone_25_v1(:,2),C_cone_25_v1(:,1)), '--', ...
     C_cone_25_v2(:,1),C_cone_25_v2(:,3)./0.01./-gradient(C_cone_25_v2(:,2),C_cone_25_v2(:,1)), '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('EHC (kJ/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,2500])
 ylim([0,40000])
@@ -623,9 +634,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25';
 print(gcf,'-dpdf',plotname);
 
@@ -633,21 +644,22 @@ print(gcf,'-dpdf',plotname);
 close all
 
 %plot EHC 75 kW/m2
-hf = figure(13);
-hX = plot(C_cone_75(:,1),C_cone_75(:,4),'k');
+figure
+plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+plot(C_cone_75(:,1),C_cone_75(:,4),'k');
 hold on
 plot(C_cone_75_v1(:,1),C_cone_75_v1(:,3)./0.01./-gradient(C_cone_75_v1(:,2),C_cone_75_v1(:,1)), '--', ...
     C_cone_75_v2(:,1),C_cone_75_v2(:,3)./0.01./-gradient(C_cone_75_v2(:,2),C_cone_75_v2(:,1)), '--') %scaled with the area
 
-plot_style
-set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Time (s)','Interpreter','tex','FontSize',Label_Font_Size)
-ylabel('EHC (kJ/kg)','Interpreter','tex','FontSize',Label_Font_Size)
-legend('Exp','FDS v1', 'FDS v2','Location', 'East')
+xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('EHC (kJ/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 xlim([0,1500])
 ylim([0,40000])
@@ -665,9 +677,9 @@ addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75';
 print(gcf,'-dpdf',plotname);
 

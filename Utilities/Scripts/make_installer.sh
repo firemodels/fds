@@ -61,11 +61,15 @@ echo "*** fatal error: installer not specified"
 exit 0
 fi
 
+BASHRC2=.bashrc
+PLATFORM=linux
 LDLIBPATH=LD_LIBRARY_PATH
-if [ "$ostype" == "OSX" ]
-then
-LDLIBPATH=DYLD_LIBRARY_PATH
+if [ "$ostype" == "OSX" ]; then
+  LDLIBPATH=DYLD_LIBRARY_PATH
+  BASHRC2=.bash_profile
+  PLATFORM=osx
 fi
+OPENMPIFILE=openmpi_1.8.4_${PLATFORM}_64.tar.gz
 
 size2=64
 
@@ -180,6 +184,7 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHFDS=/tmp/bashrc_fds.\$\$
+BASHUNINSTALL=/tmp/uninstall_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -231,18 +236,18 @@ fi
 #--- get FDS root directory
 
 echo ""
-echo "Where would you like to install FDS?"
+echo "FDS install options"
 EOF
 
 if [ "$ostype" == "OSX" ]
 then
 cat << EOF >> $INSTALLER
-    echo "  Press 1 to install in /Applications/$INSTALLDIR"
+    echo "  Press 1 to install in /Applications/$INSTALLDIR [default]"
     echo "  Press 2 to install in \$HOME/$INSTALLDIR"
 EOF
   else
 cat << EOF >> $INSTALLER
-    echo "  Press 1 to install in \$HOME/$INSTALLDIR"
+    echo "  Press 1 to install in \$HOME/$INSTALLDIR [default]"
     echo "  Press 2 to install in /opt/$INSTALLDIR"
     echo "  Press 3 to install in /usr/local/bin/$INSTALLDIR"
 EOF
@@ -286,18 +291,84 @@ fi
 #--- specify MPI location
 
 cat << EOF >> $INSTALLER
-mpipath=
-mpipatheth=
-mpipathib=
-if [ -d /shared/openmpi_64 ] ; then
-   mpipatheth=/shared/openmpi_64
-   mpipath=\$MPIDIST_ETH
-   mpipath2=\\\$MPIDIST_ETH
-fi
-if [ -d /shared/openmpi_64ib ] ; then
-   mpipathib=/shared/openmpi_64ib
-   mpipath=\$MPIDIST_IB
-   mpipath2=\\\$MPIDIST_IB
+valid_answer=
+while true; do
+  OPTION=0
+  OPTION1=
+  OPTION2=
+  OPTION3=
+  OPTION4=
+  echo ""
+  echo "OpenMPI options"
+  OPTION=\$(echo \$OPTION + 1 | bc)
+  OPTION1=\$OPTION
+  echo "  Press \$OPTION1 to install OpenMPI manually [default]"
+  echo "     See \$FDS_root/bin/README.html for details"
+#  OPTION=\$(echo \$OPTION + 1 | bc)
+#  OPTION2=\$OPTION
+  #echo "  Press \$OPTION2 to use \$FDS_root/bin/openmpi_64 "
+  mpipath=
+  mpipatheth=
+  mpiused=
+  if [ -d /shared/openmpi_64 ] ; then
+     mpipath=\$MPIDIST_ETH
+     mpipatheth=/shared/openmpi_64
+     OPTION=\$(echo \$OPTION + 1 | bc)
+     OPTION3=\$OPTION
+     echo "  Press \$OPTION3 to use /shared/openmpi_64"
+  fi
+  mpipathib=
+  if [ -d /shared/openmpi_64ib ] ; then
+     mpipathib=/shared/openmpi_64ib
+     mpipath=\$MPIDIST_IB
+     OPTION=\$(echo \$OPTION + 1 | bc)
+     OPTION4=\$OPTION
+     echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
+  fi
+
+  if [ "\$OVERRIDE" == "y" ]
+  then
+    answer="1"
+  else
+    read answer
+  fi
+#  if [[ "\$answer" == "\$OPTION2" ]]; then
+#    eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+#    eval MPIDIST_FDSROOT=\$FDS_root/bin
+#    mpiused=\$FDS_root/bin/openmpi_64
+#  else
+    eval MPIDIST_FDS=
+#  fi
+   eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+  if [[ "\$answer" == "\$OPTION3" ]]; then
+     mpipath2=\\\$MPIDIST_ETH
+     mpiused=\$mpipatheth
+     valid_answer=1
+  fi
+  if [[ "\$answer" == "\$OPTION4" ]]; then
+     mpipath2=\\\$MPIDIST_IB
+     mpiused=\$mpipathib
+     valid_answer=1
+  fi
+  if [[ "\$answer" == "\$OPTION1" || "\$answer" == "" ]]; then
+     answer=\$OPTION1
+     valid_answer=1
+  fi
+  if [[ "\$valid_answer" == "" ]]; then
+    echo ""
+    echo "An invalid option was selected"
+  else
+    break;
+  fi
+done
+
+mpipathfds=
+if [ "\$MPIDIST_FDS" != "" ]; then
+   mpipathfds=\$MPIDIST_FDS
+   mpipath=\$MPIDIST_FDS
+   if [[ "\$answer" == "\$OPTION2" ]]; then
+     mpipath2=\\\$MPIDIST_FDS
+   fi
 fi
 
 #--- do we want to proceed
@@ -305,10 +376,10 @@ fi
 while true; do
    echo ""
    echo "Installation directory: \$FDS_root"
-   if [ "\$mpipath" == "" ] ; then
-     echo "         MPI directory: none"
+   if [ "\$mpiused" == "" ] ; then
+     echo "     OpenMPI directory: to be specified later" 
    else
-     echo "         MPI directory: \$mpipath"
+     echo "     OpenMPI directory: \$mpiused"
    fi
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
@@ -328,6 +399,7 @@ echo ""
 echo "Installation beginning"
  
 MKDIR \$FDS_root 1
+MKDIR \$FDS_root/Uninstall 1
 
 #--- copy installation files into the FDS_root directory
 
@@ -335,16 +407,98 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
+#if [ "\$MPIDIST_FDSROOT" != "" ]; then
+#  echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
+#  cd \$MPIDIST_FDSROOT
+#  tar xvf $OPENMPIFILE >& /dev/null
+#fi
 echo "Copy complete."
+
+#--- create uninstall file
+
+cat << BASH > \$BASHUNINSTALL
+#/bin/bash
+FDSDIR=\$FDS_root
+UNINSTALL=
+BASH
+if [ "$ostype" == "OSX" ] ; then
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bash_profile
+BASH
+else
+cat << BASH >> \$BASHUNINSTALL
+BASHRC=~/.bashrc
+BASH
+fi
+cat << BASH >> \$BASHUNINSTALL
+while true; do
+  read -p "Do you wish to remove \\\$FDSDIR, .bashrc_fds and FDS entries from \\\$BASHRC? (yes/no) " yn
+  case \\\$yn in
+      [Yy]* ) 
+        UNINSTALL=1
+        break;;
+      [Nn]* ) 
+        break;;
+      * ) 
+        echo "Please answer yes or no.";;
+  esac
+done
+if [[ "\\\$UNINSTALL" == "1" ]]; then
+  if [[ -d \\\$FDSDIR ]]; then
+    echo removing \\\$FDSDIR
+    rm -r \\\$FDSDIR
+  else
+    echo "***warning: The directory \\\$FDSDIR does not exist."
+  fi
+  if [[ -e \\\$BASHRC ]]; then
+    BAK=_\\\`date +%Y%m%d_%H%M%S\\\`
+    echo removing FDS entries from \\\$BASHRC
+    grep -v bashrc_fds \\\$BASHRC | grep -v "#FDS" | grep -v INTEL_SHARED_LIB | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > ~/.bashrc_new
+    mv \\\$BASHRC ~/.bashrc\\\$BAK
+    mv ~/.bashrc_new \\\$BASHRC
+  else
+    echo "***warning: the file \\\$BASHRC does not exist."
+  fi
+  if [ -e ~/.bashrc_fds ]; then
+    echo removing ~/.bashrc_fds
+    rm ~/.bashrc_fds
+  else
+    echo "***warning: the file ~/.bashrc_fds does not exist."
+  fi
+  echo "Uninstall of FDS and Smokeview complete."
+else
+  echo "Uninstall of FDS and Smokeview cancelled."
+fi
+BASH
+
+chmod +x \$BASHUNINSTALL
+mv \$BASHUNINSTALL \$FDS_root/Uninstall/uninstall_fds.sh
 
 #--- create BASH startup file
 
 cat << BASH > \$BASHFDS
 #/bin/bash
 
-# MPI distribution location
+# OpenMPI location
+ARG1=\\\$1
 
-export MPIDIST=\\\$1
+# Intel shared library location (default fds_install_dir/bin/INTELLIBS16)
+ARG2=\\\$2
+
+# FDS location
+
+export FDSBINDIR=\$FDS_root/bin
+
+# OpenMPI location
+
+export MPIDIST=\\\$ARG1
+
+# Intel shared library location
+
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS16
+if [ "\\\$ARG2" != "" ]; then
+  INTEL_SHARELIB=\\\$ARG2
+fi
 
 # unalias application names used by FDS
 
@@ -357,28 +511,39 @@ unalias smokeview6 >& /dev/null
 unalias smokezip6 >& /dev/null
 unalias smokediff6 >& /dev/null
 
-# FDS location
-
-FDSBINDIR=\`pwd\`/bin
-
 if [[ "\\\$MPIDIST" != "" && ! -d \\\$MPIDIST ]]; then
   echo "*** Warning: the MPI distribution, \\\$MPIDIST, does not exist"
+  echo "      check the 'source ./bashrc_fds' line in your $BASHRC2 startup file"
   MPIDIST=
 fi
+
+# FDS network type
 
 FDSNETWORK=
 if [[ "\\\$MPIDIST" == *ib ]] ; then
   FDSNETWORK=infiniband
 fi
-export MPIDIST FDSNETWORK
+export FDSNETWORK
 
-# Update $LDLIBPATH and PATH
+# Update $LDLIBPATH
 
-$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
-PATH=\\\$FDSBINDIR:\\\$PATH
+BASH
+if [ "$ostype" == "LINUX" ] ; then
+cat << BASH >> \$BASHFDS
+$LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$INTEL_SHARELIB:\\\$$LDLIBPATH
+BASH
+fi
+cat << BASH >> \$BASHFDS
 if [ "\\\$MPIDIST" != "" ]; then
   $LDLIBPATH=\\\$MPIDIST/lib:\\\$$LDLIBPATH
-  PATH=\\\$MPIDIST/bin:\\\$PATH
+fi
+
+# Update PATH
+
+if [ "\\\$MPIDIST" == "" ]; then
+  PATH=\\\$FDSBINDIR:\\\$PATH
+else
+  PATH=\\\$MPIDIST/bin:\\\$FDSBINDIR:\\\$PATH
 fi
 export $LDLIBPATH PATH
 
@@ -408,12 +573,13 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
-  echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
+  echo "export MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
-  echo "# --------------------------------------------" >> \$BASHSTARTUP
+  echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -425,10 +591,18 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
-  echo "#FDS environment -----------------------" >> \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
+  echo "#FDS -----------------------------------" >> \$BASHSTARTUP
+  echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
   echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
   echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
+if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
+  echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
+else
+  if [ "\\\$IFORT_COMPILER" != "" ]; then
+    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
+  fi
+fi
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
@@ -438,6 +612,8 @@ fi
 
 cat << EOF >> $INSTALLER
 
+echo ""
+echo "*** Log out and log back in so changes will take effect."
 echo ""
 echo "Installation complete."
 exit 0

@@ -27,3 +27,4 @@ Extinction Time,Measured Time (s),Predicted Time (s),10,1000,0.03 0.95,SouthEast
 Species Concentration,Measured Change in Volume Fraction (%),Predicted Change in Volume Fraction (%),1,100,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Species_Concentration
 Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),1,100,0.03 0.95,SouthEast,1,20,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Obscuration
 Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,SouthEast,1,8,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Convective_Heat_Flux
+Atmospheric Dispersion,Measured Concentration (%),Predicted Concentration (%),0.1,100,0.03 0.95,EastOutside,1.5,50,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Atmospheric_Dispersion

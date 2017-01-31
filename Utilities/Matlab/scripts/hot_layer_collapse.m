@@ -73,37 +73,33 @@ dz_360 = L/360; % but N=360 is used for verification (3^3*40)
 z_T = dz_40/2:dz_40:L-dz_40/2; % exact T location is the same as for the N=40 case
 z_W = dz_40/2+dz_360/2:dz_40:L-dz_40/2+dz_360/2; % capture exact staggered z location of W component of velocity
 
-for j=1:5
+f1=figure;
+a1=gca;
+set(f1,'Visible',Figure_Visibility);
+set(a1,'Units',Plot_Units)
+set(a1,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
+for j=1:5
     T = (M.data(J(j),T_range)+273.15)/T_0;
-    W = M.data(J(j),W_range)/v0;
-    figure(1)
     H(j)=plot(T,z_T,marker_style{j}); hold on
     plot(Theta(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{j})
-    figure(2)
-    H2(j)=plot(W,z_W,marker_style{j}); hold on
-    plot(V(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{j})
-
 end
-
-figure(1)
 
 xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
-legend(H,legend_entries,'location','southwest')
-legend boxoff
+lh=legend(H,legend_entries,'location','southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,Git_Filename,'linear')
+addverstr(a1,Git_Filename,'linear')
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'hot_layer_temp_1'])
+set(a1,'FontName',Font_Name)
+set(a1,'FontSize',Label_Font_Size)
+set(f1,'Units',Paper_Units);
+set(f1,'PaperSize',[Paper_Width Paper_Height]);
+set(f1,'Position',[0 0 Paper_Width Paper_Height]);
+print(f1,'-dpdf',[plotdir,'hot_layer_temp_1'])
 
 % compute temperature error at tau(5)
 
@@ -122,26 +118,36 @@ if Error>error_tolerance
     display(['Matlab Warning: hot_layer_360.fds Temp_1 Error = ',num2str(Error)])
 end
 
-figure(2)
+f2=figure;
+a2=gca;
+set(f2,'Visible',Figure_Visibility);
+set(a2,'Units',Plot_Units)
+set(a2,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+for j=1:5
+    W = M.data(J(j),W_range)/v0;
+    H2(j)=plot(W,z_W,marker_style{j}); hold on
+    plot(V(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{j})
+end
 
 xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-200 0 0 1.2])
-legend(H2,legend_entries,'location','southwest')
-legend boxoff
+lh=legend(H2,legend_entries,'location','southwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,Git_Filename,'linear')
+addverstr(a2,Git_Filename,'linear')
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'hot_layer_vel_1'])
+set(a2,'FontName',Font_Name)
+set(a2,'FontSize',Label_Font_Size)
+set(f2,'Visible',Figure_Visibility);
+set(f2,'Units',Paper_Units);
+set(f2,'PaperSize',[Paper_Width Paper_Height]);
+set(f2,'Position',[0 0 Paper_Width Paper_Height]);
+print(f2,'-dpdf',[plotdir,'hot_layer_vel_1'])
 
 % compute velocity error at tau(5)
 
@@ -162,42 +168,41 @@ end
 
 % second set of Howard's plots
 
+f3=figure(3);
+a3=gca;
+set(f3,'Visible',Figure_Visibility);
+set(a3,'Units',Plot_Units)
+set(a3,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
 legend_entries_2 = {'\tau = 2 \times 10^{-3}','\tau = 4 \times 10^{-3}','\tau = 6 \times 10^{-3}','\tau = 8 \times 10^{-3}','\tau = 10 \times 10^{-3}'};
 
 for j=6:10
     jj=j-5;
 
     T = (M.data(J(j),T_range)+273.15)/T_0;
-    W = M.data(J(j),W_range)/v0;
-    figure(3)
     H3(jj)=plot(T,z_T,marker_style{jj}); hold on
     plot(Theta(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{jj})
-    figure(4)
-    H4(jj)=plot(W,z_W,marker_style{jj}); hold on
-    plot(V(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{jj})
 
 end
-
-figure(3)
 
 xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
-legend(H3,legend_entries_2,'location','northeast')
-legend boxoff
+lh=legend(H3,legend_entries_2,'location','northeast');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,Git_Filename,'linear')
+addverstr(a3,Git_Filename,'linear')
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'hot_layer_temp_2'])
+set(a3,'FontName',Font_Name)
+set(a3,'FontSize',Label_Font_Size)
+set(f3,'Visible',Figure_Visibility);
+set(f3,'Units',Paper_Units);
+set(f3,'PaperSize',[Paper_Width Paper_Height]);
+set(f3,'Position',[0 0 Paper_Width Paper_Height]);
+print(f3,'-dpdf',[plotdir,'hot_layer_temp_2'])
 
 % compute temperature error at tau(10)
 
@@ -216,26 +221,39 @@ if Error>error_tolerance
     display(['Matlab Warning: hot_layer_360.fds Temp_2 Error = ',num2str(Error)])
 end
 
-figure(4)
+f4=figure(4);
+a4=gca;
+set(f4,'Visible',Figure_Visibility);
+set(a4,'Units',Plot_Units)
+set(a4,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+for j=6:10
+    jj=j-5;
+
+    W = M.data(J(j),W_range)/v0;
+    H4(jj)=plot(W,z_W,marker_style{jj}); hold on
+    plot(V(lambda,tau(j),T_h,T_0),Y(lambda,tau(j),T_h,T_0),exact_soln_style{jj})
+
+end
 
 xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
 ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-60 0 0 1.6])
-legend(H4,legend_entries_2,'location','northwest')
-legend boxoff
+lh=legend(H4,legend_entries_2,'location','northwest');
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% add SVN if file is available
+% add version string if file is available
 
 Git_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,Git_Filename,'linear')
+addverstr(a4,Git_Filename,'linear')
 
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'hot_layer_vel_2'])
+set(a4,'FontName',Font_Name)
+set(a4,'FontSize',Label_Font_Size)
+set(f4,'Visible',Figure_Visibility);
+set(f4,'Units',Paper_Units);
+set(f4,'PaperSize',[Paper_Width Paper_Height]);
+set(f4,'Position',[0 0 Paper_Width Paper_Height]);
+print(f4,'-dpdf',[plotdir,'hot_layer_vel_2'])
 
 % compute velocity error at tau(10)
 
@@ -253,9 +271,3 @@ Error = norm(W-V(lambda(I),tau(10),T_h,T_0))/max(abs(W))/length(W);
 if Error>error_tolerance
     display(['Matlab Warning: hot_layer_360.fds Vel_2 Error = ',num2str(Error)])
 end
-
-
-
-
-
-

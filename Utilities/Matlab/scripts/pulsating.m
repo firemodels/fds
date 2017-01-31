@@ -5,10 +5,7 @@
 close all
 clear all
 
-figure
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 data_dir = '../../Verification/Scalar_Analytical_Solution/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
@@ -126,6 +123,9 @@ rho_FL0_32 = section2_soln(rho_fds_FL0_32(1),x-L/64,y-L/64,B,w,t_FL0_32);      e
 rho_FL0_64 = section2_soln(rho_fds_FL0_64(1),x-L/128,y-L/128,B,w,t_FL0_64);    error_FL0_64 = norm(rho_fds_FL0_64-rho_FL0_64)/length(t_FL0_64);
 rho_FL0_128 = section2_soln(rho_fds_FL0_128(1),x-L/256,y-L/256,B,w,t_FL0_128); error_FL0_128 = norm(rho_fds_FL0_128-rho_FL0_128)/length(t_FL0_128);
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(5)=plot(t_FL2_128,rho_FL2_128,'k-','LineWidth',Line_Width); hold on
 H(1)=plot(t_FL2_16,rho_fds_FL2_16,'c--','LineWidth',Line_Width); hold on
@@ -137,7 +137,9 @@ xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fon
 ylabel('Density (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([0 12.5 0 2])
 legend_handle=legend(H,'FDS N=16','FDS N=32','FDS N=64','FDS N=128','Analytical Solution','Location','NorthEast');
-set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+set(legend_handle,'Interpreter',Font_Interpreter);
+set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'Box','on');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -147,17 +149,17 @@ Git_Filename = [data_dir,'pulsating_FL2_16_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'pulsating_time_series'])
 
 % convergence plot
 
 figure
-plot_style
 set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 h = 2*pi./[16 32 64 128];
 e_FL2 = [error_FL2_16 error_FL2_32 error_FL2_64 error_FL2_128];
@@ -174,7 +176,9 @@ xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpre
 ylabel('L2 Error (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-6 1e-1])
 legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','{\it O}({\it\deltax})','{\it O}({\it\deltax^2})','Location','NorthWest');
-set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+set(legend_handle,'Interpreter',Font_Interpreter);
+set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'Box','on');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -184,9 +188,10 @@ Git_Filename = [data_dir,'pulsating_FL2_16_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plot_dir,'pulsating_convergence'])
 
 

@@ -86,7 +86,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80) :: FN_UVW,FN_MMS,FN_SPEC
 LOGICAL :: L_READ_EFF
-INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END
+INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END, NN
 
 TNOW = SECOND()
 
@@ -132,53 +132,74 @@ ELSE
 
    IF (T>=PART_CLOCK(NM) .AND. PARTICLE_FILE) THEN
       CALL DUMP_PART(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_PART)
          PART_CLOCK(NM) = PART_CLOCK(NM) + DT_PART
-         IF (PART_CLOCK(NM)>=T) EXIT
+         IF (PART_CLOCK(NM)>=T) THEN
+            PART_CLOCK(NM) = MIN(PART_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=ISOF_CLOCK(NM)) THEN
       CALL DUMP_ISOF(T,DT,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_ISOF)
          ISOF_CLOCK(NM) = ISOF_CLOCK(NM) + DT_ISOF
-         IF (ISOF_CLOCK(NM)>=T) EXIT
+         IF (ISOF_CLOCK(NM)>=T) THEN
+            ISOF_CLOCK(NM) = MIN(ISOF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=SLCF_CLOCK(NM)) THEN
       CALL DUMP_SLCF(T,DT,NM,0)
       IF (SMOKE3D) CALL DUMP_SMOKE3D(T,DT,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_SLCF)
          SLCF_CLOCK(NM) = SLCF_CLOCK(NM) + DT_SLCF
-         IF (SLCF_CLOCK(NM)>=T) EXIT
+         IF (SLCF_CLOCK(NM)>=T) THEN
+            SLCF_CLOCK(NM) = MIN(SLCF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=SL3D_CLOCK(NM) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
       CALL DUMP_SLCF(T,DT,NM,2)
-      DO
+      DO NN=1,CEILING(DT/DT_SL3D)
          SL3D_CLOCK(NM) = SL3D_CLOCK(NM) + DT_SL3D
-         IF (SL3D_CLOCK(NM)>=T) EXIT
+         IF (SL3D_CLOCK(NM)>=T) THEN
+            SL3D_CLOCK(NM) = MIN(SL3D_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=BNDF_CLOCK(NM)) THEN
       CALL DUMP_BNDF(T,NM)
       IF (TERRAIN_CASE) CALL DUMP_BNDF_TO_SLCF(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_BNDF)
          BNDF_CLOCK(NM) = BNDF_CLOCK(NM) + DT_BNDF
-         IF (BNDF_CLOCK(NM)>=T) EXIT
+         IF (BNDF_CLOCK(NM)>=T) THEN
+            BNDF_CLOCK(NM) = MIN(BNDF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=PL3D_CLOCK(NM) .OR. STOP_STATUS==INSTABILITY_STOP) THEN
       CALL DUMP_SLCF(T,DT,NM,1)
-      DO
+      DO NN=1,CEILING(DT/DT_PL3D)
          PL3D_CLOCK(NM) = PL3D_CLOCK(NM) + DT_PL3D
-         IF (PL3D_CLOCK(NM)>=T) EXIT
+         IF (PL3D_CLOCK(NM)>=T) THEN
+            PL3D_CLOCK(NM) = MIN(PL3D_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=PROF_CLOCK(NM)) THEN
       CALL DUMP_PROF(T,NM)
-      DO
+      DO NN=1,CEILING(DT/DT_PROF)
          PROF_CLOCK(NM) = PROF_CLOCK(NM) + DT_PROF
-         IF (PROF_CLOCK(NM)>=T) EXIT
+         IF (PROF_CLOCK(NM)>=T) THEN
+            PROF_CLOCK(NM) = MIN(PROF_CLOCK(NM),T_END)
+            EXIT
+         ENDIF
       ENDDO
    ENDIF
    IF (T>=UVW_TIMER(MESHES(NM)%IUVW)) THEN
@@ -201,7 +222,7 @@ ELSE
          IF (T>=MMS_TIMER .AND. NM==1) THEN
             WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
             CALL DUMP_MMS(NM,FN_MMS,T)
-            MMS_TIMER=1.E10_EB
+            MMS_TIMER=HUGE_EB
          ENDIF
       CASE(9)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
@@ -210,7 +231,7 @@ ELSE
             MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
          ENDIF
          IF (T>=TURB_INIT_CLOCK) THEN
-            TURB_INIT_CLOCK=HUGE(1._EB) ! only write ini_salsa.dat file once
+            TURB_INIT_CLOCK=HUGE_EB ! only write ini_salsa.dat file once
             CALL SANDIA_OUT(NM)
          ENDIF
    END SELECT PERIODIC_TEST_SELECT
@@ -1801,8 +1822,15 @@ DO N=1,N_DEVC
    WRITE(LU_SMV,'(1X,A,1X,A,1X,A)') TRIM(DV%ID),'%',TRIM(DV%QUANTITY)
    STATE_INDEX = 0
    IF (DV%INITIAL_STATE) STATE_INDEX = 1
-   WRITE(LU_SMV,'(6F12.5,2I3,A,A)') DV%X,DV%Y,DV%Z,ORIENTATION_VECTOR(1,DV%ORIENTATION_INDEX),&
-         ORIENTATION_VECTOR(2,DV%ORIENTATION_INDEX),ORIENTATION_VECTOR(3,DV%ORIENTATION_INDEX),STATE_INDEX,0,' % ',TRIM(PY%ID)
+   IF (DV%X1>-900000.0) THEN
+      WRITE(LU_SMV,'(6F12.5,2I3,A,6F12.5,A,A)') DV%X,DV%Y,DV%Z,ORIENTATION_VECTOR(1,DV%ORIENTATION_INDEX),&
+            ORIENTATION_VECTOR(2,DV%ORIENTATION_INDEX),ORIENTATION_VECTOR(3,DV%ORIENTATION_INDEX),STATE_INDEX,0,&
+            ' # ',DV%X1,DV%Y1,DV%Z1,DV%X2,DV%Y2,DV%Z2,&
+            ' % ',TRIM(PY%ID)
+   ELSE
+      WRITE(LU_SMV,'(6F12.5,2I3,A,A)') DV%X,DV%Y,DV%Z,ORIENTATION_VECTOR(1,DV%ORIENTATION_INDEX),&
+            ORIENTATION_VECTOR(2,DV%ORIENTATION_INDEX),ORIENTATION_VECTOR(3,DV%ORIENTATION_INDEX),STATE_INDEX,0,' % ',TRIM(PY%ID)
+   ENDIF
 ENDDO
 
 ! Write out level set slice file name (placeholder)
@@ -2514,22 +2542,54 @@ DO N=1,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ', MU_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ', CP_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', CPBAR_Z(ITMP,N)*TMPA
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(ITMP,N)*500._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(ITMP,N)*1000._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(ITMP,N)*1500._EB
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient, ',ITMP,' K: ', D_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (SM%EVAPORATING) THEN
+      WRITE(LU_OUTPUT,'(A)') ' '
+      SS => SPECIES(SM%SINGLE_SPEC_INDEX)
+      ITMP = MIN(NINT(SS%TMP_MELT),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Enthalpy (J/kg)     Melt ',ITMP,' K: ', &
+         SS%C_P_L_BAR(ITMP)*SS%TMP_MELT
+      ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', &
+         SS%C_P_L_BAR(ITMP)*0.5_EB*(SS%TMP_V+SS%TMP_MELT)
+      ITMP = MIN(NINT(SS%TMP_V),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', &
+         SS%C_P_L_BAR(ITMP)*SS%TMP_V
+      WRITE(LU_OUTPUT,'(A)') ' '
+      SS => SPECIES(SM%SINGLE_SPEC_INDEX)
+      ITMP = MIN(NINT(SS%TMP_MELT),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Liq. Spec. Heat (J/kg/K) Melt ',ITMP,' K: ', SS%C_P_L(ITMP)
+      ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%C_P_L(ITMP)
+      ITMP = MIN(NINT(SS%TMP_V),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%C_P_L(ITMP)
+      WRITE(LU_OUTPUT,'(A)') ' '
+      ITMP = MIN(NINT(SS%TMP_MELT),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Heat of Vapor. (J/kg)    Melt ',ITMP,' K: ', SS%H_V(ITMP)
+      ITMP = MIN(NINT(0.5_EB*(SS%TMP_V+SS%TMP_MELT)),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                                 ',ITMP,' K: ', SS%H_V(ITMP)
+      ITMP = MIN(NINT(SS%TMP_V),5000)
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '                            Boil ',ITMP,' K: ', SS%H_V(ITMP)
+   ENDIF
 ENDDO
 
 ! Print out Stoichiometric parameters for reactions
@@ -4831,7 +4891,7 @@ SELECT CASE(IOR)
       IF (ABS(SUM)<=TWO_EPSILON_EB) THEN
          FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
       ELSE
-         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K)) + &
+         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K+1)) + &
                         A(I,J+1,K)*MAX(C(I,J+1,K),C(I+1,J+1,K)) + A(I,J+1,K+1)*MAX(C(I,J+1,K+1),C(I+1,J+1,K+1)) )/SUM
       ENDIF
    CASE(2)
@@ -5485,8 +5545,9 @@ IND_SELECT: SELECT CASE(IND)
    CASE(12)  ! H
       GAS_PHASE_OUTPUT_RES = H(II,JJ,KK)
    CASE(13)  ! MIXTURE FRACTION
-      GAS_PHASE_OUTPUT_RES = ZZ(II,JJ,KK,REACTION(1)%FUEL_SMIX_INDEX)+ZZ(II,JJ,KK,Z_INDEX)* &
-      SPECIES_MIXTURE(REACTION(1)%FUEL_SMIX_INDEX)%MW/(SPECIES_MIXTURE(Z_INDEX)%MW*REACTION(1)%NU(Z_INDEX))
+      ! requires FUEL + AIR --> PROD (SIMPLE_CHEMISTRY)
+      ! f = Z_FUEL + Z_PROD/(1+S), where S is the mass stoichiometric coefficient for AIR
+      GAS_PHASE_OUTPUT_RES = ZZ(II,JJ,KK,REACTION(1)%FUEL_SMIX_INDEX)+ZZ(II,JJ,KK,REACTION(1)%N_SMIX)/(1._EB+REACTION(1)%S)
    CASE(14)  ! DIVERGENCE
       GAS_PHASE_OUTPUT_RES = D(II,JJ,KK)
    CASE(15)  ! MIXING TIME
@@ -5577,7 +5638,7 @@ IND_SELECT: SELECT CASE(IND)
       CALL GET_MOLECULAR_WEIGHT(ZZ_GET,GAS_PHASE_OUTPUT_RES)
 
    CASE(36)  ! POTENTIAL TEMPERATURE
-      GAS_PHASE_OUTPUT_RES = GET_POTENTIAL_TEMPERATURE(TMP(II,JJ,KK),II,JJ,KK,NM)
+      GAS_PHASE_OUTPUT_RES = GET_POTENTIAL_TEMPERATURE(TMP(II,JJ,KK),ZC(KK))
 
    CASE(37)  ! DIFFUSIVITY
       IF (LES) THEN
@@ -6032,14 +6093,12 @@ IND_SELECT: SELECT CASE(IND)
    CASE(139) ! H PRIME
       GAS_PHASE_OUTPUT_RES = H_PRIME(II,JJ,KK)
 
-   CASE(140) ! F_X
+   CASE(140) ! FVX_B
       GAS_PHASE_OUTPUT_RES = FVX_B(II,JJ,KK)
-   CASE(141) ! F_Y
+   CASE(141) ! FVY_B
       GAS_PHASE_OUTPUT_RES = FVY_B(II,JJ,KK)
-   CASE(142) ! F_Z
+   CASE(142) ! FVZ_B
       GAS_PHASE_OUTPUT_RES = FVZ_B(II,JJ,KK)
-   CASE(143) ! BAROCLINIC LIMITER
-      GAS_PHASE_OUTPUT_RES = BLIM(II,JJ,KK)
 
    CASE(154:155) ! TRANSMISSION, PATH OBSCURATION
       EXT_COEF   = 0._EB
@@ -8114,7 +8173,7 @@ REAL(EB) :: TNOW
 TNOW = SECOND()
 
 IF (PARTICLE_FILE) THEN
-   INQUIRE(UNIT=LU_MASS,OPENED=OPN)
+   INQUIRE(UNIT=LU_PART(NM),OPENED=OPN)
    IF (OPN) FLUSH(LU_PART(NM))
 ENDIF
 

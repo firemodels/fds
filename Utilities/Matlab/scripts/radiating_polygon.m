@@ -1,5 +1,5 @@
 % McGrattan
-% 2-16-15 
+% 2-16-15
 % radiating_polygon.m
 
 close all
@@ -23,7 +23,7 @@ M = importdata([datadir,'radiating_polygon_square_20_line.csv'],',',2); z_20 = 1
 M = importdata([datadir,'radiating_polygon_square_40_line.csv'],',',2); z_40 = 1-M.data(:,1); flux_40 = M.data(:,2);
 M = importdata([datadir,'radiating_polygon_square_80_line.csv'],',',2); z_80 = 1-M.data(:,1); flux_80 = M.data(:,2);
 
-% analytical solution (Siegel and Howell, 2nd ed., appendix
+% analytical solution (Siegel and Howell, 2nd ed., appendix)
 
 n=4;
 pi=4.*atan(1);
@@ -36,6 +36,9 @@ for j=1:1000
 end
 
 plot_style
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 Marker_Size=1;
 
 H(1)=plot(z,flux,'k-'); hold on
@@ -64,9 +67,9 @@ addverstr(gca,Git_Filename,'linear')
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiating_polygon_square'])
 
 end % skip_case_if

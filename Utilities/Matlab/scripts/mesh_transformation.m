@@ -69,6 +69,10 @@ Title_Font_Size=20;
 
 XMinorTick = 0.1:0.1:1.4;
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
+
 plot(cx,x,'k-','LineWidth',2); hold on
 for i=1:length(XMinorTick)
     % piece-wise linear function
@@ -89,18 +93,18 @@ ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'piece_wise_linear_trnx'])
 
 figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 plot(cy,y,'k-','LineWidth',2); hold on
 for i=1:length(XMinorTick)
@@ -116,15 +120,13 @@ ylabel('\itx','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font
 
 set(gca,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
 % print to pdf
 
 set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'polynomial_trnx'])
 
 

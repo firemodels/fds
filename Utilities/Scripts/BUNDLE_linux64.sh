@@ -12,10 +12,12 @@ export FDSEDITION=$4
 export FDSVERSION=$5
 export SMVVERSION=$6
 export MAJOR=$7
+export COMPFROM=$8
+export MISCFROM=$9
 
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
-export INTELLIB=~/FIRE-LOCAL/LIBS/LINUX/LIB64
-export DESTLIB=LIB64
+export MISCTO=LIB64
+export COMPTO=INTELLIBS16
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh

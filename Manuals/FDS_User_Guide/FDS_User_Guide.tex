@@ -420,7 +420,7 @@ This guide describes how to obtain FDS and Smokeview and how to use FDS. A separ
 Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page:
 
 \begin{center}
-\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}}
+\href{https://pages.nist.gov/fds-smv/}{{\ct https://pages.nist.gov/fds-smv/}}
 \end{center}
 
 \noindent
@@ -709,7 +709,16 @@ Get in the habit of checking the version number of your executable, periodically
 An FDS calculation may end before the specified time limit. Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
 \item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the right type of information is being provided for each parameter, like whether one real number is expected, or several integers, or whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure zeros are zeros and O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a Windows machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
-\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are mesh cells that have an aspect ratio larger than 2 to 1, high speed flow through a small opening, a sudden change in the heat release rate, or any number of sudden changes to the flow field. There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
+\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are:
+    \begin{itemize}
+    \item mesh cells that have an aspect ratio larger than 2 to 1
+    \item high speed flow through a small opening
+    \item a sudden change in the heat release rate
+    \item the removal or creation of an obstruction, like the opening or closing of a door
+    \item a high (>100 g/mol) molecular weight fuel molecule that is not in the FDS database, Table~\ref{tab:gasspecies}. In such cases, reduce the molecular weight but maintain the atom ratios.
+    \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Section~\ref{info:PRES} for details.
+    \end{itemize}
+    There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
 \item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky. In fact, for a typical 32~bit Windows PC with 4~GB RAM, only 2~GB will be available to FDS, based on user feedback. If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the calculation into multiple meshes and use the MPI version of FDS. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
 \item[{\bf File Writing Errors}:] Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
@@ -844,7 +853,7 @@ Validation Suite} removed for clarity.
 ...
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 ...
-&DEVC XYZ=6.04,0.28,3.65, QUANTITY='OXYGEN', ID='EO2_FDS' /
+&DEVC XYZ=6.04,0.28,3.65, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', ID='EO2_FDS' /
 ...
 &TAIL / End of file.
 \end{lstlisting}
@@ -1152,8 +1161,7 @@ Experiment with different mesh configurations using relatively coarse mesh cells
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
 \label{info:TRNX}
 
-By default the mesh cells that fill the computational domain are uniform in size.
-However, it is possible to specify that the cells be non-uniform in one or two
+By default the mesh cells that fill the computational domain are uniform in size. However, it is possible to specify that the cells be non-uniform in one or two
 \begin{figure}[ht]
 \begin{minipage}[t]{3.1in}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/piece_wise_linear_trnx}
@@ -1169,65 +1177,24 @@ However, it is possible to specify that the cells be non-uniform in one or two
 \label{fig:grid1}
 \end{minipage}
 \end{figure}
-of the three coordinate directions.
-For a given coordinate direction, $x$, $y$ or $z$, a function can be
-prescribed that transforms the uniformly-spaced mesh to a
-non-uniformly spaced mesh. {\bf Be careful with mesh transformations!}  If you shrink cells in one
-region you must stretch cells somewhere else. When one
-or two coordinate directions are transformed, the aspect ratio of the
-mesh cells in the 3D mesh will vary. To be on the safe side, transformations
-that alter the aspect ratio of cells beyond 2 or 3 should be avoided.
-Keep in mind that the large eddy simulation technique is based on the
-assumption that the numerical mesh should be fine enough to allow the formation
-of eddies that are responsible for the mixing. In general, eddy formation
-is limited by the largest dimension of a mesh cell, thus shrinking the
-mesh resolution in one or two directions may not necessarily lead to a better
-simulation if the third dimension is large. Transformations, in general, reduce the efficiency of the computation,
-with two coordinate transformations impairing efficiency more
-than a transformation in one coordinate direction. Experiment with different meshing
-strategies to see how much of a penalty you will pay.
+of the three coordinate directions. For a given coordinate direction, $x$, $y$ or $z$, a function can be prescribed that transforms the uniformly-spaced mesh to a non-uniformly spaced mesh. {\bf Be careful with mesh transformations!}  If you shrink cells in one region you must stretch cells somewhere else. When one or two coordinate directions are transformed, the aspect ratio of the mesh cells in the 3D mesh will vary. To be on the safe side, transformations that alter the aspect ratio of cells beyond 2 or 3 should be avoided. Keep in mind that the large eddy simulation technique is based on the assumption that the numerical mesh should be fine enough to allow the formation of eddies that are responsible for the mixing. In general, eddy formation is limited by the largest dimension of a mesh cell, thus shrinking the mesh resolution in one or two directions may not necessarily lead to a better simulation if the third dimension is large. Transformations, in general, reduce the efficiency of the computation, with two coordinate transformations impairing efficiency more than a transformation in one coordinate direction. Experiment with different meshing strategies to see how much of a penalty you will pay.
 
 Here is an example of how to do a mesh transformation. Suppose your mesh is defined
 \begin{lstlisting}
 &MESH IJK=15,10,20, XB=0.0,1.5,1.2,2.2,3.2,5.2 /
 \end{lstlisting}
-and you want to alter the uniform spacing in the $x$ direction.
-First, refer to the figures above.
-You need to define a function $x = f(\xi)$ that maps the uniformly-spaced
-{\em Computational Coordinate} ({\ct CC}) $0 \le \xi \le 1.5$
-to the {\em Physical Coordinate} ({\ct PC}) $0 \le x \le 1.5$.
-The function has three mandatory constraints: it must be monotonic (always increasing),
-it must map $\xi=0$ to $x=0$, and it must map $\xi=1.5$ to $x=1.5$.
-The default transformation function is $f(\xi) = \xi$ for a uniform mesh, but you need not do
-anything in this case.
+and you want to alter the uniform spacing in the $x$ direction. First, refer to the figures above. You need to define a function $x = f(\xi)$ that maps the uniformly-spaced {\em Computational Coordinate} ({\ct CC}) $0 \le \xi \le 1.5$ to the {\em Physical Coordinate} ({\ct PC}) $0 \le x \le 1.5$. The function has three mandatory constraints: it must be monotonic (always increasing), it must map $\xi=0$ to $x=0$, and it must map $\xi=1.5$ to $x=1.5$. The default transformation function is $f(\xi) = \xi$ for a uniform mesh, but you need not do anything in this case.
 
-Two types of transformation functions are allowed. The first, and
-simplest, is a piecewise-linear function.
-Figure~\ref{fig:grid2} gives an example of a piecewise-linear transformation.
-The graph indicates how 15 uniformly spaced mesh cells
-along the horizontal axis are transformed into 15 non-uniformly spaced cells along the vertical axis.
-In this case, the function is made up of straight line segments
-connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the following lines in the input file:
+Two types of transformation functions are allowed. The first, and simplest, is a piecewise-linear function. Figure~\ref{fig:grid2} gives an example of a piecewise-linear transformation. The graph indicates how 15 uniformly spaced mesh cells along the horizontal axis are transformed into 15 non-uniformly spaced cells along the vertical axis. In this case, the function is made up of straight line segments connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the following lines in the input file:
 \begin{lstlisting}
 &TRNX CC=0.30, PC=0.50, MESH_NUMBER=2 /
 &TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
 \end{lstlisting}
-The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located
-on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on
-the vertical axis.  The slopes of the
-line segments in the plot indicate whether the mesh is being stretched (slopes greater
-than 1) or shrunk (slopes less than 1). The tricky part about this
-process is that you usually have a desired shrinking/stretching strategy
-for the Physical Coordinate on the vertical axis, and must work backwards
-to determine what the corresponding points should be for the Computational
-Coordinate on the horizontal axis. Note that the above transformation is
-applied to the second mesh in a multiple mesh job.
+The integer {\ct MESH\_NUMBER} indicates which mesh to apply the transformation. If you want the transformation to be applied to all meshes, set {\ct MESH\_NUMBER} to 0. The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on the vertical axis.  The slopes of the line segments in the plot indicate whether the mesh is being stretched (slopes greater than 1) or shrunk (slopes less than 1). The tricky part about this process is that you usually have a desired shrinking/stretching strategy for the Physical Coordinate on the vertical axis, and must work backwards to determine what the corresponding points should be for the Computational Coordinate on the horizontal axis. Note that the above transformation is applied to the second mesh in a multiple mesh job.
 
-The second type of transformation is
-a polynomial function whose constraints are of the form
+The second type of transformation is a polynomial function whose constraints are of the form
 \[ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   \]
-Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which
-the parameters are specified (assuming that this is the third mesh):
+Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which the parameters are specified (assuming that this is the third mesh):
 \begin{lstlisting}
 &TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
 &TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
@@ -1236,17 +1203,9 @@ which correspond to the constraints
 $f(0.75)=0.75$ and $\frac{\d f}{\d \xi}(0.75) = 0.5$, or, in words, the
 function maps 0.75 into 0.75 and the slope of the function at
 $\xi=0.75$ is 0.5~.
-The transform function must also pass through the points (0,0) and (1.5,1.5), meaning that
-FDS must compute the coefficients for the
-cubic polynomial $f(\xi) = c_0 + c_1 \, \xi + c_2 \, \xi^2 + c_3 \, \xi^3$.
-More constraints on the function lead to higher order polynomial functions, so be careful about too many constraints which could lead
-to non-monotonic functions.
-The monotonicity of the function is checked by the
-program and an error message is produced if it is not monotonic.
+The transform function must also pass through the points (0,0) and (1.5,1.5), meaning that FDS must compute the coefficients for the cubic polynomial $f(\xi) = c_0 + c_1 \, \xi + c_2 \, \xi^2 + c_3 \, \xi^3$. More constraints on the function lead to higher order polynomial functions, so be careful about too many constraints which could lead to non-monotonic functions. The monotonicity of the function is checked by the program and an error message is produced if it is not monotonic.
 
-
-Do not specify either linear transformation points or {\ct IDERIV=0} points at coordinate values corresponding to
-the mesh boundaries. This is done automatically by FDS.
+Do not specify either linear transformation points or {\ct IDERIV=0} points at coordinate values corresponding to the mesh boundaries. This is done automatically by FDS.
 
 
 \subsection{Mesh Resolution}
@@ -1311,47 +1270,6 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \end{description}
 
-\subsection{Special Topic: Specifying a Wind Field}
-\label{info:mean_forcing}
-
-If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both {\ct U0} and {\ct V0} to 7.07~m/s. Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
-
-The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct MISC}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters on the {\ct MISC} line:
-\begin{lstlisting}
-&MISC ..., MEAN_FORCING(1:2)=.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=0.1,
-      RAMP_U0_T='t-ramp', ... , RAMP_V0_Z='z-ramp' /
-\end{lstlisting}
-Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
-
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
-\begin{lstlisting}
-&RAMP ID='t-ramp', T=  0., F=0. /
-&RAMP ID='t-ramp', T=100., F=1. /
-
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
-\end{lstlisting}
-The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m).
-
-For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
-
-\subsubsection{Example Wind Simulation}
-\label{wind_example}
-
-An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The background wind velocity components vary with height, $z$, and time, $t$:
-\be
-   u(z,t) = 10 \, \cos \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}  \quad ; \quad v(z,t) = 10 \, \sin \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}
-\ee
-The 360$^\circ$ turn of the wind in 50~s is not realistic, but this case is intended to test the ramp functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} was set to 1~s. This time scale falls into the denominator of the forcing term that ``nudges'' the simulated wind to follow the specified time history. If it is too small, the ``nudging'' term becomes too dominant. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
-
-\begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified wind profile.}
-\label{wind_example_fig}
-\end{figure}
-
 
 
 \subsection{Special Topic: Specifying a Force Field}
@@ -1367,6 +1285,7 @@ This feature is typically used together with periodic boundaries.  To specify a 
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
 \end{lstlisting}
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on {\ct MISC}.
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
@@ -2070,7 +1989,9 @@ Also, you must explicitly tell FDS that two non-connected meshes need to share i
 &MESH ID='mesh2', IJK=..., XB=... /
 &MESH ID='mesh3', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh1' /
 \end{lstlisting}
-Note that {\ct PERIODIC\_MESH\_IDS} is an array of three character strings because it is possible to have three periodic boundaries, one in each coordinate direction. For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
+Note that {\ct PERIODIC\_MESH\_IDS} is an array of three character strings because it is possible to have three periodic boundaries, one in each coordinate direction. In cases where the number of meshes is not large, say a few dozen, you can set {\ct PROCESS\_ALL\_MESHES} to {\ct .TRUE.} on the {\ct MISC} line, in which case FDS will store the geometry of all meshes for all MPI processes, and in which case you need not specify {\ct PERIODIC\_MESH\_IDS}.
+
+For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
@@ -3611,7 +3532,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -4080,44 +4001,6 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 \end{figure}
 
 
-\subsection{Special Topic: Stack Effect}
-\label{info:stackeffect}
-\label{stack_effect}
-
-Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
-
-For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s. The leakage paths can be defined in terms of HVAC components. Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
-
-\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
-
-The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only. Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
-The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver. Each opening is given an area of 0.01~m$^2$ and a loss coefficient of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
-
-The initial density stratification inside and outside the building can be calculated using the relation:
-\be
-  \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\R T_0} z \right)
-\ee
-where $\R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
-
-Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
-\be
-  \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty}
-\ee
-where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points. This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building. Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
-\be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \R \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
-\ee
-where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
-
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho} }
-   \end{tabular*}
-   \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
-   \label{fig_stack_effect}
-\end{figure}
 
 
 
@@ -4196,9 +4079,7 @@ where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m
 \end{figure}
 
 
-\subsubsection{Atmospheric}
 
-{\ct PROFILE='ATMOSPHERIC'} produces a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 \subsubsection{Boundary Layer (Circular Vent)}
 
@@ -4219,24 +4100,117 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 \end{center}
 \end{figure}
 
-\section{Atmospheric Stratification}
+
+\chapter{Atmospheric Effects}
+
+The chapter describes techniques for modeling the atmospheric boundary layer.
+
+\section{Temperature Stratification}
 \label{info:stratification}
 
-Another useful parameter for outdoor simulations is the temperature
-lapse rate of the atmosphere. Typically, in the first few hundred meters
-of the atmosphere, the temperature decreases several degrees Celsius
-per kilometer. This small temperature change is important when considering the rise
-of smoke since the temperature of the smoke decreases rapidly as it
-rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the
-{\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the
-temperature {\em decreases} with height.
-This need only be set for outdoor calculations where the height of the
-domain is tens or hundreds of meters.
-The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
+Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
-By default, FDS assumes that the density and pressure decrease with height, regardless of the
-application or domain size. For most simulations, this effect is negligible, but it can be
-turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
+Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct MISC} line if you want a non-linear change in temperature with height. For example,
+\begin{lstlisting}
+&MISC ..., RAMP_TMP0_Z='T profile', TMPA=34.5, ...  /
+
+&RAMP ID='T profile', Z= 0.001 , F= 1.0258  /
+&RAMP ID='T profile', Z= 0.500 , F= 1.0019  /
+&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
+&RAMP ID='T profile', Z= 1.900 , F= 0.9986  /
+&RAMP ID='T profile', Z= 3.000 , F= 0.9977  /
+&RAMP ID='T profile', Z= 4.000 , F= 0.9972  /
+\end{lstlisting}
+The value of {\ct F} is the ratio of the temperature in degrees K to {\ct TMPA}.
+
+By default, FDS assumes that the density and pressure decrease with height, regardless of the application or domain size. For most simulations, this effect is negligible, but it can be turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
+
+\subsection{Stack Effect}
+\label{info:stackeffect}
+\label{stack_effect}
+
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature profile that is entered on the {\ct MISC} line.
+
+For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s. The leakage paths can be defined in terms of HVAC components. Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
+
+\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
+
+The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only. Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
+The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver. Each opening is given an area of 0.01~m$^2$ and a loss coefficient of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+
+The initial density stratification inside and outside the building can be calculated using the relation:
+\be
+  \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\R T_0} z \right)
+\ee
+where $\R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
+
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
+\be
+  \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty}
+\ee
+where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points. This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building. Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
+\be
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \R \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
+\ee
+where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho} }
+   \end{tabular*}
+   \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
+   \label{fig_stack_effect}
+\end{figure}
+
+
+\section{Wind}
+\label{info:mean_forcing}
+
+If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both {\ct U0} and {\ct V0} to 7.07~m/s. Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
+
+The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct MISC}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters on the {\ct MISC} line:
+\begin{lstlisting}
+&MISC ..., MEAN_FORCING(1:2)=.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=0.1,
+      RAMP_U0_T='t-ramp', ... , RAMP_V0_Z='z-ramp' /
+\end{lstlisting}
+Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+\begin{lstlisting}
+&RAMP ID='t-ramp', T=  0., F=0. /
+&RAMP ID='t-ramp', T=100., F=1. /
+
+&RAMP ID='z-ramp', Z=  0., F=1.0 /
+&RAMP ID='z-ramp', Z=200., F=1.5 /
+&RAMP ID='z-ramp', Z=500., F=1.8 /
+\end{lstlisting}
+The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m).
+
+For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
+
+\subsubsection{Example Wind Simulation}
+\label{wind_example}
+
+An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The background wind velocity components vary with height, $z$, and time, $t$:
+\be
+   u(z,t) = 10 \, \cos \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}  \quad ; \quad v(z,t) = 10 \, \sin \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}
+\ee
+The 360$^\circ$ turn of the wind in 50~s is not realistic, but this case is intended to test the ramp functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} was set to 1~s. This time scale falls into the denominator of the forcing term that ``nudges'' the simulated wind to follow the specified time history. If it is too small, the ``nudging'' term becomes too dominant. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
+\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified wind profile.}
+\label{wind_example_fig}
+\end{figure}
+
+\subsection{Specifying a ``Wall of Wind''}
+
+An alternative to {\ct MEAN\_FORCING} is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the {\ct MEAN\_FORCING} technique described above is preferable because it handles the lateral boundaries of the computational domain in a more natural way.
+
+To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 
 \chapter{User-Specified Functions}
@@ -4499,7 +4473,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &          &  {\ct CARBON DIOXIDE}      \\ \hline
 {\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y       &  {\ct CARBON MONOXIDE}     \\ \hline
 {\ct CHLORINE}           & 70.906     & Cl$_2$           & 4.217    & 316.0    &  Y       &                            \\ \hline
-{\ct DODECANE}           & 170.33484  & C$_12$H$_26$     & 4.701    & 205.78   &  Y       &  {\ct N-HEPTANE}           \\ \hline
+{\ct DODECANE}           & 170.33484  & C$_{12}$H$_{26}$     & 4.701    & 205.78   &  Y       &  {\ct N-HEPTANE}           \\ \hline
 {\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y       &  {\ct ETHANE}              \\ \hline
 {\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y       &  {\ct METHANOL}            \\ \hline
 {\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y       &  {\ct ETHYLENE}            \\ \hline
@@ -4517,7 +4491,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}            \\ \hline
 {\ct LJ AIR}             & 28.854760  &                  & 3.711    & 78.6     &          &                            \\ \hline
 {\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       &  {\ct METHANE}             \\ \hline
-{\ct METHANOL}           & 32.041860  & CH$_2$OH         & 3.626    & 481.8    &  Y       &  {\ct METHANOL}            \\ \hline
+{\ct METHANOL}           & 32.041860  & CH$_3$OH         & 3.626    & 481.8    &  Y       &  {\ct METHANOL}            \\ \hline
 {\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &  Y       &  {\ct N-HEPTANE}           \\ \hline
 {\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       &  {\ct N-HEPTANE}           \\ \hline
 {\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       &  {\ct N-HEPTANE}           \\ \hline
@@ -5404,14 +5378,25 @@ If multiple fuels are present, e.g., one fuel for cardboard and one fuel for pol
 
 \paragraph{Time variation of radiative fraction}
 
-Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line.
+Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line. The results of running the {\ct ramp\_chi\_r} test case containing the {\ct RAMP} given below is shown in Fig.~\ref{ramp_chi}.
 
 \begin{lstlisting}
-&REAC ..., RADIATIVE_FRACTION = 0.23, RAMP_CHI_R = 'chi_r'/
-&RAMP ID = 'chi_r', T =  0.0, F = 1.0/
-&RAMP ID = 'chi_r', T =  5.0, F = 1.0/
-&RAMP ID = 'chi_r', T = 60.0, F = 0.1/
+&REAC FUEL='METHANE', RADIATIVE_FRACTION=1.0, RAMP_CHI_R='CHI_R RAMP' /
+&RAMP ID='CHI_R RAMP', T= 0.0, F=0.238 /
+&RAMP ID='CHI_R RAMP', T= 2.0, F=0.238 /
+&RAMP ID='CHI_R RAMP', T= 4.0, F=0.182 /
+&RAMP ID='CHI_R RAMP', T= 6.0, F=0.158 /
+&RAMP ID='CHI_R RAMP', T= 8.0, F=0.140 /
+&RAMP ID='CHI_R RAMP', T= 10.0, F=0.140 /
 \end{lstlisting}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/ramp_chi_r}
+\caption[Results of the {\ct ramp\_chi\_r} test case]{Results of the {\ct  ramp\_chi\_r} test case.}
+\label{ramp_chi}
+\end{center}
+\end{figure}
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
@@ -6088,9 +6073,9 @@ A useful sample case to demonstrate various features of droplet motion on solid 
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{lcr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_3}
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_1} &
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_2} &
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_3}
 \end{tabular}
 \end{center}
 \caption[Example of water cascading over solid obstructions]{Smokeview rendering of the {\ct cascade} test case.}
@@ -6166,7 +6151,7 @@ The delivered density to the floor from a sprinkler depends upon where the sprin
 \section{Device Output}
 \label{info:out:DEVC}
 
-Each device has a {\ct QUANTITY} associated with it. The time history of each {\ct DEVC} quantity is output to a comma-delimited ASCII file called {\ct CHID\_devc.csv} (see Section~\ref{out:DEVC} for output file format). This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line. Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254.
+Each device has a {\ct QUANTITY} associated with it. The time history of each {\ct DEVC} quantity is output to a comma-delimited ASCII file called {\ct CHID\_devc.csv} (see Section~\ref{out:DEVC} for output file format). This file can be imported into most spreadsheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line. Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254.
 
 By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default, a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
 
@@ -6258,7 +6243,7 @@ Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note t
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/bucket_test_2}
 \caption[Results of the {\ct bucket\_test\_2} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_2} case.}
 \label{bucket_test_2_fig}
 \end{figure}
@@ -6501,7 +6486,7 @@ A cubical compartment, 2~m on a side has a three sampling location aspiration sy
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.in]{SCRIPT_FIGURES/aspiration_detector}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aspiration_detector}
 \end{center}
 \caption[Results of the {\ct aspiration\_detector} test case]{Output of {\ct aspiration\_detector} test case.}
 \label{aspiration_detector_fig}
@@ -7220,7 +7205,19 @@ You may output properties of a single solid particle using a {\ct DEVC} (device)
 &INIT ID='my particle', PART_ID='...', XB=..., N_PARTICLES=1 /
 &DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
-output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line. If the particle is split (by means of multiple {\ct ORIENTATION} vectors on the {\ct PART} line), you can specify which of the particle fragments you want using the parameter {\ct ORIENTATION\_NUMBER} on the {\ct DEVC} line.
+output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line.
+
+If the particle is split (by means of multiple {\ct ORIENTATION} vectors on the {\ct PART} line), you can specify which of the particle fragments you want using the parameter {\ct ORIENTATION\_NUMBER} on the {\ct DEVC} line.
+
+If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is introduced via this single {\ct INIT} line, then the {\ct INIT\_ID} for each takes the form {\ct '[ID]-00308'}, where {\ct ID} is that of the {\ct INIT} line, and 308 refers to the 308-th {\ct INIT} line generated by the multiplicative sequence. The {\ct INIT} lines are generated by looping over the $x$ indices, then $y$, then $z$. For example, the following input lines
+\begin{lstlisting}
+&INIT ID='P', PART_ID='CRIB1', XYZ=0.005,0.005,0.005 ,
+      N_PARTICLES=1, CELL_CENTERED=.TRUE., MULT_ID='array' /
+&MULT ID='array', DX=0.01, DY=0.01, DZ=0.01, I_LOWER=0, I_UPPER=9,
+      J_LOWER=0, J_UPPER=9, K_LOWER=0, K_UPPER=3 /
+&DEVC ID='T307', INIT_ID='P-00307', QUANTITY='WALL TEMPERATURE' /
+\end{lstlisting}
+specify an array of 10 by 10 by 4 particles. We want to record the surface temperature of the 307-th particle. See Section~\ref{info:MULT} for details of how the {\ct MULT} line is interpreted.
 
 
 
@@ -7374,7 +7371,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 \subsection{Adiabatic Surface Temperature}
 \label{info:AST}
 
-FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the net heat flux (Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FSJ}:
+FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the net heat flux (Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
 \be
    \epsilon \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm gas} - T_{\hbox{\tiny AST}}) = 0
 \ee
@@ -8321,10 +8318,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m^2.s)} & B,D         \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
-{\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & B,D          \\ \hline
-{\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & B,D          \\ \hline
-{\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & B,D          \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section~\ref{info:material_components}            & 1/s            & B,D          \\ \hline
+{\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
+{\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
+{\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & D            \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
@@ -8952,14 +8949,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
-%{\ct AEROSOL\_AL2O3}                                     & Logical       &                                                       &               & {\ct .FALSE.}    \\ \hline
+%{\ct AEROSOL\_AL2O3}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                & $^\circ$C     &                   \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}      \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
-{\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
+{\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
+{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
+{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
@@ -8967,11 +8966,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CHECK\_REALIZABILITY}                      & Logical       & Strict check of ZZ>0 \& SUM(ZZ)=1                     &               & {\ct .FALSE.}     \\ \hline
 {\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
-{\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
-{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
-{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
+{\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
-{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                                       &               & 0.                \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
@@ -9011,11 +9009,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
+{\ct PROCESS\_ALL\_MESHES}                      & Logical       & Section~\ref{sec:periodic}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct PROJECTION}                                & Logical       & Formal projection                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
+{\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
+{\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
+{\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
+{\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}                     &               &                   \\ \hline
 {\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
 {\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
 {\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
@@ -9330,14 +9333,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
-{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$   & 100.      \\ \hline
+{\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &           \\ \hline
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
 {\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
-{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
-{\ct SPRAY\_PATTERN\_BETA}              & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 5          \\ \hline
-{\ct SPRAY\_PATTERN\_MU}                & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
+{\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.        \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.        \\ \hline
 {\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &           \\ \hline
@@ -9361,7 +9364,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
-{\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
+{\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         & $\mu$m            &                   \\ \hline
 {\ct INITIAL\_RADIATION\_ITERATIONS}& Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
@@ -9829,18 +9832,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \chapter{The FDS/Smokeview Repository}
 
 For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.'' All project documents are maintained using the online utility \href{https://github.com/}{{GitHub}}, a free service that supports software development for open source applications.  GitHub uses Git version control software. Under this system, a centralized repository containing all project files resides on a GitHub server.  Anyone can obtain a copy of the repository or retrieve a specific revision of the repository.  However, only the FDS and Smokeview developers can commit changes directly to the repository. Others must submit a ``pull request.'' Detailed instructions for checking out the FDS repository can be found at
-\href{https://github.com/firemodels/fds-smv}{{https://github.com/firemodels/fds-smv}}.
+\href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 
-The repository contains the following files:
-\begin{enumerate}
-\item FDS and Smokeview source code files
-\item FDS and Smokeview documentation
-\item Input files for software testing (Examples), verification testing, and validation testing
-\item Experimental data files used for validation testing
-\item Scripts and post-processing utilities used for software testing
-\item Web pages and Wiki Pages
-\end{enumerate}
-The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
+
+\vskip\baselineskip
+\begin{tabular}{ll}
+fds & FDS source code, verification and validation tests, wikis, and documentation \\
+smv & Smokeview source code, integration tests, and documentation \\
+exp & Experimental data repository for FDS validation \\
+out & FDS output results for validation \\
+bot & Firebot (continuous integration system) source \\
+fds-smv & Web page html source
+\end{tabular}
+\vskip\baselineskip
+
+\noindent The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
 
 
 
@@ -9965,7 +9972,7 @@ T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
                       .
 \end{lstlisting}
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
 \section{Control Output Data}
 \label{out:CTRL}
@@ -9978,7 +9985,7 @@ T(1) , -001   , 001    , ... , -001
             .
             .
 \end{lstlisting}
-where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
 \section{CPU Usage Data}
 \label{out:CPU}

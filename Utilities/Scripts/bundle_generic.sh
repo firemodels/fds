@@ -1,8 +1,31 @@
 #!/bin/bash
 
-# this script is called by bundle_platform_size.csh
-# where platform may be linux or osx and size may be 32 or 64
+# this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
+
 errlog=/tmp/errlog.$$
+
+# ---------------- MDHASH -----------------
+
+MD5HASH ()
+{
+local DIR=$1
+local FILE=$2
+
+local curdir=`pwd`
+cd $DIR
+
+if [ "`uname`" == "Darwin" ] ; then
+  hash=`cat $FILE | md5`
+  echo "$hash   $FILE"
+else
+  md5sum $FILE
+fi
+
+cd $curdir
+}
+
+
+# -------------------- SCP -------------------
 
 SCP ()
 {
@@ -16,9 +39,11 @@ SCP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
   else
-    echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
   fi
 }
+
+# -------------------- CP -------------------
 
 CP ()
 {
@@ -38,6 +63,31 @@ CP ()
   fi
 }
 
+# -------------------- UNTAR -------------------
+
+UNTAR ()
+{
+  FROMDIR=$1
+  FROMFILE=$2
+  TODIR=$3
+  TODIR2=$4
+  if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the compressed file $FROMFILE does not exist"
+  else
+    curdir=`pwd`
+    cd $TODIR
+    tar xvf $FROMDIR/$FROMFILE
+    cd $curdir
+  fi
+  if [ -e $TODIR/$TODIR2 ]; then
+    echo "$FROMFILE untar'd"
+  else
+    echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
+  fi
+}
+
+# -------------------- CP2 -------------------
+
 CP2 ()
 {
   FROMDIR=$1
@@ -56,6 +106,8 @@ CP2 ()
   fi
 }
 
+# -------------------- CPDIR -------------------
+
 CPDIR ()
 {
   FROMDIR=$1
@@ -63,6 +115,9 @@ CPDIR ()
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist"
   else
+    echo "*******************************"
+    echo copying directory from $FROMDIR to $TODIR
+    echo "*******************************"
     cp -r $FROMDIR $TODIR
   fi
   if [ -e $TODIR ]; then
@@ -72,6 +127,7 @@ CPDIR ()
   fi
 }
 
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 manifest=manifest$FDSOS.html
 OUT=$MAJOR$FDSOS
@@ -105,6 +161,8 @@ fdsdir=intel$FDSOS
 fds=fds_intel$FDSOS
 fdsout=fds$OUT
 
+openmpidir=~/FDS_Guides
+
 fdsmpidir=mpi_intel$FDSOS
 fdsmpi=fds_mpi_intel$FDSOS
 fdsmpiout=fds$MAJOR\_mpi$FDSOS
@@ -131,14 +189,14 @@ webpagesdir=$fds_smvroot/webpages
 for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
+fdsforbundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 forbundle=$fds_smvroot/smv/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
-fullmanifestdir=$uploaddir/$bundledir/bin
-fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
+fds_benchamrk_cases=$fds_smvroot/fds/Verification/FDS_Benchmark_Cases.sh
 smv_cases=$fds_smvroot/smv/Verification/scripts/SMV_Cases.sh
 wui_cases=$fds_smvroot/smv/Verification/scripts/WUI_Cases.sh
 copyfdscase=$fds_smvroot/fds/Utilities/Scripts/copyfdscase.sh
@@ -150,6 +208,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
+mkdir $bundledir/bin/MD5
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
@@ -157,95 +216,58 @@ mkdir $bundledir/bin/textures
 echo ""
 echo "--- copying programs ---"
 echo ""
-# background
-
-SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
 
 # smokeview
 
-SCP $smvhost $smvbindir $smokeview $bundledir/bin $smokeviewout
+SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
+SCP $smvhost $smvbindir                     $smokeview  $bundledir/bin $smokeviewout
+SCP $fdshost $smokediffroot/$smokediffdir   $smokediff  $bundledir/bin $smokediffout
+SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin $smokezipout
+SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin $dem2fdsout
+SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin $wind2fdsout
 
-# textures
+mdversion=_$SMVVERSION.md5
+MD5DIR=$bundledir/bin/MD5
+MD5HASH $bundledir/bin $backgroundout > $MD5DIR/$backgroundout$mdversion
+MD5HASH $bundledir/bin $smokeviewout  > $MD5DIR/$smokeviewout$mdversion
+MD5HASH $bundledir/bin $smokediffout  > $MD5DIR/$smokediffout$mdversion
+MD5HASH $bundledir/bin $smokezipout   > $MD5DIR/$smokezipout$mdversion
+MD5HASH $bundledir/bin $dem2fdsout    > $MD5DIR/$dem2fdsout$mdversion
+MD5HASH $bundledir/bin $wind2fdsout   > $MD5DIR/$wind2fdsout$mdversion
 
-CPDIR $texturedir $bundledir/bin/textures
-
-# smokediff
-
-SCP $fdshost $smokediffroot/$smokediffdir $smokediff $bundledir/bin $smokediffout
-
-# smokezip
-
-SCP $fdshost $smokeziproot/$smokezipdir $smokezip $bundledir/bin $smokezipout
-
-# dem2fds
-
-SCP $fdshost $dem2fdsroot/$dem2fdsdir $dem2fds $bundledir/bin $dem2fdsout
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
-
-# wind2fds
-
-SCP $fdshost $wind2fdsroot/$wind2fdsdir $wind2fds $bundledir/bin $wind2fdsout
+CPDIR $texturedir $bundledir/bin/textures
 
 # FDS 
 
-SCP $fdshost $fdsroot/$fdsmpidir $fdsmpi $bundledir/bin $fdsmpiout
-
+SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin $fdsmpiout
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
+
+mdversion=_$FDSVERSION.md5
+MD5HASH $bundledir/bin $fdsmpiout    > $MD5DIR/$fdsmpiout$mdversion
+MD5HASH $bundledir/bin $fds2asciiout > $MD5DIR/$fds2asciiout$mdversion
 
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_linux_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_linux_bundle.md5s
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
+   openmpifile=openmpi_1.8.4_osx_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_osx_bundle.md5s
 fi
-
-cat <<EOF > $fullmanifest
-<html>
-<head>
-<TITLE>FDS-SMV Bundle Manifest</TITLE>
-</HEAD>
-<BODY BGCOLOR="#FFFFFF" >
-<pre>
-EOF
-echo ""
-echo "--- Creating Manifest ---"
-echo ""
-echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
-date >> $fullmanifest
-echo  >> $fullmanifest
-echo Versions:>> $fullmanifest
-echo  >> $fullmanifest
-echo ------fds-------------------- >> $fullmanifest
-echo 0 | $bundledir/bin/$fdsmpiout >> $fullmanifest 2>&1 
-
-echo  >> $fullmanifest
-echo ------fds2ascii-------------------- >> $fullmanifest
-$bundledir/bin/$fds2asciiout -v >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokeview-------------------- >> $fullmanifest
-$bundledir/bin/$smokeviewout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokediff-------------------- >> $fullmanifest
-$bundledir/bin/$smokediffout -v  >> $fullmanifest
-
-echo  >> $fullmanifest
-echo ------smokezip-------------------- >> $fullmanifest
-$bundledir/bin/$smokezipout -v  >> $fullmanifest
-
-echo ------dem2fds-------------------- >> $fullmanifest
-$bundledir/bin/$dem2fdsout -v  >> $fullmanifest
 
 echo ""
 echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-  CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
+
+CP $for_bundle README.html $bundledir/bin README.html
 
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
@@ -253,10 +275,11 @@ CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
 
+CP $openmpidir $openmpifile $bundledir/bin $openmpifile
+
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
@@ -266,14 +289,26 @@ CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
-if [ ! "$INTELLIB" == "" ]; then
-if [ -d $INTELLIB ]; then
 
-echo ""
-echo "--- copying run time libraries ---"
-echo ""
-CPDIR $INTELLIB $bundledir/bin/$DESTLIB
+if [ ! "$COMPFROM" == "" ]; then
+  COMPLIBFROM=~/$COMPFROM
+  if [ -d $COMPLIBFROM ]; then
+
+    echo ""
+    echo "--- copying compiler run time libraries ---"
+    echo ""
+    CPDIR $COMPLIBFROM $bundledir/bin/$COMPTO
+  fi
 fi
+if [ ! "$MISCFROM" == "" ]; then
+  MISCLIBFROM=~/$MISCFROM
+  if [ -d $MISCLIBFROM ]; then
+
+    echo ""
+    echo "--- copying miscellaneous run time libraries ---"
+    echo ""
+    CPDIR $MISCLIBFROM $bundledir/bin/$MISCTO
+  fi
 fi
 
 echo ""
@@ -284,7 +319,7 @@ CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.
 CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-CP2 $for_bundle readme_examples.html $bundledir/Examples
+# CP2 $for_bundle readme_examples.html $bundledir/Examples
 
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
@@ -296,27 +331,13 @@ echo "--- copying example files ---"
 echo ""
 cd $FDSExamplesDirectory
 $fds_cases
+$fds_benchmark_cases
 cd $SMVExamplesDirectory
 $wui_cases
 $smv_cases
 rm -rf $OUTDIR/Immersed_Boundary_Method
 
-echo >> $fullmanifest
-echo ------file listing---------------------------------- >> $fullmanifest
-set curdir=`pwd`
-cd $uploaddir/$bundledir
-find . -print >> $fullmanifest
 cd $curdir
-
-cat <<EOF>>$fullmanifest
-</pre>
-</body>
-</html>
-EOF
-
-CP $fullmanifestdir $manifest $uploaddir $manifest
-
-cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo ""
 echo "--- building archive ---"
@@ -330,6 +351,8 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
+MD5HASH . $bundlebase.sh > $bundledir/bin/MD5/$bundlebase.sh.md5
+cat $bundledir/bin/MD5/*.md5 > $MD5SUMMARY
 
 if [ -e $errlog ]; then
   numerrs=`cat $errlog | wc -l `
@@ -342,4 +365,5 @@ if [ -e $errlog ]; then
     echo "----------------------------------------------------------------"
     echo ""
   fi
+  rm $errlog
 fi

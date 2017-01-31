@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Common_Run_All.sh
-# Kristopher Overholt
-# 12/4/2013
-
 # This is a common script that is sourced by all of the individual
 # Run_All.sh scripts for each validation case. To avoid code duplication,
 # this script contains options and functions that are global to all of
@@ -12,13 +8,18 @@
 
 CURDIR=`pwd`
 
+cd $SVNROOT/..
+REPO=`pwd`
+
 cd $SVNROOT/Utilities/Scripts/
 SCRIPTDIR=`pwd`
-export QFDS=$SCRIPTDIR/qfds.sh
 cd $CURDIR
 
 export BASEDIR=`pwd`
 export INDIR=Current_Results
+JOB_PREFIX=
+export STOPFDSMAXITER=
+DV=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -27,19 +28,22 @@ echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
 echo "-h - display this message"
+echo "-j job_prefix - specify job prefix"
+echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire60s, fire70s, vis"
 echo "-s - stop FDS runs"
+echo "-u - use development version of FDS"
 echo "-x - do not copy FDS input files"
 echo "-y - overwrite existing files"
 exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bho:q:sxy' OPTION
+while getopts 'bhIj:m:o:q:suxy' OPTION
 do
 case $OPTION in
   b)
@@ -47,6 +51,12 @@ case $OPTION in
    ;;
   h)
   usage;
+   ;;
+  j)
+   JOBPREFIX="-j $OPTARG"
+   ;;
+  m)
+   export STOPFDSMAXITER="$OPTARG"
    ;;
   o)
    INDIR="$OPTARG"
@@ -57,6 +67,9 @@ case $OPTION in
   s)
    export STOPFDS=1
    ;;
+  u)
+  DV="-u"
+   ;;
   x)
    export DONOTCOPY=1
    ;;   
@@ -66,9 +79,12 @@ case $OPTION in
 esac
 done
 
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV "
+
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
 fi
+DEBUG="$DEBUG $JOBPREFIX"
 
 ##############################################################
 
