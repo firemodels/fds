@@ -4,30 +4,26 @@
 
 errlog=/tmp/errlog.$$
 
-# -------------------- MD5HASH ----------------
+# ---------------- MDHASH -----------------
 
 MD5HASH ()
 {
-local PLATSIZE=$1
-local DIR=$2
-local FILE=$3
+local DIR=$1
+local FILE=$2
 
 local curdir=`pwd`
-
-md5hash=$fds_smvroot/fds/Utilities/Scripts/md5hash.sh
-
 cd $DIR
-hashfile=${FILE}.md5
-hash2file=MD5/${FILE}_${PLATSIZE}.md5
 
-$md5hash $FILE
-if [ -e $hashfile ]; then
-  if [ -d MD5 ]; then
-    mv $hashfile $hash2file
-  fi
+if [ "`uname`" == "Darwin" ] ; then
+  hash=`cat $FILE | md5`
+  echo "$hash   $FILE"
+else
+  md5sum $FILE
 fi
+
 cd $curdir
 }
+
 
 # -------------------- SCP -------------------
 
@@ -230,12 +226,14 @@ SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin $smokezip
 SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin $dem2fdsout
 SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin $wind2fdsout
 
-MD5HASH $SMVVERSION $bundledir/bin $backgroundout 
-MD5HASH $SMVVERSION $bundledir/bin $smokeviewout
-MD5HASH $SMVVERSION $bundledir/bin $smokediffout
-MD5HASH $SMVVERSION $bundledir/bin $smokezipout
-MD5HASH $SMVVERSION $bundledir/bin $dem2fdsout
-MD5HASH $SMVVERSION $bundledir/bin $wind2fdsout
+mdversion=_$SMVVERSION.md5
+MD5DIR=$bundledir/bin/MD5
+MD5HASH $bundledir/bin $backgroundout > $MD5DIR/$backgroundout$mdversion
+MD5HASH $bundledir/bin $smokeviewout  > $MD5DIR/$smokeviewout$mdversion
+MD5HASH $bundledir/bin $smokediffout  > $MD5DIR/$smokediffout$mdversion
+MD5HASH $bundledir/bin $smokezipout   > $MD5DIR/$smokezipout$mdversion
+MD5HASH $bundledir/bin $dem2fdsout    > $MD5DIR/$dem2fdsout$mdversion
+MD5HASH $bundledir/bin $wind2fdsout   > $MD5DIR/$wind2fdsout$mdversion
 
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
 CPDIR $texturedir $bundledir/bin/textures
@@ -245,18 +243,21 @@ CPDIR $texturedir $bundledir/bin/textures
 SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin $fdsmpiout
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
-MD5HASH $FDSVERSION $bundledir/bin $fdsmpiout
-MD5HASH $FDSVERSION $bundledir/bin $fds2asciiout
+mdversion=_$FDSVERSION.md5
+MD5HASH $bundledir/bin $fdsmpiout    > $MD5DIR/$fdsmpiout$mdversion
+MD5HASH $bundledir/bin $fds2asciiout > $MD5DIR/$fds2asciiout$mdversion
 
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
    openmpifile=openmpi_1.8.4_linux_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_linux_bundle.md5s
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
    openmpifile=openmpi_1.8.4_osx_64.tar.gz
+   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_osx_bundle.md5s
 fi
 
 echo ""
@@ -350,9 +351,8 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
-MD5HASH $FDSVERSION . $bundlebase.sh
-echo mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
-mv $bundlebase.sh.md5 $bundlebase/bin/MD5/.
+MD5HASH . $bundlebase.sh > $bundledir/bin/MD5/$bundlebase.sh.md5
+cat $bundledir/bin/MD5/*.md5 > $MD5SUMMARY
 
 if [ -e $errlog ]; then
   numerrs=`cat $errlog | wc -l `

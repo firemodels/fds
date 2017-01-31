@@ -779,7 +779,7 @@ IF (ANY(REACTION(:)%FAST_CHEMISTRY)) THEN
    END SELECT
 ENDIF
 
-! Process alternate reactin pathways signaled by ALT_REAC_ID
+! Process alternate reaction pathways signaled by ALT_REAC_ID
 DO I = 1,N_REACTIONS
    RN => REACTION(I)
    IF (RN%ALT_INDEX>0) THEN
