@@ -4565,7 +4565,22 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \label{water_evaporation_7_plot}
 \end{figure}
 
+\clearpage
 
+\subsection{Case 8}
+\label{water_evaporation_8}
+
+In this case, we compare FDS predictions against the evaporation model of Li and Chow \cite{LiChow:2008}. This case replicates Fig.~6 of the Li and Chow paper.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).  Results for droplet position are shown on the left in Fig.~\ref{water_evaporation_8_plots}.  Results for the droplet diameter are shown on the right.
+
+\begin{figure}[h!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_8_z} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_8_d}
+\end{tabular*}
+\caption[Sample case \textct{water\_evaporation\_8}]{Output of \textct{water\_evaporation} case 8.}
+\label{water_evaporation_8_plots}
+\end{figure}
 
 \clearpage
 
