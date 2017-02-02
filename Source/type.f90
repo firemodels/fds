@@ -429,10 +429,10 @@ END TYPE IBM_REGFACE_TYPE
 TYPE IBM_REGFACEZ_TYPE
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, RHO_D, VELD
-   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               ::   RHO_D_DZDN
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN
-   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               ::   RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
@@ -448,10 +448,10 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE, RHO_D, VELD
-   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN
-   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN
-   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_RCFACE_LST_TYPE
 
 TYPE IBM_EXIMFACE_TYPE
@@ -459,7 +459,7 @@ TYPE IBM_EXIMFACE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::       FLX
    REAL(EB) :: AREA,FN_H_S
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::H_RHO_D_DZDN,FN_ZZ
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::H_RHO_D_DZDN=0._EB,FN_ZZ=0._EB
 END TYPE IBM_EXIMFACE_TYPE
 
 ! Velocity regular faces connected to cut-cell interpolation type:
