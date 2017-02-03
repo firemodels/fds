@@ -3814,7 +3814,7 @@ The HVAC system being modeled may either have louvers that redirect the flow lea
 \end{lstlisting}
 The above input defines a vent lying in the $y$-$z$ plane facing in the $-x$ direction.  The flow vector indicates that the flow from this vent is in the $-x$ direction with a 45 degree up angle (the $x$ and $z$ components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
-\subsection{HVAC mass transport}
+\subsection{HVAC Mass Transport}
 \label{info:hvacmasstransport}
 
 If you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line this will call the HVAC mass transport subroutine. This subroutine accounts for mass storage in the duct network and transport time of species and energy. The current HVAC solver does not account for heat loss in the HVAC network.
