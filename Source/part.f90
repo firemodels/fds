@@ -3489,6 +3489,7 @@ SH_FAC_WALL            = 0.037_EB*SC**ONTH
 NU_FAC_WALL            = 0.037_EB*PR**ONTH
 
 ! Liquid properties (temporary place)
+
 MU_LIQUID              = 1040E-6_EB  ! N.s/m2
 K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
 
@@ -3508,6 +3509,7 @@ I_FUEL = 0
 IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
 
 ! Loop over all types of evaporative species
+
 SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ! Initialize quantities common to the evaporation index
@@ -3585,7 +3587,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP(II,JJ,KK) - TMP_DROP)
 
       CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_FILM,C_DROP)
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,C_DROP)
 
       P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
       DHOR = H_V*MW_DROP/R0
@@ -3653,6 +3655,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(II,JJ,KK))
       H_G = CP * TMP(II,JJ,KK) * M_GAS
       TMP_DROP = LP%ONE_D%TMP(1)
+      TMP_DROP_NEW = TMP_DROP
       R_DROP = LP%ONE_D%X(1)
       M_DROP = LPC%FTPR * R_DROP**3
       A_DROP = 4._EB*PI * R_DROP**2
@@ -3732,8 +3735,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          D_M_VAP = MIN(M_DROP_NEW,(H_L_NEW - M_DROP_NEW*TMP_DROP_NEW*C_DROP)/H_V)
          M_VAP = M_VAP + D_M_VAP
          M_DROP_NEW = M_DROP_NEW - D_M_VAP
+         IF (M_DROP_NEW <= TWO_EPSILON_EB) THEN
+            H_L_NEW = 0._EB
+         ELSE
+            H_L_NEW = M_DROP_NEW*TMP_DROP_NEW*C_DROP
+         ENDIF
       ENDIF
 
+      LP%M_DOT = M_VAP/DT
       H_L_NEW = H_L_NEW*LP%PWT
       M_VAP = M_VAP * LP%PWT
       M_VAPOR(II,JJ,KK) = M_VAPOR(II,JJ,KK) + M_VAP
@@ -3748,7 +3757,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       Q_CON_GAS = H_L_NEW - H_L - Q_D_1 + M_VAP * (H_V + H_L_OLD)
       D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*(H_S_B - H_S) - Q_CON_GAS)/H_G) / DT
       M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC/DT
-      LP%M_DOT = M_VAP/DT
 
       ! Add stability checks
 
