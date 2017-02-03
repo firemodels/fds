@@ -3489,6 +3489,7 @@ SH_FAC_WALL            = 0.037_EB*SC**ONTH
 NU_FAC_WALL            = 0.037_EB*PR**ONTH
 
 ! Liquid properties (temporary place)
+
 MU_LIQUID              = 1040E-6_EB  ! N.s/m2
 K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
 
@@ -3508,6 +3509,7 @@ I_FUEL = 0
 IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
 
 ! Loop over all types of evaporative species
+
 SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ! Initialize quantities common to the evaporation index
@@ -3585,7 +3587,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP(II,JJ,KK) - TMP_DROP)
 
       CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_FILM,C_DROP)
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,C_DROP)
 
       P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
       DHOR = H_V*MW_DROP/R0
