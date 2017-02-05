@@ -4753,10 +4753,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
 
-   ! Do not process control output here. This is done in ctrl.f90, UPDATE_CONTROLS.
-
-   IF (DV%QUANTITY=='CONTROL VALUE' .OR. DV%QUANTITY=='CONTROL') CYCLE DEVICE_LOOP
-
    ! Check to see if the device is tied to an INIT line, in which case it is tied to a specific particle. Test to see if the
    ! particle is in the current mesh.
 
@@ -5980,6 +5976,13 @@ IND_SELECT: SELECT CASE(IND)
       ENDDO LAG_LOOP
       DV%Y_C = DV%Y_C + DT*(Y_E_LAG - DV%Y_C)/DT_C
       GAS_PHASE_OUTPUT_RES = (1._EB-EXP(-MASS_EXT_COEF*RHO(I,J,K)*DV%Y_C))*100._EB  ! Obscuration
+
+   CASE(159) ! CONTROL VALUE
+      GAS_PHASE_OUTPUT_RES = CONTROL(DV%CTRL_INDEX)%INSTANT_VALUE
+
+   CASE(160) ! CONTROL
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (CONTROL(DV%CTRL_INDEX)%CURRENT_STATE) GAS_PHASE_OUTPUT_RES = 1._EB
 
    CASE(161) ! ASPIRATION
       GAS_PHASE_OUTPUT_RES = 0._EB
