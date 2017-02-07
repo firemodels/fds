@@ -4804,35 +4804,58 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
    ENDIF
 
-   WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "Matrix_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
-   OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
-   WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "VAR_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
-   OPEN(unit=34, file=TRIM(FILE_NAME), status='unknown')
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      CALL POINT_TO_MESH(NM)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
-               WRITE(33,'(5I8,3F23.16,I8)') NM,IBM_GASPHASE,I,J,K,XC(I),YC(J),ZC(K),CCVAR(I,J,K,IBM_UNKZ)
-               WRITE(34,'(F23.16)') RZ_Z(CCVAR(I,J,K,IBM_UNKZ)) !F_Z(CCVAR(I,J,K,IBM_UNKZ))
-            ENDDO
-         ENDDO
-      ENDDO
-      ! Cut cells:
-      DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
-         DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
-            IF (IBM_CUT_CELL(ICC)%UNKZ(JCC) <= 0) CYCLE
-            WRITE(33,'(5I8,3F23.16,I8)') NM,IBM_CUTCFE,ICC,JCC,0,IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC),&
-            IBM_CUT_CELL(ICC)%UNKZ(JCC)
-            WRITE(34,'(F23.16)') RZ_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC)) !F_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC))
-         ENDDO
-      ENDDO
-   ENDDO
-   CLOSE(33)
-   CLOSE(34)
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-   STOP
+   ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "Matrix_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+   ! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+   ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "VAR_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+   ! OPEN(unit=34, file=TRIM(FILE_NAME), status='unknown')
+   ! DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   !    CALL POINT_TO_MESH(NM)
+   !    DO K=1,KBAR
+   !       DO J=1,JBAR
+   !          DO I=1,IBAR
+   !             IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
+   !             WRITE(33,'(5I8,3F24.18,I8)') NM,IBM_GASPHASE,I,J,K,XC(I),YC(J),ZC(K),CCVAR(I,J,K,IBM_UNKZ)
+   !             WRITE(34,'(F24.18)') RZ_Z(CCVAR(I,J,K,IBM_UNKZ)-UNKZ_IND(NM_START)) !RZ_Z(CCVAR(I,J,K,IBM_UNKZ))
+   !          ENDDO
+   !       ENDDO
+   !    ENDDO
+   !    ! Cut cells:
+   !    DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+   !       DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+   !          IF (IBM_CUT_CELL(ICC)%UNKZ(JCC) <= 0) CYCLE
+   !          WRITE(33,'(5I8,3F24.18,I8)') NM,IBM_CUTCFE,ICC,JCC,0,IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC),&
+   !          IBM_CUT_CELL(ICC)%UNKZ(JCC)
+   !          WRITE(34,'(F24.18)') RZ_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC)-UNKZ_IND(NM_START)) !RZ_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC))
+   !          IF(IBM_CUT_CELL(ICC)%UNKZ(JCC) == 2827) WRITE(LU_ERR,*) 'UNKZ == 2827, ',ICC,JCC,IBM_CUT_CELL(ICC)%VOLUME(JCC)
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
+   ! CLOSE(33)
+   ! CLOSE(34)
+   !
+   ! ! Write out A matrix:
+   ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "A_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+   ! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+   ! DO I=1,INNZ
+   !    WRITE(33,'(F24.18)') A_Z(I)
+   ! ENDDO
+   ! CLOSE(33)
+   ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "JA_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+   ! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+   ! DO I=1,INNZ
+   !    WRITE(33,'(I8)') JA_Z(I)
+   ! ENDDO
+   ! CLOSE(33)
+   ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "IA_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+   ! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+   ! DO I=1,NUNKZ_LOCAL+1
+   !    WRITE(33,'(I8)') IA_Z(I)
+   ! ENDDO
+   ! CLOSE(33)
+   !
+   !
+   ! CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+   ! !STOP
 
 #else
    WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
@@ -5918,7 +5941,7 @@ MNUMZ   = 1
 
 ! Define CLUSTER_SPARSE_SOLVER control parameter vector iparmz:
 IPARMZ(1) = 1   ! no solver default
-IPARMZ(2) = 2   ! fill-in reordering from METIS
+IPARMZ(2) = 3   ! fill-in reordering from METIS
 IPARMZ(4) = 0   ! no iterative-direct algorithm
 IPARMZ(5) = 0   ! no user fill-in reducing permutation
 IPARMZ(6) = 0   ! =0 solution on the first n components of x
@@ -5932,14 +5955,12 @@ IPARMZ(18) = 0  !-1 ! Output: number of nonzeros in the factor LU
 IPARMZ(19) = 0  !-1 ! Output: Mflops for LU factorization
 IPARMZ(20) = 0  ! Output: Numbers of CG Iterations
 
-IPARMZ(24) = 1
-
 IPARMZ(40) = 2  ! Matrix, solution and rhs provided in distributed assembled matrix input format.
 
 ! Here each process defines de beginning and end rows in global numeration, for the equations
 ! it has assembled:
-IPARMZ(41) = 1 ! Consider only one process for now !!!!
-IPARMZ(42) = NUNKZ_LOCAL
+IPARMZ(41) = UNKZ_IND(NM_START) + 1
+IPARMZ(42) = UNKZ_IND(NM_START) + NUNKZ_LOCAL
 
 ERRORZ  =  0 ! initialize error flag
 MSGLVLZ =  0 ! print statistical information
@@ -21257,8 +21278,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              INDK = INDXI(XKAXIS)
 
              ! Drop if cut-face has already been counted:
-             IF( IJK_COUNTED(INDI,INDJ,INDK,X1AXIS) ) CYCLE
-             IJK_COUNTED(INDI,INDJ,INDK,X1AXIS)=.TRUE.
+             IF( IJK_COUNTED(INDI,INDJ,INDK,X1AXIS) ) CYCLE; IJK_COUNTED(INDI,INDJ,INDK,X1AXIS)=.TRUE.
+             IF(MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) == IBM_SOLID) CYCLE
 
              ! Drop if face not cut-face:
              ! Test for FACE Cartesian edges being cut:
@@ -21897,7 +21918,136 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
 ENDDO IBNDINT_LOOP
 
-IF (.NOT.BNDINT_FLAG) DEALLOCATE(IJK_COUNTED)
+IF (BNDINT_FLAG) THEN
+   ! Here we mark faces on the guard-cell region for the computaiton of grid aligned INBOUNDARY faces
+   ! on CARTCELL_CUTFACES to work correctly:
+   XIAXIS_LOOP_2 : DO X1AXIS=IAXIS,KAXIS
+
+      SELECT CASE(X1AXIS)
+      case(IAXIS)
+
+         X2AXIS = JAXIS
+         X3AXIS = KAXIS
+
+         ! IAXIS gasphase cut-faces:
+         ILO = ILO_FACE-CCGUARD; IHI = IHI_FACE+CCGUARD
+         JLO = JLO_CELL-CCGUARD; JHI = JHI_CELL+CCGUARD
+         KLO = KLO_CELL-CCGUARD; KHI = KHI_CELL+CCGUARD
+
+         ! location in I,J,K od x2,x2,x3 axes:
+         XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
+
+         ! Local indexing in x1, x2, x3:
+         X1LO = ILO; X1HI = IHI
+         X2LO = JLO; X2HI = JHI
+         X3LO = KLO; X3HI = KHI
+
+      CASE(JAXIS)
+
+         X2AXIS = KAXIS
+         X3AXIS = IAXIS
+
+         ! JAXIS gasphase cut-faces:
+         JLO = JLO_FACE-CCGUARD; JHI = JHI_FACE+CCGUARD
+         ILO = ILO_CELL-CCGUARD; IHI = IHI_CELL+CCGUARD
+         KLO = KLO_CELL-CCGUARD; KHI = KHI_CELL+CCGUARD
+
+         ! location in I,J,K od x2,x2,x3 axes:
+         XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
+
+         ! Local indexing in x1, x2, x3:
+         X1LO = JLO; X1HI = JHI
+         X2LO = KLO; X2HI = KHI
+         X3LO = ILO; X3HI = IHI
+
+      CASE(KAXIS)
+
+         X2AXIS = IAXIS
+         X3AXIS = JAXIS
+
+         ! KAXIS gasphase cut-faces:
+         KLO = KLO_FACE-CCGUARD; KHI = KHI_FACE+CCGUARD
+         ILO = ILO_CELL-CCGUARD; IHI = IHI_CELL+CCGUARD
+         JLO = JLO_CELL-CCGUARD; JHI = JHI_CELL+CCGUARD
+
+         ! location in I,J,K od x2,x2,x3 axes:
+         XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
+
+         ! Local indexing in x1, x2, x3:
+         X1LO = KLO; X1HI = KHI
+         X2LO = ILO; X2HI = IHI
+         X3LO = JLO; X3HI = JHI
+
+      END SELECT
+
+      ! Loop on Cartesian faces, local x1, x2, x3 indexes:
+      DO II=X1LO,X1HI
+         DO KK=X3LO,X3HI
+            DO JJ=X2LO,X2HI
+
+             ! Face indexes:
+             INDXI(IAXIS:KAXIS) = (/ II, JJ, KK /) ! Local x1,x2,x3
+             INDI = INDXI(XIAXIS)
+             INDJ = INDXI(XJAXIS)
+             INDK = INDXI(XKAXIS)
+
+             ! Drop if cut-face has already been counted:
+             IF( IJK_COUNTED(INDI,INDJ,INDK,X1AXIS) ) CYCLE
+
+             ! Drop if face not cut-face:
+             ! Test for FACE Cartesian edges being cut:
+             ! If outface1 is true -> All regular edges for this face:
+             ! Edge at index KK-FCELL:
+             INDXI1(IAXIS:KAXIS) = (/ II, JJ, KK-FCELL /) ! Local x1,x2,x3
+             INDI1 = INDXI1(XIAXIS)
+             INDJ1 = INDXI1(XJAXIS)
+             INDK1 = INDXI1(XKAXIS)
+             ! Edge at index KK-FCELL+1:
+             INDXI2(IAXIS:KAXIS) = (/ II, JJ, KK-FCELL+1 /) ! Local x1,x2,x3
+             INDI2 = INDXI2(XIAXIS)
+             INDJ2 = INDXI2(XJAXIS)
+             INDK2 = INDXI2(XKAXIS)
+             ! Edge at index JJ-FCELL:
+             INDXI3(IAXIS:KAXIS) = (/ II, JJ-FCELL, KK /) ! Local x1,x2,x3
+             INDI3 = INDXI3(XIAXIS)
+             INDJ3 = INDXI3(XJAXIS)
+             INDK3 = INDXI3(XKAXIS)
+             ! Edge at index jj-FCELL+1:
+             INDXI4(IAXIS:KAXIS) = (/ II, JJ-FCELL+1, KK /) ! Local x1,x2,x3
+             INDI4 = INDXI4(XIAXIS)
+             INDJ4 = INDXI4(XJAXIS)
+             INDK4 = INDXI4(XKAXIS)
+
+             OUTFACE1 = (MESHES(NM)%ECVAR(INDI1,INDJ1,INDK1,IBM_EGSC,X2AXIS) /= IBM_CUTCFE) .AND. &
+                        (MESHES(NM)%ECVAR(INDI2,INDJ2,INDK2,IBM_EGSC,X2AXIS) /= IBM_CUTCFE) .AND. &
+                        (MESHES(NM)%ECVAR(INDI3,INDJ3,INDK3,IBM_EGSC,X3AXIS) /= IBM_CUTCFE) .AND. &
+                        (MESHES(NM)%ECVAR(INDI4,INDJ4,INDK4,IBM_EGSC,X3AXIS) /= IBM_CUTCFE)
+
+             ! Test for face with INB edges:
+             ! If outface2 is true -> no INB Edges associated with this face:
+             OUTFACE2 = (MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_IDCE,X1AXIS) <= 0)
+
+             ! Drop if outface1 & outface2
+             IF (OUTFACE1 .AND. OUTFACE2) THEN
+                ! Test if IBM_FSID is SOLID:
+                IF ((MESHES(NM)%ECVAR(INDI1,INDJ1,INDK1,IBM_EGSC,X2AXIS) == IBM_SOLID) .AND. &
+                   (MESHES(NM)%ECVAR(INDI2,INDJ2,INDK2,IBM_EGSC,X2AXIS) == IBM_SOLID) .AND. &
+                   (MESHES(NM)%ECVAR(INDI3,INDJ3,INDK3,IBM_EGSC,X3AXIS) == IBM_SOLID) .AND. &
+                   (MESHES(NM)%ECVAR(INDI4,INDJ4,INDK4,IBM_EGSC,X3AXIS) == IBM_SOLID) ) THEN
+                   MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) = IBM_SOLID
+                ENDIF
+                CYCLE
+             ENDIF
+
+            ENDDO ! JJ
+         ENDDO ! KK
+      ENDDO ! II
+
+   ENDDO XIAXIS_LOOP_2
+
+ELSE
+   DEALLOCATE(IJK_COUNTED)
+ENDIF
 
 RETURN
 END SUBROUTINE GET_CARTFACE_CUTFACES
