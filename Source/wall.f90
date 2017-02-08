@@ -272,6 +272,7 @@ IF (SOLID_PARTICLES) THEN
 ENDIF
 
 ! *********************** UNDER CONSTRUCTION *************************
+! Note: With HT3D called after PRYOLYSIS, HT3D inherits the PYRO TMP_F
 IF (SOLID_HT3D .AND. CORRECTOR) CALL SOLID_HEAT_TRANSFER_3D(T)
 ! ********************************************************************
 
@@ -839,7 +840,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
             END SELECT
 
          CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER ! copied from HEAT_TRANSFER_BC
-            
+
             AREA_ADJUST = WC%ONE_D%AREA_ADJUST
             SELECT CASE(IOR)
                CASE( 1); KDTDX(II,JJ,KK)   = -SF%NET_HEAT_FLUX*AREA_ADJUST
