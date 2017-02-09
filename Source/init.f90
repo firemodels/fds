@@ -1139,6 +1139,8 @@ ENDIF NON_EVAC_IF
 
 M%BC_CLOCK     = T_BEGIN
 M%WALL_COUNTER = 0
+M%BC_CLOCK_HT3D     = T_BEGIN
+M%WALL_COUNTER_HT3D = 0
 
 ! Set clock for boudary fuel vegetation model
 
