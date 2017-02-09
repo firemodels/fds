@@ -675,7 +675,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D(T)
 
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,T_IGN,AREA_ADJUST,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
@@ -822,13 +822,13 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
          K_S = ML%K_S
       ELSE
          NR = -NINT(ML%K_S)
-         K_S = EVALUATE_RAMP(TMP(II,JJ,KK),0._EB,NR)
+         K_S = EVALUATE_RAMP(WC%ONE_D%TMP_F,0._EB,NR)
       ENDIF
       K_S_MAX = MAX(K_S_MAX,K_S)
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
-         CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
+         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE
 
             SELECT CASE(IOR)
                CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
@@ -901,7 +901,35 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                WC%ONE_D%QCONF = HTC*DTMP
             ENDIF SOLID_PHASE_ONLY_IF
 
-         CASE DEFAULT ! thermally thick
+         CASE (THERMALLY_THICK) ! TMP_F and HEAT FLUX taken from PYROLYSIS
+
+            TMP_F = WC%ONE_D%TMP_F
+            TMP_S = WC%ONE_D%TMP(1)
+            DN    = ABS( 0.5_EB*(WC%ONE_D%X(0)-WC%ONE_D%X(1)) ) ! ABS required because X is a "depth"
+            HTC   = K_S / DN
+            KDTDN = HTC * (TMP_F-TMP_S)
+
+            SELECT CASE(IOR)
+               CASE( 1); KDTDX(II,JJ,KK)   =  KDTDN
+               CASE(-1); KDTDX(II-1,JJ,KK) = -KDTDN
+               CASE( 2); KDTDY(II,JJ,KK)   =  KDTDN
+               CASE(-2); KDTDY(II,JJ-1,KK) = -KDTDN
+               CASE( 3); KDTDZ(II,JJ,KK)   =  KDTDN
+               CASE(-3); KDTDZ(II,JJ,KK-1) = -KDTDN
+            END SELECT
+
+            ! check time step
+
+            IF (ML%C_S>0._EB) THEN
+               C_S = ML%C_S
+            ELSE
+               NR = -NINT(ML%C_S)
+               C_S = EVALUATE_RAMP(TMP_F,0._EB,NR)
+            ENDIF
+            RHO_S = ML%RHO_S
+            VN_HT3D = MAX( VN_HT3D, HTC/(RHO_S*C_S*DN) )
+
+         CASE (THERMALLY_THICK_HT3D) ! thermally thick, continuous heat flux, not connected with PYROLYSIS
 
             IIG = WC%ONE_D%IIG
             JJG = WC%ONE_D%JJG
