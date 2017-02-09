@@ -3284,7 +3284,7 @@ Below is an FDS input file that demonstrates how you can test a candidate pyroly
 \subsection{Simulating Bench-scale Measurements like the TGA, DSC, and MCC}
 \label{info:TGA_DSC_MCC}
 
-There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermal-gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=.TRUE.} to the {\ct SURF} line you want to analyze. You can only analyze one {\ct SURF} line at a time. Optionally, you can specify {\ct TGA\_HEATING\_RATE} (K/min) and {\ct TGA\_FINAL\_TEMPERATURE} ($^\circ$C) to indicate the linear heating rate and the final temperature of the sample. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
+There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermogravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=.TRUE.} to the {\ct SURF} line you want to analyze. You can only analyze one {\ct SURF} line at a time. Optionally, you can specify {\ct TGA\_HEATING\_RATE} (K/min) and {\ct TGA\_FINAL\_TEMPERATURE} ($^\circ$C) to indicate the linear heating rate and the final temperature of the sample. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
 \begin{lstlisting}
 &SURF ID = 'Cable Insulation'
       TGA_ANALYSIS = .TRUE.
@@ -6857,8 +6857,7 @@ control functions, will then flow water.
 \subsection{Example Case: activate\_vents}
 \label{activate_vents}
 
-The simple test case called {\ct activate\_vents} demonstrates the several of the control functions. Figure~\ref{activate_vents_fig} shows seven
-multiply-colored vents that activate at different times, depending on the particular timing or control function.
+The simple test case called {\ct activate\_vents} demonstrates several of the control functions. Figure~\ref{activate_vents_fig} shows seven differently colored vents that activate at different times, depending on the particular timing or control function.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lll}
 \includegraphics[width=2.05in]{SCRIPT_FIGURES/activate_vents_5} &
@@ -7022,6 +7021,12 @@ To record the temperature inside the surface, you can use a device as follows:
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
 The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+
+Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the cell center corresponding to the solid cell temperature being output by {\ct INSIDE WALL TEMPERATURE}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
+\end{lstlisting}
+The output should lie within half a solid grid cell distance from the specified {\ct DEPTH}.
 
 To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
 \begin{lstlisting}
@@ -8185,6 +8190,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
+{\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m              & D            \\ \hline
 {\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
