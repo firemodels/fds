@@ -6338,8 +6338,8 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S
-REAL(EB) :: AAA,BBB,CCC,ALP,BET,GAM,MMM
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW
+REAL(EB) :: AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
@@ -6735,9 +6735,41 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
       SOLID_PHASE_OUTPUT = RHO(IIG,JJG,KKG)*Y_SPECIES
 
-   CASE(62) ! SOLID CELL TEMPERATURE
+   CASE(62) ! SOLID CELL TEMPERATURE (TMP_BAR)
 
-      SOLID_PHASE_OUTPUT = 999._EB
+      !              X(II-1)      X(II)      X(IIG-1)
+      !                XC1         XC0        //|
+      !     |           |    II     |         //| <= 3D CELL INDEX, DX
+      !     |     o     |     o     |     o   //| <= WALL CELL (WC)
+      !     |.................................//| <= ONE_D%X, dx
+      !
+      !     TMP_BAR = 1/DX * INT_XC0^XC1 ONE_D%TMP * dx
+
+      II  = DV%I
+      JJ  = DV%J
+      KK  = DV%K
+      IIG = ONE_D%IIG
+      JJG = ONE_D%JJG
+      KKG = ONE_D%KKG
+      NWP = SUM(ONE_D%N_LAYER_CELLS)
+
+      ! currently for IOR=1
+
+      XC0 = X(IIG-1) - X(II)
+      XC1 = X(IIG-1) - X(II-1)
+
+      TMP_BAR = 0._EB
+      VOL = 0._EB
+      DO I=1,NWP
+         X0 = ONE_D%X(I-1); IF (X0>XC1) EXIT
+         X1 = ONE_D%X(I)  ; IF (X1<XC0) CYCLE
+         DVOL = MIN(X1,XC1) - MAX(X0,XC0)
+         TMP_BAR = TMP_BAR + ONE_D%TMP(I) * DVOL
+         VOL = VOL + DVOL
+      ENDDO
+      TMP_BAR = TMP_BAR/VOL
+
+      SOLID_PHASE_OUTPUT = TMP_BAR - TMPM
 
 END SELECT SOLID_PHASE_SELECT
 
