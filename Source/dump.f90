@@ -6339,7 +6339,7 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S
 REAL(EB) :: AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
@@ -6739,11 +6739,11 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
 
       !              X(II-1)      X(II)      X(IIG-1)
       !                XC1         XC0        //|
-      !     |           |    II     |         //| <= 3D CELL INDEX, DX
+      !     |           |    II     |         //| <= 3D CELL INDEX, VOL=XC1-XC0
       !     |     o     |     o     |     o   //| <= WALL CELL (WC)
       !     |.................................//| <= ONE_D%X, dx
       !
-      !     TMP_BAR = 1/DX * INT_XC0^XC1 ONE_D%TMP * dx
+      !     TMP_BAR = 1/VOL * INT_XC0^XC1 ONE_D%TMP * dx
 
       II  = DV%I
       JJ  = DV%J
@@ -6751,12 +6751,29 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       IIG = ONE_D%IIG
       JJG = ONE_D%JJG
       KKG = ONE_D%KKG
+      IOR = ONE_D%IOR
       NWP = SUM(ONE_D%N_LAYER_CELLS)
 
-      ! currently for IOR=1
-
-      XC0 = X(IIG-1) - X(II)
-      XC1 = X(IIG-1) - X(II-1)
+      SELECT CASE(IOR)
+         CASE (1)
+            XC0 = X(IIG-1) - X(II)
+            XC1 = X(IIG-1) - X(II-1)
+         CASE (-1)
+            XC0 = X(II-1)  - X(IIG)
+            XC1 = X(II)    - X(IIG)
+         CASE (2)
+            XC0 = Y(JJG-1) - Y(JJ)
+            XC1 = Y(JJG-1) - Y(JJ-1)
+         CASE (-2)
+            XC0 = Y(JJ-1)  - Y(JJG)
+            XC1 = Y(JJ)    - Y(JJG)
+         CASE (3)
+            XC0 = Z(KKG-1) - Z(KK)
+            XC1 = Z(KKG-1) - Z(KK-1)
+         CASE (-3)
+            XC0 = Z(KK-1)  - Z(KKG)
+            XC1 = Z(KK)    - Z(KKG)
+      END SELECT
 
       TMP_BAR = 0._EB
       VOL = 0._EB
@@ -6767,7 +6784,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          TMP_BAR = TMP_BAR + ONE_D%TMP(I) * DVOL
          VOL = VOL + DVOL
       ENDDO
-      TMP_BAR = TMP_BAR/VOL
+      IF (VOL>TWO_EPSILON_EB) TMP_BAR = TMP_BAR/VOL
 
       SOLID_PHASE_OUTPUT = TMP_BAR - TMPM
 
