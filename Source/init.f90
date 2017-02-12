@@ -1750,7 +1750,7 @@ SUBROUTINE INITIALIZE_DEVICES(NM)
 ! Find the WALL_INDEX for a device that is near a solid wall
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX
+INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG
 REAL(EB) :: DEPTH
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (MESH_TYPE), POINTER :: M
@@ -1768,8 +1768,26 @@ DEVICE_LOOP: DO N=1,N_DEVC
       II  = GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB
       JJ  = GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB
       KK  = GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB
+      IIG = II
+      JJG = JJ
+      KKG = KK
       IOR = DV%IOR
-      CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
+
+      IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
+         ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
+         ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
+         ! currently assumes II and IIG, etc., are on the same mesh
+         SELECT CASE (IOR)
+            CASE ( 1); DO IIG=II,IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-1); DO IIG=II,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 2); DO JJG=JJ,JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-2); DO JJG=JJ,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 3); DO KKG=KK,KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-3); DO KKG=KK,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+         END SELECT
+      ENDIF
+
+      CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
       IF (IW==0 .AND. DV%STATISTICS=='null') THEN
          WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
@@ -1792,7 +1810,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INSIDE_SOLID) THEN
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
-         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
+         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N,' must be associated with a heat-conducting surface'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
