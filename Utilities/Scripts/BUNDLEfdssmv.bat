@@ -37,6 +37,7 @@ if "%platform%" == "linux" (
   echo Downloading compressed archive to:
   echo   %svn_root%\fds\Utilities\uploads\!bundledir!.sh
   pscp %linux_logon%:%linux_svn_root%/fds/Utilities/uploads/!bundledir!.sh %svn_root%/fds/Utilities/uploads/.
+  pscp %linux_logon%:%linux_svn_root%/fds/Utilities/uploads/!bundledir!.sh.md5 %svn_root%/fds/Utilities/uploads/.
   goto eof
 )
 if "%platform%" == "osx" (
@@ -46,6 +47,7 @@ if "%platform%" == "osx" (
   echo Downloading compressed archive to:
   echo   %svn_root%\fds\Utilities\uploads\!bundledir!.sh
   pscp %osx_logon%:%linux_svn_root%/fds/Utilities/uploads/!bundledir!.sh %svn_root%/fds/Utilities/uploads/.
+  pscp %osx_logon%:%linux_svn_root%/fds/Utilities/uploads/!bundledir!.sh.md5 %svn_root%/fds/Utilities/uploads/.
   goto eof
 )
 
