@@ -807,7 +807,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       ENDDO
    ENDDO
 
-   ! build fluxes on boundaries (later hook into pyrolysis code)
+   ! build fluxes on boundaries
+
    HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
@@ -1013,7 +1014,130 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
 ENDDO SUBSTEP_LOOP
 
+IF (COUPLED_1D3D_HEAT_TRANSFER) CALL HT3D_1D_RECONSTRUCTION
+
 END SUBROUTINE SOLID_HEAT_TRANSFER_3D
+
+
+SUBROUTINE HT3D_1D_RECONSTRUCTION
+
+USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
+INTEGER :: IW,IC,II,JJ,KK,IIG,JJG,KKG,IOR,IZERO,NWP,I,J
+REAL(EB) :: XC0,XC1,X0,X1,VOL,DVOL,UHAT,XDATA(2),YDATA(2),XWALL
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: XI,UI,UB,UP,UH,XJ,VH,XH,VB
+
+RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+   WC => WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY)      CYCLE RECON_LOOP
+   SURF_INDEX = WC%SURF_INDEX
+   SF => SURFACE(SURF_INDEX)
+   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) CYCLE RECON_LOOP
+
+   II = WC%ONE_D%II
+   JJ = WC%ONE_D%JJ
+   KK = WC%ONE_D%KK
+
+   IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE RECON_LOOP
+   OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE RECON_LOOP
+
+   IIG = WC%ONE_D%IIG
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
+   IOR = WC%ONE_D%IOR
+   NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
+
+   ALLOCATE(XI(0:NWP),STAT=IZERO)
+   ALLOCATE(UI(0:NWP),STAT=IZERO)
+   ALLOCATE(UP(0:NWP),STAT=IZERO)
+   ALLOCATE(UB(0:NWP),STAT=IZERO)
+   ALLOCATE(VB(0:NWP),STAT=IZERO)
+
+   XI = WC%ONE_D%X(0:NWP)
+   UI = WC%ONE_D%TMP(0:NWP)
+
+   ! VH is the 3D cell temperature
+   ! XH is the 3D cell center depth
+   ! XJ is the 3D cell face depth
+
+   SELECT CASE (IOR)
+      CASE(1)
+         ALLOCATE(UH(0:II),STAT=IZERO)
+         ALLOCATE(VH(0:II),STAT=IZERO)
+         ALLOCATE(XH(0:II),STAT=IZERO)
+         ALLOCATE(XJ(0:II),STAT=IZERO)
+         DO J=0,II
+            VH(J) = TMP(II+1-J,JJ,KK)
+            XH(J) = X(II) - XC(IIG-J)
+            XJ(J) = X(II) - X(II-J)
+         ENDDO
+      CASE(-1)
+         ALLOCATE(UH(0:(IBAR-IIG)),STAT=IZERO)
+         ALLOCATE(VH(0:(IBAR-IIG)),STAT=IZERO)
+         ALLOCATE(XH(0:(IBAR-IIG)),STAT=IZERO)
+         ALLOCATE(XJ(0:(IBAR-IIG)),STAT=IZERO)
+         DO J=0,(IBAR-IIG)
+            VH(J) = TMP(IIG+J,JJG,KKG)
+            XH(J) = XC(IIG+J) - X(IIG)
+            XJ(J) = X(IIG+J) - X(IIG)
+         ENDDO
+   END SELECT
+
+   ! first steps: count cells and restrict 1D field from UI to UH
+
+   UH = 0._EB
+   VOL = 0._EB
+   J = 1
+   DO I=1,NWP
+      DVOL = MIN(XI(I),XJ(J)) - MAX(XI(I-1),XJ(J-1))
+      VOL  = VOL + DVOL
+      UH(J) = UH(J) + UI(I) * DVOL
+      IF (XI(I)>XJ(J) .AND. I<NWP) THEN
+         UH(J) = UH(J)/VOL
+         VOL = 0._EB
+         J = J+1
+      ELSEIF (I==NWP) THEN
+         UH(J) = UH(J)/VOL
+      ENDIF
+   ENDDO
+   UH(0) = WC%ONE_D%TMP_F
+   VH(0) = WC%ONE_D%TMP_F
+   XH(0) = 0._EB
+
+   ! step 2: interpolate the cell data from 1D and 3D fields
+
+   UB(0) = UI(0)
+   VB(0) = UI(0)
+   DO I=1,NWP
+      CALL INTERPOLATE1D(XH,UH,XI(I),UB(I))
+      CALL INTERPOLATE1D(XH,VH,XI(I),VB(I))
+   ENDDO
+
+   ! step 3: save the fine-grained structure of the 1D solution
+
+   UP = UI - UB;
+
+   ! step 4: add fine structure back to 3D interpolated field
+
+   UI = VB + UP;
+
+   WC%ONE_D%TMP(0:NWP) = UI
+
+   DEALLOCATE(XI)
+   DEALLOCATE(UI)
+   DEALLOCATE(UP)
+   DEALLOCATE(UB)
+   DEALLOCATE(VB)
+   DEALLOCATE(UH)
+   DEALLOCATE(XJ)
+   DEALLOCATE(VH)
+   DEALLOCATE(XH)
+
+ENDDO RECON_LOOP
+
+END SUBROUTINE HT3D_1D_RECONSTRUCTION
 
 
 SUBROUTINE CRANK_TEST_1(DIM)

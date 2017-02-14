@@ -2050,19 +2050,19 @@ UX = UBOUND(X,1)
 LX = LBOUND(X,1)
 
 IF (XI <= X(LX)) THEN
-  ANS = Y(LX)
+   ANS = Y(LX)
 ELSEIF (XI >= X(UX)) THEN
-  ANS = Y(UX)
+   ANS = Y(UX)
 ELSE
-  L1: DO I=LX,UX-1
-    IF (ABS(XI -X(I)) <= SPACING(X(I))) THEN
-      ANS = Y(I)
-      EXIT L1
-    ELSEIF (X(I+1)>XI) THEN
-      ANS = Y(I)+(XI-X(I))/(X(I+1)-X(I)) * (Y(I+1)-Y(I))
-      EXIT L1
-    ENDIF
-  ENDDO L1
+   L1: DO I=LX,UX-1
+      IF (ABS(XI -X(I)) <= SPACING(X(I))) THEN
+         ANS = Y(I)
+         EXIT L1
+      ELSEIF (X(I+1)>XI) THEN
+         ANS = Y(I)+(XI-X(I))/(X(I+1)-X(I)) * (Y(I+1)-Y(I))
+         EXIT L1
+      ENDIF
+   ENDDO L1
 ENDIF
 
 END SUBROUTINE INTERPOLATE1D
@@ -2081,13 +2081,13 @@ UX = UBOUND(X,1)
 LX = LBOUND(X,1)
 
 IF (XI <= LX) THEN
-  ANS = X(LX)
+   ANS = X(LX)
 ELSEIF (XI >= UX) THEN
-  ANS = X(UX)
+   ANS = X(UX)
 ELSE
-  I = AINT(XI)
-  FRAC = XI - REAL(I,EB)
-  ANS = X(I) + FRAC*(X(I+1)-X(I))
+   I = AINT(XI)
+   FRAC = XI - REAL(I,EB)
+   ANS = X(I) + FRAC*(X(I+1)-X(I))
 ENDIF
 
 END SUBROUTINE INTERPOLATE1D_UNIFORM
@@ -2106,11 +2106,11 @@ TA => TABLES(TABLE_INDEX)
 
 ! Do 1D for X edges of table
 IF (XI <= TA%LX) THEN
-  CALL INTERPOLATE1D(TA%Y,TA%Z(1,:),YI,ANS)
-  RETURN
+   CALL INTERPOLATE1D(TA%Y,TA%Z(1,:),YI,ANS)
+   RETURN
 ELSEIF (XI >= TA%UX) THEN
-  CALL INTERPOLATE1D(TA%Y,TA%Z(TA%NUMBER_ROWS,:),YI,ANS)
-  RETURN
+   CALL INTERPOLATE1D(TA%Y,TA%Z(TA%NUMBER_ROWS,:),YI,ANS)
+   RETURN
 ENDIF
 
 ! Do 1D for Y edges of table
