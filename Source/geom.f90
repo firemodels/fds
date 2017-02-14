@@ -270,6 +270,8 @@ INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
 
 ! Matrix vector building variables:
 
+LOGICAL, SAVE :: CC_MATVEC_DEFINED=.FALSE.
+
 LOGICAL, PARAMETER :: TRAP_CORR=.TRUE.  ! Solve implicit corrector step with Trapezoidal Rule? If not implicit RK2 corr.
                                         ! Which boils down to Backward Euler.
 REAL(EB),PARAMETER :: BRP1 = 0._EB ! If 0., Godunov for advective term; if 1., centered interp.
@@ -357,6 +359,13 @@ LOGICAL, SAVE :: FORCE_REGC_FACE_NXT = .TRUE.
 LOGICAL, SAVE :: CC_INJECT_RHO0 = .FALSE. ! .TRUE.: inject RHO0 and use Boundary W velocity for cut-cell centroid.
                                           ! .FALSE.: Interpolate RHO0 and W velocity to cut-cell centroid.
                                           ! Set to .TRUE. if &MISC CC_ZEROIBM_VELO=.TRUE.
+LOGICAL, SAVE :: CC_INTERPOLATE_H=.TRUE.  ! Set to .FALSE. if &MISC CC_ZEROIBM_VELO=.TRUE.
+
+! Communicatoin variables:
+
+INTEGER :: N_REQ11, N_REQ12
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: REQ11, REQ12
+
 
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
@@ -387,10 +396,337 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           FCELL,IBM_SOLID,IBM_CGSC,IBM_FGSC,IBM_IDCF,IBM_UNKZ,IBM_GASPHASE,IBM_CUTCFE,IBM_FTYPE_CFGAS, &
           IBM_NCVARS, IBM_UNKH,NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
           NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
-          JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, THREED_VORTEX, CCCOMPUTE_RADIATION
+          JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, THREED_VORTEX, CCCOMPUTE_RADIATION, &
+          COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, MESH_CC_EXCHANGE
 
 
 CONTAINS
+
+! ------------------------------- MESH_CC_EXCHANGE ---------------------------------
+
+SUBROUTINE MESH_CC_EXCHANGE(CODE)
+
+USE MPI
+
+INTEGER, INTENT(IN) :: CODE
+
+! Local Variables:
+INTEGER :: NM,NOM,NOOM,RNODE,SNODE,IERR
+INTEGER :: II1,JJ1,KK1,NCELL,ICC,ICC1,NQT2,JCC,LL,NN
+!INTEGER, ALLOCATABLE, DIMENSION(:) :: NCC_SV
+TYPE (MESH_TYPE), POINTER :: M
+TYPE (OMESH_TYPE), POINTER :: M2,M3
+LOGICAL, SAVE :: INITIALIZE_CC_SCALARS=.TRUE.
+LOGICAL, SAVE :: INITIALIZE_CC_VELOCTY=.TRUE.
+
+
+! In case of initialization code from main return.
+! Initialization of cut-cell communications needs to be done later in the main.f90 sequence and will be done using
+! INITIALIZE_CC_SCALARS/VELOCITY logicals.
+IF (CODE == 0 .OR. CODE==2 .OR. CODE==5 .OR. CODE>6) RETURN
+
+IF (.NOT.CC_MATVEC_DEFINED) RETURN
+
+!WRITE(LU_ERR,*) MYID, CODE, 'Into CC scalars exchange...'
+
+! First Allocate and setup persistent send-receives for scalars:
+INITIALIZE_CC_SCALARS_COND : IF (INITIALIZE_CC_SCALARS) THEN
+
+   ! Allocate REQ11, reduced cycling conditionals:
+   N_REQ11=0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      DO NOM=1,NMESHES
+         M3=>MESHES(NM)%OMESH(NOM)
+         IF (M3%NICC_S(1)==0 .AND. M3%NICC_R(1)==0) CYCLE
+         N_REQ11 = N_REQ11+1
+      ENDDO
+   ENDDO
+   ALLOCATE(REQ11(N_REQ11*4))
+
+   N_REQ11=0
+   ! 1. Receives:
+   MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+      IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP_1
+
+      RNODE = PROCESS(NM)
+
+      OTHER_MESH_LOOP_1: DO NOM=1,NMESHES
+
+         M3=>MESHES(NM)%OMESH(NOM)
+         IF (M3%NICC_S(1)==0 .AND. M3%NICC_R(1)==0) CYCLE OTHER_MESH_LOOP_1
+         IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP_1
+         SNODE = PROCESS(NOM)
+
+         IF (M3%NICC_R(1)>0) THEN
+
+            ! Cell centered variables on cut-cells:
+            ALLOCATE(M3%REAL_RECV_PKG11(M3%NICC_R(2)*(4+N_TOTAL_SCALARS)))
+
+            IF (RNODE/=SNODE) THEN
+               N_REQ11 = N_REQ11 + 1
+               CALL MPI_RECV_INIT(M3%REAL_RECV_PKG11(1),SIZE(M3%REAL_RECV_PKG11),MPI_DOUBLE_PRECISION, &
+                                  SNODE,NOM,MPI_COMM_WORLD,REQ11(N_REQ11),IERR)
+            ENDIF
+         ENDIF
+
+      ENDDO OTHER_MESH_LOOP_1
+   ENDDO MESH_LOOP_1
+
+   ! 2. Sends:
+   SENDING_MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+      IF (EVACUATION_ONLY(NM)) CYCLE SENDING_MESH_LOOP_1
+
+      M =>MESHES(NM)
+
+      RECEIVING_MESH_LOOP_1: DO NOM=1,NMESHES
+
+         M3=>MESHES(NM)%OMESH(NOM)
+         IF (M3%NICC_S(1)==0 .AND. M3%NICC_R(1)==0)  CYCLE RECEIVING_MESH_LOOP_1
+         IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP_1
+
+         SNODE = PROCESS(NOM)
+         RNODE = PROCESS(NM)
+
+         ! Initialize persistent send requests
+
+         IF (M3%NICC_S(1)>0 .AND. RNODE/=SNODE) THEN
+
+            ALLOCATE(M3%REAL_SEND_PKG11(M3%NICC_S(2)*(4+N_TOTAL_SCALARS)))
+
+            N_REQ11 = N_REQ11 + 1
+            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG11(1),SIZE(M3%REAL_SEND_PKG11),MPI_DOUBLE_PRECISION, &
+                               SNODE,NM,MPI_COMM_WORLD,REQ11(N_REQ11),IERR)
+
+         ENDIF
+
+      ENDDO RECEIVING_MESH_LOOP_1
+
+   ENDDO SENDING_MESH_LOOP_1
+
+   INITIALIZE_CC_SCALARS = .FALSE.
+
+ENDIF INITIALIZE_CC_SCALARS_COND
+
+!WRITE(LU_ERR,*) MYID, CODE, 'INITIALIZE_CC_SCALARS_COND finished...'
+
+! Exchange Scalars in cut-cells:
+SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   IF (EVACUATION_ONLY(NM)) CYCLE SENDING_MESH_LOOP_2
+   M =>MESHES(NM)
+   RECEIVING_MESH_LOOP_2: DO NOM=1,NMESHES
+
+      M3=>MESHES(NM)%OMESH(NOM)
+      IF (M3%NICC_S(1)==0 .AND. M3%NICC_R(1)==0)  CYCLE RECEIVING_MESH_LOOP_2
+      IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP_2
+
+      SNODE = PROCESS(NOM)
+      RNODE = PROCESS(NM)
+
+      ! Exchange of density and species mass fractions following the PREDICTOR update
+
+      IF (CODE==1 .AND. M3%NICC_S(1)>0) THEN
+         NQT2 = 4+N_TOTAL_SCALARS
+         LL = 0
+         IF (RNODE/=SNODE) THEN
+            PACK_REAL_SEND_PKG11: DO ICC1=1,M3%NICC_S(1)
+               ICC=M3%ICC_UNKZ_CC_S(ICC1)
+               NCELL=M%IBM_CUT_CELL(ICC)%NCELL
+               II1=M%IBM_CUT_CELL(ICC)%IJK(IAXIS)
+               JJ1=M%IBM_CUT_CELL(ICC)%IJK(JAXIS)
+               KK1=M%IBM_CUT_CELL(ICC)%IJK(KAXIS)
+               DO JCC=1,NCELL
+                  LL = LL + 1
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) ! Take the underlying Cartesian cell value for
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) ! these for now.
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) =    M%IBM_CUT_CELL(ICC)%D(JCC)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%IBM_CUT_CELL(ICC)%ZZS(NN,JCC)
+                  ENDDO
+               ENDDO
+            ENDDO PACK_REAL_SEND_PKG11
+         ELSE ! Same sender as receiver:
+            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
+            M2=>MESHES(NOM)%OMESH(NM)
+            PACK_REAL_RECV_PKG11: DO ICC1=1,M3%NICC_S(1)
+               ICC=M3%ICC_UNKZ_CC_S(ICC1)
+               NCELL=M%IBM_CUT_CELL(ICC)%NCELL
+               II1=M%IBM_CUT_CELL(ICC)%IJK(IAXIS)
+               JJ1=M%IBM_CUT_CELL(ICC)%IJK(JAXIS)
+               KK1=M%IBM_CUT_CELL(ICC)%IJK(KAXIS)
+               DO JCC=1,NCELL
+                  LL = LL + 1
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%IBM_CUT_CELL(ICC)%RHOS(JCC)
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) ! Take the underlying Cartesian cell value for
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) ! these for now.
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) =    M%IBM_CUT_CELL(ICC)%D(JCC)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%IBM_CUT_CELL(ICC)%ZZS(NN,JCC)
+                  ENDDO
+               ENDDO
+            ENDDO PACK_REAL_RECV_PKG11
+         ENDIF
+      ENDIF
+
+      ! Exchange of density and species mass fractions following the CORRECTOR update
+
+      IF (CODE==4 .AND. M3%NICC_S(1)>0) THEN
+         NQT2 = 4+N_TOTAL_SCALARS
+         LL = 0
+         IF (RNODE/=SNODE) THEN
+            PACK_REAL_SEND_PKG111: DO ICC1=1,M3%NICC_S(1)
+               ICC=M3%ICC_UNKZ_CC_S(ICC1)
+               NCELL=M%IBM_CUT_CELL(ICC)%NCELL
+               II1=M%IBM_CUT_CELL(ICC)%IJK(IAXIS)
+               JJ1=M%IBM_CUT_CELL(ICC)%IJK(JAXIS)
+               KK1=M%IBM_CUT_CELL(ICC)%IJK(KAXIS)
+               DO JCC=1,NCELL
+                  LL = LL + 1
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%IBM_CUT_CELL(ICC)%RHO(JCC)
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) ! Take the underlying Cartesian cell value for
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) ! these for now.
+                  M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) =    M%IBM_CUT_CELL(ICC)%DS(JCC)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%IBM_CUT_CELL(ICC)%ZZ(NN,JCC)
+                  ENDDO
+               ENDDO
+            ENDDO PACK_REAL_SEND_PKG111
+         ELSE ! Same sender as receiver:
+            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
+            M2=>MESHES(NOM)%OMESH(NM)
+            PACK_REAL_RECV_PKG111: DO ICC1=1,M3%NICC_S(1)
+               ICC=M3%ICC_UNKZ_CC_S(ICC1)
+               NCELL=M%IBM_CUT_CELL(ICC)%NCELL
+               II1=M%IBM_CUT_CELL(ICC)%IJK(IAXIS)
+               JJ1=M%IBM_CUT_CELL(ICC)%IJK(JAXIS)
+               KK1=M%IBM_CUT_CELL(ICC)%IJK(KAXIS)
+               DO JCC=1,NCELL
+                  LL = LL + 1
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%IBM_CUT_CELL(ICC)%RHO(JCC)
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) ! Take the underlying Cartesian cell value for
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) ! these for now.
+                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) =    M%IBM_CUT_CELL(ICC)%DS(JCC)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%IBM_CUT_CELL(ICC)%ZZ(NN,JCC)
+                  ENDDO
+               ENDDO
+            ENDDO PACK_REAL_RECV_PKG111
+         ENDIF
+      ENDIF
+
+
+   ENDDO RECEIVING_MESH_LOOP_2
+ENDDO SENDING_MESH_LOOP_2
+
+!WRITE(LU_ERR,*) MYID, CODE, 'REAL Package built, into exchange...'
+
+IF (N_MPI_PROCESSES>1 .AND. CODE==1 .AND. N_REQ11>0) THEN
+   CALL MPI_STARTALL(N_REQ11,REQ11(1:N_REQ11),IERR)
+   CALL CC_TIMEOUT('REQ11',N_REQ11,REQ11(1:N_REQ11))
+ENDIF
+
+!WRITE(LU_ERR,*) MYID, CODE, 'Package exchange done, into fill guard cut-cells...'
+
+! Receive the information sent above into the appropriate arrays.
+
+RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   IF (EVACUATION_ONLY(NOM)) CYCLE RECV_MESH_LOOP
+   M =>MESHES(NOM)
+
+   SEND_MESH_LOOP: DO NM=1,NMESHES
+
+      M2=>MESHES(NOM)%OMESH(NM)
+      IF (M2%NICC_S(1)==0 .AND. M2%NICC_R(1)==0) CYCLE SEND_MESH_LOOP
+      IF (EVACUATION_ONLY(NM)) CYCLE SEND_MESH_LOOP
+
+      ! Unpack densities and species mass fractions following PREDICTOR exchange
+
+      IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
+
+         NQT2 = 4+N_TOTAL_SCALARS
+         LL = 0
+         DO ICC=M%IBM_NCUTCELL_MESH+1,M%IBM_NCUTCELL_MESH+M%IBM_NGCCUTCELL_MESH
+            NOOM   = M%IBM_CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
+            DO JCC=1,M%IBM_CUT_CELL(ICC)%NCELL
+               LL = LL + 1
+               M%IBM_CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+               !M%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)   ! Take the underlying Cartesian cell value for
+               !M%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) ! these for now.
+               M%IBM_CUT_CELL(ICC)%D(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+               DO NN=1,N_TOTAL_SCALARS
+                  M%IBM_CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ENDIF
+
+      ! Unpack densities and species mass fractions following CORRECTOR exchange
+
+      IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
+
+         NQT2 = 4+N_TOTAL_SCALARS
+         LL = 0
+         DO ICC=M%IBM_NCUTCELL_MESH+1,M%IBM_NCUTCELL_MESH+M%IBM_NGCCUTCELL_MESH
+            NOOM   = M%IBM_CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
+            DO JCC=1,M%IBM_CUT_CELL(ICC)%NCELL
+               LL = LL + 1
+               M%IBM_CUT_CELL(ICC)%RHO(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+               !M%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)   ! Take the underlying Cartesian cell value for
+               !M%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) ! these for now.
+               M%IBM_CUT_CELL(ICC)%DS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+               DO NN=1,N_TOTAL_SCALARS
+                  M%IBM_CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ENDIF
+
+
+
+   ENDDO SEND_MESH_LOOP
+ENDDO RECV_MESH_LOOP
+
+!WRITE(LU_ERR,*) MYID, CODE, 'Fill guard cut-cells done.'
+
+RETURN
+
+CONTAINS
+
+SUBROUTINE CC_TIMEOUT(RNAME,NR,RR)
+
+REAL(EB) :: START_TIME,WAIT_TIME
+INTEGER :: NR
+INTEGER, DIMENSION(:) :: RR
+LOGICAL :: FLAG
+CHARACTER(*) :: RNAME
+
+IF (.NOT.PROFILING) THEN
+
+   START_TIME = MPI_WTIME()
+   FLAG = .FALSE.
+   DO WHILE(.NOT.FLAG)
+      CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
+      WAIT_TIME = MPI_WTIME() - START_TIME
+      IF (WAIT_TIME>MPI_TIMEOUT) THEN
+         WRITE(LU_ERR,'(A,A,A,I6,A,A)') 'CC_TIMEOUT Error: ',TRIM(RNAME),' timed out for MPI process ',MYID
+         CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
+      ENDIF
+   ENDDO
+ELSE
+
+   CALL MPI_WAITALL(NR,RR(1:NR),MPI_STATUSES_IGNORE,IERR)
+
+ENDIF
+
+END SUBROUTINE CC_TIMEOUT
+
+END SUBROUTINE MESH_CC_EXCHANGE
 
 
 ! ----------------------------- CCCOMPUTE_RADIATION --------------------------------
@@ -462,6 +798,9 @@ CALL SET_CCIBM_MATVEC_DATA              ! Defines data for discretization matrix
 
 ! Here in case of Moving meshes -> do interpolation of variables to newly defined cut-cells and faces.
 !!! Something like INIT_CUT_CELL_DATA
+
+! Set flag that specifies cut-cell data as defined:
+CC_MATVEC_DEFINED=.TRUE.
 
 RETURN
 END SUBROUTINE CCIBM_SET_DATA
@@ -4607,23 +4946,23 @@ MATRIX_DIFF_IF : IF (IMP_REGION_FROM_MATRIX_DIFF) THEN
    CALL SYMBLU_ZZ
    ! Numerical Factorization and Solve.
    PHASEZ = 23
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
         A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
 
    ! Release internal memory for scalar:
    PHASEZ = -1
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
         A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
 #elif WITH_CLUSTER_SPARSE_SOLVER
    CALL SYMBLU_ZZ
    ! Numerical Factorization and Solve.
    PHASEZ = 23
-   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
 
    ! Release internal memory for scalar:
    PHASEZ = -1
-   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
 
 #else
@@ -4766,41 +5105,95 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       CALL SYMBLU_ZZ
       ! Numerical Factorization:
       PHASEZ = 22
-      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
            A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
    ENDIF
 
    ! Solve Phase
    PHASEZ = 33
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
         A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
 
    ! Release internal memory for scalar:
    IF ( DNS .OR. (N==N_TOTAL_SCALARS) ) THEN
       PHASEZ = -1
-      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
            A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
    ENDIF
 
 #elif WITH_CLUSTER_SPARSE_SOLVER
 
+
+! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "Matrix_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "VAR_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+! OPEN(unit=34, file=TRIM(FILE_NAME), status='unknown')
+! DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+!    CALL POINT_TO_MESH(NM)
+!    DO K=1,KBAR
+!       DO J=1,JBAR
+!          DO I=1,IBAR
+!             IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
+!             WRITE(33,'(5I8,3F24.18,I8)') NM,IBM_GASPHASE,I,J,K,XC(I),YC(J),ZC(K),CCVAR(I,J,K,IBM_UNKZ)
+!             WRITE(34,'(F24.18)') RZ_Z(CCVAR(I,J,K,IBM_UNKZ)-UNKZ_IND(NM_START)) !RZ_Z(CCVAR(I,J,K,IBM_UNKZ))
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!    ! Cut cells:
+!    DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+!       DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+!          IF (IBM_CUT_CELL(ICC)%UNKZ(JCC) <= 0) CYCLE
+!          WRITE(33,'(5I8,3F24.18,I8)') NM,IBM_CUTCFE,ICC,JCC,0,IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC),&
+!          IBM_CUT_CELL(ICC)%UNKZ(JCC)
+!          WRITE(34,'(F24.18)') RZ_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC)-UNKZ_IND(NM_START)) !RZ_Z(IBM_CUT_CELL(ICC)%UNKZ(JCC))
+!          IF(IBM_CUT_CELL(ICC)%UNKZ(JCC) == 2827) WRITE(LU_ERR,*) 'UNKZ == 2827, ',ICC,JCC,IBM_CUT_CELL(ICC)%VOLUME(JCC)
+!       ENDDO
+!    ENDDO
+! ENDDO
+! CLOSE(33)
+! CLOSE(34)
+!
+! ! Write out A matrix:
+! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "A_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+! DO I=1,INNZ
+!    WRITE(33,'(F24.18)') A_Z(I)
+! ENDDO
+! CLOSE(33)
+! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "JA_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+! DO I=1,INNZ
+!    WRITE(33,'(I8)') JA_Z(I)
+! ENDDO
+! CLOSE(33)
+! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "IA_Z_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
+! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+! DO I=1,NUNKZ_LOCAL+1
+!    WRITE(33,'(I8)') IA_Z(I)
+! ENDDO
+! CLOSE(33)
+!
+!
+! CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+! !STOP
+
    IF ( DNS .OR. (N==1) ) THEN
       CALL SYMBLU_ZZ
       ! Numerical Factorization.
       PHASEZ = 22
-      CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+      CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
    ENDIF
 
    ! Solve Phase
    PHASEZ = 33
-   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+   CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
 
    ! Release internal memory for scalar:
    IF ( DNS .OR. (N==N_TOTAL_SCALARS) ) THEN
       PHASEZ = -1
-      CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+      CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
    ENDIF
 
@@ -5941,7 +6334,11 @@ MNUMZ   = 1
 
 ! Define CLUSTER_SPARSE_SOLVER control parameter vector iparmz:
 IPARMZ(1) = 1   ! no solver default
-IPARMZ(2) = 3   ! fill-in reordering from METIS
+#ifdef WITH_PARDISO
+IPARMZ(2) = 2   ! fill-in reordering from METIS
+#elif WITH_CLUSTER_SPARSE_SOLVER
+IPARMZ(2) = 3   ! Parallel fill-in reordering from METIS
+#endif
 IPARMZ(4) = 0   ! no iterative-direct algorithm
 IPARMZ(5) = 0   ! no user fill-in reducing permutation
 IPARMZ(6) = 0   ! =0 solution on the first n components of x
@@ -5975,7 +6372,7 @@ DO I=1,64
 ENDDO
 ! Reorder and Symbolic factorization:
 PHASEZ = 11
-CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
              A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
 
 #elif WITH_CLUSTER_SPARSE_SOLVER
@@ -5985,7 +6382,7 @@ DO I=1,64
 ENDDO
 ! Reorder and Symbolic factorization:
 PHASEZ = 11
-CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_LOCAL, &
+CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
     A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
 #else
 WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
@@ -6650,6 +7047,8 @@ REAL(EB):: U_IBM, V_IBM, W_IBM
 ! This routine interpolates H to cut cells/Cartesian cells at the end of step.
 ! Makes use of dH/dXn boundary condition on immersed solid surfaces.
 
+IF (CC_ZEROIBM_VELO) CC_INTERPOLATE_H=.FALSE.
+
 ! Interpolate H in cut-cells:
 MESH_LOOP : DO NM=1,NMESHES
 
@@ -6677,26 +7076,29 @@ MESH_LOOP : DO NM=1,NMESHES
       J = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(JAXIS)
       K = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(KAXIS)
 
-      PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
-      INTCOEF(1:5)               = MESHES(NM)%IBM_RCELL_H(IRCELL)%INTCOEF_CARTCEN(1:5)
-
-      IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bpund pt.
-
-      ! Now values:
-      VAL(1) = 0._EB
-      VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-      VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-      VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-      VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
-
-      ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
       VAL_CC    = 0._EB
-      DO II=1,5
-         VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-      ENDDO
-      ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
-      ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
-      VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      IF (CC_INTERPOLATE_H) THEN
+         PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+         INTCOEF(1:5)               = MESHES(NM)%IBM_RCELL_H(IRCELL)%INTCOEF_CARTCEN(1:5)
+
+         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bpund pt.
+
+         ! Now values:
+         VAL(1) = 0._EB
+         VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+         VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+         VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+         VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+
+         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+
+         DO II=1,5
+            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+         ENDDO
+         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      ENDIF
 
       HP(I,J,K) = VAL_CC
 
@@ -6722,65 +7124,76 @@ MESH_LOOP : DO NM=1,NMESHES
          CYCLE
       ENDIF
 
-      ! First Cartesian centroid:
-      PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
-      INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
-
-      IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
-
-      ! Now values:
-      VAL(1) = 0._EB
-      VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-      VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-      VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-      VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
-
-      ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
       VAL_CC    = 0._EB
-      DO II=1,5
-         VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-      ENDDO
-      ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
-      ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
-      VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      IF (CC_INTERPOLATE_H) THEN
+         ! First Cartesian centroid:
+         PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+         INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
+
+         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+
+         ! Now values:
+         VAL(1) = 0._EB
+         VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+         VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+         VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+         VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+
+         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+         DO II=1,5
+            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+         ENDDO
+         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      ENDIF
 
       HP(I,J,K) = VAL_CC
 
       ! Now if the Pressure equation has been solved on Cartesian cells, interpolate values of
       ! H to corresponding cut-cell centroids:
       IF (PRES_ON_CARTESIAN) THEN
-         DO ICELL=1,NCELL
 
-            ! Centroid location:
-            XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+         IF (CC_INTERPOLATE_H) THEN
+            DO ICELL=1,NCELL
+               ! Centroid location:
+               XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
 
-            PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
-            XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
-            INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+               PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+               XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+               INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
 
-            ! Now values:
-            VAL(1) = 0._EB
-            VAL(2) = H(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-            VAL(3) = H(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-            VAL(4) = H(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-            VAL(5) = H(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+               ! Now values:
+               VAL(1) = 0._EB
+               VAL(2) = H(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+               VAL(3) = H(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+               VAL(4) = H(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+               VAL(5) = H(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
 
-            VAL_CC    = 0._EB
-            DO II=1,5
-               VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+               VAL_CC    = 0._EB
+               DO II=1,5
+                  VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+               ENDDO
+
+               IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+                                                           ! No regular gasphase cells found for interpolation.
+               VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dH/dxn = 0.
+
+               IF (PREDICTOR) THEN
+                  IBM_CUT_CELL(ICC)%H(ICELL) = VAL_CC
+               ELSE
+                  IBM_CUT_CELL(ICC)%HS(ICELL) = VAL_CC
+               ENDIF
+
             ENDDO
-
-            IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
-                                                        ! No regular gasphase cells found for interpolation.
-            VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dH/dxn = 0.
-
+         ELSE
+            VAL_CC    = 0._EB
             IF (PREDICTOR) THEN
-               IBM_CUT_CELL(ICC)%H(ICELL) = VAL_CC
+               IBM_CUT_CELL(ICC)%H(1:NCELL) = VAL_CC
             ELSE
-               IBM_CUT_CELL(ICC)%HS(ICELL) = VAL_CC
+               IBM_CUT_CELL(ICC)%HS(1:NCELL) = VAL_CC
             ENDIF
-
-         ENDDO
+        ENDIF
       ENDIF
 
    ENDDO ICC_LOOP
@@ -7565,20 +7978,23 @@ END SUBROUTINE GET_BOUND_VEL
 
 SUBROUTINE CCIBM_CHECK_DIVERGENCE(PREDVEL)
 
+USE MPI
+
 ! This routine is to be used at the end of predictor or corrector:
 
 LOGICAL, INTENT(IN) :: PREDVEL
 
 ! Local Variables:
-INTEGER :: NM, I, J, K, ICC, NCELL, JCC, IFC, IFACE, LOWHIGH, ILH, X1AXIS, IFC2, IFACE2
+INTEGER :: NM, I, J, K, ICC, NCELL, JCC, IFC, IFACE, LOWHIGH, ILH, X1AXIS, IFC2, IFACE2,IERR
 INTEGER :: NMV(1)
 REAL(EB):: PRFCT, DIV, RES, AF, VELN, DIVVOL, VOL, FCT, DPCC, DIV2
 
 REAL(EB), POINTER, DIMENSION(:,:,:)  :: UP=>NULL(), VP=>NULL(), WP=>NULL(), DP=>NULL()
-REAL(EB), ALLOCATABLE, DIMENSION(:)  :: RESMAXV
-REAL(EB), ALLOCATABLE, DIMENSION(:,:):: DIVMNX, DIVVOLMNX, VOLMNX
-INTEGER,  ALLOCATABLE, DIMENSION(:,:):: IJKRM
-INTEGER,  ALLOCATABLE, DIMENSION(:,:,:):: IJKMNX, DIVVOLIJKMNX,DIVVOLICJCMNX,DIVICJCMNX
+REAL(EB), ALLOCATABLE, DIMENSION(:)  :: RESMAXV, RESMAXV_AUX
+REAL(EB), ALLOCATABLE, DIMENSION(:,:):: DIVMNX, DIVVOLMNX, VOLMNX, DIVMNX_AUX, DIVVOLMNX_AUX, VOLMNX_AUX
+INTEGER,  ALLOCATABLE, DIMENSION(:,:):: IJKRM, IJKRM_AUX
+INTEGER,  ALLOCATABLE, DIMENSION(:,:,:):: IJKMNX    , DIVVOLIJKMNX    , DIVVOLICJCMNX     ,DIVICJCMNX    ,&
+                                          IJKMNX_AUX, DIVVOLIJKMNX_AUX, DIVVOLICJCMNX_AUX ,DIVICJCMNX_AUX
 LOGICAL, PARAMETER :: DO_CARTESIAN = .FALSE.
 
 ! Allocate div Containers
@@ -7589,8 +8005,8 @@ ALLOCATE( IJKRM(MAX_DIM,NMESHES), IJKMNX(MAX_DIM,LOW_IND:HIGH_IND,NMESHES), &
 
 ! Initialize div containers
 RESMAXV(1:NMESHES) = 0._EB
-DIVMNX(HIGH_IND,1:NMESHES)  = 0._EB
-DIVMNX(LOW_IND ,1:NMESHES)  = 0._EB
+DIVMNX(LOW_IND:HIGH_IND,1:NMESHES)    = 0._EB
+DIVVOLMNX(LOW_IND:HIGH_IND,1:NMESHES) = 0._EB
 IJKRM(IAXIS:KAXIS,1:NMESHES)                         = 0
 IJKMNX(IAXIS:KAXIS,LOW_IND:HIGH_IND,1:NMESHES)       = 0
 DIVVOLIJKMNX(IAXIS:KAXIS,LOW_IND:HIGH_IND,1:NMESHES) = 0
@@ -7599,14 +8015,12 @@ DIVICJCMNX(1:2,LOW_IND:HIGH_IND,1:NMESHES)           = 0
 VOLMNX(LOW_IND:HIGH_IND,1:NMESHES)                   = 0._EB
 
 ! Meshes Loop:
-MESHES_LOOP : DO NM=1,NMESHES
+MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    DIVMNX(HIGH_IND,NM)     = -10000._EB
    DIVMNX(LOW_IND ,NM)     =  10000._EB
    DIVVOLMNX(HIGH_IND,NM)  = -10000._EB
    DIVVOLMNX(LOW_IND ,NM)  =  10000._EB
-
-   IF (PROCESS(NM)/=MYID) CYCLE
 
    CALL POINT_TO_MESH(NM)
 
@@ -7841,23 +8255,61 @@ MESHES_LOOP : DO NM=1,NMESHES
 ENDDO MESHES_LOOP
 
 ! Here All_Reduce SUM all mesh values:
-NMV(1)=MINLOC(DIVMNX(LOW_IND ,1:NMESHES),DIM=1)
-WRITE(LU_ERR,*) "Div Min=",NMV(1),DIVMNX(LOW_IND ,NMV(1)),IJKMNX(IAXIS:KAXIS,LOW_IND ,NMV(1)),&
-DIVICJCMNX(1:2,LOW_IND,NMV(1)),VOLMNX(LOW_IND,NMV(1))
-NMV(1)=MAXLOC(DIVMNX(HIGH_IND ,1:NMESHES),DIM=1)
-WRITE(LU_ERR,*) "Div Max=",NMV(1),DIVMNX(HIGH_IND,NMV(1)),IJKMNX(IAXIS:KAXIS,HIGH_IND,NMV(1)),&
-DIVICJCMNX(1:2,HIGH_IND,NMV(1)),VOLMNX(HIGH_IND,NMV(1))
+IF (N_MPI_PROCESSES>1) THEN
+   ! Allocate aux div Containers
+   ALLOCATE( RESMAXV_AUX(NMESHES), DIVMNX_AUX(LOW_IND:HIGH_IND,NMESHES), DIVVOLMNX_AUX(LOW_IND:HIGH_IND,NMESHES) )
+   ALLOCATE( IJKRM_AUX(MAX_DIM,NMESHES), IJKMNX_AUX(MAX_DIM,LOW_IND:HIGH_IND,NMESHES), &
+             DIVVOLIJKMNX_AUX(MAX_DIM,LOW_IND:HIGH_IND,NMESHES),  DIVVOLICJCMNX_AUX(2,LOW_IND:HIGH_IND,1:NMESHES), &
+             DIVICJCMNX_AUX(2,LOW_IND:HIGH_IND,1:NMESHES) ,  VOLMNX_AUX(LOW_IND:HIGH_IND,1:NMESHES) )
+   RESMAXV_AUX(:)           = RESMAXV(:)
+   DIVMNX_AUX(:,:)          = DIVMNX(:,:)
+   DIVVOLMNX_AUX(:,:)       = DIVVOLMNX(:,:)
+   IJKRM_AUX(:,:)           = IJKRM(:,:)
+   IJKMNX_AUX(:,:,:)        = IJKMNX(:,:,:)
+   DIVVOLIJKMNX_AUX(:,:,:)  = DIVVOLIJKMNX(:,:,:)
+   DIVVOLICJCMNX_AUX(:,:,:) = DIVVOLICJCMNX(:,:,:)
+   DIVICJCMNX_AUX(:,:,:)    = DIVICJCMNX(:,:,:)
+   VOLMNX_AUX(:,:)          = VOLMNX(:,:)
 
-NMV(1)=MAXLOC(RESMAXV(1:NMESHES),DIM=1)
-WRITE(LU_ERR,*) "Res Max=",NMV(1),RESMAXV(NMV(1)),IJKRM(IAXIS:KAXIS,NMV(1))
+   ! Reals:
+   CALL MPI_ALLREDUCE(RESMAXV_AUX(1) , RESMAXV(1) ,   NMESHES, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(DIVMNX_AUX(1,1), DIVMNX(1,1), 2*NMESHES, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(DIVVOLMNX_AUX(1,1), DIVVOLMNX(1,1), 2*NMESHES, MPI_DOUBLE_PRECISION, MPI_SUM, &
+                      MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(VOLMNX_AUX(1,1), VOLMNX(1,1), 2*NMESHES, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
 
-NMV(1)=MINLOC(DIVVOLMNX(LOW_IND ,1:NMESHES),DIM=1)
-WRITE(LU_ERR,*) "DivVol Min=",NMV(1),DIVVOLMNX(LOW_IND ,NMV(1)),DIVVOLIJKMNX(IAXIS:KAXIS,LOW_IND ,NMV(1)),&
-DIVVOLICJCMNX(1:2,LOW_IND,NMV(1))
-NMV(1)=MAXLOC(DIVVOLMNX(HIGH_IND ,1:NMESHES),DIM=1)
-WRITE(LU_ERR,*) "DivVol Max=",NMV(1),DIVVOLMNX(HIGH_IND,NMV(1)),DIVVOLIJKMNX(IAXIS:KAXIS,HIGH_IND,NMV(1)),&
-DIVVOLICJCMNX(1:2,HIGH_IND,NMV(1))
+   ! Integers:
+   CALL MPI_ALLREDUCE(IJKRM_AUX(1,1), IJKRM(1,1), MAX_DIM*NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(IJKMNX_AUX(1,1,1), IJKMNX(1,1,1), MAX_DIM*2*NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(DIVVOLIJKMNX_AUX(1,1,1), DIVVOLIJKMNX(1,1,1), MAX_DIM*2*NMESHES, MPI_INTEGER, MPI_SUM, &
+                      MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(DIVVOLICJCMNX_AUX(1,1,1), DIVVOLICJCMNX(1,1,1), 2*2*NMESHES, MPI_INTEGER, MPI_SUM, &
+                      MPI_COMM_WORLD, IERR)
+   CALL MPI_ALLREDUCE(DIVICJCMNX_AUX(1,1,1), DIVICJCMNX(1,1,1), 2*2*NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
 
+   DEALLOCATE(RESMAXV_AUX, DIVMNX_AUX, DIVVOLMNX_AUX, IJKRM_AUX, IJKMNX_AUX, DIVVOLIJKMNX_AUX, DIVVOLICJCMNX_AUX, &
+              DIVICJCMNX_AUX, VOLMNX_AUX)
+ENDIF
+
+
+IF (MYID==0) THEN
+   NMV(1)=MINLOC(DIVMNX(LOW_IND ,1:NMESHES),DIM=1)
+   WRITE(LU_ERR,*) "Div Min=",NMV(1),DIVMNX(LOW_IND ,NMV(1)),IJKMNX(IAXIS:KAXIS,LOW_IND ,NMV(1)),&
+   DIVICJCMNX(1:2,LOW_IND,NMV(1)),VOLMNX(LOW_IND,NMV(1))
+   NMV(1)=MAXLOC(DIVMNX(HIGH_IND ,1:NMESHES),DIM=1)
+   WRITE(LU_ERR,*) "Div Max=",NMV(1),DIVMNX(HIGH_IND,NMV(1)),IJKMNX(IAXIS:KAXIS,HIGH_IND,NMV(1)),&
+   DIVICJCMNX(1:2,HIGH_IND,NMV(1)),VOLMNX(HIGH_IND,NMV(1))
+
+   NMV(1)=MAXLOC(RESMAXV(1:NMESHES),DIM=1)
+   WRITE(LU_ERR,*) "Res Max=",NMV(1),RESMAXV(NMV(1)),IJKRM(IAXIS:KAXIS,NMV(1))
+
+   NMV(1)=MINLOC(DIVVOLMNX(LOW_IND ,1:NMESHES),DIM=1)
+   WRITE(LU_ERR,*) "DivVol Min=",NMV(1),DIVVOLMNX(LOW_IND ,NMV(1)),DIVVOLIJKMNX(IAXIS:KAXIS,LOW_IND ,NMV(1)),&
+   DIVVOLICJCMNX(1:2,LOW_IND,NMV(1))
+   NMV(1)=MAXLOC(DIVVOLMNX(HIGH_IND ,1:NMESHES),DIM=1)
+   WRITE(LU_ERR,*) "DivVol Max=",NMV(1),DIVVOLMNX(HIGH_IND,NMV(1)),DIVVOLIJKMNX(IAXIS:KAXIS,HIGH_IND,NMV(1)),&
+   DIVVOLICJCMNX(1:2,HIGH_IND,NMV(1))
+ENDIF
 
 ! DeAllocate div Containers
 DEALLOCATE( RESMAXV, DIVMNX, DIVVOLMNX )
@@ -8451,12 +8903,12 @@ PHASE = 33   ! Solve system back-forth substitution.
 TNOW=SECOND()
 #ifdef WITH_PARDISO
 
-CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_LOCAL, &
+CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
      A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
 WRITE(LU_ERR,*) "POTENTIAL_FLOW PARDISO time=",SECOND()-TNOW,ERROR
 
 #elif WITH_CLUSTER_SPARSE_SOLVER
-CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_LOCAL, &
+CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
              A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
 WRITE(LU_ERR,*) "POTENTIAL_FLOW CLUSTER_SPARSE_SOLVER time=",SECOND()-TNOW,ERROR
 
@@ -15753,6 +16205,8 @@ SUBROUTINE GET_H_CUTFACES
 ! Local variables:
 INTEGER :: NM
 INTEGER :: NCELL,ICC,JCC,IFC,IFACE,LOWHIGH,ICF1,ICF2
+INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,X1AXIS
+TYPE (WALL_TYPE), POINTER :: WC
 
 ! Mesh loop:
 MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -15806,6 +16260,78 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+
+   ! Now Apply external wall cell loop for guard-cell cut cells:
+   GUARD_CUT_CELL_LOOP :  DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE GUARD_CUT_CELL_LOOP
+
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+
+      ! Drop if face is not of type IBM_CUTCFE:
+      X1AXIS=ABS(IOR)
+      SELECT CASE(IOR)
+      CASE( IAXIS)
+         IIF=II  ; JJF=JJ  ; KKF=KK
+         LOWHIGH_TEST=HIGH_IND ! Face on high side of Guard-Cell
+      CASE(-IAXIS)
+         IIF=II-1; JJF=JJ  ; KKF=KK
+         LOWHIGH_TEST=LOW_IND
+      CASE( JAXIS)
+         IIF=II  ; JJF=JJ  ; KKF=KK
+         LOWHIGH_TEST=HIGH_IND
+      CASE(-JAXIS)
+         IIF=II  ; JJF=JJ-1; KKF=KK
+         LOWHIGH_TEST=LOW_IND
+      CASE( KAXIS)
+         IIF=II  ; JJF=JJ  ; KKF=KK
+         LOWHIGH_TEST=HIGH_IND
+      CASE(-KAXIS)
+         IIF=II  ; JJF=JJ  ; KKF=KK-1
+         LOWHIGH_TEST=LOW_IND
+      END SELECT
+
+      IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_CUTCFE) CYCLE GUARD_CUT_CELL_LOOP
+
+      ! Copy CCVAR(II,JJ,KK,IBM_CGSC) to guard cell:
+      ICC = MESHES(NM)%CCVAR(II,JJ,KK,IBM_IDCC)
+
+      DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+
+         ! Loop faces and test:
+         DO IFC=1,IBM_CUT_CELL(ICC)%CCELEM(1,JCC)
+
+            IFACE = IBM_CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+            ! Which face ?
+            LOWHIGH = IBM_CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+
+            IF ( IBM_CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_CFGAS) CYCLE ! Must Be gasphase cut-face
+            IF ( LOWHIGH                              /= LOWHIGH_TEST) CYCLE ! In same side as EWC from guard-cell
+            IF ( IBM_CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
+
+            ICF1    = IBM_CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+            ICF2    = IBM_CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+
+            IF ( LOWHIGH == LOW_IND) THEN ! Cut-face on low side of cut-cell:
+               IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured H Poisson matrix build, use cut-cell vols:
+                  IBM_CUT_FACE(ICF1)%UNKH(HIGH_IND,ICF2) = IBM_CUT_CELL(ICC)%UNKH(JCC)
+               ELSE ! Unstructured build, use underlying cartesian cells:
+                  IBM_CUT_FACE(ICF1)%UNKH(HIGH_IND,ICF2) = IBM_CUT_CELL(ICC)%UNKH(1)
+               ENDIF
+            ELSE ! HIGH
+               IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured H Poisson matrix build, use cut-cell vols:
+                  IBM_CUT_FACE(ICF1)%UNKH(LOW_IND,ICF2) = IBM_CUT_CELL(ICC)%UNKH(JCC)
+               ELSE ! Unstructured build, use underlying cartesian cells:
+                  IBM_CUT_FACE(ICF1)%UNKH(LOW_IND,ICF2) = IBM_CUT_CELL(ICC)%UNKH(1)
+               ENDIF
+            ENDIF
+
+         ENDDO
+      ENDDO
+   ENDDO GUARD_CUT_CELL_LOOP
 
 ENDDO MAIN_MESH_LOOP
 
@@ -15912,9 +16438,6 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ICF1    = IBM_CUT_CELL(ICC)%FACE_LIST(4,IFACE)
             ICF2    = IBM_CUT_CELL(ICC)%FACE_LIST(5,IFACE)
 
-            IF (IBM_CUT_CELL(ICC)%UNKZ(JCC) < 0) THEN
-               WRITE(LU_ERR,*) NM,MESHES(NM)%IBM_NCUTCELL_MESH,ICC,JCC,',IBM_CUT_CELL(ICC)%UNKZ(JCC)=',IBM_CUT_CELL(ICC)%UNKZ(JCC)
-            ENDIF
             IF ( LOWHIGH == LOW_IND) THEN ! Cut-face on low side of cut-cell:
                IBM_CUT_FACE(ICF1)%UNKZ(HIGH_IND,ICF2)        = IBM_CUT_CELL(ICC)%UNKZ(JCC)
                IBM_CUT_FACE(ICF1)%XCENHIGH(IAXIS:KAXIS,ICF2) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
@@ -15957,6 +16480,10 @@ INTEGER :: XIAXIS,XJAXIS,XKAXIS,INDXI1(MAX_DIM),INCELL,JNCELL,KNCELL,INFACE,JNFA
 INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 LOGICAL :: INLIST
 
+INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,IIG,JJG,KKG
+TYPE (WALL_TYPE), POINTER :: WC
+
+LOGICAL :: FLGIN
 
 ! Test for Pressure Solver:
 IF ( (PRES_METHOD /= "GLMAT") .OR. (PRES_ON_WHOLE_DOMAIN) ) RETURN ! No need to build matrix as
@@ -16030,6 +16557,57 @@ DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
       ENDDO
    ENDDO
 ENDDO
+
+! Check for RCFACE_H on the boundary of the domain, where the cut-cell is in the cut-cell region.
+! Now Apply external wall cell loop for guard-cell cut cells:
+GUARD_CUT_CELL_LOOP_1 :  DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE GUARD_CUT_CELL_LOOP_1
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   ! Which face:
+   X1AXIS=ABS(IOR)
+   SELECT CASE(IOR)
+   CASE( IAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND ! Face on high side of Guard-Cell
+   CASE(-IAXIS)
+      IIF=II-1; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=LOW_IND
+   CASE( JAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND
+   CASE(-JAXIS)
+      IIF=II  ; JJF=JJ-1; KKF=KK
+      LOWHIGH_TEST=LOW_IND
+   CASE( KAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND
+   CASE(-KAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK-1
+      LOWHIGH_TEST=LOW_IND
+   END SELECT
+
+   ! Drop if FACE is not type IBM_GASPHASE
+   IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_1
+
+   IIG  = WC%ONE_D%IIG
+   JJG  = WC%ONE_D%JJG
+   KKG  = WC%ONE_D%KKG
+
+   ! Is this an actual RCFACE_VEL laying on the mesh boundary, where the cut-cell is in the guard-cell region?
+   FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_CGSC)==IBM_GASPHASE)
+
+   IF(.NOT.FLGIN) CYCLE GUARD_CUT_CELL_LOOP_1
+
+   IJKFACE(IIF,JJF,KKF,X1AXIS) = 1
+
+ENDDO GUARD_CUT_CELL_LOOP_1
+
 IRC = SUM(IJKFACE(:,:,:,:))
 IF (IRC == 0) THEN
    DEALLOCATE(IJKFACE)
@@ -16354,6 +16932,119 @@ DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
       ENDDO
    ENDDO
 ENDDO
+
+GUARD_CUT_CELL_LOOP_2 :  DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE GUARD_CUT_CELL_LOOP_2
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   ! Which face:
+   X1AXIS=ABS(IOR)
+   SELECT CASE(IOR)
+   CASE( IAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND ! Face on high side of Guard-Cell
+   CASE(-IAXIS)
+      IIF=II-1; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=LOW_IND
+   CASE( JAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND
+   CASE(-JAXIS)
+      IIF=II  ; JJF=JJ-1; KKF=KK
+      LOWHIGH_TEST=LOW_IND
+   CASE( KAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK
+      LOWHIGH_TEST=HIGH_IND
+   CASE(-KAXIS)
+      IIF=II  ; JJF=JJ  ; KKF=KK-1
+      LOWHIGH_TEST=LOW_IND
+   END SELECT
+
+   ! Drop if FACE is not type IBM_GASPHASE
+   IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_2
+
+   IIG  = WC%ONE_D%IIG
+   JJG  = WC%ONE_D%JJG
+   KKG  = WC%ONE_D%KKG
+
+   ! Is this an actual RCFACE_H laying on the mesh boundary, where the cut-cell is in the guard-cell region?
+   FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_UNKH) > 0)
+
+   IF(.NOT.FLGIN) CYCLE GUARD_CUT_CELL_LOOP_2
+
+   ICC=CCVAR(II,JJ,KK,IBM_IDCC)
+   DO JCC=1,IBM_CUT_CELL(ICC)%NCELL
+      ! Loop faces and test:
+      DO IFC=1,IBM_CUT_CELL(ICC)%CCELEM(1,JCC)
+         IFACE = IBM_CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+         ! Which face ?
+         LOWHIGH = IBM_CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+         IF ( IBM_CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_RGGAS) CYCLE ! Must Be gasphase cut-face
+         IF ( LOWHIGH                              /= LOWHIGH_TEST) CYCLE ! In same side as EWC from guard-cell
+         IF ( IBM_CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
+
+          ! If so, we need to add it to the IBM_RCFACE_H list:
+         IF (LOWHIGH == LOW_IND) THEN ! Face on low side of guard cut-cell
+
+            IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured pressure Poisson matrix build,
+                                               ! use cut-cell vols:
+               ! Work deferred.
+
+            ELSE ! Solve Poisson on underlying unstructured Cartesian mesh.
+
+               ! Add face to IBM_RCFACE_H data structure:
+               IRC = IRC + 1
+               MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ IIF, JJF, KKF, X1AXIS/)
+
+               ! Add all info required for matrix build:
+               ! Cell at i-1, i.e. regular GASPHASE:
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
+               (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
+
+               ! Cell at i+1, i.e. cut-cell:
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = IBM_CUT_CELL(ICC)%UNKH(1)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
+               (/ XCELL(II), YCELL(JJ), ZCELL(KK) /)
+
+            ENDIF
+
+         ELSEIF(LOWHIGH == HIGH_IND) THEN ! Face on high side of guard cut-cell
+
+            IF ( .NOT.PRES_ON_CARTESIAN ) THEN ! Unstructured pressure Poisson matrix build,
+                                               ! use cut-cell vols:
+               ! Work deferred.
+
+            ELSE ! Solve Poisson on underlying unstructured Cartesian mesh.
+
+               ! Add face to IBM_RCFACE_H data structure:
+               IRC = IRC + 1
+               MESHES(NM)%IBM_RCFACE_H(IRC)%IJK(IAXIS:KAXIS+1) = (/ IIF, JJF, KKF, X1AXIS/)
+
+               ! Add all info required for matrix build:
+               ! Cell at i-1, i.e. cut-cell:
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(LOW_IND) = IBM_CUT_CELL(ICC)%UNKH(1)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,LOW_IND) = &
+               (/ XCELL(II), YCELL(JJ), ZCELL(KK) /)
+
+               ! Cell at i+1, i.e. regular GASPHASE:
+               MESHES(NM)%IBM_RCFACE_H(IRC)%UNK(HIGH_IND) = CCVAR(IIG,JJG,KKG,IBM_UNKH)
+               MESHES(NM)%IBM_RCFACE_H(IRC)%XCEN(IAXIS:KAXIS,HIGH_IND) = &
+               (/ XCELL(IIG), YCELL(JJG), ZCELL(KKG) /)
+            ENDIF
+
+         ENDIF
+         ! At this point the face has been found, cycle:
+         CYCLE GUARD_CUT_CELL_LOOP_2
+      ENDDO
+   ENDDO
+
+ENDDO GUARD_CUT_CELL_LOOP_2
 
 DEALLOCATE(XCELL,YCELL,ZCELL)
 DEALLOCATE(IJKFACE)
@@ -16988,6 +17679,91 @@ ENDIF FLAG12_COND
 
 RETURN
 END SUBROUTINE NUMBER_UNKH_CUTCELLS
+
+! ------------------- COPY_CC_HS_TO_UNKH ----------------------------
+
+SUBROUTINE COPY_CC_HS_TO_UNKH(NM)
+
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: NOM,ICC,II,JJ,KK,IOR,IW,IIO,JJO,KKO
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (WALL_TYPE), POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+
+IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
+
+   ! Loop over external wall cells:
+   EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+      WC=>WALL(IW)
+      EWC=>EXTERNAL_WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+      NOM = EWC%NOM
+      OM => OMESH(NOM)
+
+      ! This assumes all meshes at the same level of refinement:
+      KKO=EWC%KKO_MIN
+      JJO=EWC%JJO_MIN
+      IIO=EWC%IIO_MIN
+
+      ICC=CCVAR(II,JJ,KK,IBM_IDCC)
+
+      IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
+         MESHES(NM)%IBM_CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
+      ELSE
+         MESHES(NM)%CCVAR(II,JJ,KK,IBM_UNKH) = INT(OM%HS(IIO,JJO,KKO))
+      ENDIF
+
+      OM%HS(IIO,JJO,KKO) = 0._EB ! (VAR_CC == UNKH)
+
+   ENDDO EXTERNAL_WALL_LOOP
+
+ELSE
+
+   ! Unstructured pressure solve: Method 1.
+   WRITE(LU_ERR,*) 'COPY_CC_UNKH_TO_HS Error: Unstructured pressure solve not implemented yet.'
+
+ENDIF
+
+RETURN
+END SUBROUTINE COPY_CC_HS_TO_UNKH
+
+! ------------------- COPY_CC_UNKH_TO_HS ----------------------------
+
+SUBROUTINE COPY_CC_UNKH_TO_HS(NM)
+
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: I,J,K,ICC
+
+IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
+
+   DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+      I = MESHES(NM)%IBM_CUT_CELL(ICC)%IJK(IAXIS)
+      J = MESHES(NM)%IBM_CUT_CELL(ICC)%IJK(JAXIS)
+      K = MESHES(NM)%IBM_CUT_CELL(ICC)%IJK(KAXIS)
+      HS(I,J,K)= REAL(MESHES(NM)%IBM_CUT_CELL(ICC)%UNKH(1),EB)
+   ENDDO
+
+ELSE
+
+   ! Unstructured pressure solve: Method 1.
+   WRITE(LU_ERR,*) 'COPY_CC_UNKH_TO_HS Error: Unstructured pressure solve not implemented yet.'
+
+ENDIF
+
+
+
+RETURN
+END SUBROUTINE COPY_CC_UNKH_TO_HS
 
 ! ---------------- DEFINE_REGULAR_CUTFACES --------------------------
 

@@ -1,11 +1,11 @@
 &HEAD CHID='cube_cc_compute', TITLE='CC-IBM: Test cut-cell computation around cube.' /
   
 # 1 MESH:
-#& MESH IJK=16,16,16, XB=-2,2,-2,2,0,4 /
+&MESH IJK=16,16,16, XB=-2,2,-2,2,0,4 /
 
 # 2 MESHES:
-&MESH IJK=16,16,8, XB=-2.0,2.0,-2.0,2.0,0.0,2.0, MULT_ID='mesh' /
-&MULT ID='mesh', DZ=2., K_UPPER=1 /
+#& MESH IJK=32,32,16, XB=-2.0,2.0,-2.0,2.0,0.0,2.0, MULT_ID='mesh' /
+#& MULT ID='mesh', DZ=2., K_UPPER=1 /
 #& MESH IJK=36,72,72, XB=-2.0,0.0,-2.0,2.0,0.0,4.0, MULT_ID='mesh' /
 #& MULT ID='mesh', DX=2., I_UPPER=1 /
 
@@ -24,10 +24,10 @@
 #&MESH IJK=36,36,18, XB=-2.0,0.0,-2.0,0.0,0.0,1.0, MULT_ID='mesh' /
 #&MULT ID='mesh', DX=2., DY=2., DZ=1., I_UPPER=1, J_UPPER=1, K_UPPER=3 /
   
-&TIME T_END=1.0/
+&TIME T_END=.1, LOCK_TIME_STEP=.TRUE., DT=0.05 /
 &MISC NOISE=.FALSE., CC_IBM=.TRUE., CCVOL_LINK=0.0, COMPUTE_CUTCELLS_ONLY=.FALSE., CC_ZEROIBM_VELO=.TRUE. /
 
-#& PRES GLMAT_SOLVER=.TRUE. /
+&PRES GLMAT_SOLVER=.TRUE. /
 
 &RADI RADIATION=.FALSE. /
 
