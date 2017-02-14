@@ -352,6 +352,7 @@ echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
 MD5HASH . $bundlebase.sh > $bundledir/bin/MD5/$bundlebase.sh.md5
+MD5HASH . $bundlebase.sh > $uploaddir/$bundlebase.sh.md5
 cat $bundledir/bin/MD5/*.md5 > $MD5SUMMARY
 
 if [ -e $errlog ]; then
