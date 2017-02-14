@@ -913,8 +913,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
          CASE (THERMALLY_THICK) ! TMP_F and HEAT FLUX taken from PYROLYSIS
 
             TMP_F = WC%ONE_D%TMP_F
-            TMP_S = WC%ONE_D%TMP(1)
-            DN    = ABS( 0.5_EB*(WC%ONE_D%X(0)-WC%ONE_D%X(1)) ) ! ABS required because X is a "depth"
+            TMP_S = 0.5_EB*(WC%ONE_D%TMP(1) + WC%ONE_D%TMP(2))
+            DN    = WC%ONE_D%X(1) - WC%ONE_D%X(0)
             HTC   = K_S / DN
             KDTDN = HTC * (TMP_F-TMP_S)
 
