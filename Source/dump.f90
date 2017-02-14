@@ -6735,7 +6735,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
       SOLID_PHASE_OUTPUT = RHO(IIG,JJG,KKG)*Y_SPECIES
 
-   CASE(62) ! SOLID CELL TEMPERATURE (TMP_BAR)
+   CASE(62) ! SOLID CELL TEMPERATURE
 
       !              X(II-1)      X(II)      X(IIG-1)
       !                XC1         XC0        //|
