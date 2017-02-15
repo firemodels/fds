@@ -2069,7 +2069,7 @@ Colors for many items within FDS can be prescribed in two ways; a triplet of int
 will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
 It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
 
-Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview.
+Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
 
 \begin{table}[p]
@@ -6457,9 +6457,22 @@ A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, rep
 \label{beam_detector}
 \end{figure}
 
-
-
-
+\subsubsection{Special Topic: Beam Detectors Spanning Multiple Meshes}
+The data from a device are processed and stored on the mesh in which the device is spatially located; therefore you cannot specify a single beam detector which spans multiple meshes. To model a single beam detector which is required to span multiple meshes, specify one beam on each mesh spanned and use a combination of secondary {\ct DEVC}s and {\ct CTRL}s to sum the obscuration from each of the constituent beams. For example, to model {\ct beam\_1}, which is required to span two meshes, specify two constituent beams (\,{\ct beam\_1a} and {\ct beam\_1b}\,) and sum their obscuration to output the total obscuration of {\ct beam\_1}:
+\begin{lstlisting}
+&DEVC ID='beam_1a', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
+&DEVC ID='beam_1b', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
+&CTRL ID='beam_1a_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1a', CONSTANT=100. /
+&CTRL ID='beam_1b_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1b', CONSTANT=100. /
+&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
+&CTRL ID='beam_1_f', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1_m', CONSTANT=100. /
+&DEVC ID='beam_1', QUANTITY='CONTROL VALUE', CTRL_ID='beam_1_f', XYZ=... /
+\end{lstlisting}
+The outputs of the constituent beams are suppressed and the obscuration of {\ct beam\_1} will be in percent. The constant on the line:
+\begin{lstlisting}
+&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
+\end{lstlisting}
+needs to be modified to suit the number of constituent beams. To maintain correct decimal placement, the value of the negative exponent should be equal to the number of constituent beams multiplied by \num{2}, minus \num{2}.
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
@@ -9055,7 +9068,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
+{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:mean_forcing}                        & m/s           & 0.                \\ \hline
 %{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
