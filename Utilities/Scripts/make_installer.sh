@@ -300,13 +300,16 @@ while true; do
   OPTION4=
   echo ""
   echo "OpenMPI options"
+
+  OPTION=\$(echo \$OPTION + 1 | bc)
+  OPTION2=\$OPTION
+  echo "  Press \$OPTION2 to use \$FDS_root/bin/openmpi_64 [default]"
+
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION1=\$OPTION
-  echo "  Press \$OPTION1 to install OpenMPI manually [default]"
+  echo "  Press \$OPTION1 to install OpenMPI manually"
   echo "     See \$FDS_root/bin/README.html for details"
-#  OPTION=\$(echo \$OPTION + 1 | bc)
-#  OPTION2=\$OPTION
-  #echo "  Press \$OPTION2 to use \$FDS_root/bin/openmpi_64 "
+
   mpipath=
   mpipatheth=
   mpiused=
@@ -332,14 +335,16 @@ while true; do
   else
     read answer
   fi
-#  if [[ "\$answer" == "\$OPTION2" ]]; then
-#    eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
-#    eval MPIDIST_FDSROOT=\$FDS_root/bin
-#    mpiused=\$FDS_root/bin/openmpi_64
-#  else
+  if [[ "\$answer" == "\$OPTION2" || "\$answer" == "" ]]; then
+     answer=\$OPTION2
+     eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+     eval MPIDIST_FDSROOT=\$FDS_root/bin
+     mpiused=\$FDS_root/bin/openmpi_64
+     valid_answer=1
+  else
     eval MPIDIST_FDS=
-#  fi
-   eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+  fi
+  eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
   if [[ "\$answer" == "\$OPTION3" ]]; then
      mpipath2=\\\$MPIDIST_ETH
      mpiused=\$mpipatheth
@@ -348,10 +353,6 @@ while true; do
   if [[ "\$answer" == "\$OPTION4" ]]; then
      mpipath2=\\\$MPIDIST_IB
      mpiused=\$mpipathib
-     valid_answer=1
-  fi
-  if [[ "\$answer" == "\$OPTION1" || "\$answer" == "" ]]; then
-     answer=\$OPTION1
      valid_answer=1
   fi
   if [[ "\$valid_answer" == "" ]]; then
@@ -407,11 +408,11 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
-#if [ "\$MPIDIST_FDSROOT" != "" ]; then
-#  echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
-#  cd \$MPIDIST_FDSROOT
-#  tar xvf $OPENMPIFILE >& /dev/null
-#fi
+if [ "\$MPIDIST_FDSROOT" != "" ]; then
+  echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
+  cd \$MPIDIST_FDSROOT
+  tar xvf $OPENMPIFILE >& /dev/null
+fi
 echo "Copy complete."
 
 #--- create uninstall file
@@ -611,7 +612,6 @@ EOF
 fi
 
 cat << EOF >> $INSTALLER
-
 echo ""
 echo "*** Log out and log back in so changes will take effect."
 echo ""
