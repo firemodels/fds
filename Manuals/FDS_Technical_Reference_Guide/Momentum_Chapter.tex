@@ -118,6 +118,13 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 \end{align}
 Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
 
+\subsection{Wind Fields via Mean Forcing or Nudging}
+
+A common technique used in data assimilation referred to as mean forcing or {\em nudging} is applied to model wind fields~\cite{Kalnay:2003}. Given a vertically and temporally varying wind field, $\bu_\infty(z,t)$, that is assumed to apply to the entire computational domain, a forcing term is added to the momentum equation:
+\be
+   \frac{\partial \bu}{\partial t} = \ldots + \frac{\bu_\infty - \overline{\bu}}{\tau}
+\ee
+where $\overline{\bu}$ is the average velocity vector over a particular horizontal slice of the atmosphere (typically a single horizontal row of grid cells). The relaxation time scale, $\tau$, is chosen by the user such that the computed velocity field faithfully follows the specified wind field. In cases where the wind is steady, the value of $\tau$ can be fairly large and hence the forcing term fairly small. However, if the wind field fluctuates rapidly in time, the value of $\tau$ needs to be chosen based on some trial and error.
 
 \newpage
 \section{Models for the Turbulent Viscosity}
@@ -497,6 +504,8 @@ Note that for both stages, the normal components of velocity at the interface ar
 \section{Velocity Boundary Conditions}
 \label{info:velocity_bc}
 
+This section describes how the tangential component of velocity is specified at solid surfaces, mesh interfaces, or open boundaries to the outside atmosphere. The normal component of velocity is not specified directly at these boundaries, but rather indirectly via the pressure boundary condition, as described in Section~\ref{PoissonEq}.
+
 \subsection{Smooth Walls}
 \label{smooth_wall_model}
 
@@ -558,6 +567,16 @@ where $A$ is a dimensionless empirical constant equal to 26.  The term in bracke
    \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
 \end{equation}
 where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
+
+\subsection{Open Boundaries}
+
+An open boundary is where the fluid is allowed to enter or exit the computational domain based on local pressure gradients, like at an open window or door of a building. Typically, the gradients of the tangential components of velocity are set to zero at an open boundary. That is, the ``ghost cell'' values of the tangential velocity components are set equal to their values in the first grid cell. However, if the user specifies a wind field $(u_\infty,v_\infty)$, then the tangential components of velocity are set to their respective far-field values at all inflow boundaries. At outflow boundaries, the standard zero-gradient condition is applied. 
+
+\subsection{Mesh Boundaries}
+
+At the interface between two meshes, the tangential components of velocity are taken directly from the neighboring mesh via an MPI exchange. 
+
+
 
 
 \newpage
