@@ -1026,10 +1026,11 @@ SUBROUTINE HT3D_1D_RECONSTRUCTION
 
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 INTEGER :: IW,IC,II,JJ,KK,IIG,JJG,KKG,IOR,IZERO,NWP,I,J
-REAL(EB) :: XC0,XC1,X0,X1,VOL,DVOL,UHAT,XDATA(2),YDATA(2),XWALL,TMPMIN_LOC,TMPMAX_LOC
+REAL(EB) :: VOL,DVOL,TMPMIN_LOC,TMPMAX_LOC,RANDOM_UNUSED_VARIABLE
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: XI,UI,UB,UP,UH,XJ,VH,XH,VB
+REAL(EB), POINTER, DIMENSION(:) :: XI=>NULL(),UI=>NULL(),UB=>NULL(),UP=>NULL(), &
+                                   XJ=>NULL(),UH=>NULL(),VH=>NULL(),XH=>NULL()
 
 RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
@@ -1052,28 +1053,28 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IOR = WC%ONE_D%IOR
    NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
 
-   ALLOCATE(XI(0:NWP),STAT=IZERO)
-   ALLOCATE(UI(0:NWP),STAT=IZERO)
-   ALLOCATE(UP(0:NWP),STAT=IZERO)
-   ALLOCATE(UB(0:NWP),STAT=IZERO)
-   ALLOCATE(VB(0:NWP),STAT=IZERO)
+   XI => ONE_D_WORK1
+   UI => ONE_D_WORK2
+   UP => ONE_D_WORK3
+   UB => ONE_D_WORK4
 
-   XI = WC%ONE_D%X(0:NWP)
-   UI = WC%ONE_D%TMP(0:NWP)
+   XI(0:NWP) = WC%ONE_D%X(0:NWP)
+   UI(0:NWP) = WC%ONE_D%TMP(0:NWP)
 
-   TMPMIN_LOC=MINVAL(UI)
-   TMPMAX_LOC=MAXVAL(UI)
+   TMPMIN_LOC=MINVAL(UI(0:NWP))
+   TMPMAX_LOC=MAXVAL(UI(0:NWP))
 
    ! VH is the 3D cell temperature
    ! XH is the 3D cell center depth
    ! XJ is the 3D cell face depth
 
+   UH => ONE_D_WORK5; UH=0._EB
+   VH => ONE_D_WORK6; VH=0._EB
+   XH => ONE_D_WORK7; XH=0._EB
+   XJ => ONE_D_WORK8; XJ=0._EB
+
    SELECT CASE (IOR)
       CASE(1)
-         ALLOCATE(UH(0:II),STAT=IZERO)
-         ALLOCATE(VH(0:II),STAT=IZERO)
-         ALLOCATE(XH(0:II),STAT=IZERO)
-         ALLOCATE(XJ(0:II),STAT=IZERO)
          DO J=0,II
             VH(J) = TMP(II+1-J,JJ,KK)
             XH(J) = X(II) - XC(IIG-J)
@@ -1081,37 +1082,36 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             TMPMIN_LOC = MIN(TMPMIN_LOC,VH(J))
             TMPMAX_LOC = MAX(TMPMAX_LOC,VH(J))
          ENDDO
-      CASE(-1)
-         ALLOCATE(UH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(VH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(XH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(XJ(0:(IBAR-IIG)),STAT=IZERO)
-         DO J=0,(IBAR-IIG)
-            VH(J) = TMP(IIG+J,JJG,KKG)
-            XH(J) = XC(IIG+J) - X(IIG)
-            XJ(J) = X(IIG+J) - X(IIG)
-            TMPMIN_LOC = MIN(TMPMIN_LOC,VH(J))
-            TMPMAX_LOC = MAX(TMPMAX_LOC,VH(J))
-         ENDDO
    END SELECT
 
    ! first steps: count cells and restrict 1D field from UI to UH
 
-   UH = 0._EB
-   VOL = 0._EB
+   UH = HUGE_EB
+   DVOL = 0._EB
+   VOL  = 0._EB
    J = 1
+   UH(J) = 0._EB
    DO I=1,NWP
+
       DVOL = MIN(XI(I),XJ(J)) - MAX(XI(I-1),XJ(J-1))
-      VOL  = VOL + DVOL
+      VOL = VOL + DVOL
       UH(J) = UH(J) + UI(I) * DVOL
-      IF (XI(I)>XJ(J) .AND. I<NWP) THEN
+
+      IF ( XI(I) >= XJ(J) ) THEN
          UH(J) = UH(J)/VOL
          VOL = 0._EB
          J = J+1
+         UH(J) = 0._EB
       ELSEIF (I==NWP) THEN
-         UH(J) = UH(J)/VOL
+         IF (VOL > TWO_EPSILON_EB) THEN
+            UH(J) = UH(J)/VOL
+         ELSE
+            UH(J) = UI(I)
+         ENDIF
       ENDIF
+
    ENDDO
+
    UH(0) = WC%ONE_D%TMP_F
    VH(0) = WC%ONE_D%TMP_F
    XH(0) = 0._EB
@@ -1119,32 +1119,41 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! step 2: interpolate the cell data from 1D and 3D fields
 
    UB(0) = UI(0)
-   VB(0) = UI(0)
-
    DO I=1,NWP
-      CALL INTERPOLATE1D(XH,UH,XI(I),UB(I))
-      CALL INTERPOLATE1D(XH,VH,XI(I),VB(I))
+      CALL INTERPOLATE1D(XH(0:J),UH(0:J),XI(I),UB(I))
    ENDDO
 
    ! step 3: save the fine-grained structure of the 1D solution
 
-   UP = UI - UB;
+   UP(1:NWP) = UI(1:NWP) - UB(1:NWP)
+
+!    if (IW==1928) then
+!       print *
+!       print *, II,JJ,KK
+!       print *, J,XI(NWP),XJ(J)
+!       print *
+!       print *, XJ(0:J+1)
+!       print *, XH(0:J+1)
+!       print *, UH(0:J+1)
+!       print *, VH(0:J+1)
+!       print *
+!       print *, XI(0:NWP)
+!       print *, UP(0:NWP)
+!       print *, UI(0:NWP)
+!       print *, UB(0:NWP)
+!       print *
+!       stop
+!    endif
 
    ! step 4: add fine structure back to 3D interpolated field
 
-   UI = VB + UP;
+   DO I=1,NWP
+      CALL INTERPOLATE1D(XH(0:J),VH(0:J),XI(I),UB(I))
+   ENDDO
 
-   WC%ONE_D%TMP(0:NWP) = MIN(TMPMAX_LOC,MAX(TMPMIN_LOC,UI))
+   UI(1:NWP) = UB(1:NWP) + UP(1:NWP)
 
-   DEALLOCATE(XI)
-   DEALLOCATE(UI)
-   DEALLOCATE(UP)
-   DEALLOCATE(UB)
-   DEALLOCATE(VB)
-   DEALLOCATE(UH)
-   DEALLOCATE(XJ)
-   DEALLOCATE(VH)
-   DEALLOCATE(XH)
+   WC%ONE_D%TMP(0:NWP) = MIN(TMPMAX_LOC,MAX(TMPMIN_LOC,UI(0:NWP)))
 
 ENDDO RECON_LOOP
 
