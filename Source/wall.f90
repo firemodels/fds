@@ -1086,7 +1086,7 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! first steps: count cells and restrict 1D field from UI to UH
 
-   UH = HUGE_EB
+   UH = UI(NWP)
    DVOL = 0._EB
    VOL  = 0._EB
    J = 1
@@ -1097,7 +1097,7 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       VOL = VOL + DVOL
       UH(J) = UH(J) + UI(I) * DVOL
 
-      IF ( XI(I) >= XJ(J) ) THEN
+      IF ( XI(I) >= XJ(J) .AND. I<NWP) THEN
          UH(J) = UH(J)/VOL
          VOL = 0._EB
          J = J+1
@@ -1127,7 +1127,7 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    UP(1:NWP) = UI(1:NWP) - UB(1:NWP)
 
-!    if (IW==1928) then
+!    if (T>12.36 .and. IW==890) then
 !       print *
 !       print *, II,JJ,KK
 !       print *, J,XI(NWP),XJ(J)
@@ -1142,7 +1142,6 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 !       print *, UI(0:NWP)
 !       print *, UB(0:NWP)
 !       print *
-!       stop
 !    endif
 
    ! step 4: add fine structure back to 3D interpolated field
