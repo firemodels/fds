@@ -678,8 +678,6 @@ END SUBROUTINE HEAT_TRANSFER_BC
 SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 ! Solves the 3D heat conduction equation internal to OBSTs.
-! Currently, this is not hooked into PYROLYSIS shell elements,
-! but this is under development.
 
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,T_IGN,AREA_ADJUST,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
