@@ -1,4 +1,4 @@
-&HEAD CHID='vege_mass_conservation', TITLE='Test for burning vegetation mass conservation' /
+&HEAD CHID='vege_mass_conservation', TITLE='Test for mass conservation when burning vegetation' /
 
 - Need to introduce a new boolean parameter for the MATL Namelist
 - 
@@ -20,7 +20,7 @@
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MISC HUMIDITY=0., Y_O2_INFTY = 0.01/
-&TIME T_END=10., DT=0.01 / 
+&TIME T_END=1., DT=0.01 / 
 
 &REAC FUEL = 'GLUCOSE'
       C = 6. 
@@ -76,9 +76,9 @@
 
 &DUMP MASS_FILE=.TRUE. /
 
-&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='fuel gas mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='GLUCOSE' /
-&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='water vapor mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='WATER VAPOR' /
-&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='MPUV', PART_ID='pine needles', ID='solid mass', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='fuel_gas_mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='GLUCOSE' /
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='water_vapor_mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='WATER VAPOR' /
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='MPUV', PART_ID='pine needles', ID='solid_mass', STATISTICS='VOLUME INTEGRAL'  /
 
 &SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR' /
 &SLCF PBY=0.5, QUANTITY='RELATIVE HUMIDITY' /
