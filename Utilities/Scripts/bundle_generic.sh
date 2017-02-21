@@ -186,12 +186,11 @@ wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
-for_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
-fdsforbundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
-forbundle=$fds_smvroot/smv/for_bundle
-texturedir=$forbundle/textures
+fds_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
+smv_bundle=$fds_smvroot/smv/for_bundle
+texturedir=$smv_bundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
@@ -264,18 +263,18 @@ echo ""
 echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
-  CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
+  CP $fds_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
 fi
 
-CP $for_bundle README.html $bundledir/bin README.html
+CP $fds_bundle README.html   $bundledir/bin README.html
 
-CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
+CP $smv_bundle smokeview.ini $bundledir/bin smokeview.ini
 
-CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
+CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 
-CP $forbundle objects.svo $bundledir/bin objects.svo
+CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile $bundledir/bin $openmpifile
+CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
 
 echo ""
 echo "--- copying documentation ---"
@@ -314,12 +313,12 @@ fi
 echo ""
 echo "--- copying release notes ---"
 echo ""
-CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
+CP $fds_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
 CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-# CP2 $for_bundle readme_examples.html $bundledir/Examples
+# CP2 $fds_bundle readme_examples.html $bundledir/Examples
 
 export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
