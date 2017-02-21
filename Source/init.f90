@@ -939,10 +939,16 @@ IF (COUPLED_1D3D_HEAT_TRANSFER) THEN
    ! solid phase chemical heat source term
    IF (ANY(SURFACE%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL)) THEN
       PYROLYSIS_HT3D = .TRUE.
-      ALLOCATE(M%Q_DOT_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-      CALL ChkMemErr('INIT','Q_DOT_PPP_S',IZERO)
-      M%Q_DOT_PPP_S = 0._EB
+      STORE_Q_DOT_PPP_S = .TRUE.
    ENDIF
+ENDIF
+
+! solid phase chemical heat source term
+
+IF (STORE_Q_DOT_PPP_S) THEN
+   ALLOCATE(M%Q_DOT_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','Q_DOT_PPP_S',IZERO)
+   M%Q_DOT_PPP_S = 0._EB
 ENDIF
 
 ! Allocate local auto-ignition temperature
