@@ -12,6 +12,8 @@ USE COMP_FUNCTIONS
 IMPLICIT NONE
 PRIVATE
 
+REAL(EB) :: DUMMY(3)
+
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
@@ -1303,7 +1305,7 @@ REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,M
 
 REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY, &
+REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0, &
             U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN,RDN
 INTEGER :: SUBIT
 
@@ -1360,7 +1362,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1378,11 +1380,11 @@ END FUNCTION VELTAN2D
 
 
 REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS,U_INT)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 
 REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS,U_INT
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY,U_RELA(3), &
+REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,U_RELA(3), &
             U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN,RDN
 INTEGER :: SUBIT,I,J
 
@@ -1472,7 +1474,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM,MU*RRHO,DN,ROUGHNESS)
       !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1914,7 +1916,7 @@ IMPLICIT NONE
 ! This exe generates a random velocity field with a spectrum that matches the
 ! Comte-Bellot/Corrsin 1971 experimental data.
 
-REAL(EB) :: DUMMY,MEANU,MEANV,MEANW
+REAL(EB) :: MEANU,MEANV,MEANW
 INTEGER :: I,J,K,II,JJ,KK,FILE_NUM,IM,IW,IOR,IIO,JJO,KKO,NX,NX_BLOCK,I_MESH,J_MESH,K_MESH,MX
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_ISO
@@ -1953,8 +1955,8 @@ IF (II/=NX) CALL SHUTDOWN('ERROR: wrong iso_ini.dat file')
 
 ! read physical dimensions
 
-READ (FILE_NUM,*) DUMMY, DUMMY, DUMMY
-READ (FILE_NUM,*) DUMMY, DUMMY, DUMMY
+READ (FILE_NUM,*) DUMMY(1), DUMMY(2), DUMMY(3)
+READ (FILE_NUM,*) DUMMY(1), DUMMY(2), DUMMY(3)
 
 DO KK=1,NX
    K_MESH = CEILING(REAL(KK,EB)/REAL(NX_BLOCK,EB)) ! "k" position of mesh block in global domain
@@ -2533,7 +2535,7 @@ IMPLICIT NONE
       enddo
 
       if(ndim-1.lt.0) goto 920
-1     ntot=2
+      ntot=2
       do idim=1,ndim
       if(nn(idim).le.0) goto 920
       ntot=ntot*nn(idim)
@@ -2553,15 +2555,15 @@ IMPLICIT NONE
 !
 !     is n a power of two and if not, what are its factors
 !
-5     m=n
+      m=n
       ntwo=np1
       iif=1
       idiv=2
 10    iquot=m/idiv
       irem=m-idiv*iquot
       if(iquot-idiv.lt.0) goto 50
-11    if(irem.ne.0) goto 20
-12    ntwo=ntwo+ntwo
+      if(irem.ne.0) goto 20
+      ntwo=ntwo+ntwo
       ifact(iif)=idiv
       iif=iif+1
       m=iquot
@@ -2571,8 +2573,8 @@ IMPLICIT NONE
 30    iquot=m/idiv
       irem=m-idiv*iquot
       if(iquot-idiv.lt.0) goto 60
-31    if(irem.ne.0) goto 40
-32    ifact(iif)=idiv
+      if(irem.ne.0) goto 40
+      ifact(iif)=idiv
       iif=iif+1
       m=iquot
       go to 30
@@ -2580,7 +2582,7 @@ IMPLICIT NONE
       go to 30
 50    inon2=iif
       if(irem.ne.0) goto 60
-51    ntwo=ntwo+ntwo
+      ntwo=ntwo+ntwo
       go to 70
 60    ifact(iif)=m
 !
@@ -2602,14 +2604,14 @@ IMPLICIT NONE
       ifmin=1
       i1rng=np1
       if(idim-4.ge.0) goto 100
-71    if(iform.gt.0) goto 100
-72    icase=2
+      if(iform.gt.0) goto 100
+      icase=2
       i1rng=np0*(1+nprev/2)
       if(idim-1.gt.0) goto 100
-73    icase=3
+      icase=3
       i1rng=np1
       if(ntwo-np1.le.0) goto 100
-74    icase=4
+      icase=4
       ifmin=2
       ntwo=ntwo/2
       n=n/2
@@ -2625,11 +2627,11 @@ IMPLICIT NONE
 !     can be done by simple interchange, no working array is needed
 !
 100   if(ntwo-np2.lt.0) goto 200
-110   np2hf=np2/2
+      np2hf=np2/2
       j=1
       do i2=1,np2,np1
       if(j-i2.ge.0) goto 130
-120   i1max=i2+np1-2
+      i1max=i2+np1-2
       do i1=i2,i1max,2
          do i3=i1,ntot,np2
             j3=j+i3-i2
@@ -2643,7 +2645,7 @@ IMPLICIT NONE
       enddo
 130   m=np2hf
 140   if(j-m.le.0) goto 150
-145   j=j-m
+      j=j-m
       m=m/2
       if(m-np1.ge.0) goto 140
 150   j=j+m
@@ -2658,7 +2660,7 @@ IMPLICIT NONE
       j=i3
       do 260 i=1,nwork,2
       if(icase-3.ne.0) goto 220
-210   work(i)=data(j)
+      work(i)=data(j)
       work(i+1)=data(j+1)
       go to 230
 220   work(i)=data(j)
@@ -2668,7 +2670,7 @@ IMPLICIT NONE
 240   ifp1=ifp2/ifact(iif)
       j=j+ifp1
       if(j-i3-ifp2.lt.0) goto 260
-250   j=j-ifp2
+      j=j-ifp2
       ifp2=ifp1
       iif=iif+1
       if(ifp2-np1.gt.0) goto 240
@@ -2678,7 +2680,7 @@ IMPLICIT NONE
       do i2=i3,i2max,np1
       data(i2)=work(i)
       data(i2+1)=work(i+1)
-270   i=i+2
+      i=i+2
       enddo
       enddo
       enddo
@@ -2689,14 +2691,14 @@ IMPLICIT NONE
 !     and repeat for w=w*(1+isign*sqrt(-1))/sqrt(2).
 !
 300   if(ntwo-np1.le.0) goto 600
-305   np1tw=np1+np1
+      np1tw=np1+np1
       ipar=ntwo/np1
 310   if(ipar-2.lt.0) then
          goto 350
       elseif(ipar-2.eq.0) then
          goto 330
       endif
-320   ipar=ipar/4
+      ipar=ipar/4
       go to 310
 330   do i1=1,i1rng,2
       do k1=i1,ntot,np1tw
@@ -2706,18 +2708,18 @@ IMPLICIT NONE
       data(k2)=data(k1)-tempr
       data(k2+1)=data(k1+1)-tempi
       data(k1)=data(k1)+tempr
-340   data(k1+1)=data(k1+1)+tempi
+      data(k1+1)=data(k1+1)+tempi
       enddo
       enddo
 350   mmax=np1
 360   if(mmax-ntwo/2.ge.0) goto 600
-370   lmax=max0(np1tw,mmax/2)
+      lmax=max0(np1tw,mmax/2)
       do 570 l=np1,lmax,np1tw
       m=l
       if(mmax-np1.le.0) goto 420
-380   theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
+      theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
       if(isign.lt.0) goto 400
-390   theta=-theta
+      theta=-theta
 400   wr=cos(theta)
       wi=sin(theta)
 410   w2r=wr*wr-wi*wi
@@ -2727,23 +2729,23 @@ IMPLICIT NONE
 420   do 530 i1=1,i1rng,2
       kmin=i1+ipar*m
       if(mmax-np1.gt.0) goto 440
-430   kmin=i1
+      kmin=i1
 440   kdif=ipar*mmax
 450   kstep=4*kdif
       if(kstep-ntwo.gt.0) goto 530
-460   do k1=kmin,ntot,kstep
+      do k1=kmin,ntot,kstep
       k2=k1+kdif
       k3=k2+kdif
       k4=k3+kdif
       if(mmax-np1.gt.0) goto 480
-470   u1r=data(k1)+data(k2)
+      u1r=data(k1)+data(k2)
       u1i=data(k1+1)+data(k2+1)
       u2r=data(k3)+data(k4)
       u2i=data(k3+1)+data(k4+1)
       u3r=data(k1)-data(k2)
       u3i=data(k1+1)-data(k2+1)
       if(isign.ge.0) goto 472
-471   u4r=data(k3+1)-data(k4+1)
+      u4r=data(k3+1)-data(k4+1)
       u4i=data(k4)-data(k3)
       go to 510
 472   u4r=data(k4+1)-data(k3+1)
@@ -2762,7 +2764,7 @@ IMPLICIT NONE
       u3r=data(k1)-t2r
       u3i=data(k1+1)-t2i
       if(isign.ge.0) goto 500
-490   u4r=t3i-t4i
+      u4r=t3i-t4i
       u4i=t4r-t3r
       go to 510
 500   u4r=t4i-t3i
@@ -2774,7 +2776,7 @@ IMPLICIT NONE
       data(k3)=u1r-u2r
       data(k3+1)=u1i-u2i
       data(k4)=u3r-u4r
-520   data(k4+1)=u3i-u4i
+      data(k4+1)=u3i-u4i
       enddo
       kdif=kstep
       kmin=4*(kmin-i1)+i1
@@ -2782,8 +2784,8 @@ IMPLICIT NONE
 530   continue
       m=m+lmax
       if(m-mmax.gt.0) goto 570
-540   if(isign.ge.0) goto 560
-550   tempr=wr
+      if(isign.ge.0) goto 560
+      tempr=wr
       wr=(wr+wi)*rthlf
       wi=(wi-tempr)*rthlf
       go to 410
@@ -2802,16 +2804,16 @@ IMPLICIT NONE
 !     conjugate symmetries.
 !
 600   if(ntwo-np2.ge.0) goto 700
-605   ifp1=ntwo
+      ifp1=ntwo
       iif=inon2
       np1hf=np1/2
 610   ifp2=ifact(iif)*ifp1
       j1min=np1+1
       if(j1min-ifp1.gt.0) goto 640
-615   do j1=j1min,ifp1,np1
+      do j1=j1min,ifp1,np1
       theta=-twopi*REAL(j1-1,EB)/REAL(ifp2,EB)
       if(isign.lt.0) goto 625
-620   theta=-theta
+      theta=-theta
 625   wstpr=cos(theta)
       wstpi=sin(theta)
       wr=wstpr
@@ -2824,17 +2826,17 @@ IMPLICIT NONE
       do j3=i1,ntot,ifp2
       tempr=data(j3)
       data(j3)=data(j3)*wr-data(j3+1)*wi
-630   data(j3+1)=tempr*wi+data(j3+1)*wr
+      data(j3+1)=tempr*wi+data(j3+1)*wr
       enddo
       enddo
       tempr=wr
       wr=wr*wstpr-wi*wstpi
-635   wi=tempr*wstpi+wi*wstpr
+      wi=tempr*wstpi+wi*wstpr
       enddo
       enddo
 640   theta=-twopi/REAL(ifact(iif),EB)
       if(isign.lt.0) goto 650
-645   theta=-theta
+      theta=-theta
 650   wstpr=cos(theta)
       wstpi=sin(theta)
       j2rng=ifp1*(1+ifact(iif)/2)
@@ -2850,11 +2852,11 @@ IMPLICIT NONE
       jmax=jmin+ifp2-ifp1
       i=1+(j3-i3)/np1hf
       if(j2-i3.gt.0) goto 665
-655   sumr=0._EB
+      sumr=0._EB
       sumi=0._EB
       do j=jmin,jmax,ifp1
-659   sumr=sumr+data(j)
-660   sumi=sumi+data(j+1)
+      sumr=sumr+data(j)
+      sumi=sumi+data(j+1)
       enddo
       work(i)=sumr
       work(i+1)=sumi
@@ -2874,7 +2876,7 @@ IMPLICIT NONE
       oldsi=tempi
       j=j-ifp1
       if(j-jmin.gt.0) goto 670
-675   tempr=wr*sumr-oldsr+data(j)
+      tempr=wr*sumr-oldsr+data(j)
       tempi=wi*sumi
       work(i)=tempr-tempi
       work(iconj)=tempr+tempi
@@ -2886,7 +2888,7 @@ IMPLICIT NONE
       enddo
       enddo
       if(j2-i3.gt.0) goto 686
-685   wr=wstpr
+      wr=wstpr
       wi=wstpi
       go to 690
 686   tempr=wr
@@ -2899,7 +2901,7 @@ IMPLICIT NONE
       do i2=i3,i2max,np1
       data(i2)=work(i)
       data(i2+1)=work(i+1)
-695   i=i+2
+      i=i+2
       enddo
       enddo
       enddo
@@ -2922,7 +2924,7 @@ IMPLICIT NONE
       n=n+n
       theta=-twopi/REAL(n,EB)
       if(isign.lt.0) goto 703
-702   theta=-theta
+      theta=-theta
 703   wstpr=cos(theta)
       wstpi=sin(theta)
       wr=wstpr
@@ -2942,7 +2944,7 @@ IMPLICIT NONE
       data(i+1)=difi+tempi
       data(j)=sumr-tempr
       data(j+1)=-difi+tempi
-720   j=j+np2
+      j=j+np2
       enddo
       imin=imin+2
       jmin=jmin-2
@@ -2954,9 +2956,9 @@ IMPLICIT NONE
       elseif(imin-jmin.gt.0) then
          goto 740
       endif
-730   if(isign.ge.0) goto 740
-731   do i=imin,ntot,np2
-735   data(i+1)=-data(i+1)
+      if(isign.ge.0) goto 740
+      do i=imin,ntot,np2
+      data(i+1)=-data(i+1)
       enddo
 740   np2=np2+np2
       ntot=ntot+ntot
@@ -2970,7 +2972,7 @@ IMPLICIT NONE
 755   i=i+2
       j=j-2
       if(i-imax.lt.0) goto 750
-760   data(j)=data(imin)-data(imin+1)
+      data(j)=data(imin)-data(imin+1)
       data(j+1)=0._EB
       if(i-j.lt.0) then
          goto 770
@@ -2982,7 +2984,7 @@ IMPLICIT NONE
 770   i=i-2
       j=j-2
       if(i-imin.gt.0) goto 765
-775   data(j)=data(imin)+data(imin+1)
+      data(j)=data(imin)+data(imin+1)
       data(j+1)=0._EB
       imax=imin
       go to 745
@@ -2994,26 +2996,26 @@ IMPLICIT NONE
 !     conjugate symmetries.
 !
 800   if(i1rng-np1.ge.0) goto 900
-805   do i3=1,ntot,np2
+      do i3=1,ntot,np2
       i2max=i3+np2-np1
       do i2=i3,i2max,np1
       imin=i2+i1rng
       imax=i2+np1-2
       jmax=2*i3+np1-imin
       if(i2-i3.le.0) goto 820
-810   jmax=jmax+np2
+      jmax=jmax+np2
 820   if(idim-2.le.0) goto 850
-830   j=jmax+np0
+      j=jmax+np0
       do i=imin,imax,2
       data(i)=data(j)
       data(i+1)=-data(j+1)
-840   j=j-2
+      j=j-2
       enddo
 850   j=jmax
       do i=imin,imax,np0
       data(i)=data(j)
       data(i+1)=-data(j+1)
-860   j=j-np0
+      j=j-np0
       enddo
       enddo
       enddo
@@ -3022,7 +3024,7 @@ IMPLICIT NONE
 !
 900   np0=np1
       np1=np2
-910   nprev=n
+      nprev=n
       enddo
 
       ! reshape data back to 3D complex array
