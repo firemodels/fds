@@ -1280,9 +1280,9 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    ! Determine the limiting time step to ensure particle does not traverse more than a single grid cell
 
-   DT_CFL = MIN(DX(LP%ONE_D%IIG)/(ABS(LP%U)+EPSILON_EB),&
-                DY(LP%ONE_D%JJG)/(ABS(LP%V)+EPSILON_EB),&
-                DZ(LP%ONE_D%KKG)/(ABS(LP%W)+EPSILON_EB))
+   DT_CFL = MIN(DX(LP%ONE_D%IIG)/(ABS(LP%U)+TWO_EPSILON_EB),&
+                DY(LP%ONE_D%JJG)/(ABS(LP%V)+TWO_EPSILON_EB),&
+                DZ(LP%ONE_D%KKG)/(ABS(LP%W)+TWO_EPSILON_EB))
    N_ITER = CEILING(DT/DT_CFL)
    DT_P   = DT/REAL(N_ITER,EB)
 
