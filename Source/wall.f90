@@ -678,13 +678,10 @@ END SUBROUTINE HEAT_TRANSFER_BC
 SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 ! Solves the 3D heat conduction equation internal to OBSTs.
-! Currently, this is not hooked into PYROLYSIS shell elements,
-! but this is under development.
 
-!REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,T_IGN,AREA_ADJUST,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
@@ -913,8 +910,14 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
          CASE (THERMALLY_THICK) ! TMP_F and HEAT FLUX taken from PYROLYSIS
 
             TMP_F = WC%ONE_D%TMP_F
-            TMP_S = 0.5_EB*(WC%ONE_D%TMP(1) + WC%ONE_D%TMP(2))
-            DN    = WC%ONE_D%X(1) - WC%ONE_D%X(0)
+            NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
+            IF (NWP>=2) THEN
+               TMP_S = 0.5_EB*(WC%ONE_D%TMP(1) + WC%ONE_D%TMP(2))
+               DN    = WC%ONE_D%X(1) - WC%ONE_D%X(0)
+            ELSE
+               TMP_S = TMP(II,JJ,KK)
+               DN    = 2._EB/WC%RDN
+            ENDIF
             HTC   = K_S / DN
             KDTDN = HTC * (TMP_F-TMP_S)
 
@@ -999,9 +1002,14 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                                                                  (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                                                                  (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
+
+            IF (PYROLYSIS_HT3D) TMP_NEW(I,J,K) = TMP_NEW(I,J,K) + DT_SUB/(RHO_S*C_S) * Q_DOT_PPP_S(I,J,K)
+
          ENDDO
       ENDDO
    ENDDO
+
+   IF (PYROLYSIS_HT3D) Q_DOT_PPP_S = 0._EB
 
    ! time step adjustment
 
@@ -1023,10 +1031,11 @@ SUBROUTINE HT3D_1D_RECONSTRUCTION
 
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 INTEGER :: IW,IC,II,JJ,KK,IIG,JJG,KKG,IOR,IZERO,NWP,I,J
-REAL(EB) :: XC0,XC1,X0,X1,VOL,DVOL,UHAT,XDATA(2),YDATA(2),XWALL
+REAL(EB) :: VOL,DVOL,TMPMIN_LOC,TMPMAX_LOC
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: XI,UI,UB,UP,UH,XJ,VH,XH,VB
+REAL(EB), POINTER, DIMENSION(:) :: XI=>NULL(),UI=>NULL(),UB=>NULL(),UP=>NULL(), &
+                                   XJ=>NULL(),UH=>NULL(),VH=>NULL(),XH=>NULL()
 
 RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
@@ -1048,60 +1057,67 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
    NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
+   IF (NWP<2) CYCLE
 
-   ALLOCATE(XI(0:NWP),STAT=IZERO)
-   ALLOCATE(UI(0:NWP),STAT=IZERO)
-   ALLOCATE(UP(0:NWP),STAT=IZERO)
-   ALLOCATE(UB(0:NWP),STAT=IZERO)
-   ALLOCATE(VB(0:NWP),STAT=IZERO)
+   XI => ONE_D_WORK1
+   UI => ONE_D_WORK2
+   UP => ONE_D_WORK3
+   UB => ONE_D_WORK4
 
-   XI = WC%ONE_D%X(0:NWP)
-   UI = WC%ONE_D%TMP(0:NWP)
+   XI(0:NWP) = WC%ONE_D%X(0:NWP)
+   UI(0:NWP) = WC%ONE_D%TMP(0:NWP)
+
+   TMPMIN_LOC=MINVAL(UI(0:NWP))
+   TMPMAX_LOC=MAXVAL(UI(0:NWP))
 
    ! VH is the 3D cell temperature
    ! XH is the 3D cell center depth
    ! XJ is the 3D cell face depth
 
+   UH => ONE_D_WORK5; UH=0._EB
+   VH => ONE_D_WORK6; VH=0._EB
+   XH => ONE_D_WORK7; XH=0._EB
+   XJ => ONE_D_WORK8; XJ=0._EB
+
    SELECT CASE (IOR)
       CASE(1)
-         ALLOCATE(UH(0:II),STAT=IZERO)
-         ALLOCATE(VH(0:II),STAT=IZERO)
-         ALLOCATE(XH(0:II),STAT=IZERO)
-         ALLOCATE(XJ(0:II),STAT=IZERO)
          DO J=0,II
             VH(J) = TMP(II+1-J,JJ,KK)
             XH(J) = X(II) - XC(IIG-J)
             XJ(J) = X(II) - X(II-J)
-         ENDDO
-      CASE(-1)
-         ALLOCATE(UH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(VH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(XH(0:(IBAR-IIG)),STAT=IZERO)
-         ALLOCATE(XJ(0:(IBAR-IIG)),STAT=IZERO)
-         DO J=0,(IBAR-IIG)
-            VH(J) = TMP(IIG+J,JJG,KKG)
-            XH(J) = XC(IIG+J) - X(IIG)
-            XJ(J) = X(IIG+J) - X(IIG)
+            TMPMIN_LOC = MIN(TMPMIN_LOC,VH(J))
+            TMPMAX_LOC = MAX(TMPMAX_LOC,VH(J))
          ENDDO
    END SELECT
 
    ! first steps: count cells and restrict 1D field from UI to UH
 
-   UH = 0._EB
-   VOL = 0._EB
+   UH = UI(NWP)
+   DVOL = 0._EB
+   VOL  = 0._EB
    J = 1
+   UH(J) = 0._EB
    DO I=1,NWP
+
       DVOL = MIN(XI(I),XJ(J)) - MAX(XI(I-1),XJ(J-1))
-      VOL  = VOL + DVOL
+      VOL = VOL + DVOL
       UH(J) = UH(J) + UI(I) * DVOL
-      IF (XI(I)>XJ(J) .AND. I<NWP) THEN
+
+      IF ( XI(I) >= XJ(J) .AND. I<NWP) THEN
          UH(J) = UH(J)/VOL
          VOL = 0._EB
          J = J+1
+         UH(J) = 0._EB
       ELSEIF (I==NWP) THEN
-         UH(J) = UH(J)/VOL
+         IF (VOL > TWO_EPSILON_EB) THEN
+            UH(J) = UH(J)/VOL
+         ELSE
+            UH(J) = UI(I)
+         ENDIF
       ENDIF
+
    ENDDO
+
    UH(0) = WC%ONE_D%TMP_F
    VH(0) = WC%ONE_D%TMP_F
    XH(0) = 0._EB
@@ -1109,31 +1125,40 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! step 2: interpolate the cell data from 1D and 3D fields
 
    UB(0) = UI(0)
-   VB(0) = UI(0)
    DO I=1,NWP
-      CALL INTERPOLATE1D(XH,UH,XI(I),UB(I))
-      CALL INTERPOLATE1D(XH,VH,XI(I),VB(I))
+      CALL INTERPOLATE1D(XH(0:J),UH(0:J),XI(I),UB(I))
    ENDDO
 
    ! step 3: save the fine-grained structure of the 1D solution
 
-   UP = UI - UB;
+   UP(1:NWP) = UI(1:NWP) - UB(1:NWP)
+
+!    if (T>12.36 .and. IW==890) then
+!       print *
+!       print *, II,JJ,KK
+!       print *, J,XI(NWP),XJ(J)
+!       print *
+!       print *, XJ(0:J+1)
+!       print *, XH(0:J+1)
+!       print *, UH(0:J+1)
+!       print *, VH(0:J+1)
+!       print *
+!       print *, XI(0:NWP)
+!       print *, UP(0:NWP)
+!       print *, UI(0:NWP)
+!       print *, UB(0:NWP)
+!       print *
+!    endif
 
    ! step 4: add fine structure back to 3D interpolated field
 
-   UI = VB + UP;
+   DO I=1,NWP
+      CALL INTERPOLATE1D(XH(0:J),VH(0:J),XI(I),UB(I))
+   ENDDO
 
-   WC%ONE_D%TMP(0:NWP) = UI
+   UI(1:NWP) = UB(1:NWP) + UP(1:NWP)
 
-   DEALLOCATE(XI)
-   DEALLOCATE(UI)
-   DEALLOCATE(UP)
-   DEALLOCATE(UB)
-   DEALLOCATE(VB)
-   DEALLOCATE(UH)
-   DEALLOCATE(XJ)
-   DEALLOCATE(VH)
-   DEALLOCATE(XH)
+   WC%ONE_D%TMP(0:NWP) = MIN(TMPMAX_LOC,MAX(TMPMIN_LOC,UI(0:NWP)))
 
 ENDDO RECON_LOOP
 
@@ -1806,7 +1831,8 @@ REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,TMP_G,RFACF,RFACB,RFACF2,RFACB2, &
             DXKF,DXKB,REACTION_RATE,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             MFLUX, MFLUX_S, VOLSUM, REGRID_MAX, REGRID_SUM,  &
             DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,&
-            MW_G,H_MASS,X_G,Y_G,X_W,D_AIR,MU_AIR,U2,V2,W2,RE_L,SC_AIR,SH_FAC_WALL,SHERWOOD,VELCON,RHO_G,TMP_BACK,RDN
+            MW_G,H_MASS,X_G,Y_G,X_W,D_AIR,MU_AIR,U2,V2,W2,RE_L,SC_AIR,SH_FAC_WALL,SHERWOOD,VELCON,RHO_G,TMP_BACK,RDN,&
+            QCELL,DVOL
 INTEGER :: IIG,JJG,KKG,IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NN,NNN,NL,IOR,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,ZZ_GET(1:N_TRACKED_SPECIES)
 REAL(EB),ALLOCATABLE,DIMENSION(:) :: TMP_W_NEW
@@ -2165,7 +2191,7 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
                   ! Calculate oxygen volume fraction in the gas cell
                   X_G = SPECIES(O2_INDEX)%RCON*Y_G/RSUM(IIG,JJG,KKG)
                   ! Calculate oxygen concentration inside the material, assuming decay function
-                  X_G = X_G * EXP(-ONE_D%X(I-1)/(EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
+                  X_G = X_G * EXP(-ONE_D%X(I-1)/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                   REACTION_RATE = REACTION_RATE * X_G**ML%N_O2(J)
                ENDIF
                ! Reaction rate in kg/(m3s)
@@ -2448,6 +2474,32 @@ IF (SF%INTERNAL_RADIATION) THEN
    ENDDO
    ONE_D%QRADOUT = ONE_D%EMISSIVITY*RFLUX_DOWN
 ENDIF
+
+! If 3D heat transfer coupling, store solid cell mean chemical source term
+
+PYRO_HT3D_IF: IF (PYROLYSIS_HT3D) THEN
+
+   IF (IOR==1) THEN
+
+      ! print *, Q_S(1) * 0.001_EB
+
+      QCELL = 0._EB
+      J = 1
+      DO I=1,NWP
+         DVOL = MIN(ONE_D%X(I),X(IIG-1)-X(IIG-1-J)) - MAX(ONE_D%X(I-1),X(IIG-1)-X(IIG-J))
+         QCELL = QCELL + Q_S(I) * DVOL
+         IF (ONE_D%X(I)>(X(IIG-1)-X(IIG-1-J)) .AND. I<NWP) THEN
+            Q_DOT_PPP_S(IIG-J,JJG,KKG) = QCELL/DX(IIG-J)
+            QCELL = 0._EB
+            J = J+1
+         ELSEIF (I==NWP) THEN
+            Q_DOT_PPP_S(IIG-J,JJG,KKG) = QCELL/DX(IIG-J)
+         ENDIF
+      ENDDO
+
+   ENDIF
+
+ENDIF PYRO_HT3D_IF
 
 ! Update the 1-D heat transfer equation
 
