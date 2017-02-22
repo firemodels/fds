@@ -1,23 +1,5 @@
 &HEAD CHID='vege_mass_conservation', TITLE='Test for mass conservation when burning vegetation' /
 
-- Need to introduce a new boolean parameter for the MATL Namelist
-- 
-- VEGETATION=.TRUE. (default .FALSE.)
--
-- which sets in MATL
--  a) ALLOW_SHRINKING=.FALSE.
--  b)  ALLOW_SWELLING=.FALSE.
-- and in INIT
--  a) N_PARTICLES_PER_CELL=1
--  b) CELL_CENTERED=.TRUE.
-- INIT's MASS_PER_VOLUME must be set.
--
-- Questions
--  a) Mass is computed differently for vegetation.  Fix?
-- 
-- Problems:
-- a) At all times, sum of fuel gas mass + water vapor mass + solid mass = 1.
-
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MISC HUMIDITY=0., Y_O2_INFTY = 0.01/
 &TIME T_END=1., DT=0.01 / 
