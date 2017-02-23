@@ -20,7 +20,7 @@ Module DCDFLIB
   Implicit None
 
   Private
-  Public cdfbet,cdfgam,cdfnor,gamma
+  Public cdfbet,cdfgam,cdfnor,gamma_ieva
 
   !
   !*********************************************************
@@ -30,6 +30,9 @@ Module DCDFLIB
   ! The Fortran90 version form:
   ! http://people.scs.fsu.edu/~burkardt/f_src/dcdflib/dcdflib.html
   !
+  ! Unused functions commented out by Timo Korhonen, 2017 (not all dcdflib needed in stat.f90 routines)
+  ! Implicit integer = real conversions made explicit, integer = INT(real) by Timo Korhonen, 2017
+  ! Unused 'label continue' statements removed by Timo Korhonen, 2017
   ! Assigned goto statements removed by Timo Korhonen, 2008.
   ! Statement functions replaced with internal function by Timo Korhonen, 2008.
   !
@@ -1136,7 +1139,7 @@ Contains
        lambda = Abs ( lambda )
     End If
 
-70  Continue
+! 70  Continue
 
     If ( b0 < 40.0D+00 .And. b0 * x0 <= 0.7D+00 ) Then
        go to 110
@@ -1217,7 +1220,7 @@ Contains
 
 160 Continue
 
-    n = b0
+    n = INT(b0)
     b0 = b0 - n
 
     If ( b0 == 0.0D+00 ) Then
@@ -1225,7 +1228,7 @@ Contains
        b0 = 1.0D+00
     End If
 
-170 Continue
+! 170 Continue
 
     w = beta_up ( b0, a0, y0, x0, n, eps )
 
@@ -1241,7 +1244,7 @@ Contains
        a0 = a0 + n
     End If
 
-190 Continue
+! 190 Continue
 
     Call beta_grat ( a0, b0, x0, y0, w, 15.0D+00 * eps, ierr1 )
     w1 = 0.5D+00 + ( 0.5D+00 - w )
@@ -1275,129 +1278,129 @@ Contains
     Return
   End Subroutine beta_inc
 
-  Subroutine beta_inc_values ( n_data, a, b, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! BETA_INC_VALUES returns some values of the incomplete Beta function.
-    !
-    !  Discussion:
-    !
-    !    The incomplete Beta function may be written
-    !
-    !      BETA_INC(A,B,X) = Integral (0 to X) T**(A-1) * (1-T)**(B-1) dT
-    !                      / Integral (0 to 1) T**(A-1) * (1-T)**(B-1) dT
-    !
-    !    Thus,
-    !
-    !      BETA_INC(A,B,0.0) = 0.0
-    !      BETA_INC(A,B,1.0) = 1.0
-    !
-    !    Note that in Mathematica, the expressions:
-    !
-    !      BETA[A,B]   = Integral (0 to 1) T**(A-1) * (1-T)**(B-1) dT
-    !      BETA[X,A,B] = Integral (0 to X) T**(A-1) * (1-T)**(B-1) dT
-    !
-    !    and thus, to evaluate the incomplete Beta function requires:
-    !
-    !      BETA_INC(A,B,X) = BETA[X,A,B] / BETA[A,B]
-    !
-    !  Modified:
-    !
-    !    17 February 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Karl Pearson,
-    !    Tables of the Incomplete Beta Function,
-    !    Cambridge University Press, 1968.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) A, B, X, the arguments of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 30
-
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
-         0.5D+00,  0.5D+00,  0.5D+00,  1.0D+00, &
-         1.0D+00,  1.0D+00,  1.0D+00,  1.0D+00, &
-         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
-         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
-         2.0D+00,  5.5D+00, 10.0D+00, 10.0D+00, &
-         10.0D+00, 10.0D+00, 20.0D+00, 20.0D+00, &
-         20.0D+00, 20.0D+00, 20.0D+00, 30.0D+00, &
-         30.0D+00, 40.0D+00 /)
-    Real ( kind = 8 ) b
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: b_vec = (/ &
-         0.5D+00,  0.5D+00,  0.5D+00,  0.5D+00, &
-         0.5D+00,  0.5D+00,  0.5D+00,  1.0D+00, &
-         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
-         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
-         2.0D+00,  5.0D+00,  0.5D+00,  5.0D+00, &
-         5.0D+00, 10.0D+00,  5.0D+00, 10.0D+00, &
-         10.0D+00, 20.0D+00, 20.0D+00, 10.0D+00, &
-         10.0D+00, 20.0D+00 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.0637686D+00, 0.2048328D+00, 1.0000000D+00, 0.0D+00,       &
-         0.0050126D+00, 0.0513167D+00, 0.2928932D+00, 0.5000000D+00, &
-         0.028D+00,     0.104D+00,     0.216D+00,     0.352D+00,     &
-         0.500D+00,     0.648D+00,     0.784D+00,     0.896D+00,     &
-         0.972D+00,     0.4361909D+00, 0.1516409D+00, 0.0897827D+00, &
-         1.0000000D+00, 0.5000000D+00, 0.4598773D+00, 0.2146816D+00, &
-         0.9507365D+00, 0.5000000D+00, 0.8979414D+00, 0.2241297D+00, &
-         0.7586405D+00, 0.7001783D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.01D+00, 0.10D+00, 1.00D+00, 0.0D+00,  &
-         0.01D+00, 0.10D+00, 0.50D+00, 0.50D+00, &
-         0.1D+00,  0.2D+00,  0.3D+00,  0.4D+00,  &
-         0.5D+00,  0.6D+00,  0.7D+00,  0.8D+00,  &
-         0.9D+00,  0.50D+00, 0.90D+00, 0.50D+00, &
-         1.00D+00, 0.50D+00, 0.80D+00, 0.60D+00, &
-         0.80D+00, 0.50D+00, 0.60D+00, 0.70D+00, &
-         0.80D+00, 0.70D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0.0D+00
-       b = 0.0D+00
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       b = b_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine beta_inc_values
+!!$  Subroutine beta_inc_values ( n_data, a, b, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! BETA_INC_VALUES returns some values of the incomplete Beta function.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The incomplete Beta function may be written
+!!$    !
+!!$    !      BETA_INC(A,B,X) = Integral (0 to X) T**(A-1) * (1-T)**(B-1) dT
+!!$    !                      / Integral (0 to 1) T**(A-1) * (1-T)**(B-1) dT
+!!$    !
+!!$    !    Thus,
+!!$    !
+!!$    !      BETA_INC(A,B,0.0) = 0.0
+!!$    !      BETA_INC(A,B,1.0) = 1.0
+!!$    !
+!!$    !    Note that in Mathematica, the expressions:
+!!$    !
+!!$    !      BETA[A,B]   = Integral (0 to 1) T**(A-1) * (1-T)**(B-1) dT
+!!$    !      BETA[X,A,B] = Integral (0 to X) T**(A-1) * (1-T)**(B-1) dT
+!!$    !
+!!$    !    and thus, to evaluate the incomplete Beta function requires:
+!!$    !
+!!$    !      BETA_INC(A,B,X) = BETA[X,A,B] / BETA[A,B]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    17 February 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Karl Pearson,
+!!$    !    Tables of the Incomplete Beta Function,
+!!$    !    Cambridge University Press, 1968.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) A, B, X, the arguments of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 30
+!!$
+!!$    Real ( kind = 8 ) a
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         0.5D+00,  0.5D+00,  0.5D+00,  1.0D+00, &
+!!$         1.0D+00,  1.0D+00,  1.0D+00,  1.0D+00, &
+!!$         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
+!!$         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
+!!$         2.0D+00,  5.5D+00, 10.0D+00, 10.0D+00, &
+!!$         10.0D+00, 10.0D+00, 20.0D+00, 20.0D+00, &
+!!$         20.0D+00, 20.0D+00, 20.0D+00, 30.0D+00, &
+!!$         30.0D+00, 40.0D+00 /)
+!!$    Real ( kind = 8 ) b
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: b_vec = (/ &
+!!$         0.5D+00,  0.5D+00,  0.5D+00,  0.5D+00, &
+!!$         0.5D+00,  0.5D+00,  0.5D+00,  1.0D+00, &
+!!$         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
+!!$         2.0D+00,  2.0D+00,  2.0D+00,  2.0D+00, &
+!!$         2.0D+00,  5.0D+00,  0.5D+00,  5.0D+00, &
+!!$         5.0D+00, 10.0D+00,  5.0D+00, 10.0D+00, &
+!!$         10.0D+00, 20.0D+00, 20.0D+00, 10.0D+00, &
+!!$         10.0D+00, 20.0D+00 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.0637686D+00, 0.2048328D+00, 1.0000000D+00, 0.0D+00,       &
+!!$         0.0050126D+00, 0.0513167D+00, 0.2928932D+00, 0.5000000D+00, &
+!!$         0.028D+00,     0.104D+00,     0.216D+00,     0.352D+00,     &
+!!$         0.500D+00,     0.648D+00,     0.784D+00,     0.896D+00,     &
+!!$         0.972D+00,     0.4361909D+00, 0.1516409D+00, 0.0897827D+00, &
+!!$         1.0000000D+00, 0.5000000D+00, 0.4598773D+00, 0.2146816D+00, &
+!!$         0.9507365D+00, 0.5000000D+00, 0.8979414D+00, 0.2241297D+00, &
+!!$         0.7586405D+00, 0.7001783D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.01D+00, 0.10D+00, 1.00D+00, 0.0D+00,  &
+!!$         0.01D+00, 0.10D+00, 0.50D+00, 0.50D+00, &
+!!$         0.1D+00,  0.2D+00,  0.3D+00,  0.4D+00,  &
+!!$         0.5D+00,  0.6D+00,  0.7D+00,  0.8D+00,  &
+!!$         0.9D+00,  0.50D+00, 0.90D+00, 0.50D+00, &
+!!$         1.00D+00, 0.50D+00, 0.80D+00, 0.60D+00, &
+!!$         0.80D+00, 0.50D+00, 0.60D+00, 0.70D+00, &
+!!$         0.80D+00, 0.70D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0.0D+00
+!!$       b = 0.0D+00
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       b = b_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine beta_inc_values
 
   Function beta_log ( a0, b0 )
 
@@ -1493,7 +1496,7 @@ Contains
        go to 80
     End If
 
-    n = a - 1.0D+00
+    n = INT(a - 1.0D+00)
     w = 1.0D+00
     Do i = 1, n
        a = a - 1.0D+00
@@ -1511,7 +1514,7 @@ Contains
     !
 60  Continue
 
-    n = b - 1.0D+00
+    n = INT(b - 1.0D+00)
     z = 1.0D+00
     Do i = 1, n
        b = b - 1.0D+00
@@ -1526,7 +1529,7 @@ Contains
     !
 80  Continue
 
-    n = a - 1.0D+00
+    n = INT(a - 1.0D+00)
     w = 1.0D+00
     Do i = 1, n
        a = a - 1.0D+00
@@ -1652,7 +1655,7 @@ Contains
        Else If ( b0 < 8.0D+00 ) Then
 
           u = gamma_ln1 ( a0 )
-          m = b0 - 1.0D+00
+          m = INT(b0 - 1.0D+00)
 
           c = 1.0D+00
           Do i = 1, m
@@ -1826,7 +1829,7 @@ Contains
        Else If ( b0 < 8.0D+00 ) Then
 
           u = gamma_ln1 ( a0 )
-          n = b0 - 1.0D+00
+          n = INT(b0 - 1.0D+00)
 
           c = 1.0D+00
           Do i = 1, n
@@ -1981,7 +1984,7 @@ Contains
     !
     !  Procedure for A < 1 OR B < 1
     !
-40  Continue
+! 40  Continue
 
     b0 = Max ( a, b )
 
@@ -2019,7 +2022,7 @@ Contains
 70  Continue
 
     u = gamma_ln1 ( a0 )
-    n = b0 - 1.0D+00
+    n = INT(b0 - 1.0D+00)
 
     c = 1.0D+00
     Do i = 1, n
@@ -2151,8 +2154,8 @@ Contains
        If ( 1.0D+00 <= a ) Then
 
           If ( 1.1D+00 * ap1 <= apb ) Then
-             mu = Abs ( exparg ( 1 ) )
-             k = exparg ( 0 )
+             mu = INT(Abs ( exparg ( 1 ) ))
+             k = INT(exparg ( 0 ))
              If ( k < mu ) Then
                 mu = k
              End If
@@ -2190,7 +2193,7 @@ Contains
              k = n - 1
              t = n - 1
              If ( r < t ) Then
-                k = r
+                k = INT(r)
              End If
           End If
 
@@ -2223,102 +2226,102 @@ Contains
     Return
   End Function beta_up
 
-  Subroutine binomial_cdf_values ( n_data, a, b, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! BINOMIAL_CDF_VALUES returns some values of the binomial CDF.
-    !
-    !  Discussion:
-    !
-    !    CDF(X)(A,B) is the probability of at most X successes in A trials,
-    !    given that the probability of success on a single trial is B.
-    !
-    !  Modified:
-    !
-    !    27 May 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Daniel Zwillinger,
-    !    CRC Standard Mathematical Tables and Formulae,
-    !    30th Edition, CRC Press, 1996, pages 651-652.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer A, real ( kind = 8 ) B, integer X, the arguments
-    !    of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 17
-
-    Integer a
-    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
-         2,  2,  2,  2, &
-         2,  4,  4,  4, &
-         4, 10, 10, 10, &
-         10, 10, 10, 10, &
-         10 /)
-    Real ( kind = 8 ) b
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: b_vec = (/ &
-         0.05D+00, 0.05D+00, 0.05D+00, 0.50D+00, &
-         0.50D+00, 0.25D+00, 0.25D+00, 0.25D+00, &
-         0.25D+00, 0.05D+00, 0.10D+00, 0.15D+00, &
-         0.20D+00, 0.25D+00, 0.30D+00, 0.40D+00, &
-         0.50D+00 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.9025D+00, 0.9975D+00, 1.0000D+00, 0.2500D+00, &
-         0.7500D+00, 0.3164D+00, 0.7383D+00, 0.9492D+00, &
-         0.9961D+00, 0.9999D+00, 0.9984D+00, 0.9901D+00, &
-         0.9672D+00, 0.9219D+00, 0.8497D+00, 0.6331D+00, &
-         0.3770D+00 /)
-    Integer n_data
-    Integer x
-    Integer, Save, Dimension ( n_max ) :: x_vec = (/ &
-         0, 1, 2, 0, &
-         1, 0, 1, 2, &
-         3, 4, 4, 4, &
-         4, 4, 4, 4, &
-         4 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0
-       b = 0.0D+00
-       x = 0
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       b = b_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine binomial_cdf_values
+!!$  Subroutine binomial_cdf_values ( n_data, a, b, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! BINOMIAL_CDF_VALUES returns some values of the binomial CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    CDF(X)(A,B) is the probability of at most X successes in A trials,
+!!$    !    given that the probability of success on a single trial is B.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    27 May 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Daniel Zwillinger,
+!!$    !    CRC Standard Mathematical Tables and Formulae,
+!!$    !    30th Edition, CRC Press, 1996, pages 651-652.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer A, real ( kind = 8 ) B, integer X, the arguments
+!!$    !    of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 17
+!!$
+!!$    Integer a
+!!$    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         2,  2,  2,  2, &
+!!$         2,  4,  4,  4, &
+!!$         4, 10, 10, 10, &
+!!$         10, 10, 10, 10, &
+!!$         10 /)
+!!$    Real ( kind = 8 ) b
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: b_vec = (/ &
+!!$         0.05D+00, 0.05D+00, 0.05D+00, 0.50D+00, &
+!!$         0.50D+00, 0.25D+00, 0.25D+00, 0.25D+00, &
+!!$         0.25D+00, 0.05D+00, 0.10D+00, 0.15D+00, &
+!!$         0.20D+00, 0.25D+00, 0.30D+00, 0.40D+00, &
+!!$         0.50D+00 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.9025D+00, 0.9975D+00, 1.0000D+00, 0.2500D+00, &
+!!$         0.7500D+00, 0.3164D+00, 0.7383D+00, 0.9492D+00, &
+!!$         0.9961D+00, 0.9999D+00, 0.9984D+00, 0.9901D+00, &
+!!$         0.9672D+00, 0.9219D+00, 0.8497D+00, 0.6331D+00, &
+!!$         0.3770D+00 /)
+!!$    Integer n_data
+!!$    Integer x
+!!$    Integer, Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0, 1, 2, 0, &
+!!$         1, 0, 1, 2, &
+!!$         3, 4, 4, 4, &
+!!$         4, 4, 4, 4, &
+!!$         4 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0
+!!$       b = 0.0D+00
+!!$       x = 0
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       b = b_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine binomial_cdf_values
 
   Subroutine cdfbet ( which, p, q, x, y, a, b, status, bound )
 
@@ -2740,1814 +2743,1814 @@ Contains
     Return
   End Subroutine cdfbet
 
-  Subroutine cdfbin ( which, p, q, s, xn, pr, ompr, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFBIN evaluates the CDF of the Binomial distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the binomial distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of the other parameters involves a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    P is the probablility of S or fewer successes in XN binomial trials,
-    !    each trial having an individual probability of success of PR.
-    !
-    !  Modified:
-    !
-    !    09 June 2004
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.24.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which of argument values is to
-    !    be calculated from the others.
-    !    1: Calculate P and Q from S, XN, PR and OMPR;
-    !    2: Calculate S from P, Q, XN, PR and OMPR;
-    !    3: Calculate XN from P, Q, S, PR and OMPR;
-    !    4: Calculate PR and OMPR from P, Q, S and XN.
-    !
-    !    Input/output, real ( kind = 8 ) P, the cumulation, from 0 to S,
-    !    of the binomial distribution.  If P is an input value, it should
-    !    lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) S, the number of successes observed.
-    !    Whether this is an input or output value, it should lie in the
-    !    range [0,XN].
-    !
-    !    Input/output, real ( kind = 8 ) XN, the number of binomial trials.
-    !    If this is an input value it should lie in the range: (0, +infinity).
-    !    If it is an output value it will be searched for in the
-    !    range [1.0D-300, 1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
-    !    binomial trial.  Whether this is an input or output value, it should
-    !    lie in the range: [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) OMPR, equal to 1-PR.  Whether this is an
-    !    input or output value, it should lie in the range [0,1].  Also, it should
-    !    be the case that PR + OMPR = 1.
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1;
-    !    +4, if PR + OMPR /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
-    Real ( kind = 8 ) ompr
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) pr
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Real ( kind = 8 ) s
-    Integer status
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    Real ( kind = 8 ) xhi
-    Real ( kind = 8 ) xlo
-    Real ( kind = 8 ) xn
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 4 < which ) Then
-       bound = 4.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless XN is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( xn <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter XN is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless S is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( s < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter S is out of range.'
-          Return
-       Else If ( which /= 3 .And. xn < s ) Then
-          bound = xn
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter S is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless PR is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( pr < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
-          Return
-       Else If ( 1.0D+00 < pr ) Then
-          bound = 1.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless OMPR is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( ompr < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -7
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
-          Return
-       Else If ( 1.0D+00 < ompr ) Then
-          bound = 1.0D+00
-          status = -7
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Check that PR + OMPR = 1.
-    !
-    If ( which /= 4 ) Then
-       If ( 3.0D+00 * Epsilon ( 1.0D+00 ) &
-            < Abs ( ( pr + ompr ) - 1.0D+00 ) ) Then
-          status = 4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
-          Write ( *, '(a)' ) '  PR + OMPR /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumbin ( s, xn, pr, ompr, p, q )
-       status = 0
-       !
-       !  Calculate S.
-       !
-    Else If ( which == 2 ) Then
-
-       s = 5.0D+00
-       ! Call dstinv ( 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumbin ( s, xn, pr, ompr, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = xn
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate XN.
-       !
-    Else If ( which == 3 ) Then
-
-       xn = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumbin ( s, xn, pr, ompr, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          End If
-       End If
-       !
-       !  Calculate PR and OMPR.
-       !
-    Else If ( which == 4 ) Then
-
-       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
-       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
-
-       If ( p <= q ) Then
-
-          status = 0
-          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-          ompr = 1.0D+00 - pr
-
-          Do
-
-             If ( status /= 1 ) Then
-                Exit
-             End If
-
-             Call cumbin ( s, xn, pr, ompr, cum, ccum )
-             fx = cum - p
-             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-             ompr = 1.0D+00 - pr
-
-          End Do
-
-       Else
-
-          status = 0
-          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-          pr = 1.0D+00 - ompr
-
-          Do
-
-             If ( status /= 1 ) Then
-                Exit
-             End If
-
-             Call cumbin ( s, xn, pr, ompr, cum, ccum )
-             fx = ccum - q
-             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-             pr = 1.0D+00 - ompr
-
-          End Do
-
-       End If
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = 1.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFBIN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdfbin
-
-  Subroutine cdfchi ( which, p, q, x, df, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFCHI evaluates the CDF of the chi square distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the chi square distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of the other parameters involves a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    The CDF of the chi square distribution can be evaluated
-    !    within Mathematica by commands such as:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF [ ChiSquareDistribution [ DF ], X ]
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.4.19.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from X and DF;
-    !    2: Calculate X from P, Q and DF;
-    !    3: Calculate DF from P, Q and X.
-    !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
-    !    the chi-square distribution.  If this is an input value, it should
-    !    lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) X, the upper limit of integration
-    !    of the chi-square distribution.  If this is an input
-    !    value, it should lie in the range: [0, +infinity).  If it is an output
-    !    value, it will be searched for in the range: [0,1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) DF, the degrees of freedom of the
-    !    chi-square distribution.  If this is an input value, it should lie
-    !    in the range: (0, +infinity).  If it is an output value, it will be
-    !    searched for in the range: [ 1.0D-300, 1.0D+300].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1;
-    !    +10, an error was returned from CUMGAM.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) porq
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Integer status
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    Real ( kind = 8 ) x
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 3 < which ) Then
-       bound = 3.0
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless X is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( x < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter X is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DF is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( df <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Select the minimum of P and Q.
-    !
-    If ( which /= 1 ) Then
-       porq = Min ( p, q )
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       status = 0
-       Call cumchi ( x, df, p, q )
-
-       If ( 1.5D+00 < porq ) Then
-          status = 10
-          Return
-       End If
-       !
-       !  Calculate X.
-       !
-    Else If ( which == 2 ) Then
-
-       x = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumchi ( x, df, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          If ( 1.5D+00 < fx + porq ) Then
-             status = 10
-             Return
-          End If
-
-          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-
-       End If
-       !
-       !  Calculate DF.
-       !
-    Else If ( which == 3 ) Then
-
-       df = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumchi ( x, df, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          If ( 1.5D+00 < fx + porq ) Then
-             status = 10
-             Return
-          End If
-
-          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdfchi
-
-  Subroutine cdfchn ( which, p, q, x, df, pnonc, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFCHN evaluates the CDF of the Noncentral Chi-Square.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the noncentral chi-square
-    !    distribution given values for the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of the other parameters involves a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    The computation time required for this routine is proportional
-    !    to the noncentrality parameter (PNONC).  Very large values of
-    !    this parameter can consume immense computer resources.  This is
-    !    why the search range is bounded by 10,000.
-    !
-    !    The CDF of the noncentral chi square distribution can be evaluated
-    !    within Mathematica by commands such as:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF[ NoncentralChiSquareDistribution [ DF, LAMBDA ], X ]
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.25.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from X, DF and PNONC;
-    !    2: Calculate X from P, DF and PNONC;
-    !    3: Calculate DF from P, X and PNONC;
-    !    4: Calculate PNONC from P, X and DF.
-    !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
-    !    the noncentral chi-square distribution.  If this is an input
-    !    value, it should lie in the range: [0, 1.0-1.0D-16).
-    !
-    !    Input/output, real ( kind = 8 ) Q, is generally not used by this
-    !    subroutine and is only included for similarity with other routines.
-    !    However, if P is to be computed, then a value will also be computed
-    !    for Q.
-    !
-    !    Input, real ( kind = 8 ) X, the upper limit of integration of the
-    !    noncentral chi-square distribution.  If this is an input value, it
-    !    should lie in the range: [0, +infinity).  If it is an output value,
-    !    it will be sought in the range: [0,1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom
-    !    of the noncentral chi-square distribution.  If this is an input value,
-    !    it should lie in the range: (0, +infinity).  If it is an output value,
-    !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter of
-    !    the noncentral chi-square distribution.  If this is an input value, it
-    !    should lie in the range: [0, +infinity).  If it is an output value,
-    !    it will be searched for in the range: [0,1.0D+4]
-    !
-    !    Output, integer STATUS, reports on the calculation.
-    !    0, if calculation completed correctly;
-    !    -I, if input parameter number I is out of range;
-    !    1, if the answer appears to be lower than the lowest search bound;
-    !    2, if the answer appears to be higher than the greatest search bound.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol=1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf=1.0D+300
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) pnonc
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Integer status
-    Real ( kind = 8 ), Parameter :: tent4=1.0D+04
-    Real ( kind = 8 ), Parameter :: tol=1.0D-08
-    Integer which
-    Real ( kind = 8 ) x
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 4 < which ) Then
-       bound = 4.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless X is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( x < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter X is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DF is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( df <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless PNONC is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( pnonc < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PNONC is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumchn ( x, df, pnonc, p, q )
-       status = 0
-       !
-       !  Calculate X.
-       !
-    Else If ( which == 2 ) Then
-
-       x = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-          Call cumchn ( x, df, pnonc, cum, ccum )
-          fx = cum - p
-          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate DF.
-       !
-    Else If ( which == 3 ) Then
-
-       df = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-          If ( status /= 1 ) Then
-             Exit
-          End If
-          Call cumchn ( x, df, pnonc, cum, ccum )
-          fx = cum - p
-          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-       End Do
-
-       If ( status == -1 )Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate PNONC.
-       !
-    Else If ( which == 4 ) Then
-
-       pnonc = 5.0D+00
-       !Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumchn ( x, df, pnonc, cum, ccum )
-          fx = cum - p
-          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = tent4
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFCHN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdfchn
-
-  Subroutine cdff ( which, p, q, f, dfn, dfd, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFF evaluates the CDF of the F distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the F distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of the other parameters involves a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    The value of the cumulative F distribution is not necessarily
-    !    monotone in either degrees of freedom.  There thus may be two
-    !    values that provide a given CDF value.  This routine assumes
-    !    monotonicity and will find an arbitrary one of the two values.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.6.2.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from F, DFN and DFD;
-    !    2: Calculate F from P, Q, DFN and DFD;
-    !    3: Calculate DFN from P, Q, F and DFD;
-    !    4: Calculate DFD from P, Q, F and DFN.
-    !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
-    !    the F-density.  If it is an input value, it should lie in the
-    !    range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
-    !    of the F-density.  If this is an input value, it should lie in the
-    !    range [0, +infinity).  If it is an output value, it will be searched
-    !    for in the range [0,1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of
-    !    freedom of the numerator sum of squares.  If this is an input value,
-    !    it should lie in the range: (0, +infinity).  If it is an output value,
-    !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
-    !    of the denominator sum of squares.  If this is an input value, it should
-    !    lie in the range: (0, +infinity).  If it is an output value, it will
-    !    be searched for in the  range: [ 1.0D-300, 1.0D+300].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) dfd
-    Real ( kind = 8 ) dfn
-    Real ( kind = 8 ) f
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Integer status
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFF - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 4 < which ) Then
-       bound = 4.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFF - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless F is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( f < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter F is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DFN is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( dfn <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DFN is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DFD is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( dfd <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DFD is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFF - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumf ( f, dfn, dfd, p, q )
-       status = 0
-       !
-       !  Calculate F.
-       !
-    Else If ( which == 2 ) Then
-
-       f = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumf ( f, dfn, dfd, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate DFN.
-       !
-    Else If ( which == 3 ) Then
-
-       dfn = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumf ( f, dfn, dfd, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          End If
-       End If
-       !
-       !  Calculate DFD.
-       !
-    Else If ( which == 4 ) Then
-
-       dfd = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumf ( f, dfn, dfd, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFF - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdff
-
-  Subroutine cdffnc ( which, p, q, f, dfn, dfd, pnonc, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFFNC evaluates the CDF of the Noncentral F distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine originally used 1.0D+300 as the upper bound for the
-    !    interval in which many of the missing parameters are to be sought.
-    !    Since the underlying rootfinder routine needs to evaluate the
-    !    function at this point, it is no surprise that the program was
-    !    experiencing overflows.  A less extravagant upper bound
-    !    is being tried for now!
-    !
-    !    This routine calculates any one parameter of the Noncentral F distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of the other parameters involves a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    The computation time required for this routine is proportional
-    !    to the noncentrality parameter PNONC.  Very large values of
-    !    this parameter can consume immense computer resources.  This is
-    !    why the search range is bounded by 10,000.
-    !
-    !    The value of the cumulative noncentral F distribution is not
-    !    necessarily monotone in either degree of freedom.  There thus
-    !    may be two values that provide a given CDF value.  This routine
-    !    assumes monotonicity and will find an arbitrary one of the two
-    !    values.
-    !
-    !    The CDF of the noncentral F distribution can be evaluated
-    !    within Mathematica by commands such as:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF [ NoncentralFRatioDistribution [ DFN, DFD, PNONC ], X ]
-    !
-    !  Modified:
-    !
-    !    15 June 2004
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.6.20.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from F, DFN, DFD and PNONC;
-    !    2: Calculate F from P, Q, DFN, DFD and PNONC;
-    !    3: Calculate DFN from P, Q, F, DFD and PNONC;
-    !    4: Calculate DFD from P, Q, F, DFN and PNONC;
-    !    5: Calculate PNONC from P, Q, F, DFN and DFD.
-    !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
-    !    the noncentral F-density.  If P is an input value it should
-    !    lie in the range [0,1) (Not including 1!).
-    !
-    !    Dummy, real ( kind = 8 ) Q, is not used by this subroutine,
-    !    and is only included for similarity with the other routines.
-    !    Its input value is not checked.  If P is to be computed, the
-    !    Q is set to 1 - P.
-    !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
-    !    of the noncentral F-density.  If this is an input value, it should
-    !    lie in the range: [0, +infinity).  If it is an output value, it
-    !    will be searched for in the range: [0,1.0D+30].
-    !
-    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of freedom
-    !    of the numerator sum of squares.  If this is an input value, it should
-    !    lie in the range: (0, +infinity).  If it is an output value, it will
-    !    be searched for in the range: [ 1.0, 1.0D+30].
-    !
-    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
-    !    of the denominator sum of squares.  If this is an input value, it should
-    !    be in range: (0, +infinity).  If it is an output value, it will be
-    !    searched for in the range [1.0, 1.0D+30].
-    !
-    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter
-    !    If this is an input value, it should be nonnegative.
-    !    If it is an output value, it will be searched for in the range: [0,1.0D+4].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) dfd
-    Real ( kind = 8 ) dfn
-    Real ( kind = 8 ) f
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+30
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) pnonc
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Integer status
-    Real ( kind = 8 ), Parameter :: tent4 = 1.0D+04
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 5 < which ) Then
-       bound = 5.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless F is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( f < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter F is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DFN is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( dfn <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DFN is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DFD is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( dfd <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DFD is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless PNONC is to be computed, make sure it is legal.
-    !
-    If ( which /= 5 ) Then
-       If ( pnonc < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -7
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PNONC is out of range.'
-          Return
-       End If
-    End If
-    !
-    ! Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumfnc ( f, dfn, dfd, pnonc, p, q )
-       status = 0
-       !
-       !  Calculate F.
-       !
-    Else If ( which == 2 ) Then
-
-       f = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
-          fx = cum - p
-          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-             Return
-          End If
-       End If
-       !
-       !  Calculate DFN.
-       !
-    Else If ( which == 3 ) Then
-
-       dfn = 5.0D+00
-       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, dfn, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
-          fx = cum - p
-
-          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate DFD.
-       !
-    Else If ( which == 4 ) Then
-
-       dfd = 5.0D+00
-       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, dfd, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
-          fx = cum - p
-          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate PNONC.
-       !
-    Else If ( which == 5 ) Then
-
-       pnonc = 5.0D+00
-       ! Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
-          fx = cum - p
-
-          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = tent4
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFFNC - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdffnc
+!!$  Subroutine cdfbin ( which, p, q, s, xn, pr, ompr, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFBIN evaluates the CDF of the Binomial distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the binomial distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of the other parameters involves a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    P is the probablility of S or fewer successes in XN binomial trials,
+!!$    !    each trial having an individual probability of success of PR.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    09 June 2004
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.24.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which of argument values is to
+!!$    !    be calculated from the others.
+!!$    !    1: Calculate P and Q from S, XN, PR and OMPR;
+!!$    !    2: Calculate S from P, Q, XN, PR and OMPR;
+!!$    !    3: Calculate XN from P, Q, S, PR and OMPR;
+!!$    !    4: Calculate PR and OMPR from P, Q, S and XN.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the cumulation, from 0 to S,
+!!$    !    of the binomial distribution.  If P is an input value, it should
+!!$    !    lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) S, the number of successes observed.
+!!$    !    Whether this is an input or output value, it should lie in the
+!!$    !    range [0,XN].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) XN, the number of binomial trials.
+!!$    !    If this is an input value it should lie in the range: (0, +infinity).
+!!$    !    If it is an output value it will be searched for in the
+!!$    !    range [1.0D-300, 1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
+!!$    !    binomial trial.  Whether this is an input or output value, it should
+!!$    !    lie in the range: [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) OMPR, equal to 1-PR.  Whether this is an
+!!$    !    input or output value, it should lie in the range [0,1].  Also, it should
+!!$    !    be the case that PR + OMPR = 1.
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1;
+!!$    !    +4, if PR + OMPR /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
+!!$    Real ( kind = 8 ) ompr
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) pr
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Real ( kind = 8 ) s
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    Real ( kind = 8 ) xhi
+!!$    Real ( kind = 8 ) xlo
+!!$    Real ( kind = 8 ) xn
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 4 < which ) Then
+!!$       bound = 4.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless XN is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( xn <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter XN is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless S is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( s < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter S is out of range.'
+!!$          Return
+!!$       Else If ( which /= 3 .And. xn < s ) Then
+!!$          bound = xn
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter S is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless PR is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( pr < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < pr ) Then
+!!$          bound = 1.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless OMPR is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( ompr < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -7
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < ompr ) Then
+!!$          bound = 1.0D+00
+!!$          status = -7
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that PR + OMPR = 1.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( 1.0D+00 ) &
+!!$            < Abs ( ( pr + ompr ) - 1.0D+00 ) ) Then
+!!$          status = 4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFBET - Fatal error!'
+!!$          Write ( *, '(a)' ) '  PR + OMPR /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumbin ( s, xn, pr, ompr, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate S.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       s = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, xn, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumbin ( s, xn, pr, ompr, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = xn
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate XN.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       xn = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumbin ( s, xn, pr, ompr, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, xn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate PR and OMPR.
+!!$       !
+!!$    Else If ( which == 4 ) Then
+!!$
+!!$       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+!!$       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
+!!$
+!!$       If ( p <= q ) Then
+!!$
+!!$          status = 0
+!!$          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$          ompr = 1.0D+00 - pr
+!!$
+!!$          Do
+!!$
+!!$             If ( status /= 1 ) Then
+!!$                Exit
+!!$             End If
+!!$
+!!$             Call cumbin ( s, xn, pr, ompr, cum, ccum )
+!!$             fx = cum - p
+!!$             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$             ompr = 1.0D+00 - pr
+!!$
+!!$          End Do
+!!$
+!!$       Else
+!!$
+!!$          status = 0
+!!$          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$          pr = 1.0D+00 - ompr
+!!$
+!!$          Do
+!!$
+!!$             If ( status /= 1 ) Then
+!!$                Exit
+!!$             End If
+!!$
+!!$             Call cumbin ( s, xn, pr, ompr, cum, ccum )
+!!$             fx = ccum - q
+!!$             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$             pr = 1.0D+00 - ompr
+!!$
+!!$          End Do
+!!$
+!!$       End If
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = 1.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFBIN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdfbin
+
+!!$  Subroutine cdfchi ( which, p, q, x, df, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFCHI evaluates the CDF of the chi square distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the chi square distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of the other parameters involves a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    The CDF of the chi square distribution can be evaluated
+!!$    !    within Mathematica by commands such as:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF [ ChiSquareDistribution [ DF ], X ]
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.4.19.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from X and DF;
+!!$    !    2: Calculate X from P, Q and DF;
+!!$    !    3: Calculate DF from P, Q and X.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
+!!$    !    the chi-square distribution.  If this is an input value, it should
+!!$    !    lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) X, the upper limit of integration
+!!$    !    of the chi-square distribution.  If this is an input
+!!$    !    value, it should lie in the range: [0, +infinity).  If it is an output
+!!$    !    value, it will be searched for in the range: [0,1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DF, the degrees of freedom of the
+!!$    !    chi-square distribution.  If this is an input value, it should lie
+!!$    !    in the range: (0, +infinity).  If it is an output value, it will be
+!!$    !    searched for in the range: [ 1.0D-300, 1.0D+300].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1;
+!!$    !    +10, an error was returned from CUMGAM.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) porq
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    Real ( kind = 8 ) x
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 3 < which ) Then
+!!$       bound = 3.0
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless X is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( x < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter X is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DF is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( df <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Select the minimum of P and Q.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       porq = Min ( p, q )
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       status = 0
+!!$       Call cumchi ( x, df, p, q )
+!!$
+!!$       If ( 1.5D+00 < porq ) Then
+!!$          status = 10
+!!$          Return
+!!$       End If
+!!$       !
+!!$       !  Calculate X.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       x = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumchi ( x, df, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          If ( 1.5D+00 < fx + porq ) Then
+!!$             status = 10
+!!$             Return
+!!$          End If
+!!$
+!!$          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$
+!!$       End If
+!!$       !
+!!$       !  Calculate DF.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       df = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumchi ( x, df, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          If ( 1.5D+00 < fx + porq ) Then
+!!$             status = 10
+!!$             Return
+!!$          End If
+!!$
+!!$          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdfchi
+
+!!$  Subroutine cdfchn ( which, p, q, x, df, pnonc, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFCHN evaluates the CDF of the Noncentral Chi-Square.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the noncentral chi-square
+!!$    !    distribution given values for the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of the other parameters involves a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    The computation time required for this routine is proportional
+!!$    !    to the noncentrality parameter (PNONC).  Very large values of
+!!$    !    this parameter can consume immense computer resources.  This is
+!!$    !    why the search range is bounded by 10,000.
+!!$    !
+!!$    !    The CDF of the noncentral chi square distribution can be evaluated
+!!$    !    within Mathematica by commands such as:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF[ NoncentralChiSquareDistribution [ DF, LAMBDA ], X ]
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.25.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from X, DF and PNONC;
+!!$    !    2: Calculate X from P, DF and PNONC;
+!!$    !    3: Calculate DF from P, X and PNONC;
+!!$    !    4: Calculate PNONC from P, X and DF.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
+!!$    !    the noncentral chi-square distribution.  If this is an input
+!!$    !    value, it should lie in the range: [0, 1.0-1.0D-16).
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, is generally not used by this
+!!$    !    subroutine and is only included for similarity with other routines.
+!!$    !    However, if P is to be computed, then a value will also be computed
+!!$    !    for Q.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) X, the upper limit of integration of the
+!!$    !    noncentral chi-square distribution.  If this is an input value, it
+!!$    !    should lie in the range: [0, +infinity).  If it is an output value,
+!!$    !    it will be sought in the range: [0,1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom
+!!$    !    of the noncentral chi-square distribution.  If this is an input value,
+!!$    !    it should lie in the range: (0, +infinity).  If it is an output value,
+!!$    !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter of
+!!$    !    the noncentral chi-square distribution.  If this is an input value, it
+!!$    !    should lie in the range: [0, +infinity).  If it is an output value,
+!!$    !    it will be searched for in the range: [0,1.0D+4]
+!!$    !
+!!$    !    Output, integer STATUS, reports on the calculation.
+!!$    !    0, if calculation completed correctly;
+!!$    !    -I, if input parameter number I is out of range;
+!!$    !    1, if the answer appears to be lower than the lowest search bound;
+!!$    !    2, if the answer appears to be higher than the greatest search bound.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol=1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf=1.0D+300
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) pnonc
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tent4=1.0D+04
+!!$    Real ( kind = 8 ), Parameter :: tol=1.0D-08
+!!$    Integer which
+!!$    Real ( kind = 8 ) x
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 4 < which ) Then
+!!$       bound = 4.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless X is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( x < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter X is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DF is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( df <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless PNONC is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( pnonc < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFCHN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PNONC is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumchn ( x, df, pnonc, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate X.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       x = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$          Call cumchn ( x, df, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$          Call dinvr ( status, x, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DF.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       df = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$          Call cumchn ( x, df, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$       End Do
+!!$
+!!$       If ( status == -1 )Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate PNONC.
+!!$       !
+!!$    Else If ( which == 4 ) Then
+!!$
+!!$       pnonc = 5.0D+00
+!!$       !Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumchn ( x, df, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = tent4
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFCHN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdfchn
+
+!!$  Subroutine cdff ( which, p, q, f, dfn, dfd, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFF evaluates the CDF of the F distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the F distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of the other parameters involves a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    The value of the cumulative F distribution is not necessarily
+!!$    !    monotone in either degrees of freedom.  There thus may be two
+!!$    !    values that provide a given CDF value.  This routine assumes
+!!$    !    monotonicity and will find an arbitrary one of the two values.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.6.2.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from F, DFN and DFD;
+!!$    !    2: Calculate F from P, Q, DFN and DFD;
+!!$    !    3: Calculate DFN from P, Q, F and DFD;
+!!$    !    4: Calculate DFD from P, Q, F and DFN.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
+!!$    !    the F-density.  If it is an input value, it should lie in the
+!!$    !    range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
+!!$    !    of the F-density.  If this is an input value, it should lie in the
+!!$    !    range [0, +infinity).  If it is an output value, it will be searched
+!!$    !    for in the range [0,1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of
+!!$    !    freedom of the numerator sum of squares.  If this is an input value,
+!!$    !    it should lie in the range: (0, +infinity).  If it is an output value,
+!!$    !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
+!!$    !    of the denominator sum of squares.  If this is an input value, it should
+!!$    !    lie in the range: (0, +infinity).  If it is an output value, it will
+!!$    !    be searched for in the  range: [ 1.0D-300, 1.0D+300].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) dfd
+!!$    Real ( kind = 8 ) dfn
+!!$    Real ( kind = 8 ) f
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 4 < which ) Then
+!!$       bound = 4.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless F is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( f < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter F is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DFN is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( dfn <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DFN is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DFD is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( dfd <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DFD is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFF - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumf ( f, dfn, dfd, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate F.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       f = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumf ( f, dfn, dfd, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DFN.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       dfn = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumf ( f, dfn, dfd, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DFD.
+!!$       !
+!!$    Else If ( which == 4 ) Then
+!!$
+!!$       dfd = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumf ( f, dfn, dfd, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFF - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdff
+
+!!$  Subroutine cdffnc ( which, p, q, f, dfn, dfd, pnonc, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFFNC evaluates the CDF of the Noncentral F distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine originally used 1.0D+300 as the upper bound for the
+!!$    !    interval in which many of the missing parameters are to be sought.
+!!$    !    Since the underlying rootfinder routine needs to evaluate the
+!!$    !    function at this point, it is no surprise that the program was
+!!$    !    experiencing overflows.  A less extravagant upper bound
+!!$    !    is being tried for now!
+!!$    !
+!!$    !    This routine calculates any one parameter of the Noncentral F distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of the other parameters involves a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    The computation time required for this routine is proportional
+!!$    !    to the noncentrality parameter PNONC.  Very large values of
+!!$    !    this parameter can consume immense computer resources.  This is
+!!$    !    why the search range is bounded by 10,000.
+!!$    !
+!!$    !    The value of the cumulative noncentral F distribution is not
+!!$    !    necessarily monotone in either degree of freedom.  There thus
+!!$    !    may be two values that provide a given CDF value.  This routine
+!!$    !    assumes monotonicity and will find an arbitrary one of the two
+!!$    !    values.
+!!$    !
+!!$    !    The CDF of the noncentral F distribution can be evaluated
+!!$    !    within Mathematica by commands such as:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF [ NoncentralFRatioDistribution [ DFN, DFD, PNONC ], X ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    15 June 2004
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.6.20.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from F, DFN, DFD and PNONC;
+!!$    !    2: Calculate F from P, Q, DFN, DFD and PNONC;
+!!$    !    3: Calculate DFN from P, Q, F, DFD and PNONC;
+!!$    !    4: Calculate DFD from P, Q, F, DFN and PNONC;
+!!$    !    5: Calculate PNONC from P, Q, F, DFN and DFD.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
+!!$    !    the noncentral F-density.  If P is an input value it should
+!!$    !    lie in the range [0,1) (Not including 1!).
+!!$    !
+!!$    !    Dummy, real ( kind = 8 ) Q, is not used by this subroutine,
+!!$    !    and is only included for similarity with the other routines.
+!!$    !    Its input value is not checked.  If P is to be computed, the
+!!$    !    Q is set to 1 - P.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
+!!$    !    of the noncentral F-density.  If this is an input value, it should
+!!$    !    lie in the range: [0, +infinity).  If it is an output value, it
+!!$    !    will be searched for in the range: [0,1.0D+30].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of freedom
+!!$    !    of the numerator sum of squares.  If this is an input value, it should
+!!$    !    lie in the range: (0, +infinity).  If it is an output value, it will
+!!$    !    be searched for in the range: [ 1.0, 1.0D+30].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
+!!$    !    of the denominator sum of squares.  If this is an input value, it should
+!!$    !    be in range: (0, +infinity).  If it is an output value, it will be
+!!$    !    searched for in the range [1.0, 1.0D+30].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter
+!!$    !    If this is an input value, it should be nonnegative.
+!!$    !    If it is an output value, it will be searched for in the range: [0,1.0D+4].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) dfd
+!!$    Real ( kind = 8 ) dfn
+!!$    Real ( kind = 8 ) f
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+30
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) pnonc
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tent4 = 1.0D+04
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 5 < which ) Then
+!!$       bound = 5.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless F is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( f < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter F is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DFN is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( dfn <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DFN is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DFD is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( dfd <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DFD is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless PNONC is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 5 ) Then
+!!$       If ( pnonc < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -7
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFFNC - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PNONC is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    ! Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumfnc ( f, dfn, dfd, pnonc, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate F.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       f = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$             Return
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DFN.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       dfn = 5.0D+00
+!!$       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, dfn, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$
+!!$          Call dinvr ( status, dfn, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DFD.
+!!$       !
+!!$    Else If ( which == 4 ) Then
+!!$
+!!$       dfd = 5.0D+00
+!!$       ! Call dstinv ( 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, dfd, fx, qleft, qhi, 1.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$          Call dinvr ( status, dfd, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate PNONC.
+!!$       !
+!!$    Else If ( which == 5 ) Then
+!!$
+!!$       pnonc = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, tent4, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
+!!$          fx = cum - p
+!!$
+!!$          Call dinvr ( status, pnonc, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = tent4
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFFNC - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdffnc
 
   Subroutine cdfgam ( which, p, q, x, shape, scale, status, bound )
 
@@ -4860,423 +4863,423 @@ Contains
     Return
   End Subroutine cdfgam
 
-  Subroutine cdfnbn ( which, p, q, f, s, pr, ompr, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFNBN evaluates the CDF of the Negative Binomial distribution
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the negative binomial
-    !    distribution given values for the others.
-    !
-    !    The cumulative negative binomial distribution returns the
-    !    probability that there will be F or fewer failures before the
-    !    S-th success in binomial trials each of which has probability of
-    !    success PR.
-    !
-    !    The individual term of the negative binomial is the probability of
-    !    F failures before S successes and is
-    !    Choose( F, S+F-1 ) * PR^(S) * (1-PR)^F
-    !
-    !    Computation of other parameters involve a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.26.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from F, S, PR and OMPR;
-    !    2: Calculate F from P, Q, S, PR and OMPR;
-    !    3: Calculate S from P, Q, F, PR and OMPR;
-    !    4: Calculate PR and OMPR from P, Q, F and S.
-    !
-    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to F of
-    !    the negative binomial distribution.  If P is an input value, it
-    !    should lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of cumulation of
-    !    the binomial distribution.  There are F or fewer failures before
-    !    the S-th success.  If this is an input value, it may lie in the
-    !    range [0,+infinity), and if it is an output value, it will be searched
-    !    for in the range [0,1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) S, the number of successes.
-    !    If this is an input value, it should lie in the range: [0, +infinity).
-    !    If it is an output value, it will be searched for in the range:
-    !    [0, 1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
-    !    binomial trial.  Whether an input or output value, it should lie in the
-    !    range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) OMPR, the value of (1-PR).  Whether an
-    !    input or output value, it should lie in the range [0,1].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1;
-    !    +4, if PR + OMPR /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) f
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
-    Real ( kind = 8 ) ompr
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) pr
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Real ( kind = 8 ) s
-    Integer status
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    Real ( kind = 8 ) xhi
-    Real ( kind = 8 ) xlo
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 4 < which ) Then
-       bound = 4.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless F is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( f < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter F is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless S is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( s < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter S is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless PR is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( pr < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
-          Return
-       Else If ( 1.0D+00 < pr ) Then
-          bound = 1.0D+00
-          status = -6
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless OMPR is to be computed, make sure it is legal.
-    !
-    If ( which /= 4 ) Then
-       If ( ompr < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -7
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
-          Return
-       Else If ( 1.0D+00 < ompr ) Then
-          bound = 1.0D+00
-          status = -7
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Check that PR + OMPR = 1.
-    !
-    If ( which /= 4 ) Then
-       If ( 3.0D+00 * Epsilon ( pr ) < Abs ( ( pr + ompr ) - 1.0D+00 ) ) Then
-          status = 4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
-          Write ( *, '(a)' ) '  PR + OMPR /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumnbn ( f, s, pr, ompr, p, q )
-       status = 0
-       !
-       !  Calculate F.
-       !
-    Else If ( which == 2 ) Then
-
-       f = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumnbn ( f, s, pr, ompr, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate S.
-       !
-    Else If ( which == 3 ) Then
-
-       s = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumnbn ( f, s, pr, ompr, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBn - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate PR and OMPR.
-       !
-    Else If ( which == 4 ) Then
-
-       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
-       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
-
-       If ( p <= q ) Then
-
-          status = 0
-          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-          ompr = 1.0D+00 - pr
-
-          Do
-             If ( status /= 1 ) Then
-                Exit
-             End If
-             Call cumnbn ( f, s, pr, ompr, cum, ccum )
-             fx = cum - p
-             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-             ompr = 1.0D+00 - pr
-          End Do
-
-       Else
-
-          status = 0
-          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-          pr = 1.0D+00 - ompr
-
-          Do
-
-             If ( status /= 1 ) Then
-                Exit
-             End If
-
-             Call cumnbn ( f, s, pr, ompr, cum, ccum )
-             fx = ccum - q
-             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
-             pr = 1.0D+00 - ompr
-
-          End Do
-
-       End If
-
-       If ( status == -1 ) Then
-
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = 1.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFNBN - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdfnbn
+!!$  Subroutine cdfnbn ( which, p, q, f, s, pr, ompr, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFNBN evaluates the CDF of the Negative Binomial distribution
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the negative binomial
+!!$    !    distribution given values for the others.
+!!$    !
+!!$    !    The cumulative negative binomial distribution returns the
+!!$    !    probability that there will be F or fewer failures before the
+!!$    !    S-th success in binomial trials each of which has probability of
+!!$    !    success PR.
+!!$    !
+!!$    !    The individual term of the negative binomial is the probability of
+!!$    !    F failures before S successes and is
+!!$    !    Choose( F, S+F-1 ) * PR^(S) * (1-PR)^F
+!!$    !
+!!$    !    Computation of other parameters involve a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.26.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from F, S, PR and OMPR;
+!!$    !    2: Calculate F from P, Q, S, PR and OMPR;
+!!$    !    3: Calculate S from P, Q, F, PR and OMPR;
+!!$    !    4: Calculate PR and OMPR from P, Q, F and S.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to F of
+!!$    !    the negative binomial distribution.  If P is an input value, it
+!!$    !    should lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) F, the upper limit of cumulation of
+!!$    !    the binomial distribution.  There are F or fewer failures before
+!!$    !    the S-th success.  If this is an input value, it may lie in the
+!!$    !    range [0,+infinity), and if it is an output value, it will be searched
+!!$    !    for in the range [0,1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) S, the number of successes.
+!!$    !    If this is an input value, it should lie in the range: [0, +infinity).
+!!$    !    If it is an output value, it will be searched for in the range:
+!!$    !    [0, 1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
+!!$    !    binomial trial.  Whether an input or output value, it should lie in the
+!!$    !    range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) OMPR, the value of (1-PR).  Whether an
+!!$    !    input or output value, it should lie in the range [0,1].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1;
+!!$    !    +4, if PR + OMPR /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) f
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
+!!$    Real ( kind = 8 ) ompr
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) pr
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Real ( kind = 8 ) s
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    Real ( kind = 8 ) xhi
+!!$    Real ( kind = 8 ) xlo
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 4 < which ) Then
+!!$       bound = 4.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless F is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( f < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter F is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless S is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( s < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter S is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless PR is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( pr < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < pr ) Then
+!!$          bound = 1.0D+00
+!!$          status = -6
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter PR is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless OMPR is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( ompr < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -7
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < ompr ) Then
+!!$          bound = 1.0D+00
+!!$          status = -7
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter OMPR is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that PR + OMPR = 1.
+!!$    !
+!!$    If ( which /= 4 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( pr ) < Abs ( ( pr + ompr ) - 1.0D+00 ) ) Then
+!!$          status = 4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFNBN - Fatal error!'
+!!$          Write ( *, '(a)' ) '  PR + OMPR /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumnbn ( f, s, pr, ompr, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate F.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       f = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumnbn ( f, s, pr, ompr, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate S.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       s = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumnbn ( f, s, pr, ompr, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBn - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate PR and OMPR.
+!!$       !
+!!$    Else If ( which == 4 ) Then
+!!$
+!!$       ! Call dstzr ( 0.0D+00, 1.0D+00, atol, tol )
+!!$       Call dzror ( status, atol, tol, 0.0D+00, 1.0D+00, qleft, qhi, .TRUE. )
+!!$
+!!$       If ( p <= q ) Then
+!!$
+!!$          status = 0
+!!$          Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$          ompr = 1.0D+00 - pr
+!!$
+!!$          Do
+!!$             If ( status /= 1 ) Then
+!!$                Exit
+!!$             End If
+!!$             Call cumnbn ( f, s, pr, ompr, cum, ccum )
+!!$             fx = cum - p
+!!$             Call dzror ( status, pr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$             ompr = 1.0D+00 - pr
+!!$          End Do
+!!$
+!!$       Else
+!!$
+!!$          status = 0
+!!$          Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$          pr = 1.0D+00 - ompr
+!!$
+!!$          Do
+!!$
+!!$             If ( status /= 1 ) Then
+!!$                Exit
+!!$             End If
+!!$
+!!$             Call cumnbn ( f, s, pr, ompr, cum, ccum )
+!!$             fx = ccum - q
+!!$             Call dzror ( status, ompr, fx, xlo, xhi, qleft, qhi, .FALSE. )
+!!$             pr = 1.0D+00 - ompr
+!!$
+!!$          End Do
+!!$
+!!$       End If
+!!$
+!!$       If ( status == -1 ) Then
+!!$
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = 1.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFNBN - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdfnbn
 
   Subroutine cdfnor ( which, p, q, x, mean, sd, status, bound )
 
@@ -5484,773 +5487,773 @@ Contains
     Return
   End Subroutine cdfnor
 
-  Subroutine cdfpoi ( which, p, q, s, xlam, status, bound )
+!!$  Subroutine cdfpoi ( which, p, q, s, xlam, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFPOI evaluates the CDF of the Poisson distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the Poisson distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of other parameters involve a seach for a value that
+!!$    !    produces the desired value of P.  The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.4.21.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1: Calculate P and Q from S and XLAM;
+!!$    !    2: Calculate A from P, Q and XLAM;
+!!$    !    3: Calculate XLAM from P, Q and S.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to S of the
+!!$    !    Poisson density.  Whether this is an input or output value, it will
+!!$    !    lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) S, the upper limit of cumulation of
+!!$    !    the Poisson CDF.  If this is an input value, it should lie in
+!!$    !    the range: [0, +infinity).  If it is an output value, it will be
+!!$    !    searched for in the range: [0,1.0D+300].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) XLAM, the mean of the Poisson
+!!$    !    distribution.  If this is an input value, it should lie in the range
+!!$    !    [0, +infinity).  If it is an output value, it will be searched for
+!!$    !    in the range: [0,1E300].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Real ( kind = 8 ) s
+!!$    Integer status
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    Real ( kind = 8 ) xlam
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 3 < which ) Then
+!!$       bound = 3.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless S is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 2 ) Then
+!!$       If ( s < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -4
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter S is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless XLAM is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( xlam < 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter XLAM is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumpoi ( s, xlam, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate S.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       s = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumpoi ( s, xlam, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFPOI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFPOI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate XLAM.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       xlam = 5.0D+00
+!!$       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumpoi ( s, xlam, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFPOI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFPOI - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdfpoi
 
-    !*****************************************************************************80
-    !
-    !! CDFPOI evaluates the CDF of the Poisson distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the Poisson distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of other parameters involve a seach for a value that
-    !    produces the desired value of P.  The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.4.21.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1: Calculate P and Q from S and XLAM;
-    !    2: Calculate A from P, Q and XLAM;
-    !    3: Calculate XLAM from P, Q and S.
-    !
-    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to S of the
-    !    Poisson density.  Whether this is an input or output value, it will
-    !    lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) S, the upper limit of cumulation of
-    !    the Poisson CDF.  If this is an input value, it should lie in
-    !    the range: [0, +infinity).  If it is an output value, it will be
-    !    searched for in the range: [0,1.0D+300].
-    !
-    !    Input/output, real ( kind = 8 ) XLAM, the mean of the Poisson
-    !    distribution.  If this is an input value, it should lie in the range
-    !    [0, +infinity).  If it is an output value, it will be searched for
-    !    in the range: [0,1E300].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
+!!$  Subroutine cdft ( which, p, q, t, df, status, bound )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CDFT evaluates the CDF of the T distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates any one parameter of the T distribution
+!!$    !    given the others.
+!!$    !
+!!$    !    The value P of the cumulative distribution function is calculated
+!!$    !    directly.
+!!$    !
+!!$    !    Computation of other parameters involve a seach for a value that
+!!$    !    produces the desired value of P.   The search relies on the
+!!$    !    monotonicity of P with respect to the other parameters.
+!!$    !
+!!$    !    The original version of this routine allowed the search interval
+!!$    !    to extend from -1.0D+300 to +1.0D+300, which is fine until you
+!!$    !    try to evaluate a function at such a point!
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.27.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, integer WHICH, indicates which argument is to be calculated
+!!$    !    from the others.
+!!$    !    1 : Calculate P and Q from T and DF;
+!!$    !    2 : Calculate T from P, Q and DF;
+!!$    !    3 : Calculate DF from P, Q and T.
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to T of
+!!$    !    the T-density.  Whether an input or output value, this will lie in the
+!!$    !    range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
+!!$    !    value, it should lie in the range [0,1].  If Q is an output value,
+!!$    !    it will lie in the range [0,1].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) T, the upper limit of integration of
+!!$    !    the T-density.  If this is an input value, it may have any value.
+!!$    !    It it is an output value, it will be searched for in the range
+!!$    !    [ -1.0D+30, 1.0D+30 ].
+!!$    !
+!!$    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom
+!!$    !    of the T distribution.  If this is an input value, it should lie
+!!$    !    in the range: (0 , +infinity).  If it is an output value, it will be
+!!$    !    searched for in the range: [1, 1.0D+10].
+!!$    !
+!!$    !    Output, integer STATUS, reports the status of the computation.
+!!$    !     0, if the calculation completed correctly;
+!!$    !    -I, if the input parameter number I is out of range;
+!!$    !    +1, if the answer appears to be lower than lowest search bound;
+!!$    !    +2, if the answer appears to be higher than greatest search bound;
+!!$    !    +3, if P + Q /= 1.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
+!!$    !    If STATUS is negative, then this is the value exceeded by parameter I.
+!!$    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
+!!$    Real ( kind = 8 ) bound
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    !    Real ( kind = 8 ) dt1
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Parameter :: inf = 1.0D+30
+!!$    Real ( kind = 8 ), Parameter :: maxdf = 1.0D+10
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ) q
+!!$    Logical qhi
+!!$    Logical qleft
+!!$    Integer status
+!!$    Real ( kind = 8 ) t
+!!$    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
+!!$    Integer which
+!!$    !
+!!$    !  Check the arguments.
+!!$    !
+!!$    If ( which < 1 ) Then
+!!$       bound = 1.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( 3 < which ) Then
+!!$       bound = 3.0D+00
+!!$       status = -1
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  Unless P is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( p < 0.0D+00 ) Then
+!!$          status = -2
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < p ) Then
+!!$          status = -2
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter P is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless Q is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( q < 0.0D+00 ) Then
+!!$          status = -3
+!!$          bound = 0.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       Else If ( 1.0D+00 < q ) Then
+!!$          status = -3
+!!$          bound = 1.0D+00
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Unless DF is to be computed, make sure it is legal.
+!!$    !
+!!$    If ( which /= 3 ) Then
+!!$       If ( df <= 0.0D+00 ) Then
+!!$          bound = 0.0D+00
+!!$          status = -5
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Check that P + Q = 1.
+!!$    !
+!!$    If ( which /= 1 ) Then
+!!$       If ( 3.0D+00 * Epsilon ( 1.0D+00 ) &
+!!$            < Abs ( ( p + q ) - 1.0D+00 ) ) Then
+!!$          status = 3
+!!$          Write ( *, '(a)' ) ' '
+!!$          Write ( *, '(a)' ) 'CDFT - Fatal error!'
+!!$          Write ( *, '(a)' ) '  P + Q /= 1.'
+!!$          Return
+!!$       End If
+!!$    End If
+!!$    !
+!!$    !  Calculate P and Q.
+!!$    !
+!!$    If ( which == 1 ) Then
+!!$
+!!$       Call cumt ( t, df, p, q )
+!!$       status = 0
+!!$       !
+!!$       !  Calculate T.
+!!$       !
+!!$    Else If ( which == 2 ) Then
+!!$
+!!$       t = dt1 ( p, q, df )
+!!$       ! Call dstinv ( -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, t, fx, qleft, qhi, -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       fx = 0.0D+00
+!!$       Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumt ( t, df, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft )Then
+!!$             status = 1
+!!$             bound = -inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFT - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = inf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFT - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$       !
+!!$       !  Calculate DF.
+!!$       !
+!!$    Else If ( which == 3 ) Then
+!!$
+!!$       df = 5.0D+00
+!!$       ! Call dstinv ( 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
+!!$       status = 0
+!!$       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       Do
+!!$
+!!$          If ( status /= 1 ) Then
+!!$             Exit
+!!$          End If
+!!$
+!!$          Call cumt ( t, df, cum, ccum )
+!!$
+!!$          If ( p <= q ) Then
+!!$             fx = cum - p
+!!$          Else
+!!$             fx = ccum - q
+!!$          End If
+!!$
+!!$          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
+!!$
+!!$       End Do
+!!$
+!!$       If ( status == -1 ) Then
+!!$          If ( qleft ) Then
+!!$             status = 1
+!!$             bound = 0.0D+00
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFT - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          Else
+!!$             status = 2
+!!$             bound = maxdf
+!!$             Write ( *, '(a)' ) ' '
+!!$             Write ( *, '(a)' ) 'CDFT - Warning!'
+!!$             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
+!!$             Write ( *, '(a)' ) '  the search bound.'
+!!$          End If
+!!$       End If
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cdft
 
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+300
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Real ( kind = 8 ) s
-    Integer status
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    Real ( kind = 8 ) xlam
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
+!!$  Subroutine chi_noncentral_cdf_values ( n_data, x, lambda, df, cdf )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CHI_NONCENTRAL_CDF_VALUES returns values of the noncentral chi CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The CDF of the noncentral chi square distribution can be evaluated
+!!$    !    within Mathematica by commands such as:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF [ NoncentralChiSquareDistribution [ DF, LAMBDA ], X ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    12 June 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) LAMBDA, the noncentrality parameter.
+!!$    !
+!!$    !    Output, integer DF, the number of degrees of freedom.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CDF, the noncentral chi CDF.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 27
+!!$
+!!$    Real ( kind = 8 ) cdf
+!!$    Real, Save, Dimension ( n_max ) :: cdf_vec = (/ &
+!!$         0.839944E+00, 0.695906E+00, 0.535088E+00, &
+!!$         0.764784E+00, 0.620644E+00, 0.469167E+00, &
+!!$         0.307088E+00, 0.220382E+00, 0.150025E+00, &
+!!$         0.307116E-02, 0.176398E-02, 0.981679E-03, &
+!!$         0.165175E-01, 0.202342E-03, 0.498448E-06, &
+!!$         0.151325E-01, 0.209041E-02, 0.246502E-03, &
+!!$         0.263684E-01, 0.185798E-01, 0.130574E-01, &
+!!$         0.583804E-01, 0.424978E-01, 0.308214E-01, &
+!!$         0.105788E+00, 0.794084E-01, 0.593201E-01 /)
+!!$    Integer df
+!!$    Integer, Save, Dimension ( n_max ) :: df_vec = (/ &
+!!$         1,   2,   3, &
+!!$         1,   2,   3, &
+!!$         1,   2,   3, &
+!!$         1,   2,   3, &
+!!$         60,  80, 100, &
+!!$         1,   2,   3, &
+!!$         10,  10,  10, &
+!!$         10,  10,  10, &
+!!$         10,  10,  10 /)
+!!$    Real ( kind = 8 ) lambda
+!!$    Real, Save, Dimension ( n_max ) :: lambda_vec = (/ &
+!!$         0.5E+00,  0.5E+00,  0.5E+00, &
+!!$         1.0E+00,  1.0E+00,  1.0E+00, &
+!!$         5.0E+00,  5.0E+00,  5.0E+00, &
+!!$         20.0E+00, 20.0E+00, 20.0E+00, &
+!!$         30.0E+00, 30.0E+00, 30.0E+00, &
+!!$         5.0E+00,  5.0E+00,  5.0E+00, &
+!!$         2.0E+00,  3.0E+00,  4.0E+00, &
+!!$         2.0E+00,  3.0E+00,  4.0E+00, &
+!!$         2.0E+00,  3.0E+00,  4.0E+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real, Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         3.000E+00,  3.000E+00,  3.000E+00, &
+!!$         3.000E+00,  3.000E+00,  3.000E+00, &
+!!$         3.000E+00,  3.000E+00,  3.000E+00, &
+!!$         3.000E+00,  3.000E+00,  3.000E+00, &
+!!$         60.000E+00, 60.000E+00, 60.000E+00, &
+!!$         0.050E+00,  0.050E+00,  0.050E+00, &
+!!$         4.000E+00,  4.000E+00,  4.000E+00, &
+!!$         5.000E+00,  5.000E+00,  5.000E+00, &
+!!$         6.000E+00,  6.000E+00,  6.000E+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       x = 0.0D+00
+!!$       lambda = 0.0D+00
+!!$       df = 0
+!!$       cdf = 0.0D+00
+!!$    Else
+!!$       x = x_vec(n_data)
+!!$       lambda = lambda_vec(n_data)
+!!$       df = df_vec(n_data)
+!!$       cdf = cdf_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine chi_noncentral_cdf_values
 
-    If ( 3 < which ) Then
-       bound = 3.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless S is to be computed, make sure it is legal.
-    !
-    If ( which /= 2 ) Then
-       If ( s < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -4
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter S is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless XLAM is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( xlam < 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter XLAM is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( p ) < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFPOI - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumpoi ( s, xlam, p, q )
-       status = 0
-       !
-       !  Calculate S.
-       !
-    Else If ( which == 2 ) Then
-
-       s = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumpoi ( s, xlam, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFPOI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFPOI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate XLAM.
-       !
-    Else If ( which == 3 ) Then
-
-       xlam = 5.0D+00
-       ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumpoi ( s, xlam, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, xlam, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFPOI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFPOI - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdfpoi
-
-  Subroutine cdft ( which, p, q, t, df, status, bound )
-
-    !*****************************************************************************80
-    !
-    !! CDFT evaluates the CDF of the T distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates any one parameter of the T distribution
-    !    given the others.
-    !
-    !    The value P of the cumulative distribution function is calculated
-    !    directly.
-    !
-    !    Computation of other parameters involve a seach for a value that
-    !    produces the desired value of P.   The search relies on the
-    !    monotonicity of P with respect to the other parameters.
-    !
-    !    The original version of this routine allowed the search interval
-    !    to extend from -1.0D+300 to +1.0D+300, which is fine until you
-    !    try to evaluate a function at such a point!
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.27.
-    !
-    !  Parameters:
-    !
-    !    Input, integer WHICH, indicates which argument is to be calculated
-    !    from the others.
-    !    1 : Calculate P and Q from T and DF;
-    !    2 : Calculate T from P, Q and DF;
-    !    3 : Calculate DF from P, Q and T.
-    !
-    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to T of
-    !    the T-density.  Whether an input or output value, this will lie in the
-    !    range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
-    !    value, it should lie in the range [0,1].  If Q is an output value,
-    !    it will lie in the range [0,1].
-    !
-    !    Input/output, real ( kind = 8 ) T, the upper limit of integration of
-    !    the T-density.  If this is an input value, it may have any value.
-    !    It it is an output value, it will be searched for in the range
-    !    [ -1.0D+30, 1.0D+30 ].
-    !
-    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom
-    !    of the T distribution.  If this is an input value, it should lie
-    !    in the range: (0 , +infinity).  If it is an output value, it will be
-    !    searched for in the range: [1, 1.0D+10].
-    !
-    !    Output, integer STATUS, reports the status of the computation.
-    !     0, if the calculation completed correctly;
-    !    -I, if the input parameter number I is out of range;
-    !    +1, if the answer appears to be lower than lowest search bound;
-    !    +2, if the answer appears to be higher than greatest search bound;
-    !    +3, if P + Q /= 1.
-    !
-    !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
-    !    If STATUS is negative, then this is the value exceeded by parameter I.
-    !    if STATUS is 1 or 2, this is the search bound that was exceeded.
-    !
-    Implicit None
-
-    Real ( kind = 8 ), Parameter :: atol = 1.0D-50
-    Real ( kind = 8 ) bound
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    !    Real ( kind = 8 ) dt1
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Parameter :: inf = 1.0D+30
-    Real ( kind = 8 ), Parameter :: maxdf = 1.0D+10
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ) q
-    Logical qhi
-    Logical qleft
-    Integer status
-    Real ( kind = 8 ) t
-    Real ( kind = 8 ), Parameter :: tol = 1.0D-08
-    Integer which
-    !
-    !  Check the arguments.
-    !
-    If ( which < 1 ) Then
-       bound = 1.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFT - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-
-    If ( 3 < which ) Then
-       bound = 3.0D+00
-       status = -1
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CDFT - Fatal error!'
-       Write ( *, '(a)' ) '  Input parameter WHICH is out of range.'
-       Return
-    End If
-    !
-    !  Unless P is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( p < 0.0D+00 ) Then
-          status = -2
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       Else If ( 1.0D+00 < p ) Then
-          status = -2
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter P is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless Q is to be computed, make sure it is legal.
-    !
-    If ( which /= 1 ) Then
-       If ( q < 0.0D+00 ) Then
-          status = -3
-          bound = 0.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       Else If ( 1.0D+00 < q ) Then
-          status = -3
-          bound = 1.0D+00
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter Q is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Unless DF is to be computed, make sure it is legal.
-    !
-    If ( which /= 3 ) Then
-       If ( df <= 0.0D+00 ) Then
-          bound = 0.0D+00
-          status = -5
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  Input parameter DF is out of range.'
-          Return
-       End If
-    End If
-    !
-    !  Check that P + Q = 1.
-    !
-    If ( which /= 1 ) Then
-       If ( 3.0D+00 * Epsilon ( 1.0D+00 ) &
-            < Abs ( ( p + q ) - 1.0D+00 ) ) Then
-          status = 3
-          Write ( *, '(a)' ) ' '
-          Write ( *, '(a)' ) 'CDFT - Fatal error!'
-          Write ( *, '(a)' ) '  P + Q /= 1.'
-          Return
-       End If
-    End If
-    !
-    !  Calculate P and Q.
-    !
-    If ( which == 1 ) Then
-
-       Call cumt ( t, df, p, q )
-       status = 0
-       !
-       !  Calculate T.
-       !
-    Else If ( which == 2 ) Then
-
-       t = dt1 ( p, q, df )
-       ! Call dstinv ( -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, t, fx, qleft, qhi, -inf, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       fx = 0.0D+00
-       Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumt ( t, df, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, t, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft )Then
-             status = 1
-             bound = -inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFT - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = inf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFT - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-       !
-       !  Calculate DF.
-       !
-    Else If ( which == 3 ) Then
-
-       df = 5.0D+00
-       ! Call dstinv ( 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
-       Call dinvr ( status, df, fx, qleft, qhi, 1.0D+00, maxdf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0
-       Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       Do
-
-          If ( status /= 1 ) Then
-             Exit
-          End If
-
-          Call cumt ( t, df, cum, ccum )
-
-          If ( p <= q ) Then
-             fx = cum - p
-          Else
-             fx = ccum - q
-          End If
-
-          Call dinvr ( status, df, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
-
-       End Do
-
-       If ( status == -1 ) Then
-          If ( qleft ) Then
-             status = 1
-             bound = 0.0D+00
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFT - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be lower than'
-             Write ( *, '(a)' ) '  the search bound.'
-          Else
-             status = 2
-             bound = maxdf
-             Write ( *, '(a)' ) ' '
-             Write ( *, '(a)' ) 'CDFT - Warning!'
-             Write ( *, '(a)' ) '  The desired answer appears to be higher than'
-             Write ( *, '(a)' ) '  the search bound.'
-          End If
-       End If
-
-    End If
-
-    Return
-  End Subroutine cdft
-
-  Subroutine chi_noncentral_cdf_values ( n_data, x, lambda, df, cdf )
-
-    !*****************************************************************************80
-    !
-    !! CHI_NONCENTRAL_CDF_VALUES returns values of the noncentral chi CDF.
-    !
-    !  Discussion:
-    !
-    !    The CDF of the noncentral chi square distribution can be evaluated
-    !    within Mathematica by commands such as:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF [ NoncentralChiSquareDistribution [ DF, LAMBDA ], X ]
-    !
-    !  Modified:
-    !
-    !    12 June 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) LAMBDA, the noncentrality parameter.
-    !
-    !    Output, integer DF, the number of degrees of freedom.
-    !
-    !    Output, real ( kind = 8 ) CDF, the noncentral chi CDF.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 27
-
-    Real ( kind = 8 ) cdf
-    Real, Save, Dimension ( n_max ) :: cdf_vec = (/ &
-         0.839944D+00, 0.695906D+00, 0.535088D+00, &
-         0.764784D+00, 0.620644D+00, 0.469167D+00, &
-         0.307088D+00, 0.220382D+00, 0.150025D+00, &
-         0.307116D-02, 0.176398D-02, 0.981679D-03, &
-         0.165175D-01, 0.202342D-03, 0.498448D-06, &
-         0.151325D-01, 0.209041D-02, 0.246502D-03, &
-         0.263684D-01, 0.185798D-01, 0.130574D-01, &
-         0.583804D-01, 0.424978D-01, 0.308214D-01, &
-         0.105788D+00, 0.794084D-01, 0.593201D-01 /)
-    Integer df
-    Integer, Save, Dimension ( n_max ) :: df_vec = (/ &
-         1,   2,   3, &
-         1,   2,   3, &
-         1,   2,   3, &
-         1,   2,   3, &
-         60,  80, 100, &
-         1,   2,   3, &
-         10,  10,  10, &
-         10,  10,  10, &
-         10,  10,  10 /)
-    Real ( kind = 8 ) lambda
-    Real, Save, Dimension ( n_max ) :: lambda_vec = (/ &
-         0.5D+00,  0.5D+00,  0.5D+00, &
-         1.0D+00,  1.0D+00,  1.0D+00, &
-         5.0D+00,  5.0D+00,  5.0D+00, &
-         20.0D+00, 20.0D+00, 20.0D+00, &
-         30.0D+00, 30.0D+00, 30.0D+00, &
-         5.0D+00,  5.0D+00,  5.0D+00, &
-         2.0D+00,  3.0D+00,  4.0D+00, &
-         2.0D+00,  3.0D+00,  4.0D+00, &
-         2.0D+00,  3.0D+00,  4.0D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real, Save, Dimension ( n_max ) :: x_vec = (/ &
-         3.000D+00,  3.000D+00,  3.000D+00, &
-         3.000D+00,  3.000D+00,  3.000D+00, &
-         3.000D+00,  3.000D+00,  3.000D+00, &
-         3.000D+00,  3.000D+00,  3.000D+00, &
-         60.000D+00, 60.000D+00, 60.000D+00, &
-         0.050D+00,  0.050D+00,  0.050D+00, &
-         4.000D+00,  4.000D+00,  4.000D+00, &
-         5.000D+00,  5.000D+00,  5.000D+00, &
-         6.000D+00,  6.000D+00,  6.000D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       x = 0.0D+00
-       lambda = 0.0D+00
-       df = 0
-       cdf = 0.0D+00
-    Else
-       x = x_vec(n_data)
-       lambda = lambda_vec(n_data)
-       df = df_vec(n_data)
-       cdf = cdf_vec(n_data)
-    End If
-
-    Return
-  End Subroutine chi_noncentral_cdf_values
-
-  Subroutine chi_square_cdf_values ( n_data, a, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! CHI_SQUARE_CDF_VALUES returns some values of the Chi-Square CDF.
-    !
-    !  Discussion:
-    !
-    !    The value of CHI_CDF ( DF, X ) can be evaluated in Mathematica by
-    !    commands like:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF[ChiSquareDistribution[DF], X ]
-    !
-    !  Modified:
-    !
-    !    11 June 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer A, real ( kind = 8 ) X, the arguments of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 21
-
-    Integer a
-    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
-         1,  2,  1,  2, &
-         1,  2,  3,  4, &
-         1,  2,  3,  4, &
-         5,  3,  3,  3, &
-         3,  3, 10, 10, &
-         10 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.0796557D+00, 0.00498752D+00, 0.112463D+00,    0.00995017D+00, &
-         0.472911D+00,  0.181269D+00,   0.0597575D+00,   0.0175231D+00, &
-         0.682689D+00,  0.393469D+00,   0.198748D+00,    0.090204D+00, &
-         0.0374342D+00, 0.427593D+00,   0.608375D+00,    0.738536D+00, &
-         0.828203D+00,  0.88839D+00,    0.000172116D+00, 0.00365985D+00, &
-         0.0185759D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.01D+00, 0.01D+00, 0.02D+00, 0.02D+00, &
-         0.40D+00, 0.40D+00, 0.40D+00, 0.40D+00, &
-         1.00D+00, 1.00D+00, 1.00D+00, 1.00D+00, &
-         1.00D+00, 2.00D+00, 3.00D+00, 4.00D+00, &
-         5.00D+00, 6.00D+00, 1.00D+00, 2.00D+00, &
-         3.00D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine chi_square_cdf_values
+!!$  Subroutine chi_square_cdf_values ( n_data, a, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CHI_SQUARE_CDF_VALUES returns some values of the Chi-Square CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The value of CHI_CDF ( DF, X ) can be evaluated in Mathematica by
+!!$    !    commands like:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF[ChiSquareDistribution[DF], X ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    11 June 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer A, real ( kind = 8 ) X, the arguments of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 21
+!!$
+!!$    Integer a
+!!$    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         1,  2,  1,  2, &
+!!$         1,  2,  3,  4, &
+!!$         1,  2,  3,  4, &
+!!$         5,  3,  3,  3, &
+!!$         3,  3, 10, 10, &
+!!$         10 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.0796557D+00, 0.00498752D+00, 0.112463D+00,    0.00995017D+00, &
+!!$         0.472911D+00,  0.181269D+00,   0.0597575D+00,   0.0175231D+00, &
+!!$         0.682689D+00,  0.393469D+00,   0.198748D+00,    0.090204D+00, &
+!!$         0.0374342D+00, 0.427593D+00,   0.608375D+00,    0.738536D+00, &
+!!$         0.828203D+00,  0.88839D+00,    0.000172116D+00, 0.00365985D+00, &
+!!$         0.0185759D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.01D+00, 0.01D+00, 0.02D+00, 0.02D+00, &
+!!$         0.40D+00, 0.40D+00, 0.40D+00, 0.40D+00, &
+!!$         1.00D+00, 1.00D+00, 1.00D+00, 1.00D+00, &
+!!$         1.00D+00, 2.00D+00, 3.00D+00, 4.00D+00, &
+!!$         5.00D+00, 6.00D+00, 1.00D+00, 2.00D+00, &
+!!$         3.00D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine chi_square_cdf_values
 
   Subroutine cumbet ( x, y, a, b, cum, ccum )
 
@@ -7699,7 +7702,7 @@ Contains
        Return
     End If
 
-100 Continue
+! 100 Continue
 
     qup = ( qincr .And. ( yy < 0.0D+00 ) ) .Or. &
          ( .Not. qincr .And. ( 0.0D+00 < yy ) )
@@ -7759,7 +7762,7 @@ Contains
        Return
     End If
 
-160 Continue
+! 160 Continue
 
     go to 240
     !
@@ -7816,7 +7819,7 @@ Contains
        Return
     End If
 
-230 Continue
+! 230 Continue
 240 Continue
 
     ! Call dstzr ( xlb, xub, abstol, reltol )
@@ -8357,7 +8360,7 @@ Contains
        go to 190
     End If
 
-110 Continue
+! 110 Continue
 
     tol = Sign ( tol, mb )
     p = ( b - a ) * fb
@@ -8389,14 +8392,14 @@ Contains
 
     End If
 
-130 Continue
+! 130 Continue
 
     If ( p < 0.0D+00 ) Then
        p = -p
        q = -q
     End If
 
-140 Continue
+! 140 Continue
 
     If ( ext == 3 ) Then
        p = p *  2.0D+00
@@ -8551,80 +8554,80 @@ Contains
 
   End Subroutine dzror
 
-  Subroutine erf_values ( n_data, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! ERF_VALUES returns some values of the ERF or "error" function.
-    !
-    !  Definition:
-    !
-    !    ERF(X) = ( 2 / sqrt ( PI ) * integral ( 0 <= T <= X ) exp ( - T^2 ) dT
-    !
-    !  Modified:
-    !
-    !    17 April 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 21
-
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.0000000000D+00, 0.1124629160D+00, 0.2227025892D+00, 0.3286267595D+00, &
-         0.4283923550D+00, 0.5204998778D+00, 0.6038560908D+00, 0.6778011938D+00, &
-         0.7421009647D+00, 0.7969082124D+00, 0.8427007929D+00, 0.8802050696D+00, &
-         0.9103139782D+00, 0.9340079449D+00, 0.9522851198D+00, 0.9661051465D+00, &
-         0.9763483833D+00, 0.9837904586D+00, 0.9890905016D+00, 0.9927904292D+00, &
-         0.9953222650D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.0D+00, 0.1D+00, 0.2D+00, 0.3D+00, &
-         0.4D+00, 0.5D+00, 0.6D+00, 0.7D+00, &
-         0.8D+00, 0.9D+00, 1.0D+00, 1.1D+00, &
-         1.2D+00, 1.3D+00, 1.4D+00, 1.5D+00, &
-         1.6D+00, 1.7D+00, 1.8D+00, 1.9D+00, &
-         2.0D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine erf_values
+!!$  Subroutine erf_values ( n_data, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! ERF_VALUES returns some values of the ERF or "error" function.
+!!$    !
+!!$    !  Definition:
+!!$    !
+!!$    !    ERF(X) = ( 2 / sqrt ( PI ) * integral ( 0 <= T <= X ) exp ( - T^2 ) dT
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    17 April 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 21
+!!$
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.0000000000D+00, 0.1124629160D+00, 0.2227025892D+00, 0.3286267595D+00, &
+!!$         0.4283923550D+00, 0.5204998778D+00, 0.6038560908D+00, 0.6778011938D+00, &
+!!$         0.7421009647D+00, 0.7969082124D+00, 0.8427007929D+00, 0.8802050696D+00, &
+!!$         0.9103139782D+00, 0.9340079449D+00, 0.9522851198D+00, 0.9661051465D+00, &
+!!$         0.9763483833D+00, 0.9837904586D+00, 0.9890905016D+00, 0.9927904292D+00, &
+!!$         0.9953222650D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.0D+00, 0.1D+00, 0.2D+00, 0.3D+00, &
+!!$         0.4D+00, 0.5D+00, 0.6D+00, 0.7D+00, &
+!!$         0.8D+00, 0.9D+00, 1.0D+00, 1.1D+00, &
+!!$         1.2D+00, 1.3D+00, 1.4D+00, 1.5D+00, &
+!!$         1.6D+00, 1.7D+00, 1.8D+00, 1.9D+00, &
+!!$         2.0D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine erf_values
 
   Function error_f ( x )
 
@@ -9101,223 +9104,223 @@ Contains
     Return
   End Function exparg
 
-  Subroutine f_cdf_values ( n_data, a, b, x, fx )
+!!$  Subroutine f_cdf_values ( n_data, a, b, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! F_CDF_VALUES returns some values of the F CDF test function.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The value of F_CDF ( DFN, DFD, X ) can be evaluated in Mathematica by
+!!$    !    commands like:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF[FRatioDistribution[ DFN, DFD ], X ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    11 June 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer A, integer B, real ( kind = 8 ) X, the arguments
+!!$    !    of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 20
+!!$
+!!$    Integer a
+!!$    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         1, 1, 5, 1, &
+!!$         2, 4, 1, 6, &
+!!$         8, 1, 3, 6, &
+!!$         1, 1, 1, 1, &
+!!$         2, 3, 4, 5 /)
+!!$    Integer b
+!!$    Integer, Save, Dimension ( n_max ) :: b_vec = (/ &
+!!$         1,  5,  1,  5, &
+!!$         10, 20,  5,  6, &
+!!$         16,  5, 10, 12, &
+!!$         5,  5,  5,  5, &
+!!$         5,  5,  5,  5 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.500000D+00, 0.499971D+00, 0.499603D+00, 0.749699D+00, &
+!!$         0.750466D+00, 0.751416D+00, 0.899987D+00, 0.899713D+00, &
+!!$         0.900285D+00, 0.950025D+00, 0.950057D+00, 0.950193D+00, &
+!!$         0.975013D+00, 0.990002D+00, 0.994998D+00, 0.999000D+00, &
+!!$         0.568799D+00, 0.535145D+00, 0.514343D+00, 0.500000D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         1.00D+00,  0.528D+00, 1.89D+00,  1.69D+00, &
+!!$         1.60D+00,  1.47D+00,  4.06D+00,  3.05D+00, &
+!!$         2.09D+00,  6.61D+00,  3.71D+00,  3.00D+00, &
+!!$         10.01D+00, 16.26D+00, 22.78D+00, 47.18D+00, &
+!!$         1.00D+00,  1.00D+00,  1.00D+00,  1.00D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0
+!!$       b = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       b = b_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine f_cdf_values
 
-    !*****************************************************************************80
-    !
-    !! F_CDF_VALUES returns some values of the F CDF test function.
-    !
-    !  Discussion:
-    !
-    !    The value of F_CDF ( DFN, DFD, X ) can be evaluated in Mathematica by
-    !    commands like:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF[FRatioDistribution[ DFN, DFD ], X ]
-    !
-    !  Modified:
-    !
-    !    11 June 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer A, integer B, real ( kind = 8 ) X, the arguments
-    !    of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 20
-
-    Integer a
-    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
-         1, 1, 5, 1, &
-         2, 4, 1, 6, &
-         8, 1, 3, 6, &
-         1, 1, 1, 1, &
-         2, 3, 4, 5 /)
-    Integer b
-    Integer, Save, Dimension ( n_max ) :: b_vec = (/ &
-         1,  5,  1,  5, &
-         10, 20,  5,  6, &
-         16,  5, 10, 12, &
-         5,  5,  5,  5, &
-         5,  5,  5,  5 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.500000D+00, 0.499971D+00, 0.499603D+00, 0.749699D+00, &
-         0.750466D+00, 0.751416D+00, 0.899987D+00, 0.899713D+00, &
-         0.900285D+00, 0.950025D+00, 0.950057D+00, 0.950193D+00, &
-         0.975013D+00, 0.990002D+00, 0.994998D+00, 0.999000D+00, &
-         0.568799D+00, 0.535145D+00, 0.514343D+00, 0.500000D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         1.00D+00,  0.528D+00, 1.89D+00,  1.69D+00, &
-         1.60D+00,  1.47D+00,  4.06D+00,  3.05D+00, &
-         2.09D+00,  6.61D+00,  3.71D+00,  3.00D+00, &
-         10.01D+00, 16.26D+00, 22.78D+00, 47.18D+00, &
-         1.00D+00,  1.00D+00,  1.00D+00,  1.00D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0
-       b = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       b = b_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine f_cdf_values
-
-  Subroutine f_noncentral_cdf_values ( n_data, a, b, lambda, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! F_NONCENTRAL_CDF_VALUES returns some values of the F CDF test function.
-    !
-    !  Discussion:
-    !
-    !    The value of NONCENTRAL_F_CDF ( DFN, DFD, LAMDA, X ) can be evaluated
-    !    in Mathematica by commands like:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      CDF[NoncentralFRatioDistribution[ DFN, DFD, LAMBDA ], X ]
-    !
-    !  Modified:
-    !
-    !    12 June 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer A, integer B, real ( kind = 8 ) LAMBDA, the
-    !    parameters of the function.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 22
-
-    Integer a
-    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
-         1,  1,  1,  1, &
-         1,  1,  1,  1, &
-         1,  1,  2,  2, &
-         3,  3,  4,  4, &
-         5,  5,  6,  6, &
-         8, 16 /)
-    Integer b
-    Integer, Save, Dimension ( n_max ) :: b_vec = (/ &
-         1,  5,  5,  5, &
-         5,  5,  5,  5, &
-         5,  5,  5, 10, &
-         5,  5,  5,  5, &
-         1,  5,  6, 12, &
-         16,  8 /)
-    Real ( kind = 8 ) fx
-    Real, Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.500000D+00, 0.636783D+00, 0.584092D+00, 0.323443D+00, &
-         0.450119D+00, 0.607888D+00, 0.705928D+00, 0.772178D+00, &
-         0.819105D+00, 0.317035D+00, 0.432722D+00, 0.450270D+00, &
-         0.426188D+00, 0.337744D+00, 0.422911D+00, 0.692767D+00, &
-         0.363217D+00, 0.421005D+00, 0.426667D+00, 0.446402D+00, &
-         0.844589D+00, 0.816368D+00 /)
-    Real ( kind = 8 ) lambda
-    Real, Save, Dimension ( n_max ) :: lambda_vec = (/ &
-         0.00D+00,  0.000D+00, 0.25D+00,  1.00D+00, &
-         1.00D+00,  1.00D+00,  1.00D+00,  1.00D+00, &
-         1.00D+00,  2.00D+00,  1.00D+00,  1.00D+00, &
-         1.00D+00,  2.00D+00,  1.00D+00,  1.00D+00, &
-         0.00D+00,  1.00D+00,  1.00D+00,  1.00D+00, &
-         1.00D+00,  1.00D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real, Save, Dimension ( n_max ) :: x_vec = (/ &
-         1.00D+00,  1.00D+00, 1.00D+00,  0.50D+00, &
-         1.00D+00,  2.00D+00, 3.00D+00,  4.00D+00, &
-         5.00D+00,  1.00D+00, 1.00D+00,  1.00D+00, &
-         1.00D+00,  1.00D+00, 1.00D+00,  2.00D+00, &
-         1.00D+00,  1.00D+00, 1.00D+00,  1.00D+00, &
-         2.00D+00,  2.00D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0
-       b = 0
-       lambda = 0.0D+00
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       b = b_vec(n_data)
-       lambda = lambda_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine f_noncentral_cdf_values
+!!$  Subroutine f_noncentral_cdf_values ( n_data, a, b, lambda, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! F_NONCENTRAL_CDF_VALUES returns some values of the F CDF test function.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The value of NONCENTRAL_F_CDF ( DFN, DFD, LAMDA, X ) can be evaluated
+!!$    !    in Mathematica by commands like:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      CDF[NoncentralFRatioDistribution[ DFN, DFD, LAMBDA ], X ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    12 June 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer A, integer B, real ( kind = 8 ) LAMBDA, the
+!!$    !    parameters of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 22
+!!$
+!!$    Integer a
+!!$    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         1,  1,  1,  1, &
+!!$         1,  1,  1,  1, &
+!!$         1,  1,  2,  2, &
+!!$         3,  3,  4,  4, &
+!!$         5,  5,  6,  6, &
+!!$         8, 16 /)
+!!$    Integer b
+!!$    Integer, Save, Dimension ( n_max ) :: b_vec = (/ &
+!!$         1,  5,  5,  5, &
+!!$         5,  5,  5,  5, &
+!!$         5,  5,  5, 10, &
+!!$         5,  5,  5,  5, &
+!!$         1,  5,  6, 12, &
+!!$         16,  8 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real, Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.500000E+00, 0.636783E+00, 0.584092E+00, 0.323443E+00, &
+!!$         0.450119E+00, 0.607888E+00, 0.705928E+00, 0.772178E+00, &
+!!$         0.819105E+00, 0.317035E+00, 0.432722E+00, 0.450270E+00, &
+!!$         0.426188E+00, 0.337744E+00, 0.422911E+00, 0.692767E+00, &
+!!$         0.363217E+00, 0.421005E+00, 0.426667E+00, 0.446402E+00, &
+!!$         0.844589E+00, 0.816368E+00 /)
+!!$    Real ( kind = 8 ) lambda
+!!$    Real, Save, Dimension ( n_max ) :: lambda_vec = (/ &
+!!$         0.00E+00,  0.000E+00, 0.25E+00,  1.00E+00, &
+!!$         1.00E+00,  1.00E+00,  1.00E+00,  1.00E+00, &
+!!$         1.00E+00,  2.00E+00,  1.00E+00,  1.00E+00, &
+!!$         1.00E+00,  2.00E+00,  1.00E+00,  1.00E+00, &
+!!$         0.00E+00,  1.00E+00,  1.00E+00,  1.00E+00, &
+!!$         1.00E+00,  1.00E+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real, Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         1.00E+00,  1.00E+00, 1.00E+00,  0.50E+00, &
+!!$         1.00E+00,  2.00E+00, 3.00E+00,  4.00E+00, &
+!!$         5.00E+00,  1.00E+00, 1.00E+00,  1.00E+00, &
+!!$         1.00E+00,  1.00E+00, 1.00E+00,  2.00E+00, &
+!!$         1.00E+00,  1.00E+00, 1.00E+00,  1.00E+00, &
+!!$         2.00E+00,  2.00E+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0
+!!$       b = 0
+!!$       lambda = 0.0D+00
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       b = b_vec(n_data)
+!!$       lambda = lambda_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine f_noncentral_cdf_values
 
   Function fpser ( a, b, x, eps )
 
@@ -9514,7 +9517,7 @@ Contains
     Return
   End Function gam1
 
-  Function gamma ( a )
+  Function gamma_ieva ( a )
 
     !*****************************************************************************80
     !
@@ -9547,7 +9550,7 @@ Contains
     Real ( kind = 8 ), Parameter :: d = 0.41893853320467274178D+00
     !    Real ( kind = 8 ) exparg
     Real ( kind = 8 ) g
-    Real ( kind = 8 ) :: gamma
+    Real ( kind = 8 ) :: gamma_ieva
     Integer i
     Integer j
     Real ( kind = 8 ) lnx
@@ -9576,7 +9579,7 @@ Contains
     Real ( kind = 8 ) x
     Real ( kind = 8 ) z
 
-    gamma = 0.0D+00
+    gamma_ieva = 0.0D+00
     x = a
 
     If ( Abs ( a ) < 15.0D+00 ) Then
@@ -9624,7 +9627,7 @@ Contains
           !
           If ( Abs ( t ) < 1.0D-30 ) Then
              If ( 1.0001D+00 < Abs ( t ) * Huge ( t ) ) Then
-                gamma = 1.0D+00 / t
+                gamma_ieva = 1.0D+00 / t
              End If
              Return
           End If
@@ -9640,14 +9643,14 @@ Contains
           bot = bot * x + q(i)
        End Do
 
-       gamma = top / bot
+       gamma_ieva = top / bot
        !
        !  Termination.
        !
        If ( 1.0D+00 <= a ) Then
-          gamma = gamma * t
+          gamma_ieva = gamma_ieva * t
        Else
-          gamma = gamma / t
+          gamma_ieva = gamma_ieva / t
        End If
        !
        !  Evaluation of Gamma(A) FOR 15 <= ABS ( A ).
@@ -9661,7 +9664,7 @@ Contains
        If ( a <= 0.0D+00 ) Then
 
           x = -a
-          n = x
+          n = INT(x)
           t = x - n
 
           If ( 0.9D+00 < t ) Then
@@ -9700,16 +9703,16 @@ Contains
           Return
        End If
 
-       gamma = Exp ( w )* ( 1.0D+00 + t )
+       gamma_ieva = Exp ( w )* ( 1.0D+00 + t )
 
        If ( a < 0.0D+00 ) Then
-          gamma = ( 1.0D+00 / ( gamma * s ) ) / x
+          gamma_ieva = ( 1.0D+00 / ( gamma_ieva * s ) ) / x
        End If
 
     End If
 
     Return
-  End Function gamma
+  End Function gamma_ieva
 
   Subroutine gamma_inc ( a, x, ans, qans, ind )
 
@@ -10193,7 +10196,7 @@ Contains
        sum1 = sum1 + t
     End Do
 
-240 Continue
+! 240 Continue
 
     qans = sum1
     ans = 0.5D+00 + ( 0.5D+00 - qans )
@@ -10823,7 +10826,7 @@ Contains
 
     End If
 
-110 Continue
+! 110 Continue
 
     If ( p <= 0.5D+00 ) Then
        go to 130
@@ -10842,7 +10845,7 @@ Contains
        go to 30
     End If
 
-120 Continue
+! 120 Continue
 
     t = a - 1.0D+00
     xn = y + t * Log ( xn ) - alnrel ( -t / ( xn + 1.0D+00 ) )
@@ -10931,7 +10934,7 @@ Contains
        End If
     End If
 
-190 Continue
+! 190 Continue
 
     If ( 20 <= ierr ) Then
        ierr = -6
@@ -11103,101 +11106,101 @@ Contains
     go to 230
   End Subroutine gamma_inc_inv
 
-  Subroutine gamma_inc_values ( n_data, a, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! GAMMA_INC_VALUES returns some values of the incomplete Gamma function.
-    !
-    !  Discussion:
-    !
-    !    The (normalized) incomplete Gamma function P(A,X) is defined as:
-    !
-    !      PN(A,X) = 1/GAMMA(A) * Integral ( 0 <= T <= X ) T**(A-1) * exp(-T) dT.
-    !
-    !    With this definition, for all A and X,
-    !
-    !      0 <= PN(A,X) <= 1
-    !
-    !    and
-    !
-    !      PN(A,INFINITY) = 1.0
-    !
-    !    Mathematica can compute this value as
-    !
-    !      1 - GammaRegularized[A,X]
-    !
-    !  Modified:
-    !
-    !    08 May 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) A, X, the arguments of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 20
-
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
-         0.1D+00,  0.1D+00,  0.1D+00,  0.5D+00, &
-         0.5D+00,  0.5D+00,  1.0D+00,  1.0D+00, &
-         1.0D+00,  1.1D+00,  1.1D+00,  1.1D+00, &
-         2.0D+00,  2.0D+00,  2.0D+00,  6.0D+00, &
-         6.0D+00, 11.0D+00, 26.0D+00, 41.0D+00 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.7420263D+00, 0.9119753D+00, 0.9898955D+00, 0.2931279D+00, &
-         0.7656418D+00, 0.9921661D+00, 0.0951626D+00, 0.6321206D+00, &
-         0.9932621D+00, 0.0757471D+00, 0.6076457D+00, 0.9933425D+00, &
-         0.0091054D+00, 0.4130643D+00, 0.9931450D+00, 0.0387318D+00, &
-         0.9825937D+00, 0.9404267D+00, 0.4863866D+00, 0.7359709D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         3.1622777D-02, 3.1622777D-01, 1.5811388D+00, 7.0710678D-02, &
-         7.0710678D-01, 3.5355339D+00, 0.1000000D+00, 1.0000000D+00, &
-         5.0000000D+00, 1.0488088D-01, 1.0488088D+00, 5.2440442D+00, &
-         1.4142136D-01, 1.4142136D+00, 7.0710678D+00, 2.4494897D+00, &
-         1.2247449D+01, 1.6583124D+01, 2.5495098D+01, 4.4821870D+01 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0.0D+00
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine gamma_inc_values
+!!$  Subroutine gamma_inc_values ( n_data, a, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! GAMMA_INC_VALUES returns some values of the incomplete Gamma function.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    The (normalized) incomplete Gamma function P(A,X) is defined as:
+!!$    !
+!!$    !      PN(A,X) = 1/GAMMA(A) * Integral ( 0 <= T <= X ) T**(A-1) * exp(-T) dT.
+!!$    !
+!!$    !    With this definition, for all A and X,
+!!$    !
+!!$    !      0 <= PN(A,X) <= 1
+!!$    !
+!!$    !    and
+!!$    !
+!!$    !      PN(A,INFINITY) = 1.0
+!!$    !
+!!$    !    Mathematica can compute this value as
+!!$    !
+!!$    !      1 - GammaRegularized[A,X]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    08 May 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) A, X, the arguments of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 20
+!!$
+!!$    Real ( kind = 8 ) a
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         0.1D+00,  0.1D+00,  0.1D+00,  0.5D+00, &
+!!$         0.5D+00,  0.5D+00,  1.0D+00,  1.0D+00, &
+!!$         1.0D+00,  1.1D+00,  1.1D+00,  1.1D+00, &
+!!$         2.0D+00,  2.0D+00,  2.0D+00,  6.0D+00, &
+!!$         6.0D+00, 11.0D+00, 26.0D+00, 41.0D+00 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.7420263D+00, 0.9119753D+00, 0.9898955D+00, 0.2931279D+00, &
+!!$         0.7656418D+00, 0.9921661D+00, 0.0951626D+00, 0.6321206D+00, &
+!!$         0.9932621D+00, 0.0757471D+00, 0.6076457D+00, 0.9933425D+00, &
+!!$         0.0091054D+00, 0.4130643D+00, 0.9931450D+00, 0.0387318D+00, &
+!!$         0.9825937D+00, 0.9404267D+00, 0.4863866D+00, 0.7359709D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         3.1622777D-02, 3.1622777D-01, 1.5811388D+00, 7.0710678D-02, &
+!!$         7.0710678D-01, 3.5355339D+00, 0.1000000D+00, 1.0000000D+00, &
+!!$         5.0000000D+00, 1.0488088D-01, 1.0488088D+00, 5.2440442D+00, &
+!!$         1.4142136D-01, 1.4142136D+00, 7.0710678D+00, 2.4494897D+00, &
+!!$         1.2247449D+01, 1.6583124D+01, 2.5495098D+01, 4.4821870D+01 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0.0D+00
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine gamma_inc_values
 
   Function gamma_ln1 ( a )
 
@@ -11551,92 +11554,92 @@ Contains
     Return
   End Subroutine gamma_rat1
 
-  Subroutine gamma_values ( n_data, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! GAMMA_VALUES returns some values of the Gamma function.
-    !
-    !  Definition:
-    !
-    !    Gamma(Z) = Integral ( 0 <= T < Infinity) T**(Z-1) exp(-T) dT
-    !
-    !  Recursion:
-    !
-    !    Gamma(X+1) = X * Gamma(X)
-    !
-    !  Restrictions:
-    !
-    !    0 < X ( a software restriction).
-    !
-    !  Special values:
-    !
-    !    GAMMA(0.5) = sqrt(PI)
-    !
-    !    For N a positive integer, GAMMA(N+1) = N!, the standard factorial.
-    !
-    !  Modified:
-    !
-    !    17 April 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 18
-
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         4.590845D+00,     2.218160D+00,     1.489192D+00,     1.164230D+00, &
-         1.0000000000D+00, 0.9513507699D+00, 0.9181687424D+00, 0.8974706963D+00, &
-         0.8872638175D+00, 0.8862269255D+00, 0.8935153493D+00, 0.9086387329D+00, &
-         0.9313837710D+00, 0.9617658319D+00, 1.0000000000D+00, 3.6288000D+05, &
-         1.2164510D+17,    8.8417620D+30 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.2D+00,  0.4D+00,  0.6D+00,  0.8D+00, &
-         1.0D+00,  1.1D+00,  1.2D+00,  1.3D+00, &
-         1.4D+00,  1.5D+00,  1.6D+00,  1.7D+00, &
-         1.8D+00,  1.9D+00,  2.0D+00, 10.0D+00, &
-         20.0D+00, 30.0D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine gamma_values
+!!$  Subroutine gamma_values ( n_data, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! GAMMA_VALUES returns some values of the Gamma function.
+!!$    !
+!!$    !  Definition:
+!!$    !
+!!$    !    Gamma(Z) = Integral ( 0 <= T < Infinity) T**(Z-1) exp(-T) dT
+!!$    !
+!!$    !  Recursion:
+!!$    !
+!!$    !    Gamma(X+1) = X * Gamma(X)
+!!$    !
+!!$    !  Restrictions:
+!!$    !
+!!$    !    0 < X ( a software restriction).
+!!$    !
+!!$    !  Special values:
+!!$    !
+!!$    !    GAMMA(0.5) = sqrt(PI)
+!!$    !
+!!$    !    For N a positive integer, GAMMA(N+1) = N!, the standard factorial.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    17 April 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 18
+!!$
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         4.590845D+00,     2.218160D+00,     1.489192D+00,     1.164230D+00, &
+!!$         1.0000000000D+00, 0.9513507699D+00, 0.9181687424D+00, 0.8974706963D+00, &
+!!$         0.8872638175D+00, 0.8862269255D+00, 0.8935153493D+00, 0.9086387329D+00, &
+!!$         0.9313837710D+00, 0.9617658319D+00, 1.0000000000D+00, 3.6288000D+05, &
+!!$         1.2164510D+17,    8.8417620D+30 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.2D+00,  0.4D+00,  0.6D+00,  0.8D+00, &
+!!$         1.0D+00,  1.1D+00,  1.2D+00,  1.3D+00, &
+!!$         1.4D+00,  1.5D+00,  1.6D+00,  1.7D+00, &
+!!$         1.8D+00,  1.9D+00,  2.0D+00, 10.0D+00, &
+!!$         20.0D+00, 30.0D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine gamma_values
 
   Function gsumln ( a, b )
 
@@ -12084,456 +12087,456 @@ Contains
     Return
   End Function ipmpar
 
-  Subroutine negative_binomial_cdf_values ( n_data, f, s, p, cdf )
+!!$  Subroutine negative_binomial_cdf_values ( n_data, f, s, p, cdf )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! NEGATIVE_BINOMIAL_CDF_VALUES returns values of the negative binomial CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    Assume that a coin has a probability P of coming up heads on
+!!$    !    any one trial.  Suppose that we plan to flip the coin until we
+!!$    !    achieve a total of S heads.  If we let F represent the number of
+!!$    !    tails that occur in this process, then the value of F satisfies
+!!$    !    a negative binomial PDF:
+!!$    !
+!!$    !      PDF(F,S,P) = Choose ( F from F+S-1 ) * P**S * (1-P)**F
+!!$    !
+!!$    !    The negative binomial CDF is the probability that there are F or
+!!$    !    fewer failures upon the attainment of the S-th success.  Thus,
+!!$    !
+!!$    !      CDF(F,S,P) = sum ( 0 <= G <= F ) PDF(G,S,P)
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    07 June 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    FC Powell,
+!!$    !    Statistical Tables for Sociology, Biology and Physical Sciences,
+!!$    !    Cambridge University Press, 1982.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer F, the maximum number of failures.
+!!$    !
+!!$    !    Output, integer S, the number of successes.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) P, the probability of a success on one trial.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CDF, the probability of at most F failures
+!!$    !    before the S-th success.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 27
+!!$
+!!$    Real ( kind = 8 ) cdf
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: cdf_vec = (/ &
+!!$         0.6367D+00, 0.3633D+00, 0.1445D+00, &
+!!$         0.5000D+00, 0.2266D+00, 0.0625D+00, &
+!!$         0.3438D+00, 0.1094D+00, 0.0156D+00, &
+!!$         0.1792D+00, 0.0410D+00, 0.0041D+00, &
+!!$         0.0705D+00, 0.0109D+00, 0.0007D+00, &
+!!$         0.9862D+00, 0.9150D+00, 0.7472D+00, &
+!!$         0.8499D+00, 0.5497D+00, 0.2662D+00, &
+!!$         0.6513D+00, 0.2639D+00, 0.0702D+00, &
+!!$         1.0000D+00, 0.0199D+00, 0.0001D+00 /)
+!!$    Integer f
+!!$    Integer, Save, Dimension ( n_max ) :: f_vec = (/ &
+!!$         4,  3,  2, &
+!!$         3,  2,  1, &
+!!$         2,  1,  0, &
+!!$         2,  1,  0, &
+!!$         2,  1,  0, &
+!!$         11, 10,  9, &
+!!$         17, 16, 15, &
+!!$         9,  8,  7, &
+!!$         2,  1,  0 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) p
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: p_vec = (/ &
+!!$         0.50D+00, 0.50D+00, 0.50D+00, &
+!!$         0.50D+00, 0.50D+00, 0.50D+00, &
+!!$         0.50D+00, 0.50D+00, 0.50D+00, &
+!!$         0.40D+00, 0.40D+00, 0.40D+00, &
+!!$         0.30D+00, 0.30D+00, 0.30D+00, &
+!!$         0.30D+00, 0.30D+00, 0.30D+00, &
+!!$         0.10D+00, 0.10D+00, 0.10D+00, &
+!!$         0.10D+00, 0.10D+00, 0.10D+00, &
+!!$         0.01D+00, 0.01D+00, 0.01D+00 /)
+!!$    Integer s
+!!$    Integer, Save, Dimension ( n_max ) :: s_vec = (/ &
+!!$         4, 5, 6, &
+!!$         4, 5, 6, &
+!!$         4, 5, 6, &
+!!$         4, 5, 6, &
+!!$         4, 5, 6, &
+!!$         1, 2, 3, &
+!!$         1, 2, 3, &
+!!$         1, 2, 3, &
+!!$         0, 1, 2 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       f = 0
+!!$       s = 0
+!!$       p = 0.0D+00
+!!$       cdf = 0.0D+00
+!!$    Else
+!!$       f = f_vec(n_data)
+!!$       s = s_vec(n_data)
+!!$       p = p_vec(n_data)
+!!$       cdf = cdf_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine negative_binomial_cdf_values
 
-    !*****************************************************************************80
-    !
-    !! NEGATIVE_BINOMIAL_CDF_VALUES returns values of the negative binomial CDF.
-    !
-    !  Discussion:
-    !
-    !    Assume that a coin has a probability P of coming up heads on
-    !    any one trial.  Suppose that we plan to flip the coin until we
-    !    achieve a total of S heads.  If we let F represent the number of
-    !    tails that occur in this process, then the value of F satisfies
-    !    a negative binomial PDF:
-    !
-    !      PDF(F,S,P) = Choose ( F from F+S-1 ) * P**S * (1-P)**F
-    !
-    !    The negative binomial CDF is the probability that there are F or
-    !    fewer failures upon the attainment of the S-th success.  Thus,
-    !
-    !      CDF(F,S,P) = sum ( 0 <= G <= F ) PDF(G,S,P)
-    !
-    !  Modified:
-    !
-    !    07 June 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    FC Powell,
-    !    Statistical Tables for Sociology, Biology and Physical Sciences,
-    !    Cambridge University Press, 1982.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer F, the maximum number of failures.
-    !
-    !    Output, integer S, the number of successes.
-    !
-    !    Output, real ( kind = 8 ) P, the probability of a success on one trial.
-    !
-    !    Output, real ( kind = 8 ) CDF, the probability of at most F failures
-    !    before the S-th success.
-    !
-    Implicit None
+!!$  Subroutine normal_01_cdf_values ( n_data, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! NORMAL_01_CDF_VALUES returns some values of the Normal 01 CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    In Mathematica, the function can be evaluated by:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      dist = NormalDistribution [ 0, 1 ]
+!!$    !      CDF [ dist, x ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    28 August 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 17
+!!$
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.5000000000000000D+00, &
+!!$         0.5398278372770290D+00, &
+!!$         0.5792597094391030D+00, &
+!!$         0.6179114221889526D+00, &
+!!$         0.6554217416103242D+00, &
+!!$         0.6914624612740131D+00, &
+!!$         0.7257468822499270D+00, &
+!!$         0.7580363477769270D+00, &
+!!$         0.7881446014166033D+00, &
+!!$         0.8159398746532405D+00, &
+!!$         0.8413447460685429D+00, &
+!!$         0.9331927987311419D+00, &
+!!$         0.9772498680518208D+00, &
+!!$         0.9937903346742239D+00, &
+!!$         0.9986501019683699D+00, &
+!!$         0.9997673709209645D+00, &
+!!$         0.9999683287581669D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.0000000000000000D+00, &
+!!$         0.1000000000000000D+00, &
+!!$         0.2000000000000000D+00, &
+!!$         0.3000000000000000D+00, &
+!!$         0.4000000000000000D+00, &
+!!$         0.5000000000000000D+00, &
+!!$         0.6000000000000000D+00, &
+!!$         0.7000000000000000D+00, &
+!!$         0.8000000000000000D+00, &
+!!$         0.9000000000000000D+00, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1500000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2500000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.3500000000000000D+01, &
+!!$         0.4000000000000000D+01 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine normal_01_cdf_values
 
-    Integer, Parameter :: n_max = 27
+!!$  Subroutine normal_cdf_values ( n_data, mu, sigma, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! NORMAL_CDF_VALUES returns some values of the Normal CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    In Mathematica, the function can be evaluated by:
+!!$    !
+!!$    !      Needs["Statistics`ContinuousDistributions`"]
+!!$    !      dist = NormalDistribution [ mu, sigma ]
+!!$    !      CDF [ dist, x ]
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    05 August 2004
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Stephen Wolfram,
+!!$    !    The Mathematica Book,
+!!$    !    Fourth Edition,
+!!$    !    Wolfram Media / Cambridge University Press, 1999.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) MU, the mean of the distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) SIGMA, the variance of the distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 12
+!!$
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.5000000000000000D+00, &
+!!$         0.9772498680518208D+00, &
+!!$         0.9999683287581669D+00, &
+!!$         0.9999999990134124D+00, &
+!!$         0.6914624612740131D+00, &
+!!$         0.6305586598182364D+00, &
+!!$         0.5987063256829237D+00, &
+!!$         0.5792597094391030D+00, &
+!!$         0.6914624612740131D+00, &
+!!$         0.5000000000000000D+00, &
+!!$         0.3085375387259869D+00, &
+!!$         0.1586552539314571D+00 /)
+!!$    Real ( kind = 8 ) mu
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: mu_vec = (/ &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.1000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.4000000000000000D+01, &
+!!$         0.5000000000000000D+01 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) sigma
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: sigma_vec = (/ &
+!!$         0.5000000000000000D+00, &
+!!$         0.5000000000000000D+00, &
+!!$         0.5000000000000000D+00, &
+!!$         0.5000000000000000D+00, &
+!!$         0.2000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.4000000000000000D+01, &
+!!$         0.5000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01 /)
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.1000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.4000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.2000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.3000000000000000D+01, &
+!!$         0.3000000000000000D+01 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       mu = 0.0D+00
+!!$       sigma = 0.0D+00
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       mu = mu_vec(n_data)
+!!$       sigma = sigma_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine normal_cdf_values
 
-    Real ( kind = 8 ) cdf
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: cdf_vec = (/ &
-         0.6367D+00, 0.3633D+00, 0.1445D+00, &
-         0.5000D+00, 0.2266D+00, 0.0625D+00, &
-         0.3438D+00, 0.1094D+00, 0.0156D+00, &
-         0.1792D+00, 0.0410D+00, 0.0041D+00, &
-         0.0705D+00, 0.0109D+00, 0.0007D+00, &
-         0.9862D+00, 0.9150D+00, 0.7472D+00, &
-         0.8499D+00, 0.5497D+00, 0.2662D+00, &
-         0.6513D+00, 0.2639D+00, 0.0702D+00, &
-         1.0000D+00, 0.0199D+00, 0.0001D+00 /)
-    Integer f
-    Integer, Save, Dimension ( n_max ) :: f_vec = (/ &
-         4,  3,  2, &
-         3,  2,  1, &
-         2,  1,  0, &
-         2,  1,  0, &
-         2,  1,  0, &
-         11, 10,  9, &
-         17, 16, 15, &
-         9,  8,  7, &
-         2,  1,  0 /)
-    Integer n_data
-    Real ( kind = 8 ) p
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: p_vec = (/ &
-         0.50D+00, 0.50D+00, 0.50D+00, &
-         0.50D+00, 0.50D+00, 0.50D+00, &
-         0.50D+00, 0.50D+00, 0.50D+00, &
-         0.40D+00, 0.40D+00, 0.40D+00, &
-         0.30D+00, 0.30D+00, 0.30D+00, &
-         0.30D+00, 0.30D+00, 0.30D+00, &
-         0.10D+00, 0.10D+00, 0.10D+00, &
-         0.10D+00, 0.10D+00, 0.10D+00, &
-         0.01D+00, 0.01D+00, 0.01D+00 /)
-    Integer s
-    Integer, Save, Dimension ( n_max ) :: s_vec = (/ &
-         4, 5, 6, &
-         4, 5, 6, &
-         4, 5, 6, &
-         4, 5, 6, &
-         4, 5, 6, &
-         1, 2, 3, &
-         1, 2, 3, &
-         1, 2, 3, &
-         0, 1, 2 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       f = 0
-       s = 0
-       p = 0.0D+00
-       cdf = 0.0D+00
-    Else
-       f = f_vec(n_data)
-       s = s_vec(n_data)
-       p = p_vec(n_data)
-       cdf = cdf_vec(n_data)
-    End If
-
-    Return
-  End Subroutine negative_binomial_cdf_values
-
-  Subroutine normal_01_cdf_values ( n_data, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! NORMAL_01_CDF_VALUES returns some values of the Normal 01 CDF.
-    !
-    !  Discussion:
-    !
-    !    In Mathematica, the function can be evaluated by:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      dist = NormalDistribution [ 0, 1 ]
-    !      CDF [ dist, x ]
-    !
-    !  Modified:
-    !
-    !    28 August 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 17
-
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.5000000000000000D+00, &
-         0.5398278372770290D+00, &
-         0.5792597094391030D+00, &
-         0.6179114221889526D+00, &
-         0.6554217416103242D+00, &
-         0.6914624612740131D+00, &
-         0.7257468822499270D+00, &
-         0.7580363477769270D+00, &
-         0.7881446014166033D+00, &
-         0.8159398746532405D+00, &
-         0.8413447460685429D+00, &
-         0.9331927987311419D+00, &
-         0.9772498680518208D+00, &
-         0.9937903346742239D+00, &
-         0.9986501019683699D+00, &
-         0.9997673709209645D+00, &
-         0.9999683287581669D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.0000000000000000D+00, &
-         0.1000000000000000D+00, &
-         0.2000000000000000D+00, &
-         0.3000000000000000D+00, &
-         0.4000000000000000D+00, &
-         0.5000000000000000D+00, &
-         0.6000000000000000D+00, &
-         0.7000000000000000D+00, &
-         0.8000000000000000D+00, &
-         0.9000000000000000D+00, &
-         0.1000000000000000D+01, &
-         0.1500000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2500000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.3500000000000000D+01, &
-         0.4000000000000000D+01 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine normal_01_cdf_values
-
-  Subroutine normal_cdf_values ( n_data, mu, sigma, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! NORMAL_CDF_VALUES returns some values of the Normal CDF.
-    !
-    !  Discussion:
-    !
-    !    In Mathematica, the function can be evaluated by:
-    !
-    !      Needs["Statistics`ContinuousDistributions`"]
-    !      dist = NormalDistribution [ mu, sigma ]
-    !      CDF [ dist, x ]
-    !
-    !  Modified:
-    !
-    !    05 August 2004
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Stephen Wolfram,
-    !    The Mathematica Book,
-    !    Fourth Edition,
-    !    Wolfram Media / Cambridge University Press, 1999.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) MU, the mean of the distribution.
-    !
-    !    Output, real ( kind = 8 ) SIGMA, the variance of the distribution.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 12
-
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.5000000000000000D+00, &
-         0.9772498680518208D+00, &
-         0.9999683287581669D+00, &
-         0.9999999990134124D+00, &
-         0.6914624612740131D+00, &
-         0.6305586598182364D+00, &
-         0.5987063256829237D+00, &
-         0.5792597094391030D+00, &
-         0.6914624612740131D+00, &
-         0.5000000000000000D+00, &
-         0.3085375387259869D+00, &
-         0.1586552539314571D+00 /)
-    Real ( kind = 8 ) mu
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: mu_vec = (/ &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.1000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.4000000000000000D+01, &
-         0.5000000000000000D+01 /)
-    Integer n_data
-    Real ( kind = 8 ) sigma
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: sigma_vec = (/ &
-         0.5000000000000000D+00, &
-         0.5000000000000000D+00, &
-         0.5000000000000000D+00, &
-         0.5000000000000000D+00, &
-         0.2000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.4000000000000000D+01, &
-         0.5000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01 /)
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.1000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.4000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.2000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.3000000000000000D+01, &
-         0.3000000000000000D+01 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       mu = 0.0D+00
-       sigma = 0.0D+00
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       mu = mu_vec(n_data)
-       sigma = sigma_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine normal_cdf_values
-
-  Subroutine poisson_cdf_values ( n_data, a, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! POISSON_CDF_VALUES returns some values of the Poisson CDF.
-    !
-    !  Discussion:
-    !
-    !    CDF(X)(A) is the probability of at most X successes in unit time,
-    !    given that the expected mean number of successes is A.
-    !
-    !  Modified:
-    !
-    !    28 May 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !    Daniel Zwillinger,
-    !    CRC Standard Mathematical Tables and Formulae,
-    !    30th Edition, CRC Press, 1996, pages 653-658.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) A, integer X, the arguments of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 21
-
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
-         0.02D+00, 0.10D+00, 0.10D+00, 0.50D+00, &
-         0.50D+00, 0.50D+00, 1.00D+00, 1.00D+00, &
-         1.00D+00, 1.00D+00, 2.00D+00, 2.00D+00, &
-         2.00D+00, 2.00D+00, 5.00D+00, 5.00D+00, &
-         5.00D+00, 5.00D+00, 5.00D+00, 5.00D+00, &
-         5.00D+00 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.980D+00, 0.905D+00, 0.995D+00, 0.607D+00, &
-         0.910D+00, 0.986D+00, 0.368D+00, 0.736D+00, &
-         0.920D+00, 0.981D+00, 0.135D+00, 0.406D+00, &
-         0.677D+00, 0.857D+00, 0.007D+00, 0.040D+00, &
-         0.125D+00, 0.265D+00, 0.441D+00, 0.616D+00, &
-         0.762D+00 /)
-    Integer n_data
-    Integer x
-    Integer, Save, Dimension ( n_max ) :: x_vec = (/ &
-         0, 0, 1, 0, &
-         1, 2, 0, 1, &
-         2, 3, 0, 1, &
-         2, 3, 0, 1, &
-         2, 3, 4, 5, &
-         6 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0.0D+00
-       x = 0
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine poisson_cdf_values
+!!$  Subroutine poisson_cdf_values ( n_data, a, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! POISSON_CDF_VALUES returns some values of the Poisson CDF.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    CDF(X)(A) is the probability of at most X successes in unit time,
+!!$    !    given that the expected mean number of successes is A.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    28 May 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !    Daniel Zwillinger,
+!!$    !    CRC Standard Mathematical Tables and Formulae,
+!!$    !    30th Edition, CRC Press, 1996, pages 653-658.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) A, integer X, the arguments of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 21
+!!$
+!!$    Real ( kind = 8 ) a
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         0.02D+00, 0.10D+00, 0.10D+00, 0.50D+00, &
+!!$         0.50D+00, 0.50D+00, 1.00D+00, 1.00D+00, &
+!!$         1.00D+00, 1.00D+00, 2.00D+00, 2.00D+00, &
+!!$         2.00D+00, 2.00D+00, 5.00D+00, 5.00D+00, &
+!!$         5.00D+00, 5.00D+00, 5.00D+00, 5.00D+00, &
+!!$         5.00D+00 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.980D+00, 0.905D+00, 0.995D+00, 0.607D+00, &
+!!$         0.910D+00, 0.986D+00, 0.368D+00, 0.736D+00, &
+!!$         0.920D+00, 0.981D+00, 0.135D+00, 0.406D+00, &
+!!$         0.677D+00, 0.857D+00, 0.007D+00, 0.040D+00, &
+!!$         0.125D+00, 0.265D+00, 0.441D+00, 0.616D+00, &
+!!$         0.762D+00 /)
+!!$    Integer n_data
+!!$    Integer x
+!!$    Integer, Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0, 0, 1, 0, &
+!!$         1, 2, 0, 1, &
+!!$         2, 3, 0, 1, &
+!!$         2, 3, 0, 1, &
+!!$         2, 3, 4, 5, &
+!!$         6 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0.0D+00
+!!$       x = 0
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine poisson_cdf_values
 
   Function psi ( xx )
 
@@ -12759,80 +12762,80 @@ Contains
     Return
   End Function psi
 
-  Subroutine psi_values ( n_data, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! PSI_VALUES returns some values of the Psi or Digamma function.
-    !
-    !  Discussion:
-    !
-    !    PSI(X) = d LN ( GAMMA ( X ) ) / d X = GAMMA'(X) / GAMMA(X)
-    !
-    !    PSI(1) = - Euler's constant.
-    !
-    !    PSI(X+1) = PSI(X) + 1 / X.
-    !
-    !  Modified:
-    !
-    !    17 May 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, real ( kind = 8 ) X, the argument of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 11
-
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         -0.5772156649D+00, -0.4237549404D+00, -0.2890398966D+00, &
-         -0.1691908889D+00, -0.0613845446D+00, -0.0364899740D+00, &
-         0.1260474528D+00,  0.2085478749D+00,  0.2849914333D+00, &
-         0.3561841612D+00,  0.4227843351D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         1.0D+00,  1.1D+00,  1.2D+00,  &
-         1.3D+00,  1.4D+00,  1.5D+00,  &
-         1.6D+00,  1.7D+00,  1.8D+00,  &
-         1.9D+00,  2.0D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine psi_values
+!!$  Subroutine psi_values ( n_data, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! PSI_VALUES returns some values of the Psi or Digamma function.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    PSI(X) = d LN ( GAMMA ( X ) ) / d X = GAMMA'(X) / GAMMA(X)
+!!$    !
+!!$    !    PSI(1) = - Euler's constant.
+!!$    !
+!!$    !    PSI(X+1) = PSI(X) + 1 / X.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    17 May 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) X, the argument of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 11
+!!$
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         -0.5772156649D+00, -0.4237549404D+00, -0.2890398966D+00, &
+!!$         -0.1691908889D+00, -0.0613845446D+00, -0.0364899740D+00, &
+!!$         0.1260474528D+00,  0.2085478749D+00,  0.2849914333D+00, &
+!!$         0.3561841612D+00,  0.4227843351D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         1.0D+00,  1.1D+00,  1.2D+00,  &
+!!$         1.3D+00,  1.4D+00,  1.5D+00,  &
+!!$         1.6D+00,  1.7D+00,  1.8D+00,  &
+!!$         1.9D+00,  2.0D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine psi_values
 
   Subroutine r8_swap ( x, y )
 
@@ -13156,80 +13159,80 @@ Contains
     Return
   End Function rlog1
 
-  Subroutine student_cdf_values ( n_data, a, x, fx )
-
-    !*****************************************************************************80
-    !
-    !! STUDENT_CDF_VALUES returns some values of the Student CDF.
-    !
-    !  Modified:
-    !
-    !    02 June 2001
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    US Department of Commerce, 1964.
-    !
-    !  Parameters:
-    !
-    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
-    !    first call.  On each call, the routine increments N_DATA by 1, and
-    !    returns the corresponding data; when there is no more data, the
-    !    output value of N_DATA will be 0 again.
-    !
-    !    Output, integer A, real ( kind = 8 ) X, the arguments of the function.
-    !
-    !    Output, real ( kind = 8 ) FX, the value of the function.
-    !
-    Implicit None
-
-    Integer, Parameter :: n_max = 13
-
-    Integer a
-    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
-         1, 2, 3, 4, &
-         5, 2, 5, 2, &
-         5, 2, 3, 4, &
-         5 /)
-    Real ( kind = 8 ) fx
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
-         0.60D+00, 0.60D+00, 0.60D+00, 0.60D+00, &
-         0.60D+00, 0.75D+00, 0.75D+00, 0.95D+00, &
-         0.95D+00, 0.99D+00, 0.99D+00, 0.99D+00, &
-         0.99D+00 /)
-    Integer n_data
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
-         0.325D+00, 0.289D+00, 0.277D+00, 0.271D+00, &
-         0.267D+00, 0.816D+00, 0.727D+00, 2.920D+00, &
-         2.015D+00, 6.965D+00, 4.541D+00, 3.747D+00, &
-         3.365D+00 /)
-
-    If ( n_data < 0 ) Then
-       n_data = 0
-    End If
-
-    n_data = n_data + 1
-
-    If ( n_max < n_data ) Then
-       n_data = 0
-       a = 0
-       x = 0.0D+00
-       fx = 0.0D+00
-    Else
-       a = a_vec(n_data)
-       x = x_vec(n_data)
-       fx = fx_vec(n_data)
-    End If
-
-    Return
-  End Subroutine student_cdf_values
+!!$  Subroutine student_cdf_values ( n_data, a, x, fx )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! STUDENT_CDF_VALUES returns some values of the Student CDF.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    02 June 2001
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    US Department of Commerce, 1964.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input/output, integer N_DATA.  The user sets N_DATA to 0 before the
+!!$    !    first call.  On each call, the routine increments N_DATA by 1, and
+!!$    !    returns the corresponding data; when there is no more data, the
+!!$    !    output value of N_DATA will be 0 again.
+!!$    !
+!!$    !    Output, integer A, real ( kind = 8 ) X, the arguments of the function.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) FX, the value of the function.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Integer, Parameter :: n_max = 13
+!!$
+!!$    Integer a
+!!$    Integer, Save, Dimension ( n_max ) :: a_vec = (/ &
+!!$         1, 2, 3, 4, &
+!!$         5, 2, 5, 2, &
+!!$         5, 2, 3, 4, &
+!!$         5 /)
+!!$    Real ( kind = 8 ) fx
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: fx_vec = (/ &
+!!$         0.60D+00, 0.60D+00, 0.60D+00, 0.60D+00, &
+!!$         0.60D+00, 0.75D+00, 0.75D+00, 0.95D+00, &
+!!$         0.95D+00, 0.99D+00, 0.99D+00, 0.99D+00, &
+!!$         0.99D+00 /)
+!!$    Integer n_data
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ), Save, Dimension ( n_max ) :: x_vec = (/ &
+!!$         0.325D+00, 0.289D+00, 0.277D+00, 0.271D+00, &
+!!$         0.267D+00, 0.816D+00, 0.727D+00, 2.920D+00, &
+!!$         2.015D+00, 6.965D+00, 4.541D+00, 3.747D+00, &
+!!$         3.365D+00 /)
+!!$
+!!$    If ( n_data < 0 ) Then
+!!$       n_data = 0
+!!$    End If
+!!$
+!!$    n_data = n_data + 1
+!!$
+!!$    If ( n_max < n_data ) Then
+!!$       n_data = 0
+!!$       a = 0
+!!$       x = 0.0D+00
+!!$       fx = 0.0D+00
+!!$    Else
+!!$       a = a_vec(n_data)
+!!$       x = x_vec(n_data)
+!!$       fx = fx_vec(n_data)
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine student_cdf_values
 
   Function stvaln ( p )
 
@@ -13299,118 +13302,118 @@ Contains
     Return
   End Function stvaln
 
-  Subroutine timestamp ( )
-
-    !*****************************************************************************80
-    !
-    !! TIMESTAMP prints the current YMDHMS date as a time stamp.
-    !
-    !  Example:
-    !
-    !    May 31 2001   9:45:54.872 AM
-    !
-    !  Modified:
-    !
-    !    15 March 2003
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Parameters:
-    !
-    !    None
-    !
-    Implicit None
-
-    Character ( len = 40 ) string
-
-    Call timestring ( string )
-
-    Write ( *, '(a)' ) Trim ( string )
-
-    Return
-  End Subroutine timestamp
-
-  Subroutine timestring ( string )
-
-    !*****************************************************************************80
-    !
-    !! TIMESTRING writes the current YMDHMS date into a string.
-    !
-    !  Example:
-    !
-    !    STRING = 'May 31 2001   9:45:54.872 AM'
-    !
-    !  Modified:
-    !
-    !    15 March 2003
-    !
-    !  Author:
-    !
-    !    John Burkardt
-    !
-    !  Parameters:
-    !
-    !    Output, character ( len = * ) STRING, contains the date information.
-    !    A character length of 40 should always be sufficient.
-    !
-    Implicit None
-
-    Character ( len = 8 ) ampm
-    Integer d
-    Character ( len = 8 ) date
-    Integer h
-    Integer m
-    Integer mm
-    Character ( len = 9 ), Parameter, Dimension(12) :: month = (/ &
-         'January  ', 'February ', 'March    ', 'April    ', &
-         'May      ', 'June     ', 'July     ', 'August   ', &
-         'September', 'October  ', 'November ', 'December ' /)
-    Integer n
-    Integer s
-    Character ( len = * ) string
-    Character ( len = 10 ) time
-    Integer values(8)
-    Integer y
-    Character ( len = 5 ) zone
-
-    Call Date_and_time ( date, time, zone, values )
-
-    y = values(1)
-    m = values(2)
-    d = values(3)
-    h = values(5)
-    n = values(6)
-    s = values(7)
-    mm = values(8)
-
-    If ( h < 12 ) Then
-       ampm = 'AM'
-    Else If ( h == 12 ) Then
-       If ( n == 0 .And. s == 0 ) Then
-          ampm = 'Noon'
-       Else
-          ampm = 'PM'
-       End If
-    Else
-       h = h - 12
-       If ( h < 12 ) Then
-          ampm = 'PM'
-       Else If ( h == 12 ) Then
-          If ( n == 0 .And. s == 0 ) Then
-             ampm = 'Midnight'
-          Else
-             ampm = 'AM'
-          End If
-       End If
-    End If
-
-    Write ( string, '(a,1x,i2,1x,i4,2x,i2,a1,i2.2,a1,i2.2,a1,i3.3,1x,a)' ) &
-         Trim ( month(m) ), d, y, h, ':', n, ':', s, '.', mm, Trim ( ampm )
-
-    Return
-  End Subroutine timestring
+!!$  Subroutine timestamp ( )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! TIMESTAMP prints the current YMDHMS date as a time stamp.
+!!$    !
+!!$    !  Example:
+!!$    !
+!!$    !    May 31 2001   9:45:54.872 AM
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    15 March 2003
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    None
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Character ( len = 40 ) string
+!!$
+!!$    Call timestring ( string )
+!!$
+!!$    Write ( *, '(a)' ) Trim ( string )
+!!$
+!!$    Return
+!!$  End Subroutine timestamp
+!!$
+!!$  Subroutine timestring ( string )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! TIMESTRING writes the current YMDHMS date into a string.
+!!$    !
+!!$    !  Example:
+!!$    !
+!!$    !    STRING = 'May 31 2001   9:45:54.872 AM'
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    15 March 2003
+!!$    !
+!!$    !  Author:
+!!$    !
+!!$    !    John Burkardt
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Output, character ( len = * ) STRING, contains the date information.
+!!$    !    A character length of 40 should always be sufficient.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Character ( len = 8 ) ampm
+!!$    Integer d
+!!$    Character ( len = 8 ) date
+!!$    Integer h
+!!$    Integer m
+!!$    Integer mm
+!!$    Character ( len = 9 ), Parameter, Dimension(12) :: month = (/ &
+!!$         'January  ', 'February ', 'March    ', 'April    ', &
+!!$         'May      ', 'June     ', 'July     ', 'August   ', &
+!!$         'September', 'October  ', 'November ', 'December ' /)
+!!$    Integer n
+!!$    Integer s
+!!$    Character ( len = * ) string
+!!$    Character ( len = 10 ) time
+!!$    Integer values(8)
+!!$    Integer y
+!!$    Character ( len = 5 ) zone
+!!$
+!!$    Call Date_and_time ( date, time, zone, values )
+!!$
+!!$    y = values(1)
+!!$    m = values(2)
+!!$    d = values(3)
+!!$    h = values(5)
+!!$    n = values(6)
+!!$    s = values(7)
+!!$    mm = values(8)
+!!$
+!!$    If ( h < 12 ) Then
+!!$       ampm = 'AM'
+!!$    Else If ( h == 12 ) Then
+!!$       If ( n == 0 .And. s == 0 ) Then
+!!$          ampm = 'Noon'
+!!$       Else
+!!$          ampm = 'PM'
+!!$       End If
+!!$    Else
+!!$       h = h - 12
+!!$       If ( h < 12 ) Then
+!!$          ampm = 'PM'
+!!$       Else If ( h == 12 ) Then
+!!$          If ( n == 0 .And. s == 0 ) Then
+!!$             ampm = 'Midnight'
+!!$          Else
+!!$             ampm = 'AM'
+!!$          End If
+!!$       End If
+!!$    End If
+!!$
+!!$    Write ( string, '(a,1x,i2,1x,i4,2x,i2,a1,i2.2,a1,i2.2,a1,i3.3,1x,a)' ) &
+!!$         Trim ( month(m) ), d, y, h, ':', n, ':', s, '.', mm, Trim ( ampm )
+!!$
+!!$    Return
+!!$  End Subroutine timestring
 
 End Module DCDFLIB
 
