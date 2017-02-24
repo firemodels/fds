@@ -756,8 +756,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
-               ICM = CELL_INDEX(I,J,K)
-               ICP = CELL_INDEX(I,J+1,K)
+               ICM = CELL_INDEX(I,MAX(J,1),K)
+               ICP = CELL_INDEX(I,MIN(J+1,JBAR),K)
                IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
                OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
                OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
@@ -788,8 +788,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ICM = CELL_INDEX(I,J,K)
-            ICP = CELL_INDEX(I,J,K+1)
+            ICM = CELL_INDEX(I,J,MAX(K,1))
+            ICP = CELL_INDEX(I,J,MIN(K+1,KBAR))
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
