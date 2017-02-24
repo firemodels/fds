@@ -825,7 +825,8 @@ END IF
 
 ! Additional force terms
 
-IF (ANY(MEAN_FORCING))             CALL MOMENTUM_NUDGING           ! Mean forcing
+IF (ANY(MEAN_FORCING) .AND. .NOT.NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING           ! Mean forcing
+IF (ANY(MEAN_FORCING) .AND.      NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING_2         ! Test new mean forcing
 IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
 IF (WFDS_BNDRYFUEL)                CALL VEGETATION_DRAG            ! Surface vegetation drag
@@ -1028,12 +1029,91 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ENDIF
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
             DW_FORCING = (WBAR-WMEAN)/DT_LOC
-            FVZ = FVZ - DW_FORCING
+            FVZ(:,:,K) = FVZ(:,:,K) - DW_FORCING
          ENDDO K_LOOP_W
    END SELECT SELECT_RAMP_W
 ENDIF MEAN_FORCING_Z
 
 END SUBROUTINE MOMENTUM_NUDGING
+
+
+SUBROUTINE MOMENTUM_NUDGING_2
+
+! Same as MOMENTUM_NUDGING, but force term uses local velocity component.
+! Based on Yamada, T. Downscaling Mesoscale Meteorological Models for Computational Wind Engineering Applications,
+! Journal of Wind Engineering and Industrial Aerodynamics, Vol. 99, Issue 4, April 2011, pages 199-219.
+
+! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
+
+REAL(EB) :: UBAR,VBAR,WBAR,DT_LOC
+
+DT_LOC = MAX(DT,DT_MEAN_FORCING)
+
+MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
+   SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
+      CASE(0) SELECT_RAMP_U
+         UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
+                  FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(1:) SELECT_RAMP_U
+         K_LOOP_U: DO K=1,KBAR
+            UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
+            FVX(:,:,K) = FVX(:,:,K) - (UBAR-UU(:,:,K))/DT_LOC
+         ENDDO K_LOOP_U
+   END SELECT SELECT_RAMP_U
+ENDIF MEAN_FORCING_X
+
+MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
+   SELECT_RAMP_V: SELECT CASE(I_RAMP_V0_Z)
+      CASE(0) SELECT_RAMP_V
+         VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
+                  FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(1:) SELECT_RAMP_V
+         K_LOOP_V: DO K=1,KBAR
+            VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
+            FVY(:,:,K) = FVY(:,:,K) - (VBAR-VV(:,:,K))/DT_LOC
+         ENDDO K_LOOP_V
+   END SELECT SELECT_RAMP_V
+ENDIF MEAN_FORCING_Y
+
+MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
+   SELECT_RAMP_W: SELECT CASE(I_RAMP_W0_Z)
+      CASE(0) SELECT_RAMP_W
+         WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)
+         DO K=0,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
+                  FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(1:)
+         K_LOOP_W: DO K=0,KBAR
+            WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+            FVZ(:,:,K) = FVZ(:,:,K) - (WBAR-WW(:,:,K))/DT_LOC
+         ENDDO K_LOOP_W
+   END SELECT SELECT_RAMP_W
+ENDIF MEAN_FORCING_Z
+
+END SUBROUTINE MOMENTUM_NUDGING_2
+
 
 SUBROUTINE DIRECT_FORCE()
 REAL(EB) :: TIME_RAMP_FACTOR
@@ -1075,6 +1155,7 @@ ENDDO
 !$OMP END PARALLEL DO
 
 END SUBROUTINE DIRECT_FORCE
+
 
 SUBROUTINE CORIOLIS_FORCE()
 
@@ -1158,6 +1239,7 @@ ENDDO
 !$OMP END PARALLEL DO
 
 END SUBROUTINE CORIOLIS_FORCE
+
 
 SUBROUTINE VEGETATION_DRAG()
 
