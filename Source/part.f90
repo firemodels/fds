@@ -630,7 +630,7 @@ SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
-INTEGER :: IIP,ND,N_INSERT,I1,J1,K1,I2,J2,K2,MOD_N_INSERT,N,N_PARTICLES_INSERT
+INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,LP_X,LP_Y,LP_Z
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
@@ -1067,7 +1067,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                LP%ONE_D%AREA = LP_VOLUME/SF%THICKNESS
                IF (SF%THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
-                     LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+                     LP%MASS = LP%MASS + SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
                   END DO
                   LP%MASS = LP%MASS*LP%ONE_D%AREA
                ENDIF
@@ -1084,7 +1084,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                ENDIF
             CASE (SURF_SPHERICAL)
                LP%ONE_D%AREA = 3._EB*LP_VOLUME/SF%THICKNESS
-               LP%PWT = AREA/(4._EB*PI*SF%THICKNESS**2)
+               LP%PWT = LP%ONE_D%AREA/(4._EB*PI*SF%THICKNESS**2)
                IF (SF%THERMALLY_THICK) THEN
                   X1 = SUM(SF%LAYER_THICKNESS)
                   DO N=SF%N_LAYERS,1,-1
@@ -1280,9 +1280,9 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    ! Determine the limiting time step to ensure particle does not traverse more than a single grid cell
 
-   DT_CFL = MIN(DX(LP%ONE_D%IIG)/(ABS(LP%U)+EPSILON_EB),&
-                DY(LP%ONE_D%JJG)/(ABS(LP%V)+EPSILON_EB),&
-                DZ(LP%ONE_D%KKG)/(ABS(LP%W)+EPSILON_EB))
+   DT_CFL = MIN(DX(LP%ONE_D%IIG)/(ABS(LP%U)+TWO_EPSILON_EB),&
+                DY(LP%ONE_D%JJG)/(ABS(LP%V)+TWO_EPSILON_EB),&
+                DZ(LP%ONE_D%KKG)/(ABS(LP%W)+TWO_EPSILON_EB))
    N_ITER = CEILING(DT/DT_CFL)
    DT_P   = DT/REAL(N_ITER,EB)
 
@@ -4029,7 +4029,7 @@ SUBROUTINE PARTICLE_ORPHANAGE
 ! Determine if the given particle is now in another mesh, and if so, assign it to the ORPHAN array.
 
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_STORAGE_ARRAYS
-INTEGER :: OM,NOM,TAG,N_NEW_STORAGE_SLOTS
+INTEGER :: OM,NOM,N_NEW_STORAGE_SLOTS
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (OMESH_TYPE), POINTER :: M2=>NULL()
 

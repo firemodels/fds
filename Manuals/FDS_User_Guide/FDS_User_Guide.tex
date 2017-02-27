@@ -2069,7 +2069,7 @@ Colors for many items within FDS can be prescribed in two ways; a triplet of int
 will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
 It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
 
-Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview.
+Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
 
 \begin{table}[p]
@@ -2207,6 +2207,8 @@ Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct
 The end result of this input file is to create a pyramid by repeating long, rectangular obstructions at the base of each face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to repeat the obstructions in sequence rather than as an array.
 
 Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST}, {\ct HOLE}, {\ct VENT}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the bounds ({\ct XB}) of the mesh, not the number of cells.
+
+Note also that if a {\ct COLOR} is specified on a line that includes a {\ct MULT\_ID}, this color will be applied to all replicates of the object. However, you can set {\ct COLOR='RAINBOW'} which will instruct FDS to randomly choose a color for each replicate object.
 
 
 \chapter{Fire and Thermal Boundary Conditions}
@@ -3155,22 +3157,24 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the abs
 
 \subsection{Fuel Burnout}
 
-The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
-burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_{\rm s}$, and the
-layer thickness, $\delta_{\rm s}$:
-\be t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''} \ee
-However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
-highlighted in the individual sections below.
+The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_{\rm s}$, and the layer thickness, $\delta_{\rm s}$:
+\be 
+   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''} 
+\ee
+However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be highlighted in the individual sections below.
 
-\subsubsection{Solid Fuel Burnout}
+\subsubsection{Solid Fuel Burnout When the Burning Rate is Specified}
 
-If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you can estimate the burnout time for a surface using the heat of combustion, $\Delta H$, material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
+If you {\em specify} the burning rate using {\ct HRRPUA} (Heat Release Rate Per Unit Area) or {\ct MLRPUA} (Mass Loss Rate Per Unit Area), the solid surface will continue to burn at the specified rate indefinitely with no fuel burnout. You may use {\ct RAMP\_Q} to stop the burning at a desired time. You can estimate this ``burnout time'' for a surface using the heat of combustion, $\Delta H$, material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
 \be
    t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}}
 \ee
-Use the {\ct RAMP} function to stop the burning once the calculated burnout time is reached.
+The burnout time is not calculated and applied automatically because there are instances where the underlying solid is not considered fuel; that is, the burning rate and duration are not determined by the composition of the solid surface.
 
-The burnout time of a reacting solid fuel is calculated automatically by FDS based on the layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
+
+\subsubsection{Solid Fuel Burnout When the Burning Rate is Not Specified}
+
+If you use are using a pyrolysis model in which the {\ct MATL} lines have {\ct N\_REACTIONS} greater than or equal to 1, the burnout time of the pyrolyzing solid fuel is calculated automatically by FDS based on the layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated reactions rates of the materials.
 
 
 \subsubsection{Liquid Fuel Burnout}
@@ -3189,7 +3193,6 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 
 If a burning object is to disappear from the simulation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding {\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
-\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction, the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
 \item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional surface information as the mesh cells disappear.
 \item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
 \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like {\ct HRRPUA}.
@@ -6454,9 +6457,22 @@ A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, rep
 \label{beam_detector}
 \end{figure}
 
-
-
-
+\subsubsection{Special Topic: Beam Detectors Spanning Multiple Meshes}
+The data from a device are processed and stored on the mesh in which the device is spatially located; therefore you cannot specify a single beam detector which spans multiple meshes. To model a single beam detector which is required to span multiple meshes, specify one beam on each mesh spanned and use a combination of secondary {\ct DEVC}s and {\ct CTRL}s to sum the obscuration from each of the constituent beams. For example, to model {\ct beam\_1}, which is required to span two meshes, specify two constituent beams (\,{\ct beam\_1a} and {\ct beam\_1b}\,) and sum their obscuration to output the total obscuration of {\ct beam\_1}:
+\begin{lstlisting}
+&DEVC ID='beam_1a', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
+&DEVC ID='beam_1b', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
+&CTRL ID='beam_1a_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1a', CONSTANT=100. /
+&CTRL ID='beam_1b_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1b', CONSTANT=100. /
+&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
+&CTRL ID='beam_1_f', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1_m', CONSTANT=100. /
+&DEVC ID='beam_1', QUANTITY='CONTROL VALUE', CTRL_ID='beam_1_f', XYZ=... /
+\end{lstlisting}
+The outputs of the constituent beams are suppressed and the obscuration of {\ct beam\_1} will be in percent. The constant on the line:
+\begin{lstlisting}
+&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
+\end{lstlisting}
+needs to be modified to suit the number of constituent beams. To maintain correct decimal placement, the value of the negative exponent should be equal to the number of constituent beams multiplied by \num{2}, minus \num{2}.
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
@@ -9052,7 +9068,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
+{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:mean_forcing}                        & m/s           & 0.                \\ \hline
 %{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
