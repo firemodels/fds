@@ -1056,7 +1056,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    IF (.NOT.SOLID_CELL) THEN
       IF ( (ABS(WC%UW0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR. SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) &
            .AND. WC%OBST_INDEX>0 ) THEN
-         WRITE(LU_ERR,'(A,A,A,I4)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
+         WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
          STOP_STATUS = SETUP_STOP
          RETURN
@@ -1064,7 +1064,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       IF (WC%VENT_INDEX>0 .AND. WC%OBST_INDEX>0) THEN
          VT => VENTS(WC%VENT_INDEX)
          IF (VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
-            WRITE(LU_ERR,'(A,A,A,I4)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
+            WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
             STOP_STATUS = SETUP_STOP
             RETURN
@@ -1823,7 +1823,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
       IF (IW==0 .AND. DV%STATISTICS=='null') THEN
-         WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
+         WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ELSE
@@ -1904,7 +1904,7 @@ PROF_LOOP: DO N=1,N_PROF
          ENDIF
       ENDIF
    ELSE
-      WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+      WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
       STOP_STATUS = SETUP_STOP
       RETURN
    ENDIF
