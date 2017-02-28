@@ -4867,7 +4867,14 @@ suppression algorithm has been implemented in FDS that attempts to gauge whether
 
 The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1327~\si{\degree C}. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT), in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+
+You may also specify {\ct AUTO\_IGNITION\_TEMPERATURE} on an {\ct INIT} region.  This feature is intended to be used as a pilot zone.  For example, you might use something like this for a piloted methane flame:
+\begin{lstlisting}
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
+&INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
+\end{lstlisting}
+where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.
 
 \paragraph{Finding or Calculating Extinction Parameters}
 
@@ -8807,7 +8814,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-%{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Auto-ignition temperature                     & \si{\degree C} & {-273.15}     \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Section~\ref{info:extinction}                 & \si{\degree C} & {-273.15}     \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
