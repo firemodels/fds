@@ -9553,7 +9553,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ENDIF ORIENTATION_IF
 
       IF (VT%IOR==0) THEN
-         WRITE(MESSAGE,'(A,I3,A,I3)')  'ERROR: Specify orientation of VENT ',VT%ORDINAL, ', MESH NUMBER',NM
+         WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Specify orientation of VENT ',VT%ORDINAL, ', MESH NUMBER',NM
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
@@ -9563,36 +9563,36 @@ MESH_LOOP_2: DO NM=1,NMESHES
          CASE(1)
             IF (I1>=1 .AND. I1<=IBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2+1,J2,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2+1,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
-                  WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
+                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
@@ -9619,7 +9619,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       ! Check UVW
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,I3,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
+         WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
