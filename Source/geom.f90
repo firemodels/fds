@@ -658,15 +658,15 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                CASE(IAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n in x face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))/M%DXN(I)  ! dH/dx^n-1/2 in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n in y face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))/M%DYN(J)  ! dH/dy^n-1/2 in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n in z face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))/M%DZN(K)  ! dH/dz^n-1/2 in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG12
          ELSE
@@ -682,15 +682,15 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                CASE(IAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n in x face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))/M%DXN(I)  ! dH/dx^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n in y face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))/M%DYN(J)  ! dH/dy^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n in z face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))/M%DZN(K)  ! dH/dz^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG12
          ENDIF
@@ -762,15 +762,15 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                CASE(IAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))/M%DXN(I)    ! dH/dx^n in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
                CASE(JAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^n in y face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))/M%DYN(J)    ! dH/dy^n-1/2 in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^n in z face I,J,K
                   M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))/M%DZN(K)    ! dH/dz^n-1/2 in I,J,K.
+                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG112
          ELSE
@@ -786,15 +786,15 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                CASE(IAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^n in x face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))/M%DXN(I)    ! dH/dx^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^n in y face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))/M%DYN(J)    ! dH/dy^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^n in z face I,J,K
                   M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))/M%DZN(K)    ! dH/dz^n-1/2 in I,J,K.
+                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG112
          ENDIF
@@ -7317,336 +7317,6 @@ RETURN
 END SUBROUTINE GET_ADVDIFFVECTOR_SCALAR_3D
 
 
-! ----------------------------- CCIBM_RHO0W_INTERP ------------------------------
-
-SUBROUTINE CCIBM_RHO0W_INTERP
-
-! Local Variables:
-REAL(EB), POINTER, DIMENSION(:,:,:) :: WP
-INTEGER :: NM, ICC, NCELL, ICELL
-INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), INBFC_CCCEN(1:3)
-REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC, VALW(1:5), VAL_CCW
-
-! This routines interpolates RHO_0 and W velocity component to cut-cell centers,
-! It is used when stratification is .TRUE.
-
-IF (.NOT. STRATIFICATION) RETURN
-IF (PERIODIC_TEST == 103) RETURN
-
-IF (CC_ZEROIBM_VELO) CC_INJECT_RHO0=.TRUE.
-
-MESH_LOOP : DO NM=1,NMESHES
-
-   IF (PROCESS(NM)/=MYID) CYCLE
-
-   CALL POINT_TO_MESH(NM)
-
-   IF (PREDICTOR) THEN
-      WP => WS ! End of step velocities.
-   ELSE
-      WP => W
-   ENDIF
-
-   CC_INJECT_RHO0_COND : IF (CC_INJECT_RHO0) THEN
-
-      ICC_LOOP_1 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
-         NCELL  = IBM_CUT_CELL(ICC)%NCELL
-         I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
-         J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
-         K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
-         DO ICELL=1,NCELL
-            ! Cell variables:
-            XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
-            INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
-            XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
-            PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
-            INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
-
-            ! Now values:
-            ! First RHO_0
-            VAL_CC = RHO_0(K)
-
-            ! Second W vel interpolated to cell centers on stencil.
-            CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VAL_CCW)
-
-            IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
-            IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
-         ENDDO
-      ENDDO ICC_LOOP_1
-
-   ELSE
-
-      ICC_LOOP_2 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
-         NCELL  = IBM_CUT_CELL(ICC)%NCELL
-         I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
-         J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
-         K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
-         DO ICELL=1,NCELL
-            ! Cell variables:
-            XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
-            INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
-            XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
-            PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
-            INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
-
-            ! Now values:
-            ! First RHO_0
-            VAL(1) = RHO_0(K)
-            VAL(2) = RHO_0(PTS(KAXIS,NOD1))
-            VAL(3) = RHO_0(PTS(KAXIS,NOD2))
-            VAL(4) = RHO_0(PTS(KAXIS,NOD3))
-            VAL(5) = RHO_0(PTS(KAXIS,NOD4))
-
-            ! Second W vel interpolated to cell centers on stencil.
-            CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VALW(1))
-            VALW(2) = 0.5_EB*(WP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1)  ) + &
-                              WP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1)-1))
-            VALW(3) = 0.5_EB*(WP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2)  ) + &
-                              WP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2)-1))
-            VALW(4) = 0.5_EB*(WP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3)  ) + &
-                              WP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3)-1))
-            VALW(5) = 0.5_EB*(WP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4)  ) + &
-                              WP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4)-1))
-
-            VAL_CC    = 0._EB
-            VAL_CCW   = 0._EB
-            DO II=1,5
-               VAL_CC = VAL_CC + INTCOEF(II)* VAL(II)
-               VAL_CCW= VAL_CCW+ INTCOEF(II)*VALW(II)
-            ENDDO
-
-            IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
-            IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
-         ENDDO
-      ENDDO ICC_LOOP_2
-
-   ENDIF CC_INJECT_RHO0_COND
-
-   NULLIFY(WP)
-
-ENDDO MESH_LOOP
-
-RETURN
-END SUBROUTINE CCIBM_RHO0W_INTERP
-
-! ------------------------------- CCIBM_H_INTERP --------------------------------
-
-SUBROUTINE CCIBM_H_INTERP
-
-! Local Variables:
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,HP
-INTEGER :: NM, ICC, NCELL, ICELL
-INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), IRCELL
-REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC
-REAL(EB):: U_IBM, V_IBM, W_IBM
-
-! This routine interpolates H to cut cells/Cartesian cells at the end of step.
-! Makes use of dH/dXn boundary condition on immersed solid surfaces.
-
-IF (CC_ZEROIBM_VELO) CC_INTERPOLATE_H=.FALSE.
-
-! Interpolate H in cut-cells:
-MESH_LOOP : DO NM=1,NMESHES
-
-   IF (PROCESS(NM)/=MYID) CYCLE
-
-   CALL POINT_TO_MESH(NM)
-
-   IF (PREDICTOR) THEN
-      HP => H
-      UP => US ! End of step velocities.
-      VP => VS
-      WP => WS
-   ELSE
-      HP => HS
-      UP => U ! End of step velocities.
-      VP => V
-      WP => W
-   ENDIF
-
-   ! Interpolate to Regular cell centers of cells with all faces being forced:
-   IF (FORCE_REGC_FACE_NXT) THEN
-   NRCELL_LOOP : DO IRCELL=1,MESHES(NM)%IBM_NRCELL_H
-
-      I = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(IAXIS)
-      J = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(JAXIS)
-      K = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(KAXIS)
-
-      VAL_CC    = 0._EB
-      IF (CC_INTERPOLATE_H) THEN
-         PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
-         INTCOEF(1:5)               = MESHES(NM)%IBM_RCELL_H(IRCELL)%INTCOEF_CARTCEN(1:5)
-
-         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bpund pt.
-
-         ! Now values:
-         VAL(1) = 0._EB
-         VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-         VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-         VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-         VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
-
-         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
-
-         DO II=1,5
-            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-         ENDDO
-         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
-         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
-         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
-      ENDIF
-
-      HP(I,J,K) = VAL_CC
-
-   ENDDO NRCELL_LOOP
-   ENDIF
-
-
-   ! Interpolate to cut-cells. Cut-cell loop:
-   ICC_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
-
-      NCELL  = IBM_CUT_CELL(ICC)%NCELL
-
-      I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
-      J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
-      K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
-
-      IF(PERIODIC_TEST == 103) THEN
-         IF (PREDICTOR) THEN
-            IBM_CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K)
-         ELSE
-            IBM_CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
-         ENDIF
-         CYCLE
-      ENDIF
-
-      VAL_CC    = 0._EB
-      IF (CC_INTERPOLATE_H) THEN
-         ! First Cartesian centroid:
-         PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
-         INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
-
-         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
-
-         ! Now values:
-         VAL(1) = 0._EB
-         VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-         VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-         VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-         VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
-
-         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
-         DO II=1,5
-            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-         ENDDO
-         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
-         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
-         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
-      ENDIF
-
-      HP(I,J,K) = VAL_CC
-
-      ! Now if the Pressure equation has been solved on Cartesian cells, interpolate values of
-      ! H to corresponding cut-cell centroids:
-      IF (PRES_ON_CARTESIAN) THEN
-
-         IF (CC_INTERPOLATE_H) THEN
-            DO ICELL=1,NCELL
-               ! Centroid location:
-               XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
-
-               PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
-               XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
-               INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
-
-               ! Now values:
-               VAL(1) = 0._EB
-               VAL(2) = H(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
-               VAL(3) = H(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
-               VAL(4) = H(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
-               VAL(5) = H(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
-
-               VAL_CC    = 0._EB
-               DO II=1,5
-                  VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-               ENDDO
-
-               IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
-                                                           ! No regular gasphase cells found for interpolation.
-               VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dH/dxn = 0.
-
-               IF (PREDICTOR) THEN
-                  IBM_CUT_CELL(ICC)%H(ICELL) = VAL_CC
-               ELSE
-                  IBM_CUT_CELL(ICC)%HS(ICELL) = VAL_CC
-               ENDIF
-
-            ENDDO
-         ELSE
-            VAL_CC    = 0._EB
-            IF (PREDICTOR) THEN
-               IBM_CUT_CELL(ICC)%H(1:NCELL) = VAL_CC
-            ELSE
-               IBM_CUT_CELL(ICC)%HS(1:NCELL) = VAL_CC
-            ENDIF
-        ENDIF
-      ENDIF
-
-   ENDDO ICC_LOOP
-
-   ! Finally set HP to zero inside immersed solids:
-   DO K=0,KBP1
-     DO J=0,JBP1
-        DO I=0,IBP1
-           IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
-           HP(I,J,K) = 0._EB
-        ENDDO
-     ENDDO
-   ENDDO
-
-   ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
-   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-   ! Force U velocities in IBM_SOLID faces to zero
-   U_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
-            UP(I,J,K) = U_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force V velocities in IBM_SOLID faces to zero
-   V_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
-            VP(I,J,K) = V_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force W velocities in IBM_SOLID faces to zero
-   W_IBM = 0._EB ! Body doesn't move.
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
-            WP(I,J,K) = W_IBM
-         ENDDO
-      ENDDO
-   ENDDO
-   ENDIF
-
-   NULLIFY(UP,VP,WP,HP)
-
-ENDDO MESH_LOOP
-
-RETURN
-END SUBROUTINE CCIBM_H_INTERP
-
 ! -------------------------- CCIBM_VELOCITY_CUTFACES ----------------------------
 
 SUBROUTINE CCIBM_VELOCITY_CUTFACES
@@ -7789,14 +7459,336 @@ MESH_LOOP : DO NM=1,NMESHES
 
    ENDIF PRES_ON_WHOLE_DOMAIN_IF
 
-
-
-
 ENDDO MESH_LOOP
 
 
 RETURN
 END SUBROUTINE CCIBM_VELOCITY_CUTFACES
+
+
+! ----------------------------- CCIBM_RHO0W_INTERP ------------------------------
+
+SUBROUTINE CCIBM_RHO0W_INTERP
+
+! Local Variables:
+REAL(EB), POINTER, DIMENSION(:,:,:) :: WP
+INTEGER :: NM, ICC, NCELL, ICELL
+INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), INBFC_CCCEN(1:3)
+REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC, VALW(1:5), VAL_CCW
+INTEGER :: IPT
+
+! This routines interpolates RHO_0 and W velocity component to cut-cell centers,
+! It is used when stratification is .TRUE.
+
+IF (.NOT. STRATIFICATION) RETURN
+IF (PERIODIC_TEST == 103) RETURN
+
+IF (CC_ZEROIBM_VELO) CC_INJECT_RHO0=.TRUE.
+
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
+
+   CALL POINT_TO_MESH(NM)
+
+   IF (PREDICTOR) THEN
+      WP => WS ! End of step velocities.
+   ELSE
+      WP => W
+   ENDIF
+
+   CC_INJECT_RHO0_COND : IF (CC_INJECT_RHO0) THEN
+
+      ICC_LOOP_1 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+         NCELL  = IBM_CUT_CELL(ICC)%NCELL
+         I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+         J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+         K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+         DO ICELL=1,NCELL
+            ! Cell variables:
+            XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+            INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
+            XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+            PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+            INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+
+            ! Now values:
+            ! First RHO_0
+            VAL_CC = RHO_0(K)
+
+            ! Second W vel interpolated to cell centers on stencil.
+            CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VAL_CCW)
+
+            IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
+            IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
+         ENDDO
+      ENDDO ICC_LOOP_1
+
+   ELSE
+
+      ICC_LOOP_2 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+         NCELL  = IBM_CUT_CELL(ICC)%NCELL
+         I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+         J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+         K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+         DO ICELL=1,NCELL
+            ! Cell variables:
+            XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+            INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
+            XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+            PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+            INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+
+            ! Now values:
+            ! First RHO_0
+            VAL(1) = RHO_0(K)
+
+            ! Second W vel interpolated to cell centers on stencil.
+            CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VALW(1))
+
+            DO IPT=1,MAX_INTERP_POINTS_PLANE
+               VAL(IPT+1) = IBM_CUT_CELL(ICC)%RHO_0_CCCEN( IPT+1,ICELL)
+               VALW(IPT+1)= IBM_CUT_CELL(ICC)%W_CCCEN( IPT+1,ICELL)
+            ENDDO
+
+            VAL_CC    = 0._EB
+            VAL_CCW   = 0._EB
+            DO II=1,5
+               VAL_CC = VAL_CC + INTCOEF(II)* VAL(II)
+               VAL_CCW= VAL_CCW+ INTCOEF(II)*VALW(II)
+            ENDDO
+
+            IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
+            IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
+         ENDDO
+      ENDDO ICC_LOOP_2
+
+   ENDIF CC_INJECT_RHO0_COND
+
+   NULLIFY(WP)
+
+ENDDO MESH_LOOP
+
+RETURN
+END SUBROUTINE CCIBM_RHO0W_INTERP
+
+! ------------------------------- CCIBM_H_INTERP --------------------------------
+
+SUBROUTINE CCIBM_H_INTERP
+
+! Local Variables:
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,HP
+INTEGER :: NM, ICC, NCELL, ICELL
+INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), IRCELL
+REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC
+REAL(EB):: U_IBM, V_IBM, W_IBM
+
+INTEGER :: IPT
+
+! This routine interpolates H to cut cells/Cartesian cells at the end of step.
+! Makes use of dH/dXn boundary condition on immersed solid surfaces.
+
+IF (CC_ZEROIBM_VELO) CC_INTERPOLATE_H=.FALSE.
+
+! Interpolate H in cut-cells:
+MESH_LOOP : DO NM=1,NMESHES
+
+   IF (PROCESS(NM)/=MYID) CYCLE
+
+   CALL POINT_TO_MESH(NM)
+
+   IF (PREDICTOR) THEN
+      HP => H
+      UP => US ! End of step velocities.
+      VP => VS
+      WP => WS
+   ELSE
+      HP => HS
+      UP => U ! End of step velocities.
+      VP => V
+      WP => W
+   ENDIF
+
+   ! Interpolate to Regular cell centers of cells with all faces being forced:
+   IF (FORCE_REGC_FACE_NXT) THEN
+   NRCELL_LOOP : DO IRCELL=1,MESHES(NM)%IBM_NRCELL_H
+
+      I = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(IAXIS)
+      J = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(JAXIS)
+      K = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(KAXIS)
+
+      VAL_CC    = 0._EB
+      IF (CC_INTERPOLATE_H) THEN
+         PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+         INTCOEF(1:5)               = MESHES(NM)%IBM_RCELL_H(IRCELL)%INTCOEF_CARTCEN(1:5)
+
+         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bpund pt.
+
+         ! Now values:
+         VAL(1) = 0._EB
+         DO IPT=1,MAX_INTERP_POINTS_PLANE
+            VAL(IPT+1) = MESHES(NM)%IBM_RCELL_H(IRCELL)%H_CARTCEN( IPT+1)
+         ENDDO
+
+         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+
+         DO II=1,5
+            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+         ENDDO
+         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      ENDIF
+
+      HP(I,J,K) = VAL_CC
+
+   ENDDO NRCELL_LOOP
+   ENDIF
+
+
+   ! Interpolate to cut-cells. Cut-cell loop:
+   ICC_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+
+      NCELL  = IBM_CUT_CELL(ICC)%NCELL
+
+      I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+      J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+      K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+
+      IF(PERIODIC_TEST == 103) THEN
+         IF (PREDICTOR) THEN
+            IBM_CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K)
+         ELSE
+            IBM_CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
+         ENDIF
+         CYCLE
+      ENDIF
+
+      VAL_CC    = 0._EB
+      IF (CC_INTERPOLATE_H) THEN
+         ! First Cartesian centroid:
+         PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+         INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
+
+         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+
+         ! Now values:
+         VAL(1) = 0._EB
+         DO IPT=1,MAX_INTERP_POINTS_PLANE
+            VAL(IPT+1) = IBM_CUT_CELL(ICC)%H_CARTCEN( IPT+1)
+         ENDDO
+
+         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+         DO II=1,5
+            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+         ENDDO
+         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      ENDIF
+
+      HP(I,J,K) = VAL_CC
+
+      ! Now if the Pressure equation has been solved on Cartesian cells, interpolate values of
+      ! H to corresponding cut-cell centroids:
+      IF (PRES_ON_CARTESIAN) THEN
+
+         IF (CC_INTERPOLATE_H) THEN
+            DO ICELL=1,NCELL
+               ! Centroid location:
+               XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+
+               PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+               XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+               INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+
+               ! Now values:
+               VAL(1) = 0._EB
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  VAL(IPT+1) = IBM_CUT_CELL(ICC)%H_CCCEN( IPT+1,ICELL)
+               ENDDO
+
+               VAL_CC    = 0._EB
+               DO II=1,5
+                  VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+               ENDDO
+
+               IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+                                                           ! No regular gasphase cells found for interpolation.
+               VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dH/dxn = 0.
+
+               IF (PREDICTOR) THEN
+                  IBM_CUT_CELL(ICC)%H(ICELL) = VAL_CC
+               ELSE
+                  IBM_CUT_CELL(ICC)%HS(ICELL) = VAL_CC
+               ENDIF
+
+            ENDDO
+         ELSE
+            VAL_CC    = 0._EB
+            IF (PREDICTOR) THEN
+               IBM_CUT_CELL(ICC)%H(1:NCELL) = VAL_CC
+            ELSE
+               IBM_CUT_CELL(ICC)%HS(1:NCELL) = VAL_CC
+            ENDIF
+        ENDIF
+      ENDIF
+
+   ENDDO ICC_LOOP
+
+   ! Finally set HP to zero inside immersed solids:
+   DO K=0,KBP1
+     DO J=0,JBP1
+        DO I=0,IBP1
+           IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
+           HP(I,J,K) = 0._EB
+        ENDDO
+     ENDDO
+   ENDDO
+
+   ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
+   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+   ! Force U velocities in IBM_SOLID faces to zero
+   U_IBM = 0._EB ! Body doesn't move.
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
+            UP(I,J,K) = U_IBM
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Force V velocities in IBM_SOLID faces to zero
+   V_IBM = 0._EB ! Body doesn't move.
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+            VP(I,J,K) = V_IBM
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Force W velocities in IBM_SOLID faces to zero
+   W_IBM = 0._EB ! Body doesn't move.
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+            WP(I,J,K) = W_IBM
+         ENDDO
+      ENDDO
+   ENDDO
+   ENDIF
+
+   NULLIFY(UP,VP,WP,HP)
+
+ENDDO MESH_LOOP
+
+RETURN
+END SUBROUTINE CCIBM_H_INTERP
+
 
 ! ---------------------------- CCIBM_VELOCITY_FLUX ------------------------------
 
@@ -7868,16 +7860,12 @@ IF (FORCE_GAS_FACE) THEN
 
                ! Loop stencil points and define Un+1 approx
                DO IPT=NOD1,NOD4
-                  IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-                  JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-                  KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-                  DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
-
+                  DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+IBM_CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
                   ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
-                  IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+                  IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
                   ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
-                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                      IBM_CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
                ENDDO
 
                ! Interpolate to Un+1 approx on the cut-face centroid:
@@ -7906,16 +7894,12 @@ IF (FORCE_GAS_FACE) THEN
 
                   ! Loop stencil points and define Un+1 approx
                   DO IPT=NOD1,NOD4
-                     IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-                     JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-                     KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
-
-                     DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
-
+                     DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CFCEN(IPT+1,IFACE)+IBM_CUT_FACE(ICF)%DHDX1_CFCEN(IPT+1,IFACE))
                      ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
-                     IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+                     IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CFCEN(IPT+1,IFACE) - DUMEB
                      ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
-                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CFCEN( IPT+1,IFACE)+ &
+                                                         IBM_CUT_FACE(ICF)%VELS_CFCEN(IPT+1,IFACE)) - 0.5_EB*DUMEB
                   ENDDO
 
                   ! Interpolate to Un+1 approx on the cut-face centroid:
@@ -7966,16 +7950,12 @@ IF (FORCE_GAS_FACE) THEN
 
                ! Loop stencil points and define Un+1 approx
                DO IPT=NOD1,NOD4
-                  IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-                  JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-                  KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-                  DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
-
-                  ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
-                  IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
-                  ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
-                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+                  DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+IBM_CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
+                  ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                  IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+                  ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                      IBM_CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
                ENDDO
 
                DO IPT=1,5
@@ -8001,18 +7981,14 @@ IF (FORCE_GAS_FACE) THEN
                   XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE)
                   CALL GET_BOUND_VEL(X1AXIS,INBFC_CFCEN,XYZ_PP,VAL(1))
 
-                  ! Loop stencil points and define Vn+1 approx
+                  ! Loop stencil points and define Un+1 approx
                   DO IPT=NOD1,NOD4
-                     IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-                     JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-                     KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
-
-                     DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
-
-                     ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
-                     IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
-                     ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
-                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+                     DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CFCEN(IPT+1,IFACE)+IBM_CUT_FACE(ICF)%DHDX1_CFCEN(IPT+1,IFACE))
+                     ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                     IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CFCEN(IPT+1,IFACE) - DUMEB
+                     ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CFCEN( IPT+1,IFACE)+ &
+                                                         IBM_CUT_FACE(ICF)%VELS_CFCEN(IPT+1,IFACE)) - 0.5_EB*DUMEB
                   ENDDO
 
                   ! Interpolate to Vn+1 approx on the cut-face centroid:
@@ -8063,16 +8039,12 @@ IF (FORCE_GAS_FACE) THEN
 
                ! Loop stencil points and define Un+1 approx
                DO IPT=NOD1,NOD4
-                  IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-                  JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-                  KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-                  DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
-
-                  ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
-                  IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
-                  ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
-                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+                  DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+IBM_CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
+                  ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                  IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+                  ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                  IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                      IBM_CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
                ENDDO
 
                ! Interpolate to Wn+1 approx on the cut-face centroid:
@@ -8099,18 +8071,14 @@ IF (FORCE_GAS_FACE) THEN
                   XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE)
                   CALL GET_BOUND_VEL(X1AXIS,INBFC_CFCEN,XYZ_PP,VAL(1))
 
-                  ! Loop stencil points and define Wn+1 approx
+                  ! Loop stencil points and define Un+1 approx
                   DO IPT=NOD1,NOD4
-                     IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-                     JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-                     KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
-
-                     DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
-
-                     ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
-                     IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
-                     ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
-                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+                     DUMEB = DT*(IBM_CUT_FACE(ICF)%FV_CFCEN(IPT+1,IFACE)+IBM_CUT_FACE(ICF)%DHDX1_CFCEN(IPT+1,IFACE))
+                     ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                     IF (PREDICTOR) VAL(IPT+1) = IBM_CUT_FACE(ICF)%VEL_CFCEN(IPT+1,IFACE) - DUMEB
+                     ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                     IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(IBM_CUT_FACE(ICF)%VEL_CFCEN( IPT+1,IFACE)+ &
+                                                         IBM_CUT_FACE(ICF)%VELS_CFCEN(IPT+1,IFACE)) - 0.5_EB*DUMEB
                   ENDDO
 
                   ! Interpolate to Wn+1 approx on the cut-face centroid:
@@ -8177,16 +8145,13 @@ IF (FORCE_GAS_FACE) THEN
 
             ! Loop stencil points and define Un+1 approx
             DO IPT=NOD1,NOD4
-               IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-               JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-               KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-               DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
-
+               DUMEB = DT*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(IPT+1)+ &
+                           MESHES(NM)%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN(IPT+1))
                ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
-               IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+               IF (PREDICTOR) VAL(IPT+1) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
                ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
-               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                   MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
             ENDDO
 
             ! Interpolate to Un+1 approx on the cut-face centroid:
@@ -8211,18 +8176,15 @@ IF (FORCE_GAS_FACE) THEN
             XYZ_PP(IAXIS:KAXIS)= MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
             CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
 
-            ! Loop stencil points and define Vn+1 approx
+            ! Loop stencil points and define Un+1 approx
             DO IPT=NOD1,NOD4
-               IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-               JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-               KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-               DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
-
-               ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
-               IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
-               ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
-               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+               DUMEB = DT*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(IPT+1)+ &
+                           MESHES(NM)%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN(IPT+1))
+               ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+               IF (PREDICTOR) VAL(IPT+1) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+               ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                   MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
             ENDDO
 
             ! Interpolate to Vn+1 approx on the cut-face centroid:
@@ -8247,18 +8209,15 @@ IF (FORCE_GAS_FACE) THEN
             XYZ_PP(IAXIS:KAXIS)= MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
             CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
 
-            ! Loop stencil points and define Wn+1 approx
+            ! Loop stencil points and define Un+1 approx
             DO IPT=NOD1,NOD4
-               IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-               JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-               KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-
-               DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
-
-               ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
-               IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
-               ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
-               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+               DUMEB = DT*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(IPT+1)+ &
+                           MESHES(NM)%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN(IPT+1))
+               ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+               IF (PREDICTOR) VAL(IPT+1) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+               ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+               IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                   MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
             ENDDO
 
             ! Interpolate to Wn+1 approx on the cut-face centroid:
@@ -8344,6 +8303,886 @@ ENDIF
 
 RETURN
 END SUBROUTINE CCIBM_VELOCITY_FLUX
+
+! ! ----------------------------- CCIBM_RHO0W_INTERP ------------------------------
+!
+! SUBROUTINE CCIBM_RHO0W_INTERP
+!
+! ! Local Variables:
+! REAL(EB), POINTER, DIMENSION(:,:,:) :: WP
+! INTEGER :: NM, ICC, NCELL, ICELL
+! INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), INBFC_CCCEN(1:3)
+! REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC, VALW(1:5), VAL_CCW
+! INTEGER :: IPT
+!
+! ! This routines interpolates RHO_0 and W velocity component to cut-cell centers,
+! ! It is used when stratification is .TRUE.
+!
+! IF (.NOT. STRATIFICATION) RETURN
+! IF (PERIODIC_TEST == 103) RETURN
+!
+! IF (CC_ZEROIBM_VELO) CC_INJECT_RHO0=.TRUE.
+!
+! MESH_LOOP : DO NM=1,NMESHES
+!
+!    IF (PROCESS(NM)/=MYID) CYCLE
+!
+!    CALL POINT_TO_MESH(NM)
+!
+!    IF (PREDICTOR) THEN
+!       WP => WS ! End of step velocities.
+!    ELSE
+!       WP => W
+!    ENDIF
+!
+!    CC_INJECT_RHO0_COND : IF (CC_INJECT_RHO0) THEN
+!
+!       ICC_LOOP_1 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+!          NCELL  = IBM_CUT_CELL(ICC)%NCELL
+!          I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+!          J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+!          K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+!          DO ICELL=1,NCELL
+!             ! Cell variables:
+!             XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+!             INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
+!             XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+!             PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+!             INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+!
+!             ! Now values:
+!             ! First RHO_0
+!             VAL_CC = RHO_0(K)
+!
+!             ! Second W vel interpolated to cell centers on stencil.
+!             CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VAL_CCW)
+!
+!             IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
+!             IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
+!          ENDDO
+!       ENDDO ICC_LOOP_1
+!
+!    ELSE
+!
+!       ICC_LOOP_2 : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+!          NCELL  = IBM_CUT_CELL(ICC)%NCELL
+!          I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+!          J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+!          K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+!          DO ICELL=1,NCELL
+!             ! Cell variables:
+!             XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+!             INBFC_CCCEN(1:3) = IBM_CUT_CELL(ICC)%INBFC_CCCEN(1:3,ICELL)
+!             XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+!             PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+!             INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+!
+!             ! Now values:
+!             ! First RHO_0
+!             VAL(1) = RHO_0(K)
+!             VAL(2) = RHO_0(PTS(KAXIS,NOD1))
+!             VAL(3) = RHO_0(PTS(KAXIS,NOD2))
+!             VAL(4) = RHO_0(PTS(KAXIS,NOD3))
+!             VAL(5) = RHO_0(PTS(KAXIS,NOD4))
+!
+!             ! Second W vel interpolated to cell centers on stencil.
+!             CALL GET_BOUND_VEL(KAXIS,INBFC_CCCEN,XYZ_PP,VALW(1))
+!             VALW(2) = 0.5_EB*(WP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1)  ) + &
+!                               WP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1)-1))
+!             VALW(3) = 0.5_EB*(WP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2)  ) + &
+!                               WP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2)-1))
+!             VALW(4) = 0.5_EB*(WP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3)  ) + &
+!                               WP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3)-1))
+!             VALW(5) = 0.5_EB*(WP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4)  ) + &
+!                               WP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4)-1))
+!
+!             VAL_CC    = 0._EB
+!             VAL_CCW   = 0._EB
+!             DO II=1,5
+!                VAL_CC = VAL_CC + INTCOEF(II)* VAL(II)
+!                VAL_CCW= VAL_CCW+ INTCOEF(II)*VALW(II)
+!             ENDDO
+!
+!             IBM_CUT_CELL(ICC)%RHO_0(ICELL) = VAL_CC
+!             IBM_CUT_CELL(ICC)%WVEL(ICELL)  = VAL_CCW
+!          ENDDO
+!       ENDDO ICC_LOOP_2
+!
+!    ENDIF CC_INJECT_RHO0_COND
+!
+!    NULLIFY(WP)
+!
+! ENDDO MESH_LOOP
+!
+! RETURN
+! END SUBROUTINE CCIBM_RHO0W_INTERP
+!
+! ! ------------------------------- CCIBM_H_INTERP --------------------------------
+!
+! SUBROUTINE CCIBM_H_INTERP
+!
+! ! Local Variables:
+! REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,HP
+! INTEGER :: NM, ICC, NCELL, ICELL
+! INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), IRCELL
+! REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC
+! REAL(EB):: U_IBM, V_IBM, W_IBM
+!
+! INTEGER :: IPT
+!
+! ! This routine interpolates H to cut cells/Cartesian cells at the end of step.
+! ! Makes use of dH/dXn boundary condition on immersed solid surfaces.
+!
+! IF (CC_ZEROIBM_VELO) CC_INTERPOLATE_H=.FALSE.
+!
+! ! Interpolate H in cut-cells:
+! MESH_LOOP : DO NM=1,NMESHES
+!
+!    IF (PROCESS(NM)/=MYID) CYCLE
+!
+!    CALL POINT_TO_MESH(NM)
+!
+!    IF (PREDICTOR) THEN
+!       HP => H
+!       UP => US ! End of step velocities.
+!       VP => VS
+!       WP => WS
+!    ELSE
+!       HP => HS
+!       UP => U ! End of step velocities.
+!       VP => V
+!       WP => W
+!    ENDIF
+!
+!    ! Interpolate to Regular cell centers of cells with all faces being forced:
+!    IF (FORCE_REGC_FACE_NXT) THEN
+!    NRCELL_LOOP : DO IRCELL=1,MESHES(NM)%IBM_NRCELL_H
+!
+!       I = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(IAXIS)
+!       J = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(JAXIS)
+!       K = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK(KAXIS)
+!
+!       VAL_CC    = 0._EB
+!       IF (CC_INTERPOLATE_H) THEN
+!          PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCELL_H(IRCELL)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+!          INTCOEF(1:5)               = MESHES(NM)%IBM_RCELL_H(IRCELL)%INTCOEF_CARTCEN(1:5)
+!
+!          IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bpund pt.
+!
+!          ! Now values:
+!          VAL(1) = 0._EB
+!          VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+!          VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+!          VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+!          VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+!
+!          ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+!
+!          DO II=1,5
+!             VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+!          ENDDO
+!          ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+!          ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+!          VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+!       ENDIF
+!
+!       HP(I,J,K) = VAL_CC
+!
+!    ENDDO NRCELL_LOOP
+!    ENDIF
+!
+!
+!    ! Interpolate to cut-cells. Cut-cell loop:
+!    ICC_LOOP : DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
+!
+!       NCELL  = IBM_CUT_CELL(ICC)%NCELL
+!
+!       I      = IBM_CUT_CELL(ICC)%IJK(IAXIS)
+!       J      = IBM_CUT_CELL(ICC)%IJK(JAXIS)
+!       K      = IBM_CUT_CELL(ICC)%IJK(KAXIS)
+!
+!       IF(PERIODIC_TEST == 103) THEN
+!          IF (PREDICTOR) THEN
+!             IBM_CUT_CELL(ICC)%H(1:NCELL) = HP(I,J,K)
+!          ELSE
+!             IBM_CUT_CELL(ICC)%HS(1:NCELL) = HP(I,J,K)
+!          ENDIF
+!          CYCLE
+!       ENDIF
+!
+!       VAL_CC    = 0._EB
+!       IF (CC_INTERPOLATE_H) THEN
+!          ! First Cartesian centroid:
+!          PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+!          INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
+!
+!          IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+!
+!          ! Now values:
+!          VAL(1) = 0._EB
+!          VAL(2) = HP(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+!          VAL(3) = HP(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+!          VAL(4) = HP(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+!          VAL(5) = HP(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+!
+!          ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+!          DO II=1,5
+!             VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+!          ENDDO
+!          ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+!          ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+!          VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+!       ENDIF
+!
+!       HP(I,J,K) = VAL_CC
+!
+!       ! Now if the Pressure equation has been solved on Cartesian cells, interpolate values of
+!       ! H to corresponding cut-cell centroids:
+!       IF (PRES_ON_CARTESIAN) THEN
+!
+!          IF (CC_INTERPOLATE_H) THEN
+!             DO ICELL=1,NCELL
+!                ! Centroid location:
+!                XYZ(IAXIS:KAXIS) = IBM_CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,ICELL)
+!
+!                PTS(IAXIS:KAXIS,NOD1:NOD4) = IBM_CUT_CELL(ICC)%IJK_CCCEN(IAXIS:KAXIS,NOD1:NOD4,ICELL)
+!                XYZ_PP(IAXIS:KAXIS)        = IBM_CUT_CELL(ICC)%XYZ_BP_CCCEN(IAXIS:KAXIS,ICELL)
+!                INTCOEF(1:5)               = IBM_CUT_CELL(ICC)%INTCOEF_CCCEN(1:5,ICELL)
+!
+!                ! Now values:
+!                VAL(1) = 0._EB
+!                VAL(2) = H(PTS(IAXIS,NOD1),PTS(JAXIS,NOD1),PTS(KAXIS,NOD1))
+!                VAL(3) = H(PTS(IAXIS,NOD2),PTS(JAXIS,NOD2),PTS(KAXIS,NOD2))
+!                VAL(4) = H(PTS(IAXIS,NOD3),PTS(JAXIS,NOD3),PTS(KAXIS,NOD3))
+!                VAL(5) = H(PTS(IAXIS,NOD4),PTS(JAXIS,NOD4),PTS(KAXIS,NOD4))
+!
+!                VAL_CC    = 0._EB
+!                DO II=1,5
+!                   VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+!                ENDDO
+!
+!                IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+!                                                            ! No regular gasphase cells found for interpolation.
+!                VAL_CC = VAL_CC / (1._EB-INTCOEF(1)) ! dH/dxn = 0.
+!
+!                IF (PREDICTOR) THEN
+!                   IBM_CUT_CELL(ICC)%H(ICELL) = VAL_CC
+!                ELSE
+!                   IBM_CUT_CELL(ICC)%HS(ICELL) = VAL_CC
+!                ENDIF
+!
+!             ENDDO
+!          ELSE
+!             VAL_CC    = 0._EB
+!             IF (PREDICTOR) THEN
+!                IBM_CUT_CELL(ICC)%H(1:NCELL) = VAL_CC
+!             ELSE
+!                IBM_CUT_CELL(ICC)%HS(1:NCELL) = VAL_CC
+!             ENDIF
+!         ENDIF
+!       ENDIF
+!
+!    ENDDO ICC_LOOP
+!
+!    ! Finally set HP to zero inside immersed solids:
+!    DO K=0,KBP1
+!      DO J=0,JBP1
+!         DO I=0,IBP1
+!            IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
+!            HP(I,J,K) = 0._EB
+!         ENDDO
+!      ENDDO
+!    ENDDO
+!
+!    ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
+!    IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+!    ! Force U velocities in IBM_SOLID faces to zero
+!    U_IBM = 0._EB ! Body doesn't move.
+!    DO K=1,KBAR
+!       DO J=1,JBAR
+!          DO I=0,IBAR
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
+!             UP(I,J,K) = U_IBM
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    ! Force V velocities in IBM_SOLID faces to zero
+!    V_IBM = 0._EB ! Body doesn't move.
+!    DO K=1,KBAR
+!       DO J=0,JBAR
+!          DO I=1,IBAR
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+!             VP(I,J,K) = V_IBM
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    ! Force W velocities in IBM_SOLID faces to zero
+!    W_IBM = 0._EB ! Body doesn't move.
+!    DO K=0,KBAR
+!       DO J=1,JBAR
+!          DO I=1,IBAR
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+!             WP(I,J,K) = W_IBM
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!    ENDIF
+!
+!    NULLIFY(UP,VP,WP,HP)
+!
+! ENDDO MESH_LOOP
+!
+! RETURN
+! END SUBROUTINE CCIBM_H_INTERP
+!
+! ! ---------------------------- CCIBM_VELOCITY_FLUX ------------------------------
+!
+! SUBROUTINE CCIBM_VELOCITY_FLUX(DT,NM)
+!
+! INTEGER, INTENT(IN) :: NM
+! REAL(EB), INTENT(IN) :: DT
+!
+!
+! ! Local Variables:
+! REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
+! REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,VAL(1:5),DUMEB,XYZ_PP(IAXIS:KAXIS)
+! INTEGER :: I,J,K,ICF,IFACE,X1AXIS,NFACE,IP,JP,KP,IPT,INBFC_CFCEN(1:3),INBFC_CARTCEN(1:3)
+! REAL(EB):: U_INT,V_INT,W_INT
+!
+! ! This is the CCIBM forcing routine for momentum eqns.
+!
+! IF ( FREEZE_VELOCITY ) RETURN
+! IF (PERIODIC_TEST == 103) RETURN
+!
+! IF (PREDICTOR) THEN
+!    UU => U
+!    VV => V
+!    WW => W
+!    DP => D
+!    RHOP => RHOS
+!    HP => HS ! Previous substep H
+! ELSE
+!    UU => US
+!    VV => VS
+!    WW => WS
+!    DP => DS
+!    RHOP => RHO
+!    HP => H ! Previous substep H
+! ENDIF
+!
+!
+! IF (FORCE_GAS_FACE) THEN
+!    ! For mesh NM loop through CUT_FACE field and interpolate value of Un+1 approx
+!    ! to centroids:
+!    ! If PRES_ON_CARTESIAN=.FALSE. compute momentum flux forcing on cut-faces,
+!    ! if PRES_ON_CARTESIAN= .TRUE. average cut-face velocities to Cartesian face centroid
+!    ! and compute momentum flux forcing on face centroid using Cartesian discretization.
+!    CUTFACE_LOOP : DO ICF=1,MESHES(NM)%IBM_NCUTFACE_MESH
+!
+!       IF ( IBM_CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+!
+!       I      = IBM_CUT_FACE(ICF)%IJK(IAXIS)
+!       J      = IBM_CUT_FACE(ICF)%IJK(JAXIS)
+!       K      = IBM_CUT_FACE(ICF)%IJK(KAXIS)
+!       X1AXIS = IBM_CUT_FACE(ICF)%IJK(KAXIS+1)
+!
+!       NFACE  = IBM_CUT_FACE(ICF)%NFACE
+!
+!       ! Interpolate Un+1 approx to cut-face centroids:
+!       SELECT CASE(X1AXIS)
+!       CASE(IAXIS)
+!
+!          IF (INTERP_TO_CARTFACE) THEN
+!
+!             VAL(1:5) = 0._EB
+!
+!             U_IBM = 0._EB
+!             IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                ! Get UBn+1:
+!                INBFC_CARTCEN(1:3) = IBM_CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
+!                XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!                CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!                ! Loop stencil points and define Un+1 approx
+!                DO IPT=NOD1,NOD4
+!                   IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                   JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                   KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                   DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
+!
+!                   ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+!                   IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+!                   ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+!                   IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+!                ENDDO
+!
+!                ! Interpolate to Un+1 approx on the cut-face centroid:
+!                DO IPT=1,5
+!                   U_IBM = U_IBM + IBM_CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!                ENDDO
+!             ENDIF
+!             IBM_CUT_FACE(ICF)%VELINT_CRF = U_IBM
+!
+!             ! Compute Forcing:
+!             IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+!             IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+!             FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+!
+!          ELSE ! Flux matched value of Cartesian face velocity:
+!
+!             DO IFACE=1,NFACE
+!                VAL(1:5) = 0._EB
+!
+!                U_INT = 0._EB
+!                IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                   ! Get UBn+1:
+!                   INBFC_CFCEN(1:3)   = IBM_CUT_FACE(ICF)%INBFC_CFCEN(1:3,IFACE)
+!                   XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE)
+!                   CALL GET_BOUND_VEL(X1AXIS,INBFC_CFCEN,XYZ_PP,VAL(1))
+!
+!                   ! Loop stencil points and define Un+1 approx
+!                   DO IPT=NOD1,NOD4
+!                      IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+!                      JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+!                      KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+!
+!                      DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
+!
+!                      ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+!                      IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+!                      ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+!                      IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+!                   ENDDO
+!
+!                   ! Interpolate to Un+1 approx on the cut-face centroid:
+!                   DO IPT=1,5
+!                      U_INT = U_INT + IBM_CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE)*VAL(IPT)
+!                   ENDDO
+!                ENDIF
+!                IBM_CUT_FACE(ICF)%VELINT(IFACE) = U_INT
+!             ENDDO
+!
+!             ! Now Momentum flux computation:
+!             IF (PRES_ON_CARTESIAN) THEN ! CCIBM on Cartesian cells.
+!
+!                ! Flux average velocities to Cartesian face center:
+!                ! This assumes zero velocity of solid part of Cartesian Face - !!
+!                U_IBM = 0._EB
+!                DO IFACE=1,NFACE
+!                   U_IBM = U_IBM + IBM_CUT_FACE(ICF)%AREA(IFACE)* &
+!                                   IBM_CUT_FACE(ICF)%VELINT(IFACE)
+!                ENDDO
+!                U_IBM = U_IBM/(DY(J)*DZ(K))
+!                IBM_CUT_FACE(ICF)%VELINT_CRF = U_IBM
+!
+!                ! Compute Forcing:
+!                IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+!                IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+!                FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+!
+!             ELSE ! Unstructured scheme
+!                ! Compute Forcing on cut-face centroids:
+!
+!
+!             ENDIF
+!          ENDIF
+!
+!       CASE(JAXIS)
+!
+!          IF (INTERP_TO_CARTFACE) THEN
+!
+!             VAL(1:5) = 0._EB
+!
+!             V_IBM = 0._EB
+!             IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                ! Get UBn+1:
+!                INBFC_CARTCEN(1:3) = IBM_CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
+!                XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!                CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!                ! Loop stencil points and define Un+1 approx
+!                DO IPT=NOD1,NOD4
+!                   IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                   JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                   KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                   DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
+!
+!                   ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
+!                   IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
+!                   ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
+!                   IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+!                ENDDO
+!
+!                DO IPT=1,5
+!                   V_IBM = V_IBM + IBM_CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!                ENDDO
+!             ENDIF
+!             IBM_CUT_FACE(ICF)%VELINT_CRF = V_IBM
+!
+!             ! Compute Forcing:
+!             IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+!             IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+!             FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+!
+!          ELSE ! Flux matched value of Cartesian face velocity:
+!
+!             DO IFACE=1,NFACE
+!                VAL(1:5) = 0._EB
+!
+!                V_INT = 0._EB
+!                IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                   ! Get VBn+1:
+!                   INBFC_CFCEN(1:3)   = IBM_CUT_FACE(ICF)%INBFC_CFCEN(1:3,IFACE)
+!                   XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE)
+!                   CALL GET_BOUND_VEL(X1AXIS,INBFC_CFCEN,XYZ_PP,VAL(1))
+!
+!                   ! Loop stencil points and define Vn+1 approx
+!                   DO IPT=NOD1,NOD4
+!                      IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+!                      JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+!                      KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+!
+!                      DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
+!
+!                      ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
+!                      IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
+!                      ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
+!                      IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+!                   ENDDO
+!
+!                   ! Interpolate to Vn+1 approx on the cut-face centroid:
+!                   DO IPT=1,5
+!                      V_INT = V_INT + IBM_CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE)*VAL(IPT)
+!                   ENDDO
+!                ENDIF
+!                IBM_CUT_FACE(ICF)%VELINT(IFACE) = V_INT
+!             ENDDO
+!
+!             ! Now Momentum flux computation:
+!             IF (PRES_ON_CARTESIAN) THEN ! CCIBM on Cartesian cells.
+!
+!                ! Flux average velocities to Cartesian face center:
+!                ! This assumes zero velocity of solid part of Cartesian Face - !!
+!                V_IBM = 0._EB
+!                DO IFACE=1,NFACE
+!                   V_IBM = V_IBM + IBM_CUT_FACE(ICF)%AREA(IFACE)*&
+!                                   IBM_CUT_FACE(ICF)%VELINT(IFACE)
+!                ENDDO
+!                V_IBM = V_IBM/(DX(I)*DZ(K))
+!                IBM_CUT_FACE(ICF)%VELINT_CRF = V_IBM
+!
+!                ! Compute Forcing:
+!                IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+!                IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+!                FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+!
+!             ELSE ! Unstructured scheme
+!                ! Compute Forcing on cut-face centroids:
+!
+!
+!             ENDIF
+!          ENDIF
+!
+!       CASE(KAXIS)
+!
+!          IF (INTERP_TO_CARTFACE) THEN
+!
+!             VAL(1:5) = 0._EB
+!
+!             W_IBM = 0._EB
+!             IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                ! Get UBn+1:
+!                INBFC_CARTCEN(1:3) = IBM_CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
+!                XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!                CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!                ! Loop stencil points and define Un+1 approx
+!                DO IPT=NOD1,NOD4
+!                   IP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                   JP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                   KP = IBM_CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                   DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
+!
+!                   ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
+!                   IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
+!                   ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
+!                   IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+!                ENDDO
+!
+!                ! Interpolate to Wn+1 approx on the cut-face centroid:
+!                DO IPT=1,5
+!                   W_IBM = W_IBM + IBM_CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!                ENDDO
+!             ENDIF
+!             IBM_CUT_FACE(ICF)%VELINT_CRF = W_IBM
+!
+!             ! Compute Forcing:
+!             IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+!             IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+!             FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+!
+!          ELSE ! Flux matched value of Cartesian face velocity:
+!
+!             DO IFACE=1,NFACE
+!                VAL(1:5) = 0._EB
+!
+!                W_INT = 0._EB
+!                IF (.NOT.CC_ZEROIBM_VELO) THEN
+!                   ! Get WBn+1:
+!                   INBFC_CFCEN(1:3)   = IBM_CUT_FACE(ICF)%INBFC_CFCEN(1:3,IFACE)
+!                   XYZ_PP(IAXIS:KAXIS)= IBM_CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE)
+!                   CALL GET_BOUND_VEL(X1AXIS,INBFC_CFCEN,XYZ_PP,VAL(1))
+!
+!                   ! Loop stencil points and define Wn+1 approx
+!                   DO IPT=NOD1,NOD4
+!                      IP = IBM_CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+!                      JP = IBM_CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+!                      KP = IBM_CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+!
+!                      DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
+!
+!                      ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
+!                      IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
+!                      ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
+!                      IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+!                   ENDDO
+!
+!                   ! Interpolate to Wn+1 approx on the cut-face centroid:
+!                   DO IPT=1,5
+!                      W_INT = W_INT + IBM_CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE)*VAL(IPT)
+!                   ENDDO
+!                ENDIF
+!                IBM_CUT_FACE(ICF)%VELINT(IFACE) = W_INT
+!             ENDDO
+!
+!             ! Now Momentum flux computation:
+!             IF (PRES_ON_CARTESIAN) THEN ! CCIBM on Cartesian cells.
+!
+!                ! Flux average velocities to Cartesian face center:
+!                ! This assumes zero velocity of solid part of Cartesian Face - !!
+!                W_IBM = 0._EB
+!                DO IFACE=1,NFACE
+!                   W_IBM = W_IBM + IBM_CUT_FACE(ICF)%AREA(IFACE)*&
+!                                   IBM_CUT_FACE(ICF)%VELINT(IFACE)
+!                ENDDO
+!                W_IBM = W_IBM/(DX(I)*DY(J))
+!                IBM_CUT_FACE(ICF)%VELINT_CRF = W_IBM
+!
+!                ! Compute Forcing:
+!                IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+!                IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+!                FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+!
+!             ELSE ! Unstructured scheme
+!                ! Compute Forcing on cut-face centroids:
+!
+!
+!             ENDIF
+!          ENDIF
+!
+!       END SELECT
+!
+!    ENDDO CUTFACE_LOOP
+!
+!    ! For mesh NM loop through REGC_FACE_VEL field, interpolate Un+1 approx to Cartesian centroids,
+!    ! and compute momentum flux forcing on face.
+!    IF (FORCE_REGC_FACE) THEN
+!    REGCFACE_LOOP : DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
+!
+!       IF ((ICF > MESHES(NM)%IBM_NRCFACE_VEL_CC) .AND. (.NOT.FORCE_REGC_FACE_NXT)) CYCLE
+!
+!       I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS)
+!       J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(JAXIS)
+!       K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS)
+!       X1AXIS = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS+1)
+!
+!       VAL(1:5) = 0._EB
+!
+!       ! Interpolate Un+1 approx to cut-face centroids:
+!       SELECT CASE(X1AXIS)
+!       CASE(IAXIS)
+!
+!          U_INT = 0._EB
+!          IF (.NOT.CC_ZEROIBM_VELO) THEN
+!             ! Get UBn+1:
+!             INBFC_CARTCEN(1:3) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INBFC_CARTCEN(1:3)
+!             XYZ_PP(IAXIS:KAXIS)= MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!             CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!             ! Loop stencil points and define Un+1 approx
+!             DO IPT=NOD1,NOD4
+!                IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                DUMEB = DT*(FVX(IP,JP,KP)+RDXN(IP)*(HP(IP+1,JP,KP)-HP(IP,JP,KP)))
+!
+!                ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+!                IF (PREDICTOR) VAL(IPT+1) = U(IP,JP,KP) - DUMEB
+!                ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+!                IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(U(IP,JP,KP)+US(IP,JP,KP)) - 0.5_EB*DUMEB
+!             ENDDO
+!
+!             ! Interpolate to Un+1 approx on the cut-face centroid:
+!             DO IPT=1,5
+!                U_INT = U_INT + MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!             ENDDO
+!          ENDIF
+!          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = U_INT
+!
+!          ! Compute Forcing:
+!          U_IBM = U_INT
+!          IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+!          IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+!          FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+!
+!       CASE(JAXIS)
+!
+!          V_INT = 0._EB
+!          IF (.NOT.CC_ZEROIBM_VELO) THEN
+!             ! Get VBn+1:
+!             INBFC_CARTCEN(1:3) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INBFC_CARTCEN(1:3)
+!             XYZ_PP(IAXIS:KAXIS)= MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!             CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!             ! Loop stencil points and define Vn+1 approx
+!             DO IPT=NOD1,NOD4
+!                IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                DUMEB = DT*(FVY(IP,JP,KP)+RDYN(JP)*(HP(IP,JP+1,KP)-HP(IP,JP,KP)))
+!
+!                ! Case PREDICTOR => Vn+1_aprx = Vn - DT*(FVYn + DH/DYn):
+!                IF (PREDICTOR) VAL(IPT+1) = V(IP,JP,KP) - DUMEB
+!                ! Case CORRECTOR => Vn+1_aprx = 1/2*(Vn + Vs) - DT/2*(FVYs + DH/DYs):
+!                IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(V(IP,JP,KP)+VS(IP,JP,KP)) - 0.5_EB*DUMEB
+!             ENDDO
+!
+!             ! Interpolate to Vn+1 approx on the cut-face centroid:
+!             DO IPT=1,5
+!                V_INT = V_INT + MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!             ENDDO
+!          ENDIF
+!          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = V_INT
+!
+!          ! Compute Forcing:
+!          V_IBM = V_INT
+!          IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+!          IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+!          FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+!
+!       CASE(KAXIS)
+!
+!          W_INT = 0._EB
+!          IF (.NOT.CC_ZEROIBM_VELO) THEN
+!             ! Get WBn+1:
+!             INBFC_CARTCEN(1:3) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INBFC_CARTCEN(1:3)
+!             XYZ_PP(IAXIS:KAXIS)= MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+!             CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+!
+!             ! Loop stencil points and define Wn+1 approx
+!             DO IPT=NOD1,NOD4
+!                IP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+!                JP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+!                KP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+!
+!                DUMEB = DT*(FVZ(IP,JP,KP)+RDZN(KP)*(HP(IP,JP,KP+1)-HP(IP,JP,KP)))
+!
+!                ! Case PREDICTOR => Wn+1_aprx = Wn - DT*(FVZn + DH/DZn):
+!                IF (PREDICTOR) VAL(IPT+1) = W(IP,JP,KP) - DUMEB
+!                ! Case CORRECTOR => Wn+1_aprx = 1/2*(Wn + Ws) - DT/2*(FVZs + DH/DZs):
+!                IF (CORRECTOR) VAL(IPT+1) = 0.5_EB*(W(IP,JP,KP)+WS(IP,JP,KP)) - 0.5_EB*DUMEB
+!             ENDDO
+!
+!             ! Interpolate to Wn+1 approx on the cut-face centroid:
+!             DO IPT=1,5
+!                W_INT = W_INT + MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+!             ENDDO
+!          ENDIF
+!          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = W_INT
+!
+!          ! Compute Forcing:
+!          W_IBM = W_INT
+!          IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+!          IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+!          FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+!
+!       END SELECT ! X1AXIS
+!    ENDDO REGCFACE_LOOP
+!   ENDIF ! FORCE_REGC_FACE
+!
+! ENDIF ! FORCE_GAS_FACE
+!
+!
+! ! For Mesh NM, force solid faces:
+! IF (FORCE_SOLID_FACE) THEN
+!
+!    ! Force U velocities in IBM_SOLID faces to zero
+!    U_IBM = 0._EB ! Body doesn't move.
+!    DO K=1,KBAR
+!       DO J=1,JBAR
+!          DO I=0,IBAR
+!
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID ) THEN
+!                IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+!                IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+!                FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+!                IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
+!                                                                     ! and solid Cartesian faces.
+!             ENDIF
+!
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    ! Force V velocities in IBM_SOLID faces to zero
+!    V_IBM = 0._EB ! Body doesn't move.
+!    DO K=1,KBAR
+!       DO J=0,JBAR
+!          DO I=1,IBAR
+!
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) == IBM_SOLID ) THEN
+!                IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+!                IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+!                FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+!                IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
+!                                                                     ! and solid Cartesian faces.
+!             ENDIF
+!
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    ! Force W velocities in IBM_SOLID faces to zero
+!    W_IBM = 0._EB ! Body doesn't move.
+!    DO K=0,KBAR
+!       DO J=1,JBAR
+!          DO I=1,IBAR
+!
+!             IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID ) THEN
+!                IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+!                IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+!                FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+!                IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
+!                                                                     ! and solid Cartesian faces.
+!             ENDIF
+!
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+! ENDIF
+!
+!
+!
+! RETURN
+! END SUBROUTINE CCIBM_VELOCITY_FLUX
 
 
 ! ------------------------------- GET_BOUND_VEL ---------------------------------
@@ -12042,7 +12881,7 @@ DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
    DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NOM)) CYCLE
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MYID .AND. MESHES(NOM)%CONNECTED_MESH(NM)) THEN
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MYID) THEN ! .AND. MESHES(NOM)%CONNECTED_MESH(NM)
          M2 => MESHES(NOM)%OMESH(NM)
          N_REQ0 = N_REQ0 + 1
          CALL MPI_IRECV(M2%NFCC_S(1),2,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
@@ -12058,8 +12897,9 @@ DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
    DO NOM=1,NMESHES
       IF (EVACUATION_ONLY(NOM)) CYCLE
+      !IF (.NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
       M3 => MESHES(NM)%OMESH(NOM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MYID .AND. MESHES(NM)%CONNECTED_MESH(NOM)) THEN
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MYID) THEN ! .AND. MESHES(NM)%CONNECTED_MESH(NOM)
          N_REQ0 = N_REQ0 + 1
          CALL MPI_ISEND(M3%NFCC_R(1),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
       ELSE
