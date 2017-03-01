@@ -6,30 +6,35 @@
 
 outdir = '../../../out/CSIRO_Grassland_Fires/FDS_Output_Files/';
 
-M1 = importdata([outdir,'Case_C064_devc.csv'],',',2);
-M2 = importdata([outdir,'Case_F19_devc.csv'],',',2);
+label = {'Case_C064','Case_F19'};
 
 H = cell(2,2);
 H(1,:) = {'s' 'm'};
 H(2,:) = {'Time' 'Front'};
 
-fid1 = fopen([outdir,'Case_C064_devc_combined.csv'],'wt','n');
-fid2 = fopen([outdir,'Case_F19_devc_combined.csv'],'wt','n');
+fid2 = fopen([outdir,'csiro_speeds.csv'],'wt','n');
 
-fprintf(fid1,'%s, %s\n',H{1,:});
-fprintf(fid1,'%s, %s\n',H{2,:});
-for i=1:numel(M1.data(:,1))
-  [yy,ii]=max(M1.data(i,8:13));
-  fprintf(fid1,'%f, %f\n',[M1.data(i,1) M1.data(i,ii+1)]);
+for j=1:2
+
+M = importdata([outdir,label{j},'_devc.csv'],',',2);
+
+fid = fopen([outdir,label{j},'_devc_combined.csv'],'wt','n');
+
+fprintf(fid,'%s, %s\n',H{1,:});
+fprintf(fid,'%s, %s\n',H{2,:});
+for i=1:numel(M.data(:,1))
+  [yy,ii]=max(M.data(i,8:13));
+  fprintf(fid,'%f, %f\n',[M.data(i,1) M.data(i,ii+1)]);
+  t(i) = M.data(i,1);
+  x(i) = M.data(i,ii+1);
+end
+speed = (x(50)-x(30))/(t(50)-t(30));
+fprintf(fid2,'%s, %f\n',label{j},speed);
+
+fclose(fid);
+
+clear fid M
+
 end
 
-fprintf(fid2,'%s, %s\n',H{1,:});
-fprintf(fid2,'%s, %s\n',H{2,:});
-for i=1:numel(M2.data(:,1))
-  [yy,ii]=max(M2.data(i,8:13));
-  fprintf(fid2,'%f, %f\n',[M2.data(i,1) M2.data(i,ii+1)]);
-end
-
-fclose(fid1);
 fclose(fid2);
-
