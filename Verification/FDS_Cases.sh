@@ -119,9 +119,9 @@ $QFDS -d Heat_Transfer ht3d_nz_80.fds
 $QFDS -d Heat_Transfer ht3d_nz_160.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
-$QFDS -d -p 2 Heat_Transfer ht3d_2mesh_x.fds
-$QFDS -d -p 2 Heat_Transfer ht3d_2mesh_y.fds
-$QFDS -d -p 2 Heat_Transfer ht3d_2mesh_z.fds
+$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
+$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
+$QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
