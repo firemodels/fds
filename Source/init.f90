@@ -772,9 +772,9 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (I==1) CYCLE
          IC = M%CELL_INDEX(I-1,J,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -795,10 +795,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==M%IBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (I==M%IBAR) CYCLE
          IC = M%CELL_INDEX(I+1,J,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -819,10 +819,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (J==1) CYCLE
          IC = M%CELL_INDEX(I,J-1,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -843,10 +843,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==M%JBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (J==M%JBAR) CYCLE
          IC = M%CELL_INDEX(I,J+1,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -867,10 +867,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (K==1) CYCLE
          IC = M%CELL_INDEX(I,J,K-1)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -891,10 +891,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==M%KBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (K==M%KBAR) CYCLE
          IC = M%CELL_INDEX(I,J,K+1)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -932,10 +932,10 @@ IF (COUPLED_1D3D_HEAT_TRANSFER) THEN
    ALLOCATE(M%ONE_D_WORK6(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK6',IZERO)
    ALLOCATE(M%ONE_D_WORK7(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK7',IZERO)
    ALLOCATE(M%ONE_D_WORK8(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK8',IZERO)
-   M%ONE_D_WORK5=0._EB
-   M%ONE_D_WORK6=0._EB
-   M%ONE_D_WORK7=0._EB
-   M%ONE_D_WORK8=0._EB
+   M%ONE_D_WORK5 = 0._EB
+   M%ONE_D_WORK6 = 0._EB
+   M%ONE_D_WORK7 = 0._EB
+   M%ONE_D_WORK8 = 0._EB
    ! solid phase chemical heat source term
    IF (ANY(SURFACE%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL)) THEN
       PYROLYSIS_HT3D = .TRUE.

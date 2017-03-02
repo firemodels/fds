@@ -1046,6 +1046,16 @@ TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: XI=>NULL(),UI=>NULL(),UB=>NULL(),UP=>NULL(), &
                                    XJ=>NULL(),UH=>NULL(),VH=>NULL(),XH=>NULL()
 
+XI => ONE_D_WORK1
+UI => ONE_D_WORK2
+UP => ONE_D_WORK3
+UB => ONE_D_WORK4
+
+UH => ONE_D_WORK5
+VH => ONE_D_WORK6
+XH => ONE_D_WORK7
+XJ => ONE_D_WORK8
+
 RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC => WALL(IW)
@@ -1068,11 +1078,6 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
    IF (NWP<2) CYCLE
 
-   XI => ONE_D_WORK1; XI=0._EB
-   UI => ONE_D_WORK2; UI=0._EB
-   UP => ONE_D_WORK3; UP=0._EB
-   UB => ONE_D_WORK4; UP=0._EB
-
    XI(0:NWP) = WC%ONE_D%X(0:NWP)
    UI(0:NWP) = WC%ONE_D%TMP(0:NWP)
 
@@ -1082,11 +1087,6 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! VH is the 3D cell temperature
    ! XH is the 3D cell center depth
    ! XJ is the 3D cell face depth
-
-   UH => ONE_D_WORK5; UH=0._EB
-   VH => ONE_D_WORK6; VH=0._EB
-   XH => ONE_D_WORK7; XH=0._EB
-   XJ => ONE_D_WORK8; XJ=0._EB
 
    SELECT CASE (IOR)
       CASE(1)
@@ -1112,7 +1112,7 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       VOL = VOL + DVOL
       UH(J) = UH(J) + UI(I) * DVOL
 
-      IF ( XI(I) >= XJ(J) .AND. I<NWP) THEN
+      IF (XI(I)>=XJ(J) .AND. I<NWP) THEN
          UH(J) = UH(J)/VOL
          VOL = 0._EB
          J = J+1
