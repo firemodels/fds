@@ -1045,6 +1045,7 @@ TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: XI=>NULL(),UI=>NULL(),UB=>NULL(),UP=>NULL(), &
                                    XJ=>NULL(),UH=>NULL(),VH=>NULL(),XH=>NULL()
+
 XI => ONE_D_WORK1
 UI => ONE_D_WORK2
 UP => ONE_D_WORK3
@@ -1111,7 +1112,7 @@ RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       VOL = VOL + DVOL
       UH(J) = UH(J) + UI(I) * DVOL
 
-      IF ( XI(I) >= XJ(J) .AND. I<NWP) THEN
+      IF (XI(I)>=XJ(J) .AND. I<NWP) THEN
          UH(J) = UH(J)/VOL
          VOL = 0._EB
          J = J+1
