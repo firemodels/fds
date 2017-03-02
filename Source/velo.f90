@@ -1045,71 +1045,57 @@ SUBROUTINE MOMENTUM_NUDGING_2
 
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
-REAL(EB) :: UBAR,VBAR,WBAR,DT_LOC
-
-DT_LOC = MAX(DT,DT_MEAN_FORCING)
+REAL(EB) :: UBAR,VBAR,WBAR,DT_LOC,DIST
 
 MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
-   SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
-      CASE(0) SELECT_RAMP_U
-         UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-                  FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
-               ENDDO
-            ENDDO
+   DO K=1,KBAR
+      UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
+      DO J=1,JBAR
+         DO I=0,IBAR
+            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+            IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
+
+            DIST = MIN( ABS(X(I)-XS_MIN), ABS(XF_MAX-X(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
+            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
+
+            FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
          ENDDO
-      CASE(1:) SELECT_RAMP_U
-         K_LOOP_U: DO K=1,KBAR
-            UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-            FVX(:,:,K) = FVX(:,:,K) - (UBAR-UU(:,:,K))/DT_LOC
-         ENDDO K_LOOP_U
-   END SELECT SELECT_RAMP_U
+      ENDDO
+   ENDDO
 ENDIF MEAN_FORCING_X
 
 MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
-   SELECT_RAMP_V: SELECT CASE(I_RAMP_V0_Z)
-      CASE(0) SELECT_RAMP_V
-         VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-                  FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
-               ENDDO
-            ENDDO
+   DO K=1,KBAR
+      VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
+      DO J=0,JBAR
+         DO I=1,IBAR
+            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+            IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
+
+            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(Y(J)-YS_MIN), ABS(YF_MAX-Y(J)) )
+            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
+
+            FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
          ENDDO
-      CASE(1:) SELECT_RAMP_V
-         K_LOOP_V: DO K=1,KBAR
-            VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-            FVY(:,:,K) = FVY(:,:,K) - (VBAR-VV(:,:,K))/DT_LOC
-         ENDDO K_LOOP_V
-   END SELECT SELECT_RAMP_V
+      ENDDO
+   ENDDO
 ENDIF MEAN_FORCING_Y
 
 MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   SELECT_RAMP_W: SELECT CASE(I_RAMP_W0_Z)
-      CASE(0) SELECT_RAMP_W
-         WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-                  FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
-               ENDDO
-            ENDDO
+   DO K=0,KBAR
+      WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+            IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
+
+            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
+            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
+
+            FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
          ENDDO
-      CASE(1:)
-         K_LOOP_W: DO K=0,KBAR
-            WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
-            FVZ(:,:,K) = FVZ(:,:,K) - (WBAR-WW(:,:,K))/DT_LOC
-         ENDDO K_LOOP_W
-   END SELECT SELECT_RAMP_W
+      ENDDO
+   ENDDO
 ENDIF MEAN_FORCING_Z
 
 END SUBROUTINE MOMENTUM_NUDGING_2
