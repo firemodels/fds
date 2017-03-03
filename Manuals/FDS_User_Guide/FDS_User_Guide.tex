@@ -8270,7 +8270,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}$^{***}$                          & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
-{\ct VISCOSITY}                                 & $\mu$                                         & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
+{\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$ & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
@@ -8347,6 +8347,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m^2.s)} & B,D         \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
+{\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & D            \\ \hline
@@ -9028,6 +9029,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 %{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
+%{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                              &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9063,6 +9065,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
+%{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Distance for linear damping of DT_MEAN_FORCING at bc  &               & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline
