@@ -399,10 +399,65 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           IBM_NCVARS, IBM_UNKH,NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
           NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
           JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, THREED_VORTEX, CCCOMPUTE_RADIATION, &
-          COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, MESH_CC_EXCHANGE
+          COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, MESH_CC_EXCHANGE, GIMME_RHOZ
 
 
 CONTAINS
+
+! ---------------------------------- GIMME_RHOZ ------------------------------------
+
+SUBROUTINE GIMME_RHOZ(PRED_FLG)
+
+LOGICAL, INTENT(IN) :: PRED_FLG
+
+! Local Variables:
+INTEGER :: NM,I,J,K
+
+REAL, PARAMETER :: X_DV=1.5_EB
+REAL, PARAMETER :: Y_DV=1.5_EB
+REAL, PARAMETER :: Z_DV=3.5_EB
+
+MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   IF(PRED_FLG) THEN
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF(X_DV <= X(I-1) .OR. X_DV > X(I) ) CYCLE
+               IF(Y_DV <= Y(J-1) .OR. Y_DV > Y(J) ) CYCLE
+               IF(Z_DV <= Z(K-1) .OR. Z_DV > Z(K) ) CYCLE
+               WRITE(LU_ERR,*) 'Predictor'
+               WRITE(LU_ERR,*) 'Point XYZ=',XC(I),YC(J),ZC(K),RHOS(I,J,K),ZZS(I,J,K,1:N_TOTAL_SCALARS),TMP(I,J,K)
+               WRITE(LU_ERR,*) 'Divgc XYZ=',D(I,J,K),DS(I,J,K),H(I,J,K),HS(I,J,K),H(I+1,J,K),HS(I+1,J,K)
+               WRITE(LU_ERR,*) 'W vel',XC(I),YC(J),Z(K),FVZ(I,J,K),W(I,J,K),WS(I,J,K)
+               WRITE(LU_ERR,*) ' '
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF(X_DV <= X(I-1) .OR. X_DV > X(I) ) CYCLE
+               IF(Y_DV <= Y(J-1) .OR. Y_DV > Y(J) ) CYCLE
+               IF(Z_DV <= Z(K-1) .OR. Z_DV > Z(K) ) CYCLE
+               WRITE(LU_ERR,*) 'Corrector'
+               WRITE(LU_ERR,*) 'Point XYZ=',XC(I),YC(J),ZC(K),RHO(I,J,K),ZZ(I,J,K,1:N_TOTAL_SCALARS),TMP(I,J,K)
+               WRITE(LU_ERR,*) 'W vel',XC(I),YC(J),Z(K),FVZ(I,J,K),W(I,J,K),WS(I,J,K)
+               WRITE(LU_ERR,*) ' '
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+ENDDO MESH_LOOP
+
+RETURN
+END SUBROUTINE GIMME_RHOZ
+
 
 ! ------------------------------- MESH_CC_EXCHANGE ---------------------------------
 
