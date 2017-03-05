@@ -3489,10 +3489,21 @@ This section presents test cases for solid phase heat diffusion (conduction) in 
 
 \subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
 \label{sec:heat_diff}
-% list the cases associated with this section
-\label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
-\label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
-\label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
+\label{ht3d_nx_10}
+\label{ht3d_nx_20}
+\label{ht3d_nx_40}
+\label{ht3d_nx_80}
+\label{ht3d_nx_160}
+\label{ht3d_ny_10}
+\label{ht3d_ny_20}
+\label{ht3d_ny_40}
+\label{ht3d_ny_80}
+\label{ht3d_ny_160}
+\label{ht3d_nz_10}
+\label{ht3d_nz_20}
+\label{ht3d_nz_40}
+\label{ht3d_nz_80}
+\label{ht3d_nz_160}
 
 This test case is an initial value problem for the heat equation in 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
 \begin{equation}
@@ -3565,9 +3576,10 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \clearpage
 
 \subsection{3D Heat Diffusion Across Mesh Boundaries (\texorpdfstring{\textct{ht3d\_2mesh}}{ht3d\_2mesh})}
-\label{ht3d_2mesh}
-%list cases associated with this section
-\label{ht3d_2mesh_x,ht3d_2mesh_y,ht3d_2mesh_z}
+\label{sec:ht3d_2mesh}
+\label{ht3d_2mesh_x}
+\label{ht3d_2mesh_y}
+\label{ht3d_2mesh_z}
 
 This set of cases tests the ability of the 3D heat conduction solver to transfer heat across mesh boundaries.  The set of up is a 1 m long insulated square bar, 0.2 m $\times$ 0.2 m in cross section.  One end is held at \SI{200}{\degreeCelsius} and the other at \SI{20}{\degreeCelsius}.  The mesh boundary lies at the midpoint between the two ends (Position = 0 m).  The thermal diffusivity is unity.  The solution is run for 100 s from an initial condition of \SI{20}{\degreeCelsius} everywhere except the hot surface.  The steady state profile is linear between the two end temperatures.  Results for three different orientations of the bar are shown in Fig.~\ref{fig:ht3d_2mesh} below.
 
