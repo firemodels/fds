@@ -32,7 +32,7 @@ USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
 INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IIG,JJG,KKG,N_OVERLAP,IZERO
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,DUMMY
+REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,DUMMY,INTEGRAL,TEMP
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
 INTEGER, TARGET  :: NULL_TARGET=NULL_BOUNDARY,DEFAULT_SURF_INDEX_TARGET=0
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
@@ -43,6 +43,7 @@ TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (MESH_TYPE), POINTER :: M
+TYPE (RAMPS_TYPE), POINTER :: RP
 
 IERR = 0
 M => MESHES(NM)
@@ -314,24 +315,39 @@ M%SCALAR_WORK4=0._EB
 ALLOCATE(M%INC(-3:3,0:M%N_OBST),STAT=IZERO)
 CALL ChkMemErr('INIT','INC',IZERO)
 
-! Initialize background pressure, temperature and density
+! Initialize background temperature and pressure
 
 M%D_PBAR_DT   = 0._EB
 M%D_PBAR_DT_S = 0._EB
 
 IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=0,M%KBP1
-      M%TMP_0(K) = TMPA + LAPSE_RATE*(M%ZC(K)-GROUND_LEVEL)
-      IF (ABS(LAPSE_RATE)>TWO_EPSILON_EB) THEN
-         M%P_0(K) =P_INF*(M%TMP_0(K)/TMPA)**(GVEC(3)/RSUM0/LAPSE_RATE)
-      ELSE
-         M%P_0(K) = P_INF*EXP(GVEC(3)*(M%ZC(K)-GROUND_LEVEL)/(RSUM0*TMPA))
-      ENDIF
+
+   ! Compute the atmospheric pressure profile ramp using the specified temperature ramp
+
+   RP => RAMPS(I_RAMP_P0_Z)
+   INTEGRAL = 0._EB
+   DO K=0,RP%NUMBER_INTERPOLATION_POINTS+1
+      TEMP = TMPA*RAMPS(I_RAMP_TMP0_Z)%INTERPOLATED_DATA(K)
+      INTEGRAL = INTEGRAL + (GVEC(3)/(RSUM0*TEMP))/RP%RDT
+      RP%INTERPOLATED_DATA(K) = P_INF *EXP(INTEGRAL)
    ENDDO
+
+   ! Populate the cell-centered background temperature and pressure
+
+   DO K=0,M%KBP1
+      M%TMP_0(K) = TMPA*EVALUATE_RAMP(M%ZC(K),DUMMY,I_RAMP_TMP0_Z)
+      M%P_0(K)   = EVALUATE_RAMP(M%ZC(K),DUMMY,I_RAMP_P0_Z)
+   ENDDO
+
 ELSE
+
    M%TMP_0(:) = TMPA
    M%P_0(:)   = P_INF
+
 ENDIF
+
+! Initialize pressure and density of pressure zones
+
 DO K=0,M%KBP1
    M%PBAR(K,:)   = M%P_0(K)
    M%PBAR_S(K,:) = M%P_0(K)
@@ -756,9 +772,9 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (I==1) CYCLE
          IC = M%CELL_INDEX(I-1,J,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -779,10 +795,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==M%IBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (I==M%IBAR) CYCLE
          IC = M%CELL_INDEX(I+1,J,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -803,10 +819,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (J==1) CYCLE
          IC = M%CELL_INDEX(I,J-1,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -827,10 +843,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==M%JBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (J==M%JBAR) CYCLE
          IC = M%CELL_INDEX(I,J+1,K)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -851,10 +867,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==1 .AND. .NOT.OB%HT3D) CYCLE
+         IF (K==1) CYCLE
          IC = M%CELL_INDEX(I,J,K-1)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = -3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -875,10 +891,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==M%KBAR .AND. .NOT.OB%HT3D) CYCLE
+         IF (K==M%KBAR) CYCLE
          IC = M%CELL_INDEX(I,J,K+1)
          ! Permanently covered face
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
          IOR = 3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -899,8 +915,41 @@ ENDDO OBST_LOOP_2
 
 ! Solid 3D heat transfer
 
-SOLID_HT3D=.FALSE.
 IF (ANY(OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
+
+IF (COUPLED_1D3D_HEAT_TRANSFER) THEN
+   ! fine-grained 1D work arrays
+   ALLOCATE(M%ONE_D_WORK1(0:NWP_MAX),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK1',IZERO)
+   ALLOCATE(M%ONE_D_WORK2(0:NWP_MAX),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK2',IZERO)
+   ALLOCATE(M%ONE_D_WORK3(0:NWP_MAX),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK3',IZERO)
+   ALLOCATE(M%ONE_D_WORK4(0:NWP_MAX),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK4',IZERO)
+   M%ONE_D_WORK1 = 0._EB
+   M%ONE_D_WORK2 = 0._EB
+   M%ONE_D_WORK3 = 0._EB
+   M%ONE_D_WORK4 = 0._EB
+   ! coarse-grained 1D work arrays
+   ALLOCATE(M%ONE_D_WORK5(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK5',IZERO)
+   ALLOCATE(M%ONE_D_WORK6(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK6',IZERO)
+   ALLOCATE(M%ONE_D_WORK7(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK7',IZERO)
+   ALLOCATE(M%ONE_D_WORK8(0:MAX(M%IBAR,M%JBAR,M%KBAR)),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK8',IZERO)
+   M%ONE_D_WORK5 = 0._EB
+   M%ONE_D_WORK6 = 0._EB
+   M%ONE_D_WORK7 = 0._EB
+   M%ONE_D_WORK8 = 0._EB
+   ! solid phase chemical heat source term
+   IF (ANY(SURFACE%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL)) THEN
+      PYROLYSIS_HT3D = .TRUE.
+      STORE_Q_DOT_PPP_S = .TRUE.
+   ENDIF
+ENDIF
+
+! solid phase chemical heat source term
+
+IF (STORE_Q_DOT_PPP_S) THEN
+   ALLOCATE(M%Q_DOT_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','Q_DOT_PPP_S',IZERO)
+   M%Q_DOT_PPP_S = 0._EB
+ENDIF
 
 ! Allocate local auto-ignition temperature
 
@@ -1007,7 +1056,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    IF (.NOT.SOLID_CELL) THEN
       IF ( (ABS(WC%UW0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR. SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) &
            .AND. WC%OBST_INDEX>0 ) THEN
-         WRITE(LU_ERR,'(A,A,A,I4)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
+         WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
          STOP_STATUS = SETUP_STOP
          RETURN
@@ -1015,7 +1064,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       IF (WC%VENT_INDEX>0 .AND. WC%OBST_INDEX>0) THEN
          VT => VENTS(WC%VENT_INDEX)
          IF (VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
-            WRITE(LU_ERR,'(A,A,A,I4)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
+            WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
             STOP_STATUS = SETUP_STOP
             RETURN
@@ -1038,7 +1087,7 @@ ENDDO WALL_LOOP_0
 NON_EVAC_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
 DO NOM=1,NMESHES
-   M%OMESH(NOM)%N_EXPOSED_WALL_CELLS = 0 
+   M%OMESH(NOM)%N_EXPOSED_WALL_CELLS = 0
 ENDDO
 
 WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
@@ -1123,6 +1172,8 @@ ENDIF NON_EVAC_IF
 
 M%BC_CLOCK     = T_BEGIN
 M%WALL_COUNTER = 0
+M%BC_CLOCK_HT3D     = T_BEGIN
+M%WALL_COUNTER_HT3D = 0
 
 ! Set clock for boudary fuel vegetation model
 
@@ -1366,8 +1417,8 @@ ENDIF
 ALLOCATE(M%SAVE1(-3:M%LSAVE),STAT=IZERO)
 CALL ChkMemErr('INIT','SAVE1',IZERO)
 IF (EXTERNAL_BOUNDARY_CORRECTION) THEN
-   ALLOCATE(M%SAVE2(-3:M%LSAVE),STAT=IZERO)      
-   CALL ChkMemErr('INIT','SAVE2',IZERO)      
+   ALLOCATE(M%SAVE2(-3:M%LSAVE),STAT=IZERO)
+   CALL ChkMemErr('INIT','SAVE2',IZERO)
 ENDIF
 ALLOCATE(M%WORK(M%LWORK),STAT=IZERO)
 CALL ChkMemErr('INIT','WORK',IZERO)
@@ -1732,7 +1783,7 @@ SUBROUTINE INITIALIZE_DEVICES(NM)
 ! Find the WALL_INDEX for a device that is near a solid wall
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX
+INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG
 REAL(EB) :: DEPTH
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (MESH_TYPE), POINTER :: M
@@ -1747,14 +1798,32 @@ DEVICE_LOOP: DO N=1,N_DEVC
    IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a wall cell
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
-      II  = GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB
-      JJ  = GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB
-      KK  = GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB
+      II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
+      JJ  = INT(GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
+      KK  = INT(GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
+      IIG = II
+      JJG = JJ
+      KKG = KK
       IOR = DV%IOR
-      CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
+
+      IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
+         ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
+         ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
+         ! currently assumes II and IIG, etc., are on the same mesh
+         SELECT CASE (IOR)
+            CASE ( 1); DO IIG=II,IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-1); DO IIG=II,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 2); DO JJG=JJ,JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-2); DO JJG=JJ,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 3); DO KKG=KK,KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-3); DO KKG=KK,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+         END SELECT
+      ENDIF
+
+      CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
       IF (IW==0 .AND. DV%STATISTICS=='null') THEN
-         WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
+         WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ELSE
@@ -1774,11 +1843,11 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INSIDE_SOLID) THEN
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
-         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N, ' must be associated with a heat-conducting surface'
+         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEViCe ',N,' must be associated with a heat-conducting surface'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
-      IF (DV%DEPTH>EPSILON_EB) THEN
+      IF (DV%DEPTH>TWO_EPSILON_EB) THEN
          DEPTH = DV%DEPTH
       ELSE
          DEPTH = MAX(0._EB,SUM(SURFACE(SURF_INDEX)%LAYER_THICKNESS)+DV%DEPTH)
@@ -1810,9 +1879,9 @@ M => MESHES(NM)
 PROF_LOOP: DO N=1,N_PROF
    PF => PROFILE(N)
    IF (NM/=PF%MESH) CYCLE PROF_LOOP
-   II  = GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB
-   JJ  = GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB
-   KK  = GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB
+   II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
+   JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
+   KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
    IOR = PF%IOR
    CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
    IF (IW>0) THEN
@@ -1835,7 +1904,7 @@ PROF_LOOP: DO N=1,N_PROF
          ENDIF
       ENDIF
    ELSE
-      WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+      WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
       STOP_STATUS = SETUP_STOP
       RETURN
    ENDIF
@@ -1985,12 +2054,12 @@ ALLOCATE(USUM(N_ZONE,NMESHES),STAT=IZERO)
 CALL ChkMemErr('INIT','USUM',IZERO)
 USUM = 0._EB
 
-ALLOCATE(PRESSURE_ERROR_MAX(NMESHES),STAT=IZERO) 
-CALL ChkMemErr('INIT','PRESSURE_ERROR_MAX',IZERO) 
-ALLOCATE(PRESSURE_ERROR_MAX_LOC(3,NMESHES),STAT=IZERO) 
-CALL ChkMemErr('INIT','PRESSURE_ERROR_MAX_LOC',IZERO) 
+ALLOCATE(PRESSURE_ERROR_MAX(NMESHES),STAT=IZERO)
+CALL ChkMemErr('INIT','PRESSURE_ERROR_MAX',IZERO)
+ALLOCATE(PRESSURE_ERROR_MAX_LOC(3,NMESHES),STAT=IZERO)
+CALL ChkMemErr('INIT','PRESSURE_ERROR_MAX_LOC',IZERO)
 PRESSURE_ERROR_MAX     = 0._EB
-PRESSURE_ERROR_MAX_LOC = 0._EB
+PRESSURE_ERROR_MAX_LOC = 0
 
 ALLOCATE(VELOCITY_ERROR_MAX(NMESHES),STAT=IZERO)
 CALL ChkMemErr('INIT','VELOCITY_ERROR_MAX',IZERO)
@@ -2188,12 +2257,16 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
       XIN = XW
       YIN = YW
       ZIN = ZW
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR== 1) XIN = XF_MAX
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR==-1) XIN = XS_MIN
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR== 2) YIN = YF_MAX
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR==-2) YIN = YS_MIN
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR== 3) ZIN = ZF_MAX
-      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .AND. IOR==-3) ZIN = ZS_MIN
+      IF (SURF_INDEX_NEW==PERIODIC_SURF_INDEX .OR. SURF_INDEX_NEW==PERIODIC_WIND_SURF_INDEX) THEN
+         SELECT CASE(IOR)
+            CASE( 1) ; XIN = XF_MAX
+            CASE(-1) ; XIN = XS_MIN
+            CASE( 2) ; YIN = YF_MAX
+            CASE(-2) ; YIN = YS_MIN
+            CASE( 3) ; ZIN = ZF_MAX
+            CASE(-3) ; ZIN = ZS_MIN
+         END SELECT
+      ENDIF
       IF (ABS(IOR)/=1) XIN = XW + (ITER*0.95_EB-0.475_EB)*(M%X(I)-M%X(I-1))
       IF (ABS(IOR)/=2) YIN = YW + (ITER*0.95_EB-0.475_EB)*(M%Y(J)-M%Y(J-1))
       IF (ABS(IOR)/=3) ZIN = ZW + (ITER*0.95_EB-0.475_EB)*(M%Z(K)-M%Z(K-1))
@@ -2285,7 +2358,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
 
       IF (OBST_INDEX==0) THEN
          IF (.NOT.M%SOLID(ICG)) BOUNDARY_TYPE = INTERPOLATED_BOUNDARY
-         SURF_INDEX_NEW = INTERPOLATED_SURF_INDEX
+         IF (SURF_INDEX_NEW/=PERIODIC_WIND_SURF_INDEX) SURF_INDEX_NEW = INTERPOLATED_SURF_INDEX
          VENT_INDEX = 0
       ENDIF
 
@@ -2556,14 +2629,22 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
    ! Check if fire spreads radially over this vent
 
    IF (VT%FIRE_SPREAD_RATE>0._EB) THEN
-      DIST = SQRT((WC%XW-VT%X0)**2 +(WC%YW-VT%Y0)**2 +(WC%ZW-VT%Z0)**2)
+      DIST = SQRT((WC%XW-VT%X0)**2 + (WC%YW-VT%Y0)**2 + (WC%ZW-VT%Z0)**2)
       T_ACTIVATE = TT + DIST/VT%FIRE_SPREAD_RATE
    ENDIF
 
    ! Miscellaneous settings
 
-   IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY   .AND. .NOT.M%SOLID(ICG)) WC%BOUNDARY_TYPE = OPEN_BOUNDARY
-   IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .AND. .NOT.M%SOLID(ICG)) WC%BOUNDARY_TYPE = MIRROR_BOUNDARY
+   IF (.NOT.M%SOLID(ICG)) THEN
+      IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
+         WC%BOUNDARY_TYPE = MIRROR_BOUNDARY
+         WC%SURF_INDEX    = MIRROR_SURF_INDEX
+      ENDIF
+      IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+         WC%BOUNDARY_TYPE = OPEN_BOUNDARY
+         WC%SURF_INDEX    = OPEN_SURF_INDEX
+      ENDIF
+   ENDIF
 
 ENDIF PROCESS_VENT
 
@@ -2917,7 +2998,7 @@ VENT_LOOP: DO N=1,N_VENT
    ENDDO
 
    ! Write message to .smv file
-   
+
    IF (VT%RADIUS<0._EB) THEN
       IF (ACTIVATE_VENT)   SV_LABEL = 'OPEN_VENT'
       IF (DEACTIVATE_VENT) SV_LABEL = 'CLOSE_VENT'
