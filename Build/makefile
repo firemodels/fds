@@ -476,6 +476,13 @@ gnu_osx_64 : obj = fds_gnu_osx_64
 gnu_osx_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
+gnu_osx_64_dv : FFLAGS  = -O1 -fbacktrace $(GITINFOGNU)
+gnu_osx_64_dv : FCOMPL  = gfortran
+gnu_osx_64_dv : FOPENMPFLAGS = -fopenmp
+gnu_osx_64_dv : obj     = fds_gnu_osx_64_dv
+gnu_osx_64_dv : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
 gnu_osx_64_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 gnu_osx_64_db : FCOMPL  = gfortran
 gnu_osx_64_db : FOPENMPFLAGS = -fopenmp
@@ -492,7 +499,7 @@ mpi_gnu_linux_32 : setup $(obj_mpi)
 
 mpi_gnu_linux_64 : FFLAGS = -O3 $(GITINFOGNU)
 mpi_gnu_linux_64 : FCOMPL = mpifort
-mpi_gnu_linux_64 : FOPENMPFLAGS =
+mpi_gnu_linux_64 : FOPENMPFLAGS = -fopenmp
 mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
@@ -506,7 +513,7 @@ mpi_gnu_linux_32_db : setup $(obj_mpi)
 
 mpi_gnu_linux_64_db : FFLAGS = -O2 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
-mpi_gnu_linux_64_db : FOPENMPFLAGS =
+mpi_gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
 mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
 mpi_gnu_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)

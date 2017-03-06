@@ -1109,7 +1109,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 
 \begin{figure}[ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The $L_2$ error at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
@@ -1321,7 +1321,7 @@ The first case, {\ct bound\_test\_1}, consists of two independent reactions, one
 
 \begin{figure}[!ht]
    \centering
-   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_1}
+   \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_1}
    \caption[Results of the {\ct bound\_test\_1} case]{Results of the {\ct bound\_test\_1} case.}
    \label{fig:bound_test_1}
 \end{figure}
@@ -1335,7 +1335,7 @@ The second test case, {\ct bound\_test\_2}, is more challenging---we add a third
 The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2}.  As discussed in the FDS Tech Guide \cite{FDS_Math_Guide}, the right-hand-side of the chemistry ODE is set up assuming a large Arrhenius constant and no activation energy and (in this case) second-order concentration dependence for each reaction.  It can be shown through numerical experiments that this assumption is equivalent to applying Curl's mixing model (Coalescence-Dispersion) \cite{Curl:1} in a batch reactor with infinitely fast chemistry.
 \begin{figure}[!ht]
    \centering
-   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_2}
+   \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_2}
    \caption[Results of the {\ct bound\_test\_2} case]{Results of the {\ct bound\_test\_2} case.}
    \label{fig:bound_test_2}
 \end{figure}
@@ -1759,8 +1759,8 @@ Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from F
 where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_profile} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_convergence}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
    \end{tabular*}
    \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
    \label{blasius}
@@ -1827,8 +1827,8 @@ where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
    \end{tabular*}
    \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
 \end{figure}
@@ -2172,7 +2172,7 @@ In this case, a steel pan is placed inside a small compartment with a small door
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2_plot} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2_plot}
 \end{tabular*}
 \caption[The \textct{symmetry\_test\_2} case]{Flow field (left) and temperature plot (right) for the \textct{symmetry\_test\_2} case.}
 \label{symmetry_test_2_fig}
@@ -2564,7 +2564,7 @@ same amount of each product species should be produced in each case. The followi
 mass of the three combustion products. The figure compares the simple chemistry versus the primitive species versus the lumped species.
 \begin{figure}[ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
 \caption[Yield of combustion products for alternative reactions]{The combustion product masses using three alternative definitions of the reaction:  Simple chemistry vs. primitive species vs. lumped species. }
 \label{fig_methane_flame_yields}
 \end{figure}
@@ -2598,7 +2598,7 @@ The cases presented in the section are designed to examine species evolutions fo
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
 \caption[Species evolution in a 1-step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_spec}
 \end{figure}
@@ -2613,8 +2613,8 @@ PV = n \R T
 \end{equation}
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step methane EDC reaction]{Time evolution of temperature and pressure for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_temppres}
@@ -2628,15 +2628,15 @@ The results for the propane case are shown in Figs.~\ref{fig:EDC_1Step_prop_spec
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
 \caption[Species evolution in a 1-step propane EDC reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step propane EDC reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_temppres}
@@ -2646,15 +2646,15 @@ In the previous two examples, each computational cell contained a stoichiometric
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
 \caption[Species evolution in 1-Step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s. }
 \label{fig:EDC_meth_non_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step Methane EDC reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_meth_non_temppres}
@@ -2669,7 +2669,7 @@ Each cell in the model reaction is initialized with an oxygen rich mixture and t
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
 \caption[Species evolution in 2-step methane EDC reaction]{Time evolution of species mass fraction for a series, fuel-limited EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.05$~s.}
 \label{fig:EDC_2Step_fuel}
 \end{figure}
@@ -2684,7 +2684,7 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
 \caption[Results of the {\ct reactionrate\_series\_reaction} case]{Results of the {\ct reactionrate\_series\_reaction} case.}
 \label{fig:reactionrate_series_reaction}
 \end{figure}
@@ -2698,7 +2698,7 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:EDC_2Ste
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2fuel}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2fuel}
 \caption[Species evolution in two parallel EDC reactions]{Time evolution of species mass fraction for oxygen-limited EDC two fuel reaction set with a fixed mixing time of $\tau_{\rm mix}=0.1$~s.}
 \label{fig:EDC_2Step_ox}
 \end{figure}
@@ -2723,7 +2723,7 @@ The lumped species used in these reactions are defined by:
 The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_lumped_two_air}.
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
 \caption[Results of the {\ct reactionrate\_lumped\_two\_species} case]{Results of the {\ct reactionrate\_lumped\_two\_species} case.}
 \label{fig:reactionrate_lumped_two_air}
 \end{figure}
@@ -2756,7 +2756,7 @@ The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha
 \end{table}
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
 \caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
@@ -2773,7 +2773,7 @@ The second finite rate test case is a one-step, second-order propane reaction, E
 \end{table}
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
 \caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
@@ -2830,14 +2830,14 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
 \caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2step}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
 \caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
@@ -2859,15 +2859,15 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
 \caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
 \end{tabular*}
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
@@ -2966,14 +2966,14 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{(Left) Lumped species mass fractions as a function of mixture fraction.}
 \label{fig:burke_schumann_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_temp}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
@@ -3489,10 +3489,21 @@ This section presents test cases for solid phase heat diffusion (conduction) in 
 
 \subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
 \label{sec:heat_diff}
-% list the cases associated with this section
-\label{ht3d_nx_10,ht3d_nx_20,ht3d_nx_40,ht3d_nx_80,ht3d_nx_160}
-\label{ht3d_ny_10,ht3d_ny_20,ht3d_ny_40,ht3d_ny_80,ht3d_ny_160}
-\label{ht3d_nz_10,ht3d_nz_20,ht3d_nz_40,ht3d_nz_80,ht3d_nz_160}
+\label{ht3d_nx_10}
+\label{ht3d_nx_20}
+\label{ht3d_nx_40}
+\label{ht3d_nx_80}
+\label{ht3d_nx_160}
+\label{ht3d_ny_10}
+\label{ht3d_ny_20}
+\label{ht3d_ny_40}
+\label{ht3d_ny_80}
+\label{ht3d_ny_160}
+\label{ht3d_nz_10}
+\label{ht3d_nz_20}
+\label{ht3d_nz_40}
+\label{ht3d_nz_80}
+\label{ht3d_nz_160}
 
 This test case is an initial value problem for the heat equation in 1D.  In FDS, a square bar of length $L=1\;\si{m}$ is initialized with a sine profile that decays exponentially in time.  The temperature baseline is $T_0 = 20 \;\si{\degree C}$.  The Dirichlet boundary conditions at each end of the bar are set to $T_0$.  The initial amplitude of the wave is $A = 100 \;\si{\degree C}$ and the starting position of the bar is $x_0 = -0.5 \;\si{m}$.  The thermal properties of the material are set to give a thermal diffusivity of $\alpha = 1 \;\si{m^2/s}$.  The solution to this problem is given by \cite{Crank:1}
 \begin{equation}
@@ -3546,7 +3557,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
-\includegraphics[height=2.25in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left, courtesy Chao Zhang) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
 \label{fig:ht3d_ibeam_contours}
@@ -3556,12 +3567,28 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
 \label{fig:ht3d_ibeam_time_history}
 \end{figure}
 
+\clearpage
+
+\subsection{3D Heat Diffusion Across Mesh Boundaries (\texorpdfstring{\textct{ht3d\_2mesh}}{ht3d\_2mesh})}
+\label{sec:ht3d_2mesh}
+\label{ht3d_2mesh_x}
+\label{ht3d_2mesh_y}
+\label{ht3d_2mesh_z}
+
+This set of cases tests the ability of the 3D heat conduction solver to transfer heat across mesh boundaries.  The set of up is a 1 m long insulated square bar, 0.2 m $\times$ 0.2 m in cross section.  One end is held at \SI{200}{\degreeCelsius} and the other at \SI{20}{\degreeCelsius}.  The mesh boundary lies at the midpoint between the two ends (Position = 0 m).  The thermal diffusivity is unity.  The solution is run for 100 s from an initial condition of \SI{20}{\degreeCelsius} everywhere except the hot surface.  The steady state profile is linear between the two end temperatures.  Results for three different orientations of the bar are shown in Fig.~\ref{fig:ht3d_2mesh} below.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_2mesh}
+\caption[The \textct{ht3d\_2mesh} test cases]{Test of 3D heat transfer across mesh boundaries.}
+\label{fig:ht3d_2mesh}
+\end{figure}
 
 
 \chapter{Pyrolysis}
@@ -4170,8 +4197,8 @@ Consider a 1~m square duct that is 10~m long.  The boundary conditions are perio
 
 \begin{figure}[h]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_momentum}\\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_velocity}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_momentum}\\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_velocity}
 \caption[Test of fluid-particle momentum transfer for nonstationary particles]{Outputs of the \textct{fluid\_part\_mom} cases.  (Top) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols).  The analytical solutions for the fluid and particle equations are shown by the solid blue and red lines, respectively. The total momentum should be constant, as indicated by the green symbols. (Bottom) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because, by construction, the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
 \label{fig_fluid_part_mom}
 \end{figure}
@@ -4507,7 +4534,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
 \caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.}
 \label{water_evaporation_4_plot}
 \end{figure}
@@ -4521,7 +4548,7 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
 \caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
 \label{water_evaporation_5_plot}
 \end{figure}
@@ -4560,7 +4587,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_7}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_7}
 \caption[Sample case \textct{water\_evaporation\_7}]{Output of \textct{water\_evaporation} case 7.}
 \label{water_evaporation_7_plot}
 \end{figure}
