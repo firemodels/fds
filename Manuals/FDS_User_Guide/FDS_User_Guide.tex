@@ -709,7 +709,7 @@ Get in the habit of checking the version number of your executable, periodically
 An FDS calculation may end before the specified time limit. Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
 \item[{\bf Input File Errors}:] The most common errors in FDS are due to mis-typed input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the right type of information is being provided for each parameter, like whether one real number is expected, or several integers, or whatever. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure zeros are zeros and O's are O's. Make sure 1's are not !'s. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a Windows machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
-\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are:
+\item [{\bf Numerical Instability Errors}:] It is possible that during an FDS calculation the flow velocity at some location in the domain can increase due to numerical error causing the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the {\ct TIME} line by specifying the {\ct LIMITING\_DT\_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file {\ct CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are:
     \begin{itemize}
     \item mesh cells that have an aspect ratio larger than 2 to 1
     \item high speed flow through a small opening
@@ -1397,7 +1397,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 &OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
 &DUMP PLOT3D_QUANTITY(1)='PRESSURE',PLOT3D_QUANTITY(5)='HELIUM' /
 &SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
-&SLCF PBY=0.000,QUANTITY='HELIUM' /
+&SLCF PBY=0.000,QUANTITY='VOLUME FRACTION', SPEC_ID='HELIUM' /
 &TAIL /
 \end{lstlisting}
 \end{minipage}
@@ -4867,7 +4867,14 @@ suppression algorithm has been implemented in FDS that attempts to gauge whether
 
 The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1327~\si{\degree C}. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT), in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+
+You may also specify {\ct AUTO\_IGNITION\_TEMPERATURE} on an {\ct INIT} region.  This feature is intended to be used as a pilot zone.  For example, you might use something like this for a piloted methane flame:
+\begin{lstlisting}
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
+&INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
+\end{lstlisting}
+where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.
 
 \paragraph{Finding or Calculating Extinction Parameters}
 
@@ -8263,7 +8270,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}$^{***}$                          & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
-{\ct VISCOSITY}                                 & $\mu$                                         & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
+{\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$ & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
@@ -8340,6 +8347,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m^2.s)} & B,D         \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
+{\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & D            \\ \hline
@@ -8807,7 +8815,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-%{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Auto-ignition temperature                     & \si{\degree C} & {-273.15}     \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Section~\ref{info:extinction}                 & \si{\degree C} & {-273.15}     \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
@@ -9021,6 +9029,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 %{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
+%{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                              &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9056,6 +9065,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
+%{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Distance for linear damping of DT_MEAN_FORCING at bc  &               & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline

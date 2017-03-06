@@ -34,7 +34,7 @@ echo Validation Guide Figures Copied
 # Copy Verification Results
 #rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --include '*.prt5' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
 #cp $FIREBOTVER/Miscellaneous/mesh_transformation.smv $BASEDIR/../Verification/Miscellaneous/.
-3echo Verification Results Copied
+#echo Verification Results Copied
 
 # Copy Validation Results
 #rsync -v -r --include '*/' --include 'FDS_Output_Files/*_git.txt' --include 'FDS_Output_Files/*.csv' --exclude '*' $FIREBOTVAL/* $BASEDIR/../Validation/
