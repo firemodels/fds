@@ -831,7 +831,11 @@ IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct forc
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
 IF (WFDS_BNDRYFUEL)                CALL VEGETATION_DRAG            ! Surface vegetation drag
 IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX(DT,NM) ! Specified patch velocity
-IF (N_FACE>0)                      CALL IBM_VELOCITY_FLUX(DT,NM)   ! Direct-forcing Immersed Boundary Method (DEPRECATED)
+IF (CC_IBM) THEN ! Direct-forcing Immersed Boundary Method
+   CALL CCIBM_VELOCITY_FLUX(DT,NM)
+ELSEIF (N_FACE>0) THEN
+   CALL IBM_VELOCITY_FLUX(DT,NM) ! (DEPRECATED)
+ENDIF
 IF (PERIODIC_TEST==7)              CALL MMS_VELOCITY_FLUX(NM,T)    ! Source term in manufactured solution
 
 CONTAINS

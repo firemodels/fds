@@ -1371,7 +1371,8 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NCVARS, GET_H_CUTF
                              GET_BOUNDFACE_GEOM_INFO_H, ADD_INPLACE_NNZ_H_WHLDOM,   &
                              NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
                              NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
-                             JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM
+                             JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, COPY_CC_UNKH_TO_HS, &
+                             COPY_CC_HS_TO_UNKH
 
 #ifdef WITH_PARDISO
  USE MKL_PARDISO
@@ -1381,7 +1382,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NCVARS, GET_H_CUTF
 
 IMPLICIT NONE
 
-! this definitions are the same as geom.f90:
+! These definitions are the same as geom.f90:
 INTEGER,  PARAMETER :: NGUARD= 2 ! Two layers of guard-cells.
 INTEGER,  PARAMETER :: FCELL = 1 ! Right face index.
 
@@ -1911,57 +1912,39 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
-   ! Loop over all cell edges
+   !
+   IF (CC_IBM .AND. VAR_CC==UNKH) THEN
 
-   EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+      CALL COPY_CC_HS_TO_UNKH(NM)
 
-      WC=>WALL(IW)
-      EWC=>EXTERNAL_WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+   ELSE
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
-      NOM = EWC%NOM
-      OM => OMESH(NOM)
+      ! Loop over external wall cells:
+      EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
-      ! This assumes all meshes at the same level of refinement:
-      KKO=EWC%KKO_MIN
-      JJO=EWC%JJO_MIN
-      IIO=EWC%IIO_MIN
+         WC=>WALL(IW)
+         EWC=>EXTERNAL_WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
 
-      SELECT CASE(IOR)
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IOR = WC%ONE_D%IOR
+         NOM = EWC%NOM
+         OM => OMESH(NOM)
 
-      CASE( IAXIS)
-
-         CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
-
-      CASE(-IAXIS)
+         ! This assumes all meshes at the same level of refinement:
+         KKO=EWC%KKO_MIN
+         JJO=EWC%JJO_MIN
+         IIO=EWC%IIO_MIN
 
          CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
 
-      CASE( JAXIS)
+         IF (VAR_CC == UNKH) OM%HS(IIO,JJO,KKO) = 0._EB
 
-         CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
+      ENDDO EXTERNAL_WALL_LOOP
 
-      CASE(-JAXIS)
-
-         CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
-
-      CASE( KAXIS)
-
-         CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
-
-      CASE(-KAXIS)
-
-         CCVAR(II,JJ,KK,VAR_CC) = INT(OM%HS(IIO,JJO,KKO))
-
-      END SELECT
-
-      IF (VAR_CC == UNKH) OM%HS(IIO,JJO,KKO) = 0._EB
-
-   ENDDO EXTERNAL_WALL_LOOP
+   ENDIF
 
    IF (VAR_CC == UNKH) THEN
       HS(:,:,:)    = 0._EB
@@ -1985,6 +1968,10 @@ INTEGER :: NM
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    HS(0:IBP1,0:JBP1,0:KBP1) = REAL(CCVAR(0:IBP1,0:JBP1,0:KBP1,VAR_CC),EB)
+
+   ! Now cut-cells add their single Cartesian UNKH value in HS:
+   IF(CC_IBM .AND. VAR_CC==UNKH) CALL COPY_CC_UNKH_TO_HS(NM)
+
 ENDDO
 
 RETURN
@@ -2509,23 +2496,11 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
          II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
-         ! Check if CC_IBM -> If face is type IS_CUTCFE==IBM_CUTCFE cycle:
          IOR = WC%ONE_D%IOR
+         ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
          IF ( CC_IBM ) THEN
-            SELECT CASE(IOR)
-            CASE( IAXIS)
-               IF ( FCVAR(IIG-1,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-            CASE(-IAXIS)
-               IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-            CASE( JAXIS)
-               IF ( FCVAR(IIG  ,JJG-1,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-            CASE(-JAXIS)
-               IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-            CASE( KAXIS)
-               IF ( FCVAR(IIG  ,JJG  ,KKG-1,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-            CASE(-KAXIS)
-               IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-            END SELECT
+            IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
+            IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
          ENDIF
 
          ! Unknowns on related cells:
@@ -2915,7 +2890,7 @@ USE MPI
 INTEGER :: NM
 INTEGER :: X1AXIS,IFACE,I,I1,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW,IIND,NII,ILOC
-INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,JJG,KKG,IOR,IERR
+INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,JJG,KKG,IERR
 LOGICAL :: INLIST
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -3024,23 +2999,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
-     ! Check if CC_IBM -> If face is type IS_CUTCFE==IBM_CUTCFE cycle:
+     ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
      IF ( CC_IBM ) THEN
-        IOR = WC%ONE_D%IOR
-        SELECT CASE(IOR)
-        CASE( IAXIS)
-           IF ( FCVAR(IIG-1,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-        CASE(-IAXIS)
-           IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-        CASE( JAXIS)
-           IF ( FCVAR(IIG  ,JJG-1,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-        CASE(-JAXIS)
-           IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-        CASE( KAXIS)
-           IF ( FCVAR(IIG  ,JJG  ,KKG-1,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-        CASE(-KAXIS)
-           IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-        END SELECT
+        IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
+        IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
      ENDIF
 
      ! Unknowns on related cells:
@@ -3179,23 +3141,10 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
       II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
-      ! Check if CC_IBM -> If face is type IS_CUTCFE==IBM_CUTCFE cycle:
+      ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
       IF ( CC_IBM ) THEN
-         IOR = WC%ONE_D%IOR
-         SELECT CASE(IOR)
-         CASE( IAXIS)
-            IF ( FCVAR(IIG-1,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-         CASE(-IAXIS)
-            IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,IAXIS) == IS_CUTCFE ) CYCLE
-         CASE( JAXIS)
-            IF ( FCVAR(IIG  ,JJG-1,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-         CASE(-JAXIS)
-            IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,JAXIS) == IS_CUTCFE ) CYCLE
-         CASE( KAXIS)
-            IF ( FCVAR(IIG  ,JJG  ,KKG-1,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-         CASE(-KAXIS)
-            IF ( FCVAR(IIG  ,JJG  ,KKG  ,IBM_FGSC,KAXIS) == IS_CUTCFE ) CYCLE
-         END SELECT
+         IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
+         IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
       ENDIF
 
       ! Unknowns on related cells:
@@ -3237,7 +3186,6 @@ INTEGER :: NM
 INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
 INTEGER :: I,J,K,II,IREG,X1AXIS
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKBUFFER
-INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 INTEGER :: IW, IIG, JJG, KKG, IOR
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: LOG_INTWC
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -3255,24 +3203,18 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IHI_FACE = IBAR                 ! High mesh boundary face index.
    ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
    IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
-   ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
-   IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
 
    ! Y direction bounds:
    JLO_FACE = 0                    ! Low mesh boundary face index.
    JHI_FACE = JBAR                 ! High mesh boundary face index.
    JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
    JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
-   JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
-   JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
 
    ! Z direction bounds:
    KLO_FACE = 0                    ! Low mesh boundary face index.
    KHI_FACE = KBAR                 ! High mesh boundary face index.
    KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
    KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
-   KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
-   KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
 
    ! Set starting number of regular faces for NM to zero:
    MESHES(NM)%NREGFACE_H(IAXIS:KAXIS) = 0
@@ -3680,10 +3622,10 @@ IF (GLMAT_SETUP_FLAG == GLMAT_WHLDOM) THEN
    ! Finalize Pardiso:
    PHASE = -1
 #ifdef WITH_PARDISO
-   CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_LOCAL, &
+   CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
         A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
 #elif WITH_CLUSTER_SPARSE_SOLVER
-   CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_LOCAL, &
+   CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
         A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
 #endif /* WITH_PARDISO */
 

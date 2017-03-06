@@ -4282,8 +4282,10 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                       SELECT CASE(IND)
                         CASE(1)  ! DENSITY
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%RHO(JCC)
-                        CASE(5) ! TEMPERATURE
+                        CASE(5)  ! TEMPERATURE
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC) - TMPM
+                        CASE(11) ! HRRPUV
+                           VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%Q(JCC)*0.001_EB
                         CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%H(JCC)
                         CASE(14) ! DIVERGENCE
@@ -4342,12 +4344,13 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                       SELECT CASE(IND)
                         CASE(1)  ! DENSITY
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%RHO(JCC)
-                        CASE(5) ! TEMPERATURE
+                        CASE(5)  ! TEMPERATURE
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC) - TMPM
+                        CASE(11) ! HRRPUV
+                             VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%Q(JCC)*0.001_EB
                         CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%H(JCC)
                         CASE(14) ! DIVERGENCE
-                           !write(0,*) 'CC Div=',ICC,JCC,IBM_CUT_CELL(ICC)%D(JCC)
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%D(JCC)/IBM_CUT_CELL(ICC)%VOLUME(JCC)
                         CASE(90) ! MASS FRACTION, uses Y_INDEX
                            IF (Z_INDEX > 0) THEN
@@ -4406,6 +4409,8 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%RHO(JCC)
                         CASE(5) ! TEMPERATURE
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%TMP(JCC) - TMPM
+                        CASE(11) ! HRRPUV
+                           VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%Q(JCC)*0.001_EB
                         CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
                            VAL_LOC(ISIDE) = IBM_CUT_CELL(ICC)%H(JCC)
                         CASE(14) ! DIVERGENCE
@@ -4816,7 +4821,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          CLOSE(LU_SLCF(IQ,NM))
       ELSE
-      ! write geometry for slice file
+         ! write geometry for slice file
          IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
          ! geometry and data file at first time step
             OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
