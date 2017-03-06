@@ -95,6 +95,10 @@ SELECT CASE(PREDICTOR)
       ZZP => ZZ
 END SELECT
 
+! Save the largest value of the material and thermal diffusion coefficients for use in Von Neumann stability constraint
+
+IF (CHECK_VN) D_Z_MAX = 0._EB
+
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
 SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
@@ -110,7 +114,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ENDIF
    ENDIF
-   IF (CHECK_VN) D_Z_MAX = 0._EB
 
    DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
 
@@ -327,17 +330,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
 ENDIF SPECIES_GT_1_IF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-1 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
-
 ! Get the specific heat
 
 CP => WORK5
@@ -435,16 +427,6 @@ IF (CHECK_VN) THEN
    !$OMP END PARALLEL DO
 ENDIF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-2 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Compute k*dT/dx, etc
 
 !$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE(STATIC)
@@ -461,16 +443,6 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 !$OMP END PARALLEL DO
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-22 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 ! Correct thermal gradient (k dT/dn) at boundaries
 
@@ -518,30 +490,6 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO CORRECTION_LOOP
 !$OMP END PARALLEL DO
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-23 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDX:'
-!WRITE(77,'(6E16.8)')  (((KDTDX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDY:'
-!WRITE(77,'(6E16.8)')  (((KDTDY(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDZ:'
-!WRITE(77,'(6E16.8)')  (((KDTDZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'TMP:'
-!WRITE(77,'(6E16.8)')  (((TMP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KP:'
-!WRITE(77,'(6E16.8)')  (((KP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'Q:'
-!WRITE(77,'(6E16.8)')  (((Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'QR:'
-!WRITE(77,'(6E16.8)')  (((QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
@@ -571,30 +519,6 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
    ENDDO
 END SELECT CYLINDER3
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-3 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDX:'
-!WRITE(77,'(6E16.8)')  (((KDTDX(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDY:'
-!WRITE(77,'(6E16.8)')  (((KDTDY(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KDTDZ:'
-!WRITE(77,'(6E16.8)')  (((KDTDZ(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'TMP:'
-!WRITE(77,'(6E16.8)')  (((TMP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'KP:'
-!WRITE(77,'(6E16.8)')  (((KP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'Q:'
-!WRITE(77,'(6E16.8)')  (((Q(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'QR:'
-!WRITE(77,'(6E16.8)')  (((QR(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Point to the appropriate velocity components
 
 IF (PREDICTOR) THEN
@@ -605,14 +529,6 @@ ELSE
    UU=>US
    VV=>VS
    WW=>WS
-ENDIF
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-31 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
 ENDIF
 
 ! Compute U_DOT_DEL_RHO_H_S and add to other enthalpy equation source terms
@@ -632,14 +548,6 @@ CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
 ENDIF CONST_GAMMA_IF_1
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-32 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
 
 !$OMP PARALLEL DO SCHEDULE(STATIC)
@@ -655,14 +563,6 @@ ENDDO
 !$OMP END PARALLEL DO
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-4 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
@@ -712,14 +612,6 @@ IF (STRATIFICATION) THEN
    ENDDO
 ENDIF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-5 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Manufactured solution
 
 MMS_IF: IF (PERIODIC_TEST==7) THEN
@@ -749,14 +641,6 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
 ENDIF MMS_IF
 
 1000 CONTINUE ! Evacuation meshes jump here
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-6 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
 
@@ -796,14 +680,6 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
    ENDDO WALL_LOOP4
 
 ENDIF IF_PRESSURE_ZONES
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== DIVG-7 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'UU:'
-!WRITE(77,'(6E16.8)')  (((UU(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 T_USED(2)=T_USED(2)+SECOND()-TNOW
 
@@ -952,21 +828,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ENDIF
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX_H_S(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY_H_S(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ_H_S(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ_H_S(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
-   END SELECT
-
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
       CASE DEFAULT
          IOR_SELECT: SELECT CASE(IOR)
@@ -996,16 +857,22 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)                    ! FDS Tech Guide (B.13)
-         DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)                  ! FDS Tech Guide (B.14)
-         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I) ! FDS Tech Guide (B.12)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+1)==0) DU_P = (FX_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)   ! FDS Tech Guide (B.13)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-1)==0) DU_M = (FX_H_S(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K) ! FDS Tech Guide (B.14)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I)                         ! FDS Tech Guide (B.12)
 
-         DU_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+2)==0) DU_P = (FY_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-2)==0) DU_M = (FY_H_S(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         DU_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+3)==0) DU_P = (FZ_H_S(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-3)==0) DU_M = (FZ_H_S(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
@@ -1022,8 +889,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_ZZ=>NULL(),FY_ZZ=>NULL(),FZ_ZZ=>NULL()
 FX_ZZ=>WORK2
 FY_ZZ=>WORK3
 FZ_ZZ=>WORK4
-
 RHO_Z_P=>WORK6
+
 U_DOT_DEL_RHO_Z=>WORK7
 U_DOT_DEL_RHO_Z=0._EB
 
@@ -1145,21 +1012,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ENDIF OFF_WALL_IF_2
 
-   SELECT CASE(IOR)
-      CASE( 1)
-         FX_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG) ! zero out DU at wall
-      CASE(-1)
-         FX_ZZ(II-1,JJ,KK) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 2)
-         FY_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-2)
-         FY_ZZ(II,JJ-1,KK) = RHO_Z_P(IIG,JJG,KKG)
-      CASE( 3)
-         FZ_ZZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
-      CASE(-3)
-         FZ_ZZ(II,JJ,KK-1) = RHO_Z_P(IIG,JJG,KKG)
-   END SELECT
-
    ! Correct U_DOT_DEL_RHO_Z at the boundary
 
    BOUNDARY_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
@@ -1190,16 +1042,22 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
-         DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+1)==0) DU_P = (FX_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-1)==0) DU_M = (FX_ZZ(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
 
-         DU_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
-         DU_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+2)==0) DU_P = (FY_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-2)==0) DU_M = (FY_ZZ(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         DU_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
-         DU_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
+         DU_P = 0._EB
+         DU_M = 0._EB
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),+3)==0) DU_P = (FZ_ZZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
+         IF (WALL_INDEX(CELL_INDEX(I,J,K),-3)==0) DU_M = (FZ_ZZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
@@ -1438,9 +1296,8 @@ END SUBROUTINE PREDICT_NORMAL_VELOCITY
 
 SUBROUTINE EVACUATION_PRESSURE_ZONES
 IMPLICIT NONE
-REAL(EB) :: VC,VC1,TNOW,RDT,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            X1,Y1,X2,Y2,Z1,Z2
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,I_VENT,N_OVERLAP
+REAL(EB) :: X1,Y1,X2,Y2,Z1,Z2
+INTEGER :: IW,N,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,I_VENT,N_OVERLAP
 
 IF (.NOT.EVACUATION_ONLY(NM)) RETURN
 
@@ -1547,7 +1404,7 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
-REAL(EB) :: USUM_ADD(N_ZONE),UWP, DDDT_OLD
+REAL(EB) :: USUM_ADD(N_ZONE),UWP
 REAL(EB) :: RDT,TNOW,P_EQ,SUM_P_PSUM,SUM_USUM,SUM_DSUM,SUM_PSUM
 LOGICAL :: OPEN_ZONE
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
@@ -1615,16 +1472,6 @@ DO IPZ=1,N_ZONE
    USUM(IPZ,NM) = USUM(IPZ,NM) + USUM_ADD(IPZ)
 ENDDO
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-1 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Compute dP/dt for each pressure ZONE
 
 IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
@@ -1653,16 +1500,6 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
    ENDDO
 
 ENDIF IF_PRESSURE_ZONES
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-2 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 ! Zero out divergence in solid cells
 
@@ -1713,16 +1550,6 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    END SELECT
 ENDDO BC_LOOP
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-3 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ! Compute time derivative of the divergence, dD/dt
 
 TRUE_PROJECTION: IF (PROJECTION) THEN
@@ -1754,27 +1581,7 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
       DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-4 ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
-
 ELSE TRUE_PROJECTION
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-5A ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
    IF (PREDICTOR) THEN
       DDDT = (DS-D)*RDT
@@ -1785,15 +1592,6 @@ ENDIF
       D     = D_NEW
    ENDIF
 
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-5B ===================='
-!WRITE(77,*) 'DDDT:', RDT
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
 
    NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
@@ -1802,24 +1600,10 @@ ENDIF
          IIG = WALL(IW)%ONE_D%IIG
          JJG = WALL(IW)%ONE_D%JJG
          KKG = WALL(IW)%ONE_D%KKG
-
-         DDDT_OLD = DDDT(IIG, JJG, KKG)
          IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
          IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
-         !WRITE(77,'(A,I4,A,i3,A,i3,A,I3,A,4E14.6)') &
-           !'TRUTRU: IW=',IW,': DDDT(',IIG,',',JJG,',',KKG,')=',DDDT(IIG,JJG,KKG), DDDT_OLD, DS_CORR(IW), D_CORR(IW)
       ENDDO
    ENDIF NO_SCARC_IF
-
-IF (MYID == 0) THEN
-!WRITE(77,*) '==================== PART2 - DIVG-5C ===================='
-!WRITE(77,*) 'DDDT:'
-!WRITE(77,'(6E16.8)')  (((DP(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'U:'
-!WRITE(77,'(6E16.8)')  (((U(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-!WRITE(77,*) 'US:'
-!WRITE(77,'(6E16.8)')  (((US(II,JJ,KK),II=0,5),JJ=1,1),KK=5,0,-1)
-ENDIF
 
 ENDIF TRUE_PROJECTION
 
