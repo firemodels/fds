@@ -15,5 +15,6 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
   IF DEFINED IFORT_COMPILER (
     echo Setting up compiler environment
     call "%IFORT_COMPILER%\bin\compilervars" intel64
+    call "%IFORT_COMPILER%\mpi\intel64\bin\mpivars" release
   )
 :envexist
