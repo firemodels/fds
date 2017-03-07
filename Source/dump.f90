@@ -4867,19 +4867,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE('null','RMS','TIME MIN','TIME MAX') GAS_STATS_SELECT
 
-               I = DV%I
-               J = DV%J
-               K = DV%K
-               IF (DV%GHOST_CELL) THEN
-                  SELECT CASE(DV%IOR)
-                     CASE( 1); I=IBP1
-                     CASE(-1); I=0
-                     CASE( 2); J=JBP1
-                     CASE(-2); J=0
-                     CASE( 3); K=KBP1
-                     CASE(-3); K=0
-                  END SELECT
-               ENDIF
+               I = MIN( IBP1, MAX(0, DV%I + DV%GHOST_CELL_IOR(1) ) )
+               J = MIN( JBP1, MAX(0, DV%J + DV%GHOST_CELL_IOR(2) ) )
+               K = MIN( KBP1, MAX(0, DV%K + DV%GHOST_CELL_IOR(3) ) )
 
                VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
                                         DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,T,DT,NM)
