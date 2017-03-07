@@ -480,6 +480,7 @@ $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
+$QFDS -d WUI vege_mass_conservation.fds
 
 $QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
