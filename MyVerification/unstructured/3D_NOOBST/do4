@@ -1,0 +1,7 @@
+sh dofds 4 fft
+sh dofds 4 mkl
+sh dofds 4 cg_ssor
+sh dofds 4 cg_mkl
+sh dofds 4 gmg_ssor
+sh dofds 4 gmg_mkl
+sh dofds 4 glmat

@@ -1,0 +1,7 @@
+sh dofds 1 fft
+sh dofds 1 mkl
+sh dofds 1 cg_ssor
+sh dofds 1 cg_mkl
+sh dofds 1 gmg_ssor
+sh dofds 1 gmg_mkl
+sh domva 1 glmat

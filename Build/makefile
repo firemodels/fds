@@ -182,7 +182,11 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+<<<<<<< HEAD
 impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
+=======
+impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO) 
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 impi_intel_linux_64_db : LFLAGS = -static-intel
 impi_intel_linux_64_db : FCOMPL = mpiifort
 impi_intel_linux_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
@@ -214,7 +218,17 @@ mpi_intel_linux_64ib_scorep : obj = fds_mpi_intel_linux_64ib_scorep
 mpi_intel_linux_64ib_scorep : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+<<<<<<< HEAD
 intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO)
+=======
+ifdef MKLROOT # This assumes the MKL library is available.
+intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+intel_linux_64_db : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
+else # MKL not available.
+intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO)
+intel_linux_64_db : LFLAGSMKL =
+endif
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
 intel_linux_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
@@ -230,7 +244,11 @@ intel_linux_64_inspect : obj = fds_intel_linux_64_inspect -liomp5
 intel_linux_64_inspect : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
+<<<<<<< HEAD
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
+=======
+mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 mpi_intel_linux_64_db : LFLAGS = -static-intel
 mpi_intel_linux_64_db : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
@@ -286,14 +304,34 @@ mpi_intel_osx_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 mpi_intel_osx_64 : FCOMPL = mpifort
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
+<<<<<<< HEAD
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO)
+=======
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+ifdef MKLROOT # This assumes the MKL library is available.
+ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
+# Use cluster_sparse_solver with custom blacs
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -diag-disable=6916,7025 -DWITH_CLUSTER_SPARSE_SOLVER -DWITH_MKL -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_osx_64_db : LFLAGSMKL =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
+else
+# Use pardiso, non-mpi OpenMP threaded version.
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -diag-disable=6916,7025 -DWITH_PARDISO -DWITH_MKL -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_osx_64_db : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
+endif
+else # MKL is not available.
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO)
+mpi_intel_osx_64_db : LFLAGSMKL =
+endif
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static
 mpi_intel_osx_64_db : FCOMPL = mpifort
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
+<<<<<<< HEAD
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08 $(GITINFO)
@@ -303,6 +341,10 @@ intel_osx_64_dv : FCOMPL = ifort
 intel_osx_64_dv : obj = fds_intel_osx_64_dv
 intel_osx_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+=======
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 
 #*** IBM XLF Compiler ***
 
