@@ -1,3 +1,4 @@
+#define WITH_MKL
 #ifdef WITH_MKL
 include "mkl_pardiso.f90"
 include "mkl_cluster_sparse_solver.f90"
@@ -5302,10 +5303,11 @@ IF (BINTERNAL) THEN
          SM%AG_COL(IP)= SL%A_COL(IP) + NCS_OFFSET(NM, NL)
 IF (TYPE_DEBUG > NSCARC_DEBUG_EXTREME) WRITE(LU_SCARC,*) 'INTERNAL: IC=',IC,': AG_COL(',IP,')=',SM%AG_COL(IP)
       ENDIF
+#endif
+
       IP = IP + 1
 
    ENDIF
-#endif
          
 !> if IC is a boundary cell of the mesh, compute matrix contribution only if there is a neighbor for that cell
 ELSE IF (SL%FACE(IOR0)%NUM_NEIGHBORS /= 0) THEN
@@ -15429,20 +15431,21 @@ SELECT CASE (NTYPE)
                 IF (IC == SL%A_COL(IP)) WRITE(LU_SCARC,'(2I8,F18.12)') IC,SL%A_COL(IP),SL%A(IP)
             ENDDO
          ENDDO
-      ENDDO
 #endif
+      ENDDO
 
          !CALL SCARC_PRINT_MATRIX (SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, NM, NL, 'A')
          !CALL SCARC_PRINT_MATRIX2(SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, SL%NX, SL%NY, SL%NZ, NM, NL, 'A')
          !CALL SCARC_MATLAB_MATRIX(SL%A, SL%A_ROW, SL%A_COL, SL%NCS, SL%NCS, NM, NL, 'A')
 
-#ifdef WITH_MKL
    !! ------------------------------------------------------------------------------------------------
    !! Debug symmetric system matrix AS
    !! ------------------------------------------------------------------------------------------------
    CASE (NSCARC_DEBUG_MATRIXS)
 
       IF (NL > NLEVEL_MIN) RETURN
+
+#ifdef WITH_MKL
       DO NM = 1, NMESHES
          IF (PROCESS(NM) /= MYID) CYCLE
          WRITE(LU_SCARC,1000) CROUTINE, CNAME, NM, NL
@@ -17055,7 +17058,7 @@ MESHES_LOOP1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    SL => SCARC(NM)%LEVEL(NL)
 
-!   IF (.NOT. ALLOCATED(SL%CCVAR)) ALLOCATE(SL%CCVAR(0:SL%NX+1,0:SL%NY+1,0:SL%NZ+1,NCVARS))
+   IF (.NOT. ALLOCATED(SL%CCVAR)) ALLOCATE(SL%CCVAR(0:SL%NX+1,0:SL%NY+1,0:SL%NZ+1,NCVARS))
    SL%CCVAR = 0
 
    SL%CCVAR(:,:,:,CGSC) = IS_UNDEFINED
@@ -17194,7 +17197,7 @@ END SUBROUTINE SCARC_SETUP_CCVAR
 SUBROUTINE SCARC_SETUP_CCVAR_GLOBAL(NL)
 
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, NM2, IERR
+INTEGER :: NM, NM2, IERR, INUNKH_TOT
 !INTEGER :: IX, IY, IZ
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
 
@@ -17207,9 +17210,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ALLOCATE(SL%NUNKH_TOT(1:NMESHES))
    SL%NUNKH_TOT = 0
 
+   WRITE(*,*) SL%NUNKH_LOC
+   WRITE(*,*) SL%NUNKH_TOT
+   WRITE(*,*) NMESHES, IERR
    IF (N_MPI_PROCESSES > 1) THEN
-      !WRITE(*,*) 'TO BE CHECKED !!'
-      CALL MPI_ALLREDUCE(SL%NUNKH_LOC, SL%NUNKH_TOT, NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
+      CALL MPI_ALLREDUCE(SL%NUNKH_LOC, INUNKH_TOT, NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
+      SL%NUNKH_TOT = INUNKH_TOT
+
    ELSE
       SL%NUNKH_TOT = SL%NUNKH_LOC
    ENDIF
