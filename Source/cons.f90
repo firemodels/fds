@@ -361,6 +361,7 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 ! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
+<<<<<<< HEAD
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_SOLVER =.FALSE.
 !LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
@@ -375,6 +376,8 @@ INTEGER :: GLMAT_SETUP_FLAG = GLMAT_WHLDOM ! Default for now.
 ! Currently used in the thermo div definition of cut-cells.
 REAL(EB) :: CCVOL_LINK=0.15_EB
 
+=======
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 INTEGER,  PARAMETER :: LOW_IND   = 1
 INTEGER,  PARAMETER :: HIGH_IND  = 2
 
