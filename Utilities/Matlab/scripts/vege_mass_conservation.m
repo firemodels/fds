@@ -28,7 +28,7 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 plot(M(:,1),mass_delta,'LineWidth',Line_Width); hold on
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('Total mass (kg)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('\Delta mass from expected (kg)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([0 max(M(:,1)) -0.5 1])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
