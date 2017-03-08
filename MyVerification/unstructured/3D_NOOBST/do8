@@ -1,0 +1,7 @@
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db fft_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db mkl_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_ssor_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_pardiso_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_cluster_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db gmg_ssor_8mesh.fds
+mpirun -np 8 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db gmg_mkl_8mesh.fds

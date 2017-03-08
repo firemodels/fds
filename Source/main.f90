@@ -1443,7 +1443,7 @@ TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
-LOGICAL :: FOUND
+LOGICAL :: FOUND,EDGE_CONNECTED
 
 M=>MESHES(NM)
 
@@ -1569,6 +1569,28 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF ( NM/=NOM .AND. M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) THEN
       FOUND = .TRUE.
       M%CONNECTED_MESH(NOM) = .TRUE.
+   ENDIF
+
+   ! Edges and corners. This is needed to populate ghost cells at mesh edges and corners.
+   ! See Schneider and Eberly, Geometric Tools for Computer Graphics, Morgan Kaufmann Publishers, 2003, p. 638
+   IF (EXCHANGE_EDGES) THEN
+      EDGE_CONNECTED=.TRUE.
+      IF ( M%XS>(M2%XF+NANOMETER) .OR. M2%XS>(M%XF+NANOMETER) ) EDGE_CONNECTED=.FALSE.
+      IF ( M%YS>(M2%YF+NANOMETER) .OR. M2%YS>(M%YF+NANOMETER) ) EDGE_CONNECTED=.FALSE.
+      IF ( M%ZS>(M2%ZF+NANOMETER) .OR. M2%ZS>(M%ZF+NANOMETER) ) EDGE_CONNECTED=.FALSE.
+
+      IF ( NM/=NOM .AND. EDGE_CONNECTED) THEN
+         IF (.NOT.FOUND) THEN ! yet to assign IMIN, IMAX, etc.
+            IF (ABS(M%XS-M2%XF)<NANOMETER) THEN; IMIN=M2%IBM1; ENDIF
+            IF (ABS(M2%XS-M%XF)<NANOMETER) THEN; IMAX=2;       ENDIF
+            IF (ABS(M%YS-M2%YF)<NANOMETER) THEN; JMIN=M2%JBM1; ENDIF
+            IF (ABS(M2%YS-M%YF)<NANOMETER) THEN; JMAX=2;       ENDIF
+            IF (ABS(M%ZS-M2%ZF)<NANOMETER) THEN; KMIN=M2%KBM1; ENDIF
+            IF (ABS(M2%ZS-M%ZF)<NANOMETER) THEN; KMAX=2;       ENDIF
+         ENDIF
+         FOUND = .TRUE.
+         M%CONNECTED_MESH(NOM) = .TRUE.
+      ENDIF
    ENDIF
 
    ! Exit the other mesh loop if no neighboring meshes found
