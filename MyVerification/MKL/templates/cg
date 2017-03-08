@@ -1,0 +1,6 @@
+&PRES SCARC_METHOD             = 'KRYLOV'
+      SCARC_DEBUG              = 'NONE'
+      SCARC_KRYLOV             = 'CG'
+      SCARC_KRYLOV_ACCURACY    =  1E-12
+      SCARC_PRECON             = 'PARDISO' /
+

@@ -1,0 +1,8 @@
+&PRES SCARC_METHOD             = 'KRYLOV'
+      SCARC_DEBUG              = 'NONE'
+      SCARC_KRYLOV             = 'CG'
+      SCARC_KRYLOV_ACCURACY    =  1E-10
+      SCARC_PRECON             = 'SSOR'   
+      VELOCITY_TOLERANCE       = 1E-6
+      MAX_PRESSURE_ITERATIONS  = 100            /
+

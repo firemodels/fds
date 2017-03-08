@@ -1,0 +1,7 @@
+sh dofds 1 small_fft
+sh dofds 1 small_mkl
+sh dofds 1 small_cg_ssor
+sh dofds 1 small_cg_mkl
+sh dofds 1 small_gmg_ssor
+sh dofds 1 small_gmg_mkl
+sh domva 1 small_glmat

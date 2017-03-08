@@ -1,0 +1,5 @@
+&PRES SCARC_METHOD             = 'MKL'
+      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
+      SCARC_MKL                = 'GLOBAL'
+      SCARC_MKL_MTYPE          = 'SYMMETRIC'
+      SCARC_DEBUG              = 'NONE'   /

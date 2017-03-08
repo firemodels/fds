@@ -1,0 +1,1 @@
+mpirun -np $1 /Users/susannekilian/hhpberlin/01_FDS/Version_20161010/SKI/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db $2_$1mesh.fds
