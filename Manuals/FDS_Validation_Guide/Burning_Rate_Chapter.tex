@@ -1,0 +1,1164 @@
+% !TEX root = FDS_Validation_Guide.tex
+
+\chapter{Burning Rate and Fire Spread}
+
+This chapter contains a series of validation exercises where the aim is to {\em predict} the burning and spread rate of the fire. Most of the simulations included in the previous chapters involved a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a specified heat flux or as a free burn.
+
+
+
+\section{FAA Polymers}\label{sec_FAA_Polymers}
+
+The U.S.~Federal Aviation Administration (FAA) has studied various plastics that are commonly used aboard commercial aircraft.
+
+This section presents measured properties of various polymers and the numerical predictions of their mass loss and/or burning rates under constant heat heating. Two types of experiments are considered. First, the NIST Gasification Apparatus is used to measure the mass loss rate of non-burning samples in a nitrogen atmosphere. Second, the standard Cone Calorimeter~\cite{conecal} is used to measure the heat release rate of materials in a normal atmosphere. When just the mass loss rate of a non-burning sample has been measured, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a single grid cell. The result is the predicted mass loss rate as a function of time. To simulate a cone calorimeter experiment, FDS simulates the burning of a 10~cm by 10~cm sample with a specified heat flux to represent the effect of the cone heater. The cone itself is not included in the simulation. As the sample burns, FDS predicts the additional radiative and convective heating of the sample as a result of the fire.
+
+In general, the burning/gasification rate of a charring polymer is more difficult to predict than a non-charring one because there are more parameters that need to be measured and
+more complicated behavior, like intumescence, need to be considered.
+
+\subsection{Glossary of Terms}
+\label{glossary}
+
+\begin{description}
+\item[Assumption:]  Characteristics were assumed from known properties in similar materials.
+\item[Cone Calorimeter] (ASTM E 1354 \cite{conecal}) The Cone Calorimeter exposes a small sample to a constant external radiant heat flux simulating exposure of the sample to a large scale fire. The device records mass loss data along with heat release data through oxygen consumption calorimetry. From this a variety of heat release related properties can be found including heat of combustion.
+\item[Constant Volume:] The material is assumed to maintain a constant volume during the solid phase reactions.
+\item[Direct:]  Direct measurement of densities is performed by measuring the dimensions and mass of the sample.
+\item[DSC:] (ASTM E 2070 \cite{diffscancal}) A Differential Scanning Calorimeter precisely raises the temperature of a small sample of material at a constant rate. This coupled with knowledge of heat absorbed by the sample allows for the calculation of the specific heat function of a material as well as heats of reaction and phase change.
+\item[Estimated:] Characteristics were approximated based on known properties in similar materials.
+\item[FTIR:] Fourier Transform Infrared Spectroscopy uses a spectrometer to simultaneously characterize the absorption of all frequencies of infrared light. In testing a sample is exposed to infrared light and a detector records light that has passed through the sample. A Fourier transform of detector measurement is then translated into absorption information.
+\item[Gasification Apparatus:] Similar to the Cone Calorimeter however flaming is prevented. This is done typically through the introduction of inert purge gases.
+\item[Inherited:] The properties of the product or component are assumed to be the same as the original material.
+\item[Inverse Analysis:] Property was established by fitting a model to measured temperatures from the Cone Calorimeter or Gasification Apparatus.
+\item[IS:] (ASTM E 1175 \cite{intgsphere}) An Integrating Sphere, or an Ulbricht Sphere, is a hollow cavity whose interior has a high diffuse reflectivity. A sample placed inside the sphere is exposed to incident radiation and reflectivity measured. Emissivity can be determined from this information. The standard above is for measurement of Solar reflectivity, and was not necessarily precisely followed.
+\item[Laser Flash:] (ASTM E1461 \cite{laserflash}) In the Laser Flash Method one surface of a sample is rapidly heated using a single pulse from a laser. Heat sensors on the opposite side of the sample record the arrival of the resulting temperature disturbance. From this thermal diffusivity/thermal conductivity can be calculated.
+\item[Literature:] Results were found within previously published literature.
+\item[MCC:] (ASTM D 7309 \cite{microcc}) The Microscale Combustion Calorimeter (MCC)  rapidly pyrolyzes a milligram size sample in an inert atmosphere. The pyrolyzate is then exposed to an abundance of oxygen.  Heat release history is obtained from oxygen consumption. Similar to TGA with  heat release recorded rather than mass loss rate.
+\item[Pulsed Current:] Can refer to different types of tests. Generally, a sample is positioned between two electrodes in a sealed chamber with an inert atmosphere. The sample is heated through pulses of current. Measurements of the sample and the chamber can give information regarding specific heat, emissivity, or other material properties.
+\item[TGA:] (ASTM E 1131 \cite{thermalga}) In Thermal Gravimetric Analysis (TGA)  a small sample is heated at uniform rate, generally in an Nitrogen (N$_2$) atmosphere. The percentage weight loss of the sample is recorded relative to the sample's temperature. Rate constants can then be fitted to the data. Similar to MCC with mass loss recorded instead of heat release.
+\item[TLS:] (ASTM D 5930 \cite{transline}) The Transient Line Source method records temperature of a single point at a fixed distance in a sample over time using a probe. Given knowledge of the heat exposure of the sample the thermal conductivity can be found from the slope of the recorded data.
+\end{description}
+
+
+
+\newpage
+
+\subsection{Non-Charring Polymers, HDPE, HIPS, and PMMA}
+
+A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor. No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties} lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
+
+\begin{table}[h!]
+\caption[FAA non-charring polymer properties.]{Input parameters for FAA Polymers non-charring samples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.
+See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|l|l|}
+\hline
+Property                    & Units         & HDPE                  & HIPS                  & PMMA                  & Unc. (\%) & Method                &  Ref.                         \\ \hline \hline
+Density                     & kg/m$^3$      & 860                   & 950                   & 1100                  & 5         & Direct                &  \cite{Stoliarov:CF2009}      \\ \hline
+Conductivity                & W/m/K         & 0.29                  & 0.22                  & 0.20                  & 15        & TLC                   &  \cite{Stoliarov:CF2009}      \\ \hline
+Specific Heat               & kJ/kg/K       & 3.5                   & 2.0                   & 2.2                   & 15        & DSC                   &  \cite{Stoliarov:PDS2008}     \\ \hline
+Emissivity                  &               & 0.92                  & 0.86                  & 0.85                  & 20        & IS                    &  \cite{Hallman:PES1974}       \\ \hline
+Absorption Coef.            & m$^{-1}$      & 1300                  & 2700                  & 2700                  & 50        & FTIR                  &  \cite{Tsilingiris:ECM2003}   \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $4.8 \times 10^{22}$  & $1.2 \times 10^{16}$  & $8.5 \times 10^{12}$  & 50        & TGA                   &  \cite{Stoliarov:CF2009}      \\ \hline
+Activation Energy           & kJ/kmol       & $3.49 \times 10^{5}$  & $2.47 \times 10^{5}$  & $1.88 \times 10^{5}$  & 3         & TGA                   &  \cite{Stoliarov:CF2009}      \\ \hline
+Heat of Reaction            & kJ/kg         & 920                   & 1000                  & 870                   & 15        & DSC                   &  \cite{Stoliarov:PDS2008}     \\ \hline
+\end{tabular}
+\end{center}
+\label{FAA_Properties}
+\end{table}
+
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_HDPE} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_HIPS} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PMMA}&
+\end{tabular*}
+\caption[Results of FAA Polymers, non-charring, comparison.]{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
+nitrogen environment.}
+\label{FAA_Polymers}
+\end{figure}
+
+\clearpage
+
+\subsection{Complex Non-Charring Polymers: PP, PA66, POM, and PET}
+
+The polymers described in this section exhibit slightly more complex behavior than those in the previous section because they exhibit foaming and bubbling as they degrade. Table~\ref{FAA_Properties2} lists the properties of each polymer.  In the model, the polymers melt to form a liquid with identical properties as the solid, and the liquid evaporates. The melting is characterized by a threshold temperature and a heat of reaction equivalent to a heat of melting. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers2}. The exposing heat flux was 50~kW/m$^2$. A thin sheet of aluminum foil and a 2.5~cm layer of Foamglas insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:FM2012}.
+
+
+\begin{table}[h!]
+\caption[FAA complex non-charring polymer properties]{Input parameters for FAA Polymers complex non-charring samples~\cite{Stoliarov:FM2012}. Courtesy S.~Stoliarov, G.~Linteris and R.E.~Lyon. See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|l|}
+\hline
+Property                    & Units         & PP                    & PA66                  & POM                   & PET                   & Unc.      & Method    \\
+                            &               &                       &                       &                       &                       & (\%)      &           \\ \hline \hline
+Density                     & kg/m$^3$      & 910                   & 1150                  & 1425                  & 1380                  & 5         & Direct    \\ \hline
+Conductivity                & W/m/K         & 0.24                  & 0.34                  & 0.28                  & 0.29                  & 15        & TLC       \\ \hline
+Specific Heat               & kJ/kg/K       & 2.68                  & 2.54                  & 1.88                  & 2.01                  & 15        & DSC       \\ \hline
+Emissivity                  &               & 0.96                  & 0.95                  & 0.95                  & 0.903                 & 20        & IS        \\ \hline
+Absorption Coef.            & m$^{-1}$      & 966                   & 3920                  & 3550                  & 2937                  & 50        & FTIR      \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $1.6 \times 10^{23}$  & $5.7 \times 10^{17}$  & $3.7 \times 10^{10}$  & $4.50 \times 10^{18}$ & 50        & TGA       \\ \hline
+Activation Energy           & kJ/kmol       & $3.52 \times 10^{5}$  & $2.74 \times 10^{5}$  & $1.57 \times 10^{5}$  & $2.81 \times 10^{5}$  & 3         & TGA       \\ \hline
+Heat of Reaction            & kJ/kg         & 1310                  & 1390                  & 1570                  & 1800                  & 15        & DSC       \\ \hline
+Heat of Melting             & kJ/kg         & 80                    & 55                    & 141                   & 37                    & 15        & DSC       \\ \hline
+Melting Temperature         & K             & 158                   & 262                   & 165                   & 253                   & 15        & DSC       \\ \hline
+
+\end{tabular}
+\end{center}
+\label{FAA_Properties2}
+\end{table}
+
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PA66} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_POM}&
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PET} \\
+\end{tabular*}
+\caption[Results of FAA Polymers, complex, non-charring, comparison.]{Comparison of predicted and measured mass loss rates for four complex non-charring polymers exposed to a heat flux of 50~kW/m$^2$ in a
+nitrogen environment.}
+\label{FAA_Polymers2}
+\end{figure}
+
+\clearpage
+
+
+\subsection{Polycarbonate (PC)}
+
+Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
+
+\begin{table}[h!]
+\caption[Properties of polycarbonate (PC).]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                    & Units         & Value                             & Method                &  Reference                                \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1180 $\pm$ 60                     & Direct                &  \cite{Stoliarov:CF2010}                  \\ \hline
+Polymer Conductivity        & W/m/K         & 0.22 $\pm$ 0.03                   & Literature            &  \cite{Stoliarov:CF2010}                  \\ \hline
+Polymer Specific Heat       & kJ/kg/K       & 1.9 $\pm$ 0.3                     & DSC                   &  \cite{Stoliarov:PDS2008}                 \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & IS                    &  \cite{Hallman:PES1974}                   \\ \hline
+Polymer Absorption Coef.    & m$^{-1}$      & 1770 $\pm$ 590                    & FTIR                  &  \cite{Tsilingiris:ECM2003}               \\ \hline
+Char Density                & kg/m$^3$      & 248                               & Cone Calorimeter      &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char Conductivity           & W/m/K         & 0.37                              & Cone Calorimeter      &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char Specific Heat          & kJ/kg/K       & 1.72 $\pm$ 0.17                   & Pulsed Current        &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
+Char Emissivity             &               & 0.85 $\pm$ 0.05                   & Pulsed Current        &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
+Char Absorption Coef.       & m$^{-1}$      & Opaque                            & Assumption            &  \cite{Stoliarov:CF2010}                  \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $(1.9 \pm 1.1) \times 10^{18}$    & TGA                   &  \cite{Stoliarov:CF2010}                  \\ \hline
+Activation Energy           & kJ/kmol       & $(2.95 \pm 0.06) \times 10^{5}$   & TGA                   &  \cite{Stoliarov:CF2010}                  \\ \hline
+Heat of Reaction            & kJ/kg         & 830 $\pm$ 140                     & DSC                   &  \cite{Stoliarov:PDS2008}                 \\ \hline
+Heat of Combustion          & kJ/kg         & 25600 $\pm$ 130                   & MCC                   &  \cite{Stoliarov:CF2010}                  \\ \hline
+Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   & Cone Calorimeter      &  \cite{Stoliarov:CF2010}                  \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_PC}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_6_75} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_6_92} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_6_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_3_75} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_9_75} &
+\end{tabular*}
+\caption[Heat release rate of polycarbonate (PC).]{Comparison of predicted and measured heat release rates for polycarbonate (PC).}
+\label{HRR_PC}
+\end{figure}
+
+\clearpage
+
+
+\subsection{Poly(vinyl chloride) (PVC)}
+
+Table~\ref{Properties_PVC} lists the measured properties of poly(vinyl chloride). These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PVC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
+
+It is assumed that the polymer decomposes via a two-step reaction:
+\begin{eqnarray}
+   \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}
+\end{eqnarray}
+
+
+\begin{table}[h!]
+\caption[Properties of poly(vinyl chloride) (PVC).]{Properties of poly(vinyl chloride) (PVC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                    & Units         & Value                             & Method                    &  Reference                                \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1430 $\pm$ 70                     & Direct                    &  \cite{Stoliarov:CF2010}                  \\ \hline
+Polymer Conductivity        & W/m/K         & 0.17 $\pm$ 0.01                   & Literature                &  \cite{Stoliarov:CF2010}                  \\ \hline
+Polymer Specific Heat       & kJ/kg/K       & 1.55 $\pm$ 0.25                   & DSC                       &  \cite{Stoliarov:PDS2008}                 \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & IS                        &  \cite{Hallman:PES1974}                   \\ \hline
+Polymer Absorption Coef.    & m$^{-1}$      & 2145 $\pm$ 715                    & FTIR                      &  \cite{Tsilingiris:ECM2003}               \\ \hline
+Char 1 Density              & kg/m$^3$      & 629                               & Constant Volume           &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Conductivity         & W/m/K         & 0.17                              & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Specific Heat        & kJ/kg/K       & 1.55 $\pm$ 0.25                   & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Emissivity           &               & 0.90 $\pm$ 0.05                   & Inherited                 &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 1 Absorption Coef.     & m$^{-1}$      & 2453                              & Inverse Analysis          &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 2 Density              & kg/m$^3$      & 296                               & Constant Volume           &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 2 Conductivity         & W/m/K         & 0.26                              & Inverse Analysis          &  \cite{Stoliarov:CF2010}                  \\ \hline
+Char 2 Specific Heat        & kJ/kg/K       & 1.72 $\pm$ 0.17                   & Pulsed Current            &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
+Char 2 Emissivity           &               & 0.85 $\pm$ 0.05                   & Pulsed Current            &  \cite{Stoliarov:CF2010,Matsumoto:1996}   \\ \hline
+Char 2 Absorption Coef.     & m$^{-1}$      & Opaque                            & Assumption                &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 1 Pre-Exp.~Factor      & s$^{-1}$      & $(1.4 \pm 0.8) \times 10^{33}$    & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 1 Activation Energy    & kJ/kmol       & $(3.67 \pm 0.07) \times 10^{5}$   & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 1 Char Yield           &               & $0.44 \pm 0.01$                   & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 1 Heat of Reaction     & kJ/kg         & 170 $\pm$ 17                      & DSC                       &  \cite{Stoliarov:PDS2008}                 \\ \hline
+Gas 1 Heat of Combustion    & kJ/kg         & 2700 $\pm$ 300                    & MCC                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Gas 1 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   & Cone Calorimeter          &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 2 Pre-Exp.~Factor      & s$^{-1}$      & $(3.5 \pm 2.1) \times 10^{12}$    & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 2 Activation Energy    & kJ/kmol       & $(2.07 \pm 0.04) \times 10^{5}$   & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 2 Char Yield           &               & $0.47 \pm 0.01$                   & TGA                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Reac 2 Heat of Reaction     & kJ/kg         & 1200 $\pm$ 900                    & DSC                       &  \cite{Stoliarov:PDS2008}                 \\ \hline
+Gas 2 Heat of Combustion    & kJ/kg         & 36500 $\pm$ 1800                  & MCC                       &  \cite{Stoliarov:CF2010}                  \\ \hline
+Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   & Cone Calorimeter          &  \cite{Stoliarov:CF2010}                  \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_PVC}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_75} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_92} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_3_75} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_9_75} &
+\end{tabular*}
+\caption[Heat release rate of poly(vinyl chloride) (PVC).]{Comparison of predicted and measured heat release rates for poly(vinyl chloride) (PVC).}
+\label{HRR_PVC}
+\end{figure}
+
+\clearpage
+
+
+
+\subsection{Poly(aryl ether ether ketone)) (PEEK)}
+
+Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone)\footnote{Trade name VICTREX PEEK 450G. The sample has been thoroughly dried.}. Its property values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. It is assumed that the polymer decomposes via a four-step reaction:
+\begin{eqnarray}
+   \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}  \\
+   \hbox{Char 2}  &\to& \hbox{Char 3} + \hbox{Gas 2}  \\
+   \hbox{Char 3}  &\to& \hbox{Gas 2}
+\end{eqnarray}
+It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
+
+The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}. Note that the plots on the left are the results of simulations of the solid phase only, where the heat feedback from the fire is assumed to be 15~kW/m$^2$ and it is applied at the time of ignition. The plots on the right are from 3-D simulations of the solid sample and the fire. In these cases, the radiative feedback is not specified but rather calculated.
+
+\begin{table}[p]
+\caption[Properties of poly(aryl ether ether ketone) (PEEK).]{Properties of poly(aryl ether ether ketone) (PEEK). Courtesy E.~Oztekin, U.S.~FAA and S.~Stoliarov,
+University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                    & Units         & Value                             & Method                    &  Reference                              \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1300                              & Direct                    &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Conductivity        & W/m/K         & 0.28                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Specific Heat       & kJ/kg/K       & 2.05                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Emissivity          &               & 0.90                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Polymer Absorption Coef.    & m$^{-1}$      & 1690                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Density              & kg/m$^3$      & 810                               & Constant Volume           &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Conductivity         & W/m/K         & 0.37                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Specific Heat        & kJ/kg/K       & 0.24                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Absorption Coef.     & m$^{-1}$      & 81000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Density              & kg/m$^3$      & 710                               & Constant Volume           &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Conductivity         & W/m/K         & 0.37                              & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Specific Heat        & kJ/kg/K       & 0.27                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Absorption Coef.     & m$^{-1}$      & 71000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 1 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^{32}$              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 1 Activation Energy    & kJ/kmol       & $5.57 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 1 Char Yield           &               & 0.62                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 1 Heat of Reaction     & kJ/kg         & 350                               & Inverse Analysis          &  \cite{Oztekin:CF2012}                  \\ \hline
+Gas 1 Heat of Combustion    & kJ/kg         & 16000                             & Cone calorimetry          &  \cite{Oztekin:CF2012}                  \\ \hline
+Gas 1 Combustion Efficiency &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 2 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^3$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 2 Activation Energy    & kJ/kmol       & $8.9 \times 10^4$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 2 Char Yield           &               & 0.88                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 2 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Gas 2 Heat of Combustion    & kJ/kg         & 27000                             & Cone Calorimetry          &  \cite{Oztekin:CF2012}                  \\ \hline
+Gas 2 Combustion Efficiency &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^5$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Activation Energy    & kJ/kmol       & $1.47 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Char Yield           &               & 0.88                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^3$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Activation Energy    & kJ/kmol       & $1.29 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Char Yield           &               & 0                                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_PEEK}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50_solid_only} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70_solid_only} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90_solid_only} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}
+\end{tabular*}
+\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the solid sample and the fire.}
+\label{HRR_PEEK}
+\end{figure}
+
+\clearpage
+
+
+\subsection{Poly(butylene terephtalate) (PBT)}
+
+Samples of poly(butylene terephtalate) (PBT)\footnote{Tradename Arnite T06-200, DSM Engineering Plastics} have been burned without oxygen in the Gasification Apparatus and with oxygen in the Cone Calorimeter. The properties of PBT are listed in Table~\ref{Properties_PBT}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and no char.
+
+The results of the simulations are shown in Fig.~\ref{HRR_PBT}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 39~\%, 50~kW/m$^2$ by 22~\%, and 70~kW/m$^2$ by 6~\%~\cite{Kempel:1}.
+
+
+\begin{table}[h!]
+\caption[Properties of poly(butylene terephtalate) (PBT).]{Properties of poly(butylene terephtalate) (PBT). Courtesy S.~Stoliarov, University of Maryland, and
+Florian Kempel.
+See Section~\ref{glossary} for an explanation of terms. Note that the Specific Heat and Conductivity result from averaging the reported temperature dependent
+properties over the room to decomposition temperature range (300~K -- 650~K).
+The heat capacity value is increased by 0.13~kJ/kg/K to account for the heat of melting (-46~kJ/kg), which takes place at 493~K.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                & Units     & Value                             & Method                                & Reference                     \\ \hline \hline
+Density                 & kg/m$^3$  & 1300 $\pm$ 70                     & Direct                                & \cite{Kempel:1}               \\ \hline
+Specific Heat           & kJ/kg/K   & 2.23 $\pm$ 0.34                   & DSC                                   & \cite{Kempel:1}               \\ \hline
+Conductivity            & W/m/K     & 0.29 $\pm$ 0.05                   & TLS                                   & \cite{Kempel:1}               \\ \hline
+Emissivity              &           & 0.88 $\pm$ 0.05                   & FTIR                                  & \cite{Linteris:2}             \\ \hline
+Absorption Coefficient  & m$^{-1}$  & 2561 $\pm$ 140                    & FTIR                                  & \cite{Linteris:2}             \\ \hline
+Pre-Exp. Factor         & s$^{-1}$  & $(2.49 \pm 0.62) \times 10^{14}$  & TGA                                   & \cite{Kempel:1}               \\ \hline
+Activation Energy       & kJ/kmol   & $(2.12 \pm 0.53) \times 10^{5}$   & TGA                                   & \cite{Kempel:1}               \\ \hline
+Heat of Reaction        & kJ/kg     & 507                               & DSC, Literature                       & \cite{Kempel:1,Lyon:Ency2005} \\ \hline
+Heat of Combustion      & kJ/kg     & 19500                             & Cone Calorimeter                      & \cite{Kempel:1}               \\ \hline
+Combustion Efficiency   &           & 1                                 & Assumption                            & \cite{Kempel:1}               \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_PBT}
+\end{table}
+
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+ &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBT_35_solid_only} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBT} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBT_50_solid_only} \\
+ &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBT_70_solid_only}
+\end{tabular*}
+\caption[Mass loss rate of poly(butylene terephtalate) (PBT).]{Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) (PBT)
+in both the Gasification Apparatus and Cone Calorimeter.}
+\label{HRR_PBT}
+\end{figure}
+
+
+\clearpage
+
+
+\subsection{PBT with Glass Fibers (PBT-GF)}
+
+Samples of poly(butylene terephtalate) (PBT), blended with 30~\% by mass glass fibers\footnote{Tradename Arnite TV4-261, DSM Engineering Plastics}, have been burned without oxygen in the Gasification Apparatus and with oxygen in the Cone Calorimeter. The properties of PBT-GF are listed in Table~\ref{Properties_PBT-GF}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
+
+The results of the simulations are shown in Fig.~\ref{HRR_PBTGF}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 33~\%, 50~kW/m$^2$ by 16~\%, and 70~kW/m$^2$ by 5~\%~\cite{Kempel:1}.
+
+\begin{table}[h!]
+\caption[Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).]{Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).
+Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms. Note that the Polymer Specific Heat and Polymer Conductivity
+are the result of averaging the reported temperature dependent properties over the room to decomposition temperature range (300~K -- 650~K).
+The heat capacity value is increased by 0.09~kJ/kg/K to account for the heat of melting (-32~kJ/kg), which takes place at 493~K.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|l|}
+\hline
+Property                &      Units    &      Value                        & Method                                    & Reference                     \\ \hline \hline
+Polymer Density         &     kg/m$^3$  & 1520 $\pm$ 80                     & Direct                                    & \cite{Kempel:1}               \\ \hline
+Polymer Specific Heat   &    kJ/kg/K    & 1.68 $\pm$ 0.26                   & DSC                                       & \cite{Kempel:1}               \\ \hline
+Polymer Conductivity    &      W/m/K    & 0.36 $\pm$ 0.06                   & TLS                                       & \cite{Kempel:1}               \\ \hline
+Polymer Emissivity      &               & 0.87 $\pm$ 0.05                   & FTIR                                      & \cite{Linteris:2}             \\ \hline
+Polymer Absorption Coef.&  m$^{-1}$     & 2860 $\pm$ 150                    & FTIR                                      & \cite{Linteris:2}             \\ \hline
+Char Density            &     kg/m$^3$  &        482                        & Constant Volume                           & \cite{Kempel:1}               \\ \hline
+Char Specific Heat      &    kJ/kg/K    &        0.85                       & Literature                                & \cite{SCHOTT}                 \\ \hline
+Char Conductivity       &      W/m/K    & 0.07 $\pm$ 0.02                   & Laser Flash                               & \cite{Kempel:1}               \\ \hline
+Char Emissivity         &               &       0.85                        & Literature                                & \cite{Braeuer:1}              \\ \hline
+Char Absorption Coef.   &      m$^{-1}$ &       10000                       & Estimated                                 & \cite{Kempel:1}               \\ \hline
+Pre-Exp. Factor         &      s$^{-1}$ & $(2.49 \pm 0.63) \times 10^{14}$  & TGA                                       & \cite{Kempel:1}               \\ \hline
+Activation Energy       &    kJ/kmol    & $(2.12 \pm 0.53) \times 10^{5}$   & TGA                                       & \cite{Kempel:1}               \\ \hline
+Heat of Reaction        &      kJ/kg    &        355                        & DSC, Literature                           & \cite{Kempel:1,Lyon:Ency2005} \\ \hline
+Heat of Combustion      &      kJ/kg    & 19500                             & Cone Calorimeter                          & \cite{Kempel:1}               \\ \hline
+Char Yield              &               & 0.32 $\pm$ 0.05                   & Gasification Device                       & \cite{Kempel:1}               \\ \hline
+Combustion Efficiency   &               &          1                        & Assumption                                & \cite{Kempel:1}               \\ \hline
+\end{tabular}
+\end{center}
+\label{Properties_PBT-GF}
+\end{table}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+ &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBTGF_35_solid_only} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBTGF} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBTGF_50_solid_only} \\
+ &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBTGF_70_solid_only}
+\end{tabular*}
+\caption[Mass loss rate of poly(butylene terephtalate) with glass fibers (PBT-GF).]
+{Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) with glass fibers (PBT-GF) in both the Gasification Apparatus and Cone Calorimeter.}
+\label{HRR_PBTGF}
+\end{figure}
+
+\clearpage
+
+\section{UMD Polymers}
+
+This section contains a description of seven polymers analyzed by J.~Li for his doctoral thesis at the University of Maryland~\cite{Li:Thesis}. In addition to the thesis itself, details of the measurement techniques can be found in Refs.~\cite{Li:IJHMT,Li:CF,Linteris:2,Li:PDS_2014,Li:PDS_2015}.
+
+In the experiments, samples of seven different polymers were exposed to several different heat flux levels in the controlled atmosphere pyrolysis apparatus (CAPA) developed at the University of Maryland. This apparatus is similar to a cone calorimeter, but with a nitrogen environment. Thus, it is similar in function to the Gasification Apparatus. In each experiment, a roughly 6~mm sample was placed upon a wire mesh with no insulated backing. The top side of the sample was exposed to a specified heat flux, while the bottom remained exposed to ambient conditions. The mass loss rate of the sample was measured, and in the sections to follow the measured values are compared to FDS predictions. The seven polymers are organized into groups with one, two, or three degradation steps.
+
+\subsection{One-Step Degradation: ABS, HIPS, and PMMA}
+
+These three polymers are assumed to pyrolyze according to the following single step process:
+\begin{equation}
+   \hbox{Polymer}  \to \hbox{Char} + \hbox{Gas}
+\end{equation}
+The properties of the virgin polymer, the char, and the reaction kinetics are listed in Table~\ref{Properties_ABS_HIPS_PMMA}.
+
+\begin{table}[h!]
+\caption[Properties of ABS, HIPS, and PMMA]{Properties of ABS, HIPS, and PMMA. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
+\centering
+\begin{tabular*}{\textwidth}{|l|@{\extracolsep\fill}c@{\extracolsep\fill}|c|c|c|}
+\hline
+Property                    & Units         & ABS                     & HIPS                    & PMMA                     \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1050                    & 1060                    & 1160                     \\ \hline
+                            &               &                         &                         & $0.45-0.00038 \, T, \; T<378$~K      \\
+\raisebox{1.5ex}[0pt]{Polymer Cond.}        & \raisebox{1.5ex}[0pt]{W/m/K}         & \raisebox{1.5ex}[0pt]{$0.30-0.00028 \, T$}  & \raisebox{1.5ex}[0pt]{$0.10+0.0001  \, T$} & $0.27-0.00024 \, T, \; T\ge 378$~K  \\ \hline
+Polymer Spec.~Heat          & kJ/kg/K       & $1.58+0.0013  \, T$     & $0.59+0.0034  \, T$     & $0.60+0.0036  \, T$      \\ \hline
+Polymer Emissivity          &               & 0.95                    & 0.95                    & 0.95                     \\ \hline
+Polymer Abs.~Coef.          & m$^{-1}$      & 1800                    & 2250                    & 2240                     \\ \hline
+Char Density                & kg/m$^3$      & 80                      & Same as Polymer         & Same as Polymer          \\ \hline
+Char Conductivity           & W/m/K         & $0.13-0.00054 \, T$     & Same as Polymer         & Same as Polymer          \\ \hline
+Char Specific Heat          & kJ/kg/K       & $0.82+0.00011 \, T$     & Same as Polymer         & Same as Polymer          \\ \hline
+Char Emissivity             &               & 0.86                    & Same as Polymer         & Same as Polymer          \\ \hline
+Char Abs.~Coef.             & m$^{-1}$      & 2500                    & Opaque                  & Same as Polymer          \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $1.00\times 10^{14}$    & $1.70\times 10^{20}$    & $8.60\times 10^{12}$     \\ \hline
+Activation Energy           & kJ/kmol       & $2.19\times 10^5$       & $3.01\times 10^5$       & $1.88\times 10^5$        \\ \hline
+Heat of Reaction            & kJ/kg         & 460                     & 689                     & 846                      \\ \hline
+Heat of Combustion          & kJ/kg         & 28750                   & 29900                   & 24450                    \\ \hline
+Residue Fraction            &               & 0.023                   & 0.043                   & 0.015                    \\ \hline
+\end{tabular*}
+\label{Properties_ABS_HIPS_PMMA}
+\end{table}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_30} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/ABS_70}} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_30} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Polymers/HIPS_70}}
+\end{tabular*}
+\caption[Mass loss rate of ABS and HIPS]
+{Comparison of predicted and measured mass loss rates for ABS and HIPS.}
+\label{ABS_HIPS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_20} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_40} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PMMA_60}}
+\end{tabular*}
+\caption[Mass loss rate of PMMA]
+{Comparison of predicted and measured mass loss rates for PMMA.}
+\label{PMMA}
+\end{figure}
+
+\clearpage
+
+\subsection{Two-Step Degradation: Kydex}
+
+This polymer is assumed to pyrolyze according to the following two step process:
+\begin{eqnarray}
+   \hbox{Polymer}       &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac1of2} \\
+   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac2of2}
+\end{eqnarray}
+The properties of the polymer and the reaction kinetics are listed in Table~\ref{Properties_Kydex} and the mass loss rate comparisons are shown on the following page. Note that nominal exposing heat flux values of 30~kW/m$^2$, 50~kW/m$^2$, and 70~kW/m$^2$ were changed slightly in the simulations to account for the fact that the intumescing material surface moved closer to the heater during the course of the experiment~\cite{Li:PDS_2015}.
+
+\begin{table}[!h]
+\caption[Properties of Kydex]{Properties of Kydex. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Property                                 & Units         & Kydex                    \\ \hline \hline
+Polymer Density                          & kg/m$^3$      & 1350                     \\ \hline
+Polymer Cond.                            & W/m/K         & $0.28-0.00029 \, T$      \\ \hline
+Polymer Spec.~Heat                       & kJ/kg/K       & $-0.62+0.00593  \, T$    \\ \hline
+Polymer, Int. Emissivity                 &               & 0.95                     \\ \hline
+Polymer Abs.~Coef.                       & m$^{-1}$      & 2135                     \\ \hline
+Int.~Density                             & kg/m$^3$      & Same as Char             \\ \hline
+Int.~Cond.                               & W/m/K         & $0.55+0.00003 \, T$      \\ \hline
+Int.~Spec.~Heat                          & kJ/kg/K       & $0.27+0.00301  \, T$     \\ \hline
+Int.~Abs.~Coef.                          & m$^{-1}$      & 3000                     \\ \hline
+Char Density                             & kg/m$^3$      & 100                      \\ \hline
+Char Conductivity                        & W/m/K         & $0.21+0.00034 \, T$      \\ \hline
+Char Specific Heat                       & kJ/kg/K       & $1.15+0.00010 \, T$      \\ \hline
+Char Emissivity                          &               & 0.86                     \\ \hline
+Char Abs.~Coef.                          & m$^{-1}$      & 10000                    \\ \hline
+Reac.~\ref{reac1of2} Pre-Exp.~Factor     & s$^{-1}$      & $6.03\times 10^{10}$     \\ \hline
+Reac.~\ref{reac1of2} Act.~Energy         & kJ/kmol       & $1.41\times 10^5$        \\ \hline
+Reac.~\ref{reac1of2} Heat of Reac.       & kJ/kg         & 180                      \\ \hline
+Reac.~\ref{reac1of2} Residue Frac.       &               & 0.45                     \\ \hline
+Reac.~\ref{reac2of2} Pre-Exp.~Factor     & s$^{-1}$      & $1.36\times 10^{10}$     \\ \hline
+Reac.~\ref{reac2of2} Act.~Energy         & kJ/kmol       & $1.74\times 10^5$        \\ \hline
+Reac.~\ref{reac2of2} Heat of Reac.       & kJ/kg         & 125                      \\ \hline
+Reac.~\ref{reac2of2} Residue Frac.       &               & 0.31                     \\ \hline
+Gas Heat of Combustion                   & kJ/kg         & 12650                    \\ \hline
+\end{tabular}
+\label{Properties_Kydex}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_30} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/Kydex_70}}
+\end{tabular*}
+\caption[Mass loss rate of Kydex]
+{Comparison of predicted and measured mass loss rates for Kydex.}
+\label{Kydex}
+\end{figure}
+
+\clearpage
+
+\subsection{Three-Step Degradation: PEI, PET, and POM}
+
+These three polymers are assumed to pyrolyze following the three-step process:
+\begin{eqnarray}
+   \hbox{Polymer}       &\to& \hbox{Melt}  \label{reac1of3} \\
+   \hbox{Melt}          &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac2of3} \\
+   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac3of3}
+\end{eqnarray}
+The property data is listed in Table~\ref{Properties_PEI_PET_POM} and the mass loss rate comparisons are shown on the subsequent pages.
+
+\begin{table}[!h]
+\caption[Properties of PEI, PET, and POM]{Properties of PEI, PET, and POM. Note that the temperature dependence of the thermal conductivity is assumed to be linear, unlike some of those reported in Ref.~\cite{Li:Thesis}.}
+\centering
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Property                                 & Units         & PEI                     & PET                     & POM                      \\ \hline \hline
+Polymer, Melt Density                    & kg/m$^3$      & 1285                    & 1385                    & 1424                     \\ \hline
+Polymer Cond.                            & W/m/K         & $0.40-0.00040 \, T$     & $0.34-0.00046  \, T$    & $0.25+0.00002 \, T$      \\ \hline
+Polymer Spec.~Heat                       & kJ/kg/K       & $-0.04+0.00410  \, T$   & $-0.27+0.00464  \, T$   & $-1.86+0.0099  \, T$     \\ \hline
+Polymer, Melt, Int. Emiss.               &               & 0.95                    & 0.95                    & 0.95                     \\ \hline
+Polymer Abs.~Coef.                       & m$^{-1}$      & 1745                    & 1940                    & 3050                     \\ \hline
+Melt Cond.                               & W/m/K         & $0.32-0.00033 \, T$     & $0.33-0.00002 \, T$     & $0.21+0.00001 \, T$      \\ \hline
+Melt Spec.~Heat                          & kJ/kg/K       & $1.88+0.00057  \, T$    & $2.05-0.00021 \, T$     & $1.65+0.00120  \, T$     \\ \hline
+Melt Abs.~Coef.                          & m$^{-1}$      & 128500                  & Same as Polymer         & Same as Polymer          \\ \hline
+Int.~Density                             & kg/m$^3$      & Same as Char            & 730                     & Same as Polymer          \\ \hline
+Int.~Cond.                               & W/m/K         & $0.45+0.00019 \, T$     & $0.45+0.00020  \, T$    & $0.19-0.00006 \, T$      \\ \hline
+Int.~Spec.~Heat                          & kJ/kg/K       & $1.59+0.00031  \, T$    & $1.44-0.00005  \, T$    & Same as Melt             \\ \hline
+Int.~Abs.~Coef.                          & m$^{-1}$      & 8000                    & 1025                    & Same as Polymer          \\ \hline
+Char Density                             & kg/m$^3$      & 80                      & 80                      & Same as Int.             \\ \hline
+Char Conductivity                        & W/m/K         & $0.45+0.00013 \, T$     & $0.34+0.00046  \, T$    & Same as Polymer          \\ \hline
+Char Specific Heat                       & kJ/kg/K       & $1.30+0.00004 \, T$     & $0.82+0.00011 \, T$     & Same as Int.             \\ \hline
+Char Emissivity                          &               & 0.86                    & 0.86                    & Same as Polymer          \\ \hline
+Char Abs.~Coef.                          & m$^{-1}$      & Same as Int.            & 8000                    & Same as Polymer          \\ \hline
+Reac.~\ref{reac1of3} Pre-Exp.~Factor     & s$^{-1}$      & 1                       & $1.50\times 10^{36}$    & $2.69\times 10^{42}$     \\ \hline
+Reac.~\ref{reac1of3} Act.~Energy         & kJ/kmol       & 0                       & $3.80\times 10^5$       & $3.82\times 10^5$        \\ \hline
+Reac.~\ref{reac1of3} Heat of Reac.       & kJ/kg         & 1                       & 30                      & 192                      \\ \hline
+Reac.~\ref{reac1of3} Residue Frac.       &               & 1                       & 1                       & 1                        \\ \hline
+Reac.~\ref{reac2of3} Pre-Exp.~Factor     & s$^{-1}$      & $7.66\times 10^{27}$    & $1.60\times 10^{15}$    & $3.84\times 10^{14}$     \\ \hline
+Reac.~\ref{reac2of3} Act.~Energy         & kJ/kmol       & $4.65\times 10^5$       & $2.35\times 10^5$       & $2.00\times 10^5$        \\ \hline
+Reac.~\ref{reac2of3} Heat of Reac.       & kJ/kg         & -80                     & 220                     & 1192                     \\ \hline
+Reac.~\ref{reac2of3} Residue Frac.       &               & 0.65                    & 0.18                    & 0.4                      \\ \hline
+Reac.~\ref{reac3of3} Pre-Exp.~Factor     & s$^{-1}$      & $6.50\times 10^{2}$     & $3.53\times 10^{4}$     & $4.76\times 10^{44}$     \\ \hline
+Reac.~\ref{reac3of3} Act.~Energy         & kJ/kmol       & $0.88\times 10^5$       & $0.96\times 10^5$       & $5.90\times 10^5$        \\ \hline
+Reac.~\ref{reac3of3} Heat of Reac.       & kJ/kg         & -5                      & 250                     & 1352                     \\ \hline
+Reac.~\ref{reac3of3} Residue Frac.       &               & 0.77                    & 0.72                    & 0.018                    \\ \hline
+Gas Heat of Combustion                   & kJ/kg         & 18050                   & 15950                   & 14350                    \\ \hline
+\end{tabular}
+\label{Properties_PEI_PET_POM}
+\end{table}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_70} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PEI_90}} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/PET_70}
+\end{tabular*}
+\caption[Mass loss rate of PEI and PET]
+{Comparison of predicted and measured mass loss rates for PEI and PET.}
+\label{PEI_PET}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_30} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_50} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Polymers/POM_70}}
+\end{tabular*}
+\caption[Mass loss rate of POM]
+{Comparison of predicted and measured mass loss rates for POM.}
+\label{POM}
+\end{figure}
+
+\clearpage
+
+\section{Corrugated Cardboard}
+\label{Cardboard}
+
+Table~\ref{Properties_Cardboard} lists the measured properties of a double-wall corrugated cardboard with the conventional U.S.~designation 69-23B-69-23C-69. Corrugated cardboard is characterized by alternating layers of homogeneous, planar liner boards and corrugated sections made up of periodic flutes. The numbers in the specification indicate the areal density in lb/(1000~ft$^2$) and the letters indicate the flute designation (B indicates a range of 45 to 52 flutes per foot and C indicates a range of 39 to 43 flutes per foot). It is assumed that each layer consists of the same lingo-cellulosic, charring material with the density defined as the mass of the solid material divided by the volume of the layer. This representation requires slightly different definitions for the properties of each unique layer -- liner board (LB), C-flute layer (CFL), and B-flute layer (BFL).
+
+The reaction mechanism for the cardboard material includes one reaction to describe the release of residual moisture and three sequential reactions to describe the thermal degradation of the virgin material to a final residual char. Each of the initial solid components (LB, CFL, and BFL) undergoes the same four-step mechanism.
+\begin{eqnarray}
+   \hbox{Moisture} &\to& \hbox{Water Vapor}  \\
+   \hbox{Virgin Cardboard}  &\to& \hbox{Intermediary Solid} + \hbox{Fuel Gas 2}  \\
+   \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas 3}  \\
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas 4}
+\end{eqnarray}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|l|l|}
+\caption[Properties of corrugated cardboard.]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\label{Properties_Cardboard} \\
+\hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\endhead
+Property                          & Units         & Value                                   & Method                                    & Reference                             \\ \hline \hline
+Moisture Density                  & kg/m$^3$      & 1000                                    & Direct                                    & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Conductivity	          & W/m/K	      & 0.1	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
+Moisture Specific Heat	          & kJ/kg/K	      & 4.19	                                & Literature	                            & \cite{Coblentz:1}                     \\ \hline
+Moisture Emissivity	 	          &               & 0.7	                                    & Inherited             	                & \cite{McKinnon:CF2013}                \\ \hline
+LB Density	                      & kg/m$^3$      &	520	                                    & Direct	                                & \cite{McKinnon:CF2013}                \\ \hline
+LB Conductivity	                  & W/m/K	      & 0.1	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+LB Emissivity	 	              &               & 0.7	                                    & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Density	          & kg/m$^3$	  & 468	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-11}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+LB Intermediary Emissivity	 	  &               & 0.775	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Density	              & kg/m$^3$	  & 173	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+LB Char 2 Density	              & kg/m$^3$	  & 102	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-10}\times T^3$          & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Specific Heat	          & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+LB Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Density	                      & kg/m$^3$	  & 49	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Density	      & kg/m$^3$	  & 44	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Intermediary Emissivity	 	  &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Density	              & kg/m$^3$	  & 16	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+CFL Char 2 Density	              & kg/m$^3$	  & 9.4	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+CFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Density	                      & kg/m$^3$	  & 74	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Conductivity	              & W/m/K	      & 0.1                                     & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Specific Heat	              & kJ/kg/K	      & 1.8	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Emissivity	 	              &               & 0.7 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Density	      & kg/m$^3$	  & 67	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Conductivity	  & W/m/K	      & $0.05 + 7.5\times 10^{-10}\times T^3$   & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Specific Heat	  & kJ/kg/K	      & 1.55	                                & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Intermediary Emissivity       &               & 0.775 	                                & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Density	              & kg/m$^3$	  & 25	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 1 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+BFL Char 2 Density	              & kg/m$^3$	  & 15	                                    & Constant Volume                           & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Conductivity	          & W/m/K	      & $1.5\times 10^{-9}\times T^3$           & Inverse Analysis                          & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Specific Heat	      & kJ/kg/K	      & 1.3	                                    & DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+BFL Char 2 Emissivity	 	      &               & 0.85	                                & Literature	                            & \cite{Matsumoto:IJT1995}              \\ \hline
+Reaction 1 Pre-Exp.~Factor        & s$^{-1}$	  & 6.14	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 1 Activation Energy	  & kJ/mol	      & 23500                                   & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 1 Heat of Reaction       &	kJ/kg	      & 2445	                                & Literature                                & \cite{Coblentz:1}                     \\ \hline
+Reaction 1 Char Yield	 	      &               & 0	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Pre-Exp.~Factor        & s$^{-1}$      & $7.95\times 10^9$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Activation Energy	  & kJ/mol	      & $1.30\times 10^5$                       & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Char Yield	 	      &               & 0.9	                                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 2 Heat of Reaction       & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 2 Heat of Combustion     & kJ/kg	      & 18500	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Pre-Exp.~Factor        & s$^{-1}$	  & $2\times 10^{11}$                   	& TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Activation Energy	  & kJ/mol	      & $1.60\times 10^5$	                    & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Char Yield	 	      &               & 0.37	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 3 Heat of Reaction	      & kJ/kg	      & 126                                 	& DSC                                       & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 3 Heat of Combustion     & kJ/kg	      & 13600	                                & MCC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Pre-Exp.~Factor        & s$^{-1}$	  & 0.0261	                                & TGA	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Activation Energy	  & kJ/mol	      & 17000	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Char Yield	 	      &               & 0.59	                                & TGA                                       & \cite{McKinnon:CF2013}                \\ \hline
+Reaction 4 Heat of Reaction	      & kJ/kg	      & 0                                       & DSC	                                    & \cite{McKinnon:CF2013}                \\ \hline
+Fuel Gas 4 Heat of Combustion     & kJ/kg	      & 14000                               	& MCC                                       & \cite{McKinnon:CF2013}                \\ \hline
+\end{longtable}
+
+\noindent Table~\ref{Dimensions_Cardboard} lists the composition and thickness of each of the layers. The sample is insulated with 28~mm of Kaowool PM board, manufactured by ThermalCeramics (www.thermalceramics.com).
+\begin{table}[h!]
+\caption[Cardboard composition and dimensions]{Cardboard composition and dimensions.}
+\begin{center}
+\begin{tabular}{|c|l|c|l|l|}
+\hline
+Layer	  & Composition   & Thickness (mm) \\ \hline \hline
+1	      & Liner Board	  & 0.64       \\ \hline
+2	      & C Flute Layer & 3.2        \\ \hline
+3	      & Liner Board	  & 0.64       \\ \hline
+4	      & B Flute Layer & 2.1        \\ \hline
+5	      & Liner Board	  & 0.64       \\ \hline
+6	      & Kaowool	      & 28         \\ \hline
+\end{tabular}
+\end{center}
+\label{Dimensions_Cardboard}
+\end{table}
+The gasification experiments were conducted in a modified cone calorimeter referred to as the controlled atmosphere pyrolysis apparatus (CAPA)~\cite{Semmes:IAFSS11}, in which the sample is surrounded by nitrogen to prevent ignition. Measured and predicted mass loss rates at imposed heat fluxes of 20~kW/m$^2$, 40~kW/m$^2$, and 60~kW/m$^2$ are shown in Fig.~\ref{MLR_Cardboard}.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_20} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_40} \\
+ & \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/Cardboard_DW_60}
+\end{tabular*}
+\caption[Mass loss rate of corrugated cardboard]{Mass loss rate of corrugated cardboard.}
+\label{MLR_Cardboard}
+\end{figure}
+
+
+
+
+
+\clearpage
+
+
+\section{Electrical Cables (CHRISTIFIRE)}
+
+The U.S.~Nuclear Regulatory Commission has sponsored a study of the burning behavior of electrical cables typically found in nuclear power plants~\cite{CHRISTIFIRE}. The project has been given the acronym CHRISTIFIRE (\underline{C}able \underline{H}eat \underline{R}elease, \underline{I}gnition, and \underline{S}pread in \underline{T}ray \underline{I}nstallations). In this section, the modeling of a particular type of cable is presented. The sample cable (referred to as 701 in the report) has seven conductors and is 14~mm in diameter. The jacket material is polyvinyl chloride (PVC) and the insulation is polyethylene (PE). The mass fractions are 0.24 and 0.18, respectively, and the remaining mass is copper.
+
+Thermo-gravimetric analysis (TGA) with a heating rate of 10~K/min and micro-combustion calorimetry (MCC) with a heating rate of 60~K/min were performed for the jacket and insulation materials separately. Cone calorimeter experiments were performed for sample of seven 10~cm cable segments at exposing heat fluxes of 25~kW/m$^2$, 50~kW/m$^2$, and 75~kW/m$^2$. The experimental methods are explained in Section~\ref{sec_FAA_Polymers}.
+
+\subsection{Estimation of Pyrolysis Kinetics}
+
+The pyrolysis kinetics were estimated from the TGA results. The kinetic parameters depend on the choice of the reaction path, and for this example two different reaction paths are used. The first one (v1) consists of several parallel, independent reactions that each yield both fuel (combustible) and inert (incombustible) gas. The last reaction also yields residue. The second reaction path (v2) is more complex. For the PVC jacket, the model consists of three components: pure PVC, plasticizer and CaCO$_3$. Pure PVC degrades in two steps, first yielding inert gas and small amounts of fuel gas and residue, and second yielding larger amounts of fuel gas and residue. In air, the residual char is also oxidized, which contributes to the greater mass loss and release of fuel at high temperatures. The plasticizer degrades simultaneously with the first reaction of PVC yielding fuel gas. CaCO$_3$ degrades at high temperatures yielding only inert gas and residue. The initial mass fraction of these three components, the reaction yields and the heats of combustion are determined by comparing the mass loss results of the TGA analysis to the heat release results of the MCC.
+
+The estimated reaction parameters are listed in Tables~\ref{christifire_kin_parameters_v1} and~\ref{christifire_kin_parameters_v2}.
+The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_results}.
+
+\begin{table}[h!]
+\caption[Kinetic parameters for CHRISTIFIRE cable 701 v1.]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable~701 v1. The values are provided in the same units as in FDS input file.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|c|}
+ \hline
+   & \multicolumn{4}{c}{Sheath} & \multicolumn{3}{|c|}{Insulation} \\
+ \hline
+   & Comp 1 & Comp 2 & Comp 3 & Comp 4 & Comp 1 & Comp 2 & Comp 3 \\
+   \hline
+   \textct{MATL\_MASS\_FRACTION} &  0.6 & 0.13 & 0.034 & 0.229 & 0.57 & 0.12 & 0.31 \\
+  \hline
+  \textct{A} & 3.6$\cdot$10$^{21}$ & 1.2$\cdot$10$^{29}$ & 5.1$\cdot$10$^{15}$ & 6.0$\cdot$10$^{12}$ & 1.3$\cdot$10$^{25}$ & 1.9$\cdot$10$^{27}$ & 1.6$\cdot$10$^{12}$ \\
+  \hline
+  \textct{E} & 2.4$\cdot$10$^5$ & 3.8$\cdot$10$^5$ & 3.0$\cdot$10$^5$ & 2.5$\cdot$10$^5$ & 2.7$\cdot$10$^5$ & 3.6$\cdot$10$^5$ & 2.1$\cdot$10$^5$ \\
+    \hline
+  \textct{N\_S} & 2.9 & 4.1 & 2.7 & 1.4 & 3.2 & 3.7 & 4.4 \\
+    \hline
+  \textct{N\_O2} & - & - & - & 1.5 & - & - & - \\
+    \hline
+  \textct{NU\_SPEC} (propane) & 0.33 & 0.77 & 0.0 & 0.34 & 0.31 & 0.86 & 0.0 \\
+    \hline
+  \textct{NU\_SPEC} (water vapor) & 0.67 & 0.23 & 1.0 & 0.0 & 0.69 & 0.14 & 0.17 \\
+    \hline
+  \textct{NU\_MATL} & 0.0 & 0.0 & 0.0 & 0.66 & 0.0 & 0.0 & 0.83 \\
+    \hline
+  \textct{MATL\_ID} & - & - & - & ASH & - & - & CHAR-I \\
+  \hline
+  \textct{HEAT\_OF\_COMBUSTION} & 46450 & 46450 & 0 & 45000 & 46450 & 46450 & 0 \\
+  \hline
+
+\end{tabular}
+\end{center}
+\label{christifire_kin_parameters_v1}
+\end{table}
+
+\begin{table}[h!]
+\caption[Kinetic parameters for CHRISTIFIRE cable 701 v2.]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable 701 v2. The values are provided in the same units as in FDS input file.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+ \hline
+   & \multicolumn{5}{|c}{Sheath} & \multicolumn{3}{|c|}{Insulation} \\
+ \hline
+   & Comp 1 & Comp 2 & Comp 3 & Comp 4 & Comp 5 & Comp 1 & Comp 2 & Comp 3 \\
+    & 'PVC 1' & 'PVC 2' & 'Plast.' &  'CaCO$_3$' & 'Char' & 'Plast.' & 'PE' & CaCO$_3$ \\
+   \hline
+   \textct{MATL\_MASS} &  0.514 & 0.0 & 0.268 & 0.218 & 0.0 & 0.57 & 0.12 & 0.31 \\
+   \textct{\_FRACTION} & & & & & & & & \\
+  \hline
+  \textct{A} & 2.1$\cdot$10$^{26}$ &  2.0$\cdot$10$^{25}$ & 2.1$\cdot$10$^{26}$ & 9.8$\cdot$10$^{24}$ & 2.3$\cdot$10$^{10}$ & 1.3$\cdot$10$^{25}$ & 1.9$\cdot$10$^{27}$ & 1.6$\cdot$10$^{12}$\\
+  \hline
+  \textct{E} & 2.8$\cdot$10$^{5}$ &  3.2$\cdot$10$^{5}$ & 2.8$\cdot$10$^{5}$ & 2.9$\cdot$10$^{5}$ & 2.3$\cdot$10$^{5}$ &  2.7$\cdot$10$^{5}$ & 3.6$\cdot$10$^{5}$ & 2.1$\cdot$10$^{5}$\\
+    \hline
+  \textct{N\_S} & 3.7 & 4.9 & 3.7 &  0.96 & 1.2 & 3.2 & 3.7 &  4.4\\
+    \hline
+  \textct{N\_O2} & - & - & - & - & 1.5 & - & - &  \\
+    \hline
+  \textct{NU\_SPEC} &  0.043 & 0.751 & 1.0 & 0.0 & 0.34 & 1.0 & 1.0 & 0.0 \\
+   (propane) & & & & & & & & \\
+    \hline
+  \textct{NU\_SPEC} & 0.602 & 0.0 & 0.0 & 0.34 & 0.0 & 0.0 & 0.0 & 0.17\\
+     (water vapor) & & & & & & & & \\
+    \hline
+  \textct{NU\_MATL} & 0.355 & 0.249 & 0.0 & 0.816 & 0.66 & 0.0 & 0.0 & 0.83\\
+    \hline
+  \textct{MATL\_ID}  & COMP 2 & CHAR-S & - & CHAR-S & ASH & - & - & CHAR-I\\
+  \hline
+  \textct{HEAT\_OF} & 49100 & 35800 & 30200 & 0.0 & 37000 & 14445 & 39734 & 0.0\\
+  \textct{\_COMBUSTION} & & & & & & & & \\
+  \hline
+\end{tabular}
+\end{center}
+\label{christifire_kin_parameters_v2}
+\end{table}
+
+\begin{figure}[h!]
+\begin{tabular}{c c}
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_tga} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_tga} \\
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_mcc} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_mcc} \\
+\end{tabular}
+\caption{Small scale results of the CHRISTIFIRE cable 701 sheath and insulation.}
+\label{christifire_small_scale_results}
+\end{figure}
+
+\subsection{Estimation of Thermal Parameters and Validation}
+
+The remaining pyrolysis model parameters were estimated by fitting the calculated cone calorimeter results to the experimental ones at 50~kW/m$^2$ heat flux.
+The cone calorimeter sample consisting of seven cables is modeled as a rectangular solid. The layer structure of the cable sample is assumed to be
+symmetrical:
+\begin{enumerate}
+\item sheath (2.1 mm)
+\item insulation (2.1 mm)
+\item conductor (2.5 mm)
+\item insulation (2.1 mm)
+\item sheath (2.1 mm)
+\item insulating calcium silicate backing board (20 mm)
+\end{enumerate}
+The layer thicknesses are calculated using the component mass fractions and densities.
+For fitting the thermal parameters, the experimental heat release rate and mass loss rate curves were used. The results of the fitted models are shown in
+Fig.~\ref{christifire_cone_results_50}. The remaining parameters for v1 and v2 are listed in the following tables.
+
+Next, the model parameters were fixed and the model is validated by comparing the FDS and eperimental results at 25~kW/m$^2$ and 75~kW/m$^2$ heat fluxes.
+The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
+
+\begin{table}
+\begin{center}
+\caption{Thermal parameters for CHRISTIFIRE cable 701 v1.}
+\begin{tabular}{|l|c|c|c|c|c|}
+ \hline
+ & \textct{DENSITY} & \textct{CONDUCTIVITY} & \textct{SPECIFIC\_HEAT} & \textct{HEAT\_OF\_REACTION} & \textct{EMISSIVITY} \\
+ \hline
+ \multicolumn{6}{|c|}{Sheath}\\
+  \hline
+   Comp 1 & 1542 & 0.15 & 3.22 & 1607 & 0.7 \\
+    \hline
+   Comp 2 & 1542 & 0.18 & 3.45 & 1425 & 1.0\\
+    \hline
+   Comp 3 & 1542 & 0.10 & 3.50 & 43 & 1.0\\
+    \hline
+   Comp 4 & 1542 & 0.1 & 3.5 & 40 & 1.0\\
+    \hline
+   Ash & 344 & 0.12 & 3.5 & - & 0.85\\
+    \hline
+    \multicolumn{6}{|c|}{Insulation}\\
+     \hline
+     Comp 1 & 1153 & 0.78 & 3.36 & 1408 & 1.0\\
+     \hline
+     Comp 2 & 1153 & 1.0 & 3.40 & 1516 & 1.0\\
+     \hline
+     Comp 3 & 1153 & 0.09 & 2.74 & 445 & 1.0\\
+     \hline
+     CHAR-I & 297 & 0.01 & 1.29 & - & 1.0\\
+     \hline
+\end{tabular}
+\end{center}
+\label{thermal_param_v1}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption{Thermal parameters for CHRISTIFIRE cable 701 v2.}
+\begin{tabular}{|l|c|c|c|c|c|}
+ \hline
+ & \textct{DENSITY} & \textct{CONDUCTIVITY} & \textct{SPECIFIC\_HEAT} & \textct{HEAT\_OF\_REACTION} & \textct{EMISSIVITY} \\
+ \hline
+ \multicolumn{6}{|c|}{Sheath}\\
+  \hline
+   Comp 1 & 1542 & 0.15 & 3.4 & 206 & 1.0\\
+    \hline
+   Comp 2 &  281 & 0.20 & 2.3 & 1783 & 1.0\\
+    \hline
+   Comp 3 & 1542 & 0.19 & 2.8 & 1112 & 1.0\\
+    \hline
+   Comp 4 & 1542 & 0.48 & 3.5 & 1669 & 1.0\\
+    \hline
+   Comp 5 & 344 & 0.2 & 2.5 & 1500 & 1.0\\
+    \hline
+   Ash & 235 & 0.6 & 3.0 & - & 1.0\\
+    \hline
+    \multicolumn{6}{|c|}{Insulation}\\
+     \hline
+     Comp 1 & 1153 & 0.59 & 3.0 & 691 & 1.0 \\
+     \hline
+     Comp 2 & 1153 & 0.25 & 1.94 & 1760 & 1.0\\
+     \hline
+     Comp 3 & 1153 & 0.28 & 2.9 & 353 & 1.0\\
+     \hline
+     CHAR-I & 297 & 0.34 & 1.3 & - & 1.0\\
+     \hline
+\end{tabular}
+\end{center}
+\label{thermal_param_v2}
+\end{table}
+
+\begin{figure}[h!]
+\begin{tabular}{c c}
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_50} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50} \\
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50} &
+\end{tabular}
+\caption{Cone calorimeter fitting of CHRISTIFIRE cable 701 at 50~kW/m$^2$ heat flux.}
+\label{christifire_cone_results_50}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular}{c c}
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_25} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_75} \\
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_25} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_75} \\
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75} &
+ \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25}
+\end{tabular}
+\caption{Cone calorimeter validation of CHRISTIFIRE cable 701 at 25 and 75~kW/m$^2$ heat fluxes.}
+\label{christifire_cone_results_other_fluxes}
+\end{figure}
+
+\clearpage
+
+\section{Liquid Pool Fires}
+
+In this section, the predicted burning rates of a variety of liquid fuels confined within a 10~cm deep, 1~m square tray are compared with an empirical correlation. The burning rate of liquid hydrocarbon fuels has been found to correlate well~\cite{SFPE:Gottuk_and_White} with the ratio of the heat of combustion, $\Delta h_{\rm c}$, and the heat of gasification, $\Delta h_{\rm g}$:
+\begin{equation}
+\dot{m}''= 0.001 \; \frac{\Delta h_{\rm c}}{\Delta h_{\rm g}} \quad ; \quad \Delta h_{\rm g} = \Delta h_{\rm v} + \int_{T_0}^{T_{\rm b}} c_p \; dT
+\label{poolcorr}
+\end{equation}
+where $\Delta h_{\rm v}$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_{\rm b}$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. Figure~\ref{POOL_MLR} shows a comparison of predicted burning rates with experimental values listed in Ref.~\cite{SFPE:Gottuk_and_White} or the correlation, Eq.~(\ref{poolcorr}).
+
+Table~\ref{fuelprops} lists the liquid fuel properties used in the simulations. Note that the heats of vaporization are evaluated at the liquid boiling points. The thermal conductivities, $k$, are found in Ref.~\cite{CRCHandbook}, except for butane, which is found in Ref.~\cite{Webbook:FluidThermo}. The heats of combustion, $\Delta h_{\rm v}$, are computed in FDS based on the heats of formation of the reactants and products listed in Ref.~\cite{NIST_JANAF}. The heats of combustion account for the presence of products of incomplete combustion, like CO and soot.
+
+The effective absorption coefficients. $\kappa$, for benzene and ethanol are based on curve fits to experimental data as explained in Appendix~K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix~K is calculated with the assumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
+
+\begin{table}[h!]
+\begin{center}
+\caption{Liquid fuel properties.} \label{fuelprops}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|} \hline
+        & $\rho$               & $c_p$                        & $k$                &  $\Delta h_{\rm v}$         &  $\Delta h_{\rm c}$  & $\chi_{\rm r}$       & $y_{\rm CO}$         & $y_{\rm s}$          & $T_{\rm b}$                    & $\kappa$  \\
+Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                & \si{\kJ/\kg}         &                      &  \si{\g/\g}          &  \si{\g/\g}          & $^\circ$C                      & m$^{-1}$  \\
+        & \cite{Babrauskas:1}  & \cite{Webbook:HeatCapacity}  & \cite{CRCHandbook} &  \cite{Webbook:FluidThermo} & See text             & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{Webbook:BoilingPoint}    & See text  \\
+\hline \hline
+Acetone  &  791  &  2.13   & 0.20  &   501   & 28555  & 0.27 & 0.003 & 0.014 & 56.3 & 100    \\ \hline
+Benzene  &  874  &  1.74   & 0.14  &   393   & 33823  & 0.60 & 0.067 & 0.181 & 80.3 & 123    \\ \hline
+Butane   &  573  &  2.28   & 0.12  &   385   & 44680  & 0.31 & 0.007 & 0.029 & 0    & 100    \\ \hline
+Ethanol  &  794  &  2.44   & 0.17  &   837   & 27474  & 0.25 & 0.001 & 0.008 & 78.5 & 1534.3 \\ \hline
+Heptane  &  675  &  2.24   & 0.14  &   317   & 43580  & 0.33 & 0.010 & 0.037 & 98.5 & 187.5  \\ \hline
+Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 64.8 & 1500   \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/acetone_1_m} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/benzene_1_m} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/butane_1_m} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/ethanol_1_m} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/heptane_1_m} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/methanol_1_m} \\
+\end{tabular*}
+\caption[Comparison of burning rates for various liquid pool fires.]{Comparison of burning rates for various liquid pool fires.}
+\label{POOL_MLR}
+\end{figure}
+
+\clearpage
+
+\section{Wildland Fire Spread (CSIRO Grassland Fires)}
+\label{WUI}
+
+This section contains a description and results for simulations of two of the CSIRO Grassland Fire experiments. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/CSIRO_Grassland_Fires/Case_F19_0358.png}
+\caption[Snapshot of the simulation of CSIRO Grassland Fire F19]{Snapshot of the simulation of CSIRO Grassland Fire F19.}
+\label{F19}
+\end{figure}
+
+A snapshot of the simulation of Experiment~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented by 800,000 Lagrangian particles with a cylindrical geometry, or about 5 simulated blades per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
+
+
+
+\begin{table}[ht]
+\begin{center}
+\caption[Measured properties for the CSIRO Grassland Fire cases]{Measured properties for the CSIRO Grassland Fire cases~\cite{Cheney:IJWF1993}.}
+\label{Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units         & Case F19      & Case C064     \\ \hline \hline
+Wind Speed                      & m/s           & 4.8           & 4.6           \\ \hline
+Ambient Temperature             & $^\circ$C     & 34            & 32            \\ \hline
+Surface Area to Volume Ratio    & m$^{-1}$      & 12240         & 9770          \\ \hline
+Grass Height                    & m             & 0.51          & 0.21          \\ \hline
+Bulk Mass per Unit Area         & kg/m$^2$      & 0.313         & 0.283         \\ \hline
+Moisture Fraction               & \%            & 5.8           & 6.3           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption[Assumed properties for dry grass and soil]{Assumed properties for various types of dried grass and soil. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\label{Assumed_Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
+Heat of Combustion              & kJ/kg                 & 15600                     & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
+Char Yield                      & kg/kg                 & 0.2                       & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                       & Various sources                       \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
+Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
+Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
+Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19}
+\end{tabular*}
+\caption[Comparison measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison measured and predicted fire front position for the CSIRO Grassland Fires.}
+\label{CSIRO}
+\end{figure}
+
+
+\clearpage
+
+\section{Burning Trees (NIST Douglas Firs)}
+\label{Douglas_Firs}
+
+This section contains a description and results of three Douglas fir tree fire simulations. Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
+
+Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fig.~\ref{tree_snaps}. The computational domain in this case is 2~m by 2~m by 4~m. The grid cells are 5~cm cubes. The pine needles are represented by 130,000 Lagrangian particles with a cylindrical geometry, or about 25 simulated needles per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated pine needle or segment of roundwood represents many more actual needles or segments. The weighting factor is determined from the estimated bulk mass per unit volume. The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}.
+
+\begin{figure}[ht]
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0290}
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0544}
+\includegraphics[width=2in]{FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc_0879}
+\caption[Snapshots of a 2~m Douglas fir fire simulation]{Snapshots of the simulation of the 2~m tall Douglas fir tree, 14~\% moisture.}
+\label{tree_snaps}
+\end{figure}
+
+\begin{table}[ht]
+\begin{center}
+\caption[Measured properties for the NIST Douglas fir trees]{Measured properties for the NIST Douglas fir trees~\cite{Mell:2009}.}
+\label{Properties_Trees}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Property                                & Units         & Case 1        & Case 2        & Case 3     \\ \hline \hline
+Replicate Experiments                   & --            & 6             & 3             & 3          \\ \hline
+Avg.~Crown Height                       & m             & 1.9           & 1.9           & 4.2        \\ \hline
+Avg.~Base Height                        & m             & 0.15          & 0.15          & 0.3        \\ \hline
+Avg.~Base Width                         & m             & 1.7           & 1.7           & 2.9        \\ \hline
+Foliage Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
+Avg.~Initial Mass                       & kg            & 9.7           & 13.5          & 57.9       \\ \hline
+Avg.~Moisture Fraction                  & \%            & 14            & 49            & 26         \\ \hline
+Assumed Bulk Mass per Unit Volume       & kg/m$^3$      & 3.2           & 4.6           & 2.7        \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption[Assumed properties for the vegetation]{Assumed properties for the vegetation. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\label{Assumed_Properties_Trees}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption, Cellulose                 \\ \hline
+Heat of Combustion              & kJ/kg                 & 17700                     & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
+Char Yield                      & kg/kg                 & 0.26                      & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & 1.2                       & Various sources                       \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 2                         & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 514                       & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\newpage
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_2_m_14_pc} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_2_m_49_pc} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_Douglas_Firs/tree_5_m_26_pc} }
+\end{tabular*}
+\caption[Comparison measured and predicted mass loss rate for the Douglas fir tree experiments]{Comparison measured and predicted mass loss rate for the Douglas fir tree experiments.}
+\label{NIST_Douglas_Fir_MLR}
+\end{figure}
+
+
+\clearpage
+
+
+\section{Summary of Burning Rates}
+\label{Burning Rate}
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates}
+\end{tabular}
+\end{center}
+\caption[Summary of burning rate predictions]{Summary of burning rate predictions.}
+\end{figure}
+
+
+
+

@@ -1,0 +1,100 @@
+\documentclass[border=.1cm]{standalone}
+\usepackage{tikz}
+\usepackage{times}
+\usepackage{pgfplots}
+
+\begin{document}
+
+\pgfdeclarelayer{background layer}
+\pgfdeclarelayer{foreground layer}
+\pgfsetlayers{background layer,main,foreground layer}
+
+\begin{tikzpicture}
+
+\begin{scope}[x={(0.71cm,.3cm)},y={(0cm,1cm)},z={(1cm,-0.5cm)}]
+
+\path (1,0,0);
+\pgfgetlastxy{\cylxx}{\cylxy}
+\path (0,1,0);
+\pgfgetlastxy{\cylyx}{\cylyy}
+\path (0,0,1);
+\pgfgetlastxy{\cylzx}{\cylzy}
+\pgfmathsetmacro{\cylt}{(\cylzy * \cylyx - \cylzx * \cylyy)/ (\cylzy * \cylxx - \cylzx * \cylxy)}
+\pgfmathsetmacro{\ang}{atan(\cylt)}
+\pgfmathsetmacro{\ct}{1/sqrt(1 + (\cylt)^2)}
+\pgfmathsetmacro{\st}{\cylt * \ct}
+\pgfmathsetmacro{\os}{10}
+
+\begin{scope}[every path/.style={thick}]
+
+\draw (0,0,0) circle[radius=1];
+\draw (\ct,\st,0) -- ++(0,0,-4);
+\draw (-\ct,-\st,0) -- ++(0,0,-4);
+\draw (\ct,\st,-4) arc[start angle=\ang,delta angle=180,radius=1];
+
+\begin{scope}[xshift=\os cm,yshift=0cm]
+\fill[white,shift={+(0,.5)}] (0,0,0) -- ++(0,0,-4) -- (-.71,.71,-4) arc[start angle=135,delta angle=-90,radius=1] -- (.71,.71,-4) -- ++(0,0,4) -- (0,0,0);
+\draw[shift={+(0,.5)}] (-.71,.71,0) arc[start angle=135,delta angle=-90,radius=1];
+\draw[shift={+(0,.5)}] (-.71,.71,-4) arc[start angle=135,delta angle=-90,radius=1];
+\draw[shift={+(0,.5)}] (0,0,0) -- (.71,.71,0);
+\draw[shift={+(0,.5)}] (0,0,0) -- (-.71,.71,0);
+\draw[shift={+(0,.5)}] (0,0,-4) -- (-.71,.71,-4);
+\draw[shift={+(0,.5)}] (-.71,.71,0) -- (-.71,.71,-4);
+\draw[shift={+(0,.5)}] (.71,.71,0) -- (.71,.71,-4);
+\draw[shift={+(0,.5)}] (0,0,0) -- ++(0,0,-4);
+\end{scope}
+
+\begin{pgfonlayer}{background layer}
+\begin{scope}[xshift=\os cm,yshift=0cm]
+\draw[shift={+(0,-.5)}] (-.71,-.71,0) arc[start angle=225,delta angle=90,radius=1];
+\draw[shift={+(0,-.5)}] (0,0,0) -- (-.71,-.71,0);
+\draw[shift={+(0,-.5)}] (0,0,0) -- (.71,-.71,0);
+\draw[shift={+(0,-.5)}] (0,0,-4) -- (-.71,-.71,-4);
+\draw[shift={+(0,-.5)}] (-.71,-.71,0) -- (-.71,-.71,-4);
+\draw[shift={+(0,-.5)}] (0,0,0) -- (0,0,-4);
+\end{scope}
+\end{pgfonlayer}
+
+\begin{pgfonlayer}{background layer}
+\begin{scope}[xshift=\os cm+.0 cm,yshift=0cm]
+\draw[shift={+(.5,0)}] (.71,.71,0) arc[start angle=45,delta angle=-90,radius=1];
+\draw[shift={+(.5,0)}] (0,0,0) -- (.71,.71,0);
+\draw[shift={+(.5,0)}] (0,0,0) -- (.71,-.71,0);
+\draw[shift={+(.5,0)}] (0,0,-4) -- (.71,.71,-4);
+\draw[shift={+(.5,0)}] (0,0,-4) -- (.71,-.71,-4);
+\draw[shift={+(.5,0)}] (.71,.71,0) -- (.71,.71,-4);
+\draw[shift={+(.5,0)}] (.71,-.71,0) -- (.71,-.71,-4);
+\draw[shift={+(.5,0)}] (0,0,0) -- (0,0,-4);
+\end{scope}
+\end{pgfonlayer}
+
+\begin{scope}[xshift=\os cm-.0 cm,yshift=0cm]
+\fill[white,shift={+(-.5,0)}] (0,0,0) -- (-.71,.71,0) -- ++(0,0,-4) arc[start angle=135,delta angle=90,radius=1] -- ++(0,0,4) -- (0,0,0);
+\draw[shift={+(-.5,0)}] (-.71,-.71,0) arc[start angle=225,delta angle=-90,radius=1];
+\draw[shift={+(-.5,0)}] (-.71,-.71,-4) arc[start angle=225,delta angle=-90,radius=1];
+\draw[shift={+(-.5,0)}] (0,0,0) -- (-.71,-.71,0);
+\draw[shift={+(-.5,0)}] (0,0,0) -- (-.71,.71,0);
+\draw[shift={+(-.5,0)}] (-.71,-.71,0) -- (-.71,-.71,-4);
+\draw[shift={+(-.5,0)}] (-.71,.71,0) -- (-.71,.71,-4);
+\end{scope}
+
+\begin{scope}[xshift=\os cm]
+\draw [-stealth](0,1.5,-2) -- (0,3,-2);
+\node at (0,3.5,-2){\tt ORIENTATION(1:3,1)=0,0,1};
+
+\draw [-stealth](-1.5,0,-2) -- (-3,0,-2);
+\node at (-5,0,-2){\tt ORIENTATION(1:3,2)=-1,0,0};
+
+\draw [-stealth](0,-1.7,-2) -- (0,-3,-2);
+\node at (0,-3.5,-2){\tt ORIENTATION(1:3,3)=0,0,-1};
+
+\draw [-stealth](2.58,0,-2) -- (3,0,-2);
+\node at (5,0,-2){\tt ORIENTATION(1:3,4)=1,0,0};
+\end{scope}
+
+
+\end{scope}
+\end{scope}
+
+\end{tikzpicture}
+\end{document} 

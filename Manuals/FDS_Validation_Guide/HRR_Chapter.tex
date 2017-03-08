@@ -1,0 +1,53 @@
+% !TEX root = FDS_Validation_Guide.tex
+
+\chapter{Heat Release Rate}
+
+In many fire simulations, a  so-called  ``design  fire'' is  specified
+either by  a regulatory authority  or by the engineers  performing the
+analysis. Because the  fire's heat release rate is  specified, the role of
+the model is to predict  the transport of heat and combustion products
+throughout  the room or  rooms of  interest. Detailed  descriptions of  the
+contents of the building are usually not necessary because these items
+are assumed to not contribute to the fire,  and even if they are, the burning rate
+will be specified, not predicted.  Sometimes, it is necessary  to predict
+the heat  flux from the fire  to a nearby ``target,''  and even though
+the target  may heat up  to some specified ignition  temperature, the
+subsequent spread  of the  fire usually goes  beyond the scope  of the
+analysis because of the uncertainty  inherent in object to object fire
+spread.
+
+Validation  studies  of FDS  to  date  have  focussed more  on  design
+applications   than  reconstructions.  The   reason  is   that  design
+applications usually involve specified  fires and demand a minimum of
+thermophysical properties  of real materials.  Transport  of smoke and
+heat  is  the  primary  focus,  and measurements  can  be  limited  to
+well-placed thermocouples, a few  heat flux gauges, gas samplers,
+etc. Phenomena of importance in forensic reconstructions, like second
+item  ignition, flame  spread, vitiation  effects and  extinction, are
+more   difficult  to   model  and   more  difficult   to   study  with
+well-controlled experiments. Uncertainties  in material properties and
+measurements, as  well as simplifying assumptions in  the model, often
+force the  comparison between model and measurement  to be qualitative
+at best.  Nevertheless, current validation  efforts are moving  in the
+direction of these more difficult issues.
+
+
+
+\section{Victoria University Ethanol Pan Fire}
+\label{ethanol_pan}
+
+In this example, a steel pan (0.7~m by 0.8~m) is filled with a thin layer (about 5~L, 9~mm) of ethanol, which burns out within about 10~min. This case tests a number of features -- burning
+liquids, multiple layers of solids/liquids, and, most importantly, the absorption coefficient of the liquid. The pyrolysis models in FDS prior to version 5
+assumed that radiative feedback from the fire and hot gases within a compartment were absorbed at the surface. In reality, this energy is absorbed in
+depth; the extent of which is characterized by the absorption coefficient, $\kappa$. This is a property of the liquid, as well as the gaseous vapors. FDS now uses
+an absorption coefficient for both the gas and solid/liquid phases. 
+
+The results of three calculations are shown below, each identical except for the value of absorption coefficient. The results of a single experiment
+are also shown, courtesy of Ian Thomas, Victoria University, Australia~\cite{Thomas:JFPE}.
+
+
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VU_Ethanol_Pan_Fire/VU_Ethanol_Pan_Fire_HRR}
+\caption{Comparison of predicted and measured HRR from a burning pool of ethanol.}
+\end{center}
+

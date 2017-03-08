@@ -1,0 +1,127 @@
+% !TEX root = FDS_Technical_Reference_Guide.tex
+
+\typeout{new file: Introduction_Chapter.tex}
+
+\chapter{Introduction}
+\subsubsection*{Howard Baum, NIST Fellow Emeritus}
+
+The idea that the dynamics of a fire might be studied numerically dates back
+to the beginning of the computer age. Indeed, the fundamental
+conservation equations governing fluid dynamics, heat transfer, and
+combustion were first written down over a century ago.
+Despite this, practical mathematical models of fire
+(as distinct from controlled combustion) are relatively recent due
+to the inherent complexity of the problem.
+Indeed, in his brief history of the early days of fire research,
+Hoyt Hottel noted ``A case can be made for fire being,
+next to the life processes, the most complex of phenomena to understand''~\cite{Hottel:1}.
+
+The difficulties revolve about three issues:
+First, there are an enormous number of possible fire scenarios
+to consider due to their accidental nature. Second, the physical
+insight and computing power required to perform all the necessary calculations
+for most fire scenarios are limited. Any fundamentally based study of fires
+must consider at least some aspects of bluff body aerodynamics, multi-phase flow,
+turbulent mixing and combustion, radiative transport, and conjugate heat transfer;
+all of which are active research areas in their own right.
+Finally, the ``fuel'' in most fires was never intended as such.
+Thus, the mathematical models and the data needed to characterize the
+degradation of the condensed phase materials that supply the fuel may not be available.
+Indeed, the mathematical modeling of the physical and
+chemical transformations of real materials as they burn is still in its infancy.
+
+In order to make progress, the questions that are asked have to be greatly simplified.
+To begin with, instead of seeking a methodology that can be applied to all fire problems,
+we begin by looking at a few scenarios that seem to be most amenable to analysis.
+Hopefully, the methods developed to study these ``simple'' problems can be generalized
+over time so that more complex scenarios can be analyzed.
+Second, we must learn to live with idealized descriptions of fires and approximate
+solutions to our idealized equations. Finally, the methods should be capable of systematic improvement.
+As our physical insight and computing power grow more powerful, the methods of analysis can
+grow with them.
+
+To date, three distinct approaches to the simulation of fires have emerged.
+Each of these treats the fire as an inherently three dimensional process evolving in time.
+The first to reach maturity, the ``zone'' models, describe compartment fires.
+Each compartment is divided into two spatially homogeneous volumes, a hot upper layer and a cooler lower layer.
+Mass and energy balances are enforced for each layer, with additional models describing other
+physical processes appended as differential or algebraic equations as appropriate.
+Examples of such phenomena include fire plumes, flows through doors, windows and other vents,
+radiative and convective heat transfer, and solid fuel pyrolysis.
+Descriptions of the physical and mathematical assumptions
+behind the zone modeling concept are given in separate papers by Jones~\cite{Jones:1} and Quintiere~\cite{Quintiere:1},
+who chronicle developments through 1983.
+Model development since then has progressed to the point where
+documented and supported software implementing these models are widely available~\cite{Forney:1}.
+
+The relative physical and computational simplicity of the zone models has led to their
+widespread use in the analysis of fire scenarios. So long as detailed spatial
+distributions of physical properties are not required, and the two layer description
+reasonably approximates reality, these models are quite reliable.
+However, by their very nature, there is no way to systematically improve them.
+The rapid growth of computing power and the corresponding maturing of computational
+fluid dynamics (CFD), has led to the development of CFD based ``field'' models applied to fire research problems.
+Virtually all this work is based on the conceptual framework provided by the Reynolds-averaged form of the
+Navier-Stokes equations (RANS), in particular the $k -\epsilon$ turbulence model pioneered by
+Patankar and Spalding~\cite{Patankar:1}. The use of CFD models has allowed
+the description of fires in complex geometries, and the incorporation of a wide variety of
+physical phenomena. However, these models have a fundamental limitation for fire applications --
+the averaging procedure at the root of the model equations.
+
+RANS models were developed as a time-averaged approximation to the conservation equations of fluid dynamics.
+While the precise nature of the averaging time is not specified, it is clearly long enough to
+require the introduction of large eddy transport coefficients to describe the unresolved fluxes of mass,
+momentum and energy. This is the root cause of the smoothed appearance of the results of even the most
+highly resolved fire simulations. The smallest resolvable length scales are determined by the product
+of the local velocity and the averaging time rather than the spatial resolution of the underlying computational grid.
+This property of RANS models is typically exploited in numerical computations by using implicit
+numerical techniques to take large time steps.
+
+Unfortunately, the evolution of large eddy structures characteristic of most fire plumes is lost
+with such an approach, as is the prediction of local transient events. It is sometimes
+argued that the averaging process used to define the equations is an ``ensemble average'' over many
+replicates of the same experiment or postulated scenario. However, this is a moot point in
+fire research since neither experiments nor real scenarios are replicated in the sense required
+by that interpretation of the equations. The application of ``Large Eddy Simulation'' (LES)
+techniques to fire is aimed at extracting greater temporal and spatial fidelity from simulations
+of fire performed on the more finely meshed grids allowed by ever faster computers.
+
+The phrase LES refers to the description of turbulent mixing of the gaseous fuel and combustion
+products with the local atmosphere surrounding the fire. This process, which determines the burning
+rate in most fires and controls the spread of smoke and hot gases, is extremely difficult
+to predict accurately. This is true not only in fire research but in almost all phenomena
+involving turbulent fluid motion. The basic idea behind the LES technique is that the eddies
+that account for most of the mixing are large enough to be calculated with reasonable
+accuracy from the equations of fluid dynamics. The hope (which must ultimately be justified
+by comparison to experiments) is that small-scale eddy motion can either be crudely accounted for or ignored.
+
+The equations describing the transport of mass, momentum, and energy by the fire-induced flows must
+be simplified so that they can be efficiently solved for the fire scenarios of interest.
+The general equations of fluid dynamics describe a rich variety of physical processes,
+many of which have nothing to do with fires. Retaining this generality would lead to an
+enormously complex computational task that would shed very little additional insight on fire dynamics.
+The simplified equations, developed by Rehm and Baum~\cite{Rehm:1}, have been widely adopted
+by the larger combustion research community, where they are referred to as the ``low Mach number''
+combustion equations. They describe the low speed motion of a gas driven by chemical heat release and buoyancy forces.
+Oran and Boris provide a useful discussion of the technique as applied to various reactive flow regimes in the chapter
+entitled ``Coupled Continuity Equations for Fast and Slow Flows'' in Ref.~\cite{Oran:1}.
+They comment that ``There is generally a heavy price for being able to use a single algorithm for both
+fast and slow flows, a price that translates into many computer operations per time step often spent in
+solving multiple and complicated matrix operations.''
+
+The low Mach number equations are solved numerically by dividing the physical space where
+the fire is to be simulated into a large number of rectangular cells. Within each cell the gas
+velocity, temperature, etc., are assumed to be uniform; changing only with time.
+The accuracy with which the fire dynamics can be simulated depends on the number of cells
+that can be incorporated into the simulation. This number is ultimately limited
+by the computing power available. Present day, single processor desktop computers limit the number of
+such cells to at most a few million. This means that the ratio of largest to smallest eddy length
+scales that can be resolved by the computation (the ``dynamic range'' of the simulation) is on the order of 100.
+Parallel processing can be used to extend this range to some extent, but
+the range of length scales that need to be accounted for if all relevant
+fire processes are to be simulated is roughly $10^4$ to $10^5$ because combustion processes take place at
+length scales of \SI{1}{\milli m} or less, while the length scales associated with building fires are of the order of
+tens of meters. The form of the numerical equations discussed below depends on which end of the
+spectrum one wants to capture directly, and which end is to be ignored or approximated.
+
+

@@ -1,0 +1,327 @@
+\documentclass[12pt]{article}
+\input{../Bibliography/commoncommands}
+
+\usepackage{tikz,tikz-3dplot}
+\usetikzlibrary{arrows}
+
+\begin{document}
+
+% LU - logical unit
+
+\vspace{1.0in}
+\section{Numerical grid in FDS}
+
+\subsection{Overview}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% grid
+\draw[step=2cm,ultra thick] (0, 0) grid (4,4);
+
+% u arrows
+% coarse mesh
+\draw[line width=1.5pt,->] (-0.25,1) -- (0.25,1) node[anchor=west] {$u$};
+\draw[line width=1.5pt,->] (-0.25,3) -- (0.25,3);
+\draw[line width=1.5pt,->] (1.75,1) -- (2.25,1);
+\draw[line width=1.5pt,->] (1.75,3) -- (2.25,3);
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1);
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3);
+
+% v arrow
+\draw[line width=1.5pt,->] (1,-0.25) -- (1,0.25) node[anchor=south] {$v$};
+\draw[line width=1.5pt,->] (1,1.75) -- (1,2.25);
+\draw[line width=1.5pt,->] (1,3.75) -- (1,4.25);
+\draw[line width=1.5pt,->] (3,-0.25) -- (3,0.25);
+\draw[line width=1.5pt,->] (3,1.75) -- (3,2.25);
+\draw[line width=1.5pt,->] (3,3.75) -- (3,4.25);
+
+% scalars
+\node[draw,circle,inner sep=2pt,fill,label={$H$}] at (1, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (3, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (1, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (3, 3) {};
+
+\end{tikzpicture}
+\caption{2D grid topology.}
+\end{figure}
+
+\subsection{Wall data structures}
+% wall cell
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% ghost cells
+\draw[line width=1.0pt,-,dashed] (3-1.5, 3-1.5) rectangle (9+1.5, 9+1.5);
+\draw[line width=1.0pt,-,dashed] (3.0, 3.0) rectangle (9.0, 9.0);
+
+\draw[line width=1.0pt,-,dashed] (1.5,3.0) -- (3.0,3.0);
+\draw[line width=1.0pt,-,dashed] (1.5,4.5) -- (3.0,4.5);
+\draw[line width=1.0pt,-,dashed] (1.5,6.0) -- (3.0,6.0);
+\draw[line width=1.0pt,-,dashed] (1.5,7.5) -- (3.0,7.5);
+\draw[line width=1.0pt,-,dashed] (1.5,9.0) -- (3.0,9.0);
+
+\draw[line width=1.0pt,-,dashed] (3.0,1.5) -- (3.0,3.0);
+\draw[line width=1.0pt,-,dashed] (4.5,1.5) -- (4.5,3.0);
+\draw[line width=1.0pt,-,dashed] (6.0,1.5) -- (6.0,3.0);
+\draw[line width=1.0pt,-,dashed] (7.5,1.5) -- (7.5,3.0);
+\draw[line width=1.0pt,-,dashed] (9.0,1.5) -- (9.0,3.0);
+
+\draw[line width=1.0pt,-,dashed] (9.0,3.0) -- (10.5,3.0);
+\draw[line width=1.0pt,-,dashed] (9.0,4.5) -- (10.5,4.5);
+\draw[line width=1.0pt,-,dashed] (9.0,6.0) -- (10.5,6.0);
+\draw[line width=1.0pt,-,dashed] (9.0,7.5) -- (10.5,7.5);
+\draw[line width=1.0pt,-,dashed] (9.0,9.0) -- (10.5,9.0);
+
+\draw[line width=1.0pt,-,dashed] (3.0,9.0) -- (3.0,10.5);
+\draw[line width=1.0pt,-,dashed] (4.5,9.0) -- (4.5,10.5);
+\draw[line width=1.0pt,-,dashed] (6.0,9.0) -- (6.0,10.5);
+\draw[line width=1.0pt,-,dashed] (7.5,9.0) -- (7.5,10.5);
+\draw[line width=1.0pt,-,dashed] (9.0,9.0) -- (9.0,10.5);
+
+% grid
+\draw[line width=1.0pt,step=3.0cm] (0, 0) grid (12, 12);
+\draw[line width=1.0pt,step=1.5cm] (3, 3) grid (9, 9);
+\draw[line width=1.5pt,-,green] (0, 3) rectangle (3, 6);
+\draw[line width=1.5pt,-,blue] (3, 3) rectangle (9, 9);
+\draw[line width=1.5pt,-,red] (3,3) -- (3,4.5);
+\draw[line width=1.0pt,->] (3,3.75) -- (3.5,3.75); % node[anchor=west] {\texttt{IOR}};
+
+%\node at (3 - 0.75, 3 + 0.75) {\texttt{II}};
+%\node at (3 + 0.75, 3 + 0.75) {\texttt{IIG}};
+\node[draw,circle,inner sep=2pt,fill,label={\texttt{II}}] at (3 - 0.75, 3 + 0.75) {}; % ghost cell bordering wall cell
+\node[draw,circle,inner sep=2pt,fill,label={\texttt{IIG}}] at (3 + 0.75, 3 + 0.75) {}; % gas cell bordering wall cell
+\node[draw,circle,inner sep=2pt,fill,red] at (3, 3 + 0.75) {};
+
+% legend
+%\draw[line width=1.5pt,thick,-] (0,-1) -- (3,-1) node[anchor=west] {mesh 1};
+%\draw[line width=1.5pt,ultra thick,-] (0,-2) -- (3,-2) node[anchor=west] {mesh 2};
+
+\draw[line width=1.5pt,-,blue] (0,-1) -- (1.5,-1) node[anchor=west] {wall cells};
+\draw[line width=1.5pt,-,red] (0,-2) -- (1.5,-2) node[anchor=west] {highlighted wall cell};
+\draw[line width=1.5pt,-,green] (0,-3) -- (1.5,-3) node[anchor=west] {cell in \texttt{NOM\_IB}};
+\draw[line width=1.0pt,->] (0,-4) -- (1.5,-4) node[anchor=west] {\texttt{IOR}};
+\node[draw,circle,inner sep=2pt,fill,red,label=right:{\texttt{BXS} for this wall cell}] at (1, -5) {};
+
+\end{tikzpicture}
+\caption{Examples of wall data structures in an embedded mesh.}
+\end{figure}
+
+\subsection{Boundary conditions}
+% periodic, interpolated, open, walls
+
+\subsubsection{Pressure ($H$)}
+
+\subsubsection{Velocity field ($u_j$)}
+
+\subsubsection{Density ($\rho$)}
+
+\subsubsection{Temperature ($T$)}
+
+\subsubsection{Lumped species ($Z_\alpha$)}
+
+\subsection{Communication between grids}
+
+\subsubsection{Pressure}
+
+% How is the H BC currently obtained for an interior mesh?
+% ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
+% in the FDS source code file pres.f90.
+
+% https://code.google.com/p/fds-smv/source/detail?r=4213&path=/trunk/FDS/trunk/FDS_Source/pres.f90
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% https://tex.stackexchange.com/a/3172
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows}
+
+% grids
+% coarse grid (on the left)
+\draw[step=4cm,ultra thick] (0, 0) grid (8,8);
+% fine grid (on the right)
+\draw[step=2cm,ultra thick] (4, 0) grid (8,8);
+
+% interpolation lines
+\begin{scope}[thick,decoration={markings,mark=at position 0.65 with {\arrow{triangle 45}}}]
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (2,1);
+   \draw[gray,dashed] (2,1) -- (5,1);
+   \draw[gray,dashed,postaction={decorate}] (2,2) -- (2,3);
+   \draw[gray,dashed] (2,3) -- (5,3);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (2,5);
+   \draw[gray,dashed] (2,5) -- (5,5);
+   \draw[gray,dashed,postaction={decorate}] (2,6) -- (2,7);
+   \draw[gray,dashed] (2,7) -- (5,7);
+\end{scope}
+
+% moved large cell pressure
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 1) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 3) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 5) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (2, 7) {};
+
+% interpolated pressure BC
+\node[draw,circle,inner sep=2pt] at (4, 1) {};
+\node[draw,circle,inner sep=2pt] at (4, 3) {};
+\node[draw,circle,inner sep=2pt] at (4, 5) {};
+\node[draw,circle,inner sep=2pt] at (4, 7) {};
+
+% scalars for the coarse cells
+\node[draw,circle,inner sep=2pt,fill] at (2, 2) {};
+\node[draw,circle,inner sep=2pt,fill] at (2, 6) {};
+
+% scalars for the fine cells
+\node[draw,circle,inner sep=2pt,fill] at (5, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 7) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 7) {};
+
+% u vectors
+\draw[line width=1.5pt,->] (-0.25,2) -- (0.25,2) {};
+\draw[line width=1.5pt,->] (-0.25,6) -- (0.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,2) -- (4.25,2) {};
+\draw[line width=1.5pt,->] (3.75,6) -- (4.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1) {};
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3) {};
+\draw[line width=1.5pt,->] (3.75,5) -- (4.25,5) {};
+\draw[line width=1.5pt,->] (3.75,7) -- (4.25,7) {};
+\draw[line width=1.5pt,->] (5.75,1) -- (6.25,1) {};
+\draw[line width=1.5pt,->] (5.75,3) -- (6.25,3) {};
+\draw[line width=1.5pt,->] (5.75,5) -- (6.25,5) {};
+\draw[line width=1.5pt,->] (5.75,7) -- (6.25,7) {};
+\draw[line width=1.5pt,->] (7.75,1) -- (8.25,1) {};
+\draw[line width=1.5pt,->] (7.75,3) -- (8.25,3) {};
+\draw[line width=1.5pt,->] (7.75,5) -- (8.25,5) {};
+\draw[line width=1.5pt,->] (7.75,7) -- (8.25,7) {};
+
+% v vectors
+\draw[line width=1.5pt,->] (2,-0.25) -- (2,0.25) {};
+\draw[line width=1.5pt,->] (2,3.75) -- (2,4.25) {};
+\draw[line width=1.5pt,->] (2,7.75) -- (2,8.25) {};
+
+\draw[line width=1.5pt,->] (5,-0.25) -- (5,0.25) {};
+\draw[line width=1.5pt,->] (7,-0.25) -- (7,0.25) {};
+\draw[line width=1.5pt,->] (5,1.75) -- (5,2.25) {};
+\draw[line width=1.5pt,->] (7,1.75) -- (7,2.25) {};
+\draw[line width=1.5pt,->] (5,3.75) -- (5,4.25) {};
+\draw[line width=1.5pt,->] (7,3.75) -- (7,4.25) {};
+\draw[line width=1.5pt,->] (5,5.75) -- (5,6.25) {};
+\draw[line width=1.5pt,->] (7,5.75) -- (7,6.25) {};
+\draw[line width=1.5pt,->] (5,7.75) -- (5,8.25) {};
+\draw[line width=1.5pt,->] (7,7.75) -- (7,8.25) {};
+
+\end{tikzpicture}
+\caption{Interface of two (2D) grids with different resolution. Left is ``other'' mesh. Right is ``current'' mesh, for which boundary conditions are being found for. The filled circle is an intermediate value of the pressure from the other mesh cells. This value is currently taken directly from the cell center; no interpolation between other cells is done. The open circle is the actual pressure BC for the current mesh that is found by interpolating between the intermediate value and the previous time step's pressure value for the outermost cell of the current mesh.}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+
+% https://tex.stackexchange.com/a/3172
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows}
+
+% grids
+% coarse grid (on the left)
+\draw[step=4cm,ultra thick] (0, 0) grid (8,8);
+% fine grid (on the right)
+\draw[step=2cm,ultra thick] (4, 0) grid (8,8);
+
+% interpolation lines
+\draw[gray,thick,dashed] (5,3) -- (5,1);
+\draw[gray,thick,dashed] (2,2) -- (5,2);
+\draw[gray,thick,dashed] (5,5) -- (5,7);
+\draw[gray,thick,dashed] (2,6) -- (5,6);
+
+% interpolated pressure BC
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 2) {};
+\node[draw,circle,inner sep=2pt] at (4, 2) {};
+\node[draw,circle,inner sep=2pt,fill,gray] at (5, 6) {};
+\node[draw,circle,inner sep=2pt] at (4, 6) {};
+
+% scalars for the coarse cells
+\node[draw,circle,inner sep=2pt,fill] at (2, 2) {};
+\node[draw,circle,inner sep=2pt,fill] at (2, 6) {};
+
+% scalars for the fine cells
+\node[draw,circle,inner sep=2pt,fill] at (5, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (5, 7) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 1) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 3) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 5) {};
+\node[draw,circle,inner sep=2pt,fill] at (7, 7) {};
+
+% u vectors
+\draw[line width=1.5pt,->] (-0.25,2) -- (0.25,2) {};
+\draw[line width=1.5pt,->] (-0.25,6) -- (0.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,2) -- (4.25,2) {};
+\draw[line width=1.5pt,->] (3.75,6) -- (4.25,6) {};
+
+\draw[line width=1.5pt,->] (3.75,1) -- (4.25,1) {};
+\draw[line width=1.5pt,->] (3.75,3) -- (4.25,3) {};
+\draw[line width=1.5pt,->] (3.75,5) -- (4.25,5) {};
+\draw[line width=1.5pt,->] (3.75,7) -- (4.25,7) {};
+\draw[line width=1.5pt,->] (5.75,1) -- (6.25,1) {};
+\draw[line width=1.5pt,->] (5.75,3) -- (6.25,3) {};
+\draw[line width=1.5pt,->] (5.75,5) -- (6.25,5) {};
+\draw[line width=1.5pt,->] (5.75,7) -- (6.25,7) {};
+\draw[line width=1.5pt,->] (7.75,1) -- (8.25,1) {};
+\draw[line width=1.5pt,->] (7.75,3) -- (8.25,3) {};
+\draw[line width=1.5pt,->] (7.75,5) -- (8.25,5) {};
+\draw[line width=1.5pt,->] (7.75,7) -- (8.25,7) {};
+
+% v vectors
+\draw[line width=1.5pt,->] (2,-0.25) -- (2,0.25) {};
+\draw[line width=1.5pt,->] (2,3.75) -- (2,4.25) {};
+\draw[line width=1.5pt,->] (2,7.75) -- (2,8.25) {};
+
+\draw[line width=1.5pt,->] (5,-0.25) -- (5,0.25) {};
+\draw[line width=1.5pt,->] (7,-0.25) -- (7,0.25) {};
+\draw[line width=1.5pt,->] (5,1.75) -- (5,2.25) {};
+\draw[line width=1.5pt,->] (7,1.75) -- (7,2.25) {};
+\draw[line width=1.5pt,->] (5,3.75) -- (5,4.25) {};
+\draw[line width=1.5pt,->] (7,3.75) -- (7,4.25) {};
+\draw[line width=1.5pt,->] (5,5.75) -- (5,6.25) {};
+\draw[line width=1.5pt,->] (7,5.75) -- (7,6.25) {};
+\draw[line width=1.5pt,->] (5,7.75) -- (5,8.25) {};
+\draw[line width=1.5pt,->] (7,7.75) -- (7,8.25) {};
+
+\end{tikzpicture}
+\caption{Interface of two (2D) grids with different resolution. Right is ``other'' mesh. Left is ``current'' mesh, for which boundary conditions are being found for. The filled circle is an intermediate value of the pressure from the other mesh cells. The $H$ value at this point is found by averaging. The open circle is the actual pressure BC for the current mesh that is found by interpolating between the intermediate value and the previous time step's pressure value for the outermost cell of the current mesh.}
+\end{figure}
+
+\subsubsection{Velocity}
+
+% See FDS Tech Guide \S4.6.3 (Boundary Conditions at Mesh Interfaces)
+
+\subsubsection{Scalars other than pressure}
+
+% From a text file from 2012:
+
+%Correspondence between variables in the FDS guide and variables in the source code
+
+%Detailed description of the grid in FDS
+   %ghost cells
+   %cell indices
+   %what things like IIG, IIJ, etc., mean
+
+%Randy spoke about writing a NIST technical note about the FDS grid and stencil
+   %topics would include the configurations of the cells (ghost cells, cell indices, spatial locations of points, corners, etc.) and the development of different operators to simplify notation
+   
+   %The technical note comes first, then the tech. guide and code could be updated to correspond to the improved notation
+
+\end{document}

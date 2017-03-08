@@ -1,0 +1,74 @@
+\documentclass[12pt, titlepage, twoside]{article}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+
+% Set font to Arial
+\renewcommand{\rmdefault}{phv}
+\renewcommand{\sfdefault}{phv}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.75in}
+\setlength{\voffset}{-0.5in}
+\setlength{\parindent}{0.0in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+
+% Fancy headings
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.2pt}
+\pagestyle{fancy}
+\renewcommand\thesection{\Alph{section}}
+\renewcommand{\subsectionmark}[1]{\markright{#1}{}}
+\fancyhf{}
+\fancyhead[R]{\MakeUppercase{\rightmark}}
+\fancyfoot[C]{\thepage}
+
+%  ===============================================================
+%  = Change this to A, B, C, or D, to correspond to the Appendix =
+%  ===============================================================
+% Set custom page numbering
+\renewcommand{\thepage}{D-\arabic{page}}
+
+\newcommand\invisiblesection[1]{%
+  \refstepcounter{section}%
+  \addcontentsline{toc}{section}{\protect\numberline{\thesection}#1}%
+  \sectionmark{#1}}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\huge
+%  =========================================
+%  = Change this to Appendix A, B, C, or D =
+%  =========================================
+\noindent \textbf{Appendix D}
+
+\vspace{0.5em}
+\LARGE
+\noindent \textbf{COMPARISON OF INDIVIDUAL MEASUREMENTS AND PREDICTIONS FOR FDS}
+
+\normalsize
+
+\vspace{1.5em}
+\hrule
+\vspace{1.0em}
+
+For Fire Dynamics Simulator (FDS), this appendix contains individual comparisons of measured vs. predicted quantities that are contained in NUREG 1824 Supplement 1. The results for each test from each validation set are presented in the following sections and are organized by experimental data set, then by output quantity. Refer to Volume 3 of NIST SP 1018\footnote{K. McGrattan, S. Hostikka, R. McDermott, J. Floyd, C. Weinschenk, and K. Overholt. Fire Dynamics Simulator, Technical Reference Guide, Volume 3: Validation. National Institute of Standards and Technology, Gaithersburg, Maryland, USA, and VTT Technical Research Centre of Finland, Espoo, Finland, sixth edition, September 2013.} for more details on the validation of FDS.
+
+\clearpage
+\phantomsection
+\thispagestyle{empty}
+\addcontentsline{toc}{section}{List of Experimental Data Sets}
+\tableofcontents
+
+\appendix
+
+%  ============================================================================================
+%  = Change this to 0 for Appendix A, 1 for Appendix B, 2 for Appendix C, or 3 for Appendix D =
+%  ============================================================================================
+\setcounter{section}{3}
+
+\include{Appendix_Graphs}
+
+\end{document}
