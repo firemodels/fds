@@ -6124,6 +6124,90 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 
 
+
+\chapter{Vegetation}
+ 
+Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).  
+
+\section{Using Particles to Represent Vegetation}
+
+Four namelist groups are needed to specify the properties and the location of vegetation using particles: {\ct SURF}, {\ct MATL}, {\ct PART}, and {\ct INIT}. A cone-shape tree crown comprised of needles (i.e., no roundwood) can be defined by the following namelist lines.
+
+The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. In this example, the {\ct  SURF} namelist specifies that the mass of a needle is 70\% solid and 30\% moisture. The {\ct MATL ID='solid fuel'} namelist contains the properties of the needle's solid fuel and the {\ct MATL ID='moisture'} contains the properties of the needle's moisture. As a given mass of solid fuel undergoes pyrolysis,  74\% ({\ct NU\_SPEC} = 0.74) is converted to fuel gas (pyrolyzate) and 26\% ({\ct NU\_MATL=0.26}) remains as a solid in the form of char. The exothermic process of char oxidation is not modeled. Instead, char remains present as a solid with material properties listed in {\ct MATL ID='char'}.
+\begin{lstlisting}
+&SURF ID = 'needles'
+      MATL_ID(1,1:2)   = 'solid fuel','moisture'
+      MATL_MASS_FRACTION(1,1:2) = 0.7,0.3
+      THICKNESS  = 0.00025
+      LENGTH  = 0.05
+      GEOMETRY  = 'CYLINDRICAL' /
+\end{lstlisting}
+\begin{lstlisting}
+&MATL ID = 'solid fuel'
+      DENSITY = 514.
+      CONDUCTIVITY = 2.0
+      SPECIFIC_HEAT= 1.2
+      SPEC_ID = 'pyrolyzate'
+      NU_SPEC = 0.74
+      NU_MATL = 0.26
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 200.
+      REFERENCE_RATE = 0.0005
+      HEATING_RATE = 1.6
+      MATL_ID = 'char'
+      HEAT_OF_COMBUSTION = 17700.
+      HEAT_OF_REACTION = 418.
+      ALLOW_SHRINKING=.FALSE.
+      ALLOW_SWELLING=.FALSE. /
+\end{lstlisting}  
+\begin{lstlisting}
+&MATL ID = 'char'
+      DENSITY = 300.
+      CONDUCTIVITY = 2.0
+      SPECIFIC_HEAT= 1.2 /
+\end{lstlisting}      
+\begin{lstlisting}
+&MATL ID = 'moisture'
+      DENSITY = 1000.
+      CONDUCTIVITY = 2.0
+      SPECIFIC_HEAT= 4.184
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 100.
+      REFERENCE_RATE = 0.002
+      HEATING_RATE = 1.6
+      NU_SPEC = 1.0
+      SPEC_ID = 'water vapor'
+      HEAT_OF_REACTION= 2500. /
+\end{lstlisting}
+The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}). 
+\begin{lstlisting}
+&PART ID='tree crown foliage', 
+      DRAG_LAW='CYLINDER', 
+      SURF_ID='needles', 
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+      STATIC=.TRUE., 
+      COLOR='FOREST GREEN' /
+\end{lstlisting}
+\begin{lstlisting}
+&INIT PART_ID='tree crown foliage', 
+      XYZ=0.0,0.0,0.0, 
+      RADIUS=1, 
+      HEIGHT=2, 
+      SHAPE='CONE',
+      N_PARTICLES_PER_CELL=1,
+      CELL_CENTERED=.TRUE.,
+      MASS_PER_VOLUME=2.0  /
+\end{lstlisting}
+
+\section{Conversion of Vegetation Parameters Commonly Used in Forestry to those Required by FDS}
+
+Users of FDS that work in wildland fire or forestry will be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture is reported on a dry weight basis. Thus, pending the creation of new namelists or the addition of new namelist parameters,  commonly reported vegetation properties cannot be directly used in FDS input files. Instead, they must be converted to the parameters needed by FDS. These conversions affect parameters in the {\ct SURF} and {\ct INIT} namelists and are given below.
+
+The forestry literature provides vegetation moisture, $M_{\rm dw}$, on a dry weight basis. The {\ct SURF} namelist parameters for mass fractions of the solid fuel and moisture are then $1 / (1 + M_{\rm dw})$ and $M_{\rm dw} / (1 + M_{\rm dw}$), respectively. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then {\ct THICKNESS} = $2/\sigma_{\rm v}$ in the {\ct SURF} namelist.
+
+The {\ct INIT} namelist parameter {\ct MASS\_PER\_VOLUME} = $\rho_{\rm d} (1+M_{\rm dw})$ where $\rho_{\rm d}$ is the bulk density of the dry vegetation.
+
+
 \chapter{Devices and Control Logic}
 
 Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be completely unrelated, but from the point of view of FDS, they are simply devices that operate in specific ways depending on the properties assigned to them. They can be used to record some quantity of the simulated environment, like a thermocouple, or they can represent a mathematical model of a complex sensor, like a smoke detector, and in some cases they can trigger events to happen, like a timer.
