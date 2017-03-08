@@ -1,0 +1,679 @@
+% !TEX root = FDS_Technical_Reference_Guide.tex
+
+\typeout{new file: Momentum_Chapter.tex}
+
+\chapter{Momentum Transport and Pressure}
+\label{momentum_chapter}
+
+This chapter describes the solution of the momentum equation. This consists of three major parts: the LES formulation, the
+discretization of the flux terms, and the solution of an elliptic partial differential equation for the pressure.
+
+\section{Large Eddy Simulation (LES)}
+\label{LES}
+
+In this section, we temporarily return to formal LES filter notation and adopt Cartesian tensor index notation (repeated suffixes imply summation) in order to precisely define modeled terms. The LES equations are derived by applying a low-pass filter of width $\Delta$ to the DNS equations. The kernel usually associated with finite volume LES is a box filter---grid resolved quantities are physically interpreted as cell means.  This interpretation is somewhat misleading (see \cite{McDermott:2005b}), but a thorough discussion of filtering is beyond our scope, so the cell mean interpretation will suffice.  In FDS, the filter width is taken to be the cube root of the cell volume, $\Delta = V_{\rm c}^{1/3}$, $V_{\rm c} = \delta x \,\delta y\, \delta z$.  Then for any continuous field, $\phi$, a filtered field is defined as
+\begin{equation}
+\label{eqn_box_filter}
+\overline{\phi}(x,y,z,t) \equiv \frac{1}{V_{\rm c}} \int_{x - \delta x/2}^{x + \delta x/2}\int_{y - \delta y/2}^{y + \delta y/2}\int_{z - \delta z/2}^{z + \delta z/2} \phi(x',y',z',t) \,\mbox{d} x' \,\mbox{d} y' \,\mbox{d} z'
+\end{equation}
+It is also conventional to define a mass-weighted or Favre filter such that $\overline{\rho}\,\widetilde{\phi} \equiv \overline{\rho \phi}$.
+
+\subsection{The DNS Momentum Equation}
+
+In conservative form, the DNS momentum equation for the $i$th component of velocity is
+\begin{equation}
+\label{eqn_dns_conservative}
+\frac{\partial \rho u_i}{\partial t} + \frac{\partial}{\partial x_j} (\rho u_i u_j) = -\frac{\partial p}{\partial x_i} - \frac{\partial \tau_{ij}}{\partial x_j} + \rho g_i + f_{{\rm d},i} + \dot{m}_{\rm b}^\ppp u_{{\rm b},i}
+\end{equation}
+In our two-phase formulation, $f_{d,i}$ represents the drag force due to unresolved Lagrangian particles.  The bulk source term, $\dot{m}_b^\ppp u_{b,i}$, accounts for the effects of evaporation or pyrolysis. For Eq.~(\ref{eqn_dns_conservative}) to be applicable, the grid resolution should be smaller than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies \cite{Pope:2000},
+\begin{equation}
+\label{eqn_kolmogorov_scale}
+\eta \equiv (\nu^3/\epsilon)^{1/4}
+\end{equation}
+Here, $\nu$ is the kinematic viscosity and $\epsilon$ is the rate of viscous dissipation (the conversion of kinetic energy to heat by viscosity),
+\begin{equation}
+\epsilon \equiv \tau_{ij} \frac{\partial u_i}{\partial x_j} = 2 \mu \left( S_{ij} S_{ij} - \frac{1}{3} (\nabla\!\cdot \bu)^2 \right) \quad ; \quad S_{ij} \equiv \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+\end{equation}
+
+In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is therefore impractical for all but special research flame calculations.
+
+\subsection{The LES Momentum Equation}
+
+For domain sizes ranging from meters to kilometers, the affordable grid resolution for most LES fire calculations ranges from centimeters to meters.  The goal of the LES is to evolve the cell mean values of mass, momentum, and energy explicitly, while accounting for the effects that subgrid transport and chemistry have on the mean fields.  To this end, we apply the box filter to the DNS equations to obtain the filtered equations.  As an example, consider the momentum equation.  Applying Eq.~(\ref{eqn_box_filter}) to Eq.~(\ref{eqn_dns_conservative}) results in
+\begin{equation}
+\label{eqn_LES_1}
+\frac{\partial \overline{\rho u_i}}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp u_{{\rm b},i}}
+\end{equation}
+The cell mean value, $\overline{\rho u_i u_j}$, is not itself a primitive variable in the calculation---we have no way of computing the term under the bar to advance Eq.~(\ref{eqn_LES_1}) in time.  We must, therefore, decompose the terms, and this leads to closure problems.
+
+The next step is simply to apply the Favre filter,
+\begin{equation}
+\label{eqn_LES_2}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u_i u_j}) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
+\end{equation}
+The first term is now separable, provided we have a solution for $\overline{\rho}$. But we still have no way to compute the correlation $\widetilde{u_i u_j}$ on the grid. We cannot simply use $\widetilde{u}_i \widetilde{u}_j$ as a substitute (this is the old problem of ``the mean of the square does not equal the square of the mean''). Instead, we define the subgrid-scale (SGS) stress:
+\begin{equation}
+\label{eqn_sgs_stress}
+\tau_{ij}^{\rm sgs} \equiv \overline{\rho} ( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j )
+\end{equation}
+Substituting Eq.~(\ref{eqn_sgs_stress}) into Eq.~(\ref{eqn_LES_2}) yields
+\begin{equation}
+\label{eqn_LES_3}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \overline{p}}{\partial x_i} - \frac{\partial \overline{\tau}_{ij}}{\partial x_j} - \frac{\partial \tau_{ij}^{\rm sgs}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
+\end{equation}
+Equation (\ref{eqn_LES_3}) is what is typically referred to as the LES momentum equation (analogous to the Cauchy equation---constitutive models have not been applied).  All variables are primitive or computable once we find a suitable closure for the subgrid scale stress, $\tau_{ij}^{\rm sgs}$.
+
+\subsubsection*{Constitutive Relationship}
+
+There are a few more modifications we need to make in order to get Eq.~(\ref{eqn_LES_3}) into shape for FDS.  The first is to decompose the SGS stress and apply Newton's law of viscosity as the constitutive relationship for the deviatoric part.  Note that $\overline{\tau}_{ij}$ is already the deviatoric part of the viscous stress.  We model the total deviatoric stress as
+\begin{equation}
+\label{eqn_newtons_law_sgs}
+\tau_{ij}^{\rm dev} \equiv \overline{\tau}_{ij} + \tau_{ij}^{\rm sgs} - \frac{1}{3}\tau_{kk}^{\rm sgs}\delta_{ij} = - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right)
+\end{equation}
+Note that $\delta_{ij}$ is the Kronecker delta ($\delta_{ij}=1$ if $i=j$, $\delta_{ij}=0$ if $i\ne j$).  The turbulent viscosity, $\mu_t$, requires modeling, as discussed below.
+
+\subsubsection*{Modified Pressure Term}
+
+In LES of low-Mach flows, the isotropic part of the SGS stress must be absorbed by the pressure term.  Define the subgrid kinetic energy as half the trace of the SGS stress,
+\begin{equation}
+\label{eqn_ksgs_2}
+k_{\rm sgs} \equiv \frac{1}{2} \tau_{kk}^{\rm sgs}
+\end{equation}
+and define the modified filtered pressure \cite{Pope:2000} as
+\begin{equation}
+\label{eqn_modified_pressure}
+\bar{p} \equiv \overline{p} + \frac{2}{3}k_{\rm sgs}
+\end{equation}
+Upon substitution of Eqs.~(\ref{eqn_newtons_law_sgs}) and (\ref{eqn_modified_pressure}) into Eq.~(\ref{eqn_LES_3}), we have
+\begin{equation}
+\label{eqn_LES_4}
+\frac{\partial \,\overline{\rho} \widetilde{u}_i}{\partial t} + \frac{\partial}{\partial x_j} (\overline{\rho} \widetilde{u}_i \widetilde{u}_j) = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + \overline{\rho} g_i + \bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^\ppp} \, \widetilde{u}_{{\rm b},i}
+\end{equation}
+Notice that Eq.~(\ref{eqn_LES_4}) closely resembles the DNS momentum equation, Eq.~(\ref{eqn_dns_conservative}).  For this reason, we may relax the filter formalism as we discuss the numerical details of the algorithm.  The user should simply understand that in the LES context when we write $\tau_{ij}$ we mean precisely $\tau_{ij}^{\rm dev}$, and similarly for pressure in LES $p$ refers to $\bar{p}$.
+
+\subsubsection*{Bulk Mass Source Term}
+
+When writing the momentum equation in non-conservative form, which we will do below, we must account for the introduction of mass from subgrid particles (evaporation of water droplets, for example).  Using the continuity equation, Eq.~(\ref{mass}), we can rewrite Eq.~(\ref{eqn_LES_4}) as follows:
+\begin{equation}
+\label{eqn_LES_5}
+\overline{\rho} \,\DoD{\widetilde{u}_i}{t} = -\frac{\partial \bar{p}}{\partial x_i} - \frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + \overline{\rho} g_i + \underbrace{\bar{f}_{{\rm d},i} + \overline{\dot{m}_{\rm b}^{\ppp}} (\widetilde{u}_{{\rm b},i} - \widetilde{u}_i)}_{\displaystyle\bar{f}_{{\rm b},i}}
+\end{equation}
+The last term in Eq.~(\ref{eqn_LES_5}) is absorbed into the bulk subgrid force term, $\bar{f}_{{\rm b},i}$, which also accounts for drag, as discussed in Chapter \ref{chapter:lagrangian_particles} on Lagrangian Particles.
+
+\subsection{Production of Subgrid Kinetic Energy}
+
+The transport equation for the resolved kinetic energy per unit mass, $K\equiv \mhalf \widetilde{u}_i\widetilde{u}_i$, is derived by dotting the LES momentum equation with the resolved velocity vector.  The result is
+\begin{align}
+\label{eqn_LES_KE}
+\overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
+\overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{\rm dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{{\rm b},i}) \widetilde{u}_i
+\end{align}
+The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability)~\cite{Piomelli:1991}.
+Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
+\begin{align}
+\label{eqn_ke_dissipation}
+\tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \frac{\partial \widetilde{u}_i}{\partial x_j} && \notag\\
+&= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
+&= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
+\end{align}
+Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
+
+\subsection{Wind Fields via Mean Forcing or Nudging}
+
+A common technique used in data assimilation referred to as mean forcing or {\em nudging} is applied to model wind fields~\cite{Kalnay:2003}. Given a vertically and temporally varying wind field, $\bu_\infty(z,t)$, that is assumed to apply to the entire computational domain, a forcing term is added to the momentum equation:
+\be
+   \frac{\partial \bu}{\partial t} = \ldots + \frac{\bu_\infty - \overline{\bu}}{\tau}
+\ee
+where $\overline{\bu}$ is the average velocity vector over a particular horizontal slice of the atmosphere (typically a single horizontal row of grid cells). The relaxation time scale, $\tau$, is chosen by the user such that the computed velocity field faithfully follows the specified wind field. In cases where the wind is steady, the value of $\tau$ can be fairly large and hence the forcing term fairly small. However, if the wind field fluctuates rapidly in time, the value of $\tau$ needs to be chosen based on some trial and error.
+
+\newpage
+\section{Models for the Turbulent Viscosity}
+\label{section:turbulent_viscosity}
+
+In LES, the ``turbulence model'' refers to the closure for SGS flux terms.  In FDS, \emph{gradient diffusion} is the turbulence model used to close both the SGS momentum and scalar flux terms.  We then require a model for the turbulent transport coefficient: the turbulent (or eddy) viscosity or the turbulent (or eddy) diffusivity.  The turbulent diffusivity is obtained using a constant Schmidt number (for mass diffusivity) or Prandtl number (for thermal diffusivity), as discussed below, and so the most important transport coefficient is the turbulent viscosity, $\mu_{\rm t}$. There are several different options available that are described in this section. The Deardorff model, Section~\ref{sec:deardorff}, is the default. Its selection as the default was based on comparisons with a wide variety of full-scale experiments.
+
+\subsection{Constant Coefficient Smagorinsky Model}
+
+Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity can be modeled as follows:
+\be
+\mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
+\ee
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.
+
+\subsection{Dynamic Smagorinsky Model}
+
+For the dynamic Smagorinsky model~\cite{Germano:1,Moin:1991}, the coefficient $C_{\rm s}$ in Eq.~(\ref{constant_coef_LES}) is no longer taken as a constant, but rather computed based on local flow conditions.
+
+\subsection{Deardorff's Model (Default)}
+\label{sec:deardorff}
+
+By default, FDS uses a variation of Deardorff's model~\cite{Deardorff:1980}:
+\be
+  \mu_{\rm t} = \rho \, C_\nu \, \Delta \, \sqrt{ k_{\rm sgs} } \quad ; \quad
+  k_{\rm sgs} = \ha \left( (\bar{u}-\hat{\bar{u}})^2 + (\bar{v}-\hat{\bar{v}})^2 + (\bar{w}-\hat{\bar{w}})^2 \right)  \label{Deardorff_LES}
+\ee
+where $\bar{u}$ is the average value of $u$ at the grid cell center (representing the LES filtered velocity at length scale $\Delta$) and $\hat{\bar{u}}$ is a weighted average of $u$ over the adjacent cells (representing a test-filtered field at length scale $2\Delta$):
+\be
+   \bar{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{\bar{u}}_{ijk} = \frac{\bar{u}_{ijk}}{2} + \frac{\bar{u}_{i-1,jk} + \bar{u}_{i+1,jk} }{4}
+\ee
+The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
+
+\subsection{Vreman's Model}
+\label{sec:vreman}
+
+Vreman's eddy viscosity model \cite{vreman:2004} is given by
+\begin{equation}
+\label{eqn_mu_vreman}
+\mu_{\rm t} = \rho \, c \, \sqrt{ \frac{B_\beta}{\alpha_{ij}\alpha_{ij}} }
+\end{equation}
+where
+\begin{align}
+B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \beta_{13}^2 + \beta_{22}\beta_{33} - \beta_{23}^2 \quad ; \quad \beta_{ij} = \Delta_m^2 \alpha_{mi} \alpha_{mj} \\
+\alpha_{ij} &= \frac{\partial u_j}{\partial x_i}
+\end{align}
+The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
+
+The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_{\rm s}^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_{\rm s} = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
+
+\subsection{Renormalization Group (RNG) Model}
+\label{sec:rng}
+
+Renormalization group (RNG) theory \cite{Yakhot:1989} may be used to derive an effective eddy viscosity, $\mu_{\si{eff}} = \mu + \mu_t$, given by the cubic expression:
+\begin{equation}
+\label{eq:rng}
+\mu_{\si{eff}} = \mu\left[1 + H\left( \frac{\mu_s^2 \mu_{\si{eff}}}{\mu^3} - C \right)\right]^{1/3}
+\end{equation}
+Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is the Heaviside function ($H(x)=x$ if $x>0$, $H(x)=0$ if $x\le0$).
+
+For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the constant coefficient Smagorinsky model.  Unlike constant coefficient Smagorinsky, however, the RNG turns itself off in regions of low turbulence.  The cutoff constant, $C=10$, has been tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case (see FDS Verification Guide \cite{FDS_Verification_Guide}).
+
+\subsection{Thermal Conduction and Gas Species Diffusion}
+
+The other diffusive parameters,
+the thermal conductivity and mass diffusivity, are related to the turbulent viscosity by
+\be k_{\rm t} = \frac{\mu_{\rm t} \, c_p}{\PR_{\rm t}}
+\quad ; \quad
+ (\rho D)_{\rm t} =\frac{\mu_{\rm t}}{\SC_{\rm t}} \ee
+The turbulent Prandtl number $\PR_{\rm t}$ and the turbulent Schmidt number $\SC_{\rm t}$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
+
+\subsection{Numerical Implementation}
+
+In the discretized form of the momentum equation, the modeled viscosity is defined at cell centers. For example, the constant coefficient Smagorinsky model takes on the following form:
+\be \mu_{ijk} = \rho_{ijk} \, (C_{\rm s}\, \Delta)^2 \, |S|   \ee
+where $C_{\rm s}$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
+\be |S|^2 = 2\left(\dod{u}{x}\right)^2 + 2\left(\dod{v}{y}\right)^2+
+  2\left( \dod{w}{z}\right)^2
+       + \left( \dod{u}{y} + \dod{v}{x} \right)^2
+       + \left( \dod{u}{z} + \dod{w}{x} \right)^2
+       + \left( \dod{v}{z} + \dod{w}{y} \right)^2
+       - \frac{2}{3} (\nabla\!\cdot \bu)^2  \ee
+The quantity $|S|$ consists of second order spatial differences
+averaged at cell centers. For example
+\begin{align}
+\dod{u}{x} &\approx \frac{u_{ijk}-u_{i-1,jk}}{\dx_i} \\
+\dod{u}{y} &\approx \frac{1}{2} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy_{j+\ha}} + \frac{u_{ijk}-u_{i,j-1,k}}{\dy_{j-\ha}} \right)
+\end{align}
+The divergence is described in Section~\ref{div_discret}.
+
+The thermal conductivity and material diffusivity of the fluid are related to the viscosity by
+\be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_{\rm t}}  \quad ; \quad
+   (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_{\rm t}}
+\ee
+where $\PR_{\rm t}$ is the turbulent Prandtl number and $\SC_{\rm t}$ is the turbulent Schmidt number, both assumed constant. Note that the specific heat $c_{p,0}$ is that of the dominant species of the mixture. Based on simulations of smoke plumes, $C_{\rm s}$ is 0.20, $\PR_{\rm t}$ and $\SC_{\rm t}$ are 0.5. There are no rigorous justifications for these choices other than through comparison with experimental data~\cite{Zhang:1}.
+
+
+\subsection{Transport Coefficients for Direct Numerical Simulation (DNS)}
+\label{DNS}
+
+There are some flow scenarios where it is possible to use the molecular properties
+$\mu$, $k$ and $D$ directly. Usually, this means that the numerical grid cells are on the
+order of 1~mm or less, and the simulation is regarded as a
+Direct Numerical Simulation (DNS).
+For a DNS, the viscosity, thermal conductivity
+and material diffusivity are approximated from kinetic theory because the temperature
+dependence of each is important in combustion scenarios.
+The viscosity of the species $\alpha$ is given by
+\be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
+\quad [=] \quad \si{kg/(m.s)} \ee
+where $\sigma_\alpha$ is the Lennard-Jones
+hard-sphere diameter ($\text{\AA}$) and $\Omega_v$ is the
+collision integral, an empirical function of the
+temperature $T$. The thermal conductivity of species $\alpha$ is given by
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \si{W/(m.K)} \ee
+Note that the default value of the Prandtl number $\PR$ is 0.7.  However, this is an input property that can be set by the user.
+The viscosity and thermal conductivity of a gas mixture are given by
+\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
+k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
+The binary diffusion coefficient of species $\alpha$
+diffusing into species $\beta$ is given by
+\be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
+\quad [=] \quad \si{m^2/s} \ee
+where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
+$\Omega_D$ is the diffusion collision integral, an empirical
+function of the temperature, $T$~\cite{Poling:1}.
+It is assumed that nitrogen is the dominant species in any combustion
+scenario considered here, thus the diffusion coefficient in the
+species mass conservation equations is that of the given species diffusing
+into nitrogen
+\be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha, 0} \ee
+where species 0 is nitrogen.
+
+\newpage
+
+\section{Coupling the Velocity and Pressure}
+
+\subsection{Simplifications of the Momentum Equation}
+
+First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
+\be
+   \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
+\ee
+Next, we make the following substitutions:
+\begin{enumerate}
+\item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
+$\nabla p=\rho_n \bg + \nabla \tp$.
+\item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $
+\item Divide all terms by the density, $\rho$
+\item Decompose the pressure term:
+   \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \label{p_decomp} \ee
+\item Define $\cH \equiv |\bu|^2/2 + \tp/\rho $
+\end{enumerate}
+Now the momentum equation can be written
+\be
+   \dod{\bu}{t} \underbrace{- \bu\times\bo - \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]}_{\bF_{\rm A}}  \underbrace{- \tp \, \nabla \left( \frac{1}{\rho}\right)}_{\bF_{\rm B}} + \nabla \cH =  0 \label{momeq}
+\ee
+Note that the subscripts A and B for the vector $\bF$ denote Advective and Baroclinic. As will be seen in the following sections, it is convenient to group the various terms of the momentum equation into these two terms.
+
+\subsection{Finite-Difference Approximation of the Momentum Equation}
+\label{findiffmom}
+
+As discussed in the previous section, it is convenient to write the momentum equation in the form:
+\be
+   \dod{\bu}{t} + \bF + \nabla \cH = 0 \quad ; \quad \bF = \bF_{\rm A} + \bF_{\rm B} \label{simple_momentum_equation}
+\ee
+The advective and baroclinic terms, $\bF_{\rm A}$ and $\bF_{\rm B}$, are expanded as:
+\begin{align}
+F_{{\rm A},x} &= \hw \, \omy - \hv \, \omz  - \frac{1}{\rho} \left( (\rho-\rho_n)g_x + f_x  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \quad ; \quad & F_{{\rm B},x} = -\tp \, \dod{}{x} \left( \frac{1}{\rho} \right) \\[0.1in]
+F_{{\rm A},y} &= \hu \, \omz - \hw \, \omx  - \frac{1}{\rho} \left( (\rho-\rho_n)g_y + f_y  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \quad ; \quad & F_{{\rm B},y} = -\tp \, \dod{}{y} \left( \frac{1}{\rho} \right) \\[0.1in]
+F_{{\rm A},z} &= \hv \, \omx - \hu \, \omy  - \frac{1}{\rho} \left( (\rho-\rho_n)g_z + f_z  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right) \quad ; \quad & F_{{\rm B},z} = -\tp \, \dod{}{z} \left( \frac{1}{\rho} \right)
+\end{align}
+The term $\nabla \cH$ is referred to as the pressure gradient, even though, as discussed above, $\cH$ is not actually a pressure. Its discretization is:
+\begin{align}
+&\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx}  = 0  \label{umom} \\[0.15in]
+&\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy}  = 0  \label{vmom} \\[0.15in]
+&\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz}  = 0  \label{wmom}
+\end{align}
+where $\hp_{ijk}$ is taken at the center of cell $ijk$, $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$ at the side facing in the forward $z$ (vertical) direction.
+
+For the discretization of $\bF_{\rm A}$, the components of the vorticity $(\om_x,\om_y,\om_z)$ are located at cell edges pointing in the $x$, $y$ and $z$ directions, respectively. The same is true for the off-diagonal terms of the viscous stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and $\tau_{xy}=\tau_{yx}$. The diagonal components of the stress tensor, $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$, and the external force components, $f_x$, $f_y$, and $f_z$, are located at their respective cell faces.
+\begin{align}
+F_{{\rm A},\x,ijk} &= \ha \left( w_{i+\ha,jk} \; \om_{y,ijk} + w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) - \ha \left( v_{i+\ha,jk} \; \om_{z,ijk} + v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\[.1in]
+           &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk} + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx} + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy} + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\[.2in]
+F_{{\rm A},\y,ijk} &= \ha \left( u_{i,j+\ha,k} \; \om_{z,ijk} + u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) - \ha \left( w_{i,j+\ha,k} \; \om_{x,ijk} + w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\[.1in]
+           &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk} + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx} + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy} + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\[.2in]
+F_{{\rm A},\z,ijk} &=  \ha \left( v_{ij,k+\ha} \; \om_{x,ijk} + v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right) -\ha \left( u_{ij,k+\ha} \; \om_{y,ijk} + u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\[.1in]
+           &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk} + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx} + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy} + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right)
+\end{align}
+The components of the vorticity vector are discretized:
+\begin{align}
+\om_{x,ijk} &= \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} - \frac{\hv_{ij,k+1}-\hv_{ijk}}{ \dz}  \\[.1in]
+\om_{y,ijk} &= \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} - \frac{\hw_{i+1,jk}-\hw_{ijk}}{\dx}  \\[.1in]
+\om_{z,ijk} &= \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -\frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy}
+\end{align}
+The components of the viscous stress tensor are discretized:
+\begin{align}
+\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
+\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
+\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\[.1in]
+\tau_{xy,ijk} &= \tau_{yx,ijk} = \mu_{i+\ha,j+\ha,k} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy} + \frac{v_{i+1,jk} -v_{ijk}}{\dx} \right) \\[.1in]
+\tau_{xz,ijk} &= \tau_{zx,ijk} = \mu_{i+\ha,j,k+\ha} \left( \frac{u_{ij,k+1}-u_{ijk}}{\dz}  + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\[.1in]
+\tau_{yz,ijk} &= \tau_{zy,ijk} = \mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}  + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
+\end{align}
+The components of the baroclinic term, $\bF_{\rm B}$, are discretized:
+\begin{align}
+F_{{\rm B},\x,ijk} &=  - \frac{\tp_{i+1,jk}  \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}}   \, \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}}  - \frac{1}{\rho_{ijk}} \right) \\[.1in]
+F_{{\rm B},\y,ijk} &=  - \frac{\tp_{i,j+1,k} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i,j+1,k}}{\rho_{ijk}+\rho_{i,j+1,k}} \, \frac{1}{\dy} \left( \frac{1}{\rho_{i,j+1,k}} - \frac{1}{\rho_{ijk}} \right) \\[.1in]
+F_{{\rm B},\z,ijk} &=  - \frac{\tp_{ij,k+1}  \, \rho_{ijk} + \tp_{ijk} \, \rho_{ij,k+1}}{\rho_{ijk}+\rho_{ij,k+1}}   \, \frac{1}{\dz} \left( \frac{1}{\rho_{ij,k+1}}  - \frac{1}{\rho_{ijk}} \right)
+\end{align}
+Notice the somewhat unusual discretization of the term $\tp \, \nabla (1/\rho)$, which is needed to be consistent with the discretization of the other two terms in Eq.~(\ref{p_decomp}):
+\begin{align}
+  \frac{1}{(\rho_{ijk}+\rho_{i,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} =& \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) \nonumber \\[.1in]
+  & - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right)
+\end{align}
+
+
+
+\subsection{The Poisson Equation for Pressure}
+\label{PoissonEq}
+
+Before the components of velocity can be advanced in time, an elliptic partial differential equation (known as a Poisson equation) must be solved for the pressure term, $\cH$. This equation is formed by taking the divergence of the momentum equation:
+\be
+   \nabla^2 \cH = -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \left( \bF_{\rm A} + \bF_{\rm B} \right)  \label{pe}
+\ee
+Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The value of $\tp$ in $\bF_{\rm B}$ is taken from the last computed $\cH$. The pressure on the left hand side (incorporated in the variable $\cH$) is solved for directly. The reason for the decomposition of the pressure term is so that the linear algebraic system arising from the discretization of Eq.~(\ref{pe}) has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy by a fast, direct (i.e., non-iterative) method that utilizes Fast Fourier Transforms (FFT). As will be discussed below, the Poisson equation is solved multiple times, each time driving the old and new values of $\tp$ closer together.
+
+The discretized form of the Poisson equation is
+\begin{align}
+\frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
+\frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
+\frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \notag \\ =
+    -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
+    -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
+    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
+\label{pe_fin}
+\end{align}
+This elliptic partial differential equation is solved using a direct FFT-based solver~\cite{Sweet:1} that is part of a library of routines for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized form of the elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric Research (NCAR) in Boulder, Colorado.}. To ensure that the divergence of the fluid is consistent with the definition given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
+\be
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+          \frac{(\nabla\!\cdot \bu)_{ijk}^*
+              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt}
+\ee
+at the predictor step, and then
+\be
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+         \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
+         \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
+       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2}
+\ee
+at the corrector step. By construction, the thermodynamic divergence defined in Eq.~(\ref{eqn_divfromeos}) is identically equal to the divergence defined by
+\be
+(\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} + \frac{v_{ijk}-v_{i,j-1,k}}{\dy} + \frac{w_{ijk}-w_{ij,k-1}}{\dz}
+\ee
+The equivalence of the two definitions of the divergence is a result of the form of the discretized equations, the time-stepping scheme, and the direct solution of the Poisson equation for the pressure.
+
+The following sections describe how the boundary conditions for the pressure equation are specified.
+
+
+\subsubsection{Open Boundary Conditions}
+
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + |\mathbf{u}|^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for $\cH$ requires a Dirichlet condition at an open boundary; that is, its value is specified at the external boundary of the mesh. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
+\be
+  {\ct BXS(J,K)} \equiv \cH_{\ha,jk} = \left\{ \begin{array}{ll} \displaystyle
+          \displaystyle \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
+          \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
+          \end{array} \right.
+\ee
+{\ct BXS} is the name of the array sent to the pressure solver. The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
+
+
+\subsubsection{Solid Boundary Conditions}
+
+Boundary conditions at a solid surface fall into three distinct categories:
+\begin{enumerate}
+\item External boundary where the entire face of the mesh is either solid or a forced flow.
+\item External boundary where there is a mix of open and solid surfaces.
+\item Internal solid obstructions.
+\end{enumerate}
+
+\begin{description}
+\item[Case 1:] FDS uses a direct Poisson solver that requires that one specify either Neumann (specified normal gradient) or Dirichlet (specified value) boundary conditions at the exterior of the mesh. If an entire face of the mesh is a solid or forced flow boundary, we can use the Neumann boundary condition for the entire face. For example, at the $x=x_{\hbox{\tiny max}}$ boundary we can specify the normal gradient of $\cH$: \be {\ct BXF(J,K)} \equiv \frac{\hp_{I+1,jk}^n-\hp_{I,jk}^n}{\dx} = -F_{x,I,jk}^n - \frac{u_{I,jk}^*-u_{I,jk}^n}{\dt} \label{dbc} \ee where {\ct BXF} is the name of the boundary condition array sent to the pressure solver, $\cH_{I+1,jk}$ lives in the center of the ghost cell to the right of the boundary, $\cH_{I,jk}$ lives in the center of cell to the left of the boundary, $F_{x,I,jk}^n$ is the $x$-component of $\bF$ at the vent or solid wall at the start of the time step, and $u_{I,jk}^*$ is the user-specified value of the $x$-component of velocity at the next time step. For the corrector step: \be {\ct BXF(J,K)} \equiv \frac{\hp_{I+1,jk}^*-\hp_{I,jk}^*}{\dx} = -F_{x,I,jk}^* - \frac{u_{I,jk}^{n+1}-\ha(u_{I,jk}^*+u_{I,jk}^n)}{\dt/2} \label{dbc2} \ee The normal velocity component at the next time step, $u_{I,jk}^{n+1}$, is exactly (to machine accuracy) the specified value. If the boundary is a solid wall, then this value starts and remains zero. If the boundary is a forced flow vent, then this value follows the user-specified time history.
+
+\item[Case 2:] At exterior mesh faces with a mix of solid and open boundaries, we must apply Dirichlet boundary conditions at all cells, meaning that $\cH$ is specified rather than its gradient. Consider the same mesh face as in Case~1. We first modify the flux term using a previously computed value of the pressure and the desired time derivative of the velocity component: \be F_{x,I,jk}^{n,k} =  - \frac{ \cH_{I+1,jk}^{n,k-1} - \cH_{I,jk}^{n,k-1} }{\dx} - \frac{ u_{I,jk}^{*} - u_{I,jk}^n}{\dt} \label{Fspec} \ee Next, the value of $\cH$ is specified at the mesh boundary: \be {\ct BXF(J,K)} \equiv \cH_{I+\ha,jk}^{n,k} = \frac{\cH_{I,jk}^{n,k-1} + \cH_{I+1,jk}^{n,k-1} }{2} + \frac{\dx}{4\, \dt} \left( u_{I,jk}^{*,k-1}-u_{I,jk}^{*} \right) \label{HbcE} \ee The superscript $k$ is an iterative index. We use the interface value of $\cH$ from the previous iteration to estimate its value at the current. The term, $u_{I,jk}^{*,k-1}$, is a first-order estimate of the desired normal velocity component at the next time step, $u_I^{*}$. The purpose of the second term on the right hand side of Eq.~(\ref{HbcE}) is demonstrated by summing Eq.~(\ref{Fspec}) and Eq.~(\ref{HbcE}) which leads to: \be u_{I,jk}^{*} = u_{I,jk}^n + \frac{u_{I,jk}^{*,k-1}-u_{I,jk}^{*}}{2} - \dt \left( F_{x,I,jk}^{n,k} + \frac{ \cH_{I+\ha,jk}^{n,k} - \cH_{I,jk}^{n,k-1} }{ \dx/2} \right) \label{uIE} \ee Very loosely, this converges according to \be \left| u_{I,jk}^{*,k}-u_{I,jk}^{*} \right| \approx \left| \frac{u_{I,jk}^{*,k-1}-u_{I,jk}^{*}}{2} \right| \ee This iterative process continues until $\left| u_{I,jk}^{*,k} - u_{I,jk}^{*} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$. For the corrector step, this procedure is the same, except the boundary condition for the pressure term is: \be {\ct BXF(J,K)} \equiv \cH_{I+\ha,jk}^{*,k} = \frac{\cH_{I,jk}^{*,k-1} + \cH_{I+1,jk}^{*,k-1} }{2} + \frac{\dx}{2\, \dt} \left( u_{I,jk}^{n+1,k-1}-u_{I,jk}^{n+1} \right) \ee
+
+\item[Case 3:] FDS uses a simple, direct-forcing immersed boundary method (IBM) \cite{Fadlun:2000} for block Cartesian geometries. Internal solid obstructions are represented as masked grid cells, but the no-flux condition (\ref{dbc}) cannot be directly prescribed at the boundaries of these blocked cells. However, by solving the pressure equation several times within a time step, the normal component of velocity can be driven to within some specified tolerance of the desired value. At the start of a time step, the components of $\bF$ are computed at all cell faces that do not correspond to walls. At those cell faces that do correspond to solid walls but are not located at the exterior of the computational grid, we prescribe (for example at the cell face where $u_{ijk}$ ``lives``): \be F_{x,ijk}^{n,k} = - \frac{\hp_{i+1,jk}^{n,k-1}-\hp_{ijk}^{n,k-1}}{\dx} -\frac{u_{ijk}^*-u_{ijk}^n}{\dt} \label{sbc} \ee at the predictor step, and \be F_{x,ijk}^{*,k} = - \frac{\hp_{i+1,jk}^{*,k-1}-\hp_{ijk}^{*,k-1}}{\dx} - \frac{u_{ijk}^{n+1}-\ha \left( u_{ijk}^*+u_{ijk}^n \right)}{\dt/2} \label{sbcc} \ee at the corrector step. Note that the superscript $n$ refers to the time step and $k$ refers to the iteration of the pressure solver. Note that $u_{ijk}^*$ and $u_{ijk}^{n+1}$ are approximate because the true value of the velocity time derivative depends on the solution of the pressure equation, but since the most recent estimate of pressure is used, the approximation is fairly good. Also, even though there are small errors in normal velocity at solid surfaces, the divergence of each blocked cell remains exactly zero for the duration of the calculation. In other words, the total flux into a given obstruction is always identically zero, and the error in normal velocity is usually at least several orders of magnitude smaller than the characteristic flow velocity. When implemented as part of a predictor-corrector updating scheme, the no-flux condition at solid surfaces is maintained fairly well.
+\end{description}
+
+
+\subsubsection{Boundary Conditions at Mesh Interfaces}
+\label{section:mesh_interface}
+
+Dirichlet boundary conditions are applied at the interface between two meshes, which means that $\cH$ is specified at the interface. Consider the interface between two non-overlapping meshes. The value of $\cH$ in the center of the rightmost cell of the left mesh is denoted $\cH_I$, and the value of $\cH$ in the center of the leftmost cell of the right mesh is $\cH_1$. The interface value of the left mesh is denoted $\cH_{I+\ha} \equiv (\cH_I + \cH_{I+1})/2$, and the interface value of the right mesh is denoted $\cH_\ha \equiv (\cH_0 + \cH_1)/2$. The specified value of $\cH$ for both meshes is:
+\be
+   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,k-1}-u_0^{*,k-1} \right) \label{Hbc}
+\ee
+The superscript $k$ is an iterative index. The terms, $u_I^{*,k-1}$ and $u_0^{*,k-1}$, are first-order estimates of the normal velocity components at the next time step, based on the previous ($k-1$) estimate of the pressure field. For example, the normal velocity at the left mesh interface is calculated:
+\be
+  u_I^{*,k-1} = \bar{u}_I^n - \dt \left( F_{x,I}^{n} + \frac{ \cH_{I+\ha}^{k-1} - \cH_I^{k-1} }{ \dx/2} \right) \quad ; \quad \cH_{I+\ha}^{k-1} = \frac{\cH_I^{k-1}+\cH_1^{k-1}}{2} \label{u_est}
+\ee
+The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is demonstrated by substituting $\cH_{I+\ha}^k$ from Eq.~(\ref{Hbc}) into Eq.~(\ref{u_est}) which leads to:
+\be
+   u_I^{*,k-1} = \bar{u}_I^n - \frac{u_I^{*,k-2}-u_0^{*,k-2}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{k-2}+\cH_1^{k-2})/2 - \cH_I^{k-1} }{ \dx/2} \right) \label{uI}
+\ee
+The extra term on the right hand side drives $u_I$ halfway towards $u_0$, which is itself driven halfway towards $u_I$. This iterative process continues until $\left| u_I^{*,k} - u_0^{*,k} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+
+For the corrector step, this procedure is the same, except the boundary condition for the pressure term is:
+\be
+   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,k-1}-u_0^{n+1,k-1} \right)
+\ee
+
+\subsection{Iterative Procedure for Updating Velocity}
+\label{section:pressure_iteration}
+
+The Poisson solver in FDS produces an exact solution of Eq.~(\ref{pe_fin}) on each mesh. There are three problems with this solution, however:
+\begin{enumerate}
+\item The solution, $\cH$, is continuous at mesh interfaces, but the finite-difference of its gradient is not. This means that the normal component of velocity at the mesh interface will not agree at the next time step.
+\item At solid internal boundaries, the normal component of velocity is not exactly zero because the normal component of $\bF$ is set equal to the previous value of the gradient of $\cH$. The no-flux boundary condition is only exact at external boundaries.
+\item The perturbation pressure, $\tp$, that is included in $\bF$ is from the previous time step. Thus, after solving the Poisson equation, the value of $\tp$ implicit in $\cH$ will not equal the value in $\bF$.
+\end{enumerate}
+One solution to these three problems is to solve the Poisson equation multiple times, each time updating the lagged value of pressure until the normal component of velocity at internal solids and mesh boundaries converges within a specified tolerance, and until the old and new values of the perturbation pressure, $\tp$, converge to within a specified tolerance.
+
+Following is a step by step procedure for advancing the velocity components. This same procedure is followed, with a few noted exceptions, in both the predictor and corrector stages of the time step.
+
+\begin{enumerate}
+\item The overlapping normal components of velocity that co-exist at the mesh interface are replaced by their average. Consider two meshes joined side by side in the $x$ direction. The component $u_I \equiv u_{I,jk}$ lives on the right boundary of the left hand mesh, and $u_0 \equiv u_{0,jk}$ lives on the left boundary of the right hand mesh. Define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points. To do this we simply average the coincident values of the normal velocity component at the mesh interfaces. For instance, considering the same side-by-side meshes as before,
+   \be
+   \label{eqn_patchave_ufield}
+      \bar{u}_I = \bar{u}_0 \equiv \frac{1}{2} \left( u_{I,jk} + u_{0,jk} \right)
+   \ee
+   for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are possible).
+\item Compute $\bF_{\rm A}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+
+\item\label{step3} Add the baroclinic term $\bF(\bar{\mathbf{u}})=\bF_{\rm A}(\bar{\mathbf{u}})+\bF_{\rm B}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+
+\item Compute the normal component of $\bF$ at solid surfaces from Eq.~(\ref{sbc}) or Eq.~(\ref{sbcc}).
+
+\item Solve the Poisson equation for the pressure $\cH$ as described in Section~\ref{PoissonEq}. At the predictor stage:
+\be
+\label{eqn_poisson_stg1}
+\nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) - \mathbf{F}(\bar{\mathbf{u}}^n)
+\ee
+At the corrector stage:
+\be
+\label{eqn_poisson_stg2}
+\nabla^2 {\cH}^* = -\left(\frac{ 2 \nabla \cdot \bu^{n+1} - \nabla\!\cdot \bu^* - \nabla\!\cdot (\bar{\bu}^* - \bu^*) - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) - \mathbf{F}(\bar{\mathbf{u}}^*)
+\ee
+The extra terms in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$ and $\nabla\!\cdot (\bar{\bu}^* - \bu^*)$, ``correct'' the divergence error. The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface, since all force terms are determined using the patch-averaged field. This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric; this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the production of spurious vorticity at mesh interfaces.
+
+\item Estimate the velocity field at the next time step. For the predictor step:
+\begin{equation}
+\label{eqn_RK1}
+\mathbf{u}^{*,k} = \bar{\mathbf{u}}^n - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^n) + {\nabla\cH}^{k-1} \right)
+\end{equation}
+At the corrector step:
+\begin{equation}
+\label{eqn_RK2}
+\mathbf{u}^{n+1,k} = \ha \left( \bar{\mathbf{u}}^n + \bar{\mathbf{u}}^* - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^*) + {\nabla\cH}^{k-1} \right) \right)
+\end{equation}
+Note that for both stages, the normal components of velocity at the interface are no longer expected to match because the individual pressure fields do not match exactly at the interface.
+
+\item Check the convergence criteria. The default velocity tolerance is
+   \be
+      \left| u_I^* - u_0^* \right| < 0.5 \, \delta x
+   \ee
+    and the default convergence criteria for the pressure, $p=\rho(\cH-|\bu|^2/2)$, is
+   \be
+      \left| \nabla \cdot (p^k-p^{k-1}) \nabla (1/\rho) \right|<20/\dx^2
+   \ee
+   If the criteria are not met, return to Step~\ref{step3}.
+\end{enumerate}
+
+
+
+
+\newpage
+\section{Velocity Boundary Conditions}
+\label{info:velocity_bc}
+
+This section describes how the tangential component of velocity is specified at solid surfaces, mesh interfaces, or open boundaries to the outside atmosphere. The normal component of velocity is not specified directly at these boundaries, but rather indirectly via the pressure boundary condition, as described in Section~\ref{PoissonEq}.
+
+\subsection{Smooth Walls}
+\label{smooth_wall_model}
+
+In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the streamwise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
+
+An important scaling quantity in the near-wall region is the friction velocity, defined as $u_\tau \equiv \sqrt{\tau_w/\rho}$.
+From the friction velocity we can define the nondimensional streamwise velocity $u^+ \equiv u/u_\tau$ and nondimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
+\begin{align}
+\label{eqn_visclayer} u^+ &= y^+                           && \mbox{for} \quad y^+ < 11.81 \\
+\label{eqn_loglaw}    u^+ &= \frac{1}{\kappa} \ln y^+ + B  && \mbox{for} \quad y^+ \ge 11.81
+\end{align}
+where $\kappa = 0.41$ is the von K\'arm\'an constant and $B=5.2$.  The region $5 < y^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  Following the work of Werner and Wengle \cite{Werner:1991}, the solution in this region is approximated by matching the viscous region and log regions at $y^+ = 11.81$.
+
+%In FDS, the buffer layer is approximated with a semi-log fit connecting the limits of the viscous and log regions.
+%\begin{align}
+%\label{eqn_buffer_layer}
+%u^+ &= (1/\kappa)_{\mbox{\tiny\emph{buffer}}} \ln y^+ + B_{\mbox{\tiny\emph{buffer}}}  && \mbox{for} \quad 5 < y^+ < 30
+%\end{align}
+%where $(1/\kappa)_{\mbox{\tiny\emph{buffer}}}=4.74$ and $B_{\mbox{\tiny\emph{buffer}}}=-2.63$.
+
+For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---streamwise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the streamwise velocity component is stored.
+
+\subsection{Rough Walls}
+\label{rough_wall_model}
+
+For rough walls FDS employs the log law presented in Pope \cite{Pope:2000},
+\begin{equation}
+\label{eqn_roughwallloglaw}
+u^+ = \frac{1}{\kappa} \ln \left(\frac{y}{s}\right) + \tilde{B}(s^+)
+\end{equation}
+where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is the dimensional roughness. The distance to the wall, $y$, is taken as $\delta y/2$ for the first off-wall grid cell.  The parameter $\tilde{B}$ varies with $s^+$ but attains a constant value $B_2=8.5$ in the fully rough limit.  In FDS, we implement $\tilde{B}$ as the following piece-wise function:
+\begin{equation}
+\tilde{B} = \left\{ \begin{array}{lll} B + (1/\kappa)\ln(s^+)  & \mbox{for} &          s^+ < 5.83 \\
+                                       \tilde{B}_{\rm max}     & \mbox{for} & 5.83 \le s^+ < 30.0 \\
+                                       B_2                     & \mbox{for} &          s^+ \ge 30.0 \end{array} \right.
+\end{equation}
+where $\tilde{B}_{\rm max} = 9.5$.
+
+\subsection{Wall Model Implementation}
+Once $u^+$ has been determined from the model profile, the stress may be obtained from (the definition of $u^+$)
+\begin{equation}
+\label{eqn_wall_stress}
+\tau_w = \rho \left( \frac{u}{u^+} \right)^2
+\end{equation}
+Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
+
+\subsection{Wall Damping of the Turbulent Viscosity}
+\label{sec:wall_damping}
+
+The turbulent viscosity $\nu_{\rm t} = \mu_{\rm t}/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{\rm mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
+
+To achieve the correct decay of the Reynolds stresses near a wall, Van Driest~\cite{Wilcox:1} proposed the following modification:
+\begin{equation}
+\label{eqn_vdf}
+\ell_{\rm mix} = C_{\rm s} \Delta \left[ 1 - \mathrm{e}^{-y^+/A} \right]
+\end{equation}
+where $A$ is a dimensionless empirical constant equal to 26.  The term in brackets is referred to as the {\em Van Driest damping function}. In FDS, due to difficulties defining a consistent test filter for use with either the Deardorff or the dynamic Smagorinsky turbulence model near the wall, at corners, and inside cavities, the turbulent viscosity of the first off-wall cell is obtained from the Smagorinsky model with Van Driest damping applied to the mixing length as shown in Eq.~(\ref{eqn_vdf}) with $y^+ = (\delta y/2)/\delta_\nu$ and $C_{\rm s} = 0.2$.  See Section~\ref{smooth_wall_model} for an explanation of terms. The viscosity near the wall is then given by
+\begin{equation}
+   \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
+\end{equation}
+where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
+
+\subsection{Open Boundaries}
+
+An open boundary is where the fluid is allowed to enter or exit the computational domain based on local pressure gradients, like at an open window or door of a building. Typically, the gradients of the tangential components of velocity are set to zero at an open boundary. That is, the ``ghost cell'' values of the tangential velocity components are set equal to their values in the first grid cell. However, if the user specifies a wind field $(u_\infty,v_\infty)$, then the tangential components of velocity are set to their respective far-field values at all inflow boundaries. At outflow boundaries, the standard zero-gradient condition is applied. 
+
+\subsection{Mesh Boundaries}
+
+At the interface between two meshes, the tangential components of velocity are taken directly from the neighboring mesh via an MPI exchange. 
+
+
+
+
+\newpage
+\section{Time Step and Stability Constraints}
+\label{stability}
+
+In explicit schemes, stability criteria may often be understood in terms of using the time step to maintain physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
+
+\subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+
+The well-known CFL constraint given by
+\begin{equation}
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
+\end{equation}
+places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for the purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
+
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
+\vskip\baselineskip
+\noindent
+\textct{CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \end{equation}
+\textct{CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
+    \end{equation}
+\textct{CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 }
+    \end{equation}
+
+\subsection{The Von Neumann Constraint}
+
+The Von Neumann constraint is given by
+\begin{equation}
+\mbox{VN} = \delta t \max \big[(\mu/\rho),D_\alpha \big] \; \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
+\end{equation}
+We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i}Y_\alpha = -D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+
+We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious wiggles that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
+\begin{equation}
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} \left( u_{i-1}^n - 2u_i^n + u_{i+1}^n \right)
+\end{equation}
+Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+
+\subsection{Realizable Mass Density Constraint}
+
+In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which of course is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+\begin{equation}
+\label{eqn_dtmassrestrict}
+\delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
+\end{equation}
+We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes (time location suppressed, summation over $i$ is implied)
+\be
+\label{eqn_divstability}
+\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
+\ee
+Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \textct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+
+\subsection{Realizable Fluid Volume Constraint}
+
+Mass conservation tells us that the time rate of change of a fluid element with mass $\rho V$ does not change:
+\begin{equation}
+\label{eq:fluidelement}
+\frac{\d (\rho V)}{\d t} = 0 \,\mbox{.}
+\end{equation}
+Using continuity, Eq.~(\ref{eq:fluidelement}) rearranges to
+\begin{equation}
+\label{eq:dvoldt}
+\nabla\cdot\mathbf{u} = \frac{1}{V} \frac{\d V}{\d t} \,\mbox{,}
+\end{equation}
+where $V(t)$ is the time-dependent volume of the fluid element.  If $\nabla\cdot\mathbf{u}<0$, the fluid element is under compression.  In fire dynamics this usually occurs due to cooling (heat loss by radiation, for example).  Equation (\ref{eq:dvoldt}) highlights the physical interpretation of the velocity divergence as the rate of volumetric expansion of the fluid \emph{per unit volume}.
+
+Equation (\ref{eq:dvoldt}) also implies a time step constraint.  Consider an explicit update of Eq.~(\ref{eq:dvoldt}) for the fluid volume:
+\begin{equation}
+V^{n+1} = V^n + \Delta t \, V^n (\nabla\cdot\mathbf{u})^{\!n} \,\mbox{.}
+\end{equation}
+If the fluid element is in compression (the divergence is negative), positivity of the fluid volume requires the time step to be limited by
+\begin{equation}
+\label{eq:volumedtrestriction}
+\Delta t < -(\nabla\cdot\mathbf{u})^{\!-1} \,\mbox{.}
+\end{equation}
+Note that this is the analog of the positive mass density constraint when the divergence is positive and provides the rationale for using the absolute value of the divergence $|\nabla\cdot\mathbf{u}|$ in the final version of the CFL constraint shown below.
+
+\subsection{Heat Transfer Constraint}
+
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
+
+\subsection{Adjusting the Time Step}
+
+In the default LES mode of operation, the CFL is increased or decreased to remain between 0.8 and 1.  To be clear, the CFL constraint is now given by
+\begin{equation}
+\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
+\end{equation}
+In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. If either the CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  See the User's Guide~\cite{FDS_Users_Guide} for details.
+
+
+
+

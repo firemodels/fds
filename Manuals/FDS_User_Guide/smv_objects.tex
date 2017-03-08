@@ -1,0 +1,256 @@
+% $Date$
+% $Revision$
+% $Author$
+
+\newcommand{\devicewidth}{1.5in}
+\newcommand{\boxwidth}{3.0in}
+\newcommand{\incgraphics}[1]{
+\parbox[c]{\devicewidth}{
+\vspace{0.01in}
+\includegraphics[width=\devicewidth]{#1}
+\vspace{0.01in}
+}
+}
+
+\section{Visualizing FDS Devices in Smokeview}
+
+This section provides an overview of various objects that can be drawn by Smokeview and how to customize their appearance. Further technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
+
+
+\subsection{Devices that Indicate Activation}
+\label{info:SMOKEVIEW_ID}
+
+Devices like sprinklers and smoke detectors can be drawn in one of two ways so as to indicate activation. When FDS determines that a device has activated it places a message in the {\ct .smv} file indicating the object number, the activation time and the state (0 for inactive or 1 for active). Smokeview then draws the corresponding object. See Tables~\ref{tab:devices_static} and \ref{tab:devices_mstatic} for images.
+
+The character string, {\ct SMOKEVIEW\_ID}, on the {\ct PROP} line associates an FDS device with a Smokeview object. For example, the following lines instruct Smokeview to draw the device in the shape of a {\ct 'target'}:
+\begin{lstlisting}
+&PROP ID='my target', SMOKEVIEW_ID='target' /
+&DEVC XYZ=0.5,0.8,0.6, QUANTITY='TEMPERATURE', PROP_ID='my target' /
+\end{lstlisting}
+
+
+\begin{longtable}[t!]{|l|c|}
+\caption{Single frame static objects}
+\label{tab:devices_static}
+\\ \hline
+{\ct SMOKEVIEW\_ID} & Image  \\ \hline \hline
+\endfirsthead
+\caption{Single frame static objects (continued)} \\ \hline
+{\ct SMOKEVIEW\_ID} & Image  \\ \hline \hline
+\endhead
+
+{\ct sensor} & \incgraphics{SCRIPT_FIGURES/sensor} \\ \hline
+{\ct target} & \incgraphics{SCRIPT_FIGURES/target} \\ \hline
+
+\end{longtable}
+
+\begin{longtable}[ht]{|l|c|c|}
+\caption{Dual frame static objects}
+\label{tab:devices_mstatic}
+\\ \hline
+\multirow{2}{*}{{\ct SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
+& inactive & active  \\ \hline \hline
+\endfirsthead
+\caption{Dual frame static objects (continued)}
+\\ \hline
+\multirow{2}{*}{{\ct SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
+& inactive & active  \\ \hline \hline
+\endhead
+
+{\ct heat\_detector}      & \incgraphics{SCRIPT_FIGURES/heat_detector_0}     & \incgraphics{SCRIPT_FIGURES/heat_detector_1} \\ \hline
+{\ct nozzle}              & \incgraphics{SCRIPT_FIGURES/nozzle_0}            & \incgraphics{SCRIPT_FIGURES/nozzle_1} \\ \hline
+{\ct smoke\_detector}     & \incgraphics{SCRIPT_FIGURES/smoke_detector_0}    & \incgraphics{SCRIPT_FIGURES/smoke_detector_1} \\ \hline
+{\ct sprinkler\_upright}  & \incgraphics{SCRIPT_FIGURES/sprinkler_upright_0} & \incgraphics{SCRIPT_FIGURES/sprinkler_upright_1} \\ \hline
+{\ct sprinkler\_pendent}  & \incgraphics{SCRIPT_FIGURES/sprinkler_pendent_0} & \incgraphics{SCRIPT_FIGURES/sprinkler_pendent_1} \\ \hline
+
+\end{longtable}
+
+
+\subsection{Devices with Variable Properties}
+\label{info:SMOKEVIEW_PARAMETERS}
+
+The appearance of Smokeview objects may be modified using data specified with the array of character strings called {\ct SMOKEVIEW\_PARAMETERS} on the {\ct PROP} line. For example, the input lines
+\begin{lstlisting}
+&PROP ID='ballprops', SMOKEVIEW_ID='ball',
+      SMOKEVIEW_PARAMETERS(1:6)='R=255','G=0','B=0','DX=0.5','DY=0.25','DZ=0.1' /
+&DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE', PROP_ID='ballprops' /
+\end{lstlisting}
+create an ellipsoid colored red with $x$, $y$, and $z$ axis diameters of 0.5~m and 0.25~m and 0.1~m, respectively. Note that these parameters are enclosed within single quotes because they are character strings passed to Smokeview.
+
+Table~\ref{tab:devices_dynamic} lists objects with variable properties. Note that the {\ct tsphere} object uses a texture map or image to alter its appearance. The texture map is specified by placing the characters {\ct t\%} before the texture file name, for example, {\ct t\%texturefile.jpg}.
+
+\begin{longtable}[ht]{|l|l|c|}
+\caption{Dynamic Smokeview objects}
+\label{tab:devices_dynamic}
+\\ \hline
+{\ct SMOKEVIEW\_ID}  & {\ct SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endfirsthead
+\caption{Dynamic Smokeview objects (continued)}
+\\ \hline
+{\ct SMOKEVIEW\_ID}  & {\ct SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endhead
+
+{\ct ball} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\ct 'R=128','G=192','B=255',}\\
+{\ct 'DX=0.5','DY=.75','DZ=1.0'}\\  \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct DX, DY, DZ} - amount ball is stretched along x, y, z axis (m) \\
+\hspace{1in} } &
+\incgraphics{SCRIPT_FIGURES/ball} \\ \hline
+
+{\ct cone} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:5)=}\\
+{\ct 'R=128','G=255','B=192',}\\
+{\ct 'D=0.4','H=0.6'}\\ \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct D, H} - diameter and height (m) \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/cone} \\ \hline
+
+{\ct fan} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:11)=}\\
+{\ct 'HUB\_R=0','HUB\_G=0','HUB\_B=0',}\\
+{\ct 'HUB\_D=0.1','HUB\_L=0.12',}\\
+{\ct 'BLADE\_R=128','BLADE\_G=64',}\\
+{\ct 'BLADE\_B=32','BLADE\_ANGLE=60.0',}\\
+{\ct 'BLADE\_D=0.5','BLADE\_H=0.09'}\\  \\
+{\ct HUB\_R, HUB\_G, HUB\_B} - color components of fan hub (0 to 255) \\
+{\ct HUB\_D, HUB\_L} - diameter and length of fan hub (m) \\
+{\ct BLADE\_R, BLADE\_G, BLADE\_B} - color components of fan blades (0 to 255) \\
+{\ct BLADE\_ANGLE, BLADE\_D, BLADE\_H} - angle, diameter and height of a fan blade \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/fan} \\ \hline
+
+{\ct tsphere} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+    {\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
+    {\ct 'R=255','G=255','B=255',}\\
+    {\ct 'AX0=0.0','ELEV0=90.0',}\\
+    {\ct 'ROT0=0.0','ROTATION\_RATE=10.0',}\\
+    {\ct 'D=1.0',}\\
+    {\ct 'tfile="t\%sphere\_cover\_04.png"'}\\ \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct AX0, ELEV0, ROT0} - initial azimuth, elevation and rotation angle (deg) \\
+{\ct ROTATION\_RATE} - rotation rate about z axis (deg/s) \\
+{\ct D} - diameter (m) \\
+{\ct tfile} - name of texture map file \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/tsphere} \\ \hline
+
+{\ct vent} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\ct 'R=192','G=192','B=128',}\\
+{\ct 'W=0.5','H=1.0', 'ROT=90.0'}\\ \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct W, H} - width and height (m) \\
+{\ct ROT} - rotation angle (deg) \\
+\hspace{1in}
+} &
+\parbox[c]{\devicewidth}{
+\vspace{0.01in}
+\includegraphics[width=\devicewidth]{SCRIPT_FIGURES/vent1}
+inactive vent\\
+\vspace{0.01in}
+\includegraphics[width=\devicewidth]{SCRIPT_FIGURES/vent2}
+active vent\\
+\vspace{0.01in}
+}
+\\ \hline
+\end{longtable}
+
+
+\subsection{Objects that Represent Lagrangian Particles}
+\label{info:SMOKEVIEW_PART}
+
+Lagrangian particles, like water droplets or small solid particles, are represented in Smokeview as tiny points. However, it is possible to draw Lagrangian particles in other ways, such as those depicted in Table~\ref{tab:devices_dynamic2}. For example, the following lines define particles that represent segments of electrical cables that are 10~cm long with a diameter of 1.24~cm:
+\begin{lstlisting}
+&PART ID='cables', QUANTITIES(1)='PARTICLE TEMPERATURE', ..., PROP_ID='cable image' /
+&PROP ID='cable image', SMOKEVIEW_ID='tube', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0124' /
+\end{lstlisting}
+By default, the cables are colored black, but you can specify your own default color using the parameters {\ct R}, {\ct G}, and {\ct B}. In addition, you can color the particles according to the listed {\ct QUANTITIES} on the {\ct PART} line. Menus in Smokeview allow you to toggle between the various color options.
+
+You can control the orientation of the {\ct 'tube'} objects using a parameter such as {\ct 'RANDXY=1'} that causes the cylinders to be drawn randomly in the $x-y$ plane. Objects with the parameters {\ct U-VEL}, {\ct V-VEL}, and {\ct W-VEL} stretch according to the respective velocity components associated with the moving particles.
+
+\begin{longtable}[ht]{|l|l|c|}
+\caption{Dynamic Smokeview objects for Lagrangian particles}
+\label{tab:devices_dynamic2}
+\\ \hline
+{\ct SMOKEVIEW\_ID}  & {\ct SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endfirsthead
+\caption{Dynamic Smokeview objects for Lagrangian particles (continued)}
+\\ \hline
+{\ct SMOKEVIEW\_ID}  & {\ct SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endhead
+
+{\ct box} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\ct 'R=192','G=255','B=128',}\\
+{\ct 'DX=0.25','DY=.5','DZ=0.125'}\\  \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct DX, DY, DZ} - amount box is stretched along axes \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/box} \\ \hline
+
+{\ct tube} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\ct 'R=255','G=0','B=0',}\\
+{\ct 'D=0.2','L=0.6','RANDXY=1'}\\ \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct D, L} - diameter and length (m) \\
+{\ct RANDXY} - randomly orient in x-y plane \\
+{\ct RANDXZ} - randomly orient in x-z plane \\
+{\ct RANDYZ} - randomly orient in y-z plane \\
+{\ct RANDXYZ} - random orientation \\
+{\ct DIRX, DIRY, DIRZ} - orient along axis \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/tube} \\ \hline
+
+{\ct velegg} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:9)=} \\
+{\ct 'R=192', 'G=64', 'B=32'} \\
+{\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.'}  \\
+{\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=1.0'} \\  \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct U-VEL, V-VEL, W-VEL} - velocity components (m/s) \\
+{\ct VELMIN, VELMAX} - minimum and maximum velocity\\
+{\ct D} - diameter of egg at maximum velocity (m) \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/velegg} \\ \hline
+
+{\ct veltube} &
+\parbox[c]{\boxwidth}{
+\hspace{1in} \\
+{\ct SMOKEVIEW\_PARAMETERS(1:9)=}\\
+{\ct 'R=0', 'G=0',  'B=0'} \\
+{\ct 'U-VEL=1.', 'V-VEL=1.', 'W-VEL=1.' }  \\
+{\ct 'VELMIN=0.01', 'VELMAX=0.2', 'D=0.1'} \\  \\
+{\ct R, G, B} - color components (0 to 255) \\
+{\ct U-VEL, V-VEL, W-VEL} - velocity components (m/s) \\
+{\ct VELMIN, VELMAX} - minimum and maximum velocity \\
+{\ct D} - diameter of tube at {\ct VELMAX} (m) \\
+\hspace{1in}
+} &
+\incgraphics{SCRIPT_FIGURES/veltube} \\ \hline
+\end{longtable}

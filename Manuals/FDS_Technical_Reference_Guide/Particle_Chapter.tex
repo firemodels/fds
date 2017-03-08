@@ -1,0 +1,339 @@
+% !TEX root = FDS_Technical_Reference_Guide.tex
+
+\typeout{new file: Particle_Chapter.tex}
+
+\chapter{Lagrangian Particles}
+\label{chapter:lagrangian_particles}
+
+Lagrangian particles are used to represent a wide variety of objects that cannot be resolved on
+the numerical grid. Liquid droplets are the most common example. This chapter outlines the treatment of the transport, size
+distribution, and mass, momentum and energy transfer to and from Lagrangian particles.  The formulation presented here closely follows the dispersed discrete-element formulation presented in \cite{Crowe:1}.
+
+\section{Particle Transport in the Gas Phase}
+
+In the gas phase momentum equation, Eq.~(\ref{momentum}), the force term $\bof_{\rm b}$ represents the momentum transferred from particles to the gas. It is obtained by summing the force transferred from each particle in a grid cell and dividing by the cell volume, $V$:
+\be
+    {\bof_{\rm b}} = \frac{1}{V} \sum  \left[ \frac{\rho}{2} \, C_{\rm d} \, A_{\rm p,c} \, (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu| - \frac{\d m_{\rm p}}{\d t} \, (\bu_{\rm p}-\bu) \right] \label{part_force}
+\ee
+where $C_{\rm d}$ is the drag coefficient, $A_{\rm p,c}$ is the particle cross-sectional area, $r_{\rm p}$ is the particle radius, $\bu_{\rm p}$ is the particle velocity, $m_{\rm p}$ is the particle mass, $\bu$ is the gas velocity, and $\rho$ is the gas density. The subscript ``b'' stands for ``bulk,'' meaning that the particles in the cell represent a bulk mass dragging on the gas.
+
+The particle acceleration is given by
+\be
+    \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p,c}}{m_{\rm p}} \,
+    (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
+\ee
+The particle position, $\bx_{\rm p}$, is determined from the equation
+\be
+    \frac{\d \bx_{\rm p}}{\d t} = \bu_{\rm p}
+\ee
+The exact solution procedure of the above model is presented in Appendix~\ref{particle_momentum_transfer}. The drag coefficient (default based on a sphere) is a function of the local Reynolds number that is based on the particle diameter, $D$
+\begin{align}
+ C_{\rm d} &= \left\{ \begin{array}{ll}
+     24/\RE_D                                          & \RE_D < 1    \\[0.1in]
+     24\left(0.85+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \label{sphere_drag}\\[0.1in]
+     0.44                                              & 1000 < \RE_D
+     \end{array} \right.  \\[0.2in]
+\RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$~\cite{Crowe:1}\footnote{Note that the 0.85 in the second line of Eq.~(\ref{sphere_drag}) has been inserted to ensure continuity of the functional relationship at $\RE_D=1$.}. For cylindrical particles, the following correlation was derived from data presented by Schlichting~\cite{Schlichting:1}:
+\begin{align}
+ C_{\rm d} &= \left\{ \begin{array}{ll}
+     10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
+     10\left(0.6+0.4 \, \RE_D^{0.8} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
+     1                                             & 1000 < \RE_D
+     \end{array} \right.
+\end{align}
+Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
+
+
+\subsection{Using Lagrangian Particles to Represent Vegetation}
+
+For some applications, it is convenient to use Lagrangian particles to represent stationary vegetation, like grasses or leaves, or airborne vegetation, like burning brands. Typically, these different types of vegetation are grouped into different classes of fuel ``elements'', each of which is represented by a single representative particle in each grid cell. Each representative particle contributes to the bulk force term:
+\be
+    {\bof_{\rm b}} = \sum_{\rm e} {\bof_{\rm b,e}} \quad ; \quad {\bof_{\rm b,e}} = \rho \, C_{\rm s,e} \, C_{\rm d,e} \, \beta_{\rm e} \, \sigma_{\rm e} \, (\bu_{\rm p,e}-\bu) |\bu_{\rm p,e}-\bu| + \dot{m}_{\rm p,e}''' \, (\bu_{\rm p,e}-\bu)   \label{part_force_veg}
+\ee
+The terms with subscript ``e'' refer to a particular class of fuel \underline{e}lements and are determined geometrically or empirically.  The shape factor, $C_{\rm s,e}$, is the ratio of the particles' projected cross sectional area, $A_{\rm p,c}$, to its surface area, $A_{\rm p,s}$. A perfect sphere has a shape factor of $\pi r^2/4 \pi r^2=1/4$, but for actual vegetation, the shape factor is assigned an empirical value that accounts for both shape and orientation. Pine needles, for example, project a different cross sectional area depending on their orientation. The drag coefficient, $C_{\rm d,e}$, is empirically derived and takes into account both the geometry and shadowing effects of closely packed objects. Often, as here, it absorbs the factor of 1/2 found in Eq.~(\ref{part_force}).  $\beta_{\rm e}$ is the volume fraction; that is, the ratio of the volume occupied by solid mass to the overall volume of the vegetation, sometimes referred to as the {\em packing ratio}. $\sigma_{\rm e}$ is the surface to volume ratio of a single particle. $\dot{m}_{\rm p,e}'''$ is the mass generation rate per unit volume of that particular vegetation element.
+
+A convenient way to describe the geometric properties of vegetation is by specifying the surface to volume ratio, $\sigma_{\rm e}$, the volume (packing) ratio, $\beta_{\rm e}$, and an assumed shape, like a sphere or cylinder. The volume fraction is sometimes expressed as a mass per unit volume, or {\em bulk density}, $m'''=\rho_{\rm e} \, \beta_{\rm e}$, where $\rho_{\rm e}$ is the density of the solid. With this information, and the following relations:
+\be
+   C_{\rm s,e} = \frac{A_{\rm p,c}}{A_{\rm p,s}} \quad ; \quad C_{\rm d,e}=\frac{C_{\rm d}}{2} \quad ; \quad \beta_{\rm e}=\frac{n_{\rm p,e} \, V_{\rm p}}{V}  \quad ; \quad \sigma_{\rm e}=\frac{A_{\rm p,s}}{V_{\rm p}}
+\ee
+we can convert the drag force expression in Eq.~(\ref{part_force_veg}) to its equivalent in Eq.~(\ref{part_force}) where the single particle element is represented as $n_{\rm p,e}$ spheres or cylinders occupying a grid cell volume, $V$. In the model, it is sufficient to have only one weighted particle per grid cell per fuel element to represent all of the actual particles of that vegetation class.
+
+\subsection{Drag Reduction}
+\label{sec:threeway}
+
+Typically, Lagrangian particle models only consider two-way coupling between the gas and particles. This means that each particle interacts with the carrier fluid individually. Momentum lost from a particle is added to the fluid and vice versa. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of sub-grid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10 diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
+
+In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle can be modeled by the following~\cite{Ramirez:1}:
+\be
+  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0} \label{eq:dragred}
+\ee
+where $C_{\rm d,0}$ is the single particle drag coefficient and $F / F_0$ is the hydrodynamic force ratio of the trailing particle to an isolated particle:
+\be
+  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / D - 1
+  / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1
+  / 2 \right)^{}} \right) \right] \label{eq:dragredfact}
+\ee
+where Re is the single particle Reynolds number, L is the distance between the particles, and W is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
+\be
+  W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
+  \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right] \label{eq:Wake-Vel}
+\ee
+This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The separation distance $L/D$ between particle centers is calculated from the local particle volume fraction and local average particle diameter $\bar{D}$
+\be
+  L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}
+\ee
+Here, local quantities are averaged over a single computational cell.
+
+In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}. The drag reduction model is turned on by default.
+
+An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation under-estimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
+
+
+
+\section{Liquid Droplet Size Distribution}
+
+The cumulative volume distribution for a liquid spray is represented by a combination of lognormal and Rosin-Rammler distributions~\cite{Chan:1}:
+\be F_{\rm v}(D) = \left\{ \begin{array}{ll}
+   \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^D} \, \frac{1}{\sigma\, D'} \,
+   \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
+   1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D_{\rm v,0.5} < D)
+   \end{array} \right.  \ee
+where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
+
+The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual has yielded a correlation for the median droplet diameter~\cite{Yu:2}
+\be
+   \frac{D_{\rm v,0.5}}{d} \propto \WE^{-\ot}  \label{dropcor}
+\ee
+where $d$ is the orifice diameter of the nozzle. The orifice Weber number, the ratio of inertial forces to surface tension forces, is given by
+\be
+   \WE = \frac{\rho_{\rm p} \, u_{\rm p}^2 \, d}{\sigma}  \label{Weber}
+\ee
+where $\rho_{\rm p}$ is the liquid density, $u_{\rm p}$ is the discharge velocity, and $\sigma$ is the liquid surface tension (\SI{72.8e-3}{N/m} at \SI{20}{\degreeCelsius} for water).
+The discharge velocity can be computed from the mass flow rate, a function of the operating pressure and orifice coefficient known as the K-factor. FM reports that the constant of proportionality in Eq.~(\ref{dropcor}) appears to be independent of flow rate and operating pressure. Three different sprinklers were tested in their study with orifice diameters of \SI{16.3}{\milli m}, \SI{13.5}{\milli m}, and \SI{12.7}{\milli m}, and the constants were approximately 4.3, 2.9, and 2.3, respectively. The strike plates of the two smaller sprinklers were notched, while that of the largest sprinkler was not~\cite{Yu:2}.
+
+In real sprinkler systems, the operating pressure is affected by the number of open nozzles. Typically, the pressure in the piping is high when the first sprinkler activates, and
+decreases when more and more sprinkler heads are activated. The pipe pressure has an effect on flow rate, droplet velocity and droplet size distribution. FDS does not predict the variation of pipe pressure; it should be specified by the user. The following dependencies are used to update the droplet boundary conditions for mass flow, droplet speed, and median diameter:
+\be
+    \dot{m}_{\rm p} \propto p^{1/2} \quad ; \quad u_{\rm p} \propto p^{1/2} \quad ; \quad D_{\rm v,0.5}  \propto  p^{-1/3}
+\ee
+The droplet diameters are randomly chosen from the given size distribution. The cumulative number fraction (CNF), $F_{\rm n}$, is determined from the cumulative volume fraction, $F_{\rm v}$, as follows
+\be
+   F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
+     \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}
+\ee
+Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4.5in]{FIGURES/rosin}
+\caption[Liquid droplet size distribution]{Cumulative Volume Fraction and Cumulative Number
+Fraction functions of the droplet size distribution from
+a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,0.5}$, is
+1~mm, $\sigma=0.6$ and $\gamma=2.4$.}
+\label{rosin}
+\end{center}
+\end{figure}
+
+The selection of droplet diameters makes use of a stratified sampling technique to ensure that the droplets span the entire range of sizes, even with a relatively small number of droplets. Without the stratification, the tails of the distribution can be poorly represented. The procedure for selecting droplet sizes is as follows:
+\begin{enumerate}
+\item Suppose that the mass flow rate of the liquid is $\dm$, that the time interval for droplet insertion is $\dt$, and that the number of droplets inserted each time interval is $N$.
+\item Divide the droplet diameter range into a number of bins of equal width (7 by default).
+\item Randomly choose $N$ integers, $n_i$, ranging from 1 to the total number of bins.
+\item Choose $N$ uniformly distributed real numbers between 0 and 1 and calculate $N$ random droplet diameters:
+\be
+   D_i = F^{-1}_{\rm n} \Big[ F_{\rm n}(D_{n_i,\min}) + {\cal U}(0,1)\left(F_{\rm n}(D_{n_i,\max})-F_{\rm n}(D_{n_i,\min}) \right) \Big] \label{Ud_strat}
+\ee
+where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and $D_{n_i,\min}$ and $D_{n_i,\max}$ are the minimum and maximum diameters of bin $n_i$.
+\item Compute weighting constants for each droplet $C_i = F_{\rm n}(D_{n_i,\max}) - F_{\rm n}(D_{n_i,\min})$.
+\item Compute a global weighting constant, C, to maintain the overall mass balance:
+    \be \dm \; \dt = C \, \sum_{i=1}^N \; C_i \; \frac{4}{3} \pi \rho_{\rm p}
+      \left( \frac{D_i}{2} \right)^3
+    \ee
+    The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
+\end{enumerate}
+
+
+\section{Spray Initialization}
+
+The droplets are introduced into the simulation along a spherical surface whose diameter is a specified stand-off distance from the nozzle orifice. It is assumed that the droplets have fully atomized by this stage. The longitude of the initial droplet position, $0\le \theta < 2 \pi$, is randomly chosen from a uniform distribution. The latitude, $0 \le \phi < \pi$, is randomly selected from the following distribution:
+\begin{equation}
+  f(\phi) = \exp \left[ - \beta \left( \frac{\phi - \phi_{\min}}{\phi_{\max} - \phi_{\min}} \right)^2 \right]
+\end{equation}
+Note that $\phi=0$ is the south pole of the sphere. The spread parameter, $\beta$, is 5 by default. All the droplets are given the same initial speed in the direction of the surface normal.
+
+
+
+\section{Heating and Evaporation of Liquid Droplets}
+
+Liquid droplets can represent either discrete airborne spheres or elements of the thin liquid film that forms on wetted solids. These film ``droplets'' are still individually tracked as Lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
+
+Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
+\begin{align}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\end{align}
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p,s}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+\be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
+      \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
+      Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
+where $X_{\alpha,\ell}$ is the equilibrium vapor {\em volume} fraction, $W_{\alpha}$ is the molecular weight of the gaseous species $\alpha$, $W_{\rm a}$ is the molecular weight of air, $R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
+
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Incropera:1}:
+\be
+   h_{\rm m} = \frac{\SH \; D_{\rm \ell g}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
+\ee
+$\SH$ is the Sherwood number, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).
+
+An analogous relationship exists for the heat transfer coefficient~\cite{Incropera:1}:
+\be
+   h = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{gas-droplet} \\ [0.1in]
+                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{gas-film}     \end{array} \right.
+\ee
+$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases). In cases where the droplet is actually a portion of the liquid film attached to a solid surface, half of the droplet mass is heated or cooled by the solid surface and half is heated or cooled by the gas.
+
+The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
+appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
+
+Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
+\be
+   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p,s} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
+   A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
+\ee
+The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
+\be
+   Y_{\rm \alpha,\ell}^{n+1} \approx Y_{\rm \alpha,\ell}^n + \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \; \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)
+\ee
+where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obtained via the chain rule:
+\be
+   \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} = \frac{\d Y_{\rm \alpha,\ell}}{\d X_{\rm \alpha,\ell}} \, \frac{\d X_{\rm \alpha,\ell}}{\d T_{\rm p}}  = \frac{W_{\rm a}/W_{\alpha}}{ (X_{\rm \alpha,\ell} (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha})^2 } \;
+   \frac{h_{\rm v} W_{\alpha}}{R \, T_{\rm p}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]
+\ee
+The amount of evaporated liquid is given by
+\be
+   \delta m_{\rm p} = - \dt \, A_{\rm p,s} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
+   \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
+\ee
+The amount of heat transfer from the gas to the particle is
+\be
+   \delta q_{\rm p} = \dt \, A_{\rm p,s} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
+\ee
+
+
+\subsection{Filtered Volumetric Source Terms}
+
+The filtered volumetric source terms for mass and energy---which are required in the mass transport equation, Eq.~(\ref{species}), and the divergence expression, Eq.~(\ref{eqn_simplediv1})---are obtained by summation of the individual particle source contributions with a given cell divided by the LES time step, $\delta t_{\si{LES}}$, and the local cell volume, $V_{\si{c}}$. The bulk mass and energy source terms are, respectively,
+\begin{equation}
+\label{eq:bulk_source}
+\dot{m}_{{\rm b},\alpha}^{\ppp} = - \frac{ \sum_p \sum_n \delta m_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \quad ; \quad
+\dot{q}_{\rm b}^{\ppp} = - \frac{ \sum_p \sum_n \delta q_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \,\mbox{.}
+\end{equation}
+where $n$ represents the sub-time step in the integration of the droplet mass and energy equations.  The summation over $p$ is over all the particles within the cell.
+
+\subsection{Lagrangian Contribution to the Velocity Divergence}
+
+In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_SOURCE} within the code,
+\begin{equation}
+D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
+\end{equation}
+which is embedded in Eq.~(\ref{eqn_fdsD1}).
+
+\section{Fire Suppression by Water}
+
+The previous sections describe heat transfer from a liquid droplet to a gas, a solid, or both. Although there is some
+uncertainty in the values of the respective heat transfer coefficients,
+the fundamental physics are fairly well understood. However, when
+the droplets encounter burning surfaces,
+simple heat transfer correlations become more difficult to apply.
+The reason for this is that the water is not only cooling the surface
+and the surrounding gas, but it is also changing the pyrolysis rate
+of the fuel. If the surface of the fuel is planar, it is possible
+to characterize the decrease in the pyrolysis rate as a function of
+the decrease in the total heat feedback to the surface. Unfortunately,
+most fuels of interest in fire applications are multi-component solids
+with complex geometry at scales unresolvable by the computational grid.
+
+\subsection{Droplet Transport on a Surface}
+
+When a liquid droplet hits a solid horizontal surface, it is assigned a
+random horizontal direction and moves at a fixed velocity until it
+reaches the edge, at which point it drops straight down at the same
+fixed velocity. This ``dripping'' velocity has been measured for water to be on
+the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
+While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that
+transfers heat to the solid, and heat and mass to
+the gas. The film thickness, $\delta$, is given by
+\be
+   \delta = \max \left( \delta_{\min} , \sum \frac{4}{3} \, \frac{\pi \, r_{\rm p}^3}{A} \right)
+\ee
+where $A$ is the area of the wall cell to which the droplet is attached. It is assumed that the minimum film thickness, $\delta_{\min}$, is \SI{1e-5}{m}. This prevents a very small amount of liquid from spreading across the entire cell width. It is also assumed that the liquid is opaque with regard to thermal radiation.
+
+\subsection{Reduction of Pyrolysis Rate due to Water}
+
+To date, most of the work in this area has been performed at Factory Mutual. An important paper on the subject is by Yu {\em et al.}~\cite{Yu:1}. The authors consider dozens of rack storage commodity fires of different geometries and water application rates, and characterize the suppression rates in terms of a few global parameters. Their analysis yields an expression for the total heat release rate from a rack storage fire after sprinkler activation
+\be
+   \dQ = \dQ_0 \; \mathrm{e}^{-k (t-t_0)}  \label{fmexting}
+\ee
+where $\dQ_0$ is the total heat release rate at the time of application $t_0$, and $k$ is a fuel-dependent constant. This analysis is based on global water flow and burning rates. Equation~(\ref{fmexting}) accounts for both the cooling of non-burning surfaces as well as the decrease in heat release rate of burning surfaces. In the FDS model, the cooling of unburned surfaces and the reduction in the heat release rate are computed locally. Thus, it is awkward to apply a global suppression rule. However, the exponential nature of suppression by water is observed both locally and globally, thus it is assumed that the local heat release rate per unit area can be expressed in the form~\cite{Hamins:1,Hamins:IAFSS2002}
+\be
+   \dq''(t) = \dq_0''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
+\label{nistexting} \ee
+where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of \si{kg/m^2},
+\be
+   k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1}
+\ee
+Note that $a$ is an empirical constant that is dependent on the material properties of the solid fuel and its geometrical configuration.
+
+
+
+\section{Using Lagrangian Particles to Model Complex Objects}
+
+There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or cartesian coordinate system.
+
+It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation equation. For a grid cell with indices $ijk$, the source term is:
+\be \label{eq:qr} 
+   \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) 
+\ee
+where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
+\be 
+   \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} 
+\ee
+where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell. The net radiative heat flux onto the surface of the particle is
+\be 
+   \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right) 
+\ee
+
+
+\subsection{Porous Media (Filters, Screens, Metal Meshes, and Similar Materials)}
+
+Filters, pebble beds, screens, grating ,and similar flow obstructions can all be considered
+as type of porous media. In general, material forming the porous media will have dimensions will below that of the grid size (e.g. 100 micron diameter filter fibers on a multi-cm grid).  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. By placing particles in a plane or volume and assigning the particles a porous media drag law, the effects of the porous media can be modeled. The pressure drop over a length $\Delta x$ through porous media is given by \cite{VafaiTien:1981}:
+\be
+   \frac {\Delta p}{\Delta x} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
+\ee
+where $K$ is a permeability constant, $Y$ is an inertial constant, $u$ is the velocity normal to the screen, $\rho$ is the density, and $\mu$ is the viscosity of the gas. In the case of a non-isotropic media, the constants $K$ and $Y$ will vary with the flow direction.
+The force vector $\bof_{\rm b}$ in Eq.~(\ref{momentum}) represents the momentum transferred from the screen to the gas:
+\be
+   \bof_{\rm b} = \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \bu
+\ee
+
+For the special case of screens, gratings, and similar thin porous materials the permeability and inertial constants have been experimentally correlated to screen porosity.  $K$ and $Y$ are functions of the screen porosity (free area/total area), $\phi$:\cite{Bartzanas:1}:
+\be
+   K = 3.44 \times 10^{-9} \; \phi^{1.6} \; \; \hbox{m}^2 \quad ; \quad Y = 0.043 \, \phi^{2.13}
+\ee
+For a screen the force vector must account for the actual screen thickness, $l$, being less than that of the grid cell:
+\be
+   \bof_{\rm b} = l \; \left( \frac{\mu}{K} + \rho \frac{Y}{\sqrt{K}} |\bu| \right) \left( \frac{u}{\dx} , \frac{v}{\dy} , \frac{w}{\dz} \right)
+\ee
+This force term essentially spreads the pressure drop over the width of a grid cell.
+
+
+\section{Turbulent Dispersion}
+
+The effect of subgrid-scale turbulent fluid motion on the velocity and position of a Lagrangian particle may be accounted for using a random walk model \cite{Raman:CF}.  The position of a tracer particle obeys the stochastic differential equation
+\be
+\mbox{d}\mathbf{x}^* = \left[ \tilde{\mathbf{u}} + \frac{1}{\bar{\rho}}\nabla (\bar{\rho}\,D_t) \right] \,\mbox{d}t + \sqrt{2D_t} \,\mbox{d}\mbox{\textbf{W}}
+\ee
+where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists, the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
+
+For those unfamiliar with stochastic differential equations, the Wiener process may be understood numerically as $\mbox{dW}(t) = (\delta t)^{1/2} \, \zeta(t)$ in the limit $\delta t \rightarrow 0$, where $\zeta(t)$ is an independent standardized Gaussian random variable \cite{Pope:2000}.  In FDS, $\zeta(t)$ are generated from a Box-Muller transform \cite{Box-Muller:1958}.

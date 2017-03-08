@@ -1,0 +1,254 @@
+% !TEX root = FDS_Validation_Guide.tex
+
+\chapter{Pressure}
+
+In FDS, the pressure is decomposed into a temporally-varying background pressure plus a temporally and spatially-varying perturbation that drives the flow. The former can be thought of as the ``over-pressure'' which increases if heat is introduced into a closed compartment. In real buildings, leakage and ventilation affect the compartment ``over-pressure'' along with the fire.
+
+\section{FM/FPRF Datacenter Experiments}
+
+Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA) and the ceiling plenum (CP). A comparison of measured and predicted pressures is shown in the table below.
+
+\IfFileExists{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}{\input{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}
+
+\section{NIST/NRC Experiments}
+
+Comparisons between measured and predicted pressures for the NIST/NRC series are shown on the following pages. For those tests in which the door to the compartment was open, the over-pressures were only a few Pascals, whereas when the door was closed, the over-pressures were several hundred Pascals. The pressure within the compartment was measured at a single point, near the floor. For the simulations of the closed door tests, the compartment is assumed to leak via a small uniform flow distributed over the walls and ceiling. The flow rate is calculated based on the assumption that the leakage rate is proportional to the measured leakage area times the square root of compartment over-pressure.
+
+Note that for the closed door tests, there is often a dramatic drop in the predicted compartment pressure. This is the result of the assumption in FDS that the heat release rate is decreased to zero in one second at the time in the experiment when the fuel flow was stopped for safety reasons.  In reality, the fire did not extinguish immediately because there was an excess of fuel in the pan following the flow stoppage. For the purpose of model comparison, the peak over-pressures are compared in the closed door tests, and the peak (albeit small) under-pressures are compared in the open door tests.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Pressure}
+\end{tabular*}
+\caption{NIST/NRC experiments, compartment pressure, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Pressure_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_17_Pressure} &
+   \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Pressure}
+\end{tabular*}
+\caption{NIST/NRC experiments, compartment pressure, Tests 3, 5, 9, 14, 15, 17, 18.}
+\label{NIST_NRC_Pressure_Open}
+\end{figure}
+
+\clearpage
+
+\section{LLNL Enclosure Experiments}
+
+The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct at different times during the tests. It also lists the compartment pressures, $\Delta p$, at these same times. From the simple leak formula:
+\be
+   \frac{\dot{m}}{\rho_0} = A \, \sqrt{\frac{2 \, \Delta p}{\rho_0}}
+\ee
+the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure. For modeling purposes, the ``leakage area'' is assumed to be the sum of the inlet duct area plus any actual compartment leakage area. The mass flow rate through the exhaust duct is specified explicitly in the model. The test report does not provide enough information about the ventilation system to model the fan and filtration system within the exhaust duct.
+
+In the figures on the following pages, the open circles represent the measured pressure; the line represents the predicted pressure. The predicted pressures are time-averaged over a time interval that is one-tenth the total simulation time. In general, the short-duration pressure spike that is typical of fires within relatively tight compartments has been smoothed over in the reported test data. Depending on the simulation, it often appears in the simulation data. The comparison of measurement and prediction is based on the final few pressure points, not the initial spike.
+
+Only some of the 64 experiments are included. In some cases, the fan was turned off and there is not enough information in the test report to determine the pressure losses through the duct. In other cases, there are only two pressure measurements reported; one at the start of the test, the other either before or after extinction. In various other cases, either there is not enough data or the data is inconsistent with the reported conditions. For cases where the door to the compartment was open, the measured gauge pressures at the start of the experiment ranged from 0~Pa to 10~Pa. There is not enough information in the test report to explain why the starting pressures were not 0~Pa; thus, the measured pressures were adjusted so that the starting pressure is 0~Pa.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 9, 11-17.}
+\label{LLNL_Enclosure_Pres_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 18-20, 23, 26, 29-31.}
+\label{LLNL_Enclosure_Pres_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 32-36, 38, 40, 42.}
+\label{LLNL_Enclosure_Pres_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 44, 50-52, 54-55, 57-58.}
+\label{LLNL_Enclosure_Pres_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_62_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 59-64.}
+\label{LLNL_Enclosure_Pres_6}
+\end{figure}
+
+
+\clearpage
+
+\section{PRISME DOOR Experiments}
+
+The PRISME experiments were conducted in a relatively well-sealed set of compartments with a well-controlled ventilation system. Supply air was forced into and exhaust products extracted from the test compartments via two fans and a fairly extensive ventilation network. The air flow rates and nodal pressures were measured throughout the system. The FDS simulations included the ventilation system, and for each segment of the network a loss coefficient was calculated so as to match the initial conditions of the experiments. The plots to follow show the predicted and measured compartment pressures and supply and exhaust flows. These air flows were predicted by the model, based on the initial specification of the ventilation system.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME DOOR, compartment pressure and supply/exhaust, Room 1, Tests 1-3.}
+\label{PRISME_Room_1_Pressure_1-3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME DOOR, compartment pressure and supply/exhaust, Room 1, Tests 4-6.}
+\label{PRISME_Room_1_Pressure_4-6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME DOOR, compartment pressure and supply/exhaust, Room 2, Tests 1-3.}
+\label{PRISME_Room_2_Pressure_1-3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME DOOR, compartment pressure and supply/exhaust, Room 2, Tests 4-6.}
+\label{PRISME_Room_2_Pressure_4-6}
+\end{figure}
+
+
+\clearpage
+
+\section{PRISME SOURCE Experiments}
+
+The PRISME SOURCE experiments were conducted in a single compartment with a well-controlled ventilation system. Supply air was forced into and exhaust products extracted from the test compartment via two fans and a fairly extensive ventilation network. The air flow rates and nodal pressures were measured throughout the system. The FDS simulations included the ventilation system, and for each segment of the network a loss coefficient was calculated so as to match the initial conditions of the experiments. The plots to follow show the predicted and measured compartment pressures and supply and exhaust flows. These air flows were predicted by the model, based on the initial specification of the ventilation system.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME SOURCE, pressure and supply/exhaust flow rates, Tests 1, 2, 3 and 4.}
+\label{PRISME_SOURCE_Room_2_Pressure_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME SOURCE, pressure and supply/exhaust flow rates, Tests 5, 5a, 6 and 6a.}
+\label{PRISME_SOURCE_Room_2_Pressure_2}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Summary of Pressure Predictions}
+\label{Compartment Over-Pressure}
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure}
+\end{tabular}
+\end{center}
+\caption[Summary of pressure predictions]{Summary of pressure predictions for open and closed compartments.}
+\label{Pressure_Summary}
+\end{figure}
+

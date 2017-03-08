@@ -1,0 +1,1634 @@
+% !TEX root = FDS_Validation_Guide.tex
+
+\chapter{Surface Temperature}
+
+All solid surfaces in an FDS model are assigned thermal boundary conditions. Heat and mass transfer to and from surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of the heat equation in cartesian, cylindrical, or spherical coordinates. The latter two are useful for predicting the thermal response of so-called ``targets,'' which include structural steel, electrical cables, sensitive equipment, or any type of intervening combustible.
+
+This chapter divides solid surfaces into two major categories -- compartment linings (i.e., walls, ceiling, floor) and targets (i.e., anything that is not a wall, ceiling, or floor). The reason for this distinction is that some models treat the two categories differently. In general, FDS does not.
+
+\clearpage
+
+\section{Wall, Ceiling and Floor Temperatures}
+
+\subsection{FAA Cargo Compartments}
+
+Measurements of surface temperature were made at two ceiling locations (denoted A and B in Fig.~\ref{FAA_Cargo_probe_locations}). The surface temperature measurements are shown below.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_1_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_2_Ceiling_Temp} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/FAA_Cargo_Compartments/FAA_Cargo_Compartments_Test_3_Ceiling_Temp}}
+\end{tabular*}
+\caption{FAA Cargo Compartment experiments, ceiling surface temperatures.}
+\label{FAA_Ceiling_Temp}
+\end{figure}
+
+\clearpage
+
+\subsection{NIST Full-Scale Enclosure (FSE), 2008}
+
+Measurements of surface temperature were made at three ceiling and three floor locations in a standard ISO~9705 compartment. In the plots on the following the pages, the ceiling measurements at the rear, center and front of the compartment are denoted by TSHFRCE, TSHFCCE, and TSHFFCE, respectively (Temperature Surface Heat Flux Rear CEiling, etc.). The floor measurements at the rear and front are denoted TSHFRFL and TSHFFFL. The surface temperatures measurements that were made just outside the door were faulty and are not used. All of the floor measurements for the experiment labelled ISOHept8 were faulty.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept4_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept4_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept5_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept5_Ceiling_Temperature} \\
+ &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept8_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 3-4, 8.}
+\label{NIST_FSE_2008_Surface_Temp_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept9_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept9_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONylon10_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONylon10_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP11_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP11_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD12_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD12_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 9-12.}
+\label{NIST_FSE_2008_Surface_Temp_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD13_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHeptD13_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropD14_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropD14_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOProp15_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOProp15_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene16_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene16_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 13-16.}
+\label{NIST_FSE_2008_Surface_Temp_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene17_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene17_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP18_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPP18_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept19_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept19_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene20_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene20_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 17-20.}
+\label{NIST_FSE_2008_Surface_Temp_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene21_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOStyrene21_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept22_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept22_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept23_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept23_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept24_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept24_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 21-24.}
+\label{NIST_FSE_2008_Surface_Temp_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept25_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept25_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept26_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept26_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept27_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept27_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept28_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOHept28_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 25-28.}
+\label{NIST_FSE_2008_Surface_Temp_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene29_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOToluene29_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropanol30_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISOPropanol30_Ceiling_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG32_Floor_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG32_Ceiling_Temperature}
+\end{tabular*}
+\caption{NIST FSE experiments, floor and ceiling temperatures, Tests 29, 30, 32.}
+\label{NIST_FSE_2008_Surface_Temp_7}
+\end{figure}
+
+\clearpage
+
+\subsection{NIST/NRC Experiments}
+
+Thermocouples and heat flux gauges were positioned at various locations on all four walls of the test compartment, plus the ceiling and floor. Comparisons between measured and predicted surface temperatures are shown on the following pages. Over the course of 15 experiments, a number of the thermocouples and gauges failed, but because over half of the measurement points were in roughly the same relative location to the fire, the faulty data was discarded based on examining replicate experiments or locations on the opposite wall. Note that Position~8 for the floor and ceiling is not used, simply because the plotting routine is limited to 7 distinct colors and Position~8 is on the opposite side of the compartment to Position~1. Table~\ref{NIST_NRC_Wall_Coords} lists the locations for each test.
+
+\begin{table}[ht]
+\caption[Wall measurement positions for the NIST/NRC series]
+{Wall thermocouple and heat flux gauge positions for the NIST/NRC series. The origin of the coordinate system lies on the floor in the southwest
+corner of the compartment. The designation ``U'' and ``C'' is irrelevant, and the last digit ``2'' indicates that the thermocouple is measuring the wall temperature rather than the heat flux gauge temperature.}
+\begin{center}
+\begin{tabular}{|l|c|c|c||l|c|c|c|}
+\hline
+Name              & $x$   & $y$  & $z$      & Name              & $x$   & $y$   & $z$       \\ \hline \hline
+TC North U-1-2    & 3.85  & 7.04 & 1.49     & TC South U-1-2    & 3.86  & 0     & 1.49      \\ \hline
+TC North U-2-2    & 3.86  & 7.04 & 3.71     & TC South U-2-2    & 3.86  & 0     & 3.82      \\ \hline
+TC North U-3-2    & 9.48  & 7.04 & 1.86     & TC South U-3-2    & 9.54  & 0     & 1.86      \\ \hline
+TC North U-4-2    & 12.07 & 7.04 & 1.88     & TC South U-4-2    & 12.08 & 0     & 1.86      \\ \hline
+TC North U-5-2    & 17.69 & 7.04 & 1.49     & TC South U-5-2    & 17.69 & 0     & 1.50      \\ \hline
+TC North U-6-2    & 17.69 & 7.04 & 3.69     & TC South U-6-2    & 17.74 & 0     & 3.70      \\ \hline \hline
+TC East U-1-2     & 21.66 & 1.52 & 1.12     & TC West U-1-2     & 0     & 1.59  & 1.12      \\ \hline
+TC East U-2-2     & 21.66 & 1.52 & 2.40     & TC West U-2-2     & 0     & 1.59  & 2.42      \\ \hline
+TC East U-3-2     & 21.66 & 5.68 & 1.13     & TC West U-3-2     & 0     & 5.70  & 1.12      \\ \hline
+TC East U-4-2     & 21.66 & 5.70 & 2.42     & TC West U-4-2     & 0     & 5.70  & 2.42      \\ \hline \hline
+TC Floor U-1-2    & 3.08  & 3.51 & 0        & TC Ceiling U-1-2  & 3.04  & 3.60  & 3.82      \\ \hline
+TC Floor U-2-2    & 9.08  & 1.94 & 0        & TC Ceiling C-2-2  & 8.99  & 2.00  & 3.82      \\ \hline
+TC Floor U-3-2    & 9.06  & 5.97 & 0        & TC Ceiling C-3-2  & 9.03  & 5.97  & 3.82      \\ \hline
+TC Floor U-4-2    & 10.86 & 2.38 & 0        & TC Ceiling C-4-2  & 10.79 & 2.38  & 3.82      \\ \hline
+TC Floor C-5-2    & 10.93 & 5.20 & 0        & TC Ceiling C-5-2  & 10.79 & 5.20  & 3.82      \\ \hline
+TC Floor U-6-2    & 13.13 & 1.99 & 0        & TC Ceiling C-6-2  & 13.00 & 2.07  & 3.82      \\ \hline
+TC Floor U-7-2    & 13.00 & 5.92 & 0        & TC Ceiling C-7-2  & 12.84 & 5.98  & 3.82      \\ \hline
+TC Floor U-8-2    & 18.63 & 3.54 & 0        & TC Ceiling U-8-2  & 18.71 & 3.54  & 3.82      \\ \hline
+\end{tabular}
+\end{center}
+\label{NIST_NRC_Wall_Coords}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_North_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_North_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_North_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_North_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, north wall temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_North_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_North_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_North_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_North_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_North_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, north wall temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_North_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_South_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_South_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_South_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_South_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, south wall temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_South_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_South_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_South_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_South_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_South_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, south wall temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_South_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_East_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_East_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_East_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_East_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, east wall temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_East_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_East_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_East_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_East_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_East_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, east wall temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_East_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_West_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_West_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_West_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_West_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, west wall temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_West_Wall_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_West_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_West_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_West_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_West_Wall_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, west wall temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_West_Wall_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Ceiling_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Ceiling_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Ceiling_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Ceiling_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, ceiling temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Ceiling_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Ceiling_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Ceiling_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Ceiling_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Ceiling_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, ceiling temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Ceiling_Temp_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Floor_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Floor_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Floor_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Floor_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, floor wall temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Floor_Temp_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Floor_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Floor_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Floor_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Floor_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, floor temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Floor_Temp_Open}
+\end{figure}
+
+\clearpage
+
+\subsection{PRISME DOOR Experiments}
+
+Thermocouples were positioned at various points on the walls. Each room contained a vertical array labelled, for example, TP\_L1\_NE265. The TP indicates a surface temperature measurement, L1 indicates compartment 1, which is where the fire was located, NE indicates northeast corner of the room, and 265 indicates the number of centimeters above the floor. In addition, each room contained four measurement points centered on each wall at a height of approximately 260~cm. These points are labelled, for example, TP\_L2\_SC265, compartment 2, center of south wall, 265~cm high.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_Wall_Temperature_Array}
+\end{tabular*}
+\caption{PRISME DOOR experiments, wall temperatures, vertical array, Room 1.}
+\label{PRISME_Wall_Array_Room_1}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_Wall_Temperature_Circle}
+\end{tabular*}
+\caption{PRISME DOOR experiments, wall temperatures, four sides, Room 1.}
+\label{PRISME_Wall_Circle_Room_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_Wall_Temperature_Array}
+\end{tabular*}
+\caption{PRISME DOOR experiments, wall temperatures, vertical array, Room 2.}
+\label{PRISME_Wall_Array_Room_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_Wall_Temperature_Circle}
+\end{tabular*}
+\caption{PRISME DOOR experiments, wall temperatures, four sides, Room 2.}
+\label{PRISME_Wall_Circle_Room_2}
+\end{figure}
+
+\clearpage
+
+\subsection{PRISME SOURCE Experiments}
+
+Thermocouples were positioned at various points on the walls. The room contained a vertical array labelled, for example, TP\_L2\_NE265. The TP indicates a surface temperature measurement, L2 indicates compartment 2, which is where the fire was located, NE indicates northeast corner of the room, and 265 indicates the number of centimeters above the floor. In addition, each room contained four measurement points centered on each wall at a height of approximately 260~cm.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Wall_Temperature_Array} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Wall_Temperature_Array} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Wall_Temperature_Array}
+\end{tabular*}
+\caption{PRISME SOURCE experiments, wall temperatures, vertical array, Room 2.}
+\label{PRISME_SOURCE_Wall_Array_Room_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Wall_Temperature_Circle} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Wall_Temperature_Circle} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Wall_Temperature_Circle}
+\end{tabular*}
+\caption{PRISME SOURCE experiments, wall temperatures, four sides, Room 2.}
+\label{PRISME_SOURCE_Wall_Circle_Room_2}
+\end{figure}
+
+\clearpage
+
+
+\subsection{WTC Experiments}
+
+The following pages contain comparisons of predicted and measured ceiling temperatures, both at the surface and beneath a layer of marinite board. Table~\ref{WTC_Ceiling} below lists the coordinates of the measurement locations relative to the center of the fire pan. Names with ``IN'' appended are measurements made under the marinite board.
+
+
+\begin{table}[h!]
+\caption[Ceiling surface measurement locations for the WTC series]{Locations of ceiling surface temperature measurements relative to the fire pan in the WTC series.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Name                & $x$ (m)   & $y$ (m)   & $z$ (m)   \\ \hline \hline
+TCC                 & 0.62      & 0.07      & 3.82      \\ \hline
+TCN3                & 0.62      & 0.67      & 3.82      \\ \hline
+TCS3                & 0.62      & -0.53     & 3.82      \\ \hline
+TCE7                & 2.18      & 0.07      & 3.82      \\ \hline
+TCW7                & -1.15     & 0.07      & 3.82      \\ \hline \hline
+TCCIN               & 0.62      & 0.07      & 3.83      \\ \hline
+TCN3IN              & 0.62      & 0.67      & 3.83      \\ \hline
+TCS3IN              & 0.62      & -0.53     & 3.83      \\ \hline
+TCE4IN              & 1.28      & 0.07      & 3.83      \\ \hline
+TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
+\end{tabular}
+\end{center}
+\label{WTC_Ceiling}
+\end{table}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_N} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_N} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_N} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_N} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_N} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_N}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, north array.}
+\label{NIST_WTC_Ceiling_N}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_S} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_S} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_S} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_S} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_S} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_S}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, south array.}
+\label{NIST_WTC_Ceiling_S}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_E1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_E1-4} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_E1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_E1-4} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_E1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_E1-4}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, east array, Points 1-4.}
+\label{NIST_WTC_Ceiling_E1-4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_E5-7} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_E5-7} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_E5-7} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_E5-7} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_E5-7} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_E5-7}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, east array, Points 5-7.}
+\label{NIST_WTC_Ceiling_E5-7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_W1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_W1-4} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_W1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_W1-4} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_W1-4} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_W1-4}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, west array, Points 1-4.}
+\label{NIST_WTC_Ceiling_W1-4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_W5-8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_W5-8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_W5-8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_W5-8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_W5-8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_W5-8}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, west array, Points 5-8.}
+\label{NIST_WTC_Ceiling_W5-8}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Ceiling_Temp_EWNS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Ceiling_Temp_EWNS} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Ceiling_Temp_EWNS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Ceiling_Temp_EWNS} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Ceiling_Temp_EWNS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Ceiling_Temp_EWNS}
+\end{tabular*}
+\caption{WTC experiments, ceiling temperatures, diagonal array.}
+\label{NIST_WTC_Ceiling_EWNS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Wall_Temp_98_100_102} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Wall_Temp_98_100_102} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Wall_Temp_98_100_102} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Wall_Temp_98_100_102} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Wall_Temp_98_100_102} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Wall_Temp_98_100_102}
+\end{tabular*}
+\caption{WTC experiments, wall temperatures, Points 98, 100, 102.}
+\label{NIST_WTC_Wall_98_100_102}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Wall_Temp_103_105_106} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Wall_Temp_103_105_106} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Wall_Temp_103_105_106} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Wall_Temp_103_105_106} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Wall_Temp_103_105_106} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Wall_Temp_103_105_106}
+\end{tabular*}
+\caption{WTC experiments, wall temperatures, Points 103, 105, 106.}
+\label{NIST_WTC_Wall_103_105_106}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Wall_Temp_107_109_110} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Wall_Temp_107_109_110} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Wall_Temp_107_109_110} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Wall_Temp_107_109_110} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Wall_Temp_107_109_110} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Wall_Temp_107_109_110}
+\end{tabular*}
+\caption{WTC experiments, wall temperatures, Points 107, 109, 110.}
+\label{NIST_WTC_Wall_107_109_110}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_NS} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_NS} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_NS} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_NS}
+\end{tabular*}
+\caption{WTC experiments, inner ceiling temperatures, north-south axis.}
+\label{NIST_WTC_Inner_Ceiling_NS}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Inner_Ceiling_Temp_EW} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Inner_Ceiling_Temp_EW} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Inner_Ceiling_Temp_EW} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Inner_Ceiling_Temp_EW}
+\end{tabular*}
+\caption{WTC experiments, inner ceiling temperatures, east-west axis.}
+\label{NIST_WTC_Inner_Ceiling_EW}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Inner_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Inner_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Inner_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Inner_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Inner_Wall_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Inner_Wall_Temp}
+\end{tabular*}
+\caption{WTC experiments, inner wall temperatures.}
+\label{NIST_WTC_Inner_Wall}
+\end{figure}
+
+\clearpage
+
+\subsection{Summary of Wall, Ceiling, and Floor Temperature Predictions}
+\label{Surface Temperature}
+
+Figure~\ref{Summary_Surface_Temperature} summarizes the temperature predictions for walls, ceilings, and floors.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of compartment surface temperature predictions]
+{Summary of compartment surface temperature predictions.}
+\label{Summary_Surface_Temperature}
+\end{figure}
+
+\clearpage
+
+\section{Target Temperature}
+
+A ``target'' refers to any object that is not a wall, ceiling, or floor. In the sections to follow, the targets consist of structural steel members, electrical cables, and various other objects.
+
+\subsection{NIST/NRC Experiments}
+
+Electrical cables of various types (power and control), and configurations (horizontal or vertical; in tray or free-hanging), were installed in the test compartment. For each of the four cable targets considered, measurements of the local gas temperature, surface temperature, radiative heat flux, and total heat flux are available.  The following pages display comparisons of surface temperature for Control Cable B, Horizontal Cable Tray D, Power Cable F, and Vertical Cable Tray G. For the bundled cables within horizontal and vertical trays (Targets D and G), FDS assumes them to be rectangular slabs of thickness comparable to the diameter of the individual cables. For the free-hanging cables B and F, FDS assumes them to be cylinders of uniform composition.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_A_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_A_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_A_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_A_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable A temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_A_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_A_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_A_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_A_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_A_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable A temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_A_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_B_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_B_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_B_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_B_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable B temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_B_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_B_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_B_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_B_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_B_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable B temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_B_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_Ca_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_Ca_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_Ca_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_Ca_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable Ca temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_Ca_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_Ca_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_Ca_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_Ca_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_Ca_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable Ca temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_Ca_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_Cb_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_Cb_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_Cb_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_Cb_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable Cb temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_Cb_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_Cb_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_Cb_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_Cb_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_Cb_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable Cb temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_Cb_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_D_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_D_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_D_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_D_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable D temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_D_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_D_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_D_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_D_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_D_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable D temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_D_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_F_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_F_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_F_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_F_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable F temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_F_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_F_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_F_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_F_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_F_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable F temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_F_Open}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_01_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_07_Cable_G_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_02_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_08_Cable_G_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_04_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_10_Cable_G_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Cable_G_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable G temperatures, Tests 1, 2, 4, 7, 8, 10, 13, 16.}
+\label{NIST_NRC_Cable_G_Closed}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_03_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_09_Cable_G_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_05_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_14_Cable_G_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Cable_G_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Cable_G_Temp}
+\end{tabular*}
+\caption{NIST/NRC experiments, Cable G temperatures, Tests 3, 5, 9, 14, 15, 18.}
+\label{NIST_NRC_Cable_G_Open}
+\end{figure}
+
+\clearpage
+
+\subsection{SP Adiabatic Surface Temperature Experiments}
+
+Comparisons of FDS predictions of gas, plate thermometer, and steel temperatures for compartment and pool fire experiments conducted at SP, Sweden, are
+presented on the following pages.
+
+\subsubsection{Compartment Fire Experiments}
+
+Three experiments were conducted in a standard compartment, 3.6~m long by 2.4~m wide by 2.4~m high, with a 0.8~m wide by
+2.0~m high door centered on the narrow wall. Each experiment used a constant 450~kW propane burner and a single beam suspended 20~cm below the ceiling
+along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and
+2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was
+a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam. Details can be found in the test report~\cite{Wickstrom_AST}.
+
+Each page to follow contains the results for a single experiment and measuring station. There are nine in all. In addition to predictions plate thermometer and steel temperatures, there are predictions of the adiabatic surface temperature (AST) for the locations and orientations of the plate thermometers. The AST is a useful quantity that serves as a boundary condition for thermal resistance calculations of structures. The basic idea is as follows. The {\em net} heat flux to the solid surface is given as the sum of radiative and convective components:
+\be \dot{q}_r'' + \dot{q}_c'' = \epsilon \, \left( \dot{q}_{r,inc}'' - \sigma T_s^4 \right) + h (T_g - T_s)  \label{heat_flux} \ee
+where $\dot{q}_{r,inc}''$ is the incident radiative flux, $T_s$ the surface temperature, $T_g$ the gas temperature near the surface, and $h$ the convective heat transfer coefficient.
+Following the idea proposed by Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the AST is defined as the surface temperature of a perfectly insulated solid.
+This is equivalent to saying that the net heat flux to this (hypothetical) surface is zero:
+\be 0 = \epsilon \, \left( \dot{q}_{r,inc}'' - \sigma T_{\hbox{\tiny AST}}^4 \right) + h (T_g - T_{\hbox{\tiny AST}} )  \label{AST_solid} \ee
+This definition of the AST forms the theory behind the plate thermometer, a 10~cm by 10~cm thin metal plate with an insulated backing that is designed to
+measure the AST, albeit with a slight time lag due to the fact that it is not a perfect insulator.
+
+FDS calculates the AST by solving the following equation implicitly for $T_{\hbox{\tiny AST}}$:
+\be \dot{q}_r'' + \dot{q}_c'' = \epsilon \, \left( \sigma T_{\hbox{\tiny AST}}^4 - \sigma T_s^4 \right) + h (T_{\hbox{\tiny AST}} - T_s)  \label{AST_gas} \ee
+Equation~(\ref{AST_gas}) is simply Eq.~(\ref{heat_flux}) minus Eq.~(\ref{AST_solid}). As such, it shows that the AST can be regarded as an {\em effective} gas temperature for
+the purpose of providing boundary conditions for a detailed heat conduction calculation within the solid.
+
+FDS calculates the AST using Eq.~(\ref{AST_gas}) and the plate thermometer temperature via its standard one-dimensional heat conduction calculation for a
+two layer solid of metal and insulating material. In the experiments, the plate thermometer temperature was obtained from a thermocouple attached to the back side of
+the thin metal plate, and the AST was derived from the measured plate thermometer temperature by a back calculation involving only the thermal lag due to the
+plate, not the insulation material.
+
+\newpage
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_A_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station A plate, adiabatic surface, and steel temperatures, Test 1.}
+\label{SP_Test_1_Station_A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_B_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station B plate, adiabatic surface, and steel temperatures, Test 1.}
+\label{SP_Test_1_Station_B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_1_Sta_C_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station C plate, adiabatic surface, and steel temperatures, Test 1.}
+\label{SP_Test_1_Station_C}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_A_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station A plate, adiabatic surface, and steel temperatures, Test 2.}
+\label{SP_Test_2_Station_A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_B_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station B plate, adiabatic surface, and steel temperatures, Test 2.}
+\label{SP_Test_2_Station_B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_2_Sta_C_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station C plate, adiabatic surface, and steel temperatures, Test 2.}
+\label{SP_Test_2_Station_C}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_A_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station A plate, adiabatic surface, and steel temperatures, Test 3.}
+\label{SP_Test_3_Station_A}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_B_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station B plate, adiabatic surface, and steel temperatures, Test 3.}
+\label{SP_Test_3_Station_B}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_1_and_2_PT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_3_and_4_PT} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_1_and_2_AST} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_3_and_4_AST} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_1_and_2_Steel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Test_3_Sta_C_Pos_3_and_4_Steel}
+\end{tabular*}
+\caption{SP AST experiments, Station C plate, adiabatic surface, and steel temperatures, Test 3.}
+\label{SP_Test_3_Station_C}
+\end{figure}
+
+\clearpage
+
+\subsubsection{Pool Fire Experiments}
+
+Three experiments were conducted at SP, Sweden, in 2011, in which a 6~m long, 20~cm diameter vertical column was positioned in the middle of 1.1~m and 1.9~m diesel and 1.1~m heptane pool fires~\cite{Sjostrom:AST}. Gas, plate, and steel surface temperature measurements were made at heights of 1~m, 2~m, 3~m, 4~m, and 5~m above the pool surface. At heights of 1~m, 3~m, and 5~m, these measurements were made at only one angular position. However, at 2~m and 4~m, the measurements were made at four positions. At these heights, two conventional plates thermometers were positioned approximately 10~cm from the column surface, along with two special plate thermometers (SPT) that were installed flush with the column surface. At each height, comparable predictions were made with FDS, but at only one angular position because there is no predominant direction of leaning in the simulation. In the experiments, the fire was reported to lean in the direction of Position~1. The lean was significant for the 1.9~m diesel fuel fires, in which case only data from 1~m and 2~m above the pool are used. Also, FDS assumes the column to be square in cross section (20~cm by 20~cm), rather than circular. The grid spacing is 10~cm.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-1}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-1}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-2}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-2}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-3}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-3}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-4}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-4}
+\end{tabular*}
+\caption{SP AST experiments, steel temperatures, 1.1 m diesel fire.}
+\label{SP_Diesel_1p1_PT_Steel}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_PT-5}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p1_Steel-5}   \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_PT-1}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Steel-1}   \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_PT-2}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Diesel_1p9_Steel-2}   \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_PT-1} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Steel-1}
+\end{tabular*}
+\caption{SP AST experiments, steel temperatures, 1.1 m and 1.9 m diesel, 1.1 m heptane fires.}
+\label{SP_Diesel_1p9_PT_Steel}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_PT-2} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Steel-2}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_PT-3} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Steel-3}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_PT-4} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Steel-4}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_PT-5} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_AST_Heptane_1p1_Steel-5}
+\end{tabular*}
+\caption{SP AST experiments, steel temperatures, 1.1 m heptane fire.}
+\label{SP_Heptane_1p1_PT_Steel}
+\end{figure}
+
+\clearpage
+
+\subsubsection{Insulated Room Experiments}
+
+The plots on the following pages display measured and predicted plate thermometer (PT) temperatures for a series of single compartment experiments conducted by SP, Sweden~\cite{Sjostrom:SP2016}. The compartment was 2.7~m long, 1.8~m wide, and 1.8~m tall, with a 0.6~m by 1.5~m door centered on one of the short walls. The PTs were affixed to the walls. The designations of right and left wall are from the perspective of a person looking into the room. The back wall is the short wall without the door; the front wall is opposite. When referring to a given PT, the terms left/right, upper/lower, front/back refer to the quadrant where the PT is located. The PTs are centered within each quadrant, and are thus located at one-fourth or three-fourths of the wall's length, width or height. The term ``center'' refers to the center point of the entire wall. The designation ``back wall upper'' refers to the upper left quadrant of the back wall, and ``back wall lower'' refers to the lower right quadrant of the back wall.
+
+The 12 experiments were conducted with four different wall linings. In Series~A, the compartment was lined with a 10~cm thick light concrete block. In Series~B, the compartment was lined with a 5~cm thick layer of insulation backed by a 3~mm thick plate of steel. In Series~C, the compartment was lined with an uninsulated 3~mm thick steel plate. In Series~D, the compartment was lined with a 3~mm thick steel plate backed by a 5~cm thick layer of insulation (the opposite of Series~B).
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A1_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test A1.}
+\label{SP_Room_A1_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A2_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test A2.}
+\label{SP_Room_A2_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A3_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test A3.}
+\label{SP_Room_A3_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A4_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test A4.}
+\label{SP_Room_A4_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_A5_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test A5.}
+\label{SP_Room_A5_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B1_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test B1.}
+\label{SP_Room_B1_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_B2_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test B2.}
+\label{SP_Room_B2_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C1_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test C1.}
+\label{SP_Room_C1_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C2_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test C2.}
+\label{SP_Room_C2_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_C3_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test C3.}
+\label{SP_Room_C3_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D1_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test D1.}
+\label{SP_Room_D1_PTs}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Left_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Right_Wall_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Ceiling_PTs}   &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Floor_PTs}  \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Back_Wall_PTs} &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/SP_Room_D2_Front_Wall_PTs}
+\end{tabular*}
+\caption{SP AST experiments, Insulated Room, Test D2.}
+\label{SP_Room_D2_PTs}
+\end{figure}
+
+
+\clearpage
+
+
+\subsubsection{Plate Thermometer Validation}
+
+The simulations of the SP Adiabatic Surface Temperature experiments include a 1-D model of a plate thermometer (PT). A PT is constructed of a thin, 10~cm square sheet of Inconel backed by a layer of insulation material. A single thermocouple is attached to the back side of the Inconel plate. To test the FDS PT model, a real PT was placed in a cone calorimeter at NIST and exposed to nominal heat fluxes of 25~kW/m$^2$ and 75~kW/m$^2$. The results are shown in Fig.~\ref{plate_thermometers}.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/plate_thermometer_25}  &  \includegraphics[height=2.15in]{SCRIPT_FIGURES/SP_AST/plate_thermometer_75}
+\end{tabular*}
+\caption[Predictions of plate thermometer temperatures in a cone calorimeter]{Predictions of plate thermometer temperatures in a cone calorimeter.}
+\label{plate_thermometers}
+\end{figure}
+
+\clearpage
+
+\subsection{WTC Experiments}
+
+The compartment for the WTC experiments contained a hollow box column roughly 0.5~m from the fire pan, two trusses over the top of the pan, and one or two steel bars resting on the lower truss flanges. In Tests 1, 2 and 3, the steel was bare, and in Tests 4, 5 and 6, the steel was coated with various thicknesses of sprayed fire-resistive materials. The column was instrumented near its base (about 0.5~m from the floor, middle (1.5~m), and upper (2.5~m). Four measurements of steel (and insulation) temperatures were made at each location, for each of its four sides. These elements were modeled using thin sheet obstructions with a resolution of 10~cm.
+
+In addition to the steel structural elments, five cylinders (``slugs'') of nickel~200 ($\ge$ 99~\% nickel), 25.4~cm long and 10.2~cm in diameter, were positioned 50~cm north of the centerline in the WTC experiments. Slugs 1 through 5 were 2.92~m, 1.82~m, 0.57~m, 0.05~m, and 1.56~m, respectively, from the longitudinal axis of the fire pan. All the slugs were 50~cm north of the lateral axis. The fire pan measured 2~m by 1~m. Four thermocouples were inserted into each slug at various locations. All four temperatures for each slug were virtually indistinguishable. Rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using cylindrical coordinates.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Upper_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Upper_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Upper_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Upper_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Upper_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Upper_Column_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, upper column.}
+\label{NIST_WTC_Upper_Column_Steel}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Middle_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Middle_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Middle_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Middle_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Middle_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Middle_Column_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, middle column.}
+\label{NIST_WTC_Middle_Column_Steel}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Lower_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Lower_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Lower_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Lower_Column_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Lower_Column_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Lower_Column_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, lower column.}
+\label{NIST_WTC_Lower_Column_Steel}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_A_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_A_Upper_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_A_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_A_Upper_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_A_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_A_Upper_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, upper Truss A.}
+\label{NIST_WTC_Truss_A_Upper_Steel_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_A_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_A_Middle_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_A_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_A_Middle_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_A_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_A_Middle_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, middle Truss A.}
+\label{NIST_WTC_Truss_A_Middle_Steel_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_A_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_A_Lower_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_A_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_A_Lower_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_A_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_A_Lower_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, lower Truss A.}
+\label{NIST_WTC_Truss_A_Lower_Steel_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_B_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_B_Upper_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_B_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_B_Upper_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_B_Upper_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_B_Upper_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, upper Truss B.}
+\label{NIST_WTC_Truss_B_Upper_Steel_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_B_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_B_Middle_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_B_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_B_Middle_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_B_Middle_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_B_Middle_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, middle Truss B.}
+\label{NIST_WTC_Truss_B_Middle_Steel_Temp}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Truss_B_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Truss_B_Lower_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Truss_B_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Truss_B_Lower_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Truss_B_Lower_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Truss_B_Lower_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, lower Truss B.}
+\label{NIST_WTC_Truss_B_Lower_Steel_Temp}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Bar_1_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Bar_1_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Bar_1_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Bar_1_Steel_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Bar_1_Steel_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Bar_1_Steel_Temp}
+\end{tabular*}
+\caption{WTC experiments, steel temperatures, Bar 1.}
+\label{NIST_WTC_Bar_1_Steel_Temp}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_01_Slug_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_02_Slug_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_03_Slug_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_04_Slug_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_05_Slug_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/WTC/WTC_06_Slug_Temp}
+\end{tabular*}
+\caption{WTC experiments, slug temperatures.}
+\label{NIST_WTC_Slug_Temp}
+\end{figure}
+
+\clearpage
+
+
+\subsection{CAROLFIRE Experiments}
+
+On the following pages are predictions of the THIEF (thermally-induced electrical failure) model compared to 35 experiments conducted at Sandia National Laboratory~\cite{CAROLFIRE}. In these experiments, an instrumented electrical cable was run through a heated cylindrical ``shroud.'' The shroud temperature is an input for the model, and the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically fail electrically at temperatures near 400~$^\circ$C. Thermoplastic cables typically melt and then burn, leaving little residue behind except the conductors. These cables typically fail between 200~$^\circ$C and 250~$^\circ$C. Some cables, as in Tests~18 and 31, do not fall into either category. The thermoset cables were exposed to temperatures in the neighborhood of 480~$^\circ$C, and the thermoplastics were exposed to temperatures near 300~$^\circ$C.
+
+Note in the plots to follow that the objective of the calculation is to predict the cable temperature just inside of the jacket until the cable fails electrically. In some experiments, the short-circuiting of the cable led to ignition of the pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in temperature at a certain point in the test. In many cases, electrical failure occurred very shortly, or at about the same time, as ignition.
+
+Figure~\ref{Cable_Failure_Time_Summary_Plot} compares the measured versus predicted time to a ``threshold'' temperature. The threshold temperature is 400~$^\circ$C for thermoset cables and 200~$^\circ$C for thermoplastics.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_01} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_02} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_03} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_07} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_09} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_11} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_12} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_13}
+\end{tabular*}
+\caption{CAROLFIRE, electrical cable temperatures, Penlight Tests 1, 2, 3, 7, 9, 11-13.}
+\label{CAROLFIRE_Thermoset_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_17} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_19} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_20} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_22} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_23} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_24} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_27} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_28}
+\end{tabular*}
+\caption{CAROLFIRE, electrical cable temperatures, Penlight Tests 17, 19-20, 22-24, 27-28.}
+\label{CAROLFIRE_Thermoset_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_04} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_05} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_06} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_08} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_10} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_14} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_15} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_16}
+\end{tabular*}
+\caption{CAROLFIRE, electrical cable temperatures, Penlight Tests 4-6, 8, 10, 14-16.}
+\label{CAROLFIRE_Thermoplastic_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_21} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_25} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_26} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_29} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_30} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_63} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_65}
+\end{tabular*}
+\caption{CAROLFIRE, electrical cable temperatures, Penlight Tests 21, 25-26, 29-30, 63, 65.}
+\label{CAROLFIRE_Thermoplastic_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_62} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_64} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_18} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/CAROLFIRE/CAROLFIRE_PT_31}
+\end{tabular*}
+\caption{CAROLFIRE, electrical cable temperatures, Penlight Tests 18, 31, 62, 64.}
+\label{CAROLFIRE_Special_1}
+\end{figure}
+
+
+\clearpage
+
+
+
+
+\subsection{PRISME Experiments}
+
+In most of the PRISME experiments, instrumented electrical cables were laid within trays at various heights in the test compartment. For the PRISME LEAK series of experiments (Figs.~\ref{PRISME_1} and \ref{PRISME_2}), the gas temperature in the vicinity of the cables was measured and served as the exposing heat source for calculations using the THIEF (Thermally-Induced Electrical Failure) model~\cite{Dreisbach:Interflam}.
+
+For the PRISME Door experiments, the temperatures of surrogate cables were predicted directly from the predicted thermal environment of the entire compartment. The measurement points in these experiments were labelled, for example, TCA\_L2\_HE\_SURF, meaning thermocouple of the ``analytical'' cable, compartment 2, {\it haut} (high), east, surface. BW means {\it bas} (low) west, for example. Thermocouples were positioned on the cable surface (SURF), halfway towards center (INTER), and center (CENTRE).
+
+\newpage
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_1_Lower} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_1_Upper} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_2_Lower} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_2_Upper_A} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_2_Upper_B} &
+\end{tabular*}
+\caption{PRISME LEAK experiments, cable temperature, Tests 1 and 2.}
+\label{PRISME_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_3_A} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_3_B} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_4_A} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_4_B} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRISME_LK_4_C} &
+\end{tabular*}
+\caption{PRISME LEAK experiments, cable temperature, Tests 3 and 4.}
+\label{PRISME_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_BW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_BW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_BW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_BW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_BW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_BW_Cable_Temperature}
+\end{tabular*}
+\caption{PRISME DOOR experiments, cable temperature, Room 1, Cable BW.}
+\label{PRISME_BW_Cable_Room_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_1_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_1_HW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_1_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_HW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_1_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_1_HW_Cable_Temperature}
+\end{tabular*}
+\caption{PRISME DOOR experiments, cable temperature, Room 1, Cable HW.}
+\label{PRISME_HW_Cable_Room_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_BE_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_BE_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_BE_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_BE_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_BE_Cable_Temperature} &
+\end{tabular*}
+\caption{PRISME DOOR experiments, cable temperature, Room 2, Cable BE.}
+\label{PRISME_BE_Cable_Room_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_HE_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_HE_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_HE_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_HE_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_HE_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_HE_Cable_Temperature}
+\end{tabular*}
+\caption{PRISME DOOR experiments, cable temperature, Room 2, Cable HE.}
+\label{PRISME_HE_Cable_Room_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D1_Room_2_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D2_Room_2_HW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D3_Room_2_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_2_HW_Cable_Temperature} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D5_Room_2_HW_Cable_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D6_Room_2_HW_Cable_Temperature}
+\end{tabular*}
+\caption{PRISME DOOR experiments, cable temperature, Room 2, Cable HW.}
+\label{PRISME_HW_Cable_Room_2}
+\end{figure}
+
+
+
+\clearpage
+
+\subsection{Summary of Target Temperature Predictions}
+\label{Target Temperature}
+
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of target temperature predictions]
+{Summary of target temperature predictions.}
+\end{figure}
+
+\clearpage
+
+
+\subsection{Time to Failure}
+\label{Cable Failure Time}
+
+In addition to comparing the peak temperature predictions and measurements for electrical cables, it is also useful to consider the uncertainty in predicting the time to cable failure. Obviously, the two quantities are related, but from a practical standpoint, it is the time to failure that is of interest in these types of analyses. Figure~\ref{Cable_Failure_Time_Summary_Plot} displays results for the CAROLFIRE experiments.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Cable_Failure_Time}
+\end{tabular}
+\end{center}
+\caption[Summary of time to failure predictions for electrical cables]
+{Summary of time to failure predictions for electrical cables.}
+\label{Cable_Failure_Time_Summary_Plot}
+\end{figure}
+
+%\clearpage
+%
+%\section{Complex Geometry Surface Temperature}
+%
+%
+%\subsection{Lattimer Tilted Wall Experiments}
+%
+%The experiments were to quantify the effects of wall deflection on the heat transfer from the fire to the wall and the fire dynamics. The non-combustible wall was constructed of 915~mm high, 610~mm wide, 25~mm thick ceramic fiber board, as shown in Fig.~\ref{Lattimer_Tilted_Wall_Setup}.  The exposed surface of the wall was painted black with high temperature flat black paint. During a single experiment, the wall was at an angle of 0, 10 or 20 degrees from the vertical. Thermocouples were placed at distances of 75~mm, 305~mm, and 610~mm from the base of the wall along the centerline. The following pages contain comparisons of predicted and measured wall temperatures at the three centerline locations.
+%
+%
+%\begin{figure}[h!]
+%\begin{center}
+%\begin{tabular}{cc}
+%\begin{tikzpicture}[scale=0.6]
+%\draw[line width=0.5mm,fill=lightgray] (0,0) to (2,0) to (2,1) to (0,1) to (0,0);
+%\draw[dashed,line width=0.3mm,fill=blue!10] (0,1) to (-3.1295,9.5982) to (-3.3644,9.5127) to (-0.2349,0.9145) to (0,1);
+%\draw[dashed,line width=0.3mm,fill=blue!10] (0,1) to (-1.5889,10.0110) to (-1.8351,9.9676) to (-0.2462,0.9566) to (0,1);
+%\draw[line width=0.3mm,fill=blue!10] (0,1) to (0,10.15) to (-0.25,10.15) to (-0.25,1) to (0,1);
+%\draw (-3.13,10) node {$20^o$};
+%\draw (-1.58,10.35) node {$10^o$};
+%\draw (0,10.5) node {$0^o$};
+%\end{tikzpicture}
+%\hspace{1cm}&\hspace{1cm}
+%\begin{tikzpicture}[scale=0.6]
+%\draw[line width=0.5mm,fill=lightgray] (-1,0) to (1,0) to (1,1) to (-1,1) to (-1,0);
+%\draw[line width=0.3mm,fill=blue!10] (3.05,1) to (3.05,10.15) to (-3.05,10.15) to (-3.05,1) to (3.05,1);
+%\draw[dashed,line width=0.2mm,fill=blue!10] (0,1) to (0,11);
+%\draw[fill=black] (0,1.75) circle (1mm);
+%\draw[fill=black] (0,4.05) circle (1mm);
+%\draw[fill=black] (0,7.10) circle (1mm);
+%\draw (3,1.75) node {TC 1 (75 mm)};
+%\draw (3,4.05) node {TC 2 (305 mm)};
+%\draw (3,7.10) node {TC 3 (610 mm)};
+%\end{tikzpicture}
+%\end{tabular}
+%\caption[Wall with sand burner at the bottom of the wall]{Wall with sand burner at the bottom of the wall.}
+%\label{Lattimer_Tilted_Wall_Setup}
+%\end{center}
+%\end{figure}
+%
+%
+%\begin{figure}[p]
+%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/Wall_TC_0_degree} &
+%\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/Centerline_Temp_0_degree}
+%\end{tabular*}
+%\label{Lattimer_Wall_TC_0}
+%\end{figure}

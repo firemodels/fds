@@ -1,0 +1,72 @@
+% !TEX root = FDS_Technical_Reference_Guide.tex
+
+\typeout{new file: Time_Chapter.tex}
+
+\chapter{Solution Procedure}
+
+This section describes the basic time-marching algorithm of FDS. FDS uses a second-order accurate finite-difference approximation to the governing
+equations on a series of connected recti-linear meshes. The flow variables are updated in time using an explicit second-order Runge-Kutta scheme.
+This section describes how this algorithm is used to advance in time the density, species mass fractions, velocity components, and background and
+perturbation pressure. Let $\rho^n$, $Y_\alpha^n$, $\bu^n$, $\bp_m^n$ and $\cH^n$ denote these variables at the $n$th time step.
+
+\begin{enumerate}
+\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ to force normal components of velocity to match at mesh interface boundaries (see Section \ref{app_pressure_correction}). Note that this change in the velocity field creates an error in the divergence which is to be corrected when the velocities
+    are advanced in time.
+
+\item Estimate $\rho$, $Y_\alpha$, and $\bp_m$ at the next time step with an explicit Euler step. For
+example, the density is estimated by \be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bar{\bu}^n = 0 \ee
+
+\item Exchange values of density and mass fraction, $\rho^*$ and $Y_\alpha^*$, at mesh boundaries. The word ``exchange'' implies that information is to be passed from one mesh to another, if necessary via MPI (Message Passing Interface) calls.
+
+\item Apply boundary conditions for $\rho^*$ and $Y_\alpha^*$.
+
+\item Compute the divergence, $\widehat{\nabla\!\cdot \bu^*}$, using the estimated thermodynamic quantities. Note that the hat symbol implies that the estimated velocity field, $\bu^*$, has not been computed yet. The calculation of the pressure field in the next step shall ensure that the divergence of the updated velocity field is the same as that which is
+    computed here.
+
+\item Solve the Poisson equation for the pressure fluctuation with a direct solver on each individual mesh:
+\be \nabla^2 \cH^n = - \left[ \frac{ \widehat{\nabla\!\cdot \bu^*} -
+  \widehat{\nabla\!\cdot \bu^n} - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\dt} \right] - \nabla\!\cdot \bar{\bF}^n  \ee
+Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\bu}^n)$ is computed using patch-averaged velocities. Note also that the term $\nabla\!\cdot
+(\bar{\bu}^n - \bu^n)$ corrects the error in the divergence introduced by the averaging of velocity components at mesh interfaces.
+
+\item Estimate the velocity at the next time step
+\be \frac{\bu^* - \bar{\bu}^n}{\dt} +  \bar{\bF}^n + \nabla \calH^n = 0 \ee Note that the divergence of the estimated velocity field,
+$\nabla\!\cdot \bu^*$, is identically equal to the divergence, $\widehat{\nabla\!\cdot \bu^*}$, that was derived from the estimated thermodynamic
+quantities.
+
+\item Check the time step at this point to ensure that
+\be \dt \; \hbox{max} \left( \frac{|u|}{\dx},\frac{|v|}{\dy},\frac{|w|}{\dz} \right) < 1 \quad ; \quad
+    2 \; \dt \; \nu \; \left(\frac{1}{\dx^2} + \frac{1}{\dy^2} + \frac{1}{\dz^2} \right) < 1 \ee
+If the time step is too large, it is reduced so that it satisfies both constraints and the procedure returns to the beginning of the time step. If
+the time step satisfies the stability criteria, the procedure continues to the corrector step. See Section~\ref{stability} for more details on
+stability.
+\end{enumerate}
+
+\noindent This concludes the ``Predictor'' stage of the time step.  At this point, values of $\cH^n$ and the components of $\bu^*$ are exchanged at
+mesh boundaries via MPI calls.
+
+\begin{enumerate}
+\item Compute the ``patch-average'' velocity field $\bar{\bu}^*$ (see Section \ref{app_pressure_correction}).
+
+\item Apply the second part of the Runge-Kutta update to the mass variables. For example, the density is corrected
+\be \frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bar{\bu}^* = 0 \ee
+
+\item Exchange values of $\rho^n$ and $Y_\alpha^n$ at mesh boundaries.
+
+\item Apply boundary conditions for $\rho^n$ and $Y_\alpha^n$.
+
+\item Compute the divergence, $\widehat{\nabla\!\cdot \bu^{n+1}}$ from the corrected thermodynamic quantities.
+
+\item Compute the pressure fluctuation using estimated quantities
+\be \label{eqn_corrector_poisson2} \nabla^2\calH^* = - \left[ \frac{ \widehat{\nabla\cdot\bu^{n+1}} - \ha \left( \widehat{\nabla\cdot \bu^*} +
+\widehat{\nabla\cdot \bu^n} \right) }{\dt/2} \right]
+   - \nabla\!\cdot \bar{\mathbf{F}}^*
+\ee Note that the same type of correction is made for the divergence error at mesh boundaries.
+
+\item Update the velocity via the second part of the Runge-Kutta scheme
+\be \frac{ \bu^{n+1} - \ha \left( \bar{\bu}^* + \bar{\bu}^n \right)}{\dt/2} + \bar{\mathbf{F}}^* + \nabla \calH^*  = 0 \ee Note again that the
+divergence of the corrected velocity field is identically equal to the divergence that was computed earlier.
+
+\item At the conclusion of the time step, values of $\calH^*$ and the components of $\bu^{n+1}$ are exchanged at mesh boundaries via MPI calls.
+
+\end{enumerate}

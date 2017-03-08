@@ -1,0 +1,167 @@
+% !TEX root = FDS_Validation_Guide.tex
+
+\chapter{Suppression}
+
+This chapter looks at validation exercises where the aim is to predict the extinguishment of a fire.
+
+\section{Cup Burner Experiments}
+
+The Cup Burner is an apparatus used to determine the minimum extinguishing concentration (MEC) for combinations of fuels and suppression agents. Two fuels (methane and n-heptane) and four suppression agents (argon, carbon dioxide, helium, and nitrogen) are considered. For the simulations, the MEC is found when the post-ignition HRR drops below $1 \times 10^{-10}$~kW. The critical flame temperatures specified for the fuel reactions are 1630~$^\circ$C and 1560~$^\circ$C for methane and n-heptane, respectively. The suppression agent concentration is measured at a height level to the cup rim and 2~mm outside of the outer edge of the cup rim. In Figs.~\ref{cup_burner_extinguish_vol} and \ref{cup_burner_extinguish_mass}, methane is indicated by blue symbols and n-heptane is indicated by red symbols. The four suppression agents are identified by unique symbols.
+
+\newpage
+
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/Cup_Burner/Cup_Burner_volfrac}
+\end{tabular}
+\end{center}
+\caption[Results of Cup Burner experiments with methane and heptane]{Comparison of measured and predicted minimum extinguishing volume fractions for the cup burner tests with methane and heptane.}
+\label{cup_burner_extinguish_vol}
+\end{figure}
+
+
+\begin{figure}[b]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/Cup_Burner/Cup_Burner_massfrac}
+\end{tabular}
+\end{center}
+\caption[Results of Cup Burner experiments with methane and heptane]{Comparison of measured and predicted minimum extinguishing mass fractions for the cup burner tests with methane and heptane.}
+\label{cup_burner_extinguish_mass}
+\end{figure}
+
+\clearpage
+
+\section{USCG/HAI Water Mist Suppression Tests}
+\label{Extinction Time}
+
+The following pages contain comparisons of the predicted heat release rates for fires that are suppressed with a water mist system. In all cases, the flow rate of liquid fuel is specified in the model, but the decrease in HRR due to the extinguishing system is predicted by the model. Table~\ref{USCG_HAI_Times} reports the observed extinguishment times. Figure~\ref{USCG_Scatter} compares the measured versus predicted extinguishment times. For the simulations, the extinguishment time is taken to be when the HRR drops to half of its specified value.
+
+\begin{table}[h!]
+\caption[USCG/HAI water mist suppression extinguishment times]{Recorded extinguishment times for the USCG/HAI water mist suppression tests in a small shipboard machinery space. ``No''
+means that the fire was not extinguished within 600 s of nozzle activation.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\multicolumn{2}{|l|}{System}                            & Navy  & Grinnell  & Fogtec    & Chemetron & Fike   \\ \hline  \hline
+\multicolumn{2}{|l|}{Number of Nozzles}                 & 6     & 6         & 6         & 15        & 6      \\ \hline
+\multicolumn{2}{|l|}{Operating Pressure (bar)}          & 70    & 13        & 100       & 12        & 21     \\ \hline
+\multicolumn{2}{|l|}{Flow Rate (L/min)}                 & 68    & 75        & 22        & 70        & 48     \\ \hline
+\multicolumn{2}{|l|}{Assumed Median Drop Size ($\mu$m)} & 175   & 225       & 100       &           & 200    \\ \hline
+\multicolumn{2}{|l|}{Assumed Initial Velocity (m/s)}    & 75    & 32        & 90        &           & 41     \\ \hline
+\multicolumn{2}{|l|}{Assumed Spray Angle (deg.)}        & 120   & 90        & 120       &           & 90     \\ \hline \hline
+Fire Scenario       & Ventilation                       & \multicolumn{5}{c|}{Extinguishment Time (s)}      \\ \hline \hline
+1.0 MW Spray        & Closed                            & 15    & 26        & 21        & 27        & 21     \\ \hline
+1.0 MW Spray        & Natural                           & 15    & 40        & 32        & 43        & 35     \\ \hline
+1.0 MW Spray        & Forced                            & 17    & 55        & 76        & 357       & 133    \\ \hline
+0.5 MW Spray        & Closed                            & 34    & 70        & 39        & 53        & 56     \\ \hline
+0.5 MW Spray        & Natural                           & 41    & 117       & 67        & 158       & 140    \\ \hline
+0.5 MW Spray        & Forced                            & 124   & No        & No        & No        & No     \\ \hline
+0.25 MW Spray       & Closed                            & 157   & 360       & 169       & 314       & 277    \\ \hline
+0.25 MW Spray       & Natural                           & 206   & No        & 290       & 525       & 566    \\ \hline
+0.25 MW Spray       & Forced                            & No    & No        & No        & No        & No     \\ \hline
+\end{tabular}
+\end{center}
+\label{USCG_HAI_Times}
+\end{table}
+
+
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fike} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fike}
+\end{tabular*}
+\label{USCG_HAI_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fike} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fike}
+\end{tabular*}
+\label{USCG_HAI_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fike} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fike}
+\end{tabular*}
+\label{USCG_HAI_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fike} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fike}
+\end{tabular*}
+\label{USCG_HAI_8}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Grinnell} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Navy} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fogtec} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fike}
+\end{tabular*}
+\label{USCG_HAI_9}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time}
+\caption[Extinguishment times for the USCG/HAI water mist suppression tests]{Comparison of measured and predicted extinguishment times for the USCG/HAI water mist suppression tests.}
+\label{USCG_Scatter}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\section{VTT Water Spray Experiments}
+
+Figure~\ref{LN02} presents profiles of mean droplet diameter, mean velocity, and droplet flux below a single 74$^\circ$ hollow-cone water mist nozzle. The pressure behind the nozzle was 2~MPa, and the flow constant was 0.077~L/min/bar$^{1/2}$. The The experimental data represents average values at each distance calculated over the four measuring points at that distance (except for the point at the spray axis). A comparison of droplet speed, mist flux and Sauter mean diameter ($D_{32}$) profiles are shown in Fig.~\ref{LN02}. Comparisons are shown at 40~cm and 62~cm vertical distances from the nozzle. Simulation results are reported for three spatial resolutions: 1~cm, 2~cm, and 4~cm.
+
+\begin{figure}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62}  \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62}  \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62}  \\
+\end{tabular*}
+\caption[Droplet speed, flux, and mean diameter profiles of the LN-2 nozzle]{Comparison of predicted and experimental droplet speed (top), droplet flux (middle) and mean diameter (bottom) profiles of the LN-2 nozzle. The left column corresponds to measurements made 40~cm from the nozzle, while the right column corresponds to measurements made 62~cm from the nozzle.}
+\label{LN02}
+\end{figure}
+
+

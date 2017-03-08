@@ -1,0 +1,113 @@
+\documentclass[border=.1cm]{standalone}
+\usepackage{tikz}
+\usepackage{times}
+\usepackage{pgfplots}
+
+\begin{document}
+
+\pgfdeclarelayer{background layer}
+\pgfdeclarelayer{foreground layer}
+\pgfsetlayers{background layer,main,foreground layer}
+
+\begin{tikzpicture}
+
+\begin{scope}[x={(.91cm,.2cm)},y={(0cm,1cm)},z={(.4cm,-.2cm)}]
+
+\pgfmathsetmacro{\os}{5}
+
+\begin{scope}[every path/.style={thick}]
+
+\draw (0,1,0) circle (1cm);
+\draw[gray,dashed](0,1,0) ellipse(1cm and .15cm);
+
+\begin{scope}[xshift=\os cm]
+
+\begin{pgfonlayer}{foreground layer}
+\draw[shift={+(0,0,.5)}] (0,0,0) -- (-.577, .577, .577);
+\draw[shift={+(0,0,.5)}] (0,0,0) -- (-.577,-.577, .577);
+\draw[shift={+(0,0,.5)}] (0,0,0) -- ( .577,-.577, .577);
+\draw[shift={+(0,0,.5)}] (0,0,0) -- ( .577, .577, .577);
+\draw[shift={+(0,0,.5)},fill=white] (-.577,.577,.577) \foreach \t in {145,155,...,215} {--({cos(\t)*cos(45)},{sin(\t)},{-cos(\t)*sin(45)})};
+\draw[shift={+(0,0,.5)},fill=white] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*cos(135)},{sin(\t)},{-cos(\t)*sin(135)})};
+\draw[shift={+(0,0,.5)},fill=white] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({sin(\t)},{cos(\t)*cos(135)},{-cos(\t)*sin(135)})};
+\draw[shift={+(0,0,.5)},fill=white] (.577,-.577, .577) \foreach \t in {145,155,...,215} {--({sin(\t)},{cos(\t)*cos(45)},{-cos(\t)*sin(45)})};
+\fill[white,shift={+(0,0,.5)}] (-.577, .577, .577) -- (-.577,-.577, .577) -- (.577,-.577, .577) -- (.577, .577, .577) -- cycle;
+\end{pgfonlayer}
+
+\begin{pgfonlayer}{background layer}
+\draw[shift={+(0,0,-.5)}] (0,0,0) -- (-.577, .577,-.577);
+\draw[shift={+(0,0,-.5)}] (0,0,0) -- (-.4,-.577,-.577);
+\draw[shift={+(0,0,-.5)}] (0,0,0) -- ( .577,-.577,-.577);
+\draw[shift={+(0,0,-.5)}] (0,0,0) -- ( .577, .577,-.577);
+\draw[shift={+(0,0,-.5)}] (-.577,.577,-.577) \foreach \t in {145,150,...,160} {--({cos(\t)*cos(45)},{sin(\t)},{cos(\t)*sin(45)})};
+\draw[shift={+(0,0,-.5)}] (.577,.577,-.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*cos(135)},{sin(\t)},{cos(\t)*sin(135)})};
+\draw[shift={+(0,0,-.5)}] (-.577,.577,-.577)  \foreach \t in {215,210,...,185} {--({sin(\t)},{cos(\t)*cos(135)},{cos(\t)*sin(135)})};
+\draw[shift={+(0,0,-.5)}] (.577,-.577, -.577) \foreach \t in {145,155,...,200} {--({sin(\t)},{cos(\t)*cos(45)},{cos(\t)*sin(45)})};
+\end{pgfonlayer}
+
+\draw[shift={+(.5,0,0)}] (0,0,0) -- ( .577, .577,-.577);
+\draw[shift={+(.5,0,0)}] (0,0,0) -- ( .577,-.577,-.577);
+\draw[shift={+(.5,0,0)}] (0,0,0) -- ( .577,-.577, .577);
+\draw[shift={+(.5,0,0)}] (0,0,0) -- ( .577, .577, .577);
+%\draw[shift={+(.5,0,0)}] ( .577,.577,-.577) \foreach \t in {145,155,...,215} {--({-cos(\t)*sin(45)},{sin(\t)},{cos(\t)*cos(45)})};
+\draw[shift={+(.5,0,0)}] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({-cos(\t)*sin(135)},{sin(\t)},{cos(\t)*cos(135)})};
+\draw[shift={+(.5,0,0)}] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({-cos(\t)*sin(135)},{cos(\t)*cos(135)},{sin(\t)})};
+\draw[shift={+(.5,0,0)}] (.577,-.577, .577) \foreach \t in {145,155,...,215} {--({-cos(\t)*sin(45)},{cos(\t)*cos(45)},{sin(\t)})};
+
+\begin{pgfonlayer}{foreground layer}
+%\draw[shift={+(-.5,0,0)}] (0,0,0) -- (-.577, .577,-.577);
+%\draw[shift={+(-.5,0,0)}] (0,0,0) -- (-.577,-.577,-.577);
+\draw[shift={+(-.5,0,0)}] (0,0,0) -- (-.577,-.577, .577);
+\draw[shift={+(-.5,0,0)}] (0,0,0) -- (-.577, .577, .577);
+\draw[shift={+(-.5,0,0)},fill=white] (-.577,.577,-.577) \foreach \t in {145,155,...,215} {--({cos(\t)*sin(45)},{sin(\t)},{cos(\t)*cos(45)})};
+\draw[shift={+(-.5,0,0)},fill=white] (-.577,.577,.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*sin(135)},{sin(\t)},{cos(\t)*cos(135)})};
+\draw[shift={+(-.5,0,0)},fill=white] (-.577,.577,.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*sin(135)},{cos(\t)*cos(135)},{sin(\t)})};
+\draw[shift={+(-.5,0,0)},fill=white] (-.577,-.577, .577) \foreach \t in {145,155,...,215} {--({cos(\t)*sin(45)},{cos(\t)*cos(45)},{sin(\t)})};
+\fill[white,shift={+(-.5,0,0)}] (0,0,0) -- (-.577,-.577,.577) -- (-.577,.577,.577) -- cycle;
+\end{pgfonlayer}
+
+\begin{pgfonlayer}{foreground layer}
+%\draw[shift={+(0,.5,0)}] (0,0,0) -- ( .577, .577,-.577);
+\draw[shift={+(0,.5,0)}] (0,0,0) -- (-.577, .577,-.577);
+\draw[shift={+(0,.5,0)}] (0,0,0) -- (-.577, .577, .577);
+\draw[shift={+(0,.5,0)}] (0,0,0) -- ( .577, .577, .577);
+\draw[shift={+(0,.5,0)},fill=white] ( .577,.577,-.577) \foreach \t in {145,155,...,215} {--({sin(\t)},{-cos(\t)*sin(45)},{cos(\t)*cos(45)})};
+\draw[shift={+(0,.5,0)},fill=white] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({sin(\t)},{-cos(\t)*sin(135)},{cos(\t)*cos(135)})};
+\draw[shift={+(0,.5,0)},fill=white] (.577,.577,.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*cos(135)},{-cos(\t)*sin(135)},{sin(\t)})};
+\draw[shift={+(0,.5,0)},fill=white] (-.577,.577, .577) \foreach \t in {145,155,...,215} {--({cos(\t)*cos(45)},{-cos(\t)*sin(45)},{sin(\t)})};
+\fill[white,shift={+(0,.5,0)}] (0,0,0) -- (-.577,.577,.577) -- (.577,.577,.577) -- cycle;
+\end{pgfonlayer}
+
+\begin{pgfonlayer}{background layer}
+\draw[shift={+(0,-.5,0)}] (0,0,0) -- ( .577,-.577,-.577);
+\draw[shift={+(0,-.5,0)}] (0,0,0) -- (-.577,-.577,-.577);
+\draw[shift={+(0,-.5,0)}] (0,0,0) -- (-.577,-.577, .577);
+\draw[shift={+(0,-.5,0)}] (0,0,0) -- ( .577,-.577, .577);
+%\draw[shift={+(0,-.5,0)}] ( .577,-.577,-.577) \foreach \t in {145,155,...,215} {--({sin(\t)},{cos(\t)*sin(45)},{cos(\t)*cos(45)})};
+\draw[shift={+(0,-.5,0)}] (.577,-.577,.577)  \foreach \t in {145,155,...,215} {--({sin(\t)},{cos(\t)*sin(135)},{cos(\t)*cos(135)})};
+%\draw[shift={+(0,-.5,0)}] (.577,-.577,.577)  \foreach \t in {145,155,...,215} {--({cos(\t)*cos(135)},{cos(\t)*sin(135)},{sin(\t)})};
+\draw[shift={+(0,-.5,0)}] (-.577,-.577, .577) \foreach \t in {145,155,...,215} {--({cos(\t)*cos(45)},{cos(\t)*sin(45)},{sin(\t)})};
+\end{pgfonlayer}
+
+\draw [-stealth](0,1.5,0) -- (0,2.5,0);
+\node at (0,3.,0){\tt ORIENTATION(1:3,6)=0,0,1};
+\draw [-stealth](0,-1.5,0) -- (0,-2.5,0);
+\node at (0,-3.,0){\tt ORIENTATION(1:3,5)=0,0,-1};
+
+\draw [-stealth](1.5,0,0) -- (2.5,0,0);
+\node at (4.2,.2,0){\tt ORIENTATION(1:3,2)=1,0,0};
+\draw [-stealth](-1.5,0,0) -- (-2.5,0,0);
+\node at (-4.2,-.2,0){\tt ORIENTATION(1:3,1)=-1,0,0};
+
+\begin{pgfonlayer}{foreground layer}
+\draw [-stealth](0,0,1.5) -- (0,0,2.5);
+\node at (2.5,-1,2.5){\tt ORIENTATION(1:3,3)=0,-1,0};
+\end{pgfonlayer}
+
+\end{scope}
+
+\end{scope}
+\end{scope}
+
+\end{tikzpicture}
+\end{document}
