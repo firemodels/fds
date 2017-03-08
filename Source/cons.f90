@@ -90,7 +90,7 @@ LOGICAL :: LES,DNS,RADIATION=.TRUE.,RADIATION_COMPLETED=.TRUE.,EXCHANGE_RADIATIO
            EXTERNAL_BOUNDARY_CORRECTION=.FALSE.,EVAPORATION=.TRUE.,DUCT_HT=.FALSE., &
            DUCT_HT_INSERTED,PROCESS_ALL_MESHES=.FALSE.,&
            COUPLED_1D3D_HEAT_TRANSFER=.FALSE.,PYROLYSIS_HT3D=.FALSE.,STORE_Q_DOT_PPP_S=.FALSE.,&
-           NEW_MOMENTUM_NUDGING=.FALSE.,EXCHANGE_EDGES=.FALSE.
+           NEW_MOMENTUM_NUDGING=.FALSE.
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
@@ -361,6 +361,23 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 ! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
+<<<<<<< HEAD
+LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
+LOGICAL :: GLMAT_SOLVER =.FALSE.
+!LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
+LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
+LOGICAL :: DO_IMPLICIT_CCREGION=.TRUE.
+
+INTEGER, PARAMETER :: GLMAT_BYMESH = 1 ! Apply matrix-vector Solver by mesh.
+INTEGER, PARAMETER :: GLMAT_WHLDOM = 2 ! Apply matrix-vector Solver on the whole domain.
+INTEGER :: GLMAT_SETUP_FLAG = GLMAT_WHLDOM ! Default for now.
+
+! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
+! Currently used in the thermo div definition of cut-cells.
+REAL(EB) :: CCVOL_LINK=0.15_EB
+
+=======
+>>>>>>> 270291248e1e37629dbf08277513625af06c66a4
 INTEGER,  PARAMETER :: LOW_IND   = 1
 INTEGER,  PARAMETER :: HIGH_IND  = 2
 
