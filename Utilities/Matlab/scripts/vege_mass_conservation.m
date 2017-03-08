@@ -6,7 +6,7 @@ clear all
 plot_style
 
 % Directories
-data_dir  = '../../Verification/WUI/';
+data_dir  = '../../Verification/Vegetation/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Read the output data
