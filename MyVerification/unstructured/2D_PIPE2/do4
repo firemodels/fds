@@ -1,7 +1,0 @@
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db fft_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db mkl_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_ssor_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_pardiso_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db cg_cluster_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db gmg_ssor_4mesh.fds
-mpirun -np 4 ../../../../Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db gmg_mkl_4mesh.fds
