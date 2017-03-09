@@ -1,3 +1,7 @@
+%
+% This test is now being driven from dataplot.  Retain
+% the file as an example
+%
 
 close all
 clear all
