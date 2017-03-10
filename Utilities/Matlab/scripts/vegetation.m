@@ -5,4 +5,4 @@
 % This script generates all plots necessary for the vegetation section
 % of the verification guide.
 
-vege_mass_conservation          % mass conservation 
+%vege_mass_conservation          % mass conservation; moved to dataplot
