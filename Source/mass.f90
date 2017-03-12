@@ -815,112 +815,6 @@ ENDIF WIND_DIRECTION_IF
 END FUNCTION SCALAR_FACE_VALUE
 
 
-REAL(EB) FUNCTION SCALAR_FACE_VALUE_NEW(A,U,LIMITER)
-
-REAL(EB), INTENT(IN) :: A(3),U(4)
-INTEGER, INTENT(IN) :: LIMITER
-REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
-
-! This function is identical to the original SCALAR_FACE_VALUE except
-! that we only use 2nd order limiters if the upwind velocity is the
-! same sign as the local face velocity.
-
-! This function computes the scalar value on a face.
-! The scalar is denoted U, and the velocity is denoted A.
-! The divergence (computed elsewhere) uses a central difference across
-! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
-!
-! CENTRAL_LIMITER  = 0
-! GODUNOV_LIMITER  = 1
-! SUPERBEE_LIMITER = 2
-! MINMOD_LIMITER   = 3
-! CHARM_LIMITER    = 4
-! MP5_LIMITER      = 5
-!
-!                    location of face
-!
-!                            f
-!    |     o     |     o     |     o     |     o     |
-!               A(1)        A(2)        A(3)
-!         U(1)        U(2)        U(3)        U(4)
-
-WIND_DIRECTION_IF: IF (A(2)>0._EB) THEN
-
-   ! the flow is left to right
-
-   IF (A(1)>0._EB) THEN
-      DU_UP = U(2)-U(1)
-   ELSE
-      DU_UP = 0._EB
-   ENDIF
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE_NEW = U(2)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE_NEW = MP5(V)
-   END SELECT
-
-ELSE WIND_DIRECTION_IF
-
-   ! the flow is right to left
-
-   IF (A(3)<0._EB) THEN
-      DU_UP = U(4)-U(3)
-   ELSE
-      DU_UP = 0._EB
-   ENDIF
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE_NEW = U(3)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE_NEW = MP5(V)
-    END SELECT
-
-ENDIF WIND_DIRECTION_IF
-
-END FUNCTION SCALAR_FACE_VALUE_NEW
-
-
 REAL(EB) FUNCTION MP5(V)
 USE MATH_FUNCTIONS, ONLY: MINMOD2,MINMOD4
 REAL(EB), INTENT(IN) :: V(-2:2)
@@ -949,5 +843,6 @@ ELSE
 ENDIF
 
 END FUNCTION MP5
+
 
 END MODULE MASS
