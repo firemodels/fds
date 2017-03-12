@@ -14,6 +14,8 @@ then
   exit
 fi
 
+INTEL_VERSION=17
+
 INSTALLDIR=
 FDS_TAR=
 ostype=
@@ -483,7 +485,7 @@ cat << BASH > \$BASHFDS
 # OpenMPI location
 ARG1=\\\$1
 
-# Intel shared library location (default fds_install_dir/bin/INTELLIBS17)
+# Intel shared library location (default fds_install_dir/bin/INTELLIBS$INTEL_VERSION)
 ARG2=\\\$2
 
 # FDS location
@@ -496,7 +498,7 @@ export MPIDIST=\\\$ARG1
 
 # Intel shared library location
 
-INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS17
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
