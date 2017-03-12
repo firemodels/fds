@@ -87,7 +87,7 @@ echo ""
 echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
-echo "  1) Press <Enter> to begin installation"
+echo "  1) Press <Enter> to begin installation [default]"
 echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
@@ -385,7 +385,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to proceed with the installation? (yes/no) " yn
+     read -p "Do you wish to proceed? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
