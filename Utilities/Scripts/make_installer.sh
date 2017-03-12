@@ -299,7 +299,7 @@ while true; do
   OPTION3=
   OPTION4=
   echo ""
-  echo "OpenMPI options"
+  echo "OpenMPI install options"
 
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION2=\$OPTION
@@ -483,7 +483,7 @@ cat << BASH > \$BASHFDS
 # OpenMPI location
 ARG1=\\\$1
 
-# Intel shared library location (default fds_install_dir/bin/INTELLIBS16)
+# Intel shared library location (default fds_install_dir/bin/INTELLIBS17)
 ARG2=\\\$2
 
 # FDS location
@@ -496,7 +496,7 @@ export MPIDIST=\\\$ARG1
 
 # Intel shared library location
 
-INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS16
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS17
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
