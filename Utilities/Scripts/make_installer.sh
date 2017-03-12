@@ -69,7 +69,7 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
-OPENMPIFILE=openmpi_1.8.4_${PLATFORM}_64.tar.gz
+OPENMPIFILE=openmpi_2.0.2_${PLATFORM}_64.tar.gz
 
 size2=64
 
