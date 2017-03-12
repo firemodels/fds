@@ -15,6 +15,7 @@ then
 fi
 
 INTEL_VERSION=17
+OPENMPI_VERSION=2.0.2
 
 INSTALLDIR=
 FDS_TAR=
@@ -71,7 +72,7 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
-OPENMPIFILE=openmpi_2.0.2_${PLATFORM}_64.tar.gz
+OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
 
 size2=64
 
@@ -320,7 +321,7 @@ while true; do
      mpipatheth=/shared/openmpi_64
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION3=\$OPTION
-     echo "  Press \$OPTION3 to use existing /shared/openmpi_64"
+     echo "  Press \$OPTION3 to use existing directory /shared/openmpi_64"
   fi
   mpipathib=
   if [ -d /shared/openmpi_64ib ] ; then
@@ -328,7 +329,7 @@ while true; do
      mpipath=\$MPIDIST_IB
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION4=\$OPTION
-     echo "  Press \$OPTION4 to use existing /shared/openmpi_64ib"
+     echo "  Press \$OPTION4 to use existing directory /shared/openmpi_64ib"
   fi
 
   if [ "\$OVERRIDE" == "y" ]
