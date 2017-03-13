@@ -14,6 +14,9 @@ then
   exit
 fi
 
+INTEL_VERSION=17
+OPENMPI_VERSION=2.0.2
+
 INSTALLDIR=
 FDS_TAR=
 ostype=
@@ -69,7 +72,7 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
-OPENMPIFILE=openmpi_1.8.4_${PLATFORM}_64.tar.gz
+OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
 
 size2=64
 
@@ -87,7 +90,7 @@ echo ""
 echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
-echo "  1) Press <Enter> to begin installation"
+echo "  1) Press <Enter> to begin installation [default]"
 echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
@@ -299,15 +302,15 @@ while true; do
   OPTION3=
   OPTION4=
   echo ""
-  echo "OpenMPI options"
+  echo "OpenMPI install options"
 
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION2=\$OPTION
-  echo "  Press \$OPTION2 to use \$FDS_root/bin/openmpi_64 [default]"
+  echo "  Press \$OPTION2 to install in \$FDS_root/bin/openmpi_64 [default]"
 
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION1=\$OPTION
-  echo "  Press \$OPTION1 to install OpenMPI manually"
+  echo "  Press \$OPTION1 to install later"
   echo "     See \$FDS_root/bin/README.html for details"
 
   mpipath=
@@ -318,7 +321,7 @@ while true; do
      mpipatheth=/shared/openmpi_64
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION3=\$OPTION
-     echo "  Press \$OPTION3 to use /shared/openmpi_64"
+     echo "  Press \$OPTION3 to use existing directory /shared/openmpi_64"
   fi
   mpipathib=
   if [ -d /shared/openmpi_64ib ] ; then
@@ -326,7 +329,7 @@ while true; do
      mpipath=\$MPIDIST_IB
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION4=\$OPTION
-     echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
+     echo "  Press \$OPTION4 to use existing directory /shared/openmpi_64ib"
   fi
 
   if [ "\$OVERRIDE" == "y" ]
@@ -385,7 +388,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to proceed with the installation? (yes/no) " yn
+     read -p "Do you wish to proceed? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
@@ -483,7 +486,7 @@ cat << BASH > \$BASHFDS
 # OpenMPI location
 ARG1=\\\$1
 
-# Intel shared library location (default fds_install_dir/bin/INTELLIBS16)
+# Intel shared library location (default fds_install_dir/bin/INTELLIBS$INTEL_VERSION)
 ARG2=\\\$2
 
 # FDS location
@@ -496,7 +499,7 @@ export MPIDIST=\\\$ARG1
 
 # Intel shared library location
 
-INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS16
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
