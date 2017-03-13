@@ -1431,6 +1431,9 @@ TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB) :: IDX, AF, VAL, TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 
+! CHARACTER(30) :: FILE_NAME
+! INTEGER :: ICC, IERR
+
 TNOW=SECOND()
 
 IF (FREEZE_VELOCITY) THEN ! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FREEZE_VELOCITY=.TRUE.
@@ -1580,6 +1583,7 @@ CASE(GLMAT_WHLDOM)
       MTYPE  =  2
    ENDIF
 
+   ! WRITE(LU_ERR,*) 'SUM_FH=',SUM(F_H),H_MATRIX_INDEFINITE
 
    !.. Back substitution and iterative refinement
    IPARM(8) =  0 ! max numbers of iterative refinement steps
@@ -1593,6 +1597,38 @@ CASE(GLMAT_WHLDOM)
 #endif
    IF (ERROR /= 0) &
    WRITE(0,*) 'GLMAT_SOLVER_H: The following ERROR was detected: ', ERROR
+
+   ! WRITE(LU_ERR,*) 'SUM_XH=',SUM(X_H),SUM(A_H(1:IA_H(NUNKH_LOCAL+1)))
+   !
+   ! IF (CORRECTOR) THEN
+   !    DO NM=1,NMESHES
+   !       CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+   !       IF(MYID/=PROCESS(NM))CYCLE
+   !       CALL POINT_TO_MESH(NM)
+   !       WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A)') "FHXH_",N_MPI_PROCESSES,'_',NMESHES,".dat"
+   !       IF(NM==1)THEN
+   !          OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
+   !       ELSE
+   !          OPEN(unit=33, file=TRIM(FILE_NAME), status='old',position='append')
+   !       ENDIF
+   !       DO K=1,KBAR
+   !          DO J=1,JBAR
+   !             DO I=1,IBAR
+   !                IF(CCVAR(I,J,K,1)==1) CYCLE ! IBM_SOLID
+   !                IF(CCVAR(I,J,K,UNKH) > 0) THEN ! Gasphase Cartesian cells.
+   !                   IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START)
+   !                ELSEIF (CCVAR(I,J,K,1)==0) THEN
+   !                   ICC=CCVAR(I,J,K,4)
+   !                   IROW= IBM_CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START)
+   !                ENDIF
+   !                WRITE(33,'(4I8,5F24.18)') NM,I,J,K,XC(I),YC(J),ZC(K),F_H(IROW),X_H(IROW)
+   !             ENDDO
+   !          ENDDO
+   !       ENDDO
+   !       CLOSE(33)
+   !    ENDDO
+   ! ENDIF
+
 
    ! Dump result back to mesh containers:
    MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX

@@ -1085,18 +1085,15 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
            LL = M2%NCC_INT_R
            ! Now loop INTERPOLATED WALL_CELLs:
            EXT_WALL_LOOP : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-
               WC=>M%WALL(IW)
               EWC=>M%EXTERNAL_WALL(IW)
               IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
-
               II  = WC%ONE_D%II
               JJ  = WC%ONE_D%JJ
               KK  = WC%ONE_D%KK
               NOOM = EWC%NOM
               IF (NOOM /= NM) CYCLE EXT_WALL_LOOP
-              IF(.NOT.ANY(CCVAR(II-1:II+1,JJ-1:JJ+1,KK-1:KK+1,IBM_CGSC)==IBM_CUTCFE)) CYCLE EXT_WALL_LOOP
-              !WRITE(LU_ERR,*) NOM,NM,M2%NCC_INT_R,M2%NFCC_R(2),LL
+              IF(.NOT.ANY(M%CCVAR(II-1:II+1,JJ-1:JJ+1,KK-1:KK+1,IBM_CGSC)==IBM_CUTCFE)) CYCLE EXT_WALL_LOOP
               LL=LL+1
               IF (CODE==3)THEN ! END of PREDICTOR
                  M%H(II,JJ,KK) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
@@ -8199,6 +8196,17 @@ IF (FORCE_GAS_FACE) THEN
                IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
                FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
 
+               ! IF(SQRT((XC(I)-0.9875_EB)**2._EB+(YC(J)-0.9875_EB)**2._EB+(ZC(K+1)-2.8625_EB)**2._EB) < 10.E-10_EB) THEN
+               !    WRITE(LU_ERR,*) 'NM, ICF=',NM,ICF,MESHES(NM)%IBM_NCUTFACE_MESH
+               !    WRITE(LU_ERR,*) 'XYZCEN=',IBM_CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,1)
+               !    WRITE(LU_ERR,*) 'IN FORCE=',FVZ(I,J,K),HP(I,J,K+1),HP(I,J,K),DWWDT,W_IBM,IBM_CUT_FACE(ICF)%VELINT(1),&
+               !    NFACE
+               !    IFACE=1
+               !    DO IPT=1,5
+               !       WRITE(LU_ERR,*) 'INTCOEF,VAL=',IBM_CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+               !    ENDDO
+               ! ENDIF
+
             ELSE ! Unstructured scheme
                ! Compute Forcing on cut-face centroids:
 
@@ -11896,6 +11904,25 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,               &
                                         P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP,&
                                         DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
+            ! IF(NMESHES==1)THEN
+            !    IF(ICF==2112 .AND. IFACE > 0) THEN
+            !       WRITE(LU_ERR,*) 'NM,ICF,CIs=',NM,ICF,CI,CII,CIII,CIV,CV
+            !       WRITE(LU_ERR,*) 'P0, P1=',P0,P1
+            !       WRITE(LU_ERR,*) 'DIR_FCT, DV=',DIR_FCT,DV
+            !       DO IPT=1,MAX_INTERP_POINTS_PLANE
+            !          WRITE(LU_ERR,*) IPT,PTS2(IAXIS:KAXIS,IPT)
+            !       ENDDO
+            !    ENDIF
+            ! ELSEIF(NMESHES==4 .AND. NM==2) THEN
+            !    IF(ICF==582 .AND. IFACE > 0) THEN
+            !       WRITE(LU_ERR,*) 'NM,ICF,CIs=',NM,ICF,CI,CII,CIII,CIV,CV
+            !       WRITE(LU_ERR,*) 'P0, P1=',P0,P1
+            !       WRITE(LU_ERR,*) 'DIR_FCT, DV=',DIR_FCT,DV
+            !       DO IPT=1,MAX_INTERP_POINTS_PLANE
+            !          WRITE(LU_ERR,*) IPT,PTS2(IAXIS:KAXIS,IPT)
+            !       ENDDO
+            !    ENDIF
+            ! ENDIF
 
          ENDIF
 
@@ -13269,6 +13296,7 @@ INTEGER :: GVEC(NOD1:NOD4), GVEC2(NOD1:NOD4), GAS_PTS, ICT, IPT, DUMMY2(IAXIS:KA
 REAL(EB):: XYEL(IAXIS:JAXIS,NOD1:NOD4), VAL, DUMMY(IAXIS:JAXIS)
 REAL(EB):: A_COEF,B_COEF,C_COEF,D_COEF,DENOM,AINV(1:2,1:2),FD(1:2),VEC(1:2)
 REAL(EB) :: X_CEN, DELX, Y_CEN, DELY, XI, ETA, C1, C2, C3, C4
+REAL(EB):: NOUT2(IAXIS:KAXIS)
 
 ! Initialize:
 CI = 0._EB; CII = 0._EB; CIII = 0._EB; CIV = 0._EB; CV = 0._EB;
@@ -13276,7 +13304,12 @@ PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE)= 0
 
 TESTVAR = IBM_FFNF
 
-XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
+! Define maximum direction, add GEOMEPS factors to avoid symmetry cases with random resulting plane:
+NOUT2(IAXIS)=ABS(NOUT(IAXIS))+1000._EB*GEOMEPS
+NOUT2(JAXIS)=ABS(NOUT(JAXIS))+   0._EB*GEOMEPS
+NOUT2(KAXIS)=ABS(NOUT(KAXIS))-1000._EB*GEOMEPS
+XNAXIS = MAXLOC(NOUT2(IAXIS:KAXIS),1)
+!XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
 FCTN = INT(SIGN(1._EB,NOUT(XNAXIS)))
 
 ! Line P0+s*nout:
@@ -13996,12 +14029,18 @@ INTEGER :: GVEC(NOD1:NOD4), GVEC2(NOD1:NOD4), GAS_PTS, ICT, IPT, DUMMY2(IAXIS:KA
 REAL(EB):: XYEL(IAXIS:JAXIS,NOD1:NOD4), VAL, DUMMY(IAXIS:JAXIS)
 REAL(EB):: A_COEF,B_COEF,C_COEF,D_COEF,DENOM,AINV(1:2,1:2),FD(1:2),VEC(1:2)
 REAL(EB) :: X_CEN, DELX, Y_CEN, DELY, XI, ETA, C1, C2, C3, C4
+REAL(EB):: NOUT2(IAXIS:KAXIS)
 
 ! Initialize:
 CI = 0._EB; CII = 0._EB; CIII = 0._EB; CIV = 0._EB; CV = 0._EB;
 PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE)= 0
 
-XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
+! Define maximum direction, add GEOMEPS factors to avoid symmetry cases with random resulting plane:
+NOUT2(IAXIS)=ABS(NOUT(IAXIS))+1000._EB*GEOMEPS
+NOUT2(JAXIS)=ABS(NOUT(JAXIS))+   0._EB*GEOMEPS
+NOUT2(KAXIS)=ABS(NOUT(KAXIS))-1000._EB*GEOMEPS
+XNAXIS = MAXLOC(NOUT2(IAXIS:KAXIS),1)
+!XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
 FCTN = INT(SIGN(1._EB,NOUT(XNAXIS)))
 
 ! Line P0+s*nout:
