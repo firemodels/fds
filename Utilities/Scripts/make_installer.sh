@@ -485,9 +485,17 @@ cat << BASH > \$BASHFDS
 
 # OpenMPI location
 ARG1=\\\$1
+BASH
+
+if [ "$ostype" != "OSX" ]; then
+cat << BASH >> \$BASHFDS
 
 # Intel shared library location (default fds_install_dir/bin/INTELLIBS$INTEL_VERSION)
 ARG2=\\\$2
+BASH
+fi
+
+cat << BASH >> \$BASHFDS
 
 # FDS location
 
@@ -496,6 +504,10 @@ export FDSBINDIR=\$FDS_root/bin
 # OpenMPI location
 
 export MPIDIST=\\\$ARG1
+BASH
+
+if [ "$ostype" != "OSX" ]; then
+cat << BASH >> \$BASHFDS
 
 # Intel shared library location
 
@@ -503,6 +515,10 @@ INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
+BASH
+fi
+
+cat << BASH >> \$BASHFDS
 
 # unalias application names used by FDS
 
@@ -580,8 +596,12 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   echo "MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
-  echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
-  echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
+  if [[ "\$mpipatheth" != "" ]]; then
+    echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
+  fi
+  if [[ "\$mpipathib" != "" ]]; then
+    echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
+  fi
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
