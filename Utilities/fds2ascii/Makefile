@@ -2,7 +2,7 @@ SOURCE_DIR = ../..
 FILTERC =
 FILTERF =
 
-VPATH = ../../Data_Processing
+VPATH = ../
 bin = .
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
