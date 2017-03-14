@@ -515,6 +515,10 @@ INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
+
+# set stack size to unlimted
+
+ulimit -s unlimited
 BASH
 fi
 
