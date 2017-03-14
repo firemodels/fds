@@ -134,6 +134,7 @@ REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
 REAL(EB), SAVE :: GEOMEPS = 1.E-12_EB
+REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 INTEGER,  PARAMETER :: NGUARD= 5        ! Layers of guard-cells.
 INTEGER,  PARAMETER ::CCGUARD= NGUARD-1 ! Layers of guard cut-cells.
@@ -475,8 +476,7 @@ INTEGER :: I,J,K,IFC,ICF,IPT,X1AXIS,IFACE
 !INTEGER, ALLOCATABLE, DIMENSION(:) :: NCC_SV
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (OMESH_TYPE), POINTER :: M2,M3
-LOGICAL, SAVE :: INITIALIZE_CC_SCALARS=.TRUE.
-LOGICAL, SAVE :: INITIALIZE_CC_VELOCTY=.TRUE.
+LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
 
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -490,7 +490,7 @@ IF (CODE == 0 .OR. CODE==2 .OR. CODE==5 .OR. CODE>6) RETURN
 IF (.NOT.CC_MATVEC_DEFINED) RETURN
 
 ! First Allocate and setup persistent send-receives for scalars:
-INITIALIZE_CC_SCALARS_COND : IF (INITIALIZE_CC_SCALARS) THEN
+INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
 
    ! Allocate REQ11, for scalar transport quantities, reduced cycling conditionals:
    N_REQ11=0
@@ -633,9 +633,9 @@ INITIALIZE_CC_SCALARS_COND : IF (INITIALIZE_CC_SCALARS) THEN
 
    ENDDO SENDING_MESH_LOOP_1
 
-   INITIALIZE_CC_SCALARS = .FALSE.
+   INITIALIZE_CC_SCALARS_FORC = .FALSE.
 
-ENDIF INITIALIZE_CC_SCALARS_COND
+ENDIF INITIALIZE_CC_SCALARS_FORC_COND
 
 
 ! Exchange Scalars in cut-cells:
@@ -5335,8 +5335,8 @@ REAL(EB):: DUMMYT
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: RZ_Z2,RZ_Z2AUX
 INTEGER :: IERR
 
-CHARACTER(30) :: FILE_NAME
-INTEGER :: NM,I,J,K,ICC,JCC
+! CHARACTER(30) :: FILE_NAME
+! INTEGER :: NM,I,J,K,ICC,JCC
 
 ! Just to avoid compilation warnings: T might be used to define a time dependent source.
 DUMMYT = T
@@ -7890,7 +7890,7 @@ REAL(EB), INTENT(IN) :: DT
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
 REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,VAL(1:5),DUMEB,XYZ_PP(IAXIS:KAXIS)
-INTEGER :: I,J,K,ICF,IFACE,X1AXIS,NFACE,IP,JP,KP,IPT,INBFC_CFCEN(1:3),INBFC_CARTCEN(1:3)
+INTEGER :: I,J,K,ICF,IFACE,X1AXIS,NFACE,IPT,INBFC_CFCEN(1:3),INBFC_CARTCEN(1:3)
 REAL(EB):: U_INT,V_INT,W_INT
 
 ! This is the CCIBM forcing routine for momentum eqns.
@@ -8195,17 +8195,6 @@ IF (FORCE_GAS_FACE) THEN
                IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
                IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
                FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-
-               ! IF(SQRT((XC(I)-0.9875_EB)**2._EB+(YC(J)-0.9875_EB)**2._EB+(ZC(K+1)-2.8625_EB)**2._EB) < 10.E-10_EB) THEN
-               !    WRITE(LU_ERR,*) 'NM, ICF=',NM,ICF,MESHES(NM)%IBM_NCUTFACE_MESH
-               !    WRITE(LU_ERR,*) 'XYZCEN=',IBM_CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,1)
-               !    WRITE(LU_ERR,*) 'IN FORCE=',FVZ(I,J,K),HP(I,J,K+1),HP(I,J,K),DWWDT,W_IBM,IBM_CUT_FACE(ICF)%VELINT(1),&
-               !    NFACE
-               !    IFACE=1
-               !    DO IPT=1,5
-               !       WRITE(LU_ERR,*) 'INTCOEF,VAL=',IBM_CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
-               !    ENDDO
-               ! ENDIF
 
             ELSE ! Unstructured scheme
                ! Compute Forcing on cut-face centroids:
@@ -11904,25 +11893,6 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,               &
                                         P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP,&
                                         DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
-            ! IF(NMESHES==1)THEN
-            !    IF(ICF==2112 .AND. IFACE > 0) THEN
-            !       WRITE(LU_ERR,*) 'NM,ICF,CIs=',NM,ICF,CI,CII,CIII,CIV,CV
-            !       WRITE(LU_ERR,*) 'P0, P1=',P0,P1
-            !       WRITE(LU_ERR,*) 'DIR_FCT, DV=',DIR_FCT,DV
-            !       DO IPT=1,MAX_INTERP_POINTS_PLANE
-            !          WRITE(LU_ERR,*) IPT,PTS2(IAXIS:KAXIS,IPT)
-            !       ENDDO
-            !    ENDIF
-            ! ELSEIF(NMESHES==4 .AND. NM==2) THEN
-            !    IF(ICF==582 .AND. IFACE > 0) THEN
-            !       WRITE(LU_ERR,*) 'NM,ICF,CIs=',NM,ICF,CI,CII,CIII,CIV,CV
-            !       WRITE(LU_ERR,*) 'P0, P1=',P0,P1
-            !       WRITE(LU_ERR,*) 'DIR_FCT, DV=',DIR_FCT,DV
-            !       DO IPT=1,MAX_INTERP_POINTS_PLANE
-            !          WRITE(LU_ERR,*) IPT,PTS2(IAXIS:KAXIS,IPT)
-            !       ENDDO
-            !    ENDIF
-            ! ENDIF
 
          ENDIF
 
@@ -13051,7 +13021,6 @@ USE MPI
 
 ! Local Variables:
 INTEGER :: NM,NOM,IERR
-TYPE (MESH_TYPE), POINTER :: M
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ0
 INTEGER :: N_REQ0
@@ -13305,11 +13274,10 @@ PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE)= 0
 TESTVAR = IBM_FFNF
 
 ! Define maximum direction, add GEOMEPS factors to avoid symmetry cases with random resulting plane:
-NOUT2(IAXIS)=ABS(NOUT(IAXIS))+1000._EB*GEOMEPS
-NOUT2(JAXIS)=ABS(NOUT(JAXIS))+   0._EB*GEOMEPS
-NOUT2(KAXIS)=ABS(NOUT(KAXIS))-1000._EB*GEOMEPS
+NOUT2(IAXIS)=ABS(NOUT(IAXIS))+GEOFCT*GEOMEPS
+NOUT2(JAXIS)=ABS(NOUT(JAXIS))+ 0._EB*GEOMEPS
+NOUT2(KAXIS)=ABS(NOUT(KAXIS))-GEOFCT*GEOMEPS
 XNAXIS = MAXLOC(NOUT2(IAXIS:KAXIS),1)
-!XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
 FCTN = INT(SIGN(1._EB,NOUT(XNAXIS)))
 
 ! Line P0+s*nout:
@@ -13321,7 +13289,7 @@ XNAXIS_COND : IF ( XNAXIS == X1AXIS ) THEN ! xNaxis equal to x1axis: Search for 
    IF (FCTN > 0 ) THEN
       IF ( XB >= X1FACEP(X1LO_FACE-1) ) THEN
          DO IX1 = X1LO_FACE,X1HI_FACE
-            IF ( XB < X1FACEP(IX1) ) THEN
+            IF ( XB+GEOFCT*GEOMEPS < X1FACEP(IX1) ) THEN
                X1PLANE = IX1
                EXIT
             ENDIF
@@ -13330,7 +13298,7 @@ XNAXIS_COND : IF ( XNAXIS == X1AXIS ) THEN ! xNaxis equal to x1axis: Search for 
    ELSE
       IF ( XB <= X1FACEP(X1HI_FACE+1) ) THEN
          DO IX1 = X1HI_FACE,X1LO_FACE,-1
-            IF ( XB > X1FACEP(IX1) ) THEN
+            IF ( XB-GEOFCT*GEOMEPS > X1FACEP(IX1) ) THEN
                X1PLANE = IX1
                EXIT
             ENDIF
@@ -13355,7 +13323,7 @@ XNAXIS_COND : IF ( XNAXIS == X1AXIS ) THEN ! xNaxis equal to x1axis: Search for 
       X2PLANE = -1000
       IF ( X1X2X3(JAXIS) >= X2CELLP(X2LO_CELL-1) ) THEN
          DO IX2=X2LO_CELL,X2HI_CELL+1
-            IF ( X1X2X3(JAXIS) < X2CELLP(IX2) ) THEN
+            IF ( X1X2X3(JAXIS)+GEOFCT*GEOMEPS < X2CELLP(IX2) ) THEN
                X2PLANE = IX2 - 1
                EXIT
             ENDIF
@@ -13364,7 +13332,7 @@ XNAXIS_COND : IF ( XNAXIS == X1AXIS ) THEN ! xNaxis equal to x1axis: Search for 
       X3PLANE = -1000
       IF ( X1X2X3(KAXIS) >= X3CELLP(X3LO_CELL-1) ) THEN
          DO IX3=X3LO_CELL,X3HI_CELL+1
-            IF ( X1X2X3(KAXIS) < X3CELLP(IX3) ) THEN
+            IF ( X1X2X3(KAXIS)+GEOFCT*GEOMEPS < X3CELLP(IX3) ) THEN
                X3PLANE = IX3 - 1
                EXIT
             ENDIF
@@ -13550,7 +13518,7 @@ ELSEIF ( XNAXIS == X2AXIS ) THEN  ! xNaxis equal to x2axis: Search for intersect
    IF ( FCTN > 0 ) THEN
       IF ( XB >= X2FACEP(X2LO_FACE-1) ) THEN
          DO IX2=X2LO_FACE,X2HI_FACE
-            IF( XB < X2FACEP(IX2) ) THEN
+            IF( XB+GEOFCT*GEOMEPS < X2FACEP(IX2) ) THEN
                X2PLANE = IX2 + FCELL - 1
                EXIT
             ENDIF
@@ -13559,7 +13527,7 @@ ELSEIF ( XNAXIS == X2AXIS ) THEN  ! xNaxis equal to x2axis: Search for intersect
    ELSE
      IF ( XB <= X2FACEP(X2HI_FACE+1) ) THEN
         DO IX2=X2HI_FACE,X2LO_FACE,-1
-           IF ( XB > X2FACEP(IX2) ) THEN
+           IF ( XB-GEOFCT*GEOMEPS > X2FACEP(IX2) ) THEN
               X2PLANE = IX2 + FCELL
               EXIT
            ENDIF
@@ -13584,7 +13552,7 @@ ELSEIF ( XNAXIS == X2AXIS ) THEN  ! xNaxis equal to x2axis: Search for intersect
       X1PLANE = -1000
       IF ( X1X2X3(IAXIS) >= X1FACEP(X1LO_FACE-1) ) THEN
          DO IX1=X1LO_FACE,X1HI_FACE+1
-            IF ( X1X2X3(IAXIS) < X1FACEP(IX1) ) THEN
+            IF ( X1X2X3(IAXIS)+GEOFCT*GEOMEPS < X1FACEP(IX1) ) THEN
                X1PLANE = IX1 - 1
                EXIT
             ENDIF
@@ -13593,7 +13561,7 @@ ELSEIF ( XNAXIS == X2AXIS ) THEN  ! xNaxis equal to x2axis: Search for intersect
       X3PLANE = -1000
       IF ( X1X2X3(KAXIS) >= X3CELLP(X3LO_CELL-1) ) THEN
          DO IX3=X3LO_CELL,X3HI_CELL+1
-            IF ( X1X2X3(KAXIS) < X3CELLP(IX3) ) THEN
+            IF ( X1X2X3(KAXIS)+GEOFCT*GEOMEPS < X3CELLP(IX3) ) THEN
                X3PLANE = IX3 - 1
                EXIT
             ENDIF
@@ -13779,7 +13747,7 @@ ELSEIF ( XNAXIS == X3AXIS ) THEN  ! xNaxis equal to x3axis: Search for intersect
    IF ( FCTN > 0 ) THEN
       IF ( XB >= X3FACEP(X3LO_FACE-1) ) THEN
          DO IX3=X3LO_FACE,X3HI_FACE
-            IF ( XB < X3FACEP(IX3) ) THEN
+            IF ( XB+GEOFCT*GEOMEPS < X3FACEP(IX3) ) THEN
                X3PLANE = IX3 + FCELL - 1
                EXIT
             ENDIF
@@ -13788,7 +13756,7 @@ ELSEIF ( XNAXIS == X3AXIS ) THEN  ! xNaxis equal to x3axis: Search for intersect
    ELSE
      IF ( XB <= X3FACEP(X3HI_FACE+1) ) THEN
          DO IX3=X3HI_FACE,X3LO_FACE,-1
-             IF ( XB > X3FACEP(IX3) ) THEN
+             IF ( XB-GEOFCT*GEOMEPS > X3FACEP(IX3) ) THEN
                  X3PLANE = IX3 + FCELL
                  EXIT
              ENDIF
@@ -13811,7 +13779,7 @@ ELSEIF ( XNAXIS == X3AXIS ) THEN  ! xNaxis equal to x3axis: Search for intersect
       X1PLANE = -1000
       IF ( X1X2X3(IAXIS) >= X1FACEP(X1LO_FACE-1) ) THEN
          DO IX1=X1LO_FACE,X1HI_FACE+1
-            IF ( X1X2X3(IAXIS) < X1FACEP(IX1) ) THEN
+            IF ( X1X2X3(IAXIS)+GEOFCT*GEOMEPS < X1FACEP(IX1) ) THEN
                X1PLANE = IX1 - 1
                EXIT
             ENDIF
@@ -13820,7 +13788,7 @@ ELSEIF ( XNAXIS == X3AXIS ) THEN  ! xNaxis equal to x3axis: Search for intersect
       X2PLANE = -1000
       IF ( X1X2X3(JAXIS) >= X2CELLP(X2LO_CELL-1) ) THEN
          DO IX2=X2LO_CELL,X2HI_CELL+1
-            IF ( X1X2X3(JAXIS) < X2CELLP(IX2) ) THEN
+            IF ( X1X2X3(JAXIS)+GEOFCT*GEOMEPS < X2CELLP(IX2) ) THEN
                X2PLANE = IX2 - 1
                EXIT
             ENDIF
@@ -14036,11 +14004,10 @@ CI = 0._EB; CII = 0._EB; CIII = 0._EB; CIV = 0._EB; CV = 0._EB;
 PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE)= 0
 
 ! Define maximum direction, add GEOMEPS factors to avoid symmetry cases with random resulting plane:
-NOUT2(IAXIS)=ABS(NOUT(IAXIS))+1000._EB*GEOMEPS
-NOUT2(JAXIS)=ABS(NOUT(JAXIS))+   0._EB*GEOMEPS
-NOUT2(KAXIS)=ABS(NOUT(KAXIS))-1000._EB*GEOMEPS
+NOUT2(IAXIS)=ABS(NOUT(IAXIS))+GEOFCT*GEOMEPS
+NOUT2(JAXIS)=ABS(NOUT(JAXIS))+ 0._EB*GEOMEPS
+NOUT2(KAXIS)=ABS(NOUT(KAXIS))-GEOFCT*GEOMEPS
 XNAXIS = MAXLOC(NOUT2(IAXIS:KAXIS),1)
-!XNAXIS = MAXLOC(ABS(NOUT(IAXIS:KAXIS)),1)
 FCTN = INT(SIGN(1._EB,NOUT(XNAXIS)))
 
 ! Line P0+s*nout:
@@ -14054,7 +14021,7 @@ SELECT CASE(XNAXIS)
       IF (FCTN > 0 ) THEN
          IF ( XB >= XFACE(ILO_FACE-1) ) THEN
             DO I = ILO_FACE,IHI_FACE
-               IF ( XB < XFACE(I) ) THEN
+               IF ( XB+GEOFCT*GEOMEPS < XFACE(I) ) THEN
                   XPLANE = I + FCELL - 1
                   EXIT
                ENDIF
@@ -14063,7 +14030,7 @@ SELECT CASE(XNAXIS)
       ELSE
          IF ( XB <= XFACE(IHI_FACE+1) ) THEN
             DO I=IHI_FACE,ILO_FACE,-1
-               IF ( XB > XFACE(I) ) THEN
+               IF ( XB-GEOFCT*GEOMEPS > XFACE(I) ) THEN
                   XPLANE = I + FCELL
                   EXIT
                ENDIF
@@ -14088,7 +14055,7 @@ SELECT CASE(XNAXIS)
          YPLANE = -1
          IF ( XYZ(JAXIS) >= YCELL(JLO_CELL-1) ) THEN
             DO J=JLO_CELL,JHI_CELL+1
-               IF ( XYZ(JAXIS) < YCELL(J) ) THEN
+               IF ( XYZ(JAXIS)+GEOFCT*GEOMEPS < YCELL(J) ) THEN
                   YPLANE = J-1
                   EXIT
                ENDIF
@@ -14097,7 +14064,7 @@ SELECT CASE(XNAXIS)
          ZPLANE = -1
          IF ( XYZ(KAXIS) >= ZCELL(KLO_CELL-1) ) THEN
             DO K=KLO_CELL,KHI_CELL+1
-               IF ( XYZ(KAXIS) < ZCELL(K) ) THEN
+               IF ( XYZ(KAXIS)+GEOFCT*GEOMEPS < ZCELL(K) ) THEN
                   ZPLANE = K-1
                   EXIT
                ENDIF
@@ -14291,7 +14258,7 @@ SELECT CASE(XNAXIS)
       IF (FCTN > 0 ) THEN
          IF ( XB >= YFACE(JLO_FACE-1) ) THEN
             DO J = JLO_FACE,JHI_FACE
-               IF ( XB < YFACE(J) ) THEN
+               IF ( XB+GEOFCT*GEOMEPS < YFACE(J) ) THEN
                   YPLANE = J + FCELL - 1
                   EXIT
                ENDIF
@@ -14300,7 +14267,7 @@ SELECT CASE(XNAXIS)
       ELSE
          IF ( XB <= YFACE(JHI_FACE+1) ) THEN
             DO J = JHI_FACE,JLO_FACE,-1
-               IF ( XB > YFACE(J) ) THEN
+               IF ( XB-GEOFCT*GEOMEPS > YFACE(J) ) THEN
                   YPLANE = J + FCELL
                   EXIT
                ENDIF
@@ -14325,7 +14292,7 @@ SELECT CASE(XNAXIS)
          XPLANE = -1
          IF ( XYZ(IAXIS) >= XCELL(ILO_CELL-1) ) THEN
             DO I=ILO_CELL,IHI_CELL+1
-               IF ( XYZ(IAXIS) < XCELL(I) ) THEN
+               IF ( XYZ(IAXIS)+GEOFCT*GEOMEPS < XCELL(I) ) THEN
                   XPLANE = I-1
                   EXIT
                ENDIF
@@ -14334,7 +14301,7 @@ SELECT CASE(XNAXIS)
          ZPLANE = -1
          IF ( XYZ(KAXIS) >= ZCELL(KLO_CELL-1) ) THEN
             DO K=KLO_CELL,KHI_CELL+1
-               IF ( XYZ(KAXIS) < ZCELL(K) ) THEN
+               IF ( XYZ(KAXIS)+GEOFCT*GEOMEPS < ZCELL(K) ) THEN
                   ZPLANE = K-1
                   EXIT
                ENDIF
@@ -14530,7 +14497,7 @@ SELECT CASE(XNAXIS)
       IF (FCTN > 0 ) THEN
          IF ( XB >= ZFACE(KLO_FACE-1) ) THEN
             DO K = KLO_FACE,KHI_FACE
-               IF ( XB < ZFACE(K) ) THEN
+               IF ( XB+GEOFCT*GEOMEPS < ZFACE(K) ) THEN
                   ZPLANE = K + FCELL - 1
                   EXIT
                ENDIF
@@ -14539,7 +14506,7 @@ SELECT CASE(XNAXIS)
       ELSE
          IF ( XB <= ZFACE(KHI_FACE+1) ) THEN
             DO K = KHI_FACE,KLO_FACE,-1
-               IF ( XB > ZFACE(K) ) THEN
+               IF ( XB-GEOFCT*GEOMEPS > ZFACE(K) ) THEN
                   ZPLANE = K + FCELL
                   EXIT
                ENDIF
@@ -14564,7 +14531,7 @@ SELECT CASE(XNAXIS)
          XPLANE = -1
          IF ( XYZ(IAXIS) >= XCELL(ILO_CELL-1) ) THEN
             DO I=ILO_CELL,IHI_CELL+1
-               IF ( XYZ(IAXIS) < XCELL(I) ) THEN
+               IF ( XYZ(IAXIS)+GEOFCT*GEOMEPS < XCELL(I) ) THEN
                   XPLANE = I-1
                   EXIT
                ENDIF
@@ -14573,7 +14540,7 @@ SELECT CASE(XNAXIS)
          YPLANE = -1
          IF ( XYZ(JAXIS) >= YCELL(JLO_CELL-1) ) THEN
             DO J=JLO_CELL,JHI_CELL+1
-               IF ( XYZ(JAXIS) < YCELL(J) ) THEN
+               IF ( XYZ(JAXIS)+GEOFCT*GEOMEPS < YCELL(J) ) THEN
                   YPLANE = J-1
                   EXIT
                ENDIF
@@ -19907,7 +19874,7 @@ INTEGER, INTENT(IN) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 LOGICAL, INTENT(IN) :: BNDINT_FLAG
 
 ! Local Variables:
-INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI,X1AXIS,NVERT,NFACE,I,J,K,DI,DJ,DK,NCUTFACE
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI,X1AXIS,NVERT,NFACE,I,J,K,NCUTFACE
 INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH
 
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:,:) :: IJK_COUNTED
