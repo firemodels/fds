@@ -599,13 +599,16 @@ cat << EOF >> $INSTALLER
   echo "Updating .bash_profile"
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
-  echo "MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
+  if [[ "\$mpipatheth" != "" || "\$mpipathib" != "" ]]; then
+    echo "#FDS MPI library options:" >> \$BASHSTARTUP
+  fi
   if [[ "\$mpipatheth" != "" ]]; then
     echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
   fi
   if [[ "\$mpipathib" != "" ]]; then
     echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
   fi
+  echo "MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
@@ -622,8 +625,7 @@ cat << EOF >> $INSTALLER
   grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   if [[ "\$mpipatheth" != "" || "\$mpipathib" != "" ]]; then
-    echo "#FDS                                    " >> \$BASHSTARTUP
-    echo "#FDS MPI library options                " >> \$BASHSTARTUP
+    echo "#FDS MPI library options:" >> \$BASHSTARTUP
   fi
   if [[ "\$mpipatheth" != "" ]]; then
     echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
@@ -633,13 +635,11 @@ cat << EOF >> $INSTALLER
   fi
   echo "MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
 if [ "\$IFORT_COMPILER_LIB" != "" ]; then
-  echo "#FDS                                             " >> \$BASHSTARTUP
-  echo "#FDS Intel shared library options                " >> \$BASHSTARTUP
+  echo "#FDS Intel shared library options:" >> \$BASHSTARTUP
   echo "# INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
 else
   if [ "\$IFORT_COMPILER" != "" ]; then
-    echo "#FDS                                             " >> \$BASHSTARTUP
-    echo "#FDS Intel shared library options                " >> \$BASHSTARTUP
+    echo "#FDS Intel shared library options:" >> \$BASHSTARTUP
     echo "# INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
   fi
 fi
