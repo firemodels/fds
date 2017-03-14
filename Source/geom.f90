@@ -20368,9 +20368,6 @@ MAIN_MESH_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MAIN_MESH_LOOP2
 
-! Exchange Guardcell + guard cc information on IBM_UNKZ:
-CALL FILL_UNKZ_GUARDCELLS
-
 ! Finally link small cells to surrounding cells:
 ! Add initial index UNKX_ind to mesh blocks (regular + cut-cells):
 MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -20516,6 +20513,9 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO LINK_LOOP
 
 ENDDO MAIN_MESH_LOOP3
+
+! Exchange Guardcell + guard cc information on IBM_UNKZ:
+CALL FILL_UNKZ_GUARDCELLS
 
 RETURN
 END SUBROUTINE GET_MATRIX_INDEXES_Z
