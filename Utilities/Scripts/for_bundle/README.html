@@ -1,15 +1,16 @@
  
 <h2>Installing Open MPI</h2>
 <ul>
-<li> The OpenMPI compressed archive openmpi_1.8.4_PLATFORM_64.tar.gz is located
-in the same directory containing fds where PLATFORM is either linux or osx.
-This archive may be found by typing <pre>which fds</pre> at a command line.
+<li> The OpenMPI compressed archive, openmpi_VERSION_PLATFORM_64.tar.gz, is located
+in the same directory containing fds where PLATFORM is either linux or osx
+and VERSION is the openmpi version string.
+The directory containing fds may be found by typing <pre>which fds</pre> on a command line.
 To install OpenMPI:
 
 <ol>
-<li>  copy openmpi_1.8.4_PLATFORM_64.tar.gz to the desired OpenMPI location
+<li>  copy openmpi_VERSION_PLATFORM_64.tar.gz to the desired OpenMPI location
 <li>  cd to that directory
-<li>  type: tar xvf openmpi_1.8.4_PLATFORM_64.tar.gz
+<li>  type: tar xvf openmpi_VERSION_PLATFORM_64.tar.gz
 <li>  edit the following line in the .bashrc file (or .bash_profile on the Mac) so that the argument
 contains the path pointing to the OpenMPI location.
 <pre>
@@ -20,16 +21,16 @@ contains the path pointing to the OpenMPI location.
 <p><li>To install in the fds bin directory, type: 
 <pre>
 cd path_to_fds_bin_directory
-tar xvf openmpi_1.8.4_PLATFORM_64.tar.gz
+tar xvf openmpi_VERSION_PLATFORM_64.tar.gz
 </pre>
-and add path_to_bin_direcory to <tt>source .bashrc_fds</tt> line in .bashrc (or .bash_profile on the Mac)
+and add path_to_bin_directory to the <tt>source .bashrc_fds</tt> line in .bashrc (or .bash_profile on the Mac)
 
 </ul>
 
 <h2>Using a Different Intel Fortran Version</h2>
 <ul>
 
-<li><p>fds in this installation was built using Intel Fortran version 16.
+<li><p>fds in this installation was built using Intel Fortran version 17.
 If you wish to build and run fds using a different Intel Fortran version
 pass a second argument to <tt>.bashrc_fds</tt> giving the location of the Intel shared libraries
 for that version.  In general, the following should be in your .bashrc (Linux) or .bash_profile (Mac)
