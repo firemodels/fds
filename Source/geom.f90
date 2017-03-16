@@ -16682,7 +16682,7 @@ USE MPI
 ! Local Variables:
 INTEGER :: NM
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
-INTEGER :: LOCROW_1,LOCROW_2,LOCROW,IIND,NII,ILOC,IERR
+INTEGER :: LOCROW_1,LOCROW_2,LOCROW,IIND,NII,ILOC,IERR,IPROC
 
 
 NUNKZ_LOCAL = sum(NUNKZ_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES, only nonzeros are for meshes
@@ -16690,19 +16690,19 @@ NUNKZ_LOCAL = sum(NUNKZ_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES, only non
 NUNKZ_TOTAL = sum(NUNKZ_TOT(1:NMESHES))
 
 IF (MYID==0) THEN
-   WRITE(LU_ERR,*)
+   WRITE(LU_ERR,*) ' '
    IF (DO_IMPLICIT_CCREGION) THEN
       WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced implicitly.'
       WRITE(LU_ERR,'(A)') ' Using GLMAT as Implicit Scalar transport solver on cut-cell region.'
    ELSE
       WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced explicitly.'
    ENDIF
-   WRITE(LU_ERR,'(A)') ' List of unknown numbers per proc:'
+   WRITE(LU_ERR,'(A)') ' List of Scalar unknown numbers per proc:'
 ENDIF
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-WRITE(LU_ERR,'(A,I8,A,I8)') ' MYID=',MYID,', NUNKZ_LOCAL=',NUNKZ_LOCAL
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-IF (MYID==0) WRITE(LU_ERR,*)
+DO IPROC=0,N_MPI_PROCESSES-1
+   CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+   IF(MYID==IPROC) WRITE(LU_ERR,'(A,I8,A,I8)') ' MYID=',MYID,', NUNKZ_LOCAL=',NUNKZ_LOCAL
+ENDDO
 
 ! Allocate NNZ_D_MAT_Z, JD_MAT_Z:
 ALLOCATE( NNZ_D_MAT_Z(1:NUNKZ_LOCAL) )
