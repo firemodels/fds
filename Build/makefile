@@ -686,7 +686,7 @@ wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.o
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
-mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj
+mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj
