@@ -29,11 +29,15 @@ USE EVAC
 USE TURBULENCE, ONLY: NS_ANALYTICAL_SOLUTION,INIT_TURB_ARRAYS,COMPRESSION_WAVE,TWOD_VORTEX_CERFACS,TWOD_VORTEX_UMD, &
                       SYNTHETIC_TURBULENCE,SYNTHETIC_EDDY_SETUP,SANDIA_DAT
 USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3,SAAD_MMS_1
-USE COMPLEX_GEOMETRY, ONLY: INIT_IBM, SET_CUTCELLS_3D
+USE COMPLEX_GEOMETRY, ONLY: INIT_IBM, INIT_CUTCELL_DATA, CCIBM_SET_DATA, CCIBM_END_STEP, FINISH_CCIBM, &
+                            LINEARFIELDS_INTERP_TEST, CCREGION_DENSITY, CCREGION_DIVERGENCE_PART_1,    &
+                            CHECK_SPEC_TRANSPORT_CONSERVE,MASS_CONSERVE_INIT,CCIBM_RHO0W_INTERP,&
+                            CCCOMPUTE_RADIATION, MESH_CC_EXCHANGE
 USE OPENMP
 USE MPI
 USE SCRC, ONLY: SCARC_SETUP, SCARC_SOLVER, SCARC_TIMINGS
 USE SOOT_ROUTINES, ONLY: CALC_AGGLOMERATION
+USE GLOBALMATRIX_SOLVER, ONLY : GLMAT_SOLVER_SETUP_H, GLMAT_SOLVER_H, COPY_H_OMESH_TO_MESH,FINISH_GLMAT_SOLVER_H
 
 IMPLICIT NONE
 
@@ -55,7 +59,7 @@ TYPE (OMESH_TYPE), POINTER :: M2,M3,M5
 INTEGER :: N,I,IERR=0,STATUS(MPI_STATUS_SIZE)
 INTEGER :: PNAMELEN=0,TAG_EVAC
 INTEGER :: PROVIDED
-INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_SINGLE
+INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_FUNNELED
 INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ,REQ1,REQ2,REQ3,REQ4,REQ5,REQ6,REQ7,REQ8,REQ9,COUNTS,DISPLS,&
                                       COUNTS2D,DISPLS2D, &
                                       COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,COUNTS_Q_DOT,DISPLS_Q_DOT, &
@@ -102,10 +106,6 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 ! Read input from CHID.fds file and stop the code if any errors are found
 
 CALL READ_DATA(DT)
-
-! Initial complex geometry CC setup
-
-IF (CC_IBM) CALL SET_CUTCELLS_3D
 
 CALL STOP_CHECK(1)
 
@@ -236,12 +236,24 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INIT_TURB_ARRAYS(NM)
 ENDDO
 
-! Initialize unstructured geometry
+! Initial complex geometry CC setup
 
-IF (N_FACE>0) THEN
+IF (CC_IBM) THEN
+   CALL CCIBM_SET_DATA
+   ! Initialize unstructured geometry original IBM:
+ELSEIF (N_FACE>0) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL INIT_IBM(0._EB,NM)
    ENDDO
+ENDIF
+
+! Initialize GLMat solver for H:
+IF (GLMAT_SOLVER) THEN
+   CALL GLMAT_SOLVER_SETUP_H(1)
+   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
+   CALL GLMAT_SOLVER_SETUP_H(2)
+   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,) -> HS.
+   CALL GLMAT_SOLVER_SETUP_H(3)
 ENDIF
 
 ! Initialize the flow field with random noise to eliminate false symmetries
@@ -262,6 +274,11 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
    CALL COMPUTE_VISCOSITY(T_BEGIN,NM) ! needed here for KRES prior to mesh exchange
 ENDDO
+
+IF (CC_IBM) THEN
+   CALL INIT_CUTCELL_DATA  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
+   IF (PERIODIC_TEST==101) CALL LINEARFIELDS_INTERP_TEST
+ENDIF
 
 ! Exchange information at mesh boundaries related to the various initialization routines just completed
 
@@ -297,11 +314,15 @@ DO I=1,INITIAL_RADIATION_ITERATIONS
    ENDDO
 ENDDO
 
+IF(CHECK_MASS_CONSERVE) CALL MASS_CONSERVE_INIT
+IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) CALL CCIBM_RHO0W_INTERP
+
 ! Compute divergence just in case the flow field is not initialized to ambient
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (EVACUATION_ONLY(NM)) CYCLE
    CALL DIVERGENCE_PART_1(T_BEGIN,DT,NM)
+   IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) CALL CCREGION_DIVERGENCE_PART_1(T_BEGIN,DT,NM)
 ENDDO
 
 ! Potentially read data from a previous calculation
@@ -404,6 +425,13 @@ IF (ANY(EVACUATION_ONLY)) THEN
    IF (.NOT.RESTART) ICYC = -EVAC_TIME_ITERATIONS
 END IF
 
+! Check for CC_IBM initialization stop
+
+IF (CC_IBM) THEN
+   IF (COMPUTE_CUTCELLS_ONLY) STOP_STATUS = SETUP_ONLY_STOP
+   CALL STOP_CHECK(1)
+ENDIF
+
 ! Sprinkler piping calculation
 
 DO CNT=1,N_DEVC
@@ -504,6 +532,7 @@ MAIN_LOOP: DO
          IF (EVACUATION_SKIP(NM)) CYCLE COMPUTE_DENSITY_LOOP
          CALL DENSITY(T,DT,NM)
       ENDDO COMPUTE_DENSITY_LOOP
+      IF (CC_IBM) CALL CCREGION_DENSITY(T,DT)
 
       ! Exchange species mass fractions at interpolated boundaries.
 
@@ -513,7 +542,7 @@ MAIN_LOOP: DO
 
       COMPUTE_DIVERGENCE_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE COMPUTE_DIVERGENCE_LOOP
-         IF (N_FACE>0 .AND. FIRST_PASS) CALL INIT_IBM(T,NM)
+         IF (.NOT. CC_IBM .AND. (N_FACE>0) .AND. FIRST_PASS) CALL INIT_IBM(T,NM)
          CALL COMPUTE_VELOCITY_FLUX(T,DT,NM,2)
          IF (FIRST_PASS .AND. HVAC_SOLVE) CALL HVAC_BC_IN(NM)
       ENDDO COMPUTE_DIVERGENCE_LOOP
@@ -534,6 +563,7 @@ MAIN_LOOP: DO
          CALL WALL_BC(T,DT,NM)
          CALL PARTICLE_MOMENTUM_TRANSFER(NM)
          CALL DIVERGENCE_PART_1(T,DT,NM)
+         IF (CC_IBM) CALL CCREGION_DIVERGENCE_PART_1(T,DT,NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
@@ -599,6 +629,9 @@ MAIN_LOOP: DO
 
    CALL MESH_EXCHANGE(3)
 
+   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
+   IF (CC_IBM) CALL CCIBM_END_STEP(DIAGNOSTICS)
+
    ! Force normal components of velocity to match at interpolated boundaries
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -634,6 +667,8 @@ MAIN_LOOP: DO
       CALL MASS_FINITE_DIFFERENCES(NM)
       CALL DENSITY(T,DT,NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_2
+   IF (CC_IBM) CALL CCREGION_DENSITY(T,DT)
+   IF (CHECK_MASS_CONSERVE) CALL CHECK_SPEC_TRANSPORT_CONSERVE(T,DT,DIAGNOSTICS)
 
    ! Exchange species mass fractions.
 
@@ -665,6 +700,7 @@ MAIN_LOOP: DO
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE
          CALL COMPUTE_RADIATION(T,NM,ITER)
+         IF (CC_IBM) CALL CCCOMPUTE_RADIATION(T,NM,ITER)
       ENDDO
       IF (RADIATION_ITERATIONS>1) THEN  ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
          DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
@@ -679,6 +715,7 @@ MAIN_LOOP: DO
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_SKIP(NM)) CYCLE
       CALL DIVERGENCE_PART_1(T,DT,NM)
+      IF (CC_IBM) CALL CCREGION_DIVERGENCE_PART_1(T,DT,NM)
    ENDDO
 
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
@@ -730,6 +767,9 @@ MAIN_LOOP: DO
          IF (ICYC>1) EXIT
       ENDDO
    ENDIF
+
+   ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
+   IF (CC_IBM) CALL CCIBM_END_STEP(DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -815,9 +855,15 @@ ENDDO MAIN_LOOP
 !                                                     END OF TIME STEPPING LOOP
 !***********************************************************************************************************************************
 
+! Deallocate GLMAT_SOLVER_H variables if needed:
+
+IF (PRES_METHOD == 'GLMAT') CALL FINISH_GLMAT_SOLVER_H
+
 ! Finish unstructured geometry
 
-IF (N_FACE>0) THEN
+IF (CC_IBM) THEN
+   CALL FINISH_CCIBM
+ELSEIF (N_FACE>0) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL INIT_IBM(T,NM)
    ENDDO
@@ -1181,6 +1227,11 @@ PRESSURE_ITERATION_LOOP: DO
       CALL PRESSURE_SOLVER(T,NM)
    ENDDO
    IF (PRES_METHOD == 'SCARC') CALL SCARC_SOLVER
+   IF (PRES_METHOD == 'GLMAT') THEN
+      CALL GLMAT_SOLVER_H
+      CALL MESH_EXCHANGE(5)
+      CALL COPY_H_OMESH_TO_MESH
+   ENDIF
 
    IF (.NOT.ITERATE_PRESSURE) EXIT PRESSURE_ITERATION_LOOP
 
@@ -1434,7 +1485,7 @@ END SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 SUBROUTINE INITIALIZE_MESH_EXCHANGE_1(NM)
 
-! Create arrays by which info is to exchanged across meshes
+! Create arrays by which info is to be exchanged across meshes
 
 INTEGER :: IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS,IIO,JJO,KKO,NIC_R,II,JJ,KK
 INTEGER, INTENT(IN) :: NM
@@ -1555,6 +1606,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
             ENDDO
          ENDDO
       ENDDO INDEX_LOOP
+
    ENDIF
 
    ! For PERIODIC boundaries with 1 or 2 meshes, we must revert to allocating whole copies of OMESH
@@ -2757,6 +2809,10 @@ SNODE = PROCESS(NOM)
 ENDDO SEND_MESH_LOOP
 
 T_USED(11)=T_USED(11) + SECOND() - TNOW
+
+! Call cut-cell mesh exchange info:
+CALL MESH_CC_EXCHANGE(CODE,.FALSE.)
+
 END SUBROUTINE MESH_EXCHANGE
 
 

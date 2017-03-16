@@ -3,7 +3,8 @@ MODULE TYPES
 ! Definitions of various derived data types
 
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN, MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2,IBM_MAX_WSTRIANG_SEG
+USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN,MAX_SPECIES, &
+    IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2,IBM_MAX_WSTRIANG_SEG,LOW_IND,HIGH_IND
 
 IMPLICIT NONE
 
@@ -77,11 +78,17 @@ TYPE WALL_TYPE
                         YW,ZW
    INTEGER, POINTER :: BACK_INDEX,BACK_MESH,BOUNDARY_TYPE,NODE_INDEX,OBST_INDEX,PRESSURE_BC_INDEX,PRESSURE_ZONE,SURF_INDEX,&
                        SURF_INDEX_ORIG,VENT_INDEX,WALL_INDEX,LAPLACE_BC_INDEX
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
 END TYPE WALL_TYPE
 
 TYPE EXTERNAL_WALL_TYPE
    INTEGER :: NOM,NIC_MIN,NIC_MAX,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
    REAL(EB) :: AREA_RATIO
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN, FVNS ! species advective flux at E-wall -> flxint(rho*Y_alpha)*U
+   ! where flxint(rho*Y_alpha) is the corresponding flux limited interpolation of rho*Y_alpha being used
+   ! in the code and U is the normal velocity. FVN -> based on variables at time level n, FVNS based on
+   ! predicted variables for step n -> n+1.
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN, RHO_D_DZDNS ! species diffusive flux at E-wall, as computed in divg.f90.
 END TYPE EXTERNAL_WALL_TYPE
 
 TYPE EXPOSED_WALL_TYPE
@@ -253,6 +260,19 @@ TYPE OMESH_TYPE
          REAL_RECV_PKG1,REAL_RECV_PKG2,REAL_RECV_PKG3,REAL_RECV_PKG4,REAL_RECV_PKG5,REAL_RECV_PKG6,REAL_RECV_PKG7
    TYPE (STORAGE_TYPE), ALLOCATABLE, DIMENSION(:) :: ORPHAN_PARTICLE_STORAGE,ADOPT_PARTICLE_STORAGE
    TYPE (EXPOSED_WALL_TYPE), ALLOCATABLE, DIMENSION(:) :: EXPOSED_WALL
+
+   ! CC_IBM data exchange arrays:
+   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:) ::                &
+         REAL_SEND_PKG11,REAL_SEND_PKG12,REAL_SEND_PKG13,&
+         REAL_RECV_PKG11,REAL_RECV_PKG12,REAL_RECV_PKG13
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: UNKZ_CT_S, UNKZ_CC_S, UNKZ_CT_R, UNKZ_CC_R
+
+   ! Face variables data (velocities):
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_FC_R,JJO_FC_R,KKO_FC_R,AXS_FC_R,IIO_FC_S,JJO_FC_S,KKO_FC_S,AXS_FC_S
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_CC_R,JJO_CC_R,KKO_CC_R,IIO_CC_S,JJO_CC_S,KKO_CC_S
+
 END TYPE OMESH_TYPE
 
 TYPE OBSTRUCTION_TYPE
@@ -323,48 +343,178 @@ TYPE IBM_EDGECROSS_TYPE
 END TYPE IBM_EDGECROSS_TYPE
 
 ! Cartesian Edge Cut-Edges data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_EDGE  = 10 ! Size definition parameter. Max number of vertices per Cartesian Edge.
-INTEGER, PARAMETER :: IBM_MAXCEELEM_EDGE = 10 ! Size definition parameter. Max number of cut edges per Cartesian Edge.
 TYPE IBM_CUTEDGE_TYPE
    INTEGER :: NVERT, NEDGE, STATUS            ! Local Vertices, cut-edges and status of this Cartesian edge.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_EDGE)           :: XYZVERT  ! Locations of vertices.
-   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_EDGE)            ::  CEELEM  ! Cut-Edge connectivities.
-   INTEGER,  DIMENSION(MAX_DIM+2)                                 ::     IJK  ! [ i j k X2AXIS cetype]
-   INTEGER,  DIMENSION(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_EDGE) ::  INDSEG  ! [ntr tr1 tr2 ibod]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEELEM  ! Cut-Edge connectivities.
+   INTEGER,  DIMENSION(MAX_DIM+2)                  ::     IJK  ! [ i j k X2AXIS cetype]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  INDSEG  ! [ntr tr1 tr2 ibod]
 END TYPE IBM_CUTEDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  = 24 ! Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =128 ! Size definition parameter. Max number of vertices per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE = IBM_MAXVERTS_FACE ! Size definition parameter. Max segments per face.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE = 10 ! Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE = 96 ! Size definition parameter. Max number of cut faces per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 16 ! Size definition parameter.
+INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
    INTEGER :: NVERT, NFACE, STATUS            ! Local Vertices, cut-faces and status of this Cartesian face.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           :: XYZVERT  ! Locations of vertices.
-   INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE,IBM_MAXCFELEM_FACE)    ::  CFELEM  ! Cut-faces connectivities.
-   INTEGER,  DIMENSION(MAX_DIM+1)                                 ::     IJK  ! [ i j k X1AXIS]
-   REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::    AREA  ! Cut-faces areas.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
+   INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA  ! Cut-faces areas.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
    !Integrals to be used in cut-cell volume and centroid computations.
-   REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
-   INTEGER,  DIMENSION(1:2,1:IBM_MAXCFELEM_FACE)                  ::  BODTRI
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  BODTRI
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  UNKH, UNKZ
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XCENLOW, XCENHIGH
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  DIFF_FACE, RHO_D, VELD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)         :: RHO_D_DZDN
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: H_RHO_D_DZDN
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, DHDX, FN, VELNP1, VELINT
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDZ, JDH
+   REAL(EB) :: VELN_CRF, VELD_CRF, DHDX_CRF, FN_CRF, VELNP1_CRF, VELINT_CRF
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
+   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)            ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN,VELS_CARTCEN ! Stencil velocity values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN,DHDX1_CARTCEN! Stencil FV and DHDX1.
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::    IJK_CFCEN ! [ I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: XYZ_BP_CFCEN ! [x y z] location of bnd pt.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                           ::  INBFC_CFCEN ! Inbound face BP belongs to.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::INTCOEF_CFCEN ! Interpo coefficients.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::VEL_CFCEN,VELS_CFCEN ! Stencil velocity values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::FV_CFCEN,DHDX1_CFCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         :: NOMIND_CFCEN
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: RHOPVN
+   INTEGER :: NOMICF(2)=0  ! [NOM icf]
 END TYPE IBM_CUTFACE_TYPE
 
+
 ! Cartesian Cells Cut-Cells data structure:
-INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  =  8 ! Size definition parameter. Max number of cut-cell per cart cell.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  = 32 ! Size definition parameter. Max number of cut-faces per cart cell.
-INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   = 96
+INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  = 16 ! Size definition parameter. Max number of cut-cell per cart cell.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  = 96 ! Size definition parameter. Max number of cut-faces per cart cell.
+INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =128
 INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  = IBM_MAXVERTS_CELL
-INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL= 16 ! Size definition parameter.
+INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL= 96 ! Size definition parameter.
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
 
 TYPE IBM_CUTCELL_TYPE
-   INTEGER :: NCELL
-   INTEGER, DIMENSION(1:IBM_MAXCFACE_CUTCELL+2,IBM_MAXCCELEM_CELL) ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
-   INTEGER, DIMENSION(1:IBM_NPARAM_CCFACE,1:IBM_MAXCFELEM_CELL)    :: FACE_LIST ! List of faces, cut-faces.
-   REAL(EB), DIMENSION(IBM_MAXCCELEM_CELL)                         ::    VOLUME ! Cut-cell volumes.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCCELEM_CELL)           ::    XYZCEN ! Cut-cell centroid locaitons.
+   INTEGER :: NCELL, NFACE_CELL
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
+   INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RHO, RHOS ! Cut cells densities.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RSUM,TMP ! Cut cells temperatures.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    D,  DS ! Cut cell thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: CHI_R,AIT,MIX_TIME ! Cut-cell combustion
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC          ! variables.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: REAC_SOURCE_TERM   !
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::   ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
+                                                                                ! fractions and rho*D_z,reaction source.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
+                                                                          ! and scalars.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RTRM,R_H_G,RHO_0,WVEL
+   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)      ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), DIMENSION(MAX_DIM)                              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  DIMENSION(3)                                    ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::H_CARTCEN       ! Stencil H values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::RHO_0_CARTCEN,W_CARTCEN
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   ::    IJK_CCCEN ! [ I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: XYZ_BP_CCCEN ! [x y z] location of bnd pt.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  INBFC_CCCEN ! Inbound face BP belongs to.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::INTCOEF_CCCEN ! Interpo coefficients.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::H_CCCEN       ! Stencil H values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::RHO_0_CCCEN,W_CCCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   :: NOMIND_CCCEN
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z, U_DOT_DEL_RHO_Z
+   INTEGER :: NOMICC(2)=0
 END TYPE IBM_CUTCELL_TYPE
+
+
+TYPE IBM_REGFACE_TYPE
+   INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+END TYPE IBM_REGFACE_TYPE
+
+TYPE IBM_REGFACEZ_TYPE
+   INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               ::   RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
+END TYPE IBM_REGFACEZ_TYPE
+
+TYPE IBM_RCFACE_TYPE
+   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+END TYPE IBM_RCFACE_TYPE
+
+TYPE IBM_RCFACE_LST_TYPE
+   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
+   REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
+   INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
+   INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
+END TYPE IBM_RCFACE_LST_TYPE
+
+TYPE IBM_EXIMFACE_TYPE
+   INTEGER :: LHFACE, UNKZ
+   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::       FLX
+   REAL(EB) :: AREA,FN_H_S
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::H_RHO_D_DZDN=0._EB,FN_ZZ=0._EB
+END TYPE IBM_EXIMFACE_TYPE
+
+! Velocity regular faces connected to cut-cell interpolation type:
+INTEGER, PARAMETER :: MAX_RCVEL_NCFACE = 5
+TYPE IBM_RCVEL_TYPE
+   INTEGER :: NCFACE
+   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
+   INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
+   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)            ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN,VELS_CARTCEN ! Stencil velocity values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN,DHDX1_CARTCEN! Stencil FV and DHDX1.
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
+   REAL(EB) :: VELINT
+END TYPE IBM_RCVEL_TYPE
+
+! Regular Cartesian cells interpolation type:
+INTEGER, PARAMETER :: MAX_RCELL_NINTCELL = 26
+TYPE IBM_RCELL_TYPE
+   INTEGER :: NCCELL
+   INTEGER,  DIMENSION(MAX_DIM)                          ::            IJK ! [ I J K]
+   INTEGER,  DIMENSION(MAX_RCELL_NINTCELL)               ::      CELL_LIST ! [RC_TYPE I J K ]
+   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)  ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), DIMENSION(MAX_DIM)                          :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  DIMENSION(3)                                ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::H_CARTCEN       ! Stencil H values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::RHO_0_CARTCEN,W_CARTCEN
+   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
+   REAL(EB) :: HINT
+END TYPE IBM_RCELL_TYPE
 
 ! -----------------------------------------
 ! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists
