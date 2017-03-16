@@ -1,6 +1,7 @@
 #!/bin/bash
-JOBPREFIX=BB_
+JOBPREFIX=O
 OUTPUT=/tmp/openmp.out.$$
+HOST=`hostname`
 
 #---------------------------------------------
 #                   wait_cases_release_end
@@ -20,10 +21,10 @@ wait_cases_release_end()
 # run cases
 
 ./Run_FDS_Cases.sh -b -j $JOBPREFIX
-wait_case_release_end
+wait_cases_release_end
 
 # copy results to a file
-echo `hostname`
+echo $HOST
 echo 64x64x64>$OUTPUT
 var=0
 for case in a b c d e f g h
@@ -48,6 +49,6 @@ done
 if [ "x$EMAIL" == "x" ]; then
   cat $OUTPUT
 else
-  cat $OUTPUT | mail -s "openmp benchmark results" $MAILTO
+  cat $OUTPUT | mail -s "openmp benchmark results on $HOST" $EMAIL
 fi
 rm $OUTPUT
