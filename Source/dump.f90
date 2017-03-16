@@ -3801,7 +3801,7 @@ USE COMPLEX_GEOMETRY
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
         NFACES = 2*(I2 - I1)*(J2 - J1)
       ENDIF
-   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM' .OR. SLICETYPE_LOCAL=='INCLUDE_GEOM2') THEN
+   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF (DIR==1) THEN
          NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
@@ -3974,7 +3974,7 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ENDIF
-   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM' .OR. SLICETYPE_LOCAL=='INCLUDE_GEOM2') THEN
+   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
       IVERTCUT=NVERTS-NVERTS_CUTCELLS ! start cutcell counters after 'regular' cells
       IFACECUT=NFACES-NFACES_CUTCELLS
       NI = I2 + 1 - I1
@@ -4186,76 +4186,6 @@ IF (SLICETYPE_LOCAL=='IGNORE_GEOM') THEN
 
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(I,J,SLICE,1)
-         END DO
-      END DO
-   ENDIF
-ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM2') THEN
-   IFACE = 0
-   IFACECUT=NFACES-NFACES_CUTCELLS  ! start cutcell counter after 'regular' cells
-   IF (DIR==1) THEN
-      DO K = K1+1, K2
-         DO J = J1+1, J2
-            CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! is a cut cell
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
-                     IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = CELLTYPE
-                  ENDDO
-               ENDDO
-            ELSE
-               IFACE = IFACE + 1  ! is a solid or gas cell
-               VALS(IFACE) = CELLTYPE
-
-               IFACE = IFACE + 1
-               VALS(IFACE) = CELLTYPE
-            ENDIF
-         END DO
-      END DO
-   ELSE IF (DIR==2) THEN
-      DO K = K1+1, K2
-         DO I = I1+1, I2
-            CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
-                     IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = CELLTYPE
-                  ENDDO
-               ENDDO
-            ELSE
-               IFACE = IFACE + 1
-               VALS(IFACE) = CELLTYPE
-
-               IFACE = IFACE + 1
-               VALS(IFACE) = CELLTYPE
-            ENDIF
-         END DO
-      END DO
-   ELSE
-      DO J = J1+1, J2
-         DO I = I1+1, I2
-            CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
-            IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
-                     IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = CELLTYPE
-                  ENDDO
-               ENDDO
-            ELSE
-               IFACE = IFACE + 1
-               VALS(IFACE) = CELLTYPE
-
-               IFACE = IFACE + 1
-               VALS(IFACE) = CELLTYPE
-            ENDIF
          END DO
       END DO
    ENDIF
