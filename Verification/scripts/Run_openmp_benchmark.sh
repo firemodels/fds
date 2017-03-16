@@ -2,6 +2,14 @@
 JOBPREFIX=O
 OUTPUT=/tmp/openmp.out.$$
 HOST=`hostname`
+LOCK=~/.openmp_lock
+if [ -e $LOCK ]; then
+  echo "*** warning: another instance of this openmp benchmark script"
+  echo "    is already running. If this is not the case, "
+  echo "    remove the file: $LOCK"
+  exit
+fi
+touch $LOCK
 
 #---------------------------------------------
 #                   wait_cases_release_end
@@ -52,3 +60,4 @@ else
   cat $OUTPUT | mail -s "openmp benchmark results on $HOST" $EMAIL
 fi
 rm $OUTPUT
+rm $LOCK
