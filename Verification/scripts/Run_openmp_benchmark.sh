@@ -2,6 +2,7 @@
 JOBPREFIX=O
 OUTPUT=/tmp/openmp.out.$$
 HOST=`hostname`
+QUEUE=batch
 LOCK=~/.openmp_lock
 if [ -e $LOCK ]; then
   echo "*** warning: another instance of this openmp benchmark script"
@@ -28,7 +29,7 @@ wait_cases_release_end()
 
 # run cases
 
-./Run_FDS_Cases.sh -b -j $JOBPREFIX
+./Run_FDS_Cases.sh -b -j $JOBPREFIX -q $QUEUE
 wait_cases_release_end
 
 # copy results to a file
@@ -40,7 +41,7 @@ do
 let "var=var+1"
 CSV=../Timing_Benchmarks/openmp_test64${case}_devc.csv
 time=`tail -1 $CSV | awk '{print $2}'`
-echo $var $time>>$OUTPUT
+echo $time>>$OUTPUT
 done
 echo "">>$OUTPUT
 echo 128x128x128>>$OUTPUT
@@ -50,7 +51,7 @@ do
 let "var=var+1"
 CSV=../Timing_Benchmarks/openmp_test128${case}_devc.csv
 time=`tail -1 $CSV | awk '{print $2}'`
-echo $var $time>>$OUTPUT
+echo $time>>$OUTPUT
 
 # output or email results
 done
