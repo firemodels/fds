@@ -652,14 +652,14 @@ wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o data.o
 divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
-mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o
+mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o
 radi.o : func.o prec.o cons.o type.o mesh.o irad.o
-pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o
+pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o geom.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o pres.o
-dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o soot.o
+dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o soot.o geom.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o soot.o
 
 cons.obj : prec.obj
