@@ -159,10 +159,10 @@ intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 ifdef MKLROOT # This assumes the MKL library is available.
-intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 intel_linux_64 : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 else # MKL not available.
-intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
+intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
 intel_linux_64 : LFLAGSMKL =
 endif
 intel_linux_64 : LFLAGS = -static-intel
@@ -173,10 +173,10 @@ intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial) $(LFLAGSMKL)
 
 ifdef MKLROOT # This assumes the MKL library is available.
-intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 intel_linux_64_dv : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 else # MKL not available.
-intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback $(GITINFO)
+intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
 intel_linux_64_dv : LFLAGSMKL =
 endif
 intel_linux_64_dv : LFLAGS = -static-intel
@@ -213,15 +213,15 @@ mpi_intel_linux_64 : setup $(obj_mpi)
 ifdef MKLROOT # This assumes the MKL library is available.
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
 # Use cluster_sparse_solver with openmpi blacs
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_linux_64ib : LFLAGSMKL = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
 else
 # Use pardiso, non-mpi OpenMP threaded version.
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_linux_64ib : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 endif
 else # MKL is not available.
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
+mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
 mpi_intel_linux_64ib : LFLAGSMKL =
 endif
 mpi_intel_linux_64ib : LFLAGS = -static-intel
@@ -240,10 +240,10 @@ mpi_intel_linux_64ib_scorep : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 ifdef MKLROOT # This assumes the MKL library is available.
-intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 intel_linux_64_db : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 else # MKL not available.
-intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO)
+intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -assume realloc_lhs $(GITINFO)
 intel_linux_64_db : LFLAGSMKL =
 endif
 intel_linux_64_db : LFLAGS = -static-intel
@@ -280,15 +280,15 @@ mpi_intel_linux_64_inspect : setup $(obj_mpi)
 ifdef MKLROOT # This assumes the MKL library is available.
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
 # Use cluster_sparse_solver with openmpi blacs
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -assume realloc_lhs -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_linux_64ib_db : LFLAGSMKL = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
 else
 # Use pardiso, non-mpi OpenMP threaded version.
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
 mpi_intel_linux_64ib_db : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
 endif
 else # MKL is not available.
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO)
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin -assume realloc_lhs $(GITINFO)
 mpi_intel_linux_64ib_db : LFLAGSMKL =
 endif
 mpi_intel_linux_64ib_db : LFLAGS = -static-intel
