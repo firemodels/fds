@@ -30,21 +30,13 @@
       SPEC_ID(1)='AIR', MASS_FLUX(1)=0.2446140,
       SPEC_ID(2)='N2',  MASS_FLUX(2)=0.2567886, RAMP_MF(2)='N2 RAMP' / time varied N2 dilution
 
-&RAMP ID='N2 RAMP', T=  0.0, F=0.0      / 0.210 vol frac O2
-&RAMP ID='N2 RAMP', T= 10.0, F=0.137342 / 0.181
-&RAMP ID='N2 RAMP', T= 20.0, F=0.219753 / 0.168
-&RAMP ID='N2 RAMP', T= 30.0, F=0.292375 / 0.158
-&RAMP ID='N2 RAMP', T= 40.0, F=0.348933 / 0.151
-&RAMP ID='N2 RAMP', T= 50.0, F=0.678722 / 0.120
-&RAMP ID='N2 RAMP', T= 60.0, F=1.000000 / 0.100
+&RAMP ID='N2 RAMP', T=  0.0, F=0.0 / 0.210 vol frac O2 (0.2077972 to be exact)
+&RAMP ID='N2 RAMP', T= 60.0, F=1.0 / 0.100
 
-&RAMP ID='CHI_R', T=  0.0, F=0.237 / 0.210 vol frac O2
-&RAMP ID='CHI_R', T= 10.0, F=0.183 / 0.181
-&RAMP ID='CHI_R', T= 20.0, F=0.158 / 0.168
-&RAMP ID='CHI_R', T= 30.0, F=0.139 / 0.158
-&RAMP ID='CHI_R', T= 40.0, F=0.062 / 0.151
-&RAMP ID='CHI_R', T= 50.0, F=0.0   / 0.120
-&RAMP ID='CHI_R', T= 60.0, F=0.0   / 0.100
+&RAMP ID='CHI_R', T=  0.0, F=0.245 / see umd_line_burner_2.m
+&RAMP ID='CHI_R', T= 37.0, F=0.125 /
+&RAMP ID='CHI_R', T= 45.0, F=0.03  /
+&RAMP ID='CHI_R', T= 60.0, F=0.0   /
 
 &OBST XB=-0.25,0.25,-0.025,0.025,-0.0125,0.0, SURF_IDS='BURNER','INERT','INERT'/
 
