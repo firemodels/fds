@@ -115,13 +115,13 @@ print(gcf,'-dpdf',[pltdir,'methane_eta']);
 % double check N2 ramp
 
 % intended ramp:
-Time_ramp = [0,10,20,30,40,50,60];
-XO2_ramp = [0.21,0.181,0.168,0.158,0.151,0.120,0.100];
+Time_ramp = [0,60];
+XO2_ramp = [0.21,0.10];
 figure
 clear H
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-H(1)=plot(Time_ramp,XO2_ramp,'o','MarkerSize',10); hold on
+H(1)=plot(Time_ramp,XO2_ramp,'--o','MarkerSize',10); hold on
 H(2)=plot(Time_FDS,XO2_FDS,'-'); hold on
 axis([0 60 0.1 0.21])
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
