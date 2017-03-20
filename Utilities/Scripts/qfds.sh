@@ -435,6 +435,10 @@ fi
 
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
+# force OpenMP threads to be assigned to adjacent 
+# cores on a socket (before going to the next socket)
+export OMP_PLACES=cores
+export OMP_PROC_BIND=close
 
 cd $fulldir
 echo
