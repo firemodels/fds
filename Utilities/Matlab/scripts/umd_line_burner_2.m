@@ -28,7 +28,9 @@ figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-ramp_time = @(x) (x-0.21)*60./(0.1-0.21); % this comes from linear XO2 ramp (see input file)
+X_O2_max = 2.077972E-01;
+X_O2_min = 0.1;
+ramp_time = @(x) (x-X_O2_max)*60./(X_O2_min-X_O2_max); % this comes from linear XO2 ramp (see input file)
 H(1)=plot(ramp_time(XO2),Chi_R); hold on
 pw_ramp_time = [0,37,45,60];
 pw_ramp_chir = [.245,.125,.03,0];
@@ -64,6 +66,7 @@ eta_FDS = eta_FDS./(MLR_FDS*CH4_HOC);
 HRR2 = importdata([outdir,'methane_XO2_ramp_dx_1p25cm_hrr.csv'],',',2);
 DEV2 = importdata([outdir,'methane_XO2_ramp_dx_1p25cm_devc.csv'],',',2);
 
+Time_FDS_2 = DEV2.data(:,find(strcmp(DEV2.colheaders,'Time')));
 XO2_FDS_2 = DEV2.data(:,find(strcmp(DEV2.colheaders,'"XO2"')));
 eta_FDS_2 = HRR2.data(:,find(strcmp(HRR2.colheaders,'HRR')));
 MLR_FDS_2 = HRR2.data(:,find(strcmp(HRR2.colheaders,'MLR_FUEL')));
@@ -116,13 +119,13 @@ print(gcf,'-dpdf',[pltdir,'methane_eta']);
 
 % intended ramp:
 Time_ramp = [0,60];
-XO2_ramp = [0.21,0.10];
+XO2_ramp = [X_O2_max,X_O2_min];
 figure
 clear H
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 H(1)=plot(Time_ramp,XO2_ramp,'--o','MarkerSize',10); hold on
-H(2)=plot(Time_FDS,XO2_FDS,'-'); hold on
+H(2)=plot(Time_FDS_2,XO2_FDS_2,'-*'); hold on
 axis([0 60 0.1 0.21])
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -131,7 +134,7 @@ set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Input Ramp','FDS','Location','NorthEast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-git_file=[outdir,'methane_XO2_ramp_dx_p625cm_git.txt'];
+git_file=[outdir,'methane_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
