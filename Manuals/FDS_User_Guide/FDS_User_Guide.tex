@@ -3535,7 +3535,15 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
+
+The first method is the keyword {\ct HVAC\_PRES\_RELAK} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+\be
+P_{node}^{n+1}=P_{FDS} \; (1-HVAC\_PRES\_RELAX) \; + \; P_{node}^n \; HVAC\_PRES\_RELAX
+\ee
+Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+
+The second method is setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -4171,7 +4179,7 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \section{Wind}
 \label{info:mean_forcing}
 
-If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both {\ct U0} and {\ct V0} to 7.07~m/s. Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
+If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both the velocity components {\ct U0} and {\ct V0} to 7.07~m/s ($10 \cos(\pi/4) = 7.07$). Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
 
 The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct MISC}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters on the {\ct MISC} line:
 \begin{lstlisting}
@@ -7127,7 +7135,7 @@ To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS ouputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the cell center corresponding to the solid cell temperature being output by {\ct INSIDE WALL TEMPERATURE}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
 \begin{lstlisting}
@@ -8424,6 +8432,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m^2.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
+{\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa             & D,I,P,S      \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
@@ -9103,6 +9112,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
+{\ct HVAC\_PRES\_RELAX}                        & Real           & Section ~\ref{info:HVAC}                 &               & 0.5     \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline

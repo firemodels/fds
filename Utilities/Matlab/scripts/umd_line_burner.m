@@ -13,7 +13,7 @@ Marker_Size = 10;
 % format long
 
 % MF_AIR = 0.2446; % kg/m2/s
-% X_O2 = [0.210, 0.181, 0.168, 0.158, 0.151]; % White et al. Fig. 5
+% X_O2 = [2.077972E-01, 0.10]; % White et al. Fig. 5
 % X_O2_AIR = 2.077972E-01;
 % W_AIR = 28.76431;
 % W_N2 = 28.01340;

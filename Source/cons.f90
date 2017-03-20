@@ -334,7 +334,7 @@ INTEGER :: TEST_FILTER_QUADRATURE=TRAPAZOID_QUADRATURE
 
 INTEGER, PARAMETER :: N_TIMERS=13
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: T_USED
-REAL(EB) :: WALL_CLOCK_START, WALL_CLOCK_END, WALL_CLOCK_START_ITERATIONS=0._EB
+REAL(EB) :: WALL_CLOCK_START,WALL_CLOCK_END,WALL_CLOCK_START_ITERATIONS=0._EB,CPU_TIME_START
 
 ! OpenMP Specifications
 
@@ -361,6 +361,22 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 ! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
+LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
+LOGICAL :: GLMAT_SOLVER =.FALSE.
+LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
+LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
+LOGICAL :: DO_IMPLICIT_CCREGION=.TRUE.
+LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
+LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
+
+INTEGER, PARAMETER :: GLMAT_BYMESH = 1 ! Apply matrix-vector Solver by mesh.
+INTEGER, PARAMETER :: GLMAT_WHLDOM = 2 ! Apply matrix-vector Solver on the whole domain.
+INTEGER :: GLMAT_SETUP_FLAG = GLMAT_WHLDOM ! Default for now.
+
+! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
+! Currently used in the thermo div definition of cut-cells.
+REAL(EB) :: CCVOL_LINK=0.15_EB
+
 INTEGER,  PARAMETER :: LOW_IND   = 1
 INTEGER,  PARAMETER :: HIGH_IND  = 2
 
@@ -376,6 +392,10 @@ INTEGER, PARAMETER :: NOD4 = 4
 INTEGER, PARAMETER :: EDG1 = 1
 INTEGER, PARAMETER :: EDG2 = 2
 INTEGER, PARAMETER :: EDG3 = 3
+
+! Allocation increment parameters:
+INTEGER, PARAMETER :: IBM_ALLOC_DVERT = 10
+INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 
 ! Maximum number of wet surface triangles related to element
 
