@@ -48,7 +48,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_chi_r_ramp_check']);
+print(gcf,'-dpdf',[pltdir,'methane_Chi_r_ramp_check']);
 
 % dx=0.625 cm results
 HRR = importdata([outdir,'methane_XO2_ramp_dx_p625cm_hrr.csv'],',',2);
@@ -79,6 +79,7 @@ MLR_FDS_3 = HRR3.data(:,find(strcmp(HRR3.colheaders,'MLR_FUEL')));
 eta_FDS_3 = eta_FDS_3./(MLR_FDS_3*CH4_HOC);
 
 figure
+clear H
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
@@ -99,7 +100,7 @@ text(0.095,1.1,'Methane Combustion Efficiency','FontName',Font_Name,'FontSize',T
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-lh=legend(H,'Exp','FDS {\it\deltax}=12.5 mm','FDS {\it\deltax}=6.25 mm','FDS {\it\deltax}=3.125 mm','Location','SouthEast');
+lh=legend(H,'Exp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','SouthEast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 git_file=[outdir,'methane_XO2_ramp_dx_p3125cm_git.txt'];
@@ -114,12 +115,13 @@ print(gcf,'-dpdf',[pltdir,'methane_eta']);
 % double check N2 ramp
 
 % intended ramp:
-Time_ramp = [0,10,20,30,40,50,60];
-XO2_ramp = [0.21,0.181,0.168,0.158,0.151,0.120,0.100];
+Time_ramp = [0,60];
+XO2_ramp = [0.21,0.10];
 figure
+clear H
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-H(1)=plot(Time_ramp,XO2_ramp,'o','MarkerSize',10); hold on
+H(1)=plot(Time_ramp,XO2_ramp,'--o','MarkerSize',10); hold on
 H(2)=plot(Time_FDS,XO2_FDS,'-'); hold on
 axis([0 60 0.1 0.21])
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
