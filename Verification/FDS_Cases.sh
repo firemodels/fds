@@ -476,6 +476,8 @@ $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
+$QFDS -d Vegetation radiation_gas-veg_consistency_gas.fds
+$QFDS -d Vegetation radiation_gas-veg_consistency_veg.fds
 $QFDS -d Vegetation vege_mass_conservation.fds
 
 $QFDS -d WUI dragon_5a.fds
