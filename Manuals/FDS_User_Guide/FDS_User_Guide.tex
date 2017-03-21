@@ -3535,7 +3535,15 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
+
+The first method is the keyword {\ct HVAC\_PRES\_RELAK} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+\be
+P_{node}^{n+1}=P_{FDS} \; (1-HVAC\_PRES\_RELAX) \; + \; P_{node}^n \; HVAC\_PRES\_RELAX
+\ee
+Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
+
+The second method is setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -5253,7 +5261,7 @@ As discussed previously (Section~\ref{info:heat_of_combustion}), energy release 
 
 \section{Special Topic: Chemical Time Integration}
 \label{info:chem_integration}
-A diagnostic tool for the time integration of chemical reactions is the number of subiterations the ODE solver takes for a given FDS timestep. For infinitely fast chemistry the number of {\ct CHEMICAL SUBITERATIONS} should always be 1. For finite rate chemical reactions the number can vary between 1 and the minimum between {\ct MAX\_CHEMISTRY\_ITERATIONS} and the number needed to satisfy the error tolerance of the ODE solver. If the maximum value is reached, the user can increase the number of iterations or decrease reduce the error tolerate constraints of the integrator.
+A diagnostic tool for the time integration of chemical reactions is the number of subiterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry the number of {\ct CHEMISTRY SUBITERATIONS} should always be 1. For finite rate chemical reactions the number can vary between 1 and the minimum between {\ct MAX\_CHEMISTRY\_ITERATIONS} and the number needed to satisfy the error tolerance of the ODE solver. If the maximum value is reached, the user can increase the number of iterations or decrease the error tolerance constraint of the integrator.
 
 %\paragraph{Remark}
 %A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
@@ -7127,7 +7135,7 @@ To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive the distance is measured from the front surface. If negative, it is measured from the back surface. Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS ouputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the cell center corresponding to the solid cell temperature being output by {\ct INSIDE WALL TEMPERATURE}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
 \begin{lstlisting}
@@ -8413,7 +8421,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
-{\ct CHEMICAL SUBITERATIONS}                    & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
+{\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
@@ -9104,6 +9112,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
+{\ct HVAC\_PRES\_RELAX}                        & Real           & Section ~\ref{info:HVAC}                 &               & 0.5     \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline

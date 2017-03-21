@@ -13,20 +13,23 @@ Marker_Size = 10;
 % format long
 
 % MF_AIR = 0.2446; % kg/m2/s
-% X_O2 = [0.210, 0.181, 0.168, 0.158, 0.151]; % White et al. Fig. 5
+% X_O2 = linspace(2.077972E-01,0.10,61); % White et al. Fig. 5
 % X_O2_AIR = 2.077972E-01;
 % W_AIR = 28.76431;
 % W_N2 = 28.01340;
 
 % % X_O2 = (MF_AIR/W_AIR)*X_O2_AIR / ( MF_AIR/W_AIR + MF_N2/W_N2  )  ---> solve for MF_N2
 
-% MF_N2 = W_N2*( (MF_AIR/W_AIR)*X_O2_AIR./X_O2 - (MF_AIR/W_AIR) )
+% MF_N2 = W_N2*( (MF_AIR/W_AIR)*X_O2_AIR./X_O2 - (MF_AIR/W_AIR) );
 
-% F = MF_N2/(MF_N2(end))
+% F = MF_N2/(MF_N2(end));
+
+% ramp_time = @(x) (x-X_O2(1))*60./(0.1-X_O2(1));
+% [round(ramp_time(X_O2))',F']
 
 % return
 
-% % compute DEVC positions
+% compute DEVC positions
 
 % format long
 
