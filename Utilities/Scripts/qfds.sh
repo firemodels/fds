@@ -9,6 +9,8 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 else
   walltime=999:0:0
 fi
+OMPPLACES=cores
+OMPPROCBIND=close
 
 if [ $# -lt 1 ]
 then
@@ -36,6 +38,10 @@ then
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
+  echo " -O OMP_PLACES - specify value for OMP_PLACES environment variable [default: $OMPPLACES]"
+  echo "        options: cores, sockets, threads"
+  echo " -P OMP_PROC_BIND - specify value for OMP_PROC_BIND environment variable [default: $OMPPROCBIND]"
+  echo "        options: false, true, master, close, spread"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
   echo "        If queue is terminal then casename.fds is run in the foreground on the local computer"
@@ -103,7 +109,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -146,6 +152,12 @@ case $OPTION  in
    ;;
   N)
    nosocket="1"
+   ;;
+  O)
+   OMPPLACES="$OPTARG"
+   ;;
+  P)
+   OMPPROCBIND="$OPTARG"
    ;;
   n)
    nmpi_processes_per_node="$OPTARG"
@@ -191,6 +203,12 @@ if [ "$use_debug" == "1" ] ; then
 fi
 if [ "$use_devel" == "1" ] ; then
   DB=_dv
+fi
+if [ "$OMPPLACES" != "" ]; then
+  OMPPLACES="OMP_PLACES=$OMPPLACES"
+fi
+if [ "$OMPPROCBIND" != "" ]; then
+  OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
 # define executables if the repository is used
@@ -435,11 +453,21 @@ fi
 
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
-# force OpenMP threads to be assigned to adjacent 
-# cores on a socket (before going to the next socket)
-export OMP_PLACES=cores
-export OMP_PROC_BIND=close
+EOF
 
+if [ "$OMPPLACES" != "" ]; then
+cat << EOF >> $scriptfile
+export $OMPPLACES
+EOF
+fi
+
+if [ "$OMPPROCBIND" != "" ]; then
+cat << EOF >> $scriptfile
+export $OMPPROCBIND
+EOF
+fi
+
+cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
