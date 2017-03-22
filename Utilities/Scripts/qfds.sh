@@ -205,18 +205,14 @@ if [ "$use_devel" == "1" ] ; then
   DB=_dv
 fi
 if [[ "$OMPPLACES" != "" ]]  ; then
-  if [[ "$OMPPLACES" == "cores" ]] ||  [[ "$OMPPLACES" == "cores" ]] ||  [[ "$OMPPLACES" == "cores" ]]; then
-    valid=1
-  else
+  if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
     echo "*** error: can only be specify cores, sockets or threads with -O option"
     exit
   fi
   OMPPLACES="OMP_PLACES=$OMPPLACES"
 fi
 if [ "$OMPPROCBIND" != "" ]; then
-  if [[ "$OMPPROCBIND" == "false" ]] ||  [[ "$OMPPROCBIND" == "true" ]] ||  [[ "$OMPPROCBIND" == "master" ]] ||  [[ "$OMPPROCBIND" == "close" ]] ||  [[ "$OMPPROCBIND" == "spread" ]]; then
-    valid
-  else
+  if [[ "$OMPPROCBIND" != "false" ]] &&  [[ "$OMPPROCBIND" != "true" ]] &&  [[ "$OMPPROCBIND" != "master" ]] &&  [[ "$OMPPROCBIND" == "close" ]] &&  [[ "$OMPPROCBIND" == "spread" ]]; then
     echo "*** error: can only specify false, true, master, close or spread with -P option"
     exit
   fi
