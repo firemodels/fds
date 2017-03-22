@@ -91,11 +91,11 @@ case $OPTION in
 esac
 done
 
-if [ "$OOPT" != ]; then
+if [ "$OOPT" != "" ]; then
   OOPT="-O $OOPT"
 fi
-if [ "$POPT" != ]; then
-  POPT="-O $POPT"
+if [ "$POPT" != "" ]; then
+  POPT="-P $POPT"
 fi
 
 if [ "$KILL" == "1" ]; then
