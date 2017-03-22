@@ -9,8 +9,8 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 else
   walltime=999:0:0
 fi
-OMPPLACES=cores
-OMPPROCBIND=close
+OMPPLACES=
+OMPPROCBIND=
 
 if [ $# -lt 1 ]
 then
@@ -38,9 +38,9 @@ then
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
-  echo " -O OMP_PLACES - specify value for OMP_PLACES environment variable [default: $OMPPLACES]"
+  echo " -O OMP_PLACES - specify value for OMP_PLACES environment variable"
   echo "        options: cores, sockets, threads"
-  echo " -P OMP_PROC_BIND - specify value for OMP_PROC_BIND environment variable [default: $OMPPROCBIND]"
+  echo " -P OMP_PROC_BIND - specify value for OMP_PROC_BIND environment variable"
   echo "        options: false, true, master, close, spread"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
@@ -204,10 +204,22 @@ fi
 if [ "$use_devel" == "1" ] ; then
   DB=_dv
 fi
-if [ "$OMPPLACES" != "" ]; then
+if [[ "$OMPPLACES" != "" ]]  ; then
+  if [[ "$OMPPLACES" == "cores" ]] ||  [[ "$OMPPLACES" == "cores" ]] ||  [[ "$OMPPLACES" == "cores" ]]; then
+    valid=1
+  else
+    echo "*** error: can only be specify cores, sockets or threads with -O option"
+    exit
+  fi
   OMPPLACES="OMP_PLACES=$OMPPLACES"
 fi
 if [ "$OMPPROCBIND" != "" ]; then
+  if [[ "$OMPPROCBIND" == "false" ]] ||  [[ "$OMPPROCBIND" == "true" ]] ||  [[ "$OMPPROCBIND" == "master" ]] ||  [[ "$OMPPROCBIND" == "close" ]] ||  [[ "$OMPPROCBIND" == "spread" ]]; then
+    valid
+  else
+    echo "*** error: can only specify false, true, master, close or spread with -P option"
+    exit
+  fi
   OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
