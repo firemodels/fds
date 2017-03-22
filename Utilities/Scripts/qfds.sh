@@ -455,6 +455,7 @@ cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 EOF
 
+if test $nopenmp_threads -gt 1 ; then
 if [ "$OMPPLACES" != "" ]; then
 cat << EOF >> $scriptfile
 export $OMPPLACES
@@ -465,6 +466,7 @@ if [ "$OMPPROCBIND" != "" ]; then
 cat << EOF >> $scriptfile
 export $OMPPROCBIND
 EOF
+fi
 fi
 
 cat << EOF >> $scriptfile
