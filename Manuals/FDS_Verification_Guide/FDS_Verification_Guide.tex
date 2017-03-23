@@ -5087,6 +5087,8 @@ $\kappa_{\mathrm{veg}} = 1$.}
 \label{fig_radiation_gas-veg_consistency_gas}
 \end{figure}
 
+\pagebreak
+
 \subsubsection{The radiant energy computed with $\kappa_{\mathrm{gas}}
   = 0$, $\kappa_{\mathrm{veg}} = 1$ is consistent with
  the radiant energy pre-computed with $\kappa_{\mathrm{gas}} = 1$,
@@ -5101,6 +5103,63 @@ $\kappa_{\mathrm{veg}} = 0$ (\texorpdfstring{\textct{radiation\_gas-veg\_consist
   for the radiant energy pre-computed with  $\kappa_{\mathrm{gas}} = 1$,
 $\kappa_{\mathrm{veg}} = 0$.}
 \label{fig_radiation_gas-veg_consistency_veg}
+\end{figure}
+
+\subsection{Pressure drop  across spherical and cylindrical vegetative
+  particles in a duct}
+\label{vege_pressure-drop}
+Vegetation is idealized as solid particles dispersed throughout the
+volume comprising the vegetation in bulk, e.g., a tree crown or shrub.
+FDS models the particles as being distributed uniformly through this
+volume.  The void space is therefore isotropic. This approach may lose
+validity for fuels such as branches as the computational grid size is
+reduced and the fuel thus resolved at smaller scale.
+
+Consider a pipe or duct with frictionless walls.  Let the velocity of
+the fluid upstream of the vegetation equal $U_0$.  Since there is less
+volume for the flow in the vegetation, mass conservation requires that
+the fluid velocity increase within the vegetation bed.   This
+interstitial velocity is given by
+\be
+ U = U_0/\epsilon = U_0/(1 - \beta),
+\label{eq:interstitial velocity}
+\ee
+where $\epsilon$ is the porosity of the fuel bed and $\beta$ is the
+packing ratio.  Note that if the porosity $\epsilon$ is isotropic, so
+is $U$. For the high-porosity cases we consider here, $U \approx U_0$.
+
+The expression for the drag force on a stationary, isolated, solid of
+cross-sectional area $A_c$ is given by
+\be
+ \overline{F_D} = \frac{1}{2} C_D A_c \rho|\overline{u}| \overline{u}.
+ \label{eq:drag force}
+\ee
+In Equation~\ref{eq:drag force}, $\overline{u}$ and $\rho$ are the
+local fluid velocity and density, respectively, and $C_D$ is the
+dimensionless drag coefficient obtained from empirical correlations
+based on the particle shape and locay Reynolds number.
+
+\subsubsection{Pressure drop across spherical particles in steady
+  state flow through a pipe}
+\label{vege_pressure-drop_sphere}
+
+\begin{figure}[ht]
+\centering
+% \includegraphics[width=3.2in]{SCRIPT_FIGURES/vege_pressure-drop_sphere}
+\caption[\textct{Vegetation\_pressure-drop\_sphere}
+test case.]{TODO.}
+\label{fig_vegetation_pressure-drop_sphere}
+\end{figure}
+
+\subsubsection{Pressure drop across cylindrical particles in steady
+  state flow through a pipe}
+\label{vege_pressure-drop_cylinder}
+
+\begin{figure}[ht]
+\centering
+% \includegraphics[width=3.2in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder}
+\caption[\textct{Vegetation\_pressure-drop\_cylinder} test case.]{TODO.}
+\label{fig_vegetation_pressure-drop_cylinder}
 \end{figure}
 
 \chapter{Outputs}

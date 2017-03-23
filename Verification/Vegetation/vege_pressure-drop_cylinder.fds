@@ -1,0 +1,41 @@
+&HEAD CHID='vege_pressure-drop_cylinder', TITLE='Pressure drop in a duct filled with cylinders with Douglas fir needle properties' /
+&MISC TMPA=20. /
+&MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
+cMESH IJK=200,20,20, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=40. / 
+
+&SURF ID='BLOW', VEL=-2.0 /
+
+&VENT MB='XMIN', SURF_ID='BLOW' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+
+&SURF ID='FREE SLIP WALL', FREE_SLIP=.TRUE., DEFAULT=.TRUE. /
+
+&SURF ID         = 'ball'
+      MATL_ID    = 'stuff'
+      THICKNESS  = 0.0005076
+      LENGTH     = 0.1
+      TMP_FRONT  = 20.
+      GEOMETRY   = 'CYLINDRICAL' /
+      
+&MATL ID = 'stuff'
+      DENSITY = 514.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 1.0 /
+ 
+&PART ID='balls', SAMPLING_FACTOR=1, SURF_ID='ball', PROP_ID='ball', STATIC=.TRUE., MONODISPERSE=.TRUE. /
+
+&INIT PART_ID='balls', XB=4.,5.,0.,1.,0.,1., N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE., MASS_PER_VOLUME=2.63  /
+cINIT PART_ID='balls', XB=4.,5.,0.,1.,0.,1., N_PARTICLES=10000, MASS_PER_VOLUME=2.63  /
+
+&PROP ID='ball', SMOKEVIEW_ID='ball', SMOKEVIEW_PARAMETERS='DX=0.002','DY=0.002','DZ=0.002' /
+
+&DEVC XB=0.,10.,0.5,0.5,0.5,0.5, QUANTITY='PRESSURE', ID='pres', POINTS=99 /
+&DEVC XB=0.,10.,0.5,0.5,0.5,0.5, QUANTITY='U-VELOCITY', ID='Uvel', POINTS=99 /
+
+&DUMP DT_SLCF=0.1,DT_DEVC=0.1,DT_PL3D=20 /
+&SLCF PBY=0.5, QUANTITY='U-VELOCITY' /
+&SLCF PBY=0.5, QUANTITY='PRESSURE' /
+
+
+&TAIL /
