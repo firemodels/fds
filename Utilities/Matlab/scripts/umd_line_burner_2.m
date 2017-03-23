@@ -14,6 +14,7 @@ Lf_min = 0;
 Lf_max = 1;
 Lf_dz  = (Lf_max-Lf_min)/(Lf_pts-1);
 Lf_z   = Lf_min:Lf_dz:Lf_max;
+Lf_fac = 0.99;
 
 plot_style
 
@@ -57,7 +58,7 @@ for n=1:length(Time_FDS_1)
     q_sum = 0.;
     for i=1:Lf_pts
         q_sum = q_sum+hrrpul(i);
-        if q_sum>0.99*q_total
+        if q_sum>Lf_fac*q_total
             Lf_FDS_1(n) = Lf_z(i);
             break;
         end
@@ -86,7 +87,7 @@ for n=1:length(Time_FDS_2)
     q_sum = 0.;
     for i=1:Lf_pts
         q_sum = q_sum+hrrpul(i);
-        if q_sum>0.99*q_total
+        if q_sum>Lf_fac*q_total
             Lf_FDS_2(n) = Lf_z(i);
             break;
         end
@@ -115,7 +116,7 @@ for n=1:length(Time_FDS_3)
     q_sum = 0.;
     for i=1:Lf_pts
         q_sum = q_sum+hrrpul(i);
-        if q_sum>0.99*q_total
+        if q_sum>Lf_fac*q_total
             Lf_FDS_3(n) = Lf_z(i);
             break;
         end
@@ -139,7 +140,7 @@ H(3)=plot(XO2_FDS_1,CHI_R_FDS_1,'ksq');
 H(4)=plot(XO2_FDS_2,CHI_R_FDS_2,'b^');
 H(5)=plot(XO2_FDS_3,CHI_R_FDS_3,'m>');
 axis([0.12 0.22 0 0.30 ])
-xlabel('X_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('\chi_R','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 text(5,0.27,'Radiative Fraction Ramp','FontName',Font_Name,'FontSize',Title_Font_Size)
 set(gca,'FontName',Font_Name)
@@ -223,9 +224,9 @@ clear H
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 H(1)=plot(XO2,q_R,'o'); hold on
-H(2)=plot(XO2_FDS_1,q_R_FDS_1,'-.');
-H(3)=plot(XO2_FDS_2,q_R_FDS_2,'--');
-H(4)=plot(XO2_FDS_3,q_R_FDS_3,'-');
+H(2)=plot(XO2_FDS_1,q_R_FDS_1,'-.','LineWidth',3);
+H(3)=plot(XO2_FDS_2,q_R_FDS_2,'--','LineWidth',3);
+H(4)=plot(XO2_FDS_3,q_R_FDS_3,'-' ,'LineWidth',3);
 axis([0.12 0.21 0 1.4])
 xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('{\itq"}_R (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
