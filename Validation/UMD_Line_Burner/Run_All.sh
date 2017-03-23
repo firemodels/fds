@@ -8,11 +8,11 @@ source $SVNROOT/Validation/Common_Run_All.sh
 # XO2=0.18 cases
 $QFDS $DEBUG -p 8  $QUEUE -d $INDIR methane_dx_1p25cm.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR methane_dx_p625cm.fds
-#$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR methane_dx_p3125cm.fds
+# $QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR methane_dx_p3125cm.fds
 
 # extinction cases
-#$QFDS $DEBUG -p 10 $QUEUE -d $INDIR methane_XO2_ramp_dx_1p25cm.fds
-#$QFDS $DEBUG -p 20 $QUEUE -d $INDIR methane_XO2_ramp_dx_p625cm.fds
-#$QFDS $DEBUG -p 160 -n 8 $QUEUE -d $INDIR methane_XO2_ramp_dx_p3125cm.fds
+# $QFDS $DEBUG -p 38 -n 2 $QUEUE -d $INDIR methane_XO2_ramp_dx_1p25cm.fds
+# $QFDS $DEBUG -p 184 -n 8 $QUEUE -d $INDIR methane_XO2_ramp_dx_p625cm.fds
+# $QFDS $DEBUG -p 184 -n 8 $QUEUE -d $INDIR methane_XO2_ramp_dx_p3125cm.fds
 
 echo FDS cases submitted
