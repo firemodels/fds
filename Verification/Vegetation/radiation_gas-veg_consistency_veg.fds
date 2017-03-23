@@ -33,7 +33,7 @@ cMESH IJK=20,48,48, XB=0,1,0,2.4,0,2.4 /
 &MATL ID = 'stuff'
       DENSITY = 514.
       CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT= 10000000.0 /
+      SPECIFIC_HEAT= 99999.99 /
 &PART ID='balls', 
       SAMPLING_FACTOR=1, 
       SURF_ID='ball', 
