@@ -5106,20 +5106,22 @@ $\kappa_{\mathrm{veg}} = 0$.}
 \end{figure}
 
 \subsection{Pressure drop  across spherical and cylindrical vegetative
-  particles in a duct}
+  particles in a pipe or duct}
 \label{vege_pressure-drop}
-Vegetation is idealized as solid particles dispersed throughout the
-volume comprising the vegetation in bulk, e.g., a tree crown or shrub.
+Vegetation is idealized as solid particles dispersed in the volume
+containing the vegetation in bulk, e.g., a tree crown or shrub.
 FDS models the particles as being distributed uniformly through this
-volume.  The void space is therefore isotropic. This approach may lose
-validity for fuels such as branches as the computational grid size is
-reduced and the fuel thus resolved at smaller scale.
+volume; the void space is therefore isotropic. For fuels such as
+branches, the assumption of uniform dispersion may lose validity as
+the computational grid size is reduced and the fuel thus resolved at
+smaller scale.
 
-Consider a pipe or duct with frictionless walls.  Let the velocity of
-the fluid upstream of the vegetation equal $U_0$.  Since there is less
-volume for the flow in the vegetation, mass conservation requires that
-the fluid velocity increase within the vegetation bed.   This
-interstitial velocity is given by
+Consider a pipe or duct with frictionless walls.  We take it that the
+flow of the fluid upstream of the vegetation bed is unidirectional and
+parallel to the pipe walls, $\overline{u} = (U_0, 0, 0)$.  Within the
+vegetation bed, because there is less volume to accommodate the flow, 
+mass conservation demands that the fluid velocity increase.   This
+interstitial velocity $U$ is given by
 \be
  U = U_0/\epsilon = U_0/(1 - \beta),
 \label{eq:interstitial velocity}
@@ -5128,7 +5130,7 @@ where $\epsilon$ is the porosity of the fuel bed and $\beta$ is the
 packing ratio.  Note that if the porosity $\epsilon$ is isotropic, so
 is $U$. For the high-porosity cases we consider here, $U \approx U_0$.
 
-The expression for the drag force on a stationary, isolated, solid of
+The expression for the drag force on a stationary, isolated solid of
 cross-sectional area $A_c$ is given by
 \be
  \overline{F_D} = \frac{1}{2} C_D A_c \rho|\overline{u}| \overline{u}.
@@ -5137,7 +5139,41 @@ cross-sectional area $A_c$ is given by
 In Equation~\ref{eq:drag force}, $\overline{u}$ and $\rho$ are the
 local fluid velocity and density, respectively, and $C_D$ is the
 dimensionless drag coefficient obtained from empirical correlations
-based on the particle shape and locay Reynolds number.
+based on the particle shape and local Reynolds number.
+
+For steady flow through a pipe or duct with cross-sectional area
+$A_C$ in which vegetation particles with porosity $\epsilon$ are
+uniformly dispersed over length $L$, the force balance of pressure and 
+drag \eqref{eq:drag force} gives
+\be
+ \Delta P A_C \epsilon = \sum_V \overline{F_D}.
+ \label{eq:force balance}
+\ee 
+In Equation~\eqref{eq:force balance}, the sum is over all vegetation
+particles in the volume $V = A L$, where $A$ is the cross sectional
+area of the pipe, and $\Delta P$ is the pressure
+drop over the distance $L$. 
+
+Expanding the RHS of Equation~\eqref{eq:force balance}, we find
+\be
+ \Delta P A \epsilon = N_p F_D = N_p \dfrac{1}{2} \rho u^2 C_D A_C =
+ N_p \dfrac{1}{2} \rho U^2 C_D C_S S_p,
+ \label{eq:force balance expand}
+\ee
+where $S_p$ is the surface area of the vegetation particle and $C_S =
+A_C/S_p$ is a particle shape factor constant. Let $V_p$ represent 
+the volume of a vegetation particle.  Using
+Equation~\eqref{eq:interstitial velocity} to express $\epsilon$ in 
+terms of $1 - \beta$, and the fact that $\beta = N_p V_p / A L$, we
+obtain 
+\be
+ \Delta P / L = \dfrac{1}{2} \rho U^2 C_D C_S \sigma \beta / (1 -
+ \beta),
+ \label{eq:pressure drop}
+\ee
+where $\sigma = S_p/V_p$ is the surface to volume ratio of a single
+vegetation particle, and $C_S = 1/\pi$ for a cylinder and $1/4$ for a
+sphere.
 
 \subsubsection{Pressure drop across spherical particles in steady
   state flow through a pipe}
