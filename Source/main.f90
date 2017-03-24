@@ -2839,6 +2839,7 @@ IF (.NOT.PROFILING) THEN
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
          WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
+         FLAG = .TRUE.
          DO NNN=1,NR
             CALL MPI_CANCEL(RR(NNN),IERR)
             CALL MPI_WAIT(RR(NNN),MPI_STATUS_IGNORE,IERR)
