@@ -7,7 +7,8 @@
 close all
 clear all
 
-CH4_HOC = 50010.3475; % kJ/kg-CH4 from .out file
+CH4_HOC  = 50010.3475; % kJ/kg-methane from .out file
+C3H8_HOC = 46334.6246; % kJ/kg-propane from .out file
 
 Lf_pts = 50;
 Lf_min = 0;
@@ -23,8 +24,15 @@ expdir = '../../../exp/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experiment
 outdir = '../../../out/UMD_Line_Burner/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
+exp_fname    = {'CH4_A_Data.csv','C3H8_A_Data.csv'};
+exp_Lf_fname = {'CH4_A_Lf_Data.csv','C3H8_A_Lf_Data.csv'};
+fuel_name    = {'methane','propane'};
+Fuel_name    = {'Methane','Propane'};
+
+i_fuel = 1;
+
 % experimental results
-EXP = importdata([expdir,'CH4_A_Data.csv'],',',1);
+EXP = importdata([expdir,exp_fname{i_fuel}],',',1);
 XO2   = EXP.data(:,find(strcmp(EXP.colheaders,'XO2')));
 q_R   = EXP.data(:,find(strcmp(EXP.colheaders,'q_R')));
 Chi_R = EXP.data(:,find(strcmp(EXP.colheaders,'Chi_R')));
@@ -32,14 +40,14 @@ S_XO2 = EXP.data(:,find(strcmp(EXP.colheaders,'S_XO2'))); % uncertainty
 eta   = EXP.data(:,find(strcmp(EXP.colheaders,'eta')));
 S_eta = EXP.data(:,find(strcmp(EXP.colheaders,'S_eta')));
 
-EXP_Lf = importdata([expdir,'CH4_A_Lf_Data.csv'],',',1);
+EXP_Lf = importdata([expdir,exp_Lf_fname{i_fuel}],',',1);
 XO2_Lf = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'XO2_Lf')));
 Lf     = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'Lf')));
 S_Lf   = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'S_Lf')));
 
 % dx=1.25 cm results
-HRR1 = importdata([outdir,'methane_XO2_ramp_dx_1p25cm_hrr.csv'],',',2);
-DEV1 = importdata([outdir,'methane_XO2_ramp_dx_1p25cm_devc.csv'],',',2);
+HRR1 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_hrr.csv'],',',2);
+DEV1 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_devc.csv'],',',2);
 
 Time_FDS_1 = DEV1.data(:,find(strcmp(DEV1.colheaders,'Time')));
 XO2_FDS_1 = DEV1.data(:,find(strcmp(DEV1.colheaders,'"XO2"')));
@@ -72,8 +80,8 @@ for n=1:length(Time_FDS_1)
 end
 
 % dx=0.625 cm results
-HRR2 = importdata([outdir,'methane_XO2_ramp_dx_p625cm_hrr.csv'],',',2);
-DEV2 = importdata([outdir,'methane_XO2_ramp_dx_p625cm_devc.csv'],',',2);
+HRR2 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_hrr.csv'],',',2);
+DEV2 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_devc.csv'],',',2);
 
 Time_FDS_2 = DEV2.data(:,find(strcmp(DEV2.colheaders,'Time')));
 XO2_FDS_2 = DEV2.data(:,find(strcmp(DEV2.colheaders,'"XO2"')));
@@ -106,8 +114,8 @@ for n=1:length(Time_FDS_2)
 end
 
 % dx=0.3125 cm results
-HRR3 = importdata([outdir,'methane_XO2_ramp_dx_p3125cm_hrr.csv'],',',2);
-DEV3 = importdata([outdir,'methane_XO2_ramp_dx_p3125cm_devc.csv'],',',2);
+HRR3 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_hrr.csv'],',',2);
+DEV3 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_devc.csv'],',',2);
 
 Time_FDS_3 = DEV3.data(:,find(strcmp(DEV3.colheaders,'Time')));
 XO2_FDS_3 = DEV3.data(:,find(strcmp(DEV3.colheaders,'"XO2"')));
@@ -163,14 +171,14 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Exp','Linear Ramp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','NorthWest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
-git_file=[outdir,'methane_XO2_ramp_dx_1p25cm_git.txt'];
+git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_Chi_r_ramp_check']);
+print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_Chi_r_ramp_check']);
 
 figure
 clear H
@@ -189,7 +197,7 @@ H(4)=plot(XO2_FDS_3,eta_FDS_3,'-');
 axis([0.09 0.21 0 1.2 ])
 xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('\eta','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-text(0.095,1.12,'Methane Combustion Efficiency','FontName',Font_Name,'FontSize',Title_Font_Size)
+text(0.095,1.12,[Fuel_name{i_fuel},' Combustion Efficiency'],'FontName',Font_Name,'FontSize',Title_Font_Size)
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -197,14 +205,14 @@ set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Exp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','SouthEast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-git_file=[outdir,'methane_XO2_ramp_dx_p3125cm_git.txt'];
+git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_eta']);
+print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_eta']);
 
 % double check N2 ramp
 
@@ -225,14 +233,14 @@ set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Input Ramp','FDS','Location','NorthEast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-git_file=[outdir,'methane_XO2_ramp_dx_1p25cm_git.txt'];
+git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_N2_ramp_check']);
+print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_N2_ramp_check']);
 
 % plot heat flux
 figure
@@ -251,14 +259,14 @@ set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Exp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','NorthWest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-git_file=[outdir,'methane_XO2_ramp_dx_1p25cm_git.txt'];
+git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_rad_heat_flux']);
+print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_rad_heat_flux']);
 
 % plot flame height
 figure
@@ -281,13 +289,13 @@ set(gca,'FontSize',Label_Font_Size)
 lh=legend(H,'Exp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','NorthWest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-git_file=[outdir,'methane_XO2_ramp_dx_1p25cm_git.txt'];
+git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear');
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'methane_flame_height']);
+print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_flame_height']);
 
 
