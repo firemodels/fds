@@ -5172,12 +5172,22 @@ obtain
  \label{eq:pressure drop}
 \ee
 where $\sigma = S_p/V_p$ is the surface to volume ratio of a single
-vegetation particle, and $C_S = 1/\pi$ for a cylinder and $1/4$ for a
-sphere.
+vegetation particle.
 
 \subsubsection{Pressure drop across spherical particles in steady
   state flow through a pipe}
 \label{vege_pressure-drop_sphere}
+For a sphere, $C_S = 1/4$.  $\mathrm{Re} = 6 U/(\nu \sigma) \approx
+6 U_0/(\nu \sigma (1 - \beta))$, where $\nu$ is the kinematic
+viscosity. For $C_D$, we have
+\begin{itemize}
+ \item $C_D = 24/\mathrm{Re}$,  $\mathrm{Re} < 1$, 
+ \item $C_D = 24 (0.85 + 0.15 \mathrm{RE}^{0.687}/\mathrm{Re}$, 
+$1 \le \mathrm{Re} \le 1000$, and 
+ \item $C_D = 1$,  $\mathrm{Re} > 1000$.
+\end{itemize}
+We take the temperature to be $20^\circ$C, $\rho = 1.205$ kg/m$^3$,
+and $\nu = 15.11 \times 10^{-6}}$ m$^2$/s.
 
 \begin{figure}[ht]
 \centering
@@ -5190,6 +5200,17 @@ test case.]{TODO.}
 \subsubsection{Pressure drop across cylindrical particles in steady
   state flow through a pipe}
 \label{vege_pressure-drop_cylinder}
+For a cylinder $C_S = 1/\pi$.  $\mathrm{Re} = 4 U/(\nu \sigma) \approx
+6 U_0/(\nu \sigma (1 - \beta))$, where $\nu$ is the kinematic
+viscosity. For $C_D$, we have
+\begin{itemize}
+ \item $C_D = 10/e^{{0.5}$,  $\mathrm{Re} < 1$, 
+ \item $C_D = 10 (0.6 + 0.4 \mathrm{RE}^{0.8}/\mathrm{Re}$,  $1 \le
+   \mathrm{Re} \le 1000$, and 
+ \item $C_D = 1$,  $\mathrm{Re} > 1000$.
+\end{itemize}
+We take the temperature to be $20^\circ$C, $\rho = 1.205$ kg/m$^3$ 
+and $\nu = 15.11 \times 10^{-6}}$ m$^2$/s.
 
 \begin{figure}[ht]
 \centering
