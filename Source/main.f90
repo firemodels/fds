@@ -2822,12 +2822,15 @@ END SUBROUTINE MESH_EXCHANGE
 SUBROUTINE TIMEOUT(RNAME,NR,RR)
 
 REAL(EB) :: START_TIME,WAIT_TIME
-INTEGER :: NR
+INTEGER, INTENT(IN) :: NR
 INTEGER, DIMENSION(:) :: RR
 LOGICAL :: FLAG
 CHARACTER(*) :: RNAME
+INTEGER :: NNN
 
 IF (.NOT.PROFILING) THEN
+
+   ! Normally, PROFILING=F and this branch is continually tests the communications and aborts the run if too much time elapses.
 
    START_TIME = MPI_WTIME()
    FLAG = .FALSE.
@@ -2836,10 +2839,17 @@ IF (.NOT.PROFILING) THEN
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
          WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
-         CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
+         DO NNN=1,NR
+            CALL MPI_CANCEL(RR(NNN),IERR)
+            CALL MPI_WAIT(RR(NNN),MPI_STATUS_IGNORE,IERR)
+         ENDDO
+      !  CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
       ENDIF
    ENDDO
+
 ELSE
+
+   ! If PROFILING=T, do not do MPI_TESTALL because too many calls to this routine swamps the tracing and profiling.
 
    CALL MPI_WAITALL(NR,RR(1:NR),MPI_STATUSES_IGNORE,IERR)
 
