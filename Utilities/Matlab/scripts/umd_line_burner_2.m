@@ -15,6 +15,7 @@ Lf_max = 1;
 Lf_dz  = (Lf_max-Lf_min)/(Lf_pts-1);
 Lf_z   = Lf_min:Lf_dz:Lf_max;
 Lf_fac = 0.99;
+Lf_dt  = 10;
 
 plot_style
 
@@ -64,6 +65,11 @@ for n=1:length(Time_FDS_1)
         end
     end
 end
+Lf_tmp = Lf_FDS_1;
+for n=1:length(Time_FDS_1)
+    indx_range = [find(Time_FDS_1>(Time_FDS_1(n)-Lf_dt),1):n];
+    Lf_FDS_1(n) = mean(Lf_tmp(indx_range));
+end
 
 % dx=0.625 cm results
 HRR2 = importdata([outdir,'methane_XO2_ramp_dx_p625cm_hrr.csv'],',',2);
@@ -93,6 +99,11 @@ for n=1:length(Time_FDS_2)
         end
     end
 end
+Lf_tmp = Lf_FDS_2;
+for n=1:length(Time_FDS_2)
+    indx_range = [find(Time_FDS_2>(Time_FDS_2(n)-Lf_dt),1):n];
+    Lf_FDS_2(n) = mean(Lf_tmp(indx_range));
+end
 
 % dx=0.3125 cm results
 HRR3 = importdata([outdir,'methane_XO2_ramp_dx_p3125cm_hrr.csv'],',',2);
@@ -121,6 +132,11 @@ for n=1:length(Time_FDS_3)
             break;
         end
     end
+end
+Lf_tmp = Lf_FDS_3;
+for n=1:length(Time_FDS_3)
+    indx_range = [find(Time_FDS_3>(Time_FDS_3(n)-Lf_dt),1):n];
+    Lf_FDS_3(n) = mean(Lf_tmp(indx_range));
 end
 
 % compute CHI_R ramp
