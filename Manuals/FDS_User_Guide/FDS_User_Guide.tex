@@ -8422,7 +8422,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
-{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,S        \\ \hline
+{\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
+{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
