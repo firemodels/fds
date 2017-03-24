@@ -14,7 +14,7 @@ To install OpenMPI:
 <li>  edit the following line in the .bashrc file (or .bash_profile on the Mac) so that the argument
 contains the path pointing to the OpenMPI location.
 <pre>
-    source .bashrc_fds path_to_openmpi_location
+    source ~/.bashrc_fds path_to_openmpi_location
 </pre>
 </ol>
 
@@ -23,7 +23,7 @@ contains the path pointing to the OpenMPI location.
 cd path_to_fds_bin_directory
 tar xvf openmpi_VERSION_PLATFORM_64.tar.gz
 </pre>
-and add path_to_bin_directory to the <tt>source .bashrc_fds</tt> line in .bashrc (or .bash_profile on the Mac)
+and add path_to_bin_directory to the <tt>source ~/.bashrc_fds</tt> line in .bashrc (or .bash_profile on the Mac)
 
 </ul>
 
@@ -36,11 +36,11 @@ pass a second argument to <tt>.bashrc_fds</tt> giving the location of the Intel 
 for that version.  In general, the following should be in your .bashrc (Linux) or .bash_profile (Mac)
 startup  file
 
-<p><tt>source .bashrc_fds path_to_openmpi_library path_to_Intel_shared libraries</tt>
+<p><tt>source ~/.bashrc_fds path_to_openmpi_library path_to_Intel_shared libraries</tt>
 
 <p>The following line
 
-<p><tt>source ./bashrc_fdss /shared/openmpi_64 /opt/intel17/compilers_and_libraries/linux/lib/intel64
+<p><tt>source ~/.bashrc_fdss /shared/openmpi_64 /opt/intel17/compilers_and_libraries/linux/lib/intel64
 
 <p>would setup your system to build and run fds using an OpenMPI library located
 at <tt>/shared/openmpi_64</tt> and version 17 of the Intel Fortran compiler.
