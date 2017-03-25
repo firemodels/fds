@@ -5686,9 +5686,9 @@ Controlled fire experiments are often conducted using a spray burner, where a li
       QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
-&PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
+&PROP ID='nozzle', PART_ID='heptane droplets',
       FLOW_RATE=1.97, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
-      SPRAY_ANGLE=0.,30.   /
+      SPRAY_ANGLE=0.,30., SMOKEVIEW_ID='nozzle' /
 &RAMP ID='fuel', T= 0.0, F=0.0  /
 &RAMP ID='fuel', T=20.0, F=1.0  /
 &RAMP ID='fuel', T=40.0, F=1.0  /
