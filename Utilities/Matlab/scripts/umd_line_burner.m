@@ -114,6 +114,13 @@ F3 = importdata([outdir,'methane_dx_p3125cm_line.csv'],',',2);
 
 % return
 
+% % mass flow for propane case
+% HOC = 46334.6246; % kJ/kg propane
+% HRRPUA = 2000;
+% A = 0.05*.5;
+% HRR = HRRPUA*A % should be 50 kW
+% mf = 2000/HOC
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % mean temperature at z=0.125 m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
