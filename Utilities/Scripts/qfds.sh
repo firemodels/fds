@@ -11,22 +11,27 @@ else
 fi
 OMPPLACES=
 OMPPROCBIND=
+HELP=
 
-if [ $# -lt 1 ]
-then
+function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
   echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
   echo ""
-  echo "qfds.sh runs FDS using an executable specified with the -e option or"
-  echo "from the respository if -e is not specified (the -r option is no longer"
-  echo "used).  A parallel version of FDS is invoked by using -p to specify the"
+  echo "qfds.sh runs FDS using an executable specified with the -e option or from the repository"
+  echo "if -e is not specified.  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
-  echo " -e exe - full path of FDS used to run case [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
+  echo " -e exe - full path of FDS used to run case "
+  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
+  echo " -h     - show most used options"
+  echo " -H     - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -v   - output generated script to standard output"
   echo "input_file - input file"
+  if [ "$HELP" == "" ]; then
+    exit
+  fi
   echo "Other options:"
   echo " -A     - used by timing scripts"
   echo " -b     - use debug version of FDS"
@@ -55,6 +60,11 @@ then
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
+}
+
+if [ $# -lt 1 ]
+then
+  usage
 fi
 
 # default parameter settings
@@ -110,7 +120,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ihHj:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -137,6 +147,15 @@ case $OPTION  in
    ;;
   f)
    FDSROOT="$OPTARG"
+   ;;
+  h)
+   usage
+   exit
+   ;;
+  H)
+   HELP=ALL
+   usage
+   exit
    ;;
   i)
    use_installed=1
