@@ -9,6 +9,8 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 else
   walltime=999:0:0
 fi
+OMPPLACES=
+OMPPROCBIND=
 
 if [ $# -lt 1 ]
 then
@@ -36,6 +38,10 @@ then
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
+  echo " -O OMP_PLACES - specify value for OMP_PLACES environment variable"
+  echo "        options: cores, sockets, threads"
+  echo " -P OMP_PROC_BIND - specify value for OMP_PROC_BIND environment variable"
+  echo "        options: false, true, master, close, spread"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
   echo "        If queue is terminal then casename.fds is run in the foreground on the local computer"
@@ -103,7 +109,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ij:l:m:Nn:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:ij:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -146,6 +152,12 @@ case $OPTION  in
    ;;
   N)
    nosocket="1"
+   ;;
+  O)
+   OMPPLACES="$OPTARG"
+   ;;
+  P)
+   OMPPROCBIND="$OPTARG"
    ;;
   n)
    nmpi_processes_per_node="$OPTARG"
@@ -191,6 +203,20 @@ if [ "$use_debug" == "1" ] ; then
 fi
 if [ "$use_devel" == "1" ] ; then
   DB=_dv
+fi
+if [[ "$OMPPLACES" != "" ]]  ; then
+  if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
+    echo "*** error: can only be specify cores, sockets or threads with -O option"
+    exit
+  fi
+  OMPPLACES="OMP_PLACES=$OMPPLACES"
+fi
+if [ "$OMPPROCBIND" != "" ]; then
+  if [[ "$OMPPROCBIND" != "false" ]] &&  [[ "$OMPPROCBIND" != "true" ]] &&  [[ "$OMPPROCBIND" != "master" ]] &&  [[ "$OMPPROCBIND" == "close" ]] &&  [[ "$OMPPROCBIND" == "spread" ]]; then
+    echo "*** error: can only specify false, true, master, close or spread with -P option"
+    exit
+  fi
+  OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
 # define executables if the repository is used
@@ -435,11 +461,23 @@ fi
 
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
-# force OpenMP threads to be assigned to adjacent 
-# cores on a socket (before going to the next socket)
-export OMP_PLACES=cores
-export OMP_PROC_BIND=close
+EOF
 
+if test $nopenmp_threads -gt 1 ; then
+if [ "$OMPPLACES" != "" ]; then
+cat << EOF >> $scriptfile
+export $OMPPLACES
+EOF
+fi
+
+if [ "$OMPPROCBIND" != "" ]; then
+cat << EOF >> $scriptfile
+export $OMPPROCBIND
+EOF
+fi
+fi
+
+cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
