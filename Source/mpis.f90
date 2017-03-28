@@ -1765,6 +1765,13 @@ subroutine mpi_barrier ( comm, ierror )
 end subroutine
 
 
+subroutine mpi_cancel ( ireq, ierror )
+  integer ireq
+  integer ierror
+  dummy = ireq + ierror
+end subroutine
+
+
 subroutine mpi_file_open ( comm, filename, amode, info, fh, ierror )
    integer comm, amode, info, fh, ierror
    character :: filename
