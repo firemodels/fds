@@ -976,7 +976,9 @@ IF (IN%ID/='null') THEN
    DO ND=1,N_DEVC
       DV => DEVICE(ND)
       IF (IN%ID==DV%INIT_ID) THEN ! the INIT line is referred to be the DEVC line
-         IF (DV%QUANTITY=='RADIATIVE HEAT FLUX' .OR. DV%QUANTITY=='ADIABATIC SURFACE TEMPERATURE') THEN
+         IF (DV%QUANTITY=='RADIATIVE HEAT FLUX' .OR. &
+             DV%QUANTITY=='RADIANCE' .OR. &
+             DV%QUANTITY=='ADIABATIC SURFACE TEMPERATURE') THEN
             IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN  ! use the orientation of the DEVC
                LP%ORIENTATION_INDEX = DV%ORIENTATION_INDEX
                LP%PWT = 1._EB
