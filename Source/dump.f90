@@ -3871,6 +3871,29 @@ USE COMPLEX_GEOMETRY
    NVERTS = NVERTS + NVERTS_CUTCELLS
 END SUBROUTINE GET_GEOMSIZES
 
+
+! ---------------------------- TRIANGULATE ----------------------------------------
+
+SUBROUTINE TRIANGULATE(VERTS,NVERTS,VERT_OFFSET,FACES)
+  INTEGER, INTENT(IN) :: NVERTS, VERT_OFFSET
+  REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+  INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+  INTEGER :: IVERT
+
+  IF (VERTS(1)*VERTS(1)<0.0) THEN
+  ! a dummy check to prevent compiler warnings for unused variables
+  ! (we need VERTS eventually  but don't need VERTS now)
+     RETURN
+  ENDIF
+  DO IVERT = 1, NVERTS - 2 ! for now assume face is convex
+  ! vertex indices 1, 2, ..., NVF
+  ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
+    FACES(3*IVERT-2) = VERT_OFFSET+1
+    FACES(3*IVERT-1) = VERT_OFFSET+1+IVERT
+    FACES(3*IVERT)   = VERT_OFFSET+2+IVERT
+  ENDDO
+END SUBROUTINE TRIANGULATE
+
 ! ---------------------------- GET_GEOMINFO ----------------------------------------
 
 SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS,VERTS,FACES,LOCATIONS)
@@ -3881,9 +3904,13 @@ USE COMPLEX_GEOMETRY
    CHARACTER(*), INTENT(IN) :: SLICETYPE
    INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
    INTEGER, INTENT(IN) :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
-   INTEGER, INTENT(OUT), DIMENSION(3*NFACES) :: FACES
+   INTEGER, INTENT(OUT), DIMENSION(3*NFACES), TARGET :: FACES
    INTEGER, INTENT(OUT), DIMENSION(NFACES) :: LOCATIONS
-   REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS) :: VERTS
+   REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS), TARGET :: VERTS
+
+   INTEGER :: VERT_OFFSET
+   INTEGER, POINTER, DIMENSION(:) :: FACEPTR
+   REAL(FB), POINTER, DIMENSION(:) :: VERTPTR
 
    INTEGER :: DIR, SLICE
    INTEGER :: NI, NJ, NK
@@ -4018,14 +4045,19 @@ USE COMPLEX_GEOMETRY
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
+                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
+                     VERTPTR(1:3*NVF)    =>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         ! vertex indices 1, 2, ..., NVF
                         ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
-                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
-                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF
+! after TRIANGULATE is verified remove the following 3 lines of code (and similar lines in 2 locations below)                        
+!                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
+!                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
+!                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF
                      ENDDO
                   ENDDO
                ELSE
@@ -4067,12 +4099,16 @@ USE COMPLEX_GEOMETRY
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
+                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
+                     VERTPTR(1:3*NVF)=>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
-                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
-                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
+!                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+!                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+!                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
                   ENDDO
                ELSE
@@ -4114,12 +4150,16 @@ USE COMPLEX_GEOMETRY
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
-                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
+                     VERTPTR(1:3*NVF)=>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                    DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
-                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
-                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
+!                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+!                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+!                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
                   ENDDO
                ELSE
