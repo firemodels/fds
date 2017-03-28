@@ -12,7 +12,12 @@ $QFDS $DEBUG -p 16 $QUEUE -d $INDIR methane_dx_p625cm.fds
 
 # extinction cases
 # $QFDS $DEBUG -p 38 -n 2 $QUEUE -d $INDIR methane_XO2_ramp_dx_1p25cm.fds
-# $QFDS $DEBUG -p 184 -n 8 $QUEUE -d $INDIR methane_XO2_ramp_dx_p625cm.fds
-# $QFDS $DEBUG -p 184 -n 8 $QUEUE -d $INDIR methane_XO2_ramp_dx_p3125cm.fds
+# $QFDS $DEBUG -p 184 -n 6 $QUEUE -d $INDIR methane_XO2_ramp_dx_p625cm.fds
+# $QFDS $DEBUG -p 184 -n 6 $QUEUE -d $INDIR methane_XO2_ramp_dx_p3125cm.fds
+
+# $QFDS $DEBUG -p 38 -n 2 $QUEUE -d $INDIR propane_XO2_ramp_dx_1p25cm.fds
+# $QFDS $DEBUG -p 184 -n 6 $QUEUE -d $INDIR propane_XO2_ramp_dx_p625cm.fds
+# $QFDS $DEBUG -p 184 -n 6 $QUEUE -d $INDIR propane_XO2_ramp_dx_p3125cm.fds
+
 
 echo FDS cases submitted
