@@ -3651,6 +3651,8 @@ SUBROUTINE DUMP_SMOKE3D(T,DT,NM)
 
 ! Write out the transparent smoke/fire data to files. Typically, smoke goes into the file 1, fire (HRRPUV) into file 2.
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_VGSC,IBM_SOLID
+
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER,  INTENT(IN) :: NM
 INTEGER  :: DATA_FILE_FLAG,DATA_FLAG,I,J,K
@@ -3715,6 +3717,17 @@ DATA_FILE_LOOP: DO DATA_FILE_FLAG=1,2
          ENDDO
       ENDDO
    ENDDO
+
+   IF (CC_IBM) THEN
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               IF(MESHES(NM)%VERTVAR(I,J,K,IBM_VGSC) /= IBM_SOLID) CYCLE
+               QQ(I,J,K,1) = 0._FB
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Pack the data into a 1-D array and call the C routine that writes the file
 
@@ -6644,6 +6657,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
+   CASE(17) ! RADIANCE
+      SOLID_PHASE_OUTPUT = ONE_D%IL(1)*0.001_EB
    CASE(20) ! INCIDENT HEAT FLUX
       SOLID_PHASE_OUTPUT = ( ONE_D%QRADIN/(ONE_D%EMISSIVITY+1.0E-10_EB) )*0.001_EB
    CASE(21) ! HEAT TRANSFER COEFFICENT
