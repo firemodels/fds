@@ -3893,6 +3893,7 @@ USE COMPLEX_GEOMETRY
    INTEGER :: NI, NJ, NK
    INTEGER :: I, J, K
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
+   INTEGER VERTBEG, VERTEND, FACEBEG, FACEEND
    LOGICAL IS_SOLID
    INTEGER :: ICF, NVF, IVCF
 
@@ -4017,13 +4018,20 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
+                     VERTEND = IVERTCUT + NVF
+                     VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
-                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
-                     VERTPTR(1:3*NVF)    =>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
                      CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
@@ -4071,13 +4079,19 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
+                     VERTEND = IVERTCUT + NVF
+                     VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
-                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
-                     VERTPTR(1:3*NVF)=>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
                      CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
@@ -4122,13 +4136,17 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
-                     FACEPTR(1:3*(NVF-2))=>FACES(3*IFACECUT-2:3*IFACECUT-2+3*(NVF-2)-1)
-                     VERTPTR(1:3*NVF)=>VERTS(3*IVERTCUT-2:3*IVERTCUT-2+3*NVF-1)
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
                      CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                     DO IVCF = 1, NVF-2 ! for now assume face is convex
