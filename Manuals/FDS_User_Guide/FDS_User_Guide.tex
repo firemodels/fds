@@ -5465,7 +5465,7 @@ The radiative properties can be given by specifying the components of the materi
 quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
 The radiative properties of the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. The heptane values can
-be overriden by specifying them on the {\ct PART} line.
+be overridden by specifying them on the {\ct PART} line.
 
 Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C.
@@ -5670,7 +5670,7 @@ burning rate will be adjusted to account for the difference between the heats of
 If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
 in the same way as those for a sprinkler.  If the fuel species is present in the liquid properties table as a fuel, then the droplets will be given fuel radiation absorption properties.
 
-Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An altnerate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
+Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An alternate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
 
 \subsubsection{Example Case: spray\_burner}
 \label{spray_burner}
