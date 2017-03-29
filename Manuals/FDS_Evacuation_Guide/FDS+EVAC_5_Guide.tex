@@ -85,20 +85,20 @@
 % These are (re)defined in stylevk.
 % Next are for the new A4 Working Papers 2009
 % Heading 1: Arial 18pt bold (large) (Arial ==> textsf Sans Serif)
-%            riviv‰li 20 pt, 130pt tyhj‰‰ tilaa ennen otsikkoa
-%            otsikon j‰lkeen 16pt tyhj‰‰
-% Heading 2: Arial 14pt bold, 16pt riviv‰li, 20pt tyhj‰‰ ennen, 14pt j‰lkeen
-% Heading 3: Arial 12pt bold, 16pt riviv‰li, 18pt tyhj‰‰ ennen, 14pt j‰lkeen
-% Heading 4: Arial 12pt, 16pt riviv‰li, 18pt tyhj‰‰ ennen, 12pt j‰lkeen
+%            riviv√§li 20 pt, 130pt tyhj√§√§ tilaa ennen otsikkoa
+%            otsikon j√§lkeen 16pt tyhj√§√§
+% Heading 2: Arial 14pt bold, 16pt riviv√§li, 20pt tyhj√§√§ ennen, 14pt j√§lkeen
+% Heading 3: Arial 12pt bold, 16pt riviv√§li, 18pt tyhj√§√§ ennen, 14pt j√§lkeen
+% Heading 4: Arial 12pt, 16pt riviv√§li, 18pt tyhj√§√§ ennen, 12pt j√§lkeen
 % Contents: Arial 18pt bold
-% Abstract: Arial 18pt bold, riviv‰li 20pt, 60pt tyhj‰‰ ennen, 12pt
-%           j‰lkeen (sis.luetteloon 1. tason otsikkona)
+% Abstract: Arial 18pt bold, riviv√§li 20pt, 60pt tyhj√§√§ ennen, 12pt
+%           j√§lkeen (sis.luetteloon 1. tason otsikkona)
 % alkusanojen otsikko: kuten 1. tason otsikko
-% sis.luettelon otsikko: kuten 1. tason otsikko, sen j‰lkeen 24pt tyhj‰‰
+% sis.luettelon otsikko: kuten 1. tason otsikko, sen j√§lkeen 24pt tyhj√§√§
 % Acknowledgements: Heading 1
-% References: Heading 1, text: 10pt, 13pt riviv‰li, 1.5 cm riippuva
-%             sisennys, kappaleen j‰lkeen 13pt tyhj‰‰
-% Captions: Arial 10pt, 13pt riviv‰li, 12pt tyhj‰‰ ennen, 16pt j‰lkeen
+% References: Heading 1, text: 10pt, 13pt riviv√§li, 1.5 cm riippuva
+%             sisennys, kappaleen j√§lkeen 13pt tyhj√§√§
+% Captions: Arial 10pt, 13pt riviv√§li, 12pt tyhj√§√§ ennen, 16pt j√§lkeen
 
 
 % \renewcommand{\refname}{\textbf{\normalsize REFERENCES}}
@@ -812,7 +812,7 @@ different humans is not taken into account in the current version of
 the programme.  Whereas FDS is doing well for the smoke transport and
 the prediction of O${}_2$ levels, it does much worse on the prediction
 of the CO concentration.  In the standard mixture fraction model of
-FDS, the amount of CO produced is mainly dectated by the user inputs.
+FDS, the amount of CO produced is mainly dictated by the user inputs.
 Note also, that the effects of HCN nor HCl are not modelled and that
 the toxic effects of CO${}_2$ are not modelled; only its
 hyperventilation factor is included.
@@ -1419,7 +1419,7 @@ visibility, its irritating and asphyxiant effects.  Recently,
 Frantzich and Nilsson~\cite{Frantzich03} made experiments on the
 effect of smoke concentration on the walking speeds of humans.  They
 used larger smoke concentrations than Jin~\cite{Jin78} and they found
-the walking speed decreasing with increasing smoke consentration
+the walking speed decreasing with increasing smoke concentration
 according to the formula $v (K_s) = \alpha + \beta K_s $ to the
 experimental values, where $K_s$ is the extinction coefficient ($[K_s]
 \!\! = \!\!  \mathrm{ \textrm{m}^\textrm{-1} } $) and the values of
@@ -1581,7 +1581,7 @@ some approximation are made, see Sec.~\ref{Sec_NumMethod} for details.
 The exit selection algorithm consists of the above described two
 phases.  First the exits are divided to the preference groups
 according to Table~\ref{Table_pref_order}.  Then, an exit is selected from
-the most preferred nonempty preference group by minimising the
+the most preferred non-empty preference group by minimising the
 estimated evacuation time.
 
 
@@ -1656,7 +1656,7 @@ The distance to a door is calculated along a bee line both for the
 visible and non-visible doors.  The queueing time is calculated for
 the visible doors by counting how many agents are closer to the door
 than the present one and by dividing this number by an estimated flow
-through the door.  The estimated human flow is given by the door widht
+through the door.  The estimated human flow is given by the door width
 times the specific flow value given by the user (default 1.~3 1/m/s).
 For the non-visible doors distance should be calculated along the exit
 path and also some kind of an estimated queueing time at the door
@@ -1694,7 +1694,7 @@ unity.  If smoke concentration is used then the user gives the
 threshold visibility value for a door to be ``smoke free''.  A door is
 usable as long as visibility is larger than half the distance to the
 door, where local visibility = 3/extinction coefficient.  Similarly as
-fo the 'smoke free' case, the presently chosed door is favoured so
+fo the 'smoke free' case, the presently chosen door is favoured so
 that 10 \% more smoke is tolerated by default.  For the FED case the
 estimated FED value is multiplied with 0.9 and for the smoke
 concentration case the distance to the presently chosen door is
@@ -2031,7 +2031,7 @@ should see ``by own eyes'' that the programme is working as it should.
   input) were used, see Fig.~\ref{Fig_IMO11}.  The third staircase
   model (\Timtt{\&STRS} namelist) was not used, because it models
   whole staircase including landings, so it can not be used to model
-  one signle flight of stairs.
+  one single flight of stairs.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
@@ -2138,7 +2138,7 @@ But the implementation of the method in FDS+Evac introduces
 computational meshes.  These meshes are used to define the geometry of
 the calculation.  The most obvious mesh sensitivity issue is that the
 spatial resolution of the obstructions, like doors, stairs,
-etc., is the resolution of the underlaying mesh.  The other,
+etc., is the resolution of the underlying mesh.  The other,
 subtler effect, is the way how the mesh resolution changes the flow
 fields of the evacuation meshes, which are used to guide the agents
 towards the exit doors.  In some cases, a finer grid does not always
@@ -2168,7 +2168,7 @@ level.  Changing this value will have large effect on the FED index
 calculation, of course.  If the user wants to be on the safe side,
 then one should use height which is a little bit above the head
 positions of the escaping humans, but this depends on the room
-geometry, especially the heigth of the room.
+geometry, especially the height of the room.
 
 
 There are many more important factors affecting the calculation of the
@@ -2177,7 +2177,7 @@ and fire meshes, e.g., the production of CO and other toxic
 gases depend largely on the user inputs.  Note also that for now only
 CO, CO${}_2$ and O${}_2$ concentrations are used to calculate the FED
 index and for carbon dioxide only the hyperventilation effect is
-inclueded.
+included.
 
 
 \section{Human Parameter Sensitivity}\label{Sec_HumParSensi}
@@ -2451,7 +2451,7 @@ counterflow model.  These parameters are probably not optimal for
 counterflow, but they are at least working moderately good.  And by
 changing them a little bit would not affect the outcome of the
 calculation much.  For now the collision avoidance method is quite
-short range and it does not try to model the wayfinding of real humans
+short range and it does not try to model the way finding of real humans
 in crowds too realistically.  The main idea of the model to enable
 counter flow with reasonable high agent densities using a short range
 collision avoidance.  The parameters which are used to avoid the
@@ -2464,7 +2464,7 @@ chosen similarly by checking their possible ranges so that they did
 not change the behaviour of FDS+Evac when there was no counterflow.
 For example, if there are crowding but every agent is trying to go
 more or less towards the same direction then the original $v_0$
-direction is prefered.  For this kind of short range collision
+direction is preferred.  For this kind of short range collision
 avoidance method it is better that the agents are not changing their
 behaviour in the ``normal situation''.  Optimizing the decision making
 of an agent in general would need much more long range route planning
@@ -2621,7 +2621,7 @@ walking speed by a factor $\gtrsim$0.5 seems to give a good agreement
 with the observations.  Two different values of the anisotropy
 parameter of the social force are used, $\lambda_i$=0.3 (the default
 in FDS+Evac) and $\lambda_i$=0.5.  The $\lambda_i$=0.5 results seem to
-reporduce the experimental findings better than the default value 0.3.
+reproduce the experimental findings better than the default value 0.3.
 When a speed reduction factor $\gtrsim$0.5 is used seems to produce
 more or less quite constant flow at the exit door, i.e., at
 these speed reduction values the stairs are feeding the front door
@@ -3599,7 +3599,7 @@ a steady state solution as the time zero is approached.  Check also
 that the guiding flow field vectors of the evacuation meshes inside
 your building are leading to the doors (the outflow vents) and that
 the vectors are not pointing towards walls, which might happen if the
-fields are not converged to stedy state solutions.  There are a couple
+fields are not converged to steady state solutions.  There are a couple
 of parameters on the \Timtt{TIME} and \Timtt{MISC} namelists that you
 can use to make the flow fields more converged.  How you can tell that
 the fields are looking good? Think of yourself in the building and
@@ -3716,14 +3716,14 @@ guiding flow fields towards the exit doors.
   fire+evacuation calculation.
 %
 \item[\Timts{EVACUATION\_MC\_MODE}] If set to true then no fire meshes
-  are read in and no fire calcualtion is done.  The EFF and FED files
+  are read in and no fire calculation is done.  The EFF and FED files
   are tried to read from the hard disk if they exist.  The default is
   \Timtt{.FALSE.}, i.e., (re)calculate the FED and EFF files,
   if appropriate.  If \Timts{EVACUATION\_DRILL} is also set true then
   the FED file is not used.
 %
 \item[\Timts{EVACUATION\_DRILL}] If set to true then no fire meshes
-  are read in and no fire calcualtion is done.  The EFF file is
+  are read in and no fire calculation is done.  The EFF file is
   recalculated and no smoke information (the FED file) is used in the
   calculation.  The default is \Timtt{.FALSE.}, i.e.,
   (re)calculate the FED and EFF files, if appropriate.
@@ -3749,7 +3749,7 @@ guiding flow fields towards the exit doors.
 %
 \item[\Timts{EVAC\_TIME\_ITERATIONS}] is the number of evacuation flow
   field calculation time steps.  One should have nice converged
-  quiding flow fields for evacuation, so some iterations are needed.
+  guiding flow fields for evacuation, so some iterations are needed.
   A too large number means too long CPU time.  (Default is 50.)
 %
 \end{description}
@@ -4146,11 +4146,11 @@ programme.
 %
 \item[\Timts{OUTPUT\_CONTACT\_FORCE}] If \Timtt{.TRUE.} then the
   contact forces acting on the circumferences (N/m) of the agents are
-  saved in the ouput file to be shown in Smokeview as a colour bar.
+  saved in the output file to be shown in Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_TOTAL\_FORCE}] If \Timtt{.TRUE.} then the total
   forces (contact + social) acting on the circumferences (N/m) of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{TAU\_CHANGE\_V0}] How often, on the average, an agent
@@ -4593,7 +4593,7 @@ out from this 'door'.
 %
 \item[\Timts{KNOWN\_DOOR\_NAMES}] The ID strings of the known exit
   doors.  This only apply to agents that are generated at this entry,
-  i.e., it does not apply to those agents who are transfered to
+  i.e., it does not apply to those agents who are transferred to
   this entry from somewhere else.
 %
 \item[\Timts{KNOWN\_DOOR\_PROBS}] The probabilities that the exit
@@ -4743,7 +4743,7 @@ the stairs should be modelled with \Timtt{EVSS} or \Timtt{STRS}
 namelists.  The corridor (actually stairs)
 model is a really simple one.  One gives the length of the stairs and
 reduces the movement speed of the agents.  The speed reduction is
-uniform, so if one models (fligth+landing+flight) combination one
+uniform, so if one models (flight+landing+flight) combination one
 should give some effective values for the parameters.  One also gives
 the maximum number of persons inside the corridor.  For now there is
 no relation between the density and the movement speed (nor specific
@@ -4790,7 +4790,7 @@ example input files on the FDS+Evac web pages.  If you have merging
 flows in stairs, then you should model the landings explicitly and
 you can use \Timtt{CORR} to move the agents from one landing to the
 next one.  One could also use the \Timtt{STRS} namelist to model the
-entire staircase just as a sigle object.  This model was first
+entire staircase just as a single object.  This model was first
 introduced in the Evac version 2.2.0 and it is now the recommend way
 of modelling whole staircases.  This new model can deal with merging
 flows and counterflows.
@@ -5068,7 +5068,7 @@ same format as the FDS fire calculation particle files, see the FDS
 User's Guide for the details on the format.  The namelists
 \Timtt{EXIT} (not the \Timtt{COUNT\_ONLY=.TRUE.} exits, i.e.,
 counters) and \Timtt{DOOR} are shown as devices in Smokeview, which
-are vertical rectangels and whose front side has ``FOREST GREEN''
+are vertical rectangeles and whose front side has ``FOREST GREEN''
 colour if the object is ``open'' and ``RED'' if it is ``closed'' (the
 keywords \Timts{TIME\_OPEN} and \Timts{TIME\_CLOSE}).  Also a ``FOREST
 GREEN'' cone, whose head is at the position defined by \Timtt{XYZ}, is
@@ -6102,7 +6102,7 @@ of the programme.
   Association, Quincy, MA, 1995.
 %
 \bibitem{Frantzich03} Frantzich, H., and Nilsson, D., ``Utrymning
-  genom t‰t r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
+  genom t√§t r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
 %
