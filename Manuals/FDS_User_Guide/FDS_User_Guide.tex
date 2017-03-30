@@ -1078,7 +1078,7 @@ Additionally to the mesh assignment to individual MPI processes, the number of O
 &MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
 &MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
 \end{lstlisting}
-Notes: An unspecified value will result in the default number of threads (see \ref{single_mesh}) on the MPI process. Some cluster systems do not support an heterogenous distribution of resources, here computational cores, per MPI process. Therefore, the number of OpenMP threads may change, but not the amount of cores assigned to the MPI process.
+Notes: An unspecified value will result in the default number of threads (see \ref{single_mesh}) on the MPI process. Some cluster systems do not support a heterogeneous distribution of resources, here computational cores, per MPI process. Therefore, the number of OpenMP threads may change, but not the amount of cores assigned to the MPI process.
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
@@ -6056,7 +6056,7 @@ In special cases, you might want a single liquid droplet to be inserted at a par
 &INIT N_PARTICLES=1, XYZ=..., UVW=..., DIAMETER=200., DT_INSERT=0.05,
       PART_ID='drops', DEVC_ID='nozzle' /
 \end{lstlisting}
-Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labelled {\ct 'drops'}. A simple test case that demonstrates this functionality is called {\ct bucket\_test\_3}, in which water droplets are launched in different directions from a common point. Their size, velocity, insertion frequency, and mass flux are varied, and a check is made that water mass is conserved (see Fig.~\ref{bucket_test_3_fig}).
+Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for liquid droplets. It over-rides the {\ct DIAMETER} on the {\ct PART} line labeled {\ct 'drops'}. A simple test case that demonstrates this functionality is called {\ct bucket\_test\_3}, in which water droplets are launched in different directions from a common point. Their size, velocity, insertion frequency, and mass flux are varied, and a check is made that water mass is conserved (see Fig.~\ref{bucket_test_3_fig}).
 
 \begin{figure}[ht]
 \centering
@@ -7135,7 +7135,7 @@ To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS ouputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
 Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the cell center corresponding to the solid cell temperature being output by {\ct INSIDE WALL TEMPERATURE}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
 \begin{lstlisting}
