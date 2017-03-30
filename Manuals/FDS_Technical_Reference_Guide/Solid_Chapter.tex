@@ -193,7 +193,7 @@ The governing equation solved in {\ct HT3D} is
 \end{equation}
 Notice that we do not presently account for volumetric heat sources. Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
 
-Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES timestep, $\delta t$, and the timestep required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
 
 For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
 \begin{equation}
@@ -262,8 +262,8 @@ $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement technique
 
 The third term can be used to describe the dependence on the
 local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$.
-The oxygen concentration profile within practical materials depends on the competetion between diffusion and reactive consumption.
-As FDS does not solve for the transport of gaseous species within concensed phase materials, a simple exponential profile is assumed and the
+The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption.
+As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the
 user is expected to specify the characteristic depth at which oxygen would be present.
 The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
