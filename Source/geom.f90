@@ -29612,7 +29612,7 @@ DO I = 1, NVERTS
   IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
   V(1:3)=>VERTS(3*I-2:3*I)
   IF (POINT_IN_TRIANGLE_FB(V, V1, V2, V3)) RETURN
-END DO
+ENDDO
 
 VALID_TRIANGLE = .TRUE.
 END FUNCTION VALID_TRIANGLE
@@ -29679,74 +29679,76 @@ END FUNCTION POINT_IN_TRIANGLE
 ! ---------------------------- TRIANGULATE ----------------------------------------
 
 SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
-  INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-  REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
-  INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
-  INTEGER :: IFACE, NLIST
-  INTEGER :: VERT_LIST(100)
-  LOGICAL :: NODE_EXISTS(100)
-  INTEGER :: I, V1, V2, V3, IVERT, IFROM
-  LOGICAL HAVE_VALID, DOIT
+   INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
+   REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+   INTEGER :: IFACE, NLIST
+   INTEGER :: VERT_LIST(100)
+   LOGICAL :: NODE_EXISTS(100)
+   INTEGER :: I, V1, V2, V3, IVERT, IFROM
+   LOGICAL HAVE_TRIANGLE
   
-  IF ( NVERTS == 3 ) THEN
-    FACES(1) = VERT_OFFSET+1
-    FACES(2) = VERT_OFFSET+2
-    FACES(3) = VERT_OFFSET+3
-    RETURN
-  ENDIF
+   IF ( NVERTS == 3 ) THEN
+     FACES(1) = VERT_OFFSET+1
+     FACES(2) = VERT_OFFSET+2
+     FACES(3) = VERT_OFFSET+3
+     RETURN
+   ENDIF
 
-  DO I = 1, NVERTS
-     VERT_LIST(I) = I
-     NODE_EXISTS(I) = .TRUE.
-  END DO
-  VERT_LIST(NVERTS+1) = 1
-  VERT_LIST(NVERTS+2) = 2
-
-  IVERT = 1
-  NLIST = NVERTS
-  IFACE = 1
-  HAVE_VALID = .FALSE.
-  DOIT = .FALSE.
-  DO
-     IF (NLIST<3) EXIT
-     IF (NLIST == 3) DOIT = .TRUE.
-     V1 = VERT_LIST(IVERT)
-     V2 = VERT_LIST(IVERT+1)
-     V3 = VERT_LIST(IVERT+2)
-     IF (VALID_TRIANGLE(DIR,VERTS,NVERTS,V1,V2,V3).OR.DOIT) THEN
-        FACES(IFACE)   = VERT_OFFSET+V1
-        FACES(IFACE+1) = VERT_OFFSET+V2
-        FACES(IFACE+2) = VERT_OFFSET+V3
-        IF (NLIST == 3) EXIT
-        IFACE = IFACE + 3
-     
-        IF(IVERT.EQ.NLIST)THEN
-           NODE_EXISTS(1) = .FALSE.
-        ELSE   
-           NODE_EXISTS(IVERT+1) = .FALSE.
-        ENDIF
-        IVERT = IVERT + 2
-        HAVE_VALID = .TRUE.
-     ELSE
-        IVERT = IVERT + 1
-     ENDIF
-     IF ( IVERT >= NLIST) THEN
-        IVERT=1
-        IFROM = 0
-        DO I = 1, NLIST
-           IF(NODE_EXISTS(I))THEN
-              IFROM = IFROM + 1
-              VERT_LIST(IFROM) = VERT_LIST(I)
-           ENDIF
-        END DO
-        VERT_LIST(IFROM+1) = VERT_LIST(1)
-        VERT_LIST(IFROM+2) = VERT_LIST(2)
-        NLIST = IFROM
-        DO I = 1, NLIST
-           NODE_EXISTS(I) = .TRUE.
-        END DO
-     ENDIF
-  END DO
+   DO I = 1, NVERTS
+      VERT_LIST(I) = I
+      NODE_EXISTS(I) = .TRUE.
+   ENDDO
+ 
+   NLIST = NVERTS
+   IFACE = 1
+   OUTER: DO WHILE (NLIST>=3)
+      IVERT = 1
+      HAVE_TRIANGLE = .FALSE.
+      INNER: DO WHILE (IVERT<=NLIST-2)
+         V1 = VERT_LIST(IVERT)
+         V2 = VERT_LIST(IVERT+1)
+         V3 = VERT_LIST(IVERT+2)
+         IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V1,V2,V3)) THEN
+            FACES(IFACE)   = VERT_OFFSET+V1
+            FACES(IFACE+1) = VERT_OFFSET+V2
+            FACES(IFACE+2) = VERT_OFFSET+V3
+            IF (NLIST == 3) EXIT OUTER
+            IFACE = IFACE + 3
+            IF(IVERT.EQ.NLIST)THEN
+               NODE_EXISTS(1) = .FALSE.
+            ELSE   
+               NODE_EXISTS(IVERT+1) = .FALSE.
+            ENDIF
+            HAVE_TRIANGLE = .TRUE.
+            IVERT = IVERT + 2
+         ELSE
+            IVERT = IVERT + 1
+         ENDIF
+      ENDDO INNER
+      IF (.NOT.HAVE_TRIANGLE) THEN
+         IVERT = 1
+         V1 = VERT_LIST(IVERT)
+         V2 = VERT_LIST(IVERT+1)
+         V3 = VERT_LIST(IVERT+2)
+         FACES(IFACE)   = VERT_OFFSET+V1
+         FACES(IFACE+1) = VERT_OFFSET+V2
+         FACES(IFACE+2) = VERT_OFFSET+V3
+         IF (NLIST == 3) EXIT OUTER
+         NODE_EXISTS(IVERT+1) = .FALSE.
+      ENDIF
+      IFROM = 0
+      DO I = 1, NLIST
+         IF(NODE_EXISTS(I))THEN
+            IFROM = IFROM + 1
+            VERT_LIST(IFROM) = VERT_LIST(I)
+         ENDIF
+      ENDDO
+      NLIST = IFROM
+      DO I = 1, NLIST
+         NODE_EXISTS(I) = .TRUE.
+      ENDDO
+   ENDDO OUTER
 END SUBROUTINE TRIANGULATE
 
 ! ---------------------------- TRIANGULATE2 ----------------------------------------
@@ -29757,8 +29759,9 @@ SUBROUTINE TRIANGULATE2(DIR, VERTS,NVERTS,VERT_OFFSET,FACES)
   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
   INTEGER :: IVERT
 
-  IF (VERTS(1)*VERTS(1)<0.0) THEN
-  ! a dummy check to prevent compiler warnings for unused variables
+
+  IF (VERTS(1)*VERTS(1)<0.0 .OR. DIR==4) THEN
+  ! a dummy checks to prevent compiler warnings for unused variables
   ! (we need VERTS eventually  but don't need VERTS now)
      RETURN
   ENDIF
