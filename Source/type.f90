@@ -357,7 +357,7 @@ INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE = 96 ! Size definition parameter. Max n
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 16 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
-   INTEGER :: NVERT, NFACE, STATUS            ! Local Vertices, cut-faces and status of this Cartesian face.
+   INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
