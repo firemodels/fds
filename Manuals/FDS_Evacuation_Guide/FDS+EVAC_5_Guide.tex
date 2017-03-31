@@ -1796,7 +1796,7 @@ see ``by own eyes'' that the programme is working as it should.
   staircases (\Timtt{\&CORR} and \Timtt{\&EVSS} namelists in the
   input) were used.  The third staircase model (\Timtt{\&STRS}
   namelist) was not used, because it models whole staircase including
-  landings, so it can not be used to model one signle flight of
+  landings, so it can not be used to model one single flight of
   stairs.  The 10~m distance was assumed to be measured along the
   incline and the speed was also calculated along the incline.
 %
@@ -3272,7 +3272,7 @@ evacuation input geometry.
   \Timtt{OBST}s, \Timtt{HOLE}s, and \Timtt{VENT}s to match the mesh
   cell boundaries.  Note, that the Evac versions from 2.1.1 onward
   move also the \Timtt{DOOR}, \Timtt{EXIT}, and \Timtt{ENTR} objects
-  to match the underlaying grid.  The older versions of FDS+Evac were
+  to match the underlying grid.  The older versions of FDS+Evac were
   not doing this matching to the underlying computational mesh.  See
   Sec.~\ref{Sec_SpecFeatures} and Fig.~\ref{Fig_DoorGeom} how doors
   should be defined.
@@ -3626,7 +3626,7 @@ given by the keyword \Timts{EVAC\_DT\_STEADY\_STATE}.  Note that the
 FDS fire time step is adjusted during the calculation, so the main
 loop time step for evacuation may also change.  There is also an
 internal time step inside each evacuation mesh, which is changing
-according to how densly packed the agents are.  If the agents are
+according to how densely packed the agents are.  If the agents are
 touching each others then a quite small time step is needed to solve
 the movement equations.  This internal time step can be modified using
 the keywords in the \Timtt{PERS} namelist.  The time loop strategy is:
@@ -4137,11 +4137,11 @@ programme.
   overrides this option.  Default colour for dead agents is cyan.
 %
 \item[\Timts{OUTPUT\_SPEED}] If \Timtt{.TRUE.} then the movement
-  speeds of the agents are saved in the ouput file to be shown in
+  speeds of the agents are saved in the output file to be shown in
   Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_FED}] If \Timtt{.TRUE.} then the FED doses of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{OUTPUT\_CONTACT\_FORCE}] If \Timtt{.TRUE.} then the
@@ -5068,7 +5068,7 @@ same format as the FDS fire calculation particle files, see the FDS
 User's Guide for the details on the format.  The namelists
 \Timtt{EXIT} (not the \Timtt{COUNT\_ONLY=.TRUE.} exits, i.e.,
 counters) and \Timtt{DOOR} are shown as devices in Smokeview, which
-are vertical rectangeles and whose front side has ``FOREST GREEN''
+are vertical rectangles and whose front side has ``FOREST GREEN''
 colour if the object is ``open'' and ``RED'' if it is ``closed'' (the
 keywords \Timts{TIME\_OPEN} and \Timts{TIME\_CLOSE}).  Also a ``FOREST
 GREEN'' cone, whose head is at the position defined by \Timtt{XYZ}, is
@@ -5423,7 +5423,7 @@ thus only one main evacuation mesh per floor is needed.  There is a
 fire in downstairs and the smoke is going to the second floor by an
 opening at the ceiling.  The second floor is connected to the first
 floor in the egress calculation, i.e., the second floor agents
-are transfered to the first floor by the combination of doors and
+are transferred to the first floor by the combination of doors and
 stairs.  The second floor has two exit doors, one leading to the
 stairs going to the first floor (the right exit door) and one leading
 to the stairs leading directly to outside of the building (the left
