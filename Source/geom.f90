@@ -29757,8 +29757,9 @@ SUBROUTINE TRIANGULATE2(DIR, VERTS,NVERTS,VERT_OFFSET,FACES)
   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
   INTEGER :: IVERT
 
-  IF (VERTS(1)*VERTS(1)<0.0) THEN
-  ! a dummy check to prevent compiler warnings for unused variables
+
+  IF (VERTS(1)*VERTS(1)<0.0 .OR. DIR==4) THEN
+  ! a dummy checks to prevent compiler warnings for unused variables
   ! (we need VERTS eventually  but don't need VERTS now)
      RETURN
   ENDIF
