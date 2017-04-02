@@ -698,7 +698,7 @@ FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
  \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
   \end{tabular}
 \end{center}
- \caption{Three triangles generated at different azmuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
+ \caption{Three triangles generated at different azimuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
 \label{fig:geom_azim}
 \end{figure}
 
@@ -823,7 +823,7 @@ the size and location of the sphere.  This discretization technique results in e
 \end{figure}
 
 Figure \ref{fig:geom_sphere2a} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct \&GEOM}\ namelist
-to split a sphere in latitudinal (north/south) and longitudinal (east/west) direcions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
+to split a sphere in latitudinal (north/south) and longitudinal (east/west) directions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
 
 \begin{figure}
 \begin{center}
@@ -1096,7 +1096,7 @@ EXCLUDEGEOM&ignore immersed geometry when generating a slice file\\
 \end{figure}
 
 \subsection{geom\_sphere2.fds}
-Figure \ref{fig:geom_sphere2b} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\ct SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\ct XYZ=10.0,0.5,1.0}, translated to the left and down using {\ct XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\ct GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\ct GAXIS=0.0,1.0,0.0}.
+Figure \ref{fig:geom_sphere2b} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\ct SCALE=0.6,0.4,0.2}\, placed initially at the right side of the domain using {\ct XYZ=10.0,0.5,1.0}, translated to the left and down using {\ct XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\ct GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\ct GAXIS=0.0,1.0,0.0}.
 
 \begin{figure}
 \begin{center}
@@ -1324,7 +1324,7 @@ This is a fractional step method because a Poisson equation is solved to obtain 
 \label{eqn:force}
 F_i^* = - \left( \frac{u_i^{ibm} - u_i^n}{\delta t} + \frac{\delta H^*}{\delta x_i}\right)
 \end{equation}
-which drives the velocity component $u_i^{n+1}$ toward $u_i^{ibm}$.  The superscript asterisk indicates that the initial guess for the pressure term is taken from the previous time step.  The update may be iterated to drive the error between $u_i^{n+1}$ and $u_i^{ibm}$ to a desired tolerance.  Note, however, that when this approach is imbedded in a second-order predictor-corrector scheme the error in most cases is remarkably small when $H^n$ is used in the force term (no iteration).
+which drives the velocity component $u_i^{n+1}$ toward $u_i^{ibm}$.  The superscript asterisk indicates that the initial guess for the pressure term is taken from the previous time step.  The update may be iterated to drive the error between $u_i^{n+1}$ and $u_i^{ibm}$ to a desired tolerance.  Note, however, that when this approach is embedded in a second-order predictor-corrector scheme the error in most cases is remarkably small when $H^n$ is used in the force term (no iteration).
 
 \subsubsection{Block Geometry}
 

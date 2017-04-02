@@ -3651,6 +3651,8 @@ SUBROUTINE DUMP_SMOKE3D(T,DT,NM)
 
 ! Write out the transparent smoke/fire data to files. Typically, smoke goes into the file 1, fire (HRRPUV) into file 2.
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_VGSC,IBM_SOLID
+
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER,  INTENT(IN) :: NM
 INTEGER  :: DATA_FILE_FLAG,DATA_FLAG,I,J,K
@@ -3715,6 +3717,17 @@ DATA_FILE_LOOP: DO DATA_FILE_FLAG=1,2
          ENDDO
       ENDDO
    ENDDO
+
+   IF (CC_IBM) THEN
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               IF(MESHES(NM)%VERTVAR(I,J,K,IBM_VGSC) /= IBM_SOLID) CYCLE
+               QQ(I,J,K,1) = 0._FB
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Pack the data into a 1-D array and call the C routine that writes the file
 
@@ -3868,14 +3881,19 @@ USE COMPLEX_GEOMETRY
    CHARACTER(*), INTENT(IN) :: SLICETYPE
    INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
    INTEGER, INTENT(IN) :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
-   INTEGER, INTENT(OUT), DIMENSION(3*NFACES) :: FACES
+   INTEGER, INTENT(OUT), DIMENSION(3*NFACES), TARGET :: FACES
    INTEGER, INTENT(OUT), DIMENSION(NFACES) :: LOCATIONS
-   REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS) :: VERTS
+   REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS), TARGET :: VERTS
+
+   INTEGER :: VERT_OFFSET
+   INTEGER, POINTER, DIMENSION(:) :: FACEPTR
+   REAL(FB), POINTER, DIMENSION(:) :: VERTPTR
 
    INTEGER :: DIR, SLICE
    INTEGER :: NI, NJ, NK
    INTEGER :: I, J, K
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
+   INTEGER VERTBEG, VERTEND, FACEBEG, FACEEND
    LOGICAL IS_SOLID
    INTEGER :: ICF, NVF, IVCF
 
@@ -4000,19 +4018,31 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
+                     VERTEND = IVERTCUT + NVF
+                     VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
+
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         ! vertex indices 1, 2, ..., NVF
                         ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
-                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
-                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF
+! after TRIANGULATE is verified remove the following 3 lines of code (and similar lines in 2 locations below)
+!                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
+!                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
+!                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF
                      ENDDO
                   ENDDO
                ELSE
@@ -4049,17 +4079,27 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
+                     VERTEND = IVERTCUT + NVF
+                     VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
-                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
-                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
+!                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+!                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+!                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
                   ENDDO
                ELSE
@@ -4096,17 +4136,25 @@ USE COMPLEX_GEOMETRY
                   ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     VERTBEG = IVERTCUT + 1
+                     VERTBEG = 3*VERTBEG - 2
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
                         VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
-                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     FACEBEG = 3*(IFACECUT+1) - 2
+                     FACEEND = FACEBEG + 3*(NVF-2) - 1
+                     FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                     VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                     VERT_OFFSET = IVERTCUT - NVF
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                    DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
-                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
-                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
-                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
+!                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+!                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+!                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
                   ENDDO
                ELSE
@@ -6604,6 +6652,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
+   CASE(17) ! RADIANCE
+      SOLID_PHASE_OUTPUT = ONE_D%IL(1)*0.001_EB
    CASE(20) ! INCIDENT HEAT FLUX
       SOLID_PHASE_OUTPUT = ( ONE_D%QRADIN/(ONE_D%EMISSIVITY+1.0E-10_EB) )*0.001_EB
    CASE(21) ! HEAT TRANSFER COEFFICENT

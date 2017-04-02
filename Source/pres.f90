@@ -2402,6 +2402,7 @@ REAL(EB):: AF,IDX,BIJ,KFACE(1:2,1:2)
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 INTEGER :: IIG,JJG,KKG,II,JJ,KK,IOR,LOCROW,IW
+INTEGER :: WC_JD(1:2,1:2)
 
 ! Allocate D_MAT_H:
 IF (GLMAT_SETUP_FLAG == GLMAT_WHLDOM) THEN
@@ -2529,6 +2530,11 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF ( .NOT.(WC%BOUNDARY_TYPE==    PERIODIC_BOUNDARY .OR. &
                     WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) ) CYCLE
 
+         WC_JD(1,1) = WC%JD11_INDEX
+         WC_JD(1,2) = WC%JD12_INDEX
+         WC_JD(2,1) = WC%JD21_INDEX
+         WC_JD(2,2) = WC%JD22_INDEX
+
          IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
          II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
@@ -2577,7 +2583,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ILOC = LOCROW                             ! Local row number in Kface, only for cell IIG,JJG,KKG.
          DO JLOC = LOW_IND,HIGH_IND                ! Local col number in Kface, JD
             IROW = IND_LOC(ILOC)                   ! Unknown number.
-            JCOL = WC%JD(ILOC,JLOC)                ! Local position of coef in D_MAT_H
+            JCOL = WC_JD(ILOC,JLOC)                ! Local position of coef in D_MAT_H
             ! Add coefficient:
             D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
          ENDDO
@@ -2610,6 +2616,7 @@ INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,
 LOGICAL :: INLIST
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+INTEGER :: WC_JD(1:2,1:2)
 
 NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only nonzeros are for meshes
                                         ! that belong to this process.
@@ -2862,7 +2869,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       WC => WALL(IW)
 
-      WC%JD(1:2,1:2) = IS_UNDEFINED
+      WC_JD(1:2,1:2) = IS_UNDEFINED
 
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
 
@@ -2899,11 +2906,15 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          NII = MESHES(NM)%NNZ_D_MAT_H(IND_LOC(LOCROW))
          DO ILOC=1,NII
             IF ( IND_LOC(IIND) == MESHES(NM)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-               WC%JD(LOCROW,IIND) = ILOC
+               WC_JD(LOCROW,IIND) = ILOC
                EXIT
             ENDIF
          ENDDO
       ENDDO
+      WC%JD11_INDEX = WC_JD(1,1)
+      WC%JD12_INDEX = WC_JD(1,2)
+      WC%JD21_INDEX = WC_JD(2,1)
+      WC%JD22_INDEX = WC_JD(2,2)
 
    ENDDO WALL_LOOP_2
 
@@ -2930,6 +2941,7 @@ INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,
 LOGICAL :: INLIST
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+INTEGER :: WC_JD(1:2,1:2)
 
 NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only nonzeros are for meshes
                                         ! that belong to this process.
@@ -3170,7 +3182,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       WC => WALL(IW)
 
-      WC%JD(1:2,1:2) = IS_UNDEFINED
+      WC_JD(1:2,1:2) = IS_UNDEFINED
 
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
 
@@ -3194,11 +3206,15 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          NII = NNZ_D_MAT_H(IND_LOC(LOCROW))
          DO ILOC=1,NII
             IF ( IND(IIND) == JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-               WC%JD(LOCROW,IIND) = ILOC
+               WC_JD(LOCROW,IIND) = ILOC
                EXIT
             ENDIF
          ENDDO
       ENDDO
+      WC%JD11_INDEX = WC_JD(1,1)
+      WC%JD12_INDEX = WC_JD(1,2)
+      WC%JD21_INDEX = WC_JD(2,1)
+      WC%JD22_INDEX = WC_JD(2,2)
 
    ENDDO WALL_LOOP_2
 
