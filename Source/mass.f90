@@ -209,9 +209,11 @@ SUBROUTINE DENSITY(T,DT,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND,SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,EVACUATION_ONLY, &
-                            PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,T_USED
+                            PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,T_USED,CC_IBM
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z,VD2D_MMS_Z_SRC
 USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
+USE COMPLEX_GEOMETRY, ONLY : SET_EXIMADVFLX_3D,SET_DOMAINADVFLX_3D
+
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
@@ -303,6 +305,9 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+
+   IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
+   IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINADVFLX_3D(UU,VV,WW,PREDICTOR)
 
    ! Add gas production source term
 
@@ -445,9 +450,14 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) THEN
       ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
-      M_DOT_PPP = 0._EB
-      D_SOURCE  = 0._EB
+      IF (.NOT. CC_IBM) THEN ! We will use these for Regular cells in cut-cell region in CCREGION_DENSITY.
+         M_DOT_PPP = 0._EB
+         D_SOURCE  = 0._EB
+      ENDIF
    ENDIF
+
+   IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
+   IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINADVFLX_3D(UU,VV,WW,PREDICTOR)
 
    ! Manufactured solution
 
@@ -542,6 +552,8 @@ REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SU
 INTEGER  :: IC,I,J,K,N
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_RHO_ZZ=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ=>NULL()
+
+IF (CHECK_MASS_CONSERVE) RETURN ! Don't modify scalar components.
 
 DELTA_RHO => WORK4
 DELTA_RHO =  0._EB
@@ -815,115 +827,6 @@ ENDIF WIND_DIRECTION_IF
 END FUNCTION SCALAR_FACE_VALUE
 
 
-<<<<<<< HEAD
-REAL(EB) FUNCTION SCALAR_FACE_VALUE_NEW(A,U,LIMITER)
-
-REAL(EB), INTENT(IN) :: A(3),U(4)
-INTEGER, INTENT(IN) :: LIMITER
-REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
-
-! This function is identical to the original SCALAR_FACE_VALUE except
-! that we only use 2nd order limiters if the upwind velocity is the
-! same sign as the local face velocity.
-
-! This function computes the scalar value on a face.
-! The scalar is denoted U, and the velocity is denoted A.
-! The divergence (computed elsewhere) uses a central difference across
-! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
-!
-! CENTRAL_LIMITER  = 0
-! GODUNOV_LIMITER  = 1
-! SUPERBEE_LIMITER = 2
-! MINMOD_LIMITER   = 3
-! CHARM_LIMITER    = 4
-! MP5_LIMITER      = 5
-!
-!                    location of face
-!
-!                            f
-!    |     o     |     o     |     o     |     o     |
-!               A(1)        A(2)        A(3)
-!         U(1)        U(2)        U(3)        U(4)
-
-WIND_DIRECTION_IF: IF (A(2)>0._EB) THEN
-
-   ! the flow is left to right
-
-   IF (A(1)>0._EB) THEN
-      DU_UP = U(2)-U(1)
-   ELSE
-      DU_UP = 0._EB
-   ENDIF
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE_NEW = U(2)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE_NEW = MP5(V)
-   END SELECT
-
-ELSE WIND_DIRECTION_IF
-
-   ! the flow is right to left
-
-   IF (A(3)<0._EB) THEN
-      DU_UP = U(4)-U(3)
-   ELSE
-      DU_UP = 0._EB
-   ENDIF
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE_NEW = U(3)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE_NEW = MP5(V)
-    END SELECT
-
-ENDIF WIND_DIRECTION_IF
-
-END FUNCTION SCALAR_FACE_VALUE_NEW
-
-
-=======
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 REAL(EB) FUNCTION MP5(V)
 USE MATH_FUNCTIONS, ONLY: MINMOD2,MINMOD4
 REAL(EB), INTENT(IN) :: V(-2:2)
@@ -953,8 +856,5 @@ ENDIF
 
 END FUNCTION MP5
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 END MODULE MASS

@@ -976,7 +976,9 @@ IF (IN%ID/='null') THEN
    DO ND=1,N_DEVC
       DV => DEVICE(ND)
       IF (IN%ID==DV%INIT_ID) THEN ! the INIT line is referred to be the DEVC line
-         IF (DV%QUANTITY=='RADIATIVE HEAT FLUX' .OR. DV%QUANTITY=='ADIABATIC SURFACE TEMPERATURE') THEN
+         IF (DV%QUANTITY=='RADIATIVE HEAT FLUX' .OR. &
+             DV%QUANTITY=='RADIANCE' .OR. &
+             DV%QUANTITY=='ADIABATIC SURFACE TEMPERATURE') THEN
             IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN  ! use the orientation of the DEVC
                LP%ORIENTATION_INDEX = DV%ORIENTATION_INDEX
                LP%PWT = 1._EB
@@ -1881,9 +1883,9 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
    IF (BETA>TWO_EPSILON_EB) THEN
       ! fluid momentum source term
       MPOM = LP%PWT*RVC/RHO_G
-      LP%ACCEL_X = LP%ACCEL_X + MPOM*(LP%MASS*(U_OLD-LP%U)/DT_P + LP%M_DOT*UREL)
-      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(LP%MASS*(V_OLD-LP%V)/DT_P + LP%M_DOT*VREL)
-      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(LP%MASS*(W_OLD-LP%W)/DT_P + LP%M_DOT*WREL)
+      LP%ACCEL_X = LP%ACCEL_X + MPOM*(LP%MASS*(U_OLD-LP%U)/DT + LP%M_DOT*UREL)
+      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(LP%MASS*(V_OLD-LP%V)/DT + LP%M_DOT*VREL)
+      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(LP%MASS*(W_OLD-LP%W)/DT + LP%M_DOT*WREL)
 
       ! semi-analytical solution for PARTICLE position
       ALBO = ALPHA*LOG(OBDT)/(BETA*OPA)

@@ -345,10 +345,14 @@ while true; do
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION3=\$OPTION
 <<<<<<< HEAD
+<<<<<<< HEAD
      echo "  Press \$OPTION3 to use /shared/openmpi_64"
 =======
      echo "  Press \$OPTION3 to use existing directory /shared/openmpi_64"
 >>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
+=======
+     echo "  Press \$OPTION3 to use /shared/openmpi_64"
+>>>>>>> 93e90958d3d506c0736a8a7c35457e1a08b60087
   fi
   mpipathib=
   if [ -d /shared/openmpi_64ib ] ; then
@@ -357,10 +361,14 @@ while true; do
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION4=\$OPTION
 <<<<<<< HEAD
+<<<<<<< HEAD
      echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
 =======
      echo "  Press \$OPTION4 to use existing directory /shared/openmpi_64ib"
 >>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
+=======
+     echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
+>>>>>>> 93e90958d3d506c0736a8a7c35457e1a08b60087
   fi
 
   if [ "\$OVERRIDE" == "y" ]
@@ -372,12 +380,12 @@ while true; do
   if [[ "\$answer" == "\$OPTION2" || "\$answer" == "" ]]; then
      answer=\$OPTION2
      eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
-     eval MPIDIST_FDSROOT=\$FDS_root/bin
      mpiused=\$FDS_root/bin/openmpi_64
      valid_answer=1
   else
     eval MPIDIST_FDS=
   fi
+  eval MPIDIST_FDSROOT=\$FDS_root/bin
   eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
   if [[ "\$answer" == "\$OPTION3" ]]; then
      mpipath2=\\\$MPIDIST_ETH
@@ -520,6 +528,10 @@ cat << BASH > \$BASHFDS
 
 # OpenMPI location
 ARG1=\\\$1
+BASH
+
+if [ "$ostype" != "OSX" ]; then
+cat << BASH >> \$BASHFDS
 
 <<<<<<< HEAD
 # Intel shared library location (default fds_install_dir/bin/INTELLIBS16)
@@ -527,6 +539,10 @@ ARG1=\\\$1
 # Intel shared library location (default fds_install_dir/bin/INTELLIBS$INTEL_VERSION)
 >>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 ARG2=\\\$2
+BASH
+fi
+
+cat << BASH >> \$BASHFDS
 
 # FDS location
 
@@ -535,6 +551,10 @@ export FDSBINDIR=\$FDS_root/bin
 # OpenMPI location
 
 export MPIDIST=\\\$ARG1
+BASH
+
+if [ "$ostype" != "OSX" ]; then
+cat << BASH >> \$BASHFDS
 
 # Intel shared library location
 
@@ -546,6 +566,14 @@ INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
+
+# set stack size to unlimted
+
+ulimit -s unlimited
+BASH
+fi
+
+cat << BASH >> \$BASHFDS
 
 # unalias application names used by FDS
 
@@ -622,9 +650,16 @@ cat << EOF >> $INSTALLER
   echo "Updating .bash_profile"
   grep -v bashrc_fds ~/.bash_profile | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
-  echo "export MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
-  echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
-  echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
+  if [[ "\$mpipatheth" != "" || "\$mpipathib" != "" ]]; then
+    echo "#FDS MPI library options:" >> \$BASHSTARTUP
+  fi
+  if [[ "\$mpipatheth" != "" ]]; then
+    echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
+  fi
+  if [[ "\$mpipathib" != "" ]]; then
+    echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
+  fi
+  echo "MPIDIST_FDS=\$mpipathfds"                >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
   echo "#FDS --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
@@ -640,17 +675,27 @@ cat << EOF >> $INSTALLER
   echo "Updating .bashrc"
   grep -v bashrc_fds ~/.bashrc | grep -v INTEL_SHARED_LIB | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_FDS | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
-  echo "export MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
-  echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
-  echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
-if [ "\\\$IFORT_COMPILER_LIB" != "" ]; then
-  echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
+  if [[ "\$mpipatheth" != "" || "\$mpipathib" != "" ]]; then
+    echo "#FDS MPI library options:" >> \$BASHSTARTUP
+  fi
+  if [[ "\$mpipatheth" != "" ]]; then
+    echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
+  fi
+  if [[ "\$mpipathib" != "" ]]; then
+    echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
+  fi
+  echo "MPIDIST_FDS=\$mpipathfds"          >> \$BASHSTARTUP
+if [ "\$IFORT_COMPILER_LIB" != "" ]; then
+  echo "#FDS Intel shared library options:" >> \$BASHSTARTUP
+  echo "# INTEL_SHARED_LIB=\\\$IFORT_COMPILER_LIB/intel64" >> \$BASHSTARTUP
 else
-  if [ "\\\$IFORT_COMPILER" != "" ]; then
-    echo "INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
+  if [ "\$IFORT_COMPILER" != "" ]; then
+    echo "#FDS Intel shared library options:" >> \$BASHSTARTUP
+    echo "# INTEL_SHARED_LIB=\\\$IFORT_COMPILER/lib/intel64" >> \$BASHSTARTUP
   fi
 fi
-  echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
+  echo "INTEL_SHARED_LIB=\$FDS_root/bin/INTELLIBS17"    >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath2 \\\$INTEL_SHARED_LIB"     >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
   rm \$BASHSTARTUP
