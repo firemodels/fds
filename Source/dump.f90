@@ -4033,7 +4033,7 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         ! vertex indices 1, 2, ..., NVF
                         ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
@@ -4094,7 +4094,7 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
@@ -4150,7 +4150,7 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
                     DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2
