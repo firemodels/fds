@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+%
+% This test is now being driven from dataplot.  Retain
+% the file as an example
+%
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 
 close all
 clear all

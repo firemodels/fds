@@ -14,6 +14,12 @@ then
   exit
 fi
 
+<<<<<<< HEAD
+=======
+INTEL_VERSION=17
+OPENMPI_VERSION=2.0.2
+
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 INSTALLDIR=
 FDS_TAR=
 ostype=
@@ -69,7 +75,11 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
+<<<<<<< HEAD
 OPENMPIFILE=openmpi_1.8.4_${PLATFORM}_64.tar.gz
+=======
+OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 
 size2=64
 
@@ -87,7 +97,11 @@ echo ""
 echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
+<<<<<<< HEAD
 echo "  1) Press <Enter> to begin installation"
+=======
+echo "  1) Press <Enter> to begin installation [default]"
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
@@ -299,6 +313,7 @@ while true; do
   OPTION3=
   OPTION4=
   echo ""
+<<<<<<< HEAD
   echo "OpenMPI options"
 
   OPTION=\$(echo \$OPTION + 1 | bc)
@@ -308,6 +323,17 @@ while true; do
   OPTION=\$(echo \$OPTION + 1 | bc)
   OPTION1=\$OPTION
   echo "  Press \$OPTION1 to install OpenMPI manually"
+=======
+  echo "OpenMPI install options"
+
+  OPTION=\$(echo \$OPTION + 1 | bc)
+  OPTION2=\$OPTION
+  echo "  Press \$OPTION2 to install in \$FDS_root/bin/openmpi_64 [default]"
+
+  OPTION=\$(echo \$OPTION + 1 | bc)
+  OPTION1=\$OPTION
+  echo "  Press \$OPTION1 to install later"
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
   echo "     See \$FDS_root/bin/README.html for details"
 
   mpipath=
@@ -318,7 +344,11 @@ while true; do
      mpipatheth=/shared/openmpi_64
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION3=\$OPTION
+<<<<<<< HEAD
      echo "  Press \$OPTION3 to use /shared/openmpi_64"
+=======
+     echo "  Press \$OPTION3 to use existing directory /shared/openmpi_64"
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
   fi
   mpipathib=
   if [ -d /shared/openmpi_64ib ] ; then
@@ -326,7 +356,11 @@ while true; do
      mpipath=\$MPIDIST_IB
      OPTION=\$(echo \$OPTION + 1 | bc)
      OPTION4=\$OPTION
+<<<<<<< HEAD
      echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
+=======
+     echo "  Press \$OPTION4 to use existing directory /shared/openmpi_64ib"
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
   fi
 
   if [ "\$OVERRIDE" == "y" ]
@@ -385,7 +419,11 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
+<<<<<<< HEAD
      read -p "Do you wish to proceed with the installation? (yes/no) " yn
+=======
+     read -p "Do you wish to proceed? (yes/no) " yn
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
    fi
    case \$yn in
       [Yy]* ) break;;
@@ -483,7 +521,11 @@ cat << BASH > \$BASHFDS
 # OpenMPI location
 ARG1=\\\$1
 
+<<<<<<< HEAD
 # Intel shared library location (default fds_install_dir/bin/INTELLIBS16)
+=======
+# Intel shared library location (default fds_install_dir/bin/INTELLIBS$INTEL_VERSION)
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 ARG2=\\\$2
 
 # FDS location
@@ -496,7 +538,11 @@ export MPIDIST=\\\$ARG1
 
 # Intel shared library location
 
+<<<<<<< HEAD
 INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS16
+=======
+INTEL_SHARELIB=\\\$FDSBINDIR/INTELLIBS$INTEL_VERSION
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi

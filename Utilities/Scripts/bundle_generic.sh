@@ -3,6 +3,10 @@
 # this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
 
 errlog=/tmp/errlog.$$
+<<<<<<< HEAD
+=======
+OPENMPI_VERSION=2.0.2
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 
 # ---------------- MDHASH -----------------
 
@@ -249,13 +253,21 @@ MD5HASH $bundledir/bin $fds2asciiout > $MD5DIR/$fds2asciiout$mdversion
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
+<<<<<<< HEAD
    openmpifile=openmpi_1.8.4_linux_64.tar.gz
+=======
+   openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
    MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_linux_bundle.md5s
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
+<<<<<<< HEAD
    openmpifile=openmpi_1.8.4_osx_64.tar.gz
+=======
+   openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
    MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_osx_bundle.md5s
 fi
 

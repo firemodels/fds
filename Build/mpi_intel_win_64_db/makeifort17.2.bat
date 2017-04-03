@@ -4,11 +4,7 @@ set arg1=%1
 :: setup compiler environment
 if x%arg1% == xbot goto skip1
 REM call ..\..\Utilities\Scripts\setup_intel_compilers.bat
-<<<<<<< HEAD
-call c:\Lokal\Test\ifort16.4-intel64-compilervars.bat
-=======
-call C:\GIT\01_FDS\scripts\ifort16.4-intel64-compilervars.bat
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
+call C:\GIT\01_FDS\scripts\ifort17.2-intel64-compilervars.bat
 :skip1
 
 Title Building debug FDS (mpi) for 64 bit Windows

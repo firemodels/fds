@@ -3,6 +3,11 @@
 # this script is called from windows which passes in the directory 
 # containing this script
 #
+<<<<<<< HEAD
+=======
+INTEL_VERSION=17
+
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 export fds_smvroot=$1
 export bundlebase=$2
 export runhost=$3
@@ -19,6 +24,10 @@ export MISCFROM=$9
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
 export MISCTO=LIB64
+<<<<<<< HEAD
 export COMPTO=INTELLIBS16
+=======
+export COMPTO=INTELLIBS$INTEL_VERSION
+>>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh
