@@ -417,7 +417,7 @@ REAL(EB),INTENT(OUT):: VAL_CF
 ! Local Variables:
 INTEGER :: II_LO,II_HI,JJ_LO,JJ_HI,KK_LO,KK_HI,SOLID_LO,SOLID_HI
 REAL(EB):: CC1(LOW_IND:HIGH_IND),CCSUM
-REAL(EB) :: RHOFACE,Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES)
 
 VAL_CF    = 0._EB
 Y_SPECIES = 1._EB
@@ -24232,8 +24232,6 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
              ENDIF
 
-             ! WRITE(LU_ERR,*) 'NSSEG=',NSSEG
-
              ! Now add IBM_SOLID Type vertices:
              ! Vertex at index JJ-FCELL,KK-FCELL:
              INDXI1(IAXIS:KAXIS) = (/ II, JJ-FCELL  , KK-FCELL   /) ! Local x1,x2,x3
@@ -24364,8 +24362,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ANGSEG   = ANGSEGAUX
              ENDDO
 
-             ! Discard face with no conected edges:
-             IF ( NSSEG == 0 ) CYCLE
+             ! Discard face with less than 3 edges (triangle):
+             IF ( NSSEG < 3 ) CYCLE
 
              ! Add segments which have both ends attached to more than two segs:
              count = 0
