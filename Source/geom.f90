@@ -29604,7 +29604,7 @@ ANGLE1 = ATAN2(U1(2),U1(1))
 ANGLE2 = ATAN2(U2(2),U2(1))
 DIFF_ANGLE = ANGLE2 - ANGLE1
 IF(DIFF_ANGLE<0.0)DIFF_ANGLE = DIFF_ANGLE+2.0*PI
-IF (DIFF_ANGLE>PI) RETURN
+IF (DIFF_ANGLE>PI-PI/180.0) RETURN
 
 ! triangle is invalid if any other vertex in polygon is inside this triangle
 
