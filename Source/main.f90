@@ -2823,28 +2823,29 @@ SUBROUTINE TIMEOUT(RNAME,NR,RR)
 
 REAL(EB) :: START_TIME,WAIT_TIME
 INTEGER, INTENT(IN) :: NR
-INTEGER, DIMENSION(:) :: RR
-LOGICAL :: FLAG
+INTEGER, DIMENSION(:) :: RR,STATUSS(MPI_STATUS_SIZE)
+INTEGER, DIMENSION(:,:) :: ARRAY_OF_STATUSES(MPI_STATUS_SIZE,NR)
+LOGICAL :: FLAG,FLAG2,FLAG3
 CHARACTER(*) :: RNAME
 INTEGER :: NNN
 
 IF (.NOT.PROFILING) THEN
 
-   ! Normally, PROFILING=F and this branch is continually tests the communications and aborts the run if too much time elapses.
+   ! Normally, PROFILING=F and this branch continually tests the communication and cancels the requests if too much time elapses.
 
    START_TIME = MPI_WTIME()
    FLAG = .FALSE.
    DO WHILE(.NOT.FLAG)
-      CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
+      CALL MPI_TESTALL(NR,RR(1:NR),FLAG,ARRAY_OF_STATUSES,IERR)
       WAIT_TIME = MPI_WTIME() - START_TIME
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
          WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
          FLAG = .TRUE.
          DO NNN=1,NR
             CALL MPI_CANCEL(RR(NNN),IERR)
-            CALL MPI_WAIT(RR(NNN),MPI_STATUS_IGNORE,IERR)
+            CALL MPI_TEST(RR(NNN),FLAG2,STATUSS,IERR)
+            CALL MPI_TEST_CANCELLED(STATUSS,FLAG3,IERR)
          ENDDO
-      !  CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
       ENDIF
    ENDDO
 
