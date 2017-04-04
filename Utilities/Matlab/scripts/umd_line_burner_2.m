@@ -27,7 +27,7 @@ fuel_name    = {'methane','propane'};
 Fuel_name    = {'Methane','Propane'};
 fuel_hoc     = [50010.3475,46334.6246]; % from .out file
 
-i_fuel = 2;
+i_fuel = 1;
 
 % experimental results
 EXP = importdata([expdir,exp_fname{i_fuel}],',',1);
@@ -43,12 +43,11 @@ XO2_Lf = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'XO2_Lf')));
 Lf     = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'Lf')));
 S_Lf   = EXP_Lf.data(:,find(strcmp(EXP_Lf.colheaders,'S_Lf')));
 
-is_case_run=1;
-if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_hrr.csv']); is_case_run=0; end
-if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_hrr.csv']); is_case_run=0; end
-if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_hrr.csv']); is_case_run=0; end
+is_case_A_run=1; if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_hrr.csv']); is_case_A_run=0; end
+is_case_B_run=1; if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_hrr.csv']); is_case_B_run=0; end
+is_case_C_run=1; if ~exist([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_hrr.csv']); is_case_C_run=0; end
 
-if is_case_run % case_run_if
+if is_case_A_run % case A if
     % dx=1.25 cm results
     HRR1 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_hrr.csv'],',',2);
     DEV1 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_devc.csv'],',',2);
@@ -82,7 +81,9 @@ if is_case_run % case_run_if
         indx_range = [find(Time_FDS_1>(Time_FDS_1(n)-Lf_dt),1):n];
         Lf_FDS_1(n) = mean(Lf_tmp(indx_range));
     end
+end % case A if
 
+if is_case_B_run % case B if
     % dx=0.625 cm results
     HRR2 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_hrr.csv'],',',2);
     DEV2 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p625cm_devc.csv'],',',2);
@@ -116,7 +117,9 @@ if is_case_run % case_run_if
         indx_range = [find(Time_FDS_2>(Time_FDS_2(n)-Lf_dt),1):n];
         Lf_FDS_2(n) = mean(Lf_tmp(indx_range));
     end
+end % case B if
 
+if is_case_C_run % case C if
     % dx=0.3125 cm results
     HRR3 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_hrr.csv'],',',2);
     DEV3 = importdata([outdir,fuel_name{i_fuel},'_XO2_ramp_dx_p3125cm_devc.csv'],',',2);
@@ -150,7 +153,7 @@ if is_case_run % case_run_if
         indx_range = [find(Time_FDS_3>(Time_FDS_3(n)-Lf_dt),1):n];
         Lf_FDS_3(n) = mean(Lf_tmp(indx_range));
     end
-end % case_run_if
+end % case C if
 
 % compute CHI_R ramp
 figure
@@ -172,11 +175,18 @@ switch i_fuel
         pw_ramp_chir = [.33,.245,.125,0,0];
 end
 H(2)=plot(pw_ramp_XO2,pw_ramp_chir);
+
+if is_case_A_run | is_case_B_run | is_case_C_run
+    is_case_run = 1;
+else
+    is_case_run = 0;
+end
+
 if is_case_run
-    H(3)=plot(XO2_FDS_1,CHI_R_FDS_1,'ksq');
-    H(4)=plot(XO2_FDS_2,CHI_R_FDS_2,'b^');
-    H(5)=plot(XO2_FDS_3,CHI_R_FDS_3,'m>');
-    axis([0.12 0.22 0 0.30 ])
+    if is_case_A_run; H(3)=plot(XO2_FDS_1,CHI_R_FDS_1,'-*'); end
+    if is_case_B_run; H(4)=plot(XO2_FDS_2,CHI_R_FDS_2,'-^'); end
+    if is_case_C_run; H(5)=plot(XO2_FDS_3,CHI_R_FDS_3,'-sq'); end
+    axis([0.12 0.22 0 0.35 ])
     xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('\chi_R','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     text(5,0.27,'Radiative Fraction Ramp','FontName',Font_Name,'FontSize',Title_Font_Size)
@@ -206,9 +216,9 @@ subr= 1:10:length(XO2);
 h=errorbar(XO2(subr),eta(subr),-S_eta(subr),S_eta(subr),-S_XO2(subr),S_XO2(subr),'.','MarkerSize',10); hold on
 set(h,'Color',steel_blue)
 if is_case_run
-    H(2)=plot(XO2_FDS_1,eta_FDS_1,'-.');
-    H(3)=plot(XO2_FDS_2,eta_FDS_2,'--');
-    H(4)=plot(XO2_FDS_3,eta_FDS_3,'-');
+    if is_case_A_run; H(2)=plot(XO2_FDS_1,eta_FDS_1,'-*'); end
+    if is_case_B_run; H(3)=plot(XO2_FDS_2,eta_FDS_2,'-^'); end
+    if is_case_C_run; H(4)=plot(XO2_FDS_3,eta_FDS_3,'-sq'); end
     axis([0.09 0.21 0 1.2 ])
     xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('\eta','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -241,13 +251,15 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 H(1)=plot(Time_ramp,XO2_ramp,'--o','MarkerSize',10); hold on
 if is_case_run
-    H(2)=plot(Time_FDS_1,XO2_FDS_1,'-*'); hold on
+    if is_case_A_run; H(2)=plot(Time_FDS_1,XO2_FDS_1,'-*'); end
+    if is_case_B_run; H(3)=plot(Time_FDS_2,XO2_FDS_2,'-^'); end
+    if is_case_C_run; H(4)=plot(Time_FDS_3,XO2_FDS_3,'-sq'); end
     axis([0 60 0.1 0.21])
     xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    lh=legend(H,'Input Ramp','FDS','Location','NorthEast');
+    lh=legend(H,'Input Ramp','FDS {\itW/\deltax}=4','FDS {\itW/\deltax}=8','FDS {\itW/\deltax}=16','Location','NorthEast');
     set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
     git_file=[outdir,fuel_name{i_fuel},'_XO2_ramp_dx_1p25cm_git.txt'];
@@ -267,10 +279,10 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 H(1)=plot(XO2,q_R,'o'); hold on
 if is_case_run
-    H(2)=plot(XO2_FDS_1,q_R_FDS_1,'-.','LineWidth',3);
-    H(3)=plot(XO2_FDS_2,q_R_FDS_2,'--','LineWidth',3);
-    H(4)=plot(XO2_FDS_3,q_R_FDS_3,'-' ,'LineWidth',3);
-    axis([0.12 0.21 0 1.4])
+    if is_case_A_run; H(2)=plot(XO2_FDS_1,q_R_FDS_1,'-*'); end
+    if is_case_B_run; H(3)=plot(XO2_FDS_2,q_R_FDS_2,'-^'); end
+    if is_case_C_run; H(4)=plot(XO2_FDS_3,q_R_FDS_3,'-sq'); end
+    axis([0.12 0.21 0 1.5])
     xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('{\itq"}_R (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     set(gca,'FontName',Font_Name)
@@ -298,10 +310,10 @@ subr=1:2:length(Lf);
 h=errorbar(XO2_Lf(subr),Lf(subr),-S_Lf(subr),S_Lf(subr),'o'); hold on
 set(h,'Color',steel_blue)
 if is_case_run
-    H(2)=plot(XO2_FDS_1,Lf_FDS_1,'-.');
-    H(3)=plot(XO2_FDS_2,Lf_FDS_2,'--');
-    H(4)=plot(XO2_FDS_3,Lf_FDS_3,'-');
-    axis([0.14 0.22 0.4 0.75])
+    if is_case_A_run; H(2)=plot(XO2_FDS_1,Lf_FDS_1,'-*'); end
+    if is_case_B_run; H(3)=plot(XO2_FDS_2,Lf_FDS_2,'-^'); end
+    if is_case_C_run; H(4)=plot(XO2_FDS_3,Lf_FDS_3,'-sq'); end
+    axis([0.14 0.22 0.4 1.00])
     xlabel('{\itX}_{O2}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     ylabel('{\itL}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     set(gca,'FontName',Font_Name)
