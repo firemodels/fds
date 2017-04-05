@@ -277,6 +277,13 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
                      mpi_send_init_char0   , mpi_send_init_char1
   end interface mpi_send_init
 
+  interface mpi_ssend_init
+    module procedure mpi_ssend_init_int0    , mpi_ssend_init_int1,    &
+                     mpi_ssend_init_real0   , mpi_ssend_init_real1,   &
+                     mpi_ssend_init_logical0, mpi_ssend_init_logical1,&
+                     mpi_ssend_init_char0   , mpi_ssend_init_char1
+  end interface mpi_ssend_init
+
   interface mpi_recv
     module procedure mpi_recv_int0    , mpi_recv_int1,    &
                      mpi_recv_real0   , mpi_recv_real1,   &
@@ -326,9 +333,16 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
      module procedure mpi_waitall_int0, mpi_waitall_int1, mpi_waitall_int1b
   end interface mpi_waitall
 
+  interface mpi_test_cancelled
+     module procedure mpi_test_cancelled
+  end interface mpi_test_cancelled
+
   interface mpi_testall
      module procedure mpi_testall
   end interface mpi_testall
+  interface mpi_test
+     module procedure mpi_test
+  end interface mpi_test
 
   contains
 
@@ -1103,6 +1117,106 @@ subroutine mpi_send_init_char1 ( data, n, datatype, iproc, itag, comm, request, 
   dummy = n + datatype + iproc + itag + comm + request + ierror
 end subroutine
 
+subroutine mpi_ssend_init_int0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_int1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_real0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_real1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_logical0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_logical1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_char0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_ssend_init_char1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
 
 subroutine mpi_recv_int0 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
   implicit none
@@ -1692,6 +1806,14 @@ subroutine mpi_waitall_int1b ( icount, irequest, istatus, ierror )
   dummy = icount + irequest(1) + istatus + ierror
 end subroutine
 
+subroutine mpi_test_cancelled ( istatus, flag, ierror )
+  integer:: ierror
+  logical:: flag
+  integer, dimension(:) :: istatus
+  flag=.true.
+  dummy = istatus(1) + ierror
+end subroutine
+
 subroutine mpi_testall ( icount, irequest, flag, istatus, ierror )
   integer:: icount
   integer:: ierror
@@ -1702,7 +1824,14 @@ subroutine mpi_testall ( icount, irequest, flag, istatus, ierror )
   dummy = icount + irequest(1) + istatus + ierror
 end subroutine
 
-
+subroutine mpi_test ( irequest, flag, istatus, ierror )
+  integer:: ierror
+  logical:: flag
+  integer :: irequest
+  integer :: istatus
+  flag=.true.
+  dummy = irequest + istatus + ierror
+end subroutine
 
 subroutine mpi_get_processor_name(pname, pnamelen, ierror)
   character(*) :: pname
