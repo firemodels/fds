@@ -492,7 +492,7 @@ REAL(EB),INTENT(OUT):: VAL_CF
 ! Local Variables:
 INTEGER :: II_LO,II_HI,JJ_LO,JJ_HI,KK_LO,KK_HI,IJK(IAXIS:KAXIS),IJK2(IAXIS:KAXIS,16),ICELL,II,JJ,KK
 LOGICAL :: FOUND
-REAL(EB) :: RHOFACE,Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB):: Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES)
 
 ! Point to mesh has been called for MESHES(NM): This routine searches for a REGULAR SOLID cell in the
 ! vicinity of the SOLID cut-face and assigns to the latter the scalar value of the former.
@@ -626,7 +626,7 @@ REAL(EB),INTENT(OUT):: VAL_CF
 ! Local Variables:
 REAL(EB) :: X1F, IDX, CCM1, CCP1, VAL_LOC(LOW_IND:HIGH_IND)
 INTEGER  :: ISIDE, ICC, JCC
-REAL(EB) :: RHOFACE(LOW_IND:HIGH_IND),Y_SPECIES(LOW_IND:HIGH_IND),ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: Y_SPECIES(LOW_IND:HIGH_IND),ZZ_GET(1:N_TRACKED_SPECIES)
 
 ! Point to mesh has been called for MESHES(NM):
 

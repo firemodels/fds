@@ -158,7 +158,6 @@ for inod=1:nnodes
 end
 
 % Tetrahedra:
-[wid]=fprintf(fid,'VOLUS=\n');
 % No volume elements.
 
 % Surface Triangles:
