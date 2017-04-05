@@ -10173,6 +10173,11 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: IJKFACE2
 INTEGER :: IIO,JJO,KKO,NOM,IPT
 LOGICAL :: FLGX,FLGY,FLGZ,INNM
 
+INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX
+INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX
+INTEGER :: SIZE_REC
+
+INTEGER, PARAMETER :: DELTA_FC = 200
 
 DO_GASNXT_CUTFACE = .FALSE.
 DO_GASNXT_CARTCELL= .FALSE.
@@ -11853,14 +11858,14 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO NOM=1,NMESHES
       ! Also considers the case NOM==NM as a regular case.
       ! Face Variables:
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%IIO_FC_R(0))
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%JJO_FC_R(0))
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%KKO_FC_R(0))
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%AXS_FC_R(0))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%IIO_FC_R(DELTA_FC))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%JJO_FC_R(DELTA_FC))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%KKO_FC_R(DELTA_FC))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%AXS_FC_R(DELTA_FC))
       ! Cell Variables:
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%IIO_CC_R(0))
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%JJO_CC_R(0))
-      ALLOCATE(MESHES(NM)%OMESH(NOM)%KKO_CC_R(0))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%IIO_CC_R(DELTA_FC))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%JJO_CC_R(DELTA_FC))
+      ALLOCATE(MESHES(NM)%OMESH(NOM)%KKO_CC_R(DELTA_FC))
    ENDDO
 
    ! Figure out which Regular face locations for this mesh are required for interpolation:
@@ -11894,10 +11899,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -11924,10 +11947,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                     ! and add 1 to NFC_R for OMESH(NOM).
                      ! Use Automatic reallocation:
                      OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                     OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                     OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                     OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                     ENDIF
+                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                      IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                   ENDIF
                ENDIF
@@ -11956,10 +11997,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -11986,10 +12045,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                     ! and add 1 to NFC_R for OMESH(NOM).
                      ! Use Automatic reallocation:
                      OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                     OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                     OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                     OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                     ENDIF
+                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                      IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                   ENDIF
                ENDIF
@@ -12018,10 +12095,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -12048,10 +12143,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                     ! and add 1 to NFC_R for OMESH(NOM).
                      ! Use Automatic reallocation:
                      OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                     OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                     OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                     OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                     ENDIF
+                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                      IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                   ENDIF
                ENDIF
@@ -12087,10 +12200,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -12118,10 +12249,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -12149,10 +12298,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  OMESH(NOM)%IIO_FC_R = [OMESH(NOM)%IIO_FC_R, IIO]
-                  OMESH(NOM)%JJO_FC_R = [OMESH(NOM)%JJO_FC_R, JJO]
-                  OMESH(NOM)%KKO_FC_R = [OMESH(NOM)%KKO_FC_R, KKO]
-                  OMESH(NOM)%AXS_FC_R = [OMESH(NOM)%AXS_FC_R, X1AXIS]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
                   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
                ENDIF
             ENDIF
@@ -12191,9 +12358,23 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               ! and add 1 to NFC_R for OMESH(NOM).
                ! Use Automatic reallocation:
                OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-               OMESH(NOM)%IIO_CC_R = [OMESH(NOM)%IIO_CC_R, IIO]
-               OMESH(NOM)%JJO_CC_R = [OMESH(NOM)%JJO_CC_R, JJO]
-               OMESH(NOM)%KKO_CC_R = [OMESH(NOM)%KKO_CC_R, KKO]
+               SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
+               IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
+                   ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
+                   IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
+                   JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
+                   KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
+               ENDIF
+               OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
+               OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
+               OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
                IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
             ENDIF
          ENDIF
@@ -12220,9 +12401,23 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                  ! and add 1 to NFC_R for OMESH(NOM).
                   ! Use Automatic reallocation:
                   OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-                  OMESH(NOM)%IIO_CC_R = [OMESH(NOM)%IIO_CC_R, IIO]
-                  OMESH(NOM)%JJO_CC_R = [OMESH(NOM)%JJO_CC_R, JJO]
-                  OMESH(NOM)%KKO_CC_R = [OMESH(NOM)%KKO_CC_R, KKO]
+                  SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
+                  IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
+                      ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
+                      IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
+                      JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
+                      KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
+                      OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
+                      DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
+                  ENDIF
+                  OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
+                  OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
+                  OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
                   IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
                ENDIF
             ENDIF
@@ -12252,9 +12447,23 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               ! and add 1 to NFC_R for OMESH(NOM).
                ! Use Automatic reallocation:
                OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-               OMESH(NOM)%IIO_CC_R = [OMESH(NOM)%IIO_CC_R, IIO]
-               OMESH(NOM)%JJO_CC_R = [OMESH(NOM)%JJO_CC_R, JJO]
-               OMESH(NOM)%KKO_CC_R = [OMESH(NOM)%KKO_CC_R, KKO]
+               SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
+               IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
+                   ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
+                   IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
+                   JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
+                   KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
+                   OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
+                   DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
+               ENDIF
+               OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
+               OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
+               OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
                IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
             ENDIF
          ENDIF
@@ -12286,9 +12495,23 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
                DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
                 OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-                OMESH(NOM)%IIO_CC_R = [OMESH(NOM)%IIO_CC_R, IIO]
-                OMESH(NOM)%JJO_CC_R = [OMESH(NOM)%JJO_CC_R, JJO]
-                OMESH(NOM)%KKO_CC_R = [OMESH(NOM)%KKO_CC_R, KKO]
+                SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
+                IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
+                    ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
+                    IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
+                    JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
+                    KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
+                    DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
+                    OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
+                    DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
+                    OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
+                    DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
+                    OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
+                    DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
+                ENDIF
+                OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
+                OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
+                OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
                ENDDO
             ENDDO
          ENDDO
@@ -17967,13 +18190,43 @@ DO ICC=1,MESHES(NM)%IBM_NCUTCELL_MESH
             XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
          END SELECT
 
-         ! Face indexes:
-         INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-FCELL+(LOWHIGH-1), IJK(X2AXIS), IJK(X3AXIS) /)
-         INFACE = INDXI1(XIAXIS)
-         JNFACE = INDXI1(XJAXIS)
-         KNFACE = INDXI1(XKAXIS)
+         IF (LOWHIGH == LOW_IND) THEN
+            ! Face indexes:
+            INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-FCELL, IJK(X2AXIS), IJK(X3AXIS) /)
+            INFACE = INDXI1(XIAXIS)
+            JNFACE = INDXI1(XJAXIS)
+            KNFACE = INDXI1(XKAXIS)
 
-         IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
+            ! Location of next Cartesian cell:
+            INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-1, IJK(X2AXIS), IJK(X3AXIS) /)
+            INCELL = INDXI1(XIAXIS)
+            JNCELL = INDXI1(XJAXIS)
+            KNCELL = INDXI1(XKAXIS)
+
+            IF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH) > 0 ) THEN
+               IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
+            ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+               IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
+            ENDIF
+         ELSE ! HIGH_IND
+            ! Face indexes:
+            INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)-FCELL+1, IJK(X2AXIS), IJK(X3AXIS) /)
+            INFACE = INDXI1(XIAXIS)
+            JNFACE = INDXI1(XJAXIS)
+            KNFACE = INDXI1(XKAXIS)
+
+            ! Location of next Cartesian cell:
+            INDXI1(IAXIS:KAXIS) = (/ IJK(X1AXIS)+1, IJK(X2AXIS), IJK(X3AXIS) /)
+            INCELL = INDXI1(XIAXIS)
+            JNCELL = INDXI1(XJAXIS)
+            KNCELL = INDXI1(XKAXIS)
+
+            IF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_UNKH) > 0 ) THEN
+               IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
+            ELSEIF ( MESHES(NM)%CCVAR(INCELL,JNCELL,KNCELL,IBM_CGSC) == IBM_CUTCFE ) THEN ! Cut-cell.
+               IJKFACE(INFACE,JNFACE,KNFACE,X1AXIS) = 1
+            ENDIF
+         ENDIF
 
       ENDDO
    ENDDO
