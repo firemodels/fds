@@ -29560,63 +29560,6 @@ IF ( MOD(N_INTERSECTIONS,2)/=0 ) POINT_IN_POLYHEDRON=.TRUE.
 
 END FUNCTION POINT_IN_POLYHEDRON
 
-! ---------------------------- VALID_TRIANGLE ----------------------------------------
-
-LOGICAL FUNCTION VALID_TRIANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3)
-
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
-REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
-
-REAL(FB), POINTER, DIMENSION(:) :: V, V1, V2, V3
-REAL(FB) :: U1(3), U2(3), ANGLE1, ANGLE2, DIFF_ANGLE
-
-INTEGER :: I
-
-VALID_TRIANGLE = .FALSE.
-
-V1(1:3)=>VERTS(3*IV1-2:3*IV1)
-V2(1:3)=>VERTS(3*IV2-2:3*IV2)
-V3(1:3)=>VERTS(3*IV3-2:3*IV3)
-
-U1 = V1 - V2
-U2 = V3 - V2
-
-! triangle is invalid if angle at V2 is > 180 deg
-
-IF(DIR==1) THEN
-   U1(1) = U1(2)
-   U1(2) = U1(3)
-   U2(1) = U2(2)
-   U2(2) = U2(3)
-ELSE IF(DIR==2) THEN
-   U1(1) = U1(1)
-   U1(2) = U1(3)
-   U2(1) = U2(1)
-   U2(2) = U2(3)
-ELSE
-   U1(1) = U1(1)
-   U1(2) = U1(2)
-   U2(1) = U2(1)
-   U2(2) = U2(2)
-ENDIF
-ANGLE1 = ATAN2(U1(2),U1(1))
-ANGLE2 = ATAN2(U2(2),U2(1))
-DIFF_ANGLE = ANGLE2 - ANGLE1
-IF(DIFF_ANGLE<0.0)DIFF_ANGLE = DIFF_ANGLE+2.0*PI
-IF (DIFF_ANGLE>PI-PI/180.0) RETURN
-
-! triangle is invalid if any other vertex in polygon is inside this triangle
-
-DO I = 1, NVERTS
-  IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
-  V(1:3)=>VERTS(3*I-2:3*I)
-  IF (POINT_IN_TRIANGLE_FB(V, V1, V2, V3)) RETURN
-ENDDO
-
-VALID_TRIANGLE = .TRUE.
-END FUNCTION VALID_TRIANGLE
-
 ! ---------------------------- POINT_IN_TRIANGLE_FB ----------------------------------------
 
 LOGICAL FUNCTION POINT_IN_TRIANGLE_FB(P_FB,V1_FB,V2_FB,V3_FB)
@@ -29676,25 +29619,124 @@ ENDDO EDGE_LOOP
 
 END FUNCTION POINT_IN_TRIANGLE
 
+
+! ---------------------------- VALID_TRIANGLE ----------------------------------------
+
+LOGICAL FUNCTION VALID_TRIANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3, FLAG, DIFF_ANGLE)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
+REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
+LOGICAL, INTENT(IN) :: FLAG
+REAL(FB), INTENT(OUT) :: DIFF_ANGLE
+
+REAL(FB), POINTER, DIMENSION(:) :: V, V1, V2, V3
+REAL(FB) :: U1(3), U2(3), ANGLE1, ANGLE2
+
+INTEGER :: I
+
+VALID_TRIANGLE = .FALSE.
+
+V1(1:3)=>VERTS(3*IV1-2:3*IV1)
+V2(1:3)=>VERTS(3*IV2-2:3*IV2)
+V3(1:3)=>VERTS(3*IV3-2:3*IV3)
+
+U1 = V1 - V2
+U2 = V3 - V2
+
+! triangle is invalid if angle at V2 is > 180 deg
+
+IF(DIR==1) THEN
+   U1(1) = U1(2)
+   U1(2) = U1(3)
+   U2(1) = U2(2)
+   U2(2) = U2(3)
+ELSE IF(DIR==2) THEN
+   U1(1) = U1(1)
+   U1(2) = U1(3)
+   U2(1) = U2(1)
+   U2(2) = U2(3)
+ELSE
+   U1(1) = U1(1)
+   U1(2) = U1(2)
+   U2(1) = U2(1)
+   U2(2) = U2(2)
+ENDIF
+ANGLE1 = ATAN2(U1(2),U1(1))
+ANGLE2 = ATAN2(U2(2),U2(1))
+DIFF_ANGLE = ANGLE2 - ANGLE1
+IF(DIFF_ANGLE<0.0)DIFF_ANGLE = DIFF_ANGLE+2.0*PI
+IF (DIFF_ANGLE>PI-PI/180.0.OR..NOT.FLAG) RETURN
+
+! triangle is invalid if any other vertex in polygon is inside this triangle
+
+DO I = 1, NVERTS
+  IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
+  V(1:3)=>VERTS(3*I-2:3*I)
+  IF (POINT_IN_TRIANGLE_FB(V, V1, V2, V3)) RETURN
+ENDDO
+
+VALID_TRIANGLE = .TRUE.
+END FUNCTION VALID_TRIANGLE
+
 ! ---------------------------- TRIANGULATE ----------------------------------------
 
 SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
    INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
    REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
    INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+
    INTEGER :: IFACE, NLIST, NLIST_OLD
    INTEGER :: VERT_LIST(0:100)
    LOGICAL :: NODE_EXISTS(100)
    INTEGER :: I, V0, V1, V2, IVERT
-   LOGICAL HAVE_TRIANGLE
+   LOGICAL HAVE_TRIANGLE, TRIANGLE_STATE
+   REAL(FB) :: DIFF_ANGLE
+   INTEGER :: NBIG_ANGLES, VERT_START
+   LOGICAL :: FLAG
 
+   FLAG = .TRUE.
    DO I = 1, NVERTS
       VERT_LIST(I) = I
    ENDDO
    VERT_LIST(0) = NVERTS
    VERT_LIST(NVERTS+1) = 1
 
-   NODE_EXISTS(1:NVERTS) = .TRUE.
+   IF (FLAG) THEN ! find number of angles > 180 deg
+      NBIG_ANGLES = 0
+      VERT_START = 1
+      DO I = 1, NVERTS
+         V0 = VERT_LIST(I-1)
+         V1 = VERT_LIST(I)
+         V2 = VERT_LIST(I+1)
+         TRIANGLE_STATE = VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2,.FALSE.,DIFF_ANGLE)
+         IF ( DIFF_ANGLE>PI-PI/180.0 ) THEN
+            NBIG_ANGLES = NBIG_ANGLES + 1
+            VERT_START = I
+         ENDIF
+      END DO
+
+! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
+
+      IF ( FLAG .OR. NBIG_ANGLES <= 1 ) THEN  ! for now always triangulate using a fan
+         IFACE = 0
+         DO IVERT = 1, NVERTS
+            V0 = VERT_LIST(IVERT)
+            V1 = VERT_LIST(IVERT+1)
+            IF ( V0==VERT_START .OR. V1==VERT_START) CYCLE
+            V2 = VERT_LIST(VERT_START)
+            FACES(3*IFACE+1) = VERT_OFFSET+V2
+            FACES(3*IFACE+2) = VERT_OFFSET+V0
+            FACES(3*IFACE+3) = VERT_OFFSET+V1
+            IFACE = IFACE + 1
+         ENDDO
+         RETURN
+      ENDIF
+   ENDIF
+
+! more than 1 angles in polygon > 180 deg
+
+   NODE_EXISTS(1:NVERTS) = .TRUE. 
 
    NLIST = NVERTS
    IFACE = 1
@@ -29706,7 +29748,7 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
          V1 = VERT_LIST(IVERT)
          V2 = VERT_LIST(IVERT+1)
          IF(.NOT.NODE_EXISTS(V2))EXIT INNER
-         IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+         IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2,.TRUE.,DIFF_ANGLE)) THEN
             FACES(IFACE  ) = VERT_OFFSET+V0
             FACES(IFACE+1) = VERT_OFFSET+V1
             FACES(IFACE+2) = VERT_OFFSET+V2
