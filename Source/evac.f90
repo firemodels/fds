@@ -126,7 +126,7 @@ MODULE EVAC
      REAL(EB) :: Tau_mean=0._EB, Tau_para=0._EB, Tau_para2=0._EB, Tau_low=0._EB, Tau_high=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
-     REAL(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
+     REAL(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB, m_agent=0._EB
      REAL(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
      REAL(EB) :: FAC_V0_UP=-1._EB, FAC_V0_DOWN=-1._EB, FAC_V0_HORI=-1._EB, MAXIMUM_V0_FACTOR=-1.0_EB
      !Issue1547: Added MAXIMUM_V0_FACTOR to person class type (structured type).
@@ -468,7 +468,7 @@ CONTAINS
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y, &
-         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR, TIME_START_FED
+         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR, TIME_START_FED, MASS_OF_AGENT
     !Issue1547: The MAXIMUM_V0_FACTOR should be difined as a variable in Fortran, because it is used
     !Issue1547: in a namelist (PERS-namelist) to read an user input, if given.
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
@@ -576,7 +576,7 @@ CONTAINS
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
          MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
          SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY, &
-         CROWBAR_DT_READ
+         CROWBAR_DT_READ, MASS_OF_AGENT
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
     !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
@@ -1609,7 +1609,8 @@ CONTAINS
          D_TORSO_MEAN = 0.30_EB
          D_SHOULDER_MEAN = 0.19_EB
          TAU_ROT   = 0.2_EB
-         M_INERTIA = -4.0_EB
+         M_INERTIA = -4.0_EB ! Default male mass of inertia
+         MASS_OF_AGENT = -80.0_EB ! Default male mass
 
          ! If not given on PERS line, use those given on EVSS lines
          FAC_V0_UP   = -1.0_EB
@@ -2029,6 +2030,7 @@ CONTAINS
          ELSE
             PCP%m_iner = M_INERTIA  ! kg m2
          END IF
+         PCP%m_agent = ABS(MASS_OF_AGENT) ! kg, default male body size mass
 
          PCP%FAC_V0_UP = FAC_V0_UP
          PCP%FAC_V0_DOWN = FAC_V0_DOWN
@@ -14327,7 +14329,7 @@ CONTAINS
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST') ; RETURN
     END SELECT
-    HR%Mass   = 80.0_EB*(HR%Radius/0.27_EB)**2
+    HR%Mass   = PCP%m_agent*(HR%Radius/0.27_EB)**2
 
     SELECT CASE(PCP%I_TAU_DIST)
     CASE(-1)
@@ -14876,7 +14878,7 @@ CONTAINS
           AP(NPP,3) =   2.0_FB*REAL(HR%r_torso,FB) ! diameter
           ! Height of a human scaled by radius, default male 1.80 m
           AP(NPP,4) =  1.80_FB*REAL(HR%Radius/0.27_EB,FB)
-
+          
           IF (CROWBAR_DUMP) THEN
              EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
              IF (EVEL >= TWO_EPSILON_EB) THEN
