@@ -29681,11 +29681,11 @@ END FUNCTION VALID_TRIANGLE
 
 ! ---------------------------- TRIANGULATE ----------------------------------------
 
-SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FLAG,FACES)
+SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
    INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-   LOGICAL, INTENT(IN) :: FLAG
    REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
    INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+
    INTEGER :: IFACE, NLIST, NLIST_OLD
    INTEGER :: VERT_LIST(0:100)
    LOGICAL :: NODE_EXISTS(100)
@@ -29693,7 +29693,9 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FLAG,FACES)
    LOGICAL HAVE_TRIANGLE, TRIANGLE_STATE
    REAL(FB) :: DIFF_ANGLE
    INTEGER :: NBIG_ANGLES, VERT_START
+   LOGICAL :: FLAG
 
+   FLAG = .TRUE.
    DO I = 1, NVERTS
       VERT_LIST(I) = I
    ENDDO
@@ -29713,7 +29715,10 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FLAG,FACES)
             VERT_START = I
          ENDIF
       END DO
-      IF ( NBIG_ANGLES <= 1 ) THEN ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
+
+! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
+
+      IF ( FLAG .OR. NBIG_ANGLES <= 1 ) THEN  ! for now always triangulate using a fan
          IFACE = 0
          DO IVERT = 1, NVERTS
             V0 = VERT_LIST(IVERT)
