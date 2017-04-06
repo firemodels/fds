@@ -461,6 +461,7 @@ EOF
 else
 cat << EOF >> $scriptfile
 #PBS -N $JOBPREFIX$TITLE
+#PBS -W umask=0022
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
