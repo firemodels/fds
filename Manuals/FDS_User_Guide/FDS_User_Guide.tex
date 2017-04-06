@@ -4095,7 +4095,7 @@ where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~m
 
 \subsubsection{Boundary Layer (Circular Vent)}
 
-{\ct PROFILE='BOUNDARY LAYER'} may be used for circular vents created using {\ct RADIUS}. By adding {\ct VEL\_BULK} on the {\ct SURF} line together with {\ct VEL}, FDS will produce a plug flow core profile, with max velocity given by {\ct VEL}, and a quadradic profile in the boundary layer.  The form of the profile is illustrated in Fig.~\ref{fig:bl_profile} for a circular vent.  The functional form of the velocity profile (here taken a vertical profile) is
+{\ct PROFILE='BOUNDARY LAYER'} may be used for circular vents created using {\ct RADIUS}. By adding {\ct VEL\_BULK} on the {\ct SURF} line together with {\ct VEL}, FDS will produce a plug flow core profile, with max velocity given by {\ct VEL}, and a quadratic profile in the boundary layer.  The form of the profile is illustrated in Fig.~\ref{fig:bl_profile} for a circular vent.  The functional form of the velocity profile (here taken a vertical profile) is
 \begin{equation}
 w(r) = \left\{ \begin{array}{ll} w_{\si{max}} & \quad \mbox{if} \quad r \le R-\delta \\ w_{\si{max}}\left(1 - \left(\frac{r-(R-\delta)}{\delta}\right)^2\right) & \quad \mbox{if} \quad R-\delta < r \le R \end{array} \right.
 \end{equation}
