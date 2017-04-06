@@ -30631,8 +30631,9 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
 REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
 
+REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), POINTER, DIMENSION(:) :: V, V1, V2, V3
-REAL(FB) :: U1(3), U2(3), ANGLE1, ANGLE2, DIFF_ANGLE
+REAL(FB) :: U1(3), U2(3), U1XU2
 
 INTEGER :: I
 
@@ -30642,8 +30643,8 @@ V1(1:3)=>VERTS(3*IV1-2:3*IV1)
 V2(1:3)=>VERTS(3*IV2-2:3*IV2)
 V3(1:3)=>VERTS(3*IV3-2:3*IV3)
 
-U1 = V1 - V2
-U2 = V3 - V2
+U1 = V2 - V1;
+U2 = V3 - V2;
 
 ! triangle is invalid if angle at V2 is > 180 deg
 
@@ -30653,23 +30654,20 @@ IF(DIR==1) THEN
    U2(1) = U2(2)
    U2(2) = U2(3)
 ELSE IF(DIR==2) THEN
-   U1(1) = U1(1)
-   U1(2) = U1(3)
-   U2(1) = U2(1)
-   U2(2) = U2(3)
+   U1(2) = U1(1)
+   U1(1) = U1(3)
+   U2(2) = U2(1)
+   U2(1) = U2(3)
 ELSE
    U1(1) = U1(1)
    U1(2) = U1(2)
    U2(1) = U2(1)
    U2(2) = U2(2)
 ENDIF
-ANGLE1 = ATAN2(U1(2),U1(1))
-ANGLE2 = ATAN2(U2(2),U2(1))
-DIFF_ANGLE = ANGLE2 - ANGLE1
-IF(DIFF_ANGLE<0.0)DIFF_ANGLE = DIFF_ANGLE+2.0*PI
-IF (DIFF_ANGLE>PI-PI/180.0) RETURN
-
-! triangle is invalid if any other vertex in polygon is inside this triangle
+U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
+U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
+U1XU2 = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
+IF (U1XU2 < EPS_FB) RETURN
 
 DO I = 1, NVERTS
   IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
@@ -30743,13 +30741,17 @@ END FUNCTION POINT_IN_TRIANGLE
 
 SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
    INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-   REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+   REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
    INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
    INTEGER :: IFACE, NLIST, NLIST_OLD
    INTEGER :: VERT_LIST(0:100)
    LOGICAL :: NODE_EXISTS(100)
    INTEGER :: I, V0, V1, V2, IVERT
    LOGICAL HAVE_TRIANGLE
+   REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
+   REAL(FB) :: U1(3), U2(3), U1XU2
+   REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
+   LOGICAL :: VERT_DROPPED
 
    DO I = 1, NVERTS
       VERT_LIST(I) = I
@@ -30757,7 +30759,7 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
    VERT_LIST(0) = NVERTS
    VERT_LIST(NVERTS+1) = 1
 
-   NODE_EXISTS(1:NVERTS) = .TRUE.
+   NODE_EXISTS(1:NVERTS+1) = .TRUE.
 
    NLIST = NVERTS
    IFACE = 1
@@ -30768,7 +30770,7 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
          V0 = VERT_LIST(IVERT-1)
          V1 = VERT_LIST(IVERT)
          V2 = VERT_LIST(IVERT+1)
-         IF(.NOT.NODE_EXISTS(V2))EXIT INNER
+         IF(.NOT.NODE_EXISTS(IVERT+1))EXIT
          IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
             FACES(IFACE  ) = VERT_OFFSET+V0
             FACES(IFACE+1) = VERT_OFFSET+V1
@@ -30776,24 +30778,13 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
             IF (NLIST == 3) EXIT OUTER
             IFACE = IFACE + 3
             NODE_EXISTS(IVERT) = .FALSE.
+            IF(IVERT==1) NODE_EXISTS(NLIST+1) = .FALSE.
             HAVE_TRIANGLE = .TRUE.
             IVERT = IVERT + 2
          ELSE
             IVERT = IVERT + 1
          ENDIF
       ENDDO INNER
-      IF (.NOT.HAVE_TRIANGLE) THEN
-         IVERT = 1
-         V0 = VERT_LIST(IVERT-1)
-         V1 = VERT_LIST(IVERT)
-         V2 = VERT_LIST(IVERT+1)
-         FACES(IFACE)   = VERT_OFFSET+V0
-         FACES(IFACE+1) = VERT_OFFSET+V1
-         FACES(IFACE+2) = VERT_OFFSET+V2
-         IF (NLIST == 3) EXIT OUTER
-         IFACE = IFACE + 3
-         NODE_EXISTS(V1) = .FALSE.
-      ENDIF
       NLIST_OLD = NLIST
       NLIST = 0
       DO I = 1, NLIST_OLD
@@ -30802,9 +30793,59 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
             VERT_LIST(NLIST) = VERT_LIST(I)
          ENDIF
       ENDDO
-      VERT_LIST(0) = NVERTS
-      VERT_LIST(NVERTS+1) = 1
-      NODE_EXISTS(1:NVERTS) = .TRUE.
+      VERT_LIST(0) = VERT_LIST(NLIST)
+      VERT_LIST(NLIST+1) = VERT_LIST(1)
+      NODE_EXISTS(1:NLIST+1) = .TRUE.
+
+      ! Test for nodes connecting parallel edges, if found drop them:
+      VERT_DROPPED=.FALSE.
+      DO I=1,NLIST
+         V0=VERT_LIST(I-1); V1=VERT_LIST(I); V2=VERT_LIST(I+1);
+         VV1(1:3)=>VERTS(3*V0-2:3*V0)
+         VV2(1:3)=>VERTS(3*V1-2:3*V1)
+         VV3(1:3)=>VERTS(3*V2-2:3*V2)
+         U1 = VV2 - VV1;
+         U2 = VV3 - VV2;
+         SELECT CASE(DIR)
+         CASE(IAXIS)
+             U1(1) = U1(2); U1(2) = U1(3)
+             U2(1) = U2(2); U2(2) = U2(3)
+         CASE(JAXIS)
+             U1(2) = U1(1); U1(1) = U1(3)
+             U2(2) = U2(1); U2(1) = U2(3)
+         CASE(KAXIS)
+             U1(1) = U1(1); U1(2) = U1(2)
+             U2(1) = U2(1); U2(2) = U2(2)
+         END SELECT
+         U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
+         U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
+         IF (U1(1)*U2(1)+U1(2)*U2(2) > -EPS_FB) CYCLE
+         U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
+         IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
+            VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
+            IF (IFACE < 3*(NVERTS-2)) THEN
+               FACES(IFACE  ) = VERT_OFFSET+V0
+               FACES(IFACE+1) = VERT_OFFSET+V1
+               FACES(IFACE+2) = VERT_OFFSET+V2
+               IFACE = IFACE + 3
+            ENDIF
+            IF (NLIST == 3) EXIT OUTER
+         ENDIF
+      ENDDO
+      IF (VERT_DROPPED) THEN
+         ! Repeat List generation:
+         NLIST_OLD = NLIST
+         NLIST = 0
+         DO I = 1, NLIST_OLD
+            IF(NODE_EXISTS(I))THEN
+               NLIST = NLIST + 1
+               VERT_LIST(NLIST) = VERT_LIST(I)
+            ENDIF
+         ENDDO
+         VERT_LIST(0) = VERT_LIST(NLIST)
+         VERT_LIST(NLIST+1) = VERT_LIST(1)
+         NODE_EXISTS(1:NLIST+1) = .TRUE.
+      ENDIF
    ENDDO OUTER
 END SUBROUTINE TRIANGULATE
 
