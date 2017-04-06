@@ -1,5 +1,5 @@
 @echo off
-set paper=FDS+EVAC_5_Guide
+set paper=FDS+EVAC_Guide
 
 echo pass 1
 pdflatex -interaction nonstopmode %paper% > %paper%.err
