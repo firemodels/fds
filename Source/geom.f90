@@ -30787,85 +30787,142 @@ END FUNCTION POINT_IN_TRIANGLE
 
 ! ---------------------------- TRIANGULATE ----------------------------------------
 
-SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
-   INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-   REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
-   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES,LOCTYPE)
 
-   INTEGER :: IFACE, NLIST, NLIST_OLD
-   INTEGER :: VERT_LIST(0:100)
-   LOGICAL :: NODE_EXISTS(100)
-   INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT
-   LOGICAL HAVE_TRIANGLE
-   REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
-   REAL(FB) :: U1(3), U2(3), U1XU2
-   REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
-   INTEGER :: NBIG_ANGLES, VERT_START
-   LOGICAL :: VERT_DROPPED, FLAG
+INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
+REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
+INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+INTEGER, INTENT(OUT) :: LOCTYPE(NVERTS-2)
 
-   FLAG = .TRUE.
-   NLIST = NVERTS
-   DO I = 1, NLIST
-      VERT_LIST(I) = I
+INTEGER :: IFACE, NLIST, NLIST_OLD
+INTEGER :: VERT_LIST(0:100), EDGE_LIST(2,1:100)
+LOGICAL :: NODE_EXISTS(100)
+INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT, IEDGE
+LOGICAL HAVE_TRIANGLE
+REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
+REAL(FB) :: U1(3), U2(3), U1XU2
+REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
+INTEGER :: NBIG_ANGLES, VERT_START
+LOGICAL :: VERT_DROPPED, FLAG
+
+INTEGER :: HIDEDGE(3), EDGEI(1:2), NEDGES
+INTEGER, PARAMETER :: SHFT_NODE(1:4) = (/ 2, 1, 0, 2 /)
+
+FLAG = .TRUE.
+NLIST = NVERTS
+NEDGES= NVERTS
+DO I = 1, NLIST
+   VERT_LIST(I) = I
+   IF(I < NLIST) EDGE_LIST(1:2,I) = (/ I, I+1 /)
+ENDDO
+VERT_LIST(0) = NLIST
+VERT_LIST(NLIST+1) = VERT_LIST(1)
+NODE_EXISTS(1:NLIST+1) = .TRUE.
+EDGE_LIST(1:2,NLIST) = (/ NEDGES, 1 /)
+
+IF (FLAG) THEN ! find number of angles > 180 deg
+   NBIG_ANGLES = 0
+   VERT_START = 1
+   DO I = 1, NVERTS
+      IM1 = I - 1
+      IF (I==1)IM1 = NVERTS
+      IP1 = I + 1
+      IF (I==NVERTS)IP1 = 1
+      IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1) ) THEN
+         NBIG_ANGLES = NBIG_ANGLES + 1
+         VERT_START = I
+      ENDIF
+   END DO
+
+   ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
+   IF ( NBIG_ANGLES <= 1 ) THEN
+      IFACE = 0
+      DO I = 1, NVERTS
+         IP1 = I + 1
+         IF (I==NVERTS) IP1=1
+         IF (I==VERT_START .OR. IP1==VERT_START) CYCLE
+         FACES(3*IFACE+1) = VERT_OFFSET+VERT_START
+         FACES(3*IFACE+2) = VERT_OFFSET+I
+         FACES(3*IFACE+3) = VERT_OFFSET+IP1
+         IFACE = IFACE + 1
+      ENDDO
+      RETURN
+   ENDIF
+ENDIF
+
+! more than 1 angles in polygon > 180 deg
+IFACE = 1
+OUTER: DO WHILE (NLIST>=3)
+   IVERT = 1
+   HAVE_TRIANGLE = .FALSE.
+   INNER: DO WHILE (IVERT<=NLIST)
+      V0 = VERT_LIST(IVERT-1)
+      V1 = VERT_LIST(IVERT)
+      V2 = VERT_LIST(IVERT+1)
+      IF(.NOT.NODE_EXISTS(IVERT+1))EXIT INNER
+      IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+         FACES(IFACE  ) = VERT_OFFSET+V0
+         FACES(IFACE+1) = VERT_OFFSET+V1
+         FACES(IFACE+2) = VERT_OFFSET+V2
+         IF (NLIST == 3) EXIT OUTER
+         IFACE = IFACE + 3
+         NODE_EXISTS(IVERT) = .FALSE.
+         IF(IVERT==1) NODE_EXISTS(NLIST+1) = .FALSE.
+         HAVE_TRIANGLE = .TRUE.
+         IVERT = IVERT + 2
+      ELSE
+         IVERT = IVERT + 1
+      ENDIF
+   ENDDO INNER
+   NLIST_OLD = NLIST
+   NLIST = 0
+   DO I = 1, NLIST_OLD
+      IF(NODE_EXISTS(I))THEN
+         NLIST = NLIST + 1
+         VERT_LIST(NLIST) = VERT_LIST(I)
+      ENDIF
    ENDDO
-   VERT_LIST(0) = NLIST
+   VERT_LIST(0) = VERT_LIST(NLIST)
    VERT_LIST(NLIST+1) = VERT_LIST(1)
    NODE_EXISTS(1:NLIST+1) = .TRUE.
 
-   IF (FLAG) THEN ! find number of angles > 180 deg
-      NBIG_ANGLES = 0
-      VERT_START = 1
-      DO I = 1, NVERTS
-         IM1 = I - 1
-         IF (I==1)IM1 = NVERTS
-         IP1 = I + 1
-         IF (I==NVERTS)IP1 = 1
-         IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1) ) THEN
-            NBIG_ANGLES = NBIG_ANGLES + 1
-            VERT_START = I
-         ENDIF
-      END DO
-
-      ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
-      IF ( NBIG_ANGLES <= 1 ) THEN
-         IFACE = 0
-         DO I = 1, NVERTS
-            IP1 = I + 1
-            IF (I==NVERTS) IP1=1
-            IF (I==VERT_START .OR. IP1==VERT_START) CYCLE
-            FACES(3*IFACE+1) = VERT_OFFSET+VERT_START
-            FACES(3*IFACE+2) = VERT_OFFSET+I
-            FACES(3*IFACE+3) = VERT_OFFSET+IP1
-            IFACE = IFACE + 1
-         ENDDO
-         RETURN
-      ENDIF
-   ENDIF
-
-   ! more than 1 angles in polygon > 180 deg
-   IFACE = 1
-   OUTER: DO WHILE (NLIST>=3)
-      IVERT = 1
-      HAVE_TRIANGLE = .FALSE.
-      INNER: DO WHILE (IVERT<=NLIST)
-         V0 = VERT_LIST(IVERT-1)
-         V1 = VERT_LIST(IVERT)
-         V2 = VERT_LIST(IVERT+1)
-         IF(.NOT.NODE_EXISTS(IVERT+1))EXIT INNER
-         IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+   ! Test for nodes connecting parallel edges, if found drop them:
+   VERT_DROPPED=.FALSE.
+   DO I=1,NLIST
+      V0=VERT_LIST(I-1); V1=VERT_LIST(I); V2=VERT_LIST(I+1);
+      VV1(1:3)=>VERTS(3*V0-2:3*V0)
+      VV2(1:3)=>VERTS(3*V1-2:3*V1)
+      VV3(1:3)=>VERTS(3*V2-2:3*V2)
+      U1 = VV2 - VV1;
+      U2 = VV3 - VV2;
+      SELECT CASE(DIR)
+      CASE(IAXIS)
+          U1(1) = U1(2); U1(2) = U1(3)
+          U2(1) = U2(2); U2(2) = U2(3)
+      CASE(JAXIS)
+          U1(2) = U1(1); U1(1) = U1(3)
+          U2(2) = U2(1); U2(1) = U2(3)
+      CASE(KAXIS)
+          U1(1) = U1(1); U1(2) = U1(2)
+          U2(1) = U2(1); U2(2) = U2(2)
+      END SELECT
+      U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
+      U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
+      IF (U1(1)*U2(1)+U1(2)*U2(2) > -EPS_FB) CYCLE
+      U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
+      IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
+         VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
+         IF (IFACE < 3*(NVERTS-2)) THEN
             FACES(IFACE  ) = VERT_OFFSET+V0
             FACES(IFACE+1) = VERT_OFFSET+V1
             FACES(IFACE+2) = VERT_OFFSET+V2
-            IF (NLIST == 3) EXIT OUTER
             IFACE = IFACE + 3
-            NODE_EXISTS(IVERT) = .FALSE.
-            IF(IVERT==1) NODE_EXISTS(NLIST+1) = .FALSE.
-            HAVE_TRIANGLE = .TRUE.
-            IVERT = IVERT + 2
-         ELSE
-            IVERT = IVERT + 1
          ENDIF
-      ENDDO INNER
+         IF (NLIST == 3) EXIT OUTER
+      ENDIF
+   ENDDO
+   IF (VERT_DROPPED) THEN
+      ! Repeat List generation:
       NLIST_OLD = NLIST
       NLIST = 0
       DO I = 1, NLIST_OLD
@@ -30877,57 +30934,27 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
       VERT_LIST(0) = VERT_LIST(NLIST)
       VERT_LIST(NLIST+1) = VERT_LIST(1)
       NODE_EXISTS(1:NLIST+1) = .TRUE.
+   ENDIF
+ENDDO OUTER
 
-      ! Test for nodes connecting parallel edges, if found drop them:
-      VERT_DROPPED=.FALSE.
-      DO I=1,NLIST
-         V0=VERT_LIST(I-1); V1=VERT_LIST(I); V2=VERT_LIST(I+1);
-         VV1(1:3)=>VERTS(3*V0-2:3*V0)
-         VV2(1:3)=>VERTS(3*V1-2:3*V1)
-         VV3(1:3)=>VERTS(3*V2-2:3*V2)
-         U1 = VV2 - VV1;
-         U2 = VV3 - VV2;
-         SELECT CASE(DIR)
-         CASE(IAXIS)
-             U1(1) = U1(2); U1(2) = U1(3)
-             U2(1) = U2(2); U2(2) = U2(3)
-         CASE(JAXIS)
-             U1(2) = U1(1); U1(1) = U1(3)
-             U2(2) = U2(1); U2(1) = U2(3)
-         CASE(KAXIS)
-             U1(1) = U1(1); U1(2) = U1(2)
-             U2(1) = U2(1); U2(2) = U2(2)
-         END SELECT
-         U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
-         U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
-         IF (U1(1)*U2(1)+U1(2)*U2(2) > -EPS_FB) CYCLE
-         U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
-         IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
-            VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
-            IF (IFACE < 3*(NVERTS-2)) THEN
-               FACES(IFACE  ) = VERT_OFFSET+V0
-               FACES(IFACE+1) = VERT_OFFSET+V1
-               FACES(IFACE+2) = VERT_OFFSET+V2
-               IFACE = IFACE + 3
-            ENDIF
-            IF (NLIST == 3) EXIT OUTER
+! Here test edges to define LOCTYPE:
+LOCTYPE(:) = 0
+DO IFACE=1,NVERTS-2
+   HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
+   DO IEDGE=1,3
+      ! Nodes i,i+1:
+      EDGEI(1:2) = (/ FACES(3*IFACE-SHFT_NODE(IEDGE))-VERT_OFFSET, FACES(3*IFACE-SHFT_NODE(IEDGE+1))-VERT_OFFSET /)
+      DO I=1,NEDGES
+         IF(EDGE_LIST(1,I)==EDGEI(1) .AND. EDGE_LIST(2,I)==EDGEI(2)) THEN
+            HIDEDGE(IEDGE) = 0 ! Edge belongs to polygon, set to plot.
+            EXIT
          ENDIF
       ENDDO
-      IF (VERT_DROPPED) THEN
-         ! Repeat List generation:
-         NLIST_OLD = NLIST
-         NLIST = 0
-         DO I = 1, NLIST_OLD
-            IF(NODE_EXISTS(I))THEN
-               NLIST = NLIST + 1
-               VERT_LIST(NLIST) = VERT_LIST(I)
-            ENDIF
-         ENDDO
-         VERT_LIST(0) = VERT_LIST(NLIST)
-         VERT_LIST(NLIST+1) = VERT_LIST(1)
-         NODE_EXISTS(1:NLIST+1) = .TRUE.
-      ENDIF
-   ENDDO OUTER
+   ENDDO
+   LOCTYPE(IFACE) = 4 * HIDEDGE(1) + 8 * HIDEDGE(2) + 16 * HIDEDGE(3)
+ENDDO
+
+RETURN
 END SUBROUTINE TRIANGULATE
 
 ! ---------------------------- TRIANGULATE2 ----------------------------------------
