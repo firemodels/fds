@@ -1,5 +1,5 @@
 %% ------------------------------------------------------------------------
-% Script geom_stl2fem_mesh:
+% Script stl2fds:
 %
 % This script reads an .stl 3D geometry file, and writes the geometry nodes 
 % and surface triangles in FEM_MESH FDS format (ASCII). The result can be
