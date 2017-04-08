@@ -371,7 +371,7 @@ geometries.  The fire calculation obstacles show up in the evacuation
 meshes, but one should not that the evacuation meshes have their own
 rectilinear meshes that need not coincide with the fire meshes, so
 that the actual positions of the obstacles might be a little bit
-different due to the different spatial discretations of the meshes.
+different due to the different spatial discretisations of the meshes.
 Usually the user needs to fine tune the obstacles in the evacuation
 meshes to represent the evacuation scenario correctly.  This is done
 by adding or removing obstacles in the evacuation meshes as needed.
@@ -610,7 +610,7 @@ Added a logical keyword to (some) \Timtt{PERS} namelist:
 agents aim straight towards the doors that they can see.  First they
 aim towards \Timtt{XYZ} and when they are close enough then they start
 to aim towards \Timtt{XB}.  ``Aim towards \Timtt{XB} or \Timtt{XYZ}''
-does not mean straght to that point.  The agents aim between the door
+does not mean straight to that point.  The agents aim between the door
 posts (minus 30 cm for the body size effect) and the mid point of the
 door (\Timtt{XYZ} is a point but the door width is also used here to
 place ``door posts'' for this point).  If the agents are within the door
@@ -2903,7 +2903,7 @@ horizontal paths and stairs.  Most of the calculations were done using
 FDS version 6.5.3 (Evac version 2.5.2).  The specific flows through
 doors and corridors were done using FDS version 6.5.2 (Evac version
 2.5.2). These should be valid for the version 6.5.3, because the
-evacuation calculation should be the same (exept some minor bug fixes
+evacuation calculation should be the same (except some minor bug fixes
 etc.) and these test cases are done in ``fire drill mode'', i.e., no
 fire meshes are defined.
 
@@ -3015,7 +3015,7 @@ walking speed by a factor $\gtrsim$0.5 seems to give a good agreement
 with the observations.  Two different values of the anisotropy
 parameter of the social force are used, $\lambda_i$=0.3 (the default
 in FDS+Evac) and $\lambda_i$=0.5.  The $\lambda_i$=0.5 results seem to
-reporduce the experimental findings better than the default value 0.3.
+reproduce the experimental findings better than the default value 0.3.
 A speed reduction factor $\gtrsim$0.5 seems to produce more or less
 quite constant flow at the exit door, \emph{i.e.}, at these speed
 reduction values the stairs are feeding the front door fast enough.
