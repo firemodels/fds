@@ -5,8 +5,8 @@ VPATH = ../Source;../../Source
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   BUILD_DATE := $(shell date /t) $(shell time /t)
-  GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
 else
 # linux/osx
   GIT_HASH := $(shell git describe --long --dirty)
@@ -22,8 +22,6 @@ GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
 GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
-
-# Definition of the non-MPI object variables
 
 obj = prec.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
 
@@ -53,29 +51,31 @@ setup_win:
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-intel_win_64 : FFLAGS = /O /traceback $(GITINFO)
+intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+intel_win_64 : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
 intel_win_64 : FCOMPL = ifort
-intel_win_64 : obj = fds_win_64
-intel_win_64 : setup_win $(objwin)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin)
+intel_win_64 : exe = geomtest_win_64
+intel_win_64 : $(objwin)
+	$(FCOMPL) -o $(exe) $(FFLAGS) $(objwin) $(MPILIB)
 
 # linux
 
-intel_linux_64 : FFLAGS = -m64 -O2 -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
+intel_linux_64 : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 intel_linux_64 : LFLAGS = -static-intel
-intel_linux_64 : FCOMPL = ifort
-intel_linux_64 : obj = fds_intel_linux_64
+intel_linux_64 : FCOMPL = $(MPIFORT)
+intel_linux_64 : exe = geomtest_linux_64
 intel_linux_64 : setup $(obj)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
 
 # OSX
 
-intel_osx_64 : FFLAGS = -m64 -no-wrap-margin $(GITINFO)
-intel_osx_64 : LFLAGS = -static-intel
-intel_osx_64 : FCOMPL = ifort
-intel_osx_64 : obj = fds_intel_osx_64
-intel_osx_64 : setup $(obj)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj)
+intel_osx_64 : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO)
+intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
+intel_osx_64 : FCOMPL = mpifort
+intel_osx_64 : exe = geomtest_osx_64
+intel_osx_64 : $(obj)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
 
 
 # *** Object Dependencies ***
