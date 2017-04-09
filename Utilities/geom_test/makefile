@@ -101,7 +101,7 @@ devc.obj : prec.obj
 mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 gsmv.obj : func.obj prec.obj cons.obj mesh.obj
-geom.obj : func.obj prec.obj cons.ointel_bj mesh.obj
+geom.obj : gsmv.obj func.obj prec.obj cons.obj mesh.obj
 geom_main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj geom.obj
 
 #*** Clean Target to remove Object and Module files ***
