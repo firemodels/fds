@@ -8,4 +8,4 @@ source $IFORT_COMPILER/bin/compilervars.sh $platform
 fi
 
 echo Building $target
-make VPATH="../../../Source;../Source" -f ../makefile $target
+make VPATH="../../../Source:../Source" -f ../makefile $target

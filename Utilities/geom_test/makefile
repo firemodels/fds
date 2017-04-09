@@ -1,6 +1,6 @@
 # Makefile for geom_test
 
-VPATH = ../Source;../../Source
+VPATH = ../Source:../../Source
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -23,7 +23,7 @@ GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
 GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
-obj = prec.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
+obj = prec.o mpis.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
 
 objwin = $(obj:.o=.obj)
 
@@ -60,6 +60,12 @@ intel_win_64 : $(objwin)
 	$(FCOMPL) -o $(exe) $(FFLAGS) $(objwin) $(MPILIB)
 
 # linux
+
+gnu_linux_32 : FFLAGS = -O0 $(GITINFOGNU)
+gnu_linux_32 : FCOMPL = gfortran
+gnu_linux_32 : exe = geomtest_linux_32
+gnu_linux_32 : $(obj)
+	$(FCOMPL) $(FFLAGS) -o $(exe) $(obj)
 
 intel_linux_64 : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 intel_linux_64 : LFLAGS = -static-intel
