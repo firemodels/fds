@@ -27,6 +27,8 @@ obj = prec.o mpis.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
 
 objwin = $(obj:.o=.obj)
 
+bindir=../bin
+
 # General Purpose Rules
 
 no_target:
@@ -53,9 +55,9 @@ setup_win:
 
 intel_win_64 : FFLAGS = /Od /nologo /debug:all /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
 intel_win_64 : FCOMPL = ifort
-intel_win_64 : exe = geomtest_intel_win_64
+intel_win_64 : exe = geomtest
 intel_win_64 : $(objwin)
-	$(FCOMPL) -o $(exe) $(FFLAGS) $(objwin)
+	$(FCOMPL) -o $(bindir)/$(exe) $(FFLAGS) $(objwin)
 
 # linux
 
@@ -63,23 +65,23 @@ gnu_linux_32 : FFLAGS = -O0 $(GITINFOGNU)
 gnu_linux_32 : FCOMPL = gfortran
 gnu_linux_32 : exe = geomtest_gnu_linux_32
 gnu_linux_32 : $(obj)
-	$(FCOMPL) $(FFLAGS) -o $(exe) $(obj)
+	$(FCOMPL) $(FFLAGS) -o $(bindir)/$(exe) $(obj)
 
 intel_linux_64 : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 intel_linux_64 : LFLAGS = -static-intel
 intel_linux_64 : FCOMPL = ifort
-intel_linux_64 : exe = geomtest_intel_linux_64
+intel_linux_64 : exe = geomtest
 intel_linux_64 : setup $(obj)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(bindir)/$(exe) $(obj)
 
 # OSX
 
 intel_osx_64 : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO)
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
-intel_osx_64 : exe = geomtest_intel_osx_64
+intel_osx_64 : exe = geomtest
 intel_osx_64 : $(obj)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(bindir)/$(exe) $(obj)
 
 
 # *** Object Dependencies ***
