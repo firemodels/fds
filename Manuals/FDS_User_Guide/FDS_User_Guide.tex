@@ -1869,7 +1869,7 @@ The extra centimeter added to the $x$ coordinates of the hole make it clear that
 
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.  When the state of the {\ct HOLE} evaluates to {\ct .FALSE.}, an obstruction will be placed in the {\ct HOLE}.  By default the obstruction filling the {\ct HOLE} will take the color of the surrounding {\ct OBST} that the {\ct HOLE} was punched through.  To make the obstruction filling the {\ct HOLE} a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction filling the {\ct HOLE} to be invisible, then set {\ct COLOR='INVISIBLE'}.  Additionally, you may use the keyword {\ct TRANSPARENCY}, real number from 0 to 1, to make the obstruction filling the {\ct HOLE} transparent. See Section~\ref{info:create_remove} for an example.
 
-If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line. Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}structions.
+If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line. Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}ructions.
 
 It is a good idea to inspect the geometry by running either a setup job
 ({\ct T\_END=0} on the {\ct TIME} line) or a short-time job to test the operation of devices and control functions.
@@ -6651,7 +6651,7 @@ Remove or create a solid obstruction by assigning the character string {\ct DEVC
 \end{lstlisting}
 will cause the given obstruction to be removed when the specified {\ct DEVC} changes state.
 
-Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}structions to appear/disappear at the various designated times. These lines are part of the simple test case called {\ct create\_remove.fds}.
+Creation or removal at a predetermined time can be performed using a {\ct DEVC} that has {\ct TIME} as its measured quantity. For example, the following instructions will cause the specified {\ct HOLE}s and {\ct OBST}ructions to appear/disappear at the various designated times. These lines are part of the simple test case called {\ct create\_remove.fds}.
 \begin{lstlisting}
 &OBST XB=0.3,0.4,0.1,0.9,0.1,0.9, COLOR='PURPLE' /
 &HOLE XB=0.2,0.4,0.2,0.3,0.2,0.3, COLOR='RED',     DEVC_ID='timer1' /
