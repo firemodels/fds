@@ -63,7 +63,7 @@ intel_win_64 : $(objwin)
 
 gnu_linux_32 : FFLAGS = -O0 $(GITINFOGNU)
 gnu_linux_32 : FCOMPL = gfortran
-gnu_linux_32 : exe = geomtest_gnu_linux_32
+gnu_linux_32 : exe = geomtest
 gnu_linux_32 : $(obj)
 	$(FCOMPL) $(FFLAGS) -o $(bindir)/$(exe) $(obj)
 
