@@ -51,35 +51,33 @@ setup_win:
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
-intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-intel_win_64 : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
+intel_win_64 : FFLAGS = /Od /nologo /debug:all /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
 intel_win_64 : FCOMPL = ifort
-intel_win_64 : exe = geomtest_win_64
+intel_win_64 : exe = geomtest_intel_win_64
 intel_win_64 : $(objwin)
-	$(FCOMPL) -o $(exe) $(FFLAGS) $(objwin) $(MPILIB)
+	$(FCOMPL) -o $(exe) $(FFLAGS) $(objwin)
 
 # linux
 
 gnu_linux_32 : FFLAGS = -O0 $(GITINFOGNU)
 gnu_linux_32 : FCOMPL = gfortran
-gnu_linux_32 : exe = geomtest_linux_32
+gnu_linux_32 : exe = geomtest_gnu_linux_32
 gnu_linux_32 : $(obj)
 	$(FCOMPL) $(FFLAGS) -o $(exe) $(obj)
 
 intel_linux_64 : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 intel_linux_64 : LFLAGS = -static-intel
-intel_linux_64 : FCOMPL = $(MPIFORT)
-intel_linux_64 : exe = geomtest_linux_64
+intel_linux_64 : FCOMPL = ifort
+intel_linux_64 : exe = geomtest_intel_linux_64
 intel_linux_64 : setup $(obj)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
 
 # OSX
 
 intel_osx_64 : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -traceback -ggdb -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO)
-intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
-intel_osx_64 : FCOMPL = mpifort
-intel_osx_64 : exe = geomtest_osx_64
+intel_osx_64 : LFLAGS = -static-intel
+intel_osx_64 : FCOMPL = ifort
+intel_osx_64 : exe = geomtest_intel_osx_64
 intel_osx_64 : $(obj)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(exe) $(obj)
 
@@ -87,6 +85,7 @@ intel_osx_64 : $(obj)
 # *** Object Dependencies ***
 
 cons.o : prec.o
+mpis.o : prec.o
 type.o : prec.o cons.o
 devc.o : prec.o
 mesh.o : prec.o type.o
@@ -96,12 +95,13 @@ geom.o : gsmv.o func.o prec.o cons.o mesh.o
 geom_main.o : func.o prec.o cons.o type.o mesh.o devc.o geom.o
 
 cons.obj : prec.obj
+mpis.obj : prec.obj
 type.obj : prec.obj cons.obj
 devc.obj : prec.obj
 mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 gsmv.obj : func.obj prec.obj cons.obj mesh.obj
-geom.obj : func.obj prec.obj cons.obj mesh.obj
+geom.obj : func.obj prec.obj cons.ointel_bj mesh.obj
 geom_main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj geom.obj
 
 #*** Clean Target to remove Object and Module files ***
