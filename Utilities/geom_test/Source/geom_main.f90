@@ -8,7 +8,7 @@ use complex_geometry, only: triangulate, valid_triangle
 implicit none
 
 integer :: i, j, nverts,input_unit
-integer :: vert_offset, faces(300)
+integer :: vert_offset, faces(300),loctype(300)
 integer :: iv1, iv2, iv3, dir
 logical :: tritest
 real(fb) :: verts(300)
@@ -40,9 +40,9 @@ end do
 
 write(0,*)""
 write(0,*)"triangulation"
-call triangulate(dir,verts,nverts,vert_offset,faces)
+call triangulate(dir,verts,nverts,vert_offset,faces,loctype)
 do i = 1, nverts - 2
-   write(0,*)"face:",i," vertices:",faces(3*i-2),faces(3*i-1),faces(3*i)
+   write(0,*)"face:",i,"vertices:",faces(3*i-2),faces(3*i-1),faces(3*i)," loc:",loctype(i)
 end do
 write(0,*)"complete"
 
