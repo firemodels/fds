@@ -3159,8 +3159,8 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the abs
 \subsection{Fuel Burnout}
 
 The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_{\rm s}$, and the layer thickness, $\delta_{\rm s}$:
-\be 
-   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''} 
+\be
+   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''}
 \ee
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be highlighted in the individual sections below.
 
@@ -6135,8 +6135,8 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 
 \chapter{Vegetation}
- 
-Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).  
+
+Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).
 
 \section{Using Particles to Represent Vegetation}
 
@@ -6168,13 +6168,13 @@ The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. I
       HEAT_OF_REACTION = 418.
       ALLOW_SHRINKING=.FALSE.
       ALLOW_SWELLING=.FALSE. /
-\end{lstlisting}  
+\end{lstlisting}
 \begin{lstlisting}
 &MATL ID = 'char'
       DENSITY = 300.
       CONDUCTIVITY = 2.0
       SPECIFIC_HEAT= 1.2 /
-\end{lstlisting}      
+\end{lstlisting}
 \begin{lstlisting}
 &MATL ID = 'moisture'
       DENSITY = 1000.
@@ -6188,20 +6188,20 @@ The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. I
       SPEC_ID = 'water vapor'
       HEAT_OF_REACTION= 2500. /
 \end{lstlisting}
-The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}). 
+The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}).
 \begin{lstlisting}
-&PART ID='tree crown foliage', 
-      DRAG_LAW='CYLINDER', 
-      SURF_ID='needles', 
+&PART ID='tree crown foliage',
+      DRAG_LAW='CYLINDER',
+      SURF_ID='needles',
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
-      STATIC=.TRUE., 
+      STATIC=.TRUE.,
       COLOR='FOREST GREEN' /
 \end{lstlisting}
 \begin{lstlisting}
-&INIT PART_ID='tree crown foliage', 
-      XYZ=0.0,0.0,0.0, 
-      RADIUS=1, 
-      HEIGHT=2, 
+&INIT PART_ID='tree crown foliage',
+      XYZ=0.0,0.0,0.0,
+      RADIUS=1,
+      HEIGHT=2,
       SHAPE='CONE',
       N_PARTICLES_PER_CELL=1,
       CELL_CENTERED=.TRUE.,
@@ -7444,13 +7444,27 @@ $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux. First, consider the {\em net} heat flux to a solid surface:
+There are various output quantities related to heat flux. 
+
+\paragraph{\ct 'NET HEAT FLUX'} The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. If you want to output the {\em net} heat flux, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you just want to output $\dq_{\rm inc,rad}''$, use {\ct 'INCIDENT HEAT FLUX'}.
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. 
 
-If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
+\paragraph{\ct 'RADIATIVE HEAT FLUX'}  This is the radiative component of Eq.~(\ref{net_flux}). 
+\be
+   \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) \label{rad_flux}
+\ee
+
+\paragraph{\ct 'CONVECTIVE HEAT FLUX'} This is the convective component of Eq.~(\ref{net_flux}).
+\be
+   \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s}) \label{con_flux}
+\ee
+
+\paragraph{\ct 'INCIDENT HEAT FLUX'} This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
+
+\paragraph{\ct 'GAUGE HEAT FLUX'} If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
 \ee
@@ -7461,14 +7475,13 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
 
-Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
+\paragraph{\ct 'RADIOMETER'}  Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
 The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
 
-
-All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\paragraph{\ct 'RADIATIVE HEAT FLUX GAS'}  All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
 &DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
@@ -7479,14 +7492,21 @@ Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
 \end{lstlisting}
-Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
-
-The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
+Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''  The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
 &INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
 \end{lstlisting}
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
+
+\paragraph{\ct 'RADIANCE'}  This is the term for the radiation intensity at a point in the gas, $\bx$, with solid angle, $\bs$, where the summation is over all spectral bands:
+\be
+   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
+\ee
+This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
+\begin{lstlisting}
+&DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
+\end{lstlisting}
 
 
 \subsection{Adiabatic Surface Temperature}
