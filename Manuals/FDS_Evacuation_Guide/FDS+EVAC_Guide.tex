@@ -4498,20 +4498,20 @@ programme.
   overrides this option.  Default colour for dead agents is cyan.
 %
 \item[\Timts{OUTPUT\_SPEED}] If \Timtt{.TRUE.} then the movement
-  speeds of the agents are saved in the ouput file to be shown in
+  speeds of the agents are saved in the output file to be shown in
   Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_FED}] If \Timtt{.TRUE.} then the FED doses of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{OUTPUT\_CONTACT\_FORCE}] If \Timtt{.TRUE.} then the
   contact forces acting on the circumferences (N/m) of the agents are
-  saved in the ouput file to be shown in Smokeview as a colour bar.
+  saved in the output file to be shown in Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_TOTAL\_FORCE}] If \Timtt{.TRUE.} then the total
   forces (contact + social) acting on the circumferences (N/m) of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{TAU\_CHANGE\_V0}] How often, on the average, an agent
@@ -5106,7 +5106,7 @@ input files on the FDS+Evac web pages.  If you have merging flows in
 stairs, then you should model the landings explicitly and you can use
 \Timtt{CORR} to move the agents from one landing to the next one.  One
 could also use the \Timtt{STRS} namelist to model the entire staircase
-just as a sigle object.  This model was first introduced in the Evac
+just as a single object.  This model was first introduced in the Evac
 version 2.2.0 and it is now the recommend way of modelling whole
 staircases.  This model can deal with merging flows and counterflows.
 
@@ -5217,10 +5217,10 @@ there the ``Stair Example'' case.
 \item[\Timtt{XB}] Defines the position of this staircase and the
   extent of the automatically generated evacuation mesh.
 %
-\item[\Timtt{IJK}] Like for the evacuation meshes, set how meny cells
+\item[\Timtt{IJK}] Like for the evacuation meshes, set how many cells
   span the $x$ and $y$ directions. K should always be equal to one.
 %
-\item[\Timtt{EVAC\_Z\_OFFSET}] Like for the evacuation mehses.  This
+\item[\Timtt{EVAC\_Z\_OFFSET}] Like for the evacuation meshes.  This
   parameter refers to the lowest level of the stairs. 
 %
 \item[\Timtt{XB\_CORES(1,:)}] The XB of the centre core of the stairs
