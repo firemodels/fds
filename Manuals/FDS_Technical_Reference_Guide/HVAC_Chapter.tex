@@ -59,7 +59,7 @@ The extrapolated pressure for a compartment can be determined by using Eq.~(\ref
 all interdependent HVAC flows into or out of an FDS pressure zone:
 \be \tilde{p}^n_i  = p^{n-1}_i+\left(\frac{\d p^{n-1}_i}{\d t} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} P \, \d V}\right)\Delta t^n = \tilde{p}^{*\,n}_i - \frac{\Delta t^n \sum_j u^n_j A^n_j}{\int_{\Omega_m} P \, \d V}
    \label{HVACextrapolatedpressure} \ee
-If the summation term for the velocities being predicted in this timestep is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
+If the summation term for the velocities being predicted in this time step is removed from Eq.~(\ref{HVACextrapolatedpressure}) and placed on the left hand side of Eq.~(\ref{HVACdiscretemomentum}) and the remaining terms of Eq.~(\ref{HVACextrapolatedpressure}) are placed on the right hand side we obtain the following:
 \begin{align}
    u^n_j \left( 1+\frac{\Delta t^n K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} P \, \d V}}= \nonumber \\
