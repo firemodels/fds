@@ -24768,13 +24768,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
-                IF (AREA < GEOMEPS) THEN
-                   WRITE(LU_ERR,*) 'Area=',AREA,ICF,NSFACE
-                   DO IPT=1,NP
-                      WRITE(LU_ERR,*) IPT,XY(IAXIS:JAXIS,IPT)
-                   ENDDO
-                   PAUSE
-                ENDIF
+
                 CX2 = CX2 / (6._EB * AREA)
                 ! In x3:
                 CX3 = 0._EB
