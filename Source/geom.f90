@@ -24449,7 +24449,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
              ! Here we load Cartesian cut faces that belong to the solid region, for SLICE plotting
              ! purposes:
-             SOLID_FACE_IF : IF (.FALSE.) THEN
+             SOLID_FACE_IF : IF (.TRUE.) THEN
              ! Build segment list:
              NSSEG      = 0
              NSVERT     = 0
@@ -24706,7 +24706,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Start a new cut-face on this Cartesian face:
                 ICF = ICF + 1
-                DO ISEG=1,NSEG
+                DO ISEG=1,NSSEG
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
