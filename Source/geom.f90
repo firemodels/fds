@@ -24449,6 +24449,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
              ! Here we load Cartesian cut faces that belong to the solid region, for SLICE plotting
              ! purposes:
+             SOLID_FACE_IF : IF (.FALSE.) THEN
              ! Build segment list:
              NSSEG      = 0
              NSVERT     = 0
@@ -24720,16 +24721,24 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
              ! Load ordered nodes to CFELEM:
              NSFACE = ICF
+             COUNT  = 0
              DO ICF=1,NSFACE
+                NP = 0
+                DO ISEG=1,NSSEG
+                   IF ( SEG_FACE2(NOD3,ISEG) == ICF ) NP = NP + 1
+                ENDDO
+                IF (NP < 3) CYCLE ! Drop face if it has less than 2 3 vertices
+                COUNT=COUNT+1
                 NP = 0
                 DO ISEG=1,NSSEG
                    IF ( SEG_FACE2(NOD3,ISEG) == ICF ) THEN
                       NP = NP + 1
-                      CFELEM(1,ICF)    = NP
-                      CFELEM(NP+1,ICF) = SEG_FACE2(NOD1,ISEG)
+                      CFELEM(1,COUNT)    = NP
+                      CFELEM(NP+1,COUNT) = SEG_FACE2(NOD1,ISEG)
                    ENDIF
                 ENDDO
              ENDDO
+             NSFACE=COUNT
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NSFACE)                 = 0._EB
@@ -24759,6 +24768,13 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
+                IF (AREA < GEOMEPS) THEN
+                   WRITE(LU_ERR,*) 'Area=',AREA,ICF,NSFACE
+                   DO IPT=1,NP
+                      WRITE(LU_ERR,*) IPT,XY(IAXIS:JAXIS,IPT)
+                   ENDDO
+                   PAUSE
+                ENDIF
                 CX2 = CX2 / (6._EB * AREA)
                 ! In x3:
                 CX3 = 0._EB
@@ -24882,6 +24898,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ENDDO
              ! Final number of cut-faces in the solid region of the face:
              MESHES(NM)%IBM_CUT_FACE(NCUTFACE)%NSFACE  = COUNT-NFACE
+
+             ENDIF SOLID_FACE_IF
 
             ENDDO ! JJ
          ENDDO ! KK
@@ -25542,6 +25560,10 @@ REAL(EB), DIMENSION(IAXIS:KAXIS) :: ACEN, SQAREA
 
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:) :: IJK_COUNTED
 
+INTEGER :: NVERT_AUX, NEDGE_OLD, IVERT, COUNT, IEOLD, INOD
+LOGICAL :: FOUND
+REAL(EB):: XYZV(IAXIS:KAXIS)
+
 ! Define which cells are cut-cell, and which are solid:
 IF (BNDINT_FLAG) THEN
    ALLOCATE( IJK_COUNTED(ISTR:IEND,JSTR:JEND,KSTR:KEND) ); IJK_COUNTED=.FALSE.
@@ -25813,29 +25835,71 @@ BNDINT_COND : IF (BNDINT_FLAG) THEN
                               CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
                               MESHES(NM)%IBM_NCUTEDGE_MESH = CEI
                               MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) = CEI
-                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = 0
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = FNVERT
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = FNEDGE
                               CALL NEW_EDGE_ALLOC(NM,CEI,FNVERT,FNEDGE)
-                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = 0
                               MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = &
                                                    (/ INDIF, INDJF, INDKF, X1AXIS, IBM_GS /)
                               MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS = IBM_INBOUNDCF
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+                                                           XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+                                                           CEELEM(NOD1:NOD2,1:FNEDGE)
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+                                                           INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+                           ELSE
+
+                              NVERT_AUX=MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT
+                              NEDGE_OLD=MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
+                              DO IVERT=1,FNVERT
+                                 XYZV(IAXIS:KAXIS) = XYZVERTF(IAXIS:KAXIS,IVERT)
+                                 CALL INSERT_FACE_VERT(XYZV,NM,CEI,NVERT_AUX,INOD)
+                                 DO IEDGE=1,FNEDGE
+                                    IF(CEELEM(NOD1,IEDGE)==IVERT) CEELEM(NOD1,IEDGE)=INOD
+                                    IF(CEELEM(NOD2,IEDGE)==IVERT) CEELEM(NOD2,IEDGE)=INOD
+                                 ENDDO
+                              ENDDO
+                              CALL REALLOCATE_EDGE_ELEM(NM,CEI,NEDGE_OLD+FNEDGE)
+                              COUNT = NEDGE_OLD
+                              OUTER :DO IEDGE=1,FNEDGE
+                                 FOUND=.FALSE.
+                                 INNER1 : DO IEOLD=1,NEDGE_OLD
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1,IEOLD) /= CEELEM(NOD1,IEDGE)) CYCLE INNER1
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD2,IEOLD) /= CEELEM(NOD2,IEDGE)) CYCLE INNER1
+                                 FOUND=.TRUE.
+                                 ENDDO INNER1
+                                 INNER2 : DO IEOLD=1,NEDGE_OLD
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD2,IEOLD) /= CEELEM(NOD1,IEDGE)) CYCLE INNER2
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1,IEOLD) /= CEELEM(NOD2,IEDGE)) CYCLE INNER2
+                                 FOUND=.TRUE.
+                                 ENDDO INNER2
+                                 IF(FOUND) CYCLE OUTER
+                                 COUNT=COUNT+1
+                                 MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,COUNT) = CEELEM(NOD1:NOD2,IEDGE)
+                                 MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT)=&
+                                                              INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE)
+                              ENDDO OUTER
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT = NVERT_AUX
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE = COUNT
+
                            ENDIF
 
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
-                                                        XYZVERTF(IAXIS:KAXIS,1:FNVERT)
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
-                                                        CEELEM(NOD1:NOD2,1:FNEDGE)
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
-                                                        INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+                           !                              XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
+                           ! WRITE(LU_ERR,*) 'CUT_EDGE=',CEI,SIZE(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM,DIM=2),FNEDGE
+                           ! WRITE(LU_ERR,*) 'CEELEM=',SIZE(CEELEM,DIM=2)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+                           !                              CEELEM(NOD1,IEDGE)) CYCLE:NOD2,1:FNEDGE)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+                           !                              INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
 
                         ENDIF
 
                      ENDIF
                   ENDDO
                ENDDO
-
 
                DEALLOCATE(IBM_BODINT_PLANE%X1NVEC,IBM_BODINT_PLANE%AINV)
             ENDDO ! I
