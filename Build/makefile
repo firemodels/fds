@@ -203,7 +203,7 @@ impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
-mpi_intel_linux_64 : LFLAGS = -static-intel -lnl
+mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
@@ -224,7 +224,7 @@ else # MKL is not available.
 mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
 mpi_intel_linux_64ib : LFLAGSMKL =
 endif
-mpi_intel_linux_64ib : LFLAGS = -static-intel -lnl
+mpi_intel_linux_64ib : LFLAGS = -static-intel
 mpi_intel_linux_64ib : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
