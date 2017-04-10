@@ -30904,6 +30904,22 @@ IF (FLAG) THEN ! find number of angles > 180 deg
          FACES(3*IFACE+3) = VERT_OFFSET+IP1
          IFACE = IFACE + 1
       ENDDO
+      ! Here test edges to define LOCTYPE:
+      LOCTYPE(:) = 0
+      DO IFACE=1,NVERTS-2
+         HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
+         DO IEDGE=1,3
+            ! Nodes i,i+1:
+            EDGEI(1:2) = (/ FACES(3*IFACE-SHFT_NODE(IEDGE))-VERT_OFFSET, FACES(3*IFACE-SHFT_NODE(IEDGE+1))-VERT_OFFSET /)
+            DO I=1,NEDGES
+               IF(EDGE_LIST(1,I)==EDGEI(1) .AND. EDGE_LIST(2,I)==EDGEI(2)) THEN
+                  HIDEDGE(IEDGE) = 0 ! Edge belongs to polygon, set to plot.
+                  EXIT
+               ENDIF
+            ENDDO
+         ENDDO
+         LOCTYPE(IFACE) = 4 * HIDEDGE(1) + 8 * HIDEDGE(2) + 16 * HIDEDGE(3)
+      ENDDO
       RETURN
    ENDIF
 ENDIF
