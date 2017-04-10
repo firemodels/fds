@@ -81,20 +81,20 @@
 % These are (re)defined in stylevk.
 % Next are for the new A4 Working Papers 2009
 % Heading 1: Arial 18pt bold (large) (Arial ==> textsf Sans Serif)
-%            riviväli 20 pt, 130pt tyhjää tilaa ennen otsikkoa
-%            otsikon jälkeen 16pt tyhjää
-% Heading 2: Arial 14pt bold, 16pt riviväli, 20pt tyhjää ennen, 14pt jälkeen
-% Heading 3: Arial 12pt bold, 16pt riviväli, 18pt tyhjää ennen, 14pt jälkeen
-% Heading 4: Arial 12pt, 16pt riviväli, 18pt tyhjää ennen, 12pt jälkeen
+%            rivivÃ¤li 20 pt, 130pt tyhjÃ¤Ã¤ tilaa ennen otsikkoa
+%            otsikon jÃ¤lkeen 16pt tyhjÃ¤Ã¤
+% Heading 2: Arial 14pt bold, 16pt rivivÃ¤li, 20pt tyhjÃ¤Ã¤ ennen, 14pt jÃ¤lkeen
+% Heading 3: Arial 12pt bold, 16pt rivivÃ¤li, 18pt tyhjÃ¤Ã¤ ennen, 14pt jÃ¤lkeen
+% Heading 4: Arial 12pt, 16pt rivivÃ¤li, 18pt tyhjÃ¤Ã¤ ennen, 12pt jÃ¤lkeen
 % Contents: Arial 18pt bold
-% Abstract: Arial 18pt bold, riviväli 20pt, 60pt tyhjää ennen, 12pt
-%           jälkeen (sis.luetteloon 1. tason otsikkona)
+% Abstract: Arial 18pt bold, rivivÃ¤li 20pt, 60pt tyhjÃ¤Ã¤ ennen, 12pt
+%           jÃ¤lkeen (sis.luetteloon 1. tason otsikkona)
 % alkusanojen otsikko: kuten 1. tason otsikko
-% sis.luettelon otsikko: kuten 1. tason otsikko, sen jälkeen 24pt tyhjää
+% sis.luettelon otsikko: kuten 1. tason otsikko, sen jÃ¤lkeen 24pt tyhjÃ¤Ã¤
 % Acknowledgements: Heading 1
-% References: Heading 1, text: 10pt, 13pt riviväli, 1.5 cm riippuva
-%             sisennys, kappaleen jälkeen 13pt tyhjää
-% Captions: Arial 10pt, 13pt riviväli, 12pt tyhjää ennen, 16pt jälkeen
+% References: Heading 1, text: 10pt, 13pt rivivÃ¤li, 1.5 cm riippuva
+%             sisennys, kappaleen jÃ¤lkeen 13pt tyhjÃ¤Ã¤
+% Captions: Arial 10pt, 13pt rivivÃ¤li, 12pt tyhjÃ¤Ã¤ ennen, 16pt jÃ¤lkeen
 
 
 % \renewcommand{\refname}{\textbf{\normalsize REFERENCES}}
@@ -369,9 +369,9 @@ evacuation geometry is described using two-dimensional planes that cut
 the fire geometry at the heights representing best the floor
 geometries.  The fire calculation obstacles show up in the evacuation
 meshes, but one should not that the evacuation meshes have their own
-rectilinear meshes that need not coinside with the fire meshes, so
+rectilinear meshes that need not coincide with the fire meshes, so
 that the actual positions of the obstacles might be a little bit
-different due to the different spatial discretations of the meshes.
+different due to the different spatial discretisations of the meshes.
 Usually the user needs to fine tune the obstacles in the evacuation
 meshes to represent the evacuation scenario correctly.  This is done
 by adding or removing obstacles in the evacuation meshes as needed.
@@ -506,7 +506,7 @@ input files as templates for new input files.  Note that only the
 latest changes are listed below, the changes that were done for the
 FDS version 5 are not shown anymore.  Also this guide describes only
 the ``new'' evacuation input style, but there is still some backward
-cabability in the code to read the ``old'' evacuation input style.
+capability in the code to read the ``old'' evacuation input style.
 
 
 \subsection{Most recent changes, version 2.5.2 vs
@@ -539,7 +539,7 @@ In short: The user needs just to define:
     mesh (floor)
   \item Inclines, stairs, staircases, etc (\Timtt{EVSS} and
     \Timtt{STRS} namelists)
-  \item Agent properties and initial postions (\Timtt{PERS} and
+  \item Agent properties and initial positions (\Timtt{PERS} and
     \Timtt{EVAC} namelists)
 \end{itemize}
 
@@ -549,7 +549,7 @@ In short: The user needs just to define:
 Simple elevator model using \Timtt{CORR} namelist:
 \Timtt{WAIT\_AT\_XYZ}, \Timtt{LOCKED\_WHEN\_CLOSED}, and
 \Timtt{TARGET\_WHEN\_CLOSED} logical paramters in
-\Timtt{EXIT}/\Timtt{DOOR} namelist.  The \Timtt{CORR} has paramerers
+\Timtt{EXIT}/\Timtt{DOOR} namelist.  The \Timtt{CORR} has parameters
 \Timtt{ELEVATOR=.TRUE.}, \Timtt{TRAVEL\_TIME=10.0}.  If a door has an
 elevator \Timtt{CORR} at its \Timtt{TO\_NODE} then the door open/close
 is checking the position of the elevator car.
@@ -610,7 +610,7 @@ Added a logical keyword to (some) \Timtt{PERS} namelist:
 agents aim straight towards the doors that they can see.  First they
 aim towards \Timtt{XYZ} and when they are close enough then they start
 to aim towards \Timtt{XB}.  ``Aim towards \Timtt{XB} or \Timtt{XYZ}''
-does not mean straght to that point.  The agents aim between the door
+does not mean straight to that point.  The agents aim between the door
 posts (minus 30 cm for the body size effect) and the mid point of the
 door (\Timtt{XYZ} is a point but the door width is also used here to
 place ``door posts'' for this point).  If the agents are within the door
@@ -753,7 +753,7 @@ was introduced by Korhonen \emph{et al.}~\cite{Korhonen05}.  Later the
 model was modified along the lines given in the paper by Langston
 \emph{et al.}~\cite{Langston06} to a three circle representation of
 agents by Korhonen \emph{et al.}~\cite{Korhonen07a, Korhonen07b,
-  Korhonen08a, Korhonen08b}.  Later the model was enchanced to deal
+  Korhonen08a, Korhonen08b}.  Later the model was enhanced to deal
 better bi-directional flow situations by introducing a counterflow
 algorithm~\cite{Heliovaara12}.
 
@@ -1205,7 +1205,7 @@ building without much control on the process.  If the target exit door
 is visible to an agent then it aims directly toward the door and does
 not follow the guiding vector field if the density of the agents is
 not too high towards the door.
-% Timo: Lisää tänne, että mitein eli jostakin kokouspaperista kuvaus eli
+% Timo: LisÃ¤Ã¤ tÃ¤nne, ettÃ¤ mitein eli jostakin kokouspaperista kuvaus eli
 % ovien xyz ja xb:n reunat.
 
 %
@@ -1273,9 +1273,9 @@ Eq.~(\ref{Eq_rotmotion}) is treated similarly and its standard deviation
 is $ {\eta}^z_{i}/ I^z_{i} = 0.1 ~\mathrm{ \textrm{s}^\textrm{-2}}$.
 
 %!Timo: BUG:  8.10.2008: Nyt evss-tasoissa random force on skaalattu paremmin,
-%!Timo: OK    eli ottaa huomioon tämän hetken target-v0:llan. Samalla myöskin
-%!Timo:       random forcea skaalattu henkilön v0:n mukaan, vertailukohtana
-%!Timo:       1.3 m/s menevä henkilö.
+%!Timo: OK    eli ottaa huomioon tÃ¤mÃ¤n hetken target-v0:llan. Samalla myÃ¶skin
+%!Timo:       random forcea skaalattu henkilÃ¶n v0:n mukaan, vertailukohtana
+%!Timo:       1.3 m/s menevÃ¤ henkilÃ¶.
 %!Timo: 8 AUG 2006: VELOCITY DEPENDENT RANDOM NOISE: V > 0.9V0, THETA=THETA_INPUT
 %!Timo: V=0, THETA=100*THETA_INPUT, 0<V<0.9V0 LINEAR INTERPOLATION.
 %          EVEL = SQRT(UBAR**2 + VBAR**2)
@@ -1425,7 +1425,7 @@ sectors form a semi circle as the angle of the sectors, $\theta$, is
 increased from 40 degrees to 45 degrees, when the speed goes towards
 zero.  The origin of the sectors, the point $P$ in
 Fig.~\ref{Fig_CFsectors}, is little bit in front the torso circle if
-the agent is moving freely and it is moved continuosly to little bit
+the agent is moving freely and it is moved continuously to little bit
 behind the torso circle when the walking speed goes towards zero.
 This shift is at most $\pm R_d$, see Table~\ref{Table_DefaultHumans}.
 It is important to include the agents at the sides to the optimization
@@ -1727,7 +1727,7 @@ type in FDS+Evac.
 The exit selection algorithm of FDS+Evac is based on a game theoretic
 model described and analyzed in detail by Korhonen and
 Hostikka~\cite{Korhonen09}, Ehtamo \emph{et al.}~\cite{Ehtamo2010},
-and Heliövaara \emph{et al.}~\cite{Heliovaara10}.  The agents observe
+and HeliÃ¶vaara \emph{et al.}~\cite{Heliovaara10}.  The agents observe
 the actions of the others and select the target exit through which the
 evacuation is estimated to be the fastest.  The evacuation time of
 each agent to each exit is calculated from the distances to the exits
@@ -2041,7 +2041,7 @@ dividing this number by an estimated flow through the door.  The
 estimated human flow is given by the door width times the specific
 flow value given by the user (default 1.3 1/m/s).  The presently
 chosen door is favoured so that 10 \% longer time is tolerated by
-default.  For the non-visible doors distance should bperhaps e
+default.  For the non-visible doors distance should perhaps be
 calculated along the exit path and also some kind of an estimated
 queueing time at the door should be added to the estimated evacuation
 time, but this is not yet implemented in the model.  The queueing time
@@ -2139,7 +2139,7 @@ verification, because IMO sees that ``At this stage of development
 there is insufficient reliable experimental data to allow a through
 quantitative verification of egress models.  Until such data becomes
 available the first three components of the verification process are
-considered sufficient.'', where the first three componets are component
+considered sufficient.'', where the first three components are component
 testing, functional verification, and qualitative verification.
 
 %\vspace{\fill}
@@ -2903,7 +2903,7 @@ horizontal paths and stairs.  Most of the calculations were done using
 FDS version 6.5.3 (Evac version 2.5.2).  The specific flows through
 doors and corridors were done using FDS version 6.5.2 (Evac version
 2.5.2). These should be valid for the version 6.5.3, because the
-evacuation calculation should be the same (exept some minor bug fixes
+evacuation calculation should be the same (except some minor bug fixes
 etc.) and these test cases are done in ``fire drill mode'', i.e., no
 fire meshes are defined.
 
@@ -3015,7 +3015,7 @@ walking speed by a factor $\gtrsim$0.5 seems to give a good agreement
 with the observations.  Two different values of the anisotropy
 parameter of the social force are used, $\lambda_i$=0.3 (the default
 in FDS+Evac) and $\lambda_i$=0.5.  The $\lambda_i$=0.5 results seem to
-reporduce the experimental findings better than the default value 0.3.
+reproduce the experimental findings better than the default value 0.3.
 A speed reduction factor $\gtrsim$0.5 seems to produce more or less
 quite constant flow at the exit door, \emph{i.e.}, at these speed
 reduction values the stairs are feeding the front door fast enough.
@@ -3409,7 +3409,7 @@ using FDS+Evac version 2.5.2.
 % TODO: Add here reference to the Building and Environment paper
 % Counterflow model for agent-based simulation of crowd dynamics
 % Building and Environment 48 (2012) 89-100
-% Simo Heliövaaraa, Timo Korhonen, Simo Hostikka, Harri Ehtamo
+% Simo HeliÃ¶vaaraa, Timo Korhonen, Simo Hostikka, Harri Ehtamo
 % - Isobe experiments counterflow corridor, validation with experiments
 % - Kretz experiments counterflow corridor, validation with experiments
 % - intersection (qualitative verification)
@@ -3429,7 +3429,7 @@ using FDS+Evac version 2.5.2.
 
 \newpage
 
-% Timo: Jäin tähän 15.7.2014
+% Timo: JÃ¤in tÃ¤hÃ¤n 15.7.2014
 
 \chapter{Running FDS+Evac}\label{Sec_Running}
 
@@ -3866,7 +3866,7 @@ are listed below:
 %
 \item In addition to the user defined meshes, there is automatically
   generated visibility meshes for each ``main'' evacuation mesh
-  defined by the user.  These meshes are located horizontally excatly
+  defined by the user.  These meshes are located horizontally exactly
   at the same place as the main evacuation mesh, but the $z$ range is
   different. The mid $z$ level is at the  position defined by the
   keyword \Timtt{HUMAN\_SMOKE\_HEIGHT} on (some) \Timtt{PERS}
@@ -4052,7 +4052,7 @@ given by the keyword \Timts{EVAC\_DT\_STEADY\_STATE}.  Note that the
 FDS fire time step is adjusted during the calculation, so the main
 loop time step for evacuation may also change.  There is also an
 internal time step inside each evacuation mesh, which is changing
-according to how densly packed the agents are.  If the agents are
+according to how densely packed the agents are.  If the agents are
 touching each others then a quite small time step is needed to solve
 the movement equations.  This internal time step can be modified using
 the keywords in the \Timtt{PERS} namelist.  The time loop strategy is:
@@ -4141,14 +4141,14 @@ meshes present in the calculation.
   fire+evacuation calculation.
 %
 \item[\Timts{EVACUATION\_MC\_MODE}] If set to true then no fire meshes
-  are read in and no fire calcualtion is done.  The EFF and FED files
+  are read in and no fire calculation is done.  The EFF and FED files
   are tried to read from the hard disk if they exist.  The default is
   \Timtt{.FALSE.}, \emph{i.e.,} (re)calculate the FED and EFF files,
   if appropriate.  If \Timts{EVACUATION\_DRILL} is also set true then
   the FED file is not used.
 %
 \item[\Timts{EVACUATION\_DRILL}] If set to true then no fire meshes
-  are read in and no fire calcualtion is done.  The EFF file is
+  are read in and no fire calculation is done.  The EFF file is
   recalculated and no smoke information (the FED file) is used in the
   calculation.  The default is \Timtt{.FALSE.}, \emph{i.e.,}
   (re)calculate the FED and EFF files, if appropriate.
@@ -4161,7 +4161,7 @@ meshes present in the calculation.
 %
 \item[\Timts{EVAC\_TIME\_ITERATIONS}] is the number of evacuation flow
   field calculation time steps.  One should have nice converged
-  quiding flow fields for evacuation, so some iterations are needed.
+  guiding flow fields for evacuation, so some iterations are needed.
   A too large number means too long CPU time.  (Default is 50.)
 %
 \end{description}
@@ -4498,20 +4498,20 @@ programme.
   overrides this option.  Default colour for dead agents is cyan.
 %
 \item[\Timts{OUTPUT\_SPEED}] If \Timtt{.TRUE.} then the movement
-  speeds of the agents are saved in the ouput file to be shown in
+  speeds of the agents are saved in the output file to be shown in
   Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_FED}] If \Timtt{.TRUE.} then the FED doses of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{OUTPUT\_CONTACT\_FORCE}] If \Timtt{.TRUE.} then the
   contact forces acting on the circumferences (N/m) of the agents are
-  saved in the ouput file to be shown in Smokeview as a colour bar.
+  saved in the output file to be shown in Smokeview as a colour bar.
 %
 \item[\Timts{OUTPUT\_TOTAL\_FORCE}] If \Timtt{.TRUE.} then the total
   forces (contact + social) acting on the circumferences (N/m) of the
-  agents are saved in the ouput file to be shown in Smokeview as a
+  agents are saved in the output file to be shown in Smokeview as a
   colour bar.
 %
 \item[\Timts{TAU\_CHANGE\_V0}] How often, on the average, an agent
@@ -5106,7 +5106,7 @@ input files on the FDS+Evac web pages.  If you have merging flows in
 stairs, then you should model the landings explicitly and you can use
 \Timtt{CORR} to move the agents from one landing to the next one.  One
 could also use the \Timtt{STRS} namelist to model the entire staircase
-just as a sigle object.  This model was first introduced in the Evac
+just as a single object.  This model was first introduced in the Evac
 version 2.2.0 and it is now the recommend way of modelling whole
 staircases.  This model can deal with merging flows and counterflows.
 
@@ -5217,10 +5217,10 @@ there the ``Stair Example'' case.
 \item[\Timtt{XB}] Defines the position of this staircase and the
   extent of the automatically generated evacuation mesh.
 %
-\item[\Timtt{IJK}] Like for the evacuation meshes, set how meny cells
+\item[\Timtt{IJK}] Like for the evacuation meshes, set how many cells
   span the $x$ and $y$ directions. K should always be equal to one.
 %
-\item[\Timtt{EVAC\_Z\_OFFSET}] Like for the evacuation mehses.  This
+\item[\Timtt{EVAC\_Z\_OFFSET}] Like for the evacuation meshes.  This
   parameter refers to the lowest level of the stairs. 
 %
 \item[\Timtt{XB\_CORES(1,:)}] The XB of the centre core of the stairs
@@ -6263,7 +6263,7 @@ of the programme.
   Association, Quincy, MA, 2003.
 %
 \bibitem{Frantzich03} Frantzich, H., and Nilsson, D., ``Utrymning
-  genom tät r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
+  genom tÃ¤t r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
 %
@@ -6332,7 +6332,7 @@ of the programme.
   W.W.F., Rogsch, C., Schadschneider, A., and Schreckenberg,
   M. (eds.), Springer, 2010, pp.~309--319.
 %
-\bibitem{Rinne10} Rinne, T., Tillander, K., and Grönberg, P., ``Data
+\bibitem{Rinne10} Rinne, T., Tillander, K., and GrÃ¶nberg, P., ``Data
   Collection and Analysis of Evacuation Situations,'' VTT Research
   Notes 2562, VTT Technical Research Centre of Finland , Espoo,
   Finland, 2010 (http://www.vtt.fi/publications/index.jsp).
