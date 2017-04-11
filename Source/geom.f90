@@ -23639,12 +23639,12 @@ INTEGER :: INDXI2(MAX_DIM), INDI2, INDJ2, INDK2
 INTEGER :: INDXI3(MAX_DIM), INDI3, INDJ3, INDK3
 INTEGER :: INDXI4(MAX_DIM), INDI4, INDJ4, INDK4
 INTEGER ::  INDLC(MAX_DIM),  IEDG,  JEDG,  KEDG
-INTEGER :: NSEG, ISEG, NVERT, NFACE, NEDGE, IEDGE
+INTEGER :: NSEG, ISEG, ISEG2, NVERT, NFACE, NEDGE, IEDGE, NVERT_CART, NSEG_CART
 LOGICAL :: OUTFACE1, OUTFACE2, NOTDONE
-INTEGER, DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_FACE) :: SEG_FACE, SEG_FACEAUX
+INTEGER, DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_FACE) :: SEG_FACE, SEG_FACE_CART, SEG_FACEAUX
 INTEGER, DIMENSION(NOD1:NOD3,1:IBM_MAXCEELEM_FACE) :: SEG_FACE2
 REAL(EB), DIMENSION(IBM_MAXCEELEM_FACE) :: ANGSEG, ANGSEGAUX
-REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT  ! Locations of vertices.
+REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT, XYZVERT_CART  ! Locations of vertices.
 INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE,IBM_MAXCFELEM_FACE)    ::      CFELEM  ! Cut-faces connectivities.
 INTEGER, PARAMETER :: MAX_EDG_PER_NODE = IBM_MAXCEELEM_FACE      ! Set to max number of segments allowed per cart face.
 INTEGER, DIMENSION(1:MAX_EDG_PER_NODE,1:IBM_MAXVERTS_FACE)     :: NODEDG_FACE
@@ -23672,6 +23672,12 @@ INTEGER :: NSSEG, NSVERT, NSFACE, NSFACE2
 LOGICAL :: ASCDESC
 INTEGER :: NV,IV,V(1:IBM_MAXVERTS_FACE)
 REAL(EB):: XVERT1(1:IBM_MAXVERTS_FACE),XVERT2(1:IBM_MAXVERTS_FACE)
+
+INTEGER, PARAMETER :: NODC1(1:4) = (/ 1, 2, 1, 2 /)
+INTEGER, PARAMETER :: NODC2(1:4) = (/ 1, 2, 2, 1 /)
+INTEGER :: SNOD1(NOD1:NOD2), SNOD2(NOD1:NOD2)
+REAL(EB) :: XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2), XYZ_SEG2(IAXIS:KAXIS,NOD1:NOD2)
+LOGICAL :: DIFF(1:4)
 
 ! Build a set of regular cut-cells in the middle of the domain to do testing.
 IF (PERIODIC_TEST == 103 ) THEN
@@ -24079,6 +24085,11 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    ANGSEG(NSEG) = PI
                 ENDDO
              ENDIF
+
+             ! Store Segment and Vertex list from Cartesian face boundary:
+             XYZVERT_CART(IAXIS:KAXIS,1:NVERT)= XYZVERT(IAXIS:KAXIS,1:NVERT)
+             SEG_FACE_CART(NOD1:NOD2,1:NSEG)  = SEG_FACE(NOD1:NOD2,1:NSEG)
+             NVERT_CART=NVERT; NSEG_CART = NSEG
 
              ! 2. IBM_INBOUNDARY cut-edges assigned to this face:
              CEI = MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_IDCE,X1AXIS)
@@ -24580,6 +24591,39 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ANGSEG(NSSEG) = 0._EB
              ENDDO
 
+             ! Use list of segments on gasphase region from IBM_CUT_EDGE:
+             ! These are to discard from SEGS computed before:
+             COUNT=0
+             SEG_FACEAUX(NOD1:NOD2,1:NSSEG) = SEG_FACE(NOD1:NOD2,1:NSSEG)
+             ANGSEGAUX(1:NSSEG)=ANGSEG(1:NSSEG)
+             SEG_FLAG(1:NSSEG) = .FALSE.
+             OUTER : DO ISEG=1,NSSEG
+                INNER : DO ISEG2=1,NSEG_CART
+                   SNOD1(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG)
+                   SNOD2(NOD1:NOD2)= SEG_FACE_CART(NOD1:NOD2,ISEG2)
+                   XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2) = XYZVERT(IAXIS:KAXIS,SNOD1(NOD1:NOD2))
+                   XYZ_SEG2(IAXIS:KAXIS,NOD1:NOD2) = XYZVERT_CART(IAXIS:KAXIS,SNOD2(NOD1:NOD2))
+                   ! Test for possible node combination:
+                   DO INOD=1,4
+                      INOD1=NODC1(INOD) ! [ 1 2 1 2 ]
+                      INOD2=NODC2(INOD) ! [ 1 2 2 1]
+                      DIFF(INOD) = SQRT((XYZ_SEG1(IAXIS,INOD1)-XYZ_SEG2(IAXIS,INOD2))**2._EB + &
+                                        (XYZ_SEG1(JAXIS,INOD1)-XYZ_SEG2(JAXIS,INOD2))**2._EB + &
+                                        (XYZ_SEG1(KAXIS,INOD1)-XYZ_SEG2(KAXIS,INOD2))**2._EB ) < GEOMEPS
+                   ENDDO
+                   IF(DIFF(1) .AND. DIFF(2)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
+                   IF(DIFF(3) .AND. DIFF(4)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
+                ENDDO INNER
+             ENDDO OUTER
+             DO ISEG=1,NSSEG
+                IF(SEG_FLAG(ISEG)) CYCLE
+                COUNT=COUNT+1
+                SEG_FACE(NOD1:NOD2,COUNT)=SEG_FACEAUX(NOD1:NOD2,ISEG)
+                ANGSEG(COUNT) = ANGSEGAUX(ISEG)
+             ENDDO
+
+             NSSEG=COUNT
+
              ! Build Solid side faces:
              NOTDONE = .TRUE.
              DO WHILE(NOTDONE)
@@ -24594,7 +24638,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
 
                 ! Drop segments with NUMEDG_NODE(INOD)=1:
-                ! The assumption here is that they are IBM_GG IBM_INBOUNDCF
+                ! The assumption here is that they are IBM_SS IBM_INBOUNDCF
                 ! segments with one node inside the Cartface i.e. case Fig
                 ! 9(a) in the CompGeom3D notes):
                 COUNT = 0
