@@ -1,4 +1,4 @@
-&HEAD CHID='methane_XO2_ramp_2step_dx_1p25cm', TITLE='UMD Line Burner, extinction'/
+&HEAD CHID='methane_2step_XO2_ramp_dx_1p25cm', TITLE='UMD Line Burner, extinction'/
 
 &MULT ID='m1', DX=0.425,DY=0.30,DZ=0.30, I_UPPER=1,J_UPPER=1,K_UPPER=4/ 20 meshes
 &MESH IJK=34,24,24, XB=-0.425,0.0,-0.30,0,-0.0125,0.2875, MULT_ID='m1'/
