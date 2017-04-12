@@ -24598,7 +24598,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ANGSEGAUX(1:NSSEG)=ANGSEG(1:NSSEG)
              SEG_FLAG(1:NSSEG) = .FALSE.
              OUTER : DO ISEG=1,NSSEG
-                INNER : DO ISEG2=1,NSEG_CART
+                ! Test against GASPHASE segments:
+                INNER1 : DO ISEG2=1,NSEG_CART
                    SNOD1(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG)
                    SNOD2(NOD1:NOD2)= SEG_FACE_CART(NOD1:NOD2,ISEG2)
                    XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2) = XYZVERT(IAXIS:KAXIS,SNOD1(NOD1:NOD2))
@@ -24613,7 +24614,14 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    ENDDO
                    IF(DIFF(1) .AND. DIFF(2)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
                    IF(DIFF(3) .AND. DIFF(4)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
-                ENDDO INNER
+                ENDDO INNER1
+                ! Test against itself:
+                INNER2 : DO ISEG2=1,NSSEG
+                   IF (ISEG==ISEG2) CYCLE
+                   SNOD1(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG)
+                   SNOD2(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG2)
+                   IF(SNOD1(NOD1)==SNOD2(NOD2) .AND. SNOD1(NOD2)==SNOD2(NOD1)) SEG_FLAG(ISEG)=.TRUE.
+                ENDDO INNER2
              ENDDO OUTER
              DO ISEG=1,NSSEG
                 IF(SEG_FLAG(ISEG)) CYCLE
@@ -24781,8 +24789,25 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                       CFELEM(NP+1,COUNT) = SEG_FACE2(NOD1,ISEG)
                    ENDIF
                 ENDDO
+                ! Does Face Have zero Area? If so drop, rewind:
+                DO IPT=2,NP+1
+                   ICF_PT = CFELEM(IPT,COUNT)
+                   ! Define closed Polygon:
+                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                ENDDO
+                ICF_PT = CFELEM(2,COUNT)
+                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                AREA = 0._EB
+                DO II2=1,NP
+                   AREA = AREA + ( XY(IAXIS,II2) * XY(JAXIS,II2+1) - &
+                                   XY(JAXIS,II2) * XY(IAXIS,II2+1) )
+                ENDDO
+                IF (ABS(AREA) < GEOMEPS**2._EB) THEN
+                   CFELEM(1:IBM_MAXVERT_CUTFACE,COUNT) = IBM_UNDEFINED
+                   COUNT = COUNT - 1
+                ENDIF
              ENDDO
-             NSFACE=COUNT
+             NSFACE = COUNT; IF(NSFACE==0) CYCLE
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NSFACE)                 = 0._EB
@@ -30782,15 +30807,17 @@ END FUNCTION VALID_TRIANGLE
 
 ! ----------------------------- DIFF_ANGLE -----------------------------------------
 
-LOGICAL FUNCTION DIFF_ANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3)
+LOGICAL FUNCTION DIFF_ANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3, ABS_FLG)
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
 REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
+LOGICAL, INTENT(IN) :: ABS_FLG
 
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), POINTER, DIMENSION(:) :: V1, V2, V3
 REAL(FB) :: U1(3), U2(3)
+LOGICAL :: TEST_FLAG
 
 DIFF_ANGLE = .FALSE.
 
@@ -30822,7 +30849,12 @@ ENDIF
 
 U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
 U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
-IF (U1(1)*U2(2)-U1(2)*U2(1) < EPS_FB) DIFF_ANGLE = .TRUE.
+IF (ABS_FLG) THEN
+   TEST_FLAG=ABS(U1(1)*U2(2)-U1(2)*U2(1)) < EPS_FB
+ELSE
+   TEST_FLAG=    U1(1)*U2(2)-U1(2)*U2(1)  < EPS_FB
+ENDIF
+IF (TEST_FLAG) DIFF_ANGLE = .TRUE.
 
 RETURN
 
@@ -30897,7 +30929,7 @@ INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
 INTEGER, INTENT(OUT) :: LOCTYPE(NVERTS-2)
 
 INTEGER :: IFACE, NLIST, NLIST_OLD
-INTEGER :: VERT_LIST(0:100), EDGE_LIST(2,1:100)
+INTEGER :: VERT_LIST(0:100), VERT_FLAG(0:100), EDGE_LIST(2,1:100)
 LOGICAL :: NODE_EXISTS(100)
 INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT, IEDGE
 LOGICAL HAVE_TRIANGLE
@@ -30907,30 +30939,49 @@ REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 INTEGER :: NBIG_ANGLES, VERT_START
 LOGICAL :: VERT_DROPPED, FLAG
 
-INTEGER :: HIDEDGE(3), EDGEI(1:2), NEDGES
+INTEGER :: HIDEDGE(3), EDGEI(1:2), NVERTS2, NEDGES, COUNT
 INTEGER, PARAMETER :: SHFT_NODE(1:4) = (/ 2, 1, 0, 2 /)
 
 FLAG = .TRUE.
-NLIST = NVERTS
-NEDGES= NVERTS
-DO I = 1, NLIST
-   VERT_LIST(I) = I
-   IF(I < NLIST) EDGE_LIST(1:2,I) = (/ I, I+1 /)
+
+! Drop vertices contained whithin lines of the polygon:
+VERT_FLAG(1:NVERTS)=1
+DO I = 1, NVERTS
+   IM1 = I - 1
+   IF (I==1     )IM1 = NVERTS
+   IP1 = I + 1
+   IF (I==NVERTS)IP1 = 1
+   IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1,.TRUE.) ) VERT_FLAG(I)=0 ! Vertex located in line joining neighbors.
 ENDDO
-VERT_LIST(0) = NLIST
+
+NLIST  = SUM(VERT_FLAG(1:NVERTS))
+NVERTS2= NLIST
+NEDGES = NLIST
+COUNT = 0
+DO I = 1, NVERTS
+   IF(VERT_FLAG(I)==0) CYCLE
+   COUNT= COUNT + 1
+   VERT_LIST(COUNT) = I
+ENDDO
+VERT_LIST(0) = VERT_LIST(NLIST)
 VERT_LIST(NLIST+1) = VERT_LIST(1)
 NODE_EXISTS(1:NLIST+1) = .TRUE.
-EDGE_LIST(1:2,NLIST) = (/ NEDGES, 1 /)
+DO I = 1, NLIST-1
+   EDGE_LIST(1:2,I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
+ENDDO
+EDGE_LIST(1:2,NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
+FACES(1:3*(NVERTS-2)) = VERT_OFFSET+VERT_LIST(NLIST)
+
 
 IF (FLAG) THEN ! find number of angles > 180 deg
    NBIG_ANGLES = 0
-   VERT_START = 1
-   DO I = 1, NVERTS
+   VERT_START = VERT_LIST(1)
+   DO I = 1, NVERTS2
       IM1 = I - 1
-      IF (I==1)IM1 = NVERTS
+      IF (I==1)IM1 = NVERTS2
       IP1 = I + 1
-      IF (I==NVERTS)IP1 = 1
-      IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1) ) THEN
+      IF (I==NVERTS2)IP1 = 1
+      IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,VERT_LIST(IM1),VERT_LIST(I),VERT_LIST(IP1),.FALSE.) ) THEN
          NBIG_ANGLES = NBIG_ANGLES + 1
          VERT_START = I
       ENDIF
@@ -30939,18 +30990,18 @@ IF (FLAG) THEN ! find number of angles > 180 deg
    ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
    IF ( NBIG_ANGLES <= 1 ) THEN
       IFACE = 0
-      DO I = 1, NVERTS
+      DO I = 1, NVERTS2
          IP1 = I + 1
-         IF (I==NVERTS) IP1=1
+         IF (I==NVERTS2) IP1=1
          IF (I==VERT_START .OR. IP1==VERT_START) CYCLE
-         FACES(3*IFACE+1) = VERT_OFFSET+VERT_START
-         FACES(3*IFACE+2) = VERT_OFFSET+I
-         FACES(3*IFACE+3) = VERT_OFFSET+IP1
+         FACES(3*IFACE+1) = VERT_OFFSET+VERT_LIST(VERT_START)
+         FACES(3*IFACE+2) = VERT_OFFSET+VERT_LIST(I)
+         FACES(3*IFACE+3) = VERT_OFFSET+VERT_LIST(IP1)
          IFACE = IFACE + 1
       ENDDO
       ! Here test edges to define LOCTYPE:
-      LOCTYPE(:) = 0
-      DO IFACE=1,NVERTS-2
+      LOCTYPE(:) = 4+8+16
+      DO IFACE=1,NVERTS2-2
          HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
          DO IEDGE=1,3
             ! Nodes i,i+1:
@@ -31030,7 +31081,7 @@ OUTER: DO WHILE (NLIST>=3)
       U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
       IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
          VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
-         IF (IFACE < 3*(NVERTS-2)) THEN
+         IF (IFACE < 3*(NVERTS2-2)) THEN
             FACES(IFACE  ) = VERT_OFFSET+V0
             FACES(IFACE+1) = VERT_OFFSET+V1
             FACES(IFACE+2) = VERT_OFFSET+V2
@@ -31056,8 +31107,8 @@ OUTER: DO WHILE (NLIST>=3)
 ENDDO OUTER
 
 ! Here test edges to define LOCTYPE:
-LOCTYPE(:) = 0
-DO IFACE=1,NVERTS-2
+LOCTYPE(:) = 4+8+16
+DO IFACE=1,NVERTS2-2
    HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
    DO IEDGE=1,3
       ! Nodes i,i+1:
