@@ -593,7 +593,7 @@ IF (N_DEVC_TIME>0) THEN
    DO I = 1,N_DEVC_FILES
       IF (APPEND) THEN
          OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='OLD')
-         CALL APPEND_FILE(LU_DEVC(I),2,T)
+         CALL APPEND_FILE(LU_DEVC(I),2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
       ELSE
          N_OUT = MIN(DEVC_COLUMN_LIMIT , N_DEVC_TIME-DEVC_COLUMN_LIMIT*(I-1))
          OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
@@ -660,7 +660,7 @@ IF (N_CTRL>0) THEN
    DO I = 1,N_CTRL_FILES
       IF (APPEND) THEN
          OPEN(LU_CTRL(I),FILE=FN_CTRL(I),FORM='FORMATTED',STATUS='OLD')
-         CALL APPEND_FILE(LU_CTRL(I),2,T)
+         CALL APPEND_FILE(LU_CTRL(I),2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
       ELSE
          OPEN(LU_CTRL(I),FILE=FN_CTRL(I),FORM='FORMATTED',STATUS='REPLACE')
          N_OUT = MIN(CTRL_COLUMN_LIMIT, N_CTRL - CTRL_COLUMN_LIMIT * (I - 1))
@@ -688,7 +688,7 @@ ENDIF
 
 IF (APPEND) THEN
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='OLD')
-   CALL APPEND_FILE(LU_HRR,2,T)
+   CALL APPEND_FILE(LU_HRR,2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
 ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
    WRITE(TCFORM,'(A,I4.4,A)') "(",12+N_ZONE_TMP,"(A,','),A)"
@@ -708,7 +708,7 @@ IF (N_ZONE>0) DEALLOCATE(P_ZONE_ID)
 IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
    IF (APPEND) THEN
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='OLD')
-      CALL APPEND_FILE(LU_MASS,2,T)
+      CALL APPEND_FILE(LU_MASS,2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
    ELSE
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
       LABEL(1) = 'Time'
@@ -2424,7 +2424,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP
-CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,EXTINCTION_MODEL
+CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
 
 ! Write out preliminary stuff to error file (unit 0)
@@ -2609,6 +2609,10 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 2'
       CASE (EXTINCTION_3)
          EXTINCTION_MODEL = 'EXTINCTION 3'
+      CASE (EXTINCTION_4)
+         EXTINCTION_MODEL = 'EXTINCTION 4'
+      CASE (EXTINCTION_5)
+         EXTINCTION_MODEL = 'EXTINCTION 5'
    END SELECT
 
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
@@ -3064,15 +3068,13 @@ WRITE(LU_CORE(NM)) DEL_RHO_D_DEL_Z
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%PART_INDEX>0) THEN
-      IF (LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)%ID=='RESERVED TARGET PARTICLE') CYCLE
-   ENDIF
-   WRITE(LU_CORE(NM)) IN%PARTICLE_INSERT_CLOCK(1:NMESHES)
+   WRITE(LU_CORE(NM)) IN%ALREADY_INSERTED(NM)
+   WRITE(LU_CORE(NM)) IN%PARTICLE_INSERT_CLOCK(NM)
 ENDDO
 
 DO N=1,N_SURF
    SF => SURFACE(N)
-   WRITE(LU_CORE(NM)) SF%PARTICLE_INSERT_CLOCK(1:NMESHES)
+   WRITE(LU_CORE(NM)) SF%PARTICLE_INSERT_CLOCK(NM)
 ENDDO
 
 DO N=1,N_OBST
@@ -3214,15 +3216,13 @@ READ(LU_RESTART(NM))  DEL_RHO_D_DEL_Z
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
-   IF (IN%PART_INDEX>0) THEN
-      IF (LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)%ID=='RESERVED TARGET PARTICLE') CYCLE
-   ENDIF
-   READ(LU_RESTART(NM)) IN%PARTICLE_INSERT_CLOCK(1:NMESHES)
+   READ(LU_RESTART(NM)) IN%ALREADY_INSERTED(NM)
+   READ(LU_RESTART(NM)) IN%PARTICLE_INSERT_CLOCK(NM)
 ENDDO
 
 DO N=1,N_SURF
    SF => SURFACE(N)
-   READ(LU_RESTART(NM)) SF%PARTICLE_INSERT_CLOCK(1:NMESHES)
+   READ(LU_RESTART(NM)) SF%PARTICLE_INSERT_CLOCK(NM)
 ENDDO
 
 DO N=1,N_OBST
@@ -3896,6 +3896,7 @@ USE COMPLEX_GEOMETRY
    INTEGER VERTBEG, VERTEND, FACEBEG, FACEEND
    LOGICAL IS_SOLID
    INTEGER :: ICF, NVF, IVCF
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LOCTYPE
 
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 
@@ -3925,13 +3926,13 @@ USE COMPLEX_GEOMETRY
             DO J=1,NJ-1
                IS_SOLID = SOLID(CELL_INDEX(SLICE,J+J1,K+K1))
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 16 ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
 
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 4 ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -3952,13 +3953,13 @@ USE COMPLEX_GEOMETRY
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,SLICE,K+K1))
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 16
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                FACES(3*IFACE)   = IJK(I+1,K+1,NI)
 
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 4
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -3979,13 +3980,13 @@ USE COMPLEX_GEOMETRY
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,J+J1,SLICE))
                IFACE = IFACE + 1
-               IF (IS_SOLID) LOCATIONS(IFACE) = 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 16
                FACES(3*IFACE-2) = IJK(  I,  J,NI)
                FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                FACES(3*IFACE)   = IJK(I+1,J+1,NI)
 
                IFACE = IFACE + 1
-               IF (IS_SOLID) LOCATIONS(IFACE) = 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 4
                FACES(3*IFACE-2) = IJK(  I,  J,NI)
                FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                FACES(3*IFACE)   = IJK(  I,J+1,NI)
@@ -4033,30 +4034,32 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                     ALLOCATE(LOCTYPE(NVF-2))
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         ! vertex indices 1, 2, ..., NVF
                         ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
                         IFACECUT = IFACECUT + 1
-                        LOCATIONS(IFACECUT) = 2
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 ! Solid side cut-faces.
+                        LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
+                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 ! after TRIANGULATE is verified remove the following 3 lines of code (and similar lines in 2 locations below)
 !                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
 !                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
 !                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF
                      ENDDO
+                     DEALLOCATE(LOCTYPE)
                   ENDDO
                ELSE
                   IFACE = IFACE + 1 ! store solid and gas faces and vertices (2 faces per cell)
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 16
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                   FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
 
                   IFACE = IFACE + 1
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 4
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                   FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -4094,27 +4097,29 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
+                     ALLOCATE(LOCTYPE(NVF-2))
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
-                        LOCATIONS(IFACECUT) = 2
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 ! Solid side cut-faces.
+                        LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
+                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 !                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
 !                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
 !                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
+                     DEALLOCATE(LOCTYPE)
                   ENDDO
                ELSE
                   IFACE = IFACE + 1
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 16
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                   FACES(3*IFACE)   = IJK(I+1,K+1,NI)
 
                   IFACE = IFACE + 1
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 4
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                   FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -4150,27 +4155,29 @@ USE COMPLEX_GEOMETRY
                      FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
                      VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
                      VERT_OFFSET = IVERTCUT - NVF
-                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR)
-                    DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     ALLOCATE(LOCTYPE(NVF-2))
+                     CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
+                     DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
-                        LOCATIONS(IFACECUT) = 2
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 ! Solid side cut-faces.
+                        LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
+                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 !                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
 !                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
 !                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
                      ENDDO
+                     DEALLOCATE(LOCTYPE)
                   ENDDO
                ELSE
                   IFACE = IFACE + 1
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 16
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                   FACES(3*IFACE)   = IJK(I+1,J+1,NI)
 
                   IFACE = IFACE + 1
-                  LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  LOCATIONS(IFACE) = 0 + 4
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                   FACES(3*IFACE)   = IJK(  I,J+1,NI)
@@ -6583,7 +6590,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
    CASE(17) ! RADIANCE
-      SOLID_PHASE_OUTPUT = ONE_D%IL(1)*0.001_EB
+      SOLID_PHASE_OUTPUT = SUM(ONE_D%IL(1:NUMBER_SPECTRAL_BANDS))*0.001_EB
    CASE(20) ! INCIDENT HEAT FLUX
       SOLID_PHASE_OUTPUT = ( ONE_D%QRADIN/(ONE_D%EMISSIVITY+1.0E-10_EB) )*0.001_EB
    CASE(21) ! HEAT TRANSFER COEFFICENT

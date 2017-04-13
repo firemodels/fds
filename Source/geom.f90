@@ -23639,12 +23639,12 @@ INTEGER :: INDXI2(MAX_DIM), INDI2, INDJ2, INDK2
 INTEGER :: INDXI3(MAX_DIM), INDI3, INDJ3, INDK3
 INTEGER :: INDXI4(MAX_DIM), INDI4, INDJ4, INDK4
 INTEGER ::  INDLC(MAX_DIM),  IEDG,  JEDG,  KEDG
-INTEGER :: NSEG, ISEG, NVERT, NFACE, NEDGE, IEDGE
+INTEGER :: NSEG, ISEG, ISEG2, NVERT, NFACE, NEDGE, IEDGE, NVERT_CART, NSEG_CART
 LOGICAL :: OUTFACE1, OUTFACE2, NOTDONE
-INTEGER, DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_FACE) :: SEG_FACE, SEG_FACEAUX
+INTEGER, DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_FACE) :: SEG_FACE, SEG_FACE_CART, SEG_FACEAUX
 INTEGER, DIMENSION(NOD1:NOD3,1:IBM_MAXCEELEM_FACE) :: SEG_FACE2
 REAL(EB), DIMENSION(IBM_MAXCEELEM_FACE) :: ANGSEG, ANGSEGAUX
-REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT  ! Locations of vertices.
+REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT, XYZVERT_CART  ! Locations of vertices.
 INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE,IBM_MAXCFELEM_FACE)    ::      CFELEM  ! Cut-faces connectivities.
 INTEGER, PARAMETER :: MAX_EDG_PER_NODE = IBM_MAXCEELEM_FACE      ! Set to max number of segments allowed per cart face.
 INTEGER, DIMENSION(1:MAX_EDG_PER_NODE,1:IBM_MAXVERTS_FACE)     :: NODEDG_FACE
@@ -23672,6 +23672,12 @@ INTEGER :: NSSEG, NSVERT, NSFACE, NSFACE2
 LOGICAL :: ASCDESC
 INTEGER :: NV,IV,V(1:IBM_MAXVERTS_FACE)
 REAL(EB):: XVERT1(1:IBM_MAXVERTS_FACE),XVERT2(1:IBM_MAXVERTS_FACE)
+
+INTEGER, PARAMETER :: NODC1(1:4) = (/ 1, 2, 1, 2 /)
+INTEGER, PARAMETER :: NODC2(1:4) = (/ 1, 2, 2, 1 /)
+INTEGER :: SNOD1(NOD1:NOD2), SNOD2(NOD1:NOD2)
+REAL(EB) :: XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2), XYZ_SEG2(IAXIS:KAXIS,NOD1:NOD2)
+LOGICAL :: DIFF(1:4)
 
 ! Build a set of regular cut-cells in the middle of the domain to do testing.
 IF (PERIODIC_TEST == 103 ) THEN
@@ -24080,6 +24086,11 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
              ENDIF
 
+             ! Store Segment and Vertex list from Cartesian face boundary:
+             XYZVERT_CART(IAXIS:KAXIS,1:NVERT)= XYZVERT(IAXIS:KAXIS,1:NVERT)
+             SEG_FACE_CART(NOD1:NOD2,1:NSEG)  = SEG_FACE(NOD1:NOD2,1:NSEG)
+             NVERT_CART=NVERT; NSEG_CART = NSEG
+
              ! 2. IBM_INBOUNDARY cut-edges assigned to this face:
              CEI = MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_IDCE,X1AXIS)
              IF ( CEI > 0 ) THEN ! There are inboundary cut-edges
@@ -24449,6 +24460,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
              ! Here we load Cartesian cut faces that belong to the solid region, for SLICE plotting
              ! purposes:
+             SOLID_FACE_IF : IF (.TRUE.) THEN
              ! Build segment list:
              NSSEG      = 0
              NSVERT     = 0
@@ -24579,6 +24591,47 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ANGSEG(NSSEG) = 0._EB
              ENDDO
 
+             ! Use list of segments on gasphase region from IBM_CUT_EDGE:
+             ! These are to discard from SEGS computed before:
+             COUNT=0
+             SEG_FACEAUX(NOD1:NOD2,1:NSSEG) = SEG_FACE(NOD1:NOD2,1:NSSEG)
+             ANGSEGAUX(1:NSSEG)=ANGSEG(1:NSSEG)
+             SEG_FLAG(1:NSSEG) = .FALSE.
+             OUTER : DO ISEG=1,NSSEG
+                ! Test against GASPHASE segments:
+                INNER1 : DO ISEG2=1,NSEG_CART
+                   SNOD1(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG)
+                   SNOD2(NOD1:NOD2)= SEG_FACE_CART(NOD1:NOD2,ISEG2)
+                   XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2) = XYZVERT(IAXIS:KAXIS,SNOD1(NOD1:NOD2))
+                   XYZ_SEG2(IAXIS:KAXIS,NOD1:NOD2) = XYZVERT_CART(IAXIS:KAXIS,SNOD2(NOD1:NOD2))
+                   ! Test for possible node combination:
+                   DO INOD=1,4
+                      INOD1=NODC1(INOD) ! [ 1 2 1 2 ]
+                      INOD2=NODC2(INOD) ! [ 1 2 2 1]
+                      DIFF(INOD) = SQRT((XYZ_SEG1(IAXIS,INOD1)-XYZ_SEG2(IAXIS,INOD2))**2._EB + &
+                                        (XYZ_SEG1(JAXIS,INOD1)-XYZ_SEG2(JAXIS,INOD2))**2._EB + &
+                                        (XYZ_SEG1(KAXIS,INOD1)-XYZ_SEG2(KAXIS,INOD2))**2._EB ) < GEOMEPS
+                   ENDDO
+                   IF(DIFF(1) .AND. DIFF(2)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
+                   IF(DIFF(3) .AND. DIFF(4)) SEG_FLAG(ISEG)=.TRUE. ! Nodes of two segs coincide, its a GASPHASE segment.
+                ENDDO INNER1
+                ! Test against itself:
+                INNER2 : DO ISEG2=1,NSSEG
+                   IF (ISEG==ISEG2) CYCLE
+                   SNOD1(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG)
+                   SNOD2(NOD1:NOD2)= SEG_FACEAUX(NOD1:NOD2,ISEG2)
+                   IF(SNOD1(NOD1)==SNOD2(NOD2) .AND. SNOD1(NOD2)==SNOD2(NOD1)) SEG_FLAG(ISEG)=.TRUE.
+                ENDDO INNER2
+             ENDDO OUTER
+             DO ISEG=1,NSSEG
+                IF(SEG_FLAG(ISEG)) CYCLE
+                COUNT=COUNT+1
+                SEG_FACE(NOD1:NOD2,COUNT)=SEG_FACEAUX(NOD1:NOD2,ISEG)
+                ANGSEG(COUNT) = ANGSEGAUX(ISEG)
+             ENDDO
+
+             NSSEG=COUNT
+
              ! Build Solid side faces:
              NOTDONE = .TRUE.
              DO WHILE(NOTDONE)
@@ -24593,7 +24646,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
 
                 ! Drop segments with NUMEDG_NODE(INOD)=1:
-                ! The assumption here is that they are IBM_GG IBM_INBOUNDCF
+                ! The assumption here is that they are IBM_SS IBM_INBOUNDCF
                 ! segments with one node inside the Cartface i.e. case Fig
                 ! 9(a) in the CompGeom3D notes):
                 COUNT = 0
@@ -24705,7 +24758,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
                 ! Start a new cut-face on this Cartesian face:
                 ICF = ICF + 1
-                DO ISEG=1,NSEG
+                DO ISEG=1,NSSEG
                    IF ( SEG_FLAG(ISEG) ) THEN
                       COUNT  = COUNT + 1
                       CTSTART= COUNT
@@ -24720,16 +24773,41 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
              ! Load ordered nodes to CFELEM:
              NSFACE = ICF
+             COUNT  = 0
              DO ICF=1,NSFACE
+                NP = 0
+                DO ISEG=1,NSSEG
+                   IF ( SEG_FACE2(NOD3,ISEG) == ICF ) NP = NP + 1
+                ENDDO
+                IF (NP < 3) CYCLE ! Drop face if it has less than 2 3 vertices
+                COUNT=COUNT+1
                 NP = 0
                 DO ISEG=1,NSSEG
                    IF ( SEG_FACE2(NOD3,ISEG) == ICF ) THEN
                       NP = NP + 1
-                      CFELEM(1,ICF)    = NP
-                      CFELEM(NP+1,ICF) = SEG_FACE2(NOD1,ISEG)
+                      CFELEM(1,COUNT)    = NP
+                      CFELEM(NP+1,COUNT) = SEG_FACE2(NOD1,ISEG)
                    ENDIF
                 ENDDO
+                ! Does Face Have zero Area? If so drop, rewind:
+                DO IPT=2,NP+1
+                   ICF_PT = CFELEM(IPT,COUNT)
+                   ! Define closed Polygon:
+                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                ENDDO
+                ICF_PT = CFELEM(2,COUNT)
+                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                AREA = 0._EB
+                DO II2=1,NP
+                   AREA = AREA + ( XY(IAXIS,II2) * XY(JAXIS,II2+1) - &
+                                   XY(JAXIS,II2) * XY(IAXIS,II2+1) )
+                ENDDO
+                IF (ABS(AREA) < GEOMEPS**2._EB) THEN
+                   CFELEM(1:IBM_MAXVERT_CUTFACE,COUNT) = IBM_UNDEFINED
+                   COUNT = COUNT - 1
+                ENDIF
              ENDDO
+             NSFACE = COUNT; IF(NSFACE==0) CYCLE
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NSFACE)                 = 0._EB
@@ -24759,6 +24837,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
+
                 CX2 = CX2 / (6._EB * AREA)
                 ! In x3:
                 CX3 = 0._EB
@@ -24882,6 +24961,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ENDDO
              ! Final number of cut-faces in the solid region of the face:
              MESHES(NM)%IBM_CUT_FACE(NCUTFACE)%NSFACE  = COUNT-NFACE
+
+             ENDIF SOLID_FACE_IF
 
             ENDDO ! JJ
          ENDDO ! KK
@@ -25542,6 +25623,10 @@ REAL(EB), DIMENSION(IAXIS:KAXIS) :: ACEN, SQAREA
 
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:) :: IJK_COUNTED
 
+INTEGER :: NVERT_AUX, NEDGE_OLD, IVERT, COUNT, IEOLD, INOD
+LOGICAL :: FOUND
+REAL(EB):: XYZV(IAXIS:KAXIS)
+
 ! Define which cells are cut-cell, and which are solid:
 IF (BNDINT_FLAG) THEN
    ALLOCATE( IJK_COUNTED(ISTR:IEND,JSTR:JEND,KSTR:KEND) ); IJK_COUNTED=.FALSE.
@@ -25813,29 +25898,71 @@ BNDINT_COND : IF (BNDINT_FLAG) THEN
                               CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
                               MESHES(NM)%IBM_NCUTEDGE_MESH = CEI
                               MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) = CEI
-                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = 0
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = FNVERT
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = FNEDGE
                               CALL NEW_EDGE_ALLOC(NM,CEI,FNVERT,FNEDGE)
-                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = 0
                               MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = &
                                                    (/ INDIF, INDJF, INDKF, X1AXIS, IBM_GS /)
                               MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS = IBM_INBOUNDCF
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+                                                           XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+                                                           CEELEM(NOD1:NOD2,1:FNEDGE)
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+                                                           INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+                           ELSE
+
+                              NVERT_AUX=MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT
+                              NEDGE_OLD=MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
+                              DO IVERT=1,FNVERT
+                                 XYZV(IAXIS:KAXIS) = XYZVERTF(IAXIS:KAXIS,IVERT)
+                                 CALL INSERT_FACE_VERT(XYZV,NM,CEI,NVERT_AUX,INOD)
+                                 DO IEDGE=1,FNEDGE
+                                    IF(CEELEM(NOD1,IEDGE)==IVERT) CEELEM(NOD1,IEDGE)=INOD
+                                    IF(CEELEM(NOD2,IEDGE)==IVERT) CEELEM(NOD2,IEDGE)=INOD
+                                 ENDDO
+                              ENDDO
+                              CALL REALLOCATE_EDGE_ELEM(NM,CEI,NEDGE_OLD+FNEDGE)
+                              COUNT = NEDGE_OLD
+                              OUTER :DO IEDGE=1,FNEDGE
+                                 FOUND=.FALSE.
+                                 INNER1 : DO IEOLD=1,NEDGE_OLD
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1,IEOLD) /= CEELEM(NOD1,IEDGE)) CYCLE INNER1
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD2,IEOLD) /= CEELEM(NOD2,IEDGE)) CYCLE INNER1
+                                 FOUND=.TRUE.
+                                 ENDDO INNER1
+                                 INNER2 : DO IEOLD=1,NEDGE_OLD
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD2,IEOLD) /= CEELEM(NOD1,IEDGE)) CYCLE INNER2
+                                 IF(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1,IEOLD) /= CEELEM(NOD2,IEDGE)) CYCLE INNER2
+                                 FOUND=.TRUE.
+                                 ENDDO INNER2
+                                 IF(FOUND) CYCLE OUTER
+                                 COUNT=COUNT+1
+                                 MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,COUNT) = CEELEM(NOD1:NOD2,IEDGE)
+                                 MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT)=&
+                                                              INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE)
+                              ENDDO OUTER
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT = NVERT_AUX
+                              MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE = COUNT
+
                            ENDIF
 
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
-                                                        XYZVERTF(IAXIS:KAXIS,1:FNVERT)
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
-                                                        CEELEM(NOD1:NOD2,1:FNEDGE)
-                           MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
-                                                        INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+                           !                              XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
+                           ! WRITE(LU_ERR,*) 'CUT_EDGE=',CEI,SIZE(MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM,DIM=2),FNEDGE
+                           ! WRITE(LU_ERR,*) 'CEELEM=',SIZE(CEELEM,DIM=2)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+                           !                              CEELEM(NOD1,IEDGE)) CYCLE:NOD2,1:FNEDGE)
+                           ! MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+                           !                              INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
 
                         ENDIF
 
                      ENDIF
                   ENDDO
                ENDDO
-
 
                DEALLOCATE(IBM_BODINT_PLANE%X1NVEC,IBM_BODINT_PLANE%AINV)
             ENDDO ! I
@@ -30680,15 +30807,17 @@ END FUNCTION VALID_TRIANGLE
 
 ! ----------------------------- DIFF_ANGLE -----------------------------------------
 
-LOGICAL FUNCTION DIFF_ANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3)
+LOGICAL FUNCTION DIFF_ANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3, ABS_FLG)
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
 REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
+LOGICAL, INTENT(IN) :: ABS_FLG
 
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), POINTER, DIMENSION(:) :: V1, V2, V3
 REAL(FB) :: U1(3), U2(3)
+LOGICAL :: TEST_FLAG
 
 DIFF_ANGLE = .FALSE.
 
@@ -30720,7 +30849,12 @@ ENDIF
 
 U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
 U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
-IF (U1(1)*U2(2)-U1(2)*U2(1) < EPS_FB) DIFF_ANGLE = .TRUE.
+IF (ABS_FLG) THEN
+   TEST_FLAG=ABS(U1(1)*U2(2)-U1(2)*U2(1)) < EPS_FB
+ELSE
+   TEST_FLAG=    U1(1)*U2(2)-U1(2)*U2(1)  < EPS_FB
+ENDIF
+IF (TEST_FLAG) DIFF_ANGLE = .TRUE.
 
 RETURN
 
@@ -30787,85 +30921,177 @@ END FUNCTION POINT_IN_TRIANGLE
 
 ! ---------------------------- TRIANGULATE ----------------------------------------
 
-SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
-   INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-   REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
-   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES,LOCTYPE)
 
-   INTEGER :: IFACE, NLIST, NLIST_OLD
-   INTEGER :: VERT_LIST(0:100)
-   LOGICAL :: NODE_EXISTS(100)
-   INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT
-   LOGICAL HAVE_TRIANGLE
-   REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
-   REAL(FB) :: U1(3), U2(3), U1XU2
-   REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
-   INTEGER :: NBIG_ANGLES, VERT_START
-   LOGICAL :: VERT_DROPPED, FLAG
+INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
+REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
+INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+INTEGER, INTENT(OUT) :: LOCTYPE(NVERTS-2)
 
-   FLAG = .TRUE.
-   NLIST = NVERTS
-   DO I = 1, NLIST
-      VERT_LIST(I) = I
+INTEGER :: IFACE, NLIST, NLIST_OLD
+INTEGER :: VERT_LIST(0:100), VERT_FLAG(0:100), EDGE_LIST(2,1:100)
+LOGICAL :: NODE_EXISTS(100)
+INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT, IEDGE
+LOGICAL HAVE_TRIANGLE
+REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
+REAL(FB) :: U1(3), U2(3), U1XU2
+REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
+INTEGER :: NBIG_ANGLES, VERT_START
+LOGICAL :: VERT_DROPPED, FLAG
+
+INTEGER :: HIDEDGE(3), EDGEI(1:2), NVERTS2, NEDGES, COUNT
+INTEGER, PARAMETER :: SHFT_NODE(1:4) = (/ 2, 1, 0, 2 /)
+
+FLAG = .TRUE.
+
+! Drop vertices contained whithin lines of the polygon:
+VERT_FLAG(1:NVERTS)=1
+DO I = 1, NVERTS
+   IM1 = I - 1
+   IF (I==1     )IM1 = NVERTS
+   IP1 = I + 1
+   IF (I==NVERTS)IP1 = 1
+   IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1,.TRUE.) ) VERT_FLAG(I)=0 ! Vertex located in line joining neighbors.
+ENDDO
+
+NLIST  = SUM(VERT_FLAG(1:NVERTS))
+NVERTS2= NLIST
+NEDGES = NLIST
+COUNT = 0
+DO I = 1, NVERTS
+   IF(VERT_FLAG(I)==0) CYCLE
+   COUNT= COUNT + 1
+   VERT_LIST(COUNT) = I
+ENDDO
+VERT_LIST(0) = VERT_LIST(NLIST)
+VERT_LIST(NLIST+1) = VERT_LIST(1)
+NODE_EXISTS(1:NLIST+1) = .TRUE.
+DO I = 1, NLIST-1
+   EDGE_LIST(1:2,I) = (/ VERT_LIST(I),     VERT_LIST(I+1) /)
+ENDDO
+EDGE_LIST(1:2,NLIST) = (/ VERT_LIST(NEDGES), VERT_LIST(1) /)
+FACES(1:3*(NVERTS-2)) = VERT_OFFSET+VERT_LIST(NLIST)
+
+
+IF (FLAG) THEN ! find number of angles > 180 deg
+   NBIG_ANGLES = 0
+   VERT_START = VERT_LIST(1)
+   DO I = 1, NVERTS2
+      IM1 = I - 1
+      IF (I==1)IM1 = NVERTS2
+      IP1 = I + 1
+      IF (I==NVERTS2)IP1 = 1
+      IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,VERT_LIST(IM1),VERT_LIST(I),VERT_LIST(IP1),.FALSE.) ) THEN
+         NBIG_ANGLES = NBIG_ANGLES + 1
+         VERT_START = I
+      ENDIF
+   END DO
+
+   ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
+   IF ( NBIG_ANGLES <= 1 ) THEN
+      IFACE = 0
+      DO I = 1, NVERTS2
+         IP1 = I + 1
+         IF (I==NVERTS2) IP1=1
+         IF (I==VERT_START .OR. IP1==VERT_START) CYCLE
+         FACES(3*IFACE+1) = VERT_OFFSET+VERT_LIST(VERT_START)
+         FACES(3*IFACE+2) = VERT_OFFSET+VERT_LIST(I)
+         FACES(3*IFACE+3) = VERT_OFFSET+VERT_LIST(IP1)
+         IFACE = IFACE + 1
+      ENDDO
+      ! Here test edges to define LOCTYPE:
+      LOCTYPE(:) = 4+8+16
+      DO IFACE=1,NVERTS2-2
+         HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
+         DO IEDGE=1,3
+            ! Nodes i,i+1:
+            EDGEI(1:2) = (/ FACES(3*IFACE-SHFT_NODE(IEDGE))-VERT_OFFSET, FACES(3*IFACE-SHFT_NODE(IEDGE+1))-VERT_OFFSET /)
+            DO I=1,NEDGES
+               IF(EDGE_LIST(1,I)==EDGEI(1) .AND. EDGE_LIST(2,I)==EDGEI(2)) THEN
+                  HIDEDGE(IEDGE) = 0 ! Edge belongs to polygon, set to plot.
+                  EXIT
+               ENDIF
+            ENDDO
+         ENDDO
+         LOCTYPE(IFACE) = 4 * HIDEDGE(1) + 8 * HIDEDGE(2) + 16 * HIDEDGE(3)
+      ENDDO
+      RETURN
+   ENDIF
+ENDIF
+
+! more than 1 angles in polygon > 180 deg
+IFACE = 1
+OUTER: DO WHILE (NLIST>=3)
+   IVERT = 1
+   HAVE_TRIANGLE = .FALSE.
+   INNER: DO WHILE (IVERT<=NLIST)
+      V0 = VERT_LIST(IVERT-1)
+      V1 = VERT_LIST(IVERT)
+      V2 = VERT_LIST(IVERT+1)
+      IF(.NOT.NODE_EXISTS(IVERT+1))EXIT INNER
+      IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+         FACES(IFACE  ) = VERT_OFFSET+V0
+         FACES(IFACE+1) = VERT_OFFSET+V1
+         FACES(IFACE+2) = VERT_OFFSET+V2
+         IF (NLIST == 3) EXIT OUTER
+         IFACE = IFACE + 3
+         NODE_EXISTS(IVERT) = .FALSE.
+         IF(IVERT==1) NODE_EXISTS(NLIST+1) = .FALSE.
+         HAVE_TRIANGLE = .TRUE.
+         IVERT = IVERT + 2
+      ELSE
+         IVERT = IVERT + 1
+      ENDIF
+   ENDDO INNER
+   NLIST_OLD = NLIST
+   NLIST = 0
+   DO I = 1, NLIST_OLD
+      IF(NODE_EXISTS(I))THEN
+         NLIST = NLIST + 1
+         VERT_LIST(NLIST) = VERT_LIST(I)
+      ENDIF
    ENDDO
-   VERT_LIST(0) = NLIST
+   VERT_LIST(0) = VERT_LIST(NLIST)
    VERT_LIST(NLIST+1) = VERT_LIST(1)
    NODE_EXISTS(1:NLIST+1) = .TRUE.
 
-   IF (FLAG) THEN ! find number of angles > 180 deg
-      NBIG_ANGLES = 0
-      VERT_START = 1
-      DO I = 1, NVERTS
-         IM1 = I - 1
-         IF (I==1)IM1 = NVERTS
-         IP1 = I + 1
-         IF (I==NVERTS)IP1 = 1
-         IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1) ) THEN
-            NBIG_ANGLES = NBIG_ANGLES + 1
-            VERT_START = I
-         ENDIF
-      END DO
-
-      ! if 0 angles (convex) or 1 angle (simple concave) then triangulate using a fan
-      IF ( NBIG_ANGLES <= 1 ) THEN
-         IFACE = 0
-         DO I = 1, NVERTS
-            IP1 = I + 1
-            IF (I==NVERTS) IP1=1
-            IF (I==VERT_START .OR. IP1==VERT_START) CYCLE
-            FACES(3*IFACE+1) = VERT_OFFSET+VERT_START
-            FACES(3*IFACE+2) = VERT_OFFSET+I
-            FACES(3*IFACE+3) = VERT_OFFSET+IP1
-            IFACE = IFACE + 1
-         ENDDO
-         RETURN
-      ENDIF
-   ENDIF
-
-   ! more than 1 angles in polygon > 180 deg
-   IFACE = 1
-   OUTER: DO WHILE (NLIST>=3)
-      IVERT = 1
-      HAVE_TRIANGLE = .FALSE.
-      INNER: DO WHILE (IVERT<=NLIST)
-         V0 = VERT_LIST(IVERT-1)
-         V1 = VERT_LIST(IVERT)
-         V2 = VERT_LIST(IVERT+1)
-         IF(.NOT.NODE_EXISTS(IVERT+1))EXIT INNER
-         IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+   ! Test for nodes connecting parallel edges, if found drop them:
+   VERT_DROPPED=.FALSE.
+   DO I=1,NLIST
+      V0=VERT_LIST(I-1); V1=VERT_LIST(I); V2=VERT_LIST(I+1);
+      VV1(1:3)=>VERTS(3*V0-2:3*V0)
+      VV2(1:3)=>VERTS(3*V1-2:3*V1)
+      VV3(1:3)=>VERTS(3*V2-2:3*V2)
+      U1 = VV2 - VV1;
+      U2 = VV3 - VV2;
+      SELECT CASE(DIR)
+      CASE(IAXIS)
+          U1(1) = U1(2); U1(2) = U1(3)
+          U2(1) = U2(2); U2(2) = U2(3)
+      CASE(JAXIS)
+          U1(2) = U1(1); U1(1) = U1(3)
+          U2(2) = U2(1); U2(1) = U2(3)
+      CASE(KAXIS)
+          U1(1) = U1(1); U1(2) = U1(2)
+          U2(1) = U2(1); U2(2) = U2(2)
+      END SELECT
+      U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
+      U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
+      IF (U1(1)*U2(1)+U1(2)*U2(2) > -EPS_FB) CYCLE
+      U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
+      IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
+         VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
+         IF (IFACE < 3*(NVERTS2-2)) THEN
             FACES(IFACE  ) = VERT_OFFSET+V0
             FACES(IFACE+1) = VERT_OFFSET+V1
             FACES(IFACE+2) = VERT_OFFSET+V2
-            IF (NLIST == 3) EXIT OUTER
             IFACE = IFACE + 3
-            NODE_EXISTS(IVERT) = .FALSE.
-            IF(IVERT==1) NODE_EXISTS(NLIST+1) = .FALSE.
-            HAVE_TRIANGLE = .TRUE.
-            IVERT = IVERT + 2
-         ELSE
-            IVERT = IVERT + 1
          ENDIF
-      ENDDO INNER
+         IF (NLIST == 3) EXIT OUTER
+      ENDIF
+   ENDDO
+   IF (VERT_DROPPED) THEN
+      ! Repeat List generation:
       NLIST_OLD = NLIST
       NLIST = 0
       DO I = 1, NLIST_OLD
@@ -30877,57 +31103,27 @@ SUBROUTINE TRIANGULATE(DIR,VERTS,NVERTS,VERT_OFFSET,FACES)
       VERT_LIST(0) = VERT_LIST(NLIST)
       VERT_LIST(NLIST+1) = VERT_LIST(1)
       NODE_EXISTS(1:NLIST+1) = .TRUE.
+   ENDIF
+ENDDO OUTER
 
-      ! Test for nodes connecting parallel edges, if found drop them:
-      VERT_DROPPED=.FALSE.
-      DO I=1,NLIST
-         V0=VERT_LIST(I-1); V1=VERT_LIST(I); V2=VERT_LIST(I+1);
-         VV1(1:3)=>VERTS(3*V0-2:3*V0)
-         VV2(1:3)=>VERTS(3*V1-2:3*V1)
-         VV3(1:3)=>VERTS(3*V2-2:3*V2)
-         U1 = VV2 - VV1;
-         U2 = VV3 - VV2;
-         SELECT CASE(DIR)
-         CASE(IAXIS)
-             U1(1) = U1(2); U1(2) = U1(3)
-             U2(1) = U2(2); U2(2) = U2(3)
-         CASE(JAXIS)
-             U1(2) = U1(1); U1(1) = U1(3)
-             U2(2) = U2(1); U2(1) = U2(3)
-         CASE(KAXIS)
-             U1(1) = U1(1); U1(2) = U1(2)
-             U2(1) = U2(1); U2(2) = U2(2)
-         END SELECT
-         U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
-         U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
-         IF (U1(1)*U2(1)+U1(2)*U2(2) > -EPS_FB) CYCLE
-         U1XU2  = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
-         IF (ABS(U1XU2) < EPS_FB) THEN ! Triple product less than EPS
-            VERT_DROPPED=.TRUE.; NODE_EXISTS(I)=.FALSE.
-            IF (IFACE < 3*(NVERTS-2)) THEN
-               FACES(IFACE  ) = VERT_OFFSET+V0
-               FACES(IFACE+1) = VERT_OFFSET+V1
-               FACES(IFACE+2) = VERT_OFFSET+V2
-               IFACE = IFACE + 3
-            ENDIF
-            IF (NLIST == 3) EXIT OUTER
+! Here test edges to define LOCTYPE:
+LOCTYPE(:) = 4+8+16
+DO IFACE=1,NVERTS2-2
+   HIDEDGE(1:3) = 1 ! Initialize to hidden all edges.
+   DO IEDGE=1,3
+      ! Nodes i,i+1:
+      EDGEI(1:2) = (/ FACES(3*IFACE-SHFT_NODE(IEDGE))-VERT_OFFSET, FACES(3*IFACE-SHFT_NODE(IEDGE+1))-VERT_OFFSET /)
+      DO I=1,NEDGES
+         IF(EDGE_LIST(1,I)==EDGEI(1) .AND. EDGE_LIST(2,I)==EDGEI(2)) THEN
+            HIDEDGE(IEDGE) = 0 ! Edge belongs to polygon, set to plot.
+            EXIT
          ENDIF
       ENDDO
-      IF (VERT_DROPPED) THEN
-         ! Repeat List generation:
-         NLIST_OLD = NLIST
-         NLIST = 0
-         DO I = 1, NLIST_OLD
-            IF(NODE_EXISTS(I))THEN
-               NLIST = NLIST + 1
-               VERT_LIST(NLIST) = VERT_LIST(I)
-            ENDIF
-         ENDDO
-         VERT_LIST(0) = VERT_LIST(NLIST)
-         VERT_LIST(NLIST+1) = VERT_LIST(1)
-         NODE_EXISTS(1:NLIST+1) = .TRUE.
-      ENDIF
-   ENDDO OUTER
+   ENDDO
+   LOCTYPE(IFACE) = 4 * HIDEDGE(1) + 8 * HIDEDGE(2) + 16 * HIDEDGE(3)
+ENDDO
+
+RETURN
 END SUBROUTINE TRIANGULATE
 
 ! ---------------------------- TRIANGULATE2 ----------------------------------------
