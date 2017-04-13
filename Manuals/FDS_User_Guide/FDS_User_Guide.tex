@@ -5582,25 +5582,14 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \subsection{Radiative Properties}
 \label{radiative_part_props}
 
-The radiative properties of water and fuel droplets are determined automatically.
-For fuel, the properties of heptane are assumed. For other types of particles, the
-radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
-{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
-a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
-Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
-The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres.
-The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing.
-Below is an example of the use of spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
-
+The radiative properties of water and fuel droplets are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using a spectral property table ({\ct TABL}) whose {\ct ID} is indicated on the {\ct PART} line via {\ct RADIATIVE\_PROPERTY\_TABLE}. Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), and the real and complex components of the refractive index. The real part of the refractive index should be a positive number. If it is greater than 10, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing. Below is an example of the use of the spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 \begin{lstlisting}
-&PART ID='particles',..., RADIATIVE_PROPERTY_TABLE='table' /
-&TABL ID='table', TABLE_DATA= 1.0,1.33,0.0001 /
-&TABL ID='table', TABLE_DATA= 5.0,1.33,0.002  /
-&TABL ID='table', TABLE_DATA=10.0,1.33,0.001  /
+&PART ID='my particles',..., RADIATIVE_PROPERTY_TABLE='radtab' /
+&TABL ID='radtab', TABLE_DATA= 1.0,1.33,0.0001 /
+&TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
+&TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-
-\noindent
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used.
 
 
 \subsection{Size Distribution}
@@ -7444,15 +7433,15 @@ $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux. 
+There are various output quantities related to heat flux.
 
 \paragraph{\ct 'NET HEAT FLUX'} The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. 
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
 
-\paragraph{\ct 'RADIATIVE HEAT FLUX'}  This is the radiative component of Eq.~(\ref{net_flux}). 
+\paragraph{\ct 'RADIATIVE HEAT FLUX'}  This is the radiative component of Eq.~(\ref{net_flux}).
 \be
    \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) \label{rad_flux}
 \ee
@@ -9176,7 +9165,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
-{\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
@@ -9349,6 +9337,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADIATIVE\_PROPERTY\_TABLE}         & Real            & Section~\ref{radiative_part_props}      &           &               \\ \hline
 {\ct REAL\_REFRACTIVE\_INDEX}            & Real            & Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
 {\ct RGB(3)}                             & Integers        & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
