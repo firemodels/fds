@@ -1,7 +1,7 @@
 &HEAD CHID='vege_mass_conservation', TITLE='Test for mass conservation when burning vegetation' /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-&MISC HUMIDITY=0., Y_O2_INFTY = 0.01, RUN_AVG_FAC=0. /
+&MISC HUMIDITY=0., Y_O2_INFTY = 0.01 /
 &TIME T_END=10., DT=0.01 / 
 
 &REAC FUEL = 'CELLULOSE'
