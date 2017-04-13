@@ -108,6 +108,7 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
+exe=
 
 if [ "$BACKGROUND" == "" ]; then
    BACKGROUND=background
@@ -256,7 +257,7 @@ else
   if [ "$use_intel_mpi" == "1" ]; then
     exe=$FDSROOT/fds/Build/impi_intel_linux_64/fds_impi_intel_linux_64
   fi
-  if [ "$exe" != "" ]; then
+  if [ "$exe" == "" ]; then
     if [ "$use_debug" == "1" ] ; then
       DB=_db
     fi
