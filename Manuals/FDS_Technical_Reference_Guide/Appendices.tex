@@ -731,7 +731,9 @@ $\bar{\kappa}_i$ and $\bar{\gamma}_i$ in temperature and/or in wavenumber is
 performed by RADCAL when necessary. If the temperature sought is out of the
 tabulated data range, then the data at the nearest temperature are used.
 
-\chapter{A Simple Model of Flame Extinction}
+\chapter{Alternative Extinction Models}
+
+\section{A Simple Model of Flame Extinction}
 \label{o2_based_model}
 
 \subsubsection*{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
@@ -778,6 +780,11 @@ As an example, the critical adiabatic flame temperature can be assumed to have a
    \hat{Y}_{\OTWO,lim} = \frac{ \overline{c_p} (T_{CFT}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1600-T_m) }{ 13100}  \label{extinction_model}
 \ee
 For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction would evaluate to $\hat{Y}_{\OTWO,lim}=0.12$.  This value is consistent with the measurements of Morehart, Zukoski and Kubota\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+
+\section{A Two-Step Chemistry Flame Extinction Model}
+\label{co_based_model}
+
+The simplest of chemical reaction schemes for predicting carbon monoxide formation is to use a two-step chemistry model. The first step oxidizes fuel to water vapor, carbon monoxide, and other products. The second step oxidizes carbon monoxide to carbon dioxide. The simple extinction model discussed in Section~/ref{extinction} is not directly applicable to two-step chemistry. Instead an alternate extinction model has been developed. This model evaluates extinction twice. In the first evaluation, the model evaluates the amount of combustion that can occur based upon the local mixing timescale and the assumption that both chemistry steps occur. A limiting flame temperature computation is performed using the limiting flame temperature for the overall two-step reaction (e.g. the same temperature that would be used for a single-step). If extinction occurs, then the mixed species are reset back to their beginning of time step values and combustion is recomputed using only the second step. A second limiting flame temperature computation is then performed using the limiting flame temperature for carbon monoxide to see if the second step by itself can take place.
 
 \chapter{Numerical Methods for Integration of Complex Chemistry}
 \label{chemistry_integration}
