@@ -42,6 +42,7 @@ function usage {
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
+  echo " -I use Intel mpi version of fds"
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
@@ -95,13 +96,13 @@ nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
 nopenmp_threads=1
-use_installed=0
-use_debug=0
-use_devel=0
+use_installed=
+use_debug=
+use_devel=
+use_intel_mpi=
 dir=.
 benchmark=no
 showinput=0
-use_repository=1
 strip_extension=0
 REPORT_BINDINGS="--report-bindings"
 nodelist=
@@ -120,7 +121,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:ihHj:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -140,7 +141,7 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
-   use_repository=0
+   use_intel_mpi=
    ;;
   E)
    EMAIL="$OPTARG"
@@ -159,7 +160,9 @@ case $OPTION  in
    ;;
   i)
    use_installed=1
-   use_repository=0
+   ;;
+  I)
+   use_intel_mpi=1
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -218,12 +221,6 @@ shift $(($OPTIND-1))
 if [ "$nodelist" != "" ] ; then
   nodelist="-l nodes=$nodelist"
 fi
-if [ "$use_debug" == "1" ] ; then
-  DB=_db
-fi
-if [ "$use_devel" == "1" ] ; then
-  DB=_dv
-fi
 if [[ "$OMPPLACES" != "" ]]  ; then
   if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
     echo "*** error: can only be specify cores, sockets or threads with -O option"
@@ -239,14 +236,9 @@ if [ "$OMPPROCBIND" != "" ]; then
   OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
-# define executables if the repository is used
+# define executable
 
-# use fds from repository (-e was not specified)
-if [ $use_repository -eq 1 ]; then
-  exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
-fi
-
-if [ $use_installed -eq 1 ]; then
+if [ "$use_installed" == "1" ]; then
   notfound=`echo | fds |& tail -1 | grep "not found" | wc -l`
   if [ $notfound -eq 1 ]; then
     echo "fds is not installed. Run aborted."
@@ -259,6 +251,19 @@ if [ $use_installed -eq 1 ]; then
     cd $fdsdir
     exe=`pwd`/fds
     cd $curdir
+  fi
+else
+  if [ "$use_intel_mpi" == "1" ]; then
+    exe=$FDSROOT/fds/Build/impi_intel_linux_64/fds_impi_intel_linux_64
+  fi
+  if [ "$exe" != "" ]; then
+    if [ "$use_debug" == "1" ] ; then
+      DB=_db
+    fi
+    if [ "$use_devel" == "1" ] ; then
+      DB=_dv
+    fi
+    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
   fi
 fi
 
