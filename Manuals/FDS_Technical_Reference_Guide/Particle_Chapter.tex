@@ -169,10 +169,12 @@ Liquid droplets can represent either discrete airborne spheres or elements of th
 
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
-\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
-\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \label{droplet_mass} \\[0.2in] 
+\rho_{\rm g} V \frac{d Y_{\rm \alpha, g}}{\d t} & = -\frac{\d m_{\rm p}}{\d t}  \label{droplet_gas_fraction} \\[0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right]  \label{droplet_temp}  \\[0.2in]
+\frac{\d T_{\rm g}}{\d t} & = \frac{1}{m_{\rm g} \, c_{\rm g}}  \left[A_{\rm p,s} \, h  \, (T_{\rm p}-T_{\rm g}) + \frac{\d m_{\rm p}}{\d t} \; (h_{\rm v}+h_{\rm l}) \right]  \label{droplet_gas_temp}
 \end{align}
-The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p,s}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p,s}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $c_{\rm g}$ is the gas specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), , $h_{\rm l}$ is the liquid specific enthalpy, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. If the droplet were located on a wall surface there would be a fourth equation for the wall temperature. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
@@ -195,29 +197,22 @@ $\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\P
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
 
-Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
+Equation~(\ref{droplet_mass}) through Equation~(\ref{droplet_gas_temp}) are solved semi-implicitly over the course of a gas phase time step as follows. The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
 \be
-   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p,s} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
-   A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
-\ee
-The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
-\be
-   Y_{\rm \alpha,\ell}^{n+1} \approx Y_{\rm \alpha,\ell}^n + \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \; \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)
+Y_{\rm \alpha,\ell}^{n+1} \approx Y_{\rm \alpha,\ell}^n + \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \; \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)
 \ee
 where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obtained via the chain rule:
 \be
-   \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} = \frac{\d Y_{\rm \alpha,\ell}}{\d X_{\rm \alpha,\ell}} \, \frac{\d X_{\rm \alpha,\ell}}{\d T_{\rm p}}  = \frac{W_{\rm a}/W_{\alpha}}{ (X_{\rm \alpha,\ell} (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha})^2 } \;
-   \frac{h_{\rm v} W_{\alpha}}{R \, T_{\rm p}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]
+\frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} = \frac{\d Y_{\rm \alpha,\ell}}{\d X_{\rm \alpha,\ell}} \, \frac{\d X_{\rm \alpha,\ell}}{\d T_{\rm p}}  = \frac{W_{\rm a}/W_{\alpha}}{ (X_{\rm \alpha,\ell} (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha})^2 } \;
+\frac{h_{\rm v} W_{\alpha}}{R \, T_{\rm p}^2} \, \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]
 \ee
-The amount of evaporated liquid is given by
+
+Equation~(\ref{droplet_mass}) and Equation~(\ref{droplet_gas_fraction}) are combined with the above result to yield:
 \be
-   \delta m_{\rm p} = - \dt \, A_{\rm p,s} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
-   \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
+   \frac{\d m_{\rm p}}{\d t} = - \frac{A h_{\rm m} \rho_{\rm g}}{2} \frac{2 Y_{\rm \alpha,\ell}^n + \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)-2 Y_{\rm \alpha, g}^n} {1+\frac{\Delta t^n A h_{\rm m}}{2 V}} \label{droplet_mass_2}
 \ee
-The amount of heat transfer from the gas to the particle is
-\be
-   \delta q_{\rm p} = \dt \, A_{\rm p,s} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
-\ee
+
+This can then be substituted into Equation~(\ref{droplet_temp}) and Equation~(\ref{droplet_gas_temp}) to yield a pair of linear equations for the droplet and gas temperature. If a wall is present, then there will be a third equation for the wall temperature. Once the new temperatures are known, the new droplet temperature can be used in Equation~(\ref{droplet_mass_2}) to determine the amount of evaporated liquid.
 
 
 \subsection{Filtered Volumetric Source Terms}
