@@ -27,7 +27,7 @@ fuel_name    = {'methane','propane'};
 Fuel_name    = {'Methane','Propane'};
 fuel_hoc     = [50010.3475,46334.6246]; % from .out file
 
-i_fuel = 2;
+i_fuel = 1;
 
 % experimental results
 EXP = importdata([expdir,exp_fname{i_fuel}],',',1);
@@ -251,7 +251,7 @@ switch i_fuel
 end
 H(2)=plot(pw_ramp_XO2,pw_ramp_chir);
 
-if is_case_1_run | is_case_2_run | is_case_3_run
+if is_case_1_run | is_case_2_run | is_case_3_run | is_case_4_run | is_case_5_run
     is_case_run = 1;
 else
     is_case_run = 0;
