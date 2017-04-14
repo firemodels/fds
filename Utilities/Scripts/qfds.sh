@@ -142,7 +142,6 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
-   use_intel_mpi=
    ;;
   E)
    EMAIL="$OPTARG"
@@ -164,6 +163,7 @@ case $OPTION  in
    ;;
   I)
    use_intel_mpi=1
+   nosocket="1"
    ;;
   j)
    JOBPREFIX="$OPTARG"
@@ -254,16 +254,16 @@ if [ "$use_installed" == "1" ]; then
     cd $curdir
   fi
 else
+  if [ "$use_debug" == "1" ] ; then
+    DB=_db
+  fi
+  if [ "$use_devel" == "1" ] ; then
+    DB=_dv
+  fi
   if [ "$use_intel_mpi" == "1" ]; then
-    exe=$FDSROOT/fds/Build/impi_intel_linux_64/fds_impi_intel_linux_64
+    exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
   fi
   if [ "$exe" == "" ]; then
-    if [ "$use_debug" == "1" ] ; then
-      DB=_db
-    fi
-    if [ "$use_devel" == "1" ] ; then
-      DB=_dv
-    fi
     exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
   fi
 fi
@@ -339,11 +339,28 @@ fi
 # use mpirun if there is more than 1 process
 
 #if [ $nmpi_processes -gt 1 ] ; then
-  MPIRUN="$MPIDIST/bin/mpirun $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
-  TITLE="$infile(MPI)"
-  case $FDSNETWORK in
-    "infiniband") TITLE="$infile(MPI_IB)"
-  esac
+  if [ "$use_intel_mpi" == "1" ]; then
+    if [ "$I_MPI_ROOT" == "" ]; then
+      echo "Intel MPI environment not setup. Run aborted."
+      ABORTRUN=y
+    else
+      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+      if [ ! -e $MPIRUNEXE ]; then
+        echo "Intel mpiexec does not exist. Run aborted."
+        ABORTRUN=y
+      fi
+      MPILABEL="IMPI"
+    fi
+  else
+    MPIRUNEXE=$MPIDIST/bin/mpirun
+    if [ "$FDSNETWORK" == "infiniband" ]; then
+      MPILABEL="MPI_IB"
+    else
+      MPILABEL="MPI"
+    fi
+  fi
+  TITLE="$infile($MPILABEL)"
+  MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
 #fi
 
 cd $dir
