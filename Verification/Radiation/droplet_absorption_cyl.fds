@@ -19,7 +19,7 @@ value of dT should be equal to the time averaged Q_abs.
 
 &TIME T_END=.01 DT = 0.00001 / 
 
-&MISC GVEC=0,0,0, RUN_AVG_FAC=0.,Y_CO2_INFTY=0.,HUMIDITY=0./  
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0.,HUMIDITY=0./  
 
 &DUMP NFRAMES=100 /
 
