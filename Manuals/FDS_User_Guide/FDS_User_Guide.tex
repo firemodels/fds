@@ -7051,7 +7051,7 @@ The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that co
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
-Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
+Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION} and which are marked with an asterisk in Table~\ref{tab:output}, require a {\ct SPEC\_ID} to be specified also - refer to Section~\ref{info:outputquantities} for more details. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
 \subsection{Single Point Output}
 
@@ -8376,7 +8376,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
-{\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct VOLUME FRACTION}$^{*}$                     & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
@@ -8386,11 +8386,11 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 \noindent
 \begin{tabbing}
 $^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                       \> Do not use for {\ct MIXTURE FRACTION}. \\
 $^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                        \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
-$^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                       \> Do not use for {\ct MIXTURE FRACTION}.
+
 \end{tabbing}
 
 
