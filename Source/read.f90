@@ -1893,12 +1893,15 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
       CASE ('EXTINCTION 5')
          !Two-step fuel -> CO, CO-> CO2
          EXTINCT_MOD = EXTINCTION_5
+      CASE ('EXTINCTION 6')
+         !Single-step product based calculation
+         EXTINCT_MOD = EXTINCTION_6
       CASE DEFAULT
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXTINCTION_MODEL, ',TRIM(EXTINCTION_MODEL),', is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       END SELECT
 ELSE
-   EXTINCT_MOD = EXTINCTION_2
+   EXTINCT_MOD = EXTINCTION_6
 ENDIF
 
 ! Check compatibility of constant_specific_heat_ratio and stratification
