@@ -20517,7 +20517,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                   X3RAY = X3FACE(KK)
 
                   ! Intersections along x2 for X3RAY x3 location:
-                  CALL GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY)
+                  CALL GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY,X1PLN)
 
                   ! Drop x2 ray if all intersections are outside of the MESH block domain:
                   IF (IBM_N_CRS > 0) THEN
@@ -21936,11 +21936,11 @@ END SUBROUTINE GET_BODINT_PLANE
 
 ! -------------------------- GET_X2INTERSECTIONS --------------------------------
 
-SUBROUTINE GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY)
+SUBROUTINE GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY,X1PLN)
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: X2AXIS, X3AXIS
-REAL(EB),INTENT(IN) :: X3RAY
+REAL(EB),INTENT(IN) :: X3RAY,X1PLN
 
 ! Local Variables:
 INTEGER :: ISGL, SGL, ISEG, SEG(NOD1:NOD2)
@@ -22177,7 +22177,8 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
       ICRS =IND_CRS(LOW_IND,IDCR) + 1
 
       IF ( IBM_IS_CRS2(LOW_IND,ICRS) /= LEFT_MEDIA ) THEN
-         print*, "Error GET_X2INTERSECTIONS: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem"
+         WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem"
+         WRITE(LU_ERR,*) "X1PLN=",X1PLN,", X2AXIS,X3AXIS=",X2AXIS,X3AXIS,", X3RAY=",X3RAY
       ENDIF
 
       IBM_SVAR_CRS_AUX(IBM_N_CRS_AUX)             = IBM_SVAR_CRS(ICRS)
@@ -22232,10 +22233,10 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
       ELSEIF (IND_LEFT == LEFT_MEDIA) THEN
          IBM_IS_CRS2_AUX(LOW_IND:HIGH_IND,IBM_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
       ELSE
-         print*, "Error GET_X2INTERSECTIONS: DROP_SS_GG = .TRUE., Didn't find left side continuity."
-         print*, "IBM_N_CRS=",IBM_N_CRS,", IDCR=",IDCR
-         print*, ICRS,"IND_LEFT=",IND_LEFT,", IND_RIGHT=",IND_RIGHT
-         print*, "IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)",IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)
+         WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: DROP_SS_GG = .TRUE., Didn't find left side continuity."
+         WRITE(LU_ERR,*) "IBM_N_CRS=",IBM_N_CRS,", IDCR=",IDCR
+         WRITE(LU_ERR,*) ICRS,"IND_LEFT=",IND_LEFT,", IND_RIGHT=",IND_RIGHT
+         WRITE(LU_ERR,*) "IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)",IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)
       ENDIF
       LEFT_MEDIA = IBM_IS_CRS2_AUX(HIGH_IND,IBM_N_CRS_AUX)
 
