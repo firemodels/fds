@@ -2613,6 +2613,8 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 4'
       CASE (EXTINCTION_5)
          EXTINCTION_MODEL = 'EXTINCTION 5'
+      CASE (EXTINCTION_6)
+         EXTINCTION_MODEL = 'EXTINCTION 6'
    END SELECT
 
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
@@ -2625,18 +2627,20 @@ REACTION_LOOP: DO N=1,N_REACTIONS
 
    WRITE(LU_OUTPUT,'(/3X,A)')     'Stoichiometry'
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Primitive Species'
-   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Primitive Species Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                          Molar'
    DO NN=1,N_SPECIES
       IF (ABS(RN%NU_SPECIES(NN))>=TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
    ENDDO
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species'
-   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                             Molar         Mass'
    DO NN=1,N_TRACKED_SPECIES
       IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-      IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
-      IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN)
+      IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6,1X,F12.6)') SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
+         RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+      IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,E12.5,1X,E12.5)') SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
+         RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDDO
 
    WRITE(LU_OUTPUT,'(/3X,A)')     'Reaction Kinetics'
