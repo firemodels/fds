@@ -5116,9 +5116,10 @@ branches, thiz assumption may lose validity as
 the computational grid size is reduced and the fuel thus resolved at
 smaller scale.
 
-Consider a pipe or duct with frictionless walls.  We take it that the
-flow of the fluid upstream of the vegetation bed is unidirectional and
-parallel to the pipe walls, $\overline{u} = (U_0, 0, 0)$.  Within the
+Consider a pipe or duct with frictionless walls.  Let $\overline{u}$
+represent the fluid velocity. Upstream of the vegetation bed the
+velocity is unidirectional and parallel to the pipe walls, 
+$\overline{u} = (U_0, 0, 0)$.  Within the
 vegetation bed, because there is less volume to accommodate the flow, 
 mass conservation demands that the fluid velocity increase.   This
 interstitial velocity $U$ is given by
@@ -5178,19 +5179,18 @@ vegetation particle.
   state flow through a pipe}
 \label{vege_pressure-drop_sphere}
 We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For a sphere, 
+and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For
+spherical particles with radius $r_p = 0.0005$ m and density 500
+$\mathrm{kg}/\mathrm{m}^3$, and
+packed with a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
 \begin{itemize} 
- \item $\mathrm{Re} = 6 U/(\nu \sigma) \approx 6 U_0/(\nu \sigma (1 - \beta))$.
- \item For $C_D$, we have
-  \begin{itemize}
-   \item $C_D = 24/\mathrm{Re}$,  $\mathrm{Re} < 1$, 
-   \item $C_D = 24 (0.85 + 0.15 \mathrm{Re}^{0.687})/\mathrm{Re}$, 
-$1 \le \mathrm{Re} \le 1000$, and 
-   \item $C_D = 1$,  $\mathrm{Re} > 1000$.
-  \end{itemize}
+ \item $\sigma = 3/r_p$ = 6000.0 $\mathrm{m}^{-1}$.
+ \item $\beta = 2/500 = 0.004$.
+ \item $\mathrm{Re} = 6 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta)) = 132.9$.
+ \item $C_D = 24 (0.85 + 0.15 \mathrm{Re}^{0.687})/\mathrm{Re} = 0.933$, $1 \le \mathrm{Re} \le 1000$. 
  \item $C_S = 1/4$.
- \item $\sigma = 3/r_p$.
 \end{itemize}
+and therefore $\Delta P = 13.65$ Pa.
 
 \begin{figure}[ht]
 \centering
@@ -5204,19 +5204,18 @@ test case.]{TODO.}
   state flow through a pipe}
 \label{vege_pressure-drop_cylinder}
 We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For a cylinder, 
+and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For
+cylindrical particles with radius $r_p = 0.0005$ m, length 
+$L_p = 0.02$ m and density 500 $\mathrm{kg}/\mathrm{m}^3$, and packed with
+a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
 \begin{itemize}
-
- \item $\mathrm{Re} = 4 U/(\nu \sigma) \approx 6 U_0/(\nu \sigma (1 - \beta))$.
- \item For $C_D$, we have
-  \begin{itemize}
-   \item $C_D = 10/e^{{0.5}$,  $\mathrm{Re} < 1$, 
-   \item $C_D = 10 (0.6 + 0.4 \mathrm{Re}^{0.8})/\mathrm{Re}$,  $1 \le \mathrm{Re} \le 1000$, and 
-   \item $C_D = 1$,  $\mathrm{Re} > 1000$.
- \end{itemize}
+ \item $\sigma = 2/r_p$ = 4000.0 $\mathrm{m}^{-1}$.
+ \item $\beta = 2/500 = 0.004$.
+ \item $\mathrm{Re} = 4 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta))  = 199.3$.
+ \item $C_D = 10 (0.6 + 0.4 \mathrm{Re}^{0.8})/\mathrm{Re} = 0.789$,  $1 \le \mathrm{Re} \le 1000$.
  \item $C_S = 1/\pi$.
- \item $\sigma = 2/r_p$.
 \end{itemize}
+and therefore $\Delta P = 16.78$ Pa.
 
 \begin{figure}[ht]
 \centering
