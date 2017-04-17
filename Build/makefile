@@ -229,6 +229,14 @@ impi_intel_linux_64_db : obj = fds_impi_intel_linux_64_db
 impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+impi_intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
+impi_intel_linux_64_dv : LFLAGS = -static-intel
+impi_intel_linux_64_dv : FCOMPL = mpiifort
+impi_intel_linux_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+impi_intel_linux_64_dv : obj = fds_impi_intel_linux_64_dv
+impi_intel_linux_64_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
 mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = $(MPIFORT)
