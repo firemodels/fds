@@ -3513,6 +3513,8 @@ SUBROUTINE CCSPECIES_ADVECTION
 ! Local Variables:
 REAL(EB) :: RHO_Z_PV(-1:0), VELC, ALPHAP1, AM_P1, AP_P1, FN_ZZ
 REAL(EB), PARAMETER :: SGNFCT=1._EB
+INTEGER :: IOR
+
 
 U_DOT_DEL_RHO_Z=>WORK7
 U_DOT_DEL_RHO_Z=0._EB
@@ -3855,6 +3857,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_Z_PV(ISIDE) = RHOPV(ISIDE)*ZZP(I+FCELL+ISIDE,J,K,N)
       ENDDO
       VELC = UU(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          U_DOT_DEL_RHO_Z(I+FCELL  ,J,K) = U_DOT_DEL_RHO_Z(I+FCELL  ,J,K) - &
@@ -3870,6 +3884,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_Z_PV(ISIDE) = RHOPV(ISIDE)*ZZP(I,J+FCELL+ISIDE,K,N)
       ENDDO
       VELC = VV(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          U_DOT_DEL_RHO_Z(I,J+FCELL  ,K) = U_DOT_DEL_RHO_Z(I,J+FCELL  ,K) - &
@@ -3885,6 +3911,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_Z_PV(ISIDE) = RHOPV(ISIDE)*ZZP(I,J,K+FCELL+ISIDE,N)
       ENDDO
       VELC = WW(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          U_DOT_DEL_RHO_Z(I,J,K+FCELL  ) = U_DOT_DEL_RHO_Z(I,J,K+FCELL  ) - &
@@ -3914,6 +3952,8 @@ SUBROUTINE CCENTHALPY_ADVECTION
 
 ! Local Variables:
 REAL(EB) :: RHO_H_S_PV(-1:0), VELC, ALPHAP1, AM_P1, AP_P1, FN_H_S
+INTEGER  :: IOR
+
 
 IF (.NOT.ENTHALPY_TRANSPORT) RETURN
 
@@ -4282,6 +4322,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_H_S_PV(ISIDE) = RHOPV(ISIDE)*H_S
       ENDDO
       VELC = UU(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          DP(I+FCELL  ,J,K) = DP(I+FCELL  ,J,K) - (-1._EB)*(FN_H_S-RHO_H_S_PV( 0))*VELC * AF ! -ve dot
@@ -4298,6 +4350,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_H_S_PV(ISIDE) = RHOPV(ISIDE)*H_S
       ENDDO
       VELC = VV(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          DP(I,J+FCELL  ,K) = DP(I,J+FCELL  ,K) - (-1._EB)*(FN_H_S-RHO_H_S_PV( 0))*VELC * AF ! -ve dot
@@ -4314,6 +4378,18 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
          RHO_H_S_PV(ISIDE) = RHOPV(ISIDE)*H_S
       ENDDO
       VELC = WW(I,J,K)
+      IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+         IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+         WC =>WALL(IW)
+         IOR= WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY)
+               IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+               IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY)
+               VELC = UVW_SAVE(IW)
+         END SELECT
+      ENDIF
       ! Add to divergence integral of surrounding cut-cell:
       IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
          DP(I,J,K+FCELL  ) = DP(I,J,K+FCELL  ) - (-1._EB)*(FN_H_S-RHO_H_S_PV( 0))*VELC * AF ! -ve dot
@@ -7274,6 +7350,8 @@ INTEGER, INTENT(IN) :: NM, N
 ! Local Variables:
 INTEGER :: I,J,K,X1AXIS,IEXIM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_ZZ=>NULL(),FY_ZZ=>NULL(),FZ_ZZ=>NULL()
+INTEGER :: IW
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 FX_ZZ=>WORK2
 FY_ZZ=>WORK3
@@ -7288,14 +7366,21 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
 
    ! Load Diffusive flux in EXIM boundary face container:
    MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = 0._EB
-   SELECT CASE(X1AXIS)
-   CASE(IAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FX_ZZ(I,J,K)
-   CASE(JAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FY_ZZ(I,J,K)
-   CASE(KAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FZ_ZZ(I,J,K)
-   END SELECT
+   IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+      IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N)=WC%RHO_F*WC%ZZ_F(N)
+   ELSE
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FX_ZZ(I,J,K)
+      CASE(JAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FY_ZZ(I,J,K)
+      CASE(KAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_ZZ(N) = FZ_ZZ(I,J,K)
+      END SELECT
+   ENDIF
 
 ENDDO
 
@@ -7309,11 +7394,16 @@ SUBROUTINE SET_EXIMRHOHSLIM_3D(NM)
 
 ! Get flux limited \bar{rho hs} computed on divg.f90 in EXIM boundary faces.
 
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SENSIBLE_ENTHALPY
+
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
 INTEGER :: I,J,K,X1AXIS,IEXIM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_H_S=>NULL(),FY_H_S=>NULL(),FZ_H_S=>NULL()
+REAL(EB) :: H_S,ZZ_GET(1:N_TRACKED_SPECIES)
+INTEGER :: IW
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 FX_H_S=>WORK2
 FY_H_S=>WORK3
@@ -7328,14 +7418,23 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
 
    ! Load Diffusive flux in EXIM boundary face container:
    MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = 0._EB
-   SELECT CASE(X1AXIS)
-   CASE(IAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FX_H_S(I,J,K)
-   CASE(JAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FY_H_S(I,J,K)
-   CASE(KAXIS)
-      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FZ_H_S(I,J,K)
-   END SELECT
+   IF (MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW > 0) THEN
+      IW = MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW
+      WC=>WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+      ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F_GAS)
+      MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S=WC%RHO_F*H_S
+   ELSE
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FX_H_S(I,J,K)
+      CASE(JAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FY_H_S(I,J,K)
+      CASE(KAXIS)
+         MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FN_H_S = FZ_H_S(I,J,K)
+      END SELECT
+   ENDIF
 
 ENDDO
 
@@ -17680,6 +17779,9 @@ INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
 INTEGER :: IEXIM
 INTEGER :: I,J,K,X1AXIS
 
+INTEGER :: IW,IOR,II,JJ,KK,IIF,JJF,KKF
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
 ! Mesh Loop:
 MAIN_MESH_LOOP : DO NM=1,NMESHES
 
@@ -17756,7 +17858,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ENDDO
 
    ! Now Allocate:
-   MESHES(NM)%IBM_NEXIMFACE_MESH = IEXIM
    ALLOCATE( MESHES(NM)%IBM_EXIM_FACE(IEXIM) )
 
    ! Finally Populate:
@@ -17773,6 +17874,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
             IF ( MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_CGSC) /= IBM_GASPHASE ) CYCLE
             IF((    (MESHES(NM)%CCVAR(I+FCELL-1,J,K,IBM_UNKZ)*       &
                      MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ)) < 0 ) ) THEN
+               IF (I==ILO_FACE .AND. MESHES(NM)%CCVAR(I+FCELL-1,J,K,IBM_UNKZ) > 0) CYCLE
+               IF (I==IHI_FACE .AND. MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ) > 0) CYCLE
                IEXIM = IEXIM + 1
                MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IJK(IAXIS:KAXIS+1) = (/ I, J, K, X1AXIS /)
                ALLOCATE(MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FLX(LOW_IND:HIGH_IND,1:N_TOTAL_SCALARS))
@@ -17784,6 +17887,34 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                ELSEIF ( MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ) > 0 ) THEN
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%LHFACE = LOW_IND
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%UNKZ   = MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
+               ENDIF
+               IF (I==ILO_FACE .OR. I==IHI_FACE) THEN
+                  WALL_LOOP_X : DO IW=1,N_EXTERNAL_WALL_CELLS
+                     WC=>WALL(IW)
+                     IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_X
+                     II  = WC%ONE_D%II
+                     JJ  = WC%ONE_D%JJ
+                     KK  = WC%ONE_D%KK
+                     IOR = WC%ONE_D%IOR
+                     SELECT CASE(IOR)
+                     CASE( IAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-IAXIS)
+                        IIF=II-1; JJF=JJ  ; KKF=KK
+                     CASE( JAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-JAXIS)
+                        IIF=II  ; JJF=JJ-1; KKF=KK
+                     CASE( KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK-1
+                     END SELECT
+                     IF (I==IIF .AND. J==JJF .AND. K==KKF) THEN
+                        MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW   = IW
+                        EXIT WALL_LOOP_X
+                     ENDIF
+                  ENDDO WALL_LOOP_X
                ENDIF
             ENDIF
          ENDDO
@@ -17801,6 +17932,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
             IF ( MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_CGSC) /= IBM_GASPHASE ) CYCLE
             IF((    (MESHES(NM)%CCVAR(I,J+FCELL-1,K,IBM_UNKZ)*       &
                      MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ)) < 0 ) ) THEN
+               IF (J==JLO_FACE .AND. MESHES(NM)%CCVAR(I,J+FCELL-1,K,IBM_UNKZ) > 0) CYCLE
+               IF (J==JHI_FACE .AND. MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ) > 0) CYCLE
                IEXIM = IEXIM + 1
                MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IJK(IAXIS:KAXIS+1) = (/ I, J, K, X1AXIS /)
                ALLOCATE(MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FLX(LOW_IND:HIGH_IND,1:N_TOTAL_SCALARS))
@@ -17812,6 +17945,34 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                ELSEIF ( MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ) > 0 ) THEN
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%LHFACE = LOW_IND
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%UNKZ   = MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
+               ENDIF
+               IF (J==JLO_FACE .OR. J==JHI_FACE) THEN
+                  WALL_LOOP_Y : DO IW=1,N_EXTERNAL_WALL_CELLS
+                     WC=>WALL(IW)
+                     IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_Y
+                     II  = WC%ONE_D%II
+                     JJ  = WC%ONE_D%JJ
+                     KK  = WC%ONE_D%KK
+                     IOR = WC%ONE_D%IOR
+                     SELECT CASE(IOR)
+                     CASE( IAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-IAXIS)
+                        IIF=II-1; JJF=JJ  ; KKF=KK
+                     CASE( JAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-JAXIS)
+                        IIF=II  ; JJF=JJ-1; KKF=KK
+                     CASE( KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK-1
+                     END SELECT
+                     IF (I==IIF .AND. J==JJF .AND. K==KKF) THEN
+                        MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW   = IW
+                        EXIT WALL_LOOP_Y
+                     ENDIF
+                  ENDDO WALL_LOOP_Y
                ENDIF
             ENDIF
          ENDDO
@@ -17829,6 +17990,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
             IF ( MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_CGSC) /= IBM_GASPHASE ) CYCLE
             IF((    (MESHES(NM)%CCVAR(I,J,K+FCELL-1,IBM_UNKZ)*       &
                      MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_UNKZ)) < 0 ) ) THEN
+               IF (K==KLO_FACE .AND. MESHES(NM)%CCVAR(I,J,K+FCELL-1,IBM_UNKZ) > 0) CYCLE
+               IF (K==KHI_FACE .AND. MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_UNKZ) > 0) CYCLE
                IEXIM = IEXIM + 1
                MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IJK(IAXIS:KAXIS+1) = (/ I, J, K, X1AXIS /)
                ALLOCATE(MESHES(NM)%IBM_EXIM_FACE(IEXIM)%FLX(LOW_IND:HIGH_IND,1:N_TOTAL_SCALARS))
@@ -17841,10 +18004,43 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%LHFACE = LOW_IND
                   MESHES(NM)%IBM_EXIM_FACE(IEXIM)%UNKZ   = MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
                ENDIF
+               IF (K==KLO_FACE .OR. K==KHI_FACE) THEN
+                  WALL_LOOP_Z : DO IW=1,N_EXTERNAL_WALL_CELLS
+                     WC=>WALL(IW)
+                     IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_Z
+                     II  = WC%ONE_D%II
+                     JJ  = WC%ONE_D%JJ
+                     KK  = WC%ONE_D%KK
+                     IOR = WC%ONE_D%IOR
+                     SELECT CASE(IOR)
+                     CASE( IAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-IAXIS)
+                        IIF=II-1; JJF=JJ  ; KKF=KK
+                     CASE( JAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-JAXIS)
+                        IIF=II  ; JJF=JJ-1; KKF=KK
+                     CASE( KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK
+                     CASE(-KAXIS)
+                        IIF=II  ; JJF=JJ  ; KKF=KK-1
+                     END SELECT
+                     IF (I==IIF .AND. J==JJF .AND. K==KKF) THEN
+                        MESHES(NM)%IBM_EXIM_FACE(IEXIM)%IW   = IW
+                        EXIT WALL_LOOP_Z
+                     ENDIF
+                  ENDDO WALL_LOOP_Z
+               ENDIF
             ENDIF
          ENDDO
       ENDDO
    ENDDO
+
+   ! Here IBM_NEXIMFACE_MESH might end up being less than size of MESHES(NM)%IBM_EXIM_FACE(:), because
+   ! EXIM faces tied to a cell on the guard-cell region are not taken into account (are dealt with on the
+   ! neighbor mesh).
+   MESHES(NM)%IBM_NEXIMFACE_MESH = IEXIM
 
 ENDDO MAIN_MESH_LOOP
 
