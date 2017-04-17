@@ -1902,6 +1902,7 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
       END SELECT
 ELSE
    EXTINCT_MOD = EXTINCTION_6
+   EXTINCTION_MODEL = 'EXTINCTION 6'
 ENDIF
 
 ! Check compatibility of constant_specific_heat_ratio and stratification
@@ -3565,7 +3566,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
    ! Check appropriate extinction model
 
-   IF (NFR > 1 .AND. EXTINCT_MOD == 2 .AND. SUPPRESSION) THEN
+   IF (NFR > 1 .AND. (EXTINCT_MOD == 2 .OR. EXTINCT_MOD == 6) .AND. SUPPRESSION) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. See Tech Guide'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
