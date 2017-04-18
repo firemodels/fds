@@ -3159,8 +3159,8 @@ Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the abs
 \subsection{Fuel Burnout}
 
 The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_{\rm s}$, and the layer thickness, $\delta_{\rm s}$:
-\be 
-   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''} 
+\be
+   t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s}}{\dm''}
 \ee
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be highlighted in the individual sections below.
 
@@ -5582,25 +5582,14 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \subsection{Radiative Properties}
 \label{radiative_part_props}
 
-The radiative properties of water and fuel droplets are determined automatically.
-For fuel, the properties of heptane are assumed. For other types of particles, the
-radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
-{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
-a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
-Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
-The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres.
-The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing.
-Below is an example of the use of spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
-
+The radiative properties of water and fuel droplets are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using a spectral property table ({\ct TABL}) whose {\ct ID} is indicated on the {\ct PART} line via {\ct RADIATIVE\_PROPERTY\_TABLE}. Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), and the real and complex components of the refractive index. The real part of the refractive index should be a positive number. If it is greater than 10, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing. Below is an example of the use of the spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 \begin{lstlisting}
-&PART ID='particles',..., RADIATIVE_PROPERTY_TABLE='table' /
-&TABL ID='table', TABLE_DATA= 1.0,1.33,0.0001 /
-&TABL ID='table', TABLE_DATA= 5.0,1.33,0.002  /
-&TABL ID='table', TABLE_DATA=10.0,1.33,0.001  /
+&PART ID='my particles',..., RADIATIVE_PROPERTY_TABLE='radtab' /
+&TABL ID='radtab', TABLE_DATA= 1.0,1.33,0.0001 /
+&TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
+&TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-
-\noindent
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used.
 
 
 \subsection{Size Distribution}
@@ -5642,7 +5631,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 \end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
-As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct \textbf{N\_STR}ATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
+As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
 To prevent FDS from generating a distribution of droplets altogether, set {\ct MONODISPERSE} to {\ct .TRUE.} on the {\ct PART} line, in which case every droplet will be assigned the same {\ct DIAMETER}.
 
@@ -6135,8 +6124,8 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 
 \chapter{Vegetation}
- 
-Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).  
+
+Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).
 
 \section{Using Particles to Represent Vegetation}
 
@@ -6168,13 +6157,13 @@ The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. I
       HEAT_OF_REACTION = 418.
       ALLOW_SHRINKING=.FALSE.
       ALLOW_SWELLING=.FALSE. /
-\end{lstlisting}  
+\end{lstlisting}
 \begin{lstlisting}
 &MATL ID = 'char'
       DENSITY = 300.
       CONDUCTIVITY = 2.0
       SPECIFIC_HEAT= 1.2 /
-\end{lstlisting}      
+\end{lstlisting}
 \begin{lstlisting}
 &MATL ID = 'moisture'
       DENSITY = 1000.
@@ -6188,20 +6177,20 @@ The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. I
       SPEC_ID = 'water vapor'
       HEAT_OF_REACTION= 2500. /
 \end{lstlisting}
-The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}). 
+The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}).
 \begin{lstlisting}
-&PART ID='tree crown foliage', 
-      DRAG_LAW='CYLINDER', 
-      SURF_ID='needles', 
+&PART ID='tree crown foliage',
+      DRAG_LAW='CYLINDER',
+      SURF_ID='needles',
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
-      STATIC=.TRUE., 
+      STATIC=.TRUE.,
       COLOR='FOREST GREEN' /
 \end{lstlisting}
 \begin{lstlisting}
-&INIT PART_ID='tree crown foliage', 
-      XYZ=0.0,0.0,0.0, 
-      RADIUS=1, 
-      HEIGHT=2, 
+&INIT PART_ID='tree crown foliage',
+      XYZ=0.0,0.0,0.0,
+      RADIUS=1,
+      HEIGHT=2,
       SHAPE='CONE',
       N_PARTICLES_PER_CELL=1,
       CELL_CENTERED=.TRUE.,
@@ -7144,7 +7133,7 @@ The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that co
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
-Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
+Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION} and which are marked with an asterisk in Table~\ref{tab:output}, require a {\ct SPEC\_ID} to be specified also - refer to Section~\ref{info:outputquantities} for more details. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
 \subsection{Single Point Output}
 
@@ -7526,13 +7515,27 @@ $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux. First, consider the {\em net} heat flux to a solid surface:
+There are various output quantities related to heat flux.
+
+\paragraph{\ct 'NET HEAT FLUX'} The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. If you want to output the {\em net} heat flux, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you just want to output $\dq_{\rm inc,rad}''$, use {\ct 'INCIDENT HEAT FLUX'}.
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
 
-If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
+\paragraph{\ct 'RADIATIVE HEAT FLUX'}  This is the radiative component of Eq.~(\ref{net_flux}).
+\be
+   \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) \label{rad_flux}
+\ee
+
+\paragraph{\ct 'CONVECTIVE HEAT FLUX'} This is the convective component of Eq.~(\ref{net_flux}).
+\be
+   \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s}) \label{con_flux}
+\ee
+
+\paragraph{\ct 'INCIDENT HEAT FLUX'} This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
+
+\paragraph{\ct 'GAUGE HEAT FLUX'} If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
 \ee
@@ -7543,14 +7546,13 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
 
-Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
+\paragraph{\ct 'RADIOMETER'}  Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
 The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
 
-
-All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\paragraph{\ct 'RADIATIVE HEAT FLUX GAS'}  All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
 &DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
@@ -7561,14 +7563,21 @@ Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
 \end{lstlisting}
-Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
-
-The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
+Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''  The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
 &INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
 \end{lstlisting}
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
+
+\paragraph{\ct 'RADIANCE'}  This is the term for the radiation intensity at a point in the gas, $\bx$, with solid angle, $\bs$, where the summation is over all spectral bands:
+\be
+   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
+\ee
+This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
+\begin{lstlisting}
+&DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
+\end{lstlisting}
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -8449,7 +8458,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
-{\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct VOLUME FRACTION}$^{*}$                     & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
@@ -8459,11 +8468,11 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 \noindent
 \begin{tabbing}
 $^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                       \> Do not use for {\ct MIXTURE FRACTION}. \\
 $^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                        \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
-$^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                       \> Do not use for {\ct MIXTURE FRACTION}.
+
 \end{tabbing}
 
 
@@ -9238,7 +9247,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
-{\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
@@ -9402,7 +9410,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_DIAMETER}                  & Real            & Section~\ref{info:particle_size}        & $\mu$m    & Infinite      \\ \hline
 {\ct MINIMUM\_DIAMETER}                  & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
 {\ct MONODISPERSE}                       & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
-{\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
+{\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 6             \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array      & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct PROP\_ID}                           & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
@@ -9411,6 +9419,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADIATIVE\_PROPERTY\_TABLE}         & Real            & Section~\ref{radiative_part_props}      &           &               \\ \hline
 {\ct REAL\_REFRACTIVE\_INDEX}            & Real            & Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
 {\ct RGB(3)}                             & Integers        & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline

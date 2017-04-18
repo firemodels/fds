@@ -24,7 +24,7 @@ MESN 3 has 3 particles with cartesian geometry and split in 2 with upward and do
 
 &TIME T_END=.01 DT = 0.00001 /
 
-&MISC GVEC=0,0,0, PR=100., RUN_AVG_FAC=0.,Y_CO2_INFTY=0.,HUMIDITY=0./  
+&MISC GVEC=0,0,0, PR=100., Y_CO2_INFTY=0.,HUMIDITY=0./  
 
 &DUMP NFRAMES=100 /
 
