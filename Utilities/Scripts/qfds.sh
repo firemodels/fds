@@ -507,6 +507,13 @@ cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 EOF
 
+if [ "$use_intel_mpi" == "1" ] ; then
+cat << EOF >> $scriptfile
+export I_MPI_FABRICS=shm:dapl
+export I_MPI_DEBUG=5
+EOF
+fi
+
 if test $nopenmp_threads -gt 1 ; then
 if [ "$OMPPLACES" != "" ]; then
 cat << EOF >> $scriptfile
