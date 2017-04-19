@@ -264,6 +264,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
    CHEM_SUBIT_OUT = 0
    REAC_SOURCE_TERM_OUT(:) = 0._EB
    Q_REAC_OUT(:) = 0._EB
+   Q_REAC_SUM(:) = 0._EB
    IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
       DT_SUB = DT/REAL(N_FIXED_CHEMISTRY_SUBSTEPS,EB)
       DT_SUB_NEW = DT_SUB
@@ -273,7 +274,6 @@ CO_EXTINCT: DO CO_PASS = 1,2
       DT_SUB_NEW = DT
       RICH_ITER_MAX = 5
    ENDIF
-   Q_REAC_SUM(:) = 0._EB
    ZZ_UNMIXED = ZZ_GET
    ZZ_MIXED = ZZ_GET
    A1 = ZZ_GET
@@ -430,6 +430,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
                CHEM_SUBIT_OUT = 0
                REAC_SOURCE_TERM_OUT(:) = 0._EB
                Q_REAC_OUT(:) = 0._EB
+               Q_REAC_SUM(:) = 0._EB
                IF (EXTINCT(2)) EXIT CO_EXTINCT
             ENDIF
          CASE(2)
@@ -441,6 +442,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
                CHEM_SUBIT_OUT = 0
                REAC_SOURCE_TERM_OUT(:) = 0._EB
                Q_REAC_OUT(:) = 0._EB
+               Q_REAC_SUM(:) = 0._EB
             ENDIF
       END SELECT
    ELSEIF(EXTINCT_MOD == EXTINCTION_6) THEN NEW_EXTINCT_IF
@@ -456,6 +458,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
          CHEM_SUBIT_OUT = 0
          REAC_SOURCE_TERM_OUT(:) = 0._EB
          Q_REAC_OUT(:) = 0._EB
+         Q_REAC_SUM(:) = 0._EB
       ENDIF
       EXIT CO_EXTINCT
    ELSE NEW_EXTINCT_IF
