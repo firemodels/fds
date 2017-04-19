@@ -1867,7 +1867,7 @@ and you want to create a door, add this:
 \end{lstlisting}
 The extra centimeter added to the $x$ coordinates of the hole make it clear that the hole is to punch through the entire obstruction.
 
-When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line.  When the state of the {\ct HOLE} evaluates to {\ct .FALSE.}, an obstruction will be placed in the {\ct HOLE}.  By default the obstruction filling the {\ct HOLE} will take the color of the surrounding {\ct OBST} that the {\ct HOLE} was punched through.  To make the obstruction filling the {\ct HOLE} a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction filling the {\ct HOLE} to be invisible, then set {\ct COLOR='INVISIBLE'}.  Additionally, you may use the keyword {\ct TRANSPARENCY}, real number from 0 to 1, to make the obstruction filling the {\ct HOLE} transparent. See Section~\ref{info:create_remove} for an example.
+When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or created or removed at pre-determined times. See Section~\ref{info:create_remove} for details. To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID} parameter respectively, to the {\ct HOLE} line\footnote{If you add a {\ct CTRL\_ID} or {\ct DEVC\_ID} to the {\ct HOLE} line, do not overlap this {\ct HOLE} with another. The control logic can fail.}.   When the state of the {\ct HOLE} evaluates to {\ct .FALSE.}, an obstruction will be placed in the {\ct HOLE}.  By default the obstruction filling the {\ct HOLE} will take the color of the surrounding {\ct OBST} that the {\ct HOLE} was punched through.  To make the obstruction filling the {\ct HOLE} a different color than the original obstruction, set the {\ct COLOR} or integer triplet {\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction filling the {\ct HOLE} to be invisible, then set {\ct COLOR='INVISIBLE'}.  Additionally, you may use the keyword {\ct TRANSPARENCY}, real number from 0 to 1, to make the obstruction filling the {\ct HOLE} transparent. See Section~\ref{info:create_remove} for an example.
 
 If an obstruction is not to be punctured by a {\ct HOLE}, add {\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line. Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only applies to {\ct OBST}ructions.
 
@@ -7776,7 +7776,7 @@ Use the {\ct STATISTICS} feature with caution because it demands that FDS evalua
 \subsubsection{Minimum or Maximum Value}
 
 For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MIN'} or {\ct STATISTICS='MAX'} computes the minimum or maximum value, respectively
-\be 
+\be
    \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
 \ee
 over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
