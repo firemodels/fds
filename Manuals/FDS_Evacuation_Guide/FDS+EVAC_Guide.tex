@@ -548,7 +548,7 @@ In short: The user needs just to define:
 
 Simple elevator model using \Timtt{CORR} namelist:
 \Timtt{WAIT\_AT\_XYZ}, \Timtt{LOCKED\_WHEN\_CLOSED}, and
-\Timtt{TARGET\_WHEN\_CLOSED} logical paramters in
+\Timtt{TARGET\_WHEN\_CLOSED} logical parameters in
 \Timtt{EXIT}/\Timtt{DOOR} namelist.  The \Timtt{CORR} has parameters
 \Timtt{ELEVATOR=.TRUE.}, \Timtt{TRAVEL\_TIME=10.0}.  If a door has an
 elevator \Timtt{CORR} at its \Timtt{TO\_NODE} then the door open/close
@@ -567,7 +567,7 @@ defined by \Timtt{HUMAN\_SMOKE\_HEIGHT} and the
 mesh.  The names of these additional meshes are like
 \Timtt{ID='Emesh\_MESH\_ID'}, where \Timtt{MESH\_ID} is the name of the
 corresponding main evacuation mesh.  One may have to use these mesh
-IDs to specify additional holes and obsts for these see-or-not meshes,
+\Timtt{ID}s to specify additional \Timtt{HOLE}s and \Timtt{OBST}s for these see-or-not meshes,
 but usually just specifying \Timtt{EVACUATION=.TRUE.} is enough is
 enough for these obstacles.
 
@@ -580,7 +580,7 @@ additional obstacles to the stairs, if needed.  Usually just
 specifying \Timtt{EVACUATION=.TRUE.} is enough for these obstacles.
 
 No need to specify the additional door flow fields.  No need to define
-"outflow" vents.  No need to define additional obsts for the "outflow"
+"outflow" vents.  No need to define additional \Timtt{OBST}s for the "outflow"
 vents.  The user should only define the main evacuation meshes and the
 \Timtt{EXIT}s and \Timtt{DOOR}s, all the above other things are
 generated automatically.
@@ -3688,7 +3688,7 @@ mistakes in the evacuation input geometry.
   velocity vector slice files of the evacuation meshes.  Check also
   that your evacuation geometry looks fine.  There should be no
   ``leaks'' at the outer walls of the evacuation floor, except those
-  at the EXITs and DOORs.  There should also be no narrow paths, say
+  at the \Timtt{EXIT}s and \Timtt{DOOR}s.  There should also be no narrow paths, say
   below 0.6~m, in the evacuation geometry, because of the shoulder
   widths of the agents.  Add obstacles or holes to the evacuation
   calculation to block too narrow paths and any other places where the
@@ -4841,7 +4841,7 @@ be safe.
 \item[\Timts{PERS\_ID}] This applies just for the \Timts{COUNT\_ONLY=
     .TRUE.} exits.  If given, then this counter just counts those
   agents, who were generated using the given \Timtt{PERS} namelists.
-  If \Timts{EVAC\_ID} is also given then both IDs match if the agent
+  If \Timts{EVAC\_ID} is also given then both \Timtt{ID}s match if the agent
   is to be counted.
 %
 \item[\Timts{EVAC\_ID}] This applies just for the \Timts{COUNT\_ONLY=
@@ -4850,7 +4850,7 @@ be safe.
   \Timtt{ENTR} namelists.  Note that there is no \Timts{ENTR\_ID}
   keyword, one uses just one keyword for both types of objects, which
   are generating new agents to the simulation.  If \Timts{PERS\_ID} is
-  also given then both IDs should match if the agent is to be counted.
+  also given then both \Timtt{ID}s should match if the agent is to be counted.
 %
 \end{description}
 
@@ -5240,13 +5240,13 @@ there the ``Stair Example'' case.
 %
 \item[\Timtt{XB\_LANDINGS(ii,:)}] An array that list the positions of
   the landing slabs, where the first index, ii, is for the landings,
-  and second one for the six numbers giving the XB of the landing.
+  and second one for the six numbers giving the \Timtt{XB} of the landing.
   The positions of the two first landings are enough to give, the
   others are duplicated from these.
 
   Note: landing (1,:) is the bottom floor landing of the stairs, which
   is at the same level as the bottom floor. One could argue that this
-  is not a landing, but it is counted as a landing. But the STRS
+  is not a landing, but it is counted as a landing. But the \Timtt{STRS}
   geometry is such that there is always landings on both sides of the
   stair flights.
 
