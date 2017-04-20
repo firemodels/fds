@@ -1,4 +1,4 @@
-&HEAD CHID='vege_pressure-drop_cylinder', TITLE='Pressure drop in a duct filled with cylinders with Douglas fir needle properties' /
+&HEAD CHID='vege_pressure-drop_sphere_MPUV2pt0', TITLE='Pressure drop in a duct filled with spheres with Douglas fir needle properties' /
 &MISC TMPA=20. /
 &MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
 cMESH IJK=200,20,20, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
@@ -11,23 +11,24 @@ cMESH IJK=200,20,20, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
 
 &SURF ID='FREE SLIP WALL', FREE_SLIP=.TRUE., DEFAULT=.TRUE. /
 
-&SURF ID         = 'cylindrical particle'
+&SURF ID         = 'spherical particle'
       MATL_ID    = 'vegetation'
       THICKNESS  = 0.0005
-      LENGTH     = 0.02
       TMP_FRONT  = 20.
-      GEOMETRY   = 'CYLINDRICAL' /
+      GEOMETRY   = 'SPHERICAL' /
       
 &MATL ID = 'vegetation'
       DENSITY = 500.0
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT= 1.0 /
  
-&PART ID='cylindrical particles', SAMPLING_FACTOR=1, SURF_ID='cylindrical particle', PROP_ID='cylindrical particle',DRAG_LAW='CYLINDER',STATIC=.TRUE., MONODISPERSE=.TRUE. /
+&PART ID='spherical particles', SAMPLING_FACTOR=1, SURF_ID='spherical particle', PROP_ID='spherical particle', STATIC=.TRUE.,DRAG_LAW='SPHERE',MONODISPERSE=.TRUE. /
 
-&INIT PART_ID='cylindrical particles', XB=4.,5.,0.,1.,0.,1., N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE., MASS_PER_VOLUME=2.0  /
+&INIT PART_ID='spherical particles', XB=4.,5.,0.,1.,0.,1., N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE., MASS_PER_VOLUME=2.0  /
 
-&PROP ID='cylindrical particle', SMOKEVIEW_ID='cylindrical particle', SMOKEVIEW_PARAMETERS='DX=0.002','DY=0.002','DZ=0.002' /
+&PROP ID='spherical particle', SMOKEVIEW_ID='spherical particle', SMOKEVIEW_PARAMETERS='DX=0.002','DY=0.002','DZ=0.002' /
+
+&DUMP MASS_FILE=.TRUE. /
 
 &DEVC XYZ=0.5,0.5,0.5, QUANTITY='U-VELOCITY', TIME_AVERAGED=.FALSE., ID='Uvel upstream' /
 
