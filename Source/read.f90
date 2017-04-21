@@ -2216,40 +2216,45 @@ COUNT_SPEC_LOOP: DO
    N_SPEC_READ = N_SPEC_READ + 1
    SPEC_ID_READ(N_SPEC_READ) = ID
 
-   !Prevent use of 'AIR' unless a new BACKGROUND has been defined.
+   IF (ID=='null') THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ, ' needs a name (ID=...)'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
+   ! Prevent use of 'AIR' unless a new BACKGROUND has been defined.
+
    IF (ID=='AIR' .AND. .NOT. DEFINED_BACKGROUND) THEN
       WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot redefine AIR without defining a BACKGROUND species'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
-   !Make sure both ramps and constant values have not been given
+
+   ! Make sure both ramps and constant values have not been given
+
    IF (SPECIFIC_HEAT > 0._EB .AND. RAMP_CP/='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot specify both SPECIFIC_HEAT and RAMP_CP'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both SPECIFIC_HEAT and RAMP_CP'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (SPECIFIC_HEAT_LIQUID > 0._EB .AND. RAMP_CP_L/='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Specify both SPECIFIC_HEAT_LIQUID and RAMP_CP_L'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both SPECIFIC_HEAT_LIQUID and RAMP_CP_L'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (CONDUCTIVITY > 0._EB .AND. RAMP_K/='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Specify both CONDUCTIVITY and RAMP_K'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both CONDUCTIVITY and RAMP_K'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (DIFFUSIVITY > 0._EB .AND. RAMP_D/='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Specify both DIFFUSIVITY and RAMP_D'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both DIFFUSIVITY and RAMP_D'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    IF (VISCOSITY > 0._EB .AND. RAMP_MU/='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Specify both VISCOSISTY and RAMP_MU'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': Cannot specify both VISCOSISTY and RAMP_MU'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
+
+   ! REFERENCE_ENTHALPY requires additional parameters
 
    IF (REFERENCE_ENTHALPY > -2.E20_EB .AND. (SPECIFIC_HEAT < 0._EB .AND. RAMP_CP=='null')) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': With REFERENCE_ENTHALPY also use SPECIFIC_HEAT or RAMP_CP'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
-
-   IF (ID=='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ, ' needs a name (ID=...)'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(ID),': REFERENCE_ENTHALPY requires SPECIFIC_HEAT or RAMP_CP'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -4541,6 +4546,7 @@ END SUBROUTINE READ_PART
 SUBROUTINE PROC_PART
 
 USE PROPERTY_DATA, ONLY: JANAF_TABLE_LIQUID
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER :: N,NN,J,ITMP,I_MELT,I_BOIL
 REAL(EB) :: H_L,H_V,CPBAR,H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V,TMP_WGT,DENSITY,MASS,VOLUME,R_O,R_I,&
             MU_LIQUID,K_LIQUID,BETA_LIQUID
@@ -4652,6 +4658,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          ELSE
             CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,LPC%FUEL,DENSITY,&
                                      MU_LIQUID,K_LIQUID,BETA_LIQUID)
+            IF (SS%RAMP_CP_L_INDEX>0) SS%C_P_L(J) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_CP_L_INDEX)*1000._EB
             IF (J==1) THEN
                IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
                IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V

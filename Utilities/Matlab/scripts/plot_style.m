@@ -90,7 +90,7 @@ switch style
 
         % Plot properties
         Plot_Units      = 'normalized'; %get(gca,'units')
-        Pos             = [0.1500    0.1200    0.7750    0.8150]; %get(gca,'position') % [left bottom width height]
+        Pos             = [0.1500    0.1500    0.7750    0.8150]; %get(gca,'position') % [left bottom width height]
         YLabel_Offset   = -0.05; % normalized units
         XLabel_Offset   = -0.05; % normalized units
         Plot_X          = Pos(1);
