@@ -5009,7 +5009,7 @@ h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\
 
 \section{Tests}
 \subsection{Mass conservation (\texorpdfstring{\textct{vege\_mass\_conservation}}{vege\_mass\_conservation})}
-\label{vege_mass_conservation}}
+\label{vege_mass_conservation}
 The total mass, which is the sum of fuel gas mass, water vapor mass
 and solid mass, should remain constant over time.
 \begin{figure}[ht]
@@ -5033,7 +5033,7 @@ With these assumptions, the thermal radiation transfer equation for a
 gray medium (no wavelength dependence) reduces to
 \be
  s \cdot \nabla I(x,s) = \kappa_{\mathrm{gas}} \left[ I_{\mathrm{b}} \left(
-   T_{\mathrm{gas} \right) - I(x, s) \right] + \kappa_{\mathrm{veg}}
+   T_{\mathrm{gas}} \right) - I(x, s) \right] + \kappa_{\mathrm{veg}}
  \left[ \epsilon_{\mathrm{veg}} I_{\mathrm{b}}\left( T_{\mathrm{veg}}
    \right) - I(x, s) \right].
 \label{eq:thermal transfer equation}
@@ -5047,7 +5047,7 @@ Integrating Equation~\ref{eq:thermal transfer equation} over all solid
 angles gives the equation for conservation of radiant energy.
 \be
 \nabla \cdot q_{\mathrm{r}}(x) = \kappa_{\mathrm{gas}} \left[ 4 \pi
-  I_\mathrm{b}} \left(T_{\mathrm{gas}} \right) - U(s) \right] +
+  I_{\mathrm{b}} \left(T_{\mathrm{gas}} \right) - U(s) \right] +
 \kappa_{\mathrm{veg}} \left[ 4 \pi I_{\mathrm{b}}
   \left(T_{\mathrm{veg}}\right) - U(s) \right].
 \label{eq:conservation of radiant energy}
@@ -5068,7 +5068,7 @@ Here
 The structure of Equation~\ref{eq:conservation of radiant energy}
 suggests a pair of reciprocal consistency tests.  The integrated radiant energy
 computed by FDS for the case $\kappa_{\mathrm{gas}} = 1, \kappa_{\mathrm{veg}} = 0$ should equal that computed for
-$\kappa_{\mathrm{gas}} = 0, \kappa_{\mathrm{\mathrm{veg}} = 1$.  
+$\kappa_{\mathrm{gas}} = 0, \kappa_{\mathrm{veg}} = 1$.  
 
 \subsubsection{The radiant energy computed with $\kappa_{\mathrm{gas}}
   = 1$, $\kappa_{\mathrm{veg}} = 0$ is consistent with
@@ -5177,9 +5177,10 @@ vegetation particle.
 
 \subsubsection{Pressure drop across spherical particles in steady
   state flow through a pipe}
-\label{vege_pressure-drop_sphere}
+\label{vege_pressure-drop_sphere_MPUV2pt0}
+\label{vege_pressure-drop_sphere_MPUV30pt0}
 We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For
+and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For
 spherical particles with radius $r_p = 0.0005$ m and density 500
 $\mathrm{kg}/\mathrm{m}^3$,
 packed with a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
@@ -5193,10 +5194,12 @@ packed with a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
 and therefore $\Delta P = 13.65$ Pa.
 
 \begin{figure}[ht]
-\centering
- \includegraphics[width=3.2in]{SCRIPT_FIGURES/vege_pressure-drop_sphere}
-\caption[\textct{Vegetation\_pressure-drop\_sphere}
-test case.]{The pressure drop in steady state flow through a duct across 2 kg of spherical
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV2pt0} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV30pt0} }
+   \end{tabular*}
+\caption[\textct{Vegetation\_pressure-drop\_sphere}]
+{The pressure drop in steady state flow through a duct across 2 kg of spherical
   particles with radius 0.0005 m and density 500 kg/m$^3$, distributed
   in a volume of 1 m$^3$.}
 \label{fig_vegetation_pressure-drop_sphere}
@@ -5204,9 +5207,10 @@ test case.]{The pressure drop in steady state flow through a duct across 2 kg of
 
 \subsubsection{Pressure drop across cylindrical particles in steady
   state flow through a pipe}
-\label{vege_pressure-drop_cylinder}
+\label{vege_pressure-drop_cylinder_MPUV2pt0}
+\label{vege_pressure-drop_cylinder_MPUV30pt0}
 We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}}$ m$^2$/s. For
+and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For
 cylindrical particles with radius $r_p = 0.0005$ m, length 
 $L_p = 0.02$ m and density 500 $\mathrm{kg}/\mathrm{m}^3$, packed with
 a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
@@ -5220,10 +5224,12 @@ a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$, we have
 and therefore $\Delta P = 19.25$ Pa.
 
 \begin{figure}[ht]
-\centering
- \includegraphics[width=3.2in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder}
-\caption[\textct{Vegetation\_pressure-drop\_cylinder} 
-test case.]{The pressure drop in steady state flow through a duct across 2 kg of cylindrical
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV2pt0} } &
+      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV30pt0} }
+   \end{tabular*}
+\caption[\textct{Vegetation\_pressure-drop\_cylinder}]
+{The pressure drop in steady state flow through a duct across 2 kg of cylindrical
   particles with radius 0.0005 m, length 0.02 m and density 500 kg/m$^3$, distributed
   in a volume of 1 m$^3$.}
 \label{fig_vegetation_pressure-drop_cylinder}

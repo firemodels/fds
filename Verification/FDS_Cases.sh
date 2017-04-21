@@ -482,8 +482,10 @@ $QFDS -d Turbulence ramp_prof_u_z.fds
 $QFDS -d Vegetation radiation_gas-veg_consistency_gas.fds
 $QFDS -d Vegetation radiation_gas-veg_consistency_veg.fds
 $QFDS -d Vegetation vege_mass_conservation.fds
-$QFDS -d Vegetation vege_pressure-drop_cylinder.fds
-$QFDS -d Vegetation vege_pressure-drop_sphere.fds
+$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV2pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV30pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV2pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV30pt0.fds
 
 $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
