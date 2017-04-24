@@ -3139,22 +3139,30 @@ The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``thresho
 
 For a liquid fuel, the thermal properties are similar to those of a solid material, with a few exceptions. The evaporation rate of the fuel is governed by the mass transfer number (see FDS Technical Reference Guide for details). The properties of a liquid fuel are given on the {\ct MATL} line:
 \begin{lstlisting}
+&REAC FUEL               = 'ETHANOL'
+      CO_YIELD           = 0.001
+      SOOT_YIELD         = 0.008 /
+
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.
-      NU_SPEC                = 0.97
+      NU_SPEC                = 1.
       SPEC_ID                = 'ETHANOL'
-      HEAT_OF_REACTION       = 836.98
+      HEAT_OF_REACTION       = 837
       CONDUCTIVITY           = 0.17
-      SPECIFIC_HEAT          = 2.4398
-      DENSITY                = 789.
-      BOILING_TEMPERATURE    = 78.5
-      ABSORPTION_COEFFICIENT = 1534.3 /
+      SPECIFIC_HEAT          = 2.44
+      DENSITY                = 794
+      ABSORPTION_COEFFICIENT = 1140
+      BOILING_TEMPERATURE    = 78.5 /
+
+&SURF ID        = 'ETHANOL POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'ETHANOL LIQUID'
+      THICKNESS = 0.1 /
 \end{lstlisting}
-The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The gaseous fuel yield, {\ct NU\_SPEC}, is 0.97 instead of 1 to account for impurities in the liquid that do not take part in the combustion process.
+The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model. The {\ct ABSORPTION\_COEFFICIENT} denotes the absorption in depth of thermal radiation into the liquid. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate can be significant.
 
-The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model.
+In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model.
 
-Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This denotes the absorption in depth of thermal radiation. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate is significant.
 
 \subsection{Fuel Burnout}
 
@@ -3538,9 +3546,9 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword {\ct HVAC\_PRES\_RELAK} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
+The first method is the keyword {\ct HVAC\_PRES\_RELAX} on the {\ct MISC} line with a default value of 0.5. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network. The node pressure at time step n+1 is taken as:
 \be
-P_{node}^{n+1}=P_{FDS} \; (1-HVAC\_PRES\_RELAX) \; + \; P_{node}^n \; HVAC\_PRES\_RELAX
+P_{node}^{n+1}=P_{FDS} \; (1-{\mathtt{HVAC\_PRES\_RELAX}}) \; + \; P_{node}^n \; {\mathtt{HVAC\_PRES\_RELAX}}
 \ee
 Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
 
@@ -4404,7 +4412,7 @@ There are different roles that a gas species might play in a simulation. A gas s
 \section{Specifying Primitive Species}
 \label{info:primitive}
 
-The {\ct SPEC} input is used to define a gas species in FDS. Once defined the species can be tracked as a single species (i.e., a primitive species) and/or the species can be used as part of one or more lumped species, also defined with {\ct SPEC}.  It is possible for a species to be both part of a lumped species and tracked separately. Often an extra gas introduced into a calculation is the same as a product of combustion, like water vapor from a sprinkler or carbon dioxide from an extinguisher. These gases are tracked separately. Thus, water vapor generated by the combustion is tracked via the Products lumped species variable and water vapor generated by evaporating sprinkler droplets is tracked via its own transport equation.
+The {\ct SPEC} namelist group is used to define a gas species in FDS. Once defined the species can be tracked as a single species (i.e., a primitive species) and/or the species can be used as part of one or more lumped species, also defined with {\ct SPEC}.  It is possible for a species to be both part of a lumped species and tracked separately. Often an extra gas introduced into a calculation is the same as a product of combustion, like water vapor from a sprinkler or carbon dioxide from an extinguisher. These gases are tracked separately. Thus, water vapor generated by the combustion is tracked via the {\ct PRODUCTS} lumped species variable and water vapor generated by evaporating sprinkler droplets is tracked via its own transport equation.
 
 If a species is only to be used as part of one or more lumped species, {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} must be added to the {\ct SPEC} line.  This tells FDS not to allocate space for the species in the array of tracked gases. If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set on the {\ct SPEC} line. This also tells FDS not to allocate space for the species in the array of tracked gases. A species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species, and it cannot be used as the background species.  However, a primitive species with {\ct BACKGROUND=.TRUE.} can also be used as part of a lumped species definition.  Note that the default background species is {\ct AIR} which is defined as a lumped species consisting of N$_2$, O$_2$, CO$_2$, and H$_2$O.  If no background species is defined in the input file, then FDS will create the background species of {\ct AIR} by internally creating the input lines shown in Example 2 in Section~\ref{info:lumped}.
 
@@ -4450,22 +4458,17 @@ If you are using the default background lumped species {\ct AIR}, then you can s
 
 If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_FRACTION\_0} is independent of {\ct HUMIDITY}.  That is setting {\ct MASS\_FRACTION\_0} for the species {\ct WATER VAPOR} will not change the ambient humidity, it will add additional water vapor.
 
-\subsection{Specifying Gas and Liquid Species Properties}
+\subsection{Pre-Defined Gas and Liquid Properties}
 \label{gas_species_props}
-
-There are several options for specifying the properties of gas and liquid species.
-
-\subsubsection{Option 1: FDS Defined Species}
 
 Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties from 0 K to 5000 K.
 
-\newpage
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|l|}
-\caption[Optional gas and liquid species]{Optional gas and liquid species~\cite{Reid:1}}
+\caption[Pre-defined gas and liquid species]{Pre-defined gas and liquid species~\cite{Reid:1}}
 \label{tab:gasspecies}\\
 \hline
-Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   & Liquid   & RadCal                     \\
-        &   (g/mol)             &                  & (\AA)    & (K)            &          & Surrogate                  \\
+Species &   Mol.~Wt.            & Chemical         & $\sigma$ & $\epsilon/k$   & Liquid   & RadCal                     \\
+        &   (g/mol)             & Formula          & (\AA)    & (K)            &          & Surrogate                  \\
 \hline \hline
 \endfirsthead
 \caption[]{Optional gas and liquid species (continued).}\\
@@ -4526,9 +4529,22 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 \end{longtable}
 
 
-\subsubsection{Option 2: User-Specified Properties}
+\subsection{User-Defined Gas and Liquid Properties}
+\label{user_defined_gas_species_props}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
+If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermo-physical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermo-physical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
+
+Note that most of the parameters listed below, with the exception of the chemical {\ct FORMULA} or molecular weight, {\ct MW}, are not necessary for large eddy simulations (LES). If any of these properties listed below are not provided, FDS typically defaults to the properties of nitrogen, the dominant species in typical fire or combustion scenarios.
+
+\subsubsection{Specifying a Chemical Formula}
+\label{info:FORMULA}
+
+If you want FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the molecular weight, {\ct MW}. This will also be used as the label for the gas species by Smokeview.  {\ct FORMULA} is a character string consisting of elements followed by their atom count. Subgroups bracketed by parentheses can also be given.  The element name is given by its standard, case-sensitive, IUPAC\footnote{International Union of Pure and Applied Chemistry} abbreviation (e.g., C for carbon, He for helium). The following are all equivalent:
+\begin{lstlisting}
+&SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H6O2'/
+&SPEC ID='ETHYLENE GLYCOL', FORMULA='OHC2H4OH'/
+&SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
+\end{lstlisting}
 
 \subsubsection{Conductivity}
 
@@ -4571,36 +4587,22 @@ would use the RadCal absorptivities for {\ct METHANOL} when computing the absorp
 Species molecular mass also affects the spectrum: a heavier species of a given molecular functional group tends to absorb and emit more infrared radiation than a lighter species of the same functional group.  For simple chemistry, if the fuel is not present in Table~\ref{tab:gasspecies} and no {\ct FUEL\_RADCAL\_ID} is provided on the {\ct REAC} line, then the absorption properties of methane will be used.
 
 \subsubsection{Gibbs Energy}
+
 If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS can use the forward reaction kinetics along with the equilibrium values of the reaction to determine the reverse kinetics.  The equilibrium is determined by minimizing the Gibbs energy.  The temperature vs. Gibbs energy (kJ/mol) for a species can be specified with {\ct RAMP\_G\_F}.
 
 \subsubsection{Liquids}
 
-If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, it can be applied to liquid droplets, in which case the following relationship should hold:
-\be
-   h_{\rm gas}(T_{\rm boil}) = h_{\rm liquid}(T_{\rm boil}) + h_{\rm v}
-\ee
-More detail is included in Chapter~\ref{info:PART}.
+The only instance where detailed liquid properties are needed is when defining a liquid droplet for a species not listed in Table~\ref{tab:gasspecies}. The necessary properties are described in Section~\ref{thermal_part_props}.
+
+
+
 
 \subsection{Air}
+
 There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost.
 
-\subsubsection{Specifying a Chemical Formula}
-\label{info:FORMULA}
 
-If you want FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the molecular weight, {\ct MW}.
-This will also be used as the label for the gas species by Smokeview.  {\ct FORMULA} is a character string consisting of elements followed by their atom count.
-Subgroups bracketed by parentheses can also be given.  The element name is given by its standard, case-sensitive, IUPAC\footnote{International Union of Pure
-and Applied Chemistry} abbreviation (e.g., C for carbon, He for helium).
-The following are all equivalent:
-
-\begin{lstlisting}
-&SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H6O2'/
-&SPEC ID='ETHYLENE GLYCOL', FORMULA='OHC2H4OH'/
-&SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
-\end{lstlisting}
-
-
-\subsubsection{Two Gas Species with the Same Properties}
+\subsection{Two Gas Species with the Same Properties}
 \label{info:SPEC_advanced}
 
 In general only one species for a given {\ct ID} can be defined; however, you may wish to model multiple inlet streams of a species and be able to identify how well the streams are mixing.  This can be done by defining a new species with a single component.  For example, the lines:
@@ -5555,29 +5557,93 @@ Massless tracer particles may also be useful in modeling dispersion of a tracer 
 
 \section{Liquid Droplets}
 
-To define an evaporating liquid droplet, you must explicitly specify the gaseous species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
-designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
-If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water,
-the radiation absorption properties of water, and will be colored blue in Smokeview.
+Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
+
+To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the {\ct SPEC\_ID} on the {\ct PART} line:
+\begin{lstlisting}
+&PART ID='my droplets', SPEC_ID='my gas species', ... /
+\end{lstlisting}
+By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporation model. Alternatively, if you specify a {\ct SURF\_ID}, you are designating a solid particle that behaves according to the given {\ct SURF} line. Solid particles are described in Section~\ref{info:PART_SURF}.
 
 
 \subsection{Thermal Properties}
 \label{thermal_part_props}
 
-The following parameters should be specified to control the evaporation.  The {\ct INITIAL\_TEMPERATURE} of liquid droplet; assumed ambient, {\ct TMPA} ($^\circ$C) is specified on {\ct PART} input.  If the fluid given by the {\ct SPEC\_ID} is included in Table~\ref{tab:gasspecies},
-then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid on the {\ct SPEC} input:
+The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
+
+\subsubsection{{\it Known} Liquid/Gas Species}
+
+If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
+\begin{lstlisting}
+&SPEC ID='WATER VAPOR' /
+&PART ID='water droplets', SPEC_ID='WATER VAPOR', ... /
+\end{lstlisting}
+There might be other optional parameters listed on the {\ct PART} line, but these are the ones that are absolutely necessary. In addition, if {\ct SPEC\_ID='WATER VAPOR'} the droplets are not only assigned the thermo-physical properties of water, but also the radiation absorption properties are set to that of water, and the droplets are colored blue in Smokeview.
+
+\subsubsection{{\it Unknown} Liquid/Gas Species}
+
+If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
-\item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle (kg/m$^3$).
-\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (\si{kJ/(kg.K})).
-\item[{\ct RAMP\_CP\_L}] Ramp of temperature vs. specific heat for the solid droplet/particle.
-\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet ($^\circ$C).
-\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet ($^\circ$C).
-\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet (kJ/kg).
+\item[{\ct DENSITY\_LIQUID}] (kg/m$^3$).
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] (\si{kJ/(kg.K})). If the specific heat of the liquid is a function of temperature, use {\ct RAMP\_CP\_L} to provide the function $c_p(T)$. 
+\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of the liquid, $T_{\rm boil}$ ($^\circ$C).
+\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of the liquid ($^\circ$C).
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/mol).
-\item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
+\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of the liquid, $h_{\rm v}$ (kJ/kg).
+\item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
+Note that FDS will adjust the liquid enthalpy so that the following relationship holds:
+\be
+   h_{\rm gas}(T_{\rm boil}) = h_{\rm liquid}(T_{\rm boil}) + h_{\rm v}
+\ee
 
 
+\subsubsection{Fuel Liquid/Gas Species}
+\label{info:fuel_droplets}
+\label{spray_burner}
+
+If the liquid droplets burn, the {\ct SPEC\_ID} on the {\ct PART} line should designate the {\ct FUEL} on the {\ct REAC} line. Depending on the combustion model, you may not need to create a separate {\ct SPEC} line. Fuel droplets will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line. The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}. The {\ct HEAT\_OF\_COMBUSTION} can be specified on the {\ct PART} line, or the {\ct REAC} line, or it will be calculated automatically by FDS. If it is specified on the {\ct PART} line, the burning rate will be adjusted to account for the difference between the heats of combustion of this particular droplet and the other fuels in the model. If the you let FDS calculate the heat of combustion automatically, run the model for a few time steps and look for the ``Heat of Combustion'' listed in the {\ct CHID.out} file. Use this value to specify the flow rate from the nozzle to achieve your desired heat release rate.
+
+If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Table~\ref{tab:gasspecies} and the column labelled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
+
+Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An alternate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
+
+In the example file ({\ct Fires/spray\_burner.fds}), heptane from two nozzles is sprayed downwards into a steel pan.  The flow rate is increased linearly so that the fire grows to 2~MW in 20 s, burns steadily for another 20 s, and then ramps down linearly in 20 s. The key input parameters are given here:
+\begin{lstlisting}
+&REAC FUEL='N-HEPTANE',SOOT_YIELD=0.01 /
+
+&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+&DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
+
+&PART ID='heptane droplets', SPEC_ID='N-HEPTANE',
+      QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
+      DIAMETER=1000., SAMPLING_FACTOR=1 /
+
+&PROP ID='nozzle', PART_ID='heptane droplets',  HEAT_OF_COMBUSTION=44500.,
+      FLOW_RATE=1.97, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
+      SPRAY_ANGLE=0.,30., SMOKEVIEW_ID='nozzle' /
+&RAMP ID='fuel', T= 0.0, F=0.0  /
+&RAMP ID='fuel', T=20.0, F=1.0  /
+&RAMP ID='fuel', T=40.0, F=1.0  /
+&RAMP ID='fuel', T=60.0, F=0.0  /
+\end{lstlisting}
+Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
+\be
+   2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
+   \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
+   \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW}
+\ee
+The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets or solid objects have different heats of combustion, the effective burning rates are adjusted so that the total heat release rate is that which you expect. However, exercises like this ought to be conducted just to ensure that this is the case. The HRR curve for this example is given in Fig.~\ref{spray_burner_fig}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/spray_burner_HRR}
+\end{center}
+\caption[Results of the {\ct spray\_burner} test case]{Heat Release Rate (HRR) of spray burner test.}
+\label{spray_burner_fig}
+\end{figure}
+
+Note also that this feature is subject to mesh dependence. If the mesh cells are too coarse, the evaporating fuel can be diluted to such a degree that it may not burn. Proper resolution depends on the type of fuel and the amount of fuel being ejected from the nozzle. Always test your burner at the resolution of your overall simulation.
 
 
 \subsection{Radiative Properties}
@@ -5649,59 +5715,7 @@ In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liq
 {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
 
-\subsection{Fuel Droplets}
-\label{info:fuel_droplets}
 
-If the droplets evaporate into the {\ct FUEL} identified on the {\ct REAC} line, they will be colored yellow by default in Smokeview and any resulting
-fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.
-The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate
-(assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}, also specified on the {\ct PART} line. Note that the
-burning rate will be adjusted to account for the difference between the heats of combustion of the droplets and the other fuels in the model.
-
-If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
-in the same way as those for a sprinkler.  If the fuel species is present in the liquid properties table as a fuel, then the droplets will be given fuel radiation absorption properties.
-
-Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An alternate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
-
-\subsubsection{Example Case: spray\_burner}
-\label{spray_burner}
-
-Controlled fire experiments are often conducted using a spray burner, where a liquid fuel is sprayed out of a nozzle and ignited. In this example ({\ct spray\_burner.fds}), heptane from two nozzles is sprayed downwards into a steel pan.  The flow rate is increased linearly so that the fire grows to 2~MW in 20 s, burns steadily for another 20 s, and then ramps down linearly in 20 s. The key input parameters are given here:
-\begin{lstlisting}
-&REAC FUEL='N-HEPTANE',SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
-
-&DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
-&DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
-
-&PART ID='heptane droplets', SPEC_ID='N-HEPTANE',
-      QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
-      DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
-
-&PROP ID='nozzle', PART_ID='heptane droplets',
-      FLOW_RATE=1.97, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
-      SPRAY_ANGLE=0.,30., SMOKEVIEW_ID='nozzle' /
-&RAMP ID='fuel', T= 0.0, F=0.0  /
-&RAMP ID='fuel', T=20.0, F=1.0  /
-&RAMP ID='fuel', T=40.0, F=1.0  /
-&RAMP ID='fuel', T=60.0, F=0.0  /
-\end{lstlisting}
-Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
-\be
-   2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
-   \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
-   \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW}
-\ee
-The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets or solid objects have different heats of combustion, the effective burning rates are adjusted so that the total heat release rate is that which you expect. However, exercises like this ought to be conducted just to ensure that this is the case. The HRR curve for this example is given in Fig.~\ref{spray_burner_fig}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/spray_burner_HRR}
-\end{center}
-\caption[Results of the {\ct spray\_burner} test case]{Heat Release Rate (HRR) of spray burner test.}
-\label{spray_burner_fig}
-\end{figure}
-
-Note also that this feature is subject to mesh dependence. If the mesh cells are too coarse, the evaporating fuel can be diluted to such a degree that it may not burn. Proper resolution depends on the type of fuel and the amount of fuel being ejected from the nozzle. Always test your burner at the resolution of your overall simulation.
 
 \clearpage
 
