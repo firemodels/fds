@@ -5112,7 +5112,7 @@ Vegetation is idealized as solid particles dispersed in a volume
 containing the vegetation in bulk, e.g., a tree crown or shrub.
 FDS models the particles as being distributed uniformly through this
 volume; the void space is therefore isotropic. For fuels such as
-branches, thiz assumption may lose validity as
+branches, this assumption may lose validity as
 the computational grid size is reduced and the fuel thus resolved at
 smaller scale.
 
@@ -5122,7 +5122,7 @@ velocity is unidirectional and parallel to the pipe walls,
 $\overline{u} = (U_0, 0, 0)$.  Within the
 vegetation bed, because there is less volume to accommodate the flow, 
 mass conservation demands that the fluid velocity increase.   This
-interstitial velocity $U$ is given by
+interstitial velocity $U$ is given by (see Holdich (2002) \cite{Holdich:2002})
 \be
  U = U_0/\epsilon = U_0/(1 - \beta),
 \label{eq:interstitial velocity}
