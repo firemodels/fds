@@ -7401,7 +7401,11 @@ If you specify pressure {\ct ZONE}s; that is, specific areas of the domain where
 \label{info:visibility}
 \label{info:obscuration}
 
-If you are performing a fire calculation using the simple chemistry approach, the smoke is tracked along with all other major products of combustion. The most useful quantity for assessing visibility in a space is the {\em light extinction coefficient}, $K$~\cite{SFPE:Mulholland}. The intensity of monochromatic light passing a distance $L$ through smoke is attenuated according to \be I/I_0 = {\rm e}^{-KL} \ee The light extinction coefficient, $K$, is a product of the density of smoke particulate, $\rho Y_{\rm S}$, and a mass specific extinction coefficient that is fuel dependent \be K = K_{\rm m} \; \rho \, Y_{\rm S} \label{mec} \ee Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct 'ASPIRATION'}, {\ct 'CHAMBER OBSCURATION'} (smoke detector), or {\ct 'PATH OBSCURATION'} (beam detector) are discussed respectively in Section~\ref{info:aspiration_detector}, Section~\ref{info:smoke_detector}, and Section~\ref{info:beam_detector}.
+If you are performing a fire calculation using the simple chemistry approach, the smoke is tracked along with all other major products of combustion. The most useful quantity for assessing visibility in a space is the {\em light extinction coefficient}, $K$~\cite{SFPE:Mulholland}. The intensity of monochromatic light passing a distance $L$ through smoke is attenuated according to
+\be I/I_0 = {\rm e}^{-KL} \ee
+The light extinction coefficient, $K$, is a product of a mass specific extinction coefficient, $K_{\rm m}$, which is fuel dependent, and the density of smoke particulate, $\rho Y_{\rm S}$
+\be K = K_{\rm m} \; \rho \, Y_{\rm S} \label{mec} \ee
+Devices that output a \% obscuration such as a {\ct DEVC} with a {\ct QUANTITY} of {\ct 'ASPIRATION'}, {\ct 'CHAMBER OBSCURATION'} (smoke detector), or {\ct 'PATH OBSCURATION'} (beam detector) are discussed respectively in Section~\ref{info:aspiration_detector}, Section~\ref{info:smoke_detector}, and Section~\ref{info:beam_detector}.
 
 Estimates of visibility through smoke can be made by using the equation
 \be  S = C/K  \label{vis}  \ee
