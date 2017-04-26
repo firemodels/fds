@@ -6216,18 +6216,100 @@ The {\ct PART} namelist references {\ct SURF} for material properties and specif
 
 Users of FDS that work in wildland fire or forestry will be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture is reported on a dry weight basis. Thus, pending the creation of new namelists or the addition of new namelist parameters,  commonly reported vegetation properties cannot be directly used in FDS input files. Instead, they must be converted to the parameters needed by FDS. These conversions affect parameters in the {\ct SURF} and {\ct INIT} namelists and are given below.
 
-The forestry literature provides vegetation moisture, $M_{\rm dw}$, on a dry weight basis. The {\ct SURF} namelist parameters for mass fractions of the solid fuel and moisture are then $1 / (1 + M_{\rm dw})$ and $M_{\rm dw} / (1 + M_{\rm dw}$), respectively. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then {\ct THICKNESS} = $2/\sigma_{\rm v}$ in the {\ct SURF} namelist.
+The forestry literature provides vegetation moisture, $M_{\rm dw}$, on a dry weight basis. The {\ct SURF} namelist parameters for mass fractions of the solid fuel and moisture are then $1 / (1 + M_{\rm dw})$ and $M_{\rm dw} / (1 + M_{\rm dw}$), respectively. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then {\ct THICKNESS} = $2/\sigma_{\rm v}$ in the {\ct SURF} namelist (here {\ct THICKNESS} equal the radius of the cylindrical shaped vegetation element).
 
 The {\ct INIT} namelist parameter {\ct MASS\_PER\_VOLUME} = $\rho_{\rm d} (1+M_{\rm dw})$ where $\rho_{\rm d}$ is the bulk density of the dry vegetation.
 
+\section{Thermal Degradation Model for Vegetation}
+
+The working model for the thermal degradation of a thermally-thin vegetative fuel used here is similar to that employed by others (e.g. Porterie et al. 2005; Morvan and Dupuy 2004; Houssami et al. 2016). The solid-phase thermal degradation process has three components: \\
+
+\noindent 1. Endothermic drying
+\be
+ {\rm Virgin\ Veg} \rightarrow M_{\rm dw} {\rm H_2O} + (1-M_{\rm dw}) {\rm Dry\ Veg} \nonumber
+\ee
+
+\noindent 2. Endothermic pyrolysis
+\be
+ {\rm Dry\ Veg} \rightarrow \chi_{\rm char} {\rm Char} + (1-\chi_{\rm char})({\rm Fuel\ Gas + Soot}) \nonumber
+\ee
+
+\noindent 3. Exothermic char oxidation
+\be
+ {\rm Char} + \nu_{\rm O_2, char} {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}){\rm CO_2} + \chi_{\rm ash}{\rm Ash} \nonumber
+\ee
+\noindent
+The stoichiometric constants are: $M_{\rm dw}$ = fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ = mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm 0_2,char}$ = 1.65 [Porterie 2005];  $\chi_{\rm ash}$ = mass fraction of char that is converted to ash during char oxidation.
+
+In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation, resolved on the computational grid, is denoted $\rho_{\rm b,dry}$ (kg m$^{-3}$). In the notation of Mell et al. (2009), $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. 
+
+The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
+\begin{eqnarray}
+  R_{\rm H_2O} &=& \rho_{\rm b, H_2O}\ A_{\rm H_2O}\ T_{\rm v}^{-\frac{1}{2}} e^{-\frac{E_{\rm H_2O}}{T_{\rm v}}}, \nonumber \\
+  R_{\rm pyr} &=& \rho_{\rm b,dry}\ A_{\rm pyr}\ e^{-\frac{E_{\rm pyr}}{T_{\rm v}}}, \nonumber \\
+  R_{\rm char} &=& \frac{A_{\rm char}}{\nu_{\rm O_2,char}}\ \rho_{\rm g}\ Y_{\rm O_2}\ \sigma_{\rm v}\ \beta_{\rm v}\ e^{-\frac{E_{\rm char}}{T_{\rm v}}} (1+\beta_{\rm char}\sqrt{Re_{\rm v}}), \nonumber
+\end{eqnarray}
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $Re_{\rm v} = 2\rho_{\rm g} r_{\rm v} / \mu $ with $r_{\rm v} = 2/\sigma_{\rm v}$ for a cylinder. The term containing $Re_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie et al. 2005.
+
+\begin{table}[!ht]
+\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al., 2005)}
+\vspace{0.1in}
+\label{tab:veg_kinetics}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Constant                 &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
+$E_{\rm H_2O}$ (K)         & 5,800 \\ \hline
+$A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
+$E_{\rm pyr}$ (K)            & 7,250  \\ \hline
+$A_{\rm char}$ (m/s)          & 430 \\ \hline
+$E_{\rm char}$ (K)           & 9,000 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The equation governing the temperature of a thermally thin fuel element is
+\be
+\label{eq:Tv_thermally_thin}
+\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\Delta{\rm h_{vap}}\ R_{\rm H_2O} - \Delta {\rm h_{pyr}}\ R_{\rm pyr} - \alpha_{\rm char}\ \Delta{\rm h_{char}}\ R_{\rm char} - \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} - \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b}.
+\ee
+The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie et al. 2005). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively (Mell et al. 2009). The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$ kJ kg$^{-1}$;  $\Delta{\rm h_{vap}}$ = 418 kJ kg$^{-1}$ [Movan and Dupuy, 2001]; $\Delta{\rm h_{char}} = -32 \times 10^3$  kJ kg$^{-1}$ [Dahale et al. 2013].
+
+In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
+\be
+\rho_{\rm b} = \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O}, \nonumber
+\ee
+
+\be
+{\rm c_{\rm p,v}} = \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}, \nonumber
+\ee
+where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are 
+\begin{eqnarray}
+c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~1997}), \nonumber \\
+c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}), \nonumber \\
+c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Launtenberger~et~al.~2009}), \nonumber \\
+c_{\rm p,H_2O} &=& 4190, \nonumber 
+\end{eqnarray}
+
+The rate of change of the total vegetative fuel mass is
+\be
+\dot{\rho}_{\rm b} = -R_{H_2O} - (1 - \chi_{\rm char})R_{\rm pyr} - (1-\chi_{\rm ash})R_{\rm char}, \nonumber
+\ee
+where $\dot{(~)}$ denotes $d(~)/dt$ and the rate of change for the components of the vegetative mass during thermal degradation are:
+
+\begin{eqnarray}
+\dot{\rho}_{\rm g,H_2O} &=& -R_{\rm H_2O}, \nonumber \\
+\dot{\rho}_{\rm b,dry} &=& -R_{\rm dry}, \nonumber \\
+\dot{\rho}_{\rm b,char} &=& -\chi_{\rm char}\ R_{\rm pyr} - R_{\rm char}. \nonumber
+\end{eqnarray}
+Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $R_{\rm H_2O}$, $(1-\chi_{\rm char})R_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash})R_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} R_{\rm char}$. 
 
 \chapter{Devices and Control Logic}
 
 Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be completely unrelated, but from the point of view of FDS, they are simply devices that operate in specific ways depending on the properties assigned to them. They can be used to record some quantity of the simulated environment, like a thermocouple, or they can represent a mathematical model of a complex sensor, like a smoke detector, and in some cases they can trigger events to happen, like a timer.
 
 All devices, in the broadest sense of the word, are designated via the namelist group {\ct DEVC}. In addition, advanced functionality and properties are accommodated via additional namelist groups called {\ct CTRL} (Control) and {\ct PROP} (Properties).
-
-
 
 
 \section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
