@@ -5040,7 +5040,7 @@ gray medium (no wavelength dependence) reduces to
 \ee
 Equation~\ref{eq:thermal transfer equation} is used to model
 vegetation composed of one type, e.g., a fuel bed composed only of
-pine needles, by a number of researchers; see Morvan (2000) 
+pine needles, by a number of researchers; see Morvan (2000)
 \cite{Morvan:2000} and Porterie (2006) \cite{Porterie:2006}.
 
 Integrating Equation~\ref{eq:thermal transfer equation} over all solid
@@ -5052,7 +5052,7 @@ angles gives the equation for conservation of radiant energy.
   \left(T_{\mathrm{veg}}\right) - U(s) \right].
 \label{eq:conservation of radiant energy}
 \ee	
-Here 
+Here
 \begin{itemize}
  \item $s$ is a unit vector in the direction of the radiation intensity
  \item $I$ is the radiation intensity, W m$^{-2}$ sr$^{-2}$
@@ -5068,7 +5068,7 @@ Here
 The structure of Equation~\ref{eq:conservation of radiant energy}
 suggests a pair of reciprocal consistency tests.  The integrated radiant energy
 computed by FDS for the case $\kappa_{\mathrm{gas}} = 1, \kappa_{\mathrm{veg}} = 0$ should equal that computed for
-$\kappa_{\mathrm{gas}} = 0, \kappa_{\mathrm{veg}} = 1$.  
+$\kappa_{\mathrm{gas}} = 0, \kappa_{\mathrm{veg}} = 1$.
 
 \subsubsection{The radiant energy computed with $\kappa_{\mathrm{gas}}
   = 1$, $\kappa_{\mathrm{veg}} = 0$ is consistent with
@@ -5118,9 +5118,9 @@ smaller scale.
 
 Consider a pipe or duct with frictionless walls.  Let $\overline{u}$
 represent the fluid velocity. Upstream of the vegetation bed the
-velocity is unidirectional and parallel to the pipe walls, 
+velocity is unidirectional and parallel to the pipe walls,
 $\overline{u} = (U_0, 0, 0)$.  Within the
-vegetation bed, because there is less volume to accommodate the flow, 
+vegetation bed, because there is less volume to accommodate the flow,
 mass conservation demands that the fluid velocity increase.   This
 interstitial velocity $U$ is given by (see Holdich (2002) \cite{Holdich:2002})
 \be
@@ -5143,29 +5143,29 @@ dimensionless drag coefficient obtained from empirical correlations
 based on the particle shape and local Reynolds number.
 
 For steady flow through a pipe or duct with cross-sectional area
-$A$ in which vegetation particles are uniformly dispersed over length 
-$L$ having porosity $\epsilon$, the force balance of pressure and 
+$A$ in which vegetation particles are uniformly dispersed over length
+$L$ having porosity $\epsilon$, the force balance of pressure and
 drag gives
 \be
  \Delta P A \epsilon = \sum_V \overline{F_D},
  \label{eq:force balance}
-\ee 
+\ee
 where the sum is over all vegetation
 particles in the volume $V = A L$, and $\Delta P$ is the pressure
-drop over the distance $L$. 
+drop over the distance $L$.
 
 Let $S_p$ and $V_p$ represent the surface area and volume,
 respectively, of a vegetation particle, and let $C_S = A_c/S_p$ be
-a particle shape factor constant. Expanding the RHS of 
+a particle shape factor constant. Expanding the RHS of
 Equation~\eqref{eq:force balance}, we find
 \be
  \Delta P A \epsilon = N_p F_D = N_p \dfrac{1}{2} \rho u^2 C_D A_c =
  N_p \dfrac{1}{2} \rho U^2 C_D C_S S_p.
  \label{eq:force balance expand}
 \ee
-By definition, $\beta = N_p V_p / A L$, and from 
-Equation~\eqref{eq:interstitial velocity}, $\epsilon = 1 - \beta$.  
-Dividing both sides of Equation~\eqref{eq:force balance expand} by $A L$, 
+By definition, $\beta = N_p V_p / A L$, and from
+Equation~\eqref{eq:interstitial velocity}, $\epsilon = 1 - \beta$.
+Dividing both sides of Equation~\eqref{eq:force balance expand} by $A L$,
 we obtain
 \be
  \Delta P / L = \dfrac{1}{2} \rho U^2 C_D C_S \sigma \beta / (1 -
@@ -5179,18 +5179,13 @@ vegetation particle.
   state flow through a pipe}
 \label{vege_pressure-drop_sphere_MPUV2pt0}
 \label{vege_pressure-drop_sphere_MPUV30pt0}
-We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For
-spherical particles with radius $r_p = 0.0005$ m and density 500
-$\mathrm{kg}/\mathrm{m}^3$,
-packed with a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$ 
-(or $30.0$ $\mathrm{kg}/\mathrm{m}^3$), we have
-\begin{itemize} 
- \item $\sigma = 3/r_p$ = 6000.0 $\mathrm{m}^{-1}$.
- \item $\beta = 2/500$ (or $\beta = 30/500$).
- \item $\mathrm{Re} = 6 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta)) = 132.9$.
- \item $C_D = 24 (0.85 + 0.15 \mathrm{Re}^{0.687})/\mathrm{Re} = 0.933$, $1 \le \mathrm{Re} \le 1000$. 
- \item $C_S = 1/4$.
+We take the temperature to be 20~$^\circ$C, the density of air $\rho = 1.205$~kg/m$^3$, and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For spherical particles with radius $r_p = 0.0005$~m and density 500~kg/m$^3$, packed with a bulk density of 2~kg/m$^3$ (30~kg/m$^3$), we have
+\begin{itemize}
+ \item $\sigma = 3/r_p$ = 6000 $\mathrm{m}^{-1}$
+ \item $\beta = 2/500$ (or $\beta = 30/500$)
+ \item $\mathrm{Re} = 6 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta)) = 132.9$
+ \item $C_D = 24 (0.85 + 0.15 \mathrm{Re}^{0.687})/\mathrm{Re} = 0.933$, $1 \le \mathrm{Re} \le 1000$
+ \item $C_S = 1/4$
 \end{itemize}
 and therefore $\Delta P = 13.65$ Pa (or $\Delta P = 237.66$ Pa).
 
@@ -5199,10 +5194,8 @@ and therefore $\Delta P = 13.65$ Pa (or $\Delta P = 237.66$ Pa).
       \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV2pt0} } &
       \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV30pt0} }
    \end{tabular*}
-\caption[\textct{Vegetation\_pressure-drop\_sphere}]
-{The pressure drop in steady state flow through a duct across 2 kg (or
- 30 kg) of spherical particles with radius 0.0005 m and density 500
- kg/m$^3$, distributed in a volume of 1 m$^3$.}
+\caption[The \textct{vege\_pressure-drop\_sphere} test cases]
+{The pressure drop in steady state flow through a duct across 2 kg (or 30 kg) of spherical particles with radius 0.0005 m and density 500~kg/m$^3$, distributed in a volume of 1 m$^3$.}
 \label{fig_vegetation_pressure-drop_sphere}
 \end{figure}
 
@@ -5210,18 +5203,14 @@ and therefore $\Delta P = 13.65$ Pa (or $\Delta P = 237.66$ Pa).
   state flow through a pipe}
 \label{vege_pressure-drop_cylinder_MPUV2pt0}
 \label{vege_pressure-drop_cylinder_MPUV30pt0}
-We take the temperature to be $20^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$,
-and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For
-cylindrical particles with radius $r_p = 0.0005$ m, length 
-$L_p = 0.02$ m and density 500 $\mathrm{kg}/\mathrm{m}^3$, packed with
-a bulk density of $2.0$ $\mathrm{kg}/\mathrm{m}^3$ 
-(or $30.0$ $\mathrm{kg}/\mathrm{m}^3$), we have
+We take the temperature to be 20~$^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$, and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For cylindrical particles with radius $r_p = 0.0005$~m, length
+$L_p = 0.02$~m and density 500~kg/m$^3$, packed with a bulk density of 2~kg/m$^3$ (or 30~kg/m$^3$), we have
 \begin{itemize}
- \item $\sigma = 2/r_p$ = 4000.0 $\mathrm{m}^{-1}$.
- \item $\beta = 2/500$ (or $\beta = 30/500$).
- \item $\mathrm{Re} = 4 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta))  = 199.3$.
- \item $C_D = 10 (0.6 + 0.4 \mathrm{Re}^{0.8})/\mathrm{Re} = 0.789$,  $1 \le \mathrm{Re} \le 1000$.
- \item $C_S = 1/\pi$.
+ \item $\sigma = 2/r_p$ = 4000 $\mathrm{m}^{-1}$
+ \item $\beta = 2/500$ (or $\beta = 30/500$)
+ \item $\mathrm{Re} = 4 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta))  = 199.3$
+ \item $C_D = 10 (0.6 + 0.4 \mathrm{Re}^{0.8})/\mathrm{Re} = 0.789$,  $1 \le \mathrm{Re} \le 1000$
+ \item $C_S = 1/\pi$
 \end{itemize}
 and therefore $\Delta P = 19.25$ Pa (or $\Delta P = 339.076$ Pa).
 
@@ -5230,10 +5219,8 @@ and therefore $\Delta P = 19.25$ Pa (or $\Delta P = 339.076$ Pa).
       \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV2pt0} } &
       \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV30pt0} }
    \end{tabular*}
-\caption[\textct{Vegetation\_pressure-drop\_cylinder}]
-{The pressure drop in steady state flow through a duct across 2 kg
- (or 30 kg) of cylindrical particles with radius 0.0005 m, length 0.02
- m and density 500 kg/m$^3$, distributed in a volume of 1 m$^3$.}
+\caption[The \textct{vege\_pressure-drop\_cylinder} test cases]
+{The pressure drop in steady state flow through a duct across 2 kg (or 30 kg) of cylindrical particles with radius 0.0005 m, length 0.02 m and density 500 kg/m$^3$, distributed in a volume of 1 m$^3$.}
 \label{fig_vegetation_pressure-drop_cylinder}
 \end{figure}
 
