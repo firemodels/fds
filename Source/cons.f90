@@ -31,7 +31,7 @@ INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0, &                                  
                       FISHPAK_BC_NEUMANN_DIRICHLET=4
 INTEGER, PARAMETER :: DIRICHLET=1,NEUMANN=2,INTERNAL=3                                      ! Pressure Boundary Conditions
 INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
-                      PYROLYSIS_PREDICTED=3,PYROLYSIS_SPECIFIED=4                            ! Pyrolysis model
+                      PYROLYSIS_PREDICTED=3,PYROLYSIS_SPECIFIED=4,PYROLYSIS_VEGETATION=5     ! Pyrolysis model
 INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1, PARABOLIC_PROFILE=2,&
                       BOUNDARY_LAYER_PROFILE=3, RAMP_PROFILE=4                              ! Surface velocity profile
 INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                               ! Cell position for output quantities
