@@ -476,7 +476,7 @@ TYPE IBM_RCFACE_LST_TYPE
 END TYPE IBM_RCFACE_LST_TYPE
 
 TYPE IBM_EXIMFACE_TYPE
-   INTEGER :: LHFACE, UNKZ
+   INTEGER :: LHFACE, UNKZ, IW=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::       FLX
    REAL(EB) :: AREA,FN_H_S
