@@ -3,6 +3,13 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
+if [ ! -e .verification_script_dir ]; then
+   echo "***error The Run_FDS_Cases.sh script must be run"
+   echo "   in the directory Verification/script."
+   echo "   script aborted."
+   exit
+fi
+
 QUEUE=batch
 DEBUG=
 IB=
