@@ -3007,7 +3007,7 @@ value of heat of combustion can be specified for each reaction, $j$, via the par
 
 \subsubsection{Modeling Upholstered Furnishings}
 
-The example input files called {\ct Fires/couch.fds} and {\ct Fires/room\_fire.fds} demonstrate a simple way to model upholstered furniture. In residential fires, upholstered furniture makes up a significant fraction of the combustible load. A single couch can generate several megawatts of energy and sometimes lead to compartment flashover. Modeling a couch fire requires a simplification of its structure and materials.  At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
+The example input file called {\ct Fires/couch.fds} demonstrates a simple way to model upholstered furniture. In residential fires, upholstered furniture makes up a significant fraction of the combustible load. A single couch can generate several megawatts of energy and sometimes lead to compartment flashover. Modeling a couch fire requires a simplification of its structure and materials.  At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
 \begin{lstlisting}
 &MATL ID                    = 'FOAM'
       SPECIFIC_HEAT         = 1.0
@@ -5585,7 +5585,7 @@ There might be other optional parameters listed on the {\ct PART} line, but thes
 If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
 \item[{\ct DENSITY\_LIQUID}] (kg/m$^3$).
-\item[{\ct SPECIFIC\_HEAT\_LIQUID}] (\si{kJ/(kg.K})). If the specific heat of the liquid is a function of temperature, use {\ct RAMP\_CP\_L} to provide the function $c_p(T)$. 
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] (\si{kJ/(kg.K})). If the specific heat of the liquid is a function of temperature, use {\ct RAMP\_CP\_L} to provide the function $c_p(T)$.
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of the liquid, $T_{\rm boil}$ ($^\circ$C).
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of the liquid ($^\circ$C).
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/mol).
@@ -6222,34 +6222,34 @@ The {\ct INIT} namelist parameter {\ct MASS\_PER\_VOLUME} = $\rho_{\rm d} (1+M_{
 
 \section{Thermal Degradation Model for Vegetation}
 
-The working model for the thermal degradation of a thermally-thin vegetative fuel used here is similar to that employed by others (e.g. Porterie et al. 2005; Morvan and Dupuy 2004; Houssami et al. 2016). The solid-phase thermal degradation process has three components: \\
+The working model for the thermal degradation of a vegetative fuel is similar to that employed by others (e.g. Porterie et al. 2005; Morvan and Dupuy 2004; Houssami et al. 2016). The solid-phase thermal degradation process has three reactions: \\
 
 \noindent 1. Endothermic drying
 \be
- {\rm Virgin\ Veg} \rightarrow M_{\rm dw} {\rm H_2O} + (1-M_{\rm dw}) {\rm Dry\ Veg} \nonumber
+ {\rm Virgin\ Veg} \rightarrow M_{\rm dw} \, {\rm H_2O} + (1-M_{\rm dw}) \, {\rm Dry\ Veg} \nonumber
 \ee
 
 \noindent 2. Endothermic pyrolysis
 \be
- {\rm Dry\ Veg} \rightarrow \chi_{\rm char} {\rm Char} + (1-\chi_{\rm char})({\rm Fuel\ Gas + Soot}) \nonumber
+ {\rm Dry\ Veg} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, ({\rm Fuel\ Gas + Soot}) \nonumber
 \ee
 
 \noindent 3. Exothermic char oxidation
 \be
- {\rm Char} + \nu_{\rm O_2, char} {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}){\rm CO_2} + \chi_{\rm ash}{\rm Ash} \nonumber
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash} \nonumber
 \ee
-\noindent
-The stoichiometric constants are: $M_{\rm dw}$ = fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ = mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm 0_2,char}$ = 1.65 [Porterie 2005];  $\chi_{\rm ash}$ = mass fraction of char that is converted to ash during char oxidation.
+$M_{\rm dw}$ is the fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ is the mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ = 1.65 [Porterie 2005];  $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
 
-In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation, resolved on the computational grid, is denoted $\rho_{\rm b,dry}$ (kg m$^{-3}$). In the notation of Mell et al. (2009), $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. 
+In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell et al. (2009), $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
 
 The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
 \begin{eqnarray}
-  R_{\rm H_2O} &=& \rho_{\rm b, H_2O}\ A_{\rm H_2O}\ T_{\rm v}^{-\frac{1}{2}} e^{-\frac{E_{\rm H_2O}}{T_{\rm v}}}, \nonumber \\
-  R_{\rm pyr} &=& \rho_{\rm b,dry}\ A_{\rm pyr}\ e^{-\frac{E_{\rm pyr}}{T_{\rm v}}}, \nonumber \\
-  R_{\rm char} &=& \frac{A_{\rm char}}{\nu_{\rm O_2,char}}\ \rho_{\rm g}\ Y_{\rm O_2}\ \sigma_{\rm v}\ \beta_{\rm v}\ e^{-\frac{E_{\rm char}}{T_{\rm v}}} (1+\beta_{\rm char}\sqrt{Re_{\rm v}}), \nonumber
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right) \nonumber \\[.1in]
+  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right) \nonumber \\[.1in]
+  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
+  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}} \nonumber
 \end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $Re_{\rm v} = 2\rho_{\rm g} r_{\rm v} / \mu $ with $r_{\rm v} = 2/\sigma_{\rm v}$ for a cylinder. The term containing $Re_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie et al. 2005.
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie et al. 2005.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al., 2005)}
@@ -6260,11 +6260,11 @@ where $T_{\rm v}$ is the temperature of the vegetation. The default values of th
 \hline
 Constant                 &   Default Value  \\ \hline \hline
 $A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
-$E_{\rm H_2O}$ (K)         & 5,800 \\ \hline
+$E_{\rm H_2O}/R$ (K)         & 5,800 \\ \hline
 $A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
-$E_{\rm pyr}$ (K)            & 7,250  \\ \hline
+$E_{\rm pyr}/R$ (K)            & 7,250  \\ \hline
 $A_{\rm char}$ (m/s)          & 430 \\ \hline
-$E_{\rm char}$ (K)           & 9,000 \\ \hline
+$E_{\rm char}/R$ (K)           & 9,000 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -6272,7 +6272,7 @@ $E_{\rm char}$ (K)           & 9,000 \\ \hline
 The equation governing the temperature of a thermally thin fuel element is
 \be
 \label{eq:Tv_thermally_thin}
-\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\Delta{\rm h_{vap}}\ R_{\rm H_2O} - \Delta {\rm h_{pyr}}\ R_{\rm pyr} - \alpha_{\rm char}\ \Delta{\rm h_{char}}\ R_{\rm char} - \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} - \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b}.
+\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
 \ee
 The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie et al. 2005). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively (Mell et al. 2009). The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$ kJ kg$^{-1}$;  $\Delta{\rm h_{vap}}$ = 418 kJ kg$^{-1}$ [Movan and Dupuy, 2001]; $\Delta{\rm h_{char}} = -32 \times 10^3$  kJ kg$^{-1}$ [Dahale et al. 2013].
 
@@ -6284,26 +6284,29 @@ In the condensed phase model, the bulk density and specific heat have contributi
 \be
 {\rm c_{\rm p,v}} = \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}, \nonumber
 \ee
-where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are 
+where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
 \begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~1997}), \nonumber \\
-c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}), \nonumber \\
-c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Launtenberger~et~al.~2009}), \nonumber \\
-c_{\rm p,H_2O} &=& 4190, \nonumber 
+c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~1997}) \nonumber \\[.1in]
+c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \nonumber \\[.1in]
+c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Launtenberger~et~al.~2009}) \nonumber \\[.1in]
+c_{\rm p,H_2O} &=& 4190 \nonumber
 \end{eqnarray}
-
 The rate of change of the total vegetative fuel mass is
 \be
-\dot{\rho}_{\rm b} = -R_{H_2O} - (1 - \chi_{\rm char})R_{\rm pyr} - (1-\chi_{\rm ash})R_{\rm char}, \nonumber
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char} \nonumber
 \ee
-where $\dot{(~)}$ denotes $d(~)/dt$ and the rate of change for the components of the vegetative mass during thermal degradation are:
+The rate of change for the components of the vegetative mass during thermal degradation are:
 
 \begin{eqnarray}
-\dot{\rho}_{\rm g,H_2O} &=& -R_{\rm H_2O}, \nonumber \\
-\dot{\rho}_{\rm b,dry} &=& -R_{\rm dry}, \nonumber \\
-\dot{\rho}_{\rm b,char} &=& -\chi_{\rm char}\ R_{\rm pyr} - R_{\rm char}. \nonumber
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O}, \nonumber \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}, \nonumber \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char} \nonumber
 \end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $R_{\rm H_2O}$, $(1-\chi_{\rm char})R_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash})R_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} R_{\rm char}$. 
+Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
+
+
+
+
 
 \chapter{Devices and Control Logic}
 
