@@ -1842,7 +1842,7 @@ REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,TMP_G,RFACF,RFACB,RFACF2,RFACB2, &
             DXKF,DXKB,REACTION_RATE,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             MFLUX, MFLUX_S, VOLSUM, REGRID_MAX, REGRID_SUM,  &
             DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,&
-            MW_G,H_MASS,X_G,X_O2,Y_O2,X_W,D_AIR,MU_AIR,U2,V2,W2,RE_L,SC_AIR,SH_FAC_WALL,SHERWOOD,VELCON,RHO_G,TMP_BACK,&
+            MW_G,H_MASS,X_G,X_O2,Y_O2,X_W,D_AIR,MU_AIR,U2,V2,W2,RE_L,RE_V,SC_AIR,SH_FAC_WALL,SHERWOOD,VELCON,RHO_G,TMP_BACK,&
             QCELL,DVOL,SIGMA_BETA
 INTEGER :: IIG,JJG,KKG,IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NN,NNN,NL,IOR,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,ZZ_GET(1:N_TRACKED_SPECIES)
@@ -2220,12 +2220,20 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ! power term
                   IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * ONE_D%TMP(I)**ML%N_T(J)
                   ! Oxidation reaction?
-                  IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+                  IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
                      ! Get oxygen mass fraction
                      ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
                      CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
                      SIGMA_BETA = LP%PWT*ONE_D%AREA*RDX(IIG)*RDY(JJG)*RDZ(KKG)
-                     REACTION_RATE = REACTION_RATE * RHOG(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+0.2_EB*SQRT(100.))/(RHO_S0*1.65)
+                     CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+                     ! Calculate tangential velocity near the surface
+                     U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+                     V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+                     W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+                     VELCON = SQRT(U2+V2+W2)
+                     RE_V   = RHOG(IIG,JJG,KKG)*VELCON*2._EB*SF%THICKNESS/MU_AIR
+                     REACTION_RATE = REACTION_RATE * &
+                                     RHOG(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_V))/(RHO_S0*ML%NU_O2(J))
                   ENDIF
                   ! Reaction rate in kg/(m3s)
                   REACTION_RATE = RHO_S0 * REACTION_RATE
