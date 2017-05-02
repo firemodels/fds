@@ -1237,6 +1237,7 @@ PRESSURE_ITERATION_LOOP: DO
 
    ! Exchange both H or HS and FVX, FVY, FVZ and then estimate values of U, V, W (US, VS, WS) at next time step.
 
+   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
    CALL MESH_EXCHANGE(5)
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
