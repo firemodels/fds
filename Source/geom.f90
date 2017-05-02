@@ -21189,19 +21189,19 @@ INTEGER :: ICF, CFACE_INDEX_LOCAL
 !    CALL POINT_TO_MESH(NM)
 !
 !    ! Count INBOUNDARY cut-faces to allocate CFACE:
-!    N_GEOM_CFACES = 0
+!    N_CFACES = 0
 !    DO ICF=1,MESHES(NM)%IBM_NCUTFACE_MESH
 !       IF(IBM_CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
 !       DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
 !          ! Option, we'll see if it is required: Cycle Areas less than GEOMEPS^2, insignificantly small.
 !          ! IF(IBM_CUT_FACE(ICF)%AREA(IFACE) < GEOMEPS*GEOMEPS) CYCLE
-!          N_GEOM_CFACES = N_GEOM_CFACES + 1
+!          N_CFACES = N_CFACES + 1
 !       ENDDO
 !    ENDDO
 !
 !    ! Now Allocate and populate fields:
 !    IF(ALLOCATED(MESHES(NM)%CFACE)) DEALLOCATE(MESHES(NM)%CFACE)
-!    ALLOCATE(MESHES(NM)%CFACE(N_GEOM_CFACES))
+!    ALLOCATE(MESHES(NM)%CFACE(N_CFACES))
 !
 !    ! Define pointers among IBM_INBOUNDARY IBM_CUT_FACE and CFACE:
 !    CFACE_INDEX_LOCAL = 0
