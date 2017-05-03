@@ -3795,7 +3795,7 @@ USE COMPLEX_GEOMETRY
 
    INTEGER :: DIR,SLICE
    INTEGER :: I, J, K
-   INTEGER :: ICF, IFACE, NVF
+   INTEGER :: ICF, IFACE, NVF, IEXIM
 
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 
@@ -3870,6 +3870,27 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ENDIF
+   ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
+      DO K = 1, KBAR
+         DO J = 1, JBAR
+            DO I = 1, IBAR
+               IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN ! There are INBOUNDARY cut-faces on this cell:
+                  ICF = CCVAR(I,J,K,IBM_IDCF)
+                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE ! Adds also SOLID side faces.
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                     NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                     NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                  ENDDO
+               ENDIF
+            END DO
+         END DO
+      END DO
+   ELSE IF (SLICETYPE_LOCAL=='EXIMBND_FACES') THEN
+      NVF = 4 ! 4 Vertices for EXIM regular face.
+      DO IEXIM=1,IBM_NEXIMFACE_MESH
+         NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+         NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+      ENDDO
    ENDIF
    NFACES = NFACES + NFACES_CUTCELLS
    NVERTS = NVERTS + NVERTS_CUTCELLS
@@ -3899,7 +3920,7 @@ USE COMPLEX_GEOMETRY
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
    INTEGER VERTBEG, VERTEND, FACEBEG, FACEEND
    LOGICAL IS_SOLID
-   INTEGER :: ICF, NVF, IVCF
+   INTEGER :: ICF, NVF, IVCF, IADD, JADD, KADD, IEXIM, X1AXIS
    INTEGER, ALLOCATABLE, DIMENSION(:) :: LOCTYPE
 
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
@@ -4149,6 +4170,8 @@ USE COMPLEX_GEOMETRY
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
                      VERTBEG = 3*VERTBEG - 2
+                     VERTEND = IVERTCUT + NVF
+                     VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
@@ -4189,6 +4212,88 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ENDIF
+   ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
+      DIR   = 0
+      IVERTCUT=NVERTS-NVERTS_CUTCELLS ! start cutcell counters after 'regular' cells
+      IFACECUT=NFACES-NFACES_CUTCELLS
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+            IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
+               ICF = CCVAR(I,J,K,IBM_IDCF)
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  VERTBEG = IVERTCUT + 1
+                  VERTBEG = 3*VERTBEG - 2
+                  VERTEND = IVERTCUT + NVF
+                  VERTEND = 3*VERTEND
+                  DO IVCF=1,NVF
+                     IVERTCUT = IVERTCUT + 1
+                     IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                     VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
+                  ENDDO
+                  FACEBEG = 3*(IFACECUT+1) - 2
+                  FACEEND = FACEBEG + 3*(NVF-2) - 1
+                  FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                  VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                  VERT_OFFSET = IVERTCUT - NVF
+                  ALLOCATE(LOCTYPE(NVF-2))
+                  CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Consider them as SOLID.
+                  ENDDO
+                  DEALLOCATE(LOCTYPE)
+               ENDDO
+            ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE IF (SLICETYPE_LOCAL=='EXIMBND_FACES') THEN
+      IVERTCUT=NVERTS-NVERTS_CUTCELLS ! start cutcell counters after 'regular' cells
+      IFACECUT=NFACES-NFACES_CUTCELLS
+      DO IEXIM=1,IBM_NEXIMFACE_MESH
+         I      = IBM_EXIM_FACE(IEXIM)%IJK(IAXIS)
+         J      = IBM_EXIM_FACE(IEXIM)%IJK(JAXIS)
+         K      = IBM_EXIM_FACE(IEXIM)%IJK(KAXIS)
+         X1AXIS = IBM_EXIM_FACE(IEXIM)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            DO KADD=-1,0
+               DO JADD=-1,0
+                  IVERTCUT = IVERTCUT + 1
+                  VERTS(3*IVERTCUT-2) = REAL(X(I     ),FB)
+                  VERTS(3*IVERTCUT-1) = REAL(Y(J+JADD),FB)
+                  VERTS(3*IVERTCUT)   = REAL(Z(K+KADD),FB)
+               ENDDO
+            ENDDO
+         CASE(JAXIS)
+            DO IADD=-1,0
+               DO KADD=-1,0
+                  IVERTCUT = IVERTCUT + 1
+                  VERTS(3*IVERTCUT-2) = REAL(X(I+IADD),FB)
+                  VERTS(3*IVERTCUT-1) = REAL(Y(J     ),FB)
+                  VERTS(3*IVERTCUT)   = REAL(Z(K+KADD),FB)
+               ENDDO
+            ENDDO
+         CASE(KAXIS)
+            DO JADD=-1,0
+               DO IADD=-1,0
+                  IVERTCUT = IVERTCUT + 1
+                  VERTS(3*IVERTCUT-2) = REAL(X(I+IADD),FB)
+                  VERTS(3*IVERTCUT-1) = REAL(Y(J+JADD),FB)
+                  VERTS(3*IVERTCUT)   = REAL(Z(K     ),FB)
+               ENDDO
+            ENDDO
+         END SELECT
+         IFACECUT = IFACECUT + 1
+         LOCATIONS(IFACECUT) = 1 + 16
+         FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT-3, IVERTCUT-2, IVERTCUT   /) ! Local Nodes 1, 2, 4
+
+         IFACECUT = IFACECUT + 1
+         LOCATIONS(IFACECUT) = 1 + 16
+         FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
+      ENDDO
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
@@ -4211,7 +4316,7 @@ CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 INTEGER :: CELLTYPE
 INTEGER :: ICF, NVF, IFACECF, IVCF, IFACECUT
 
-INTEGER :: X1AXIS
+INTEGER :: X1AXIS, IEXIM
 REAL(EB):: VAL_CF
 
 SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
@@ -4370,6 +4475,34 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
          END DO
       END DO
    ENDIF
+ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
+   IFACECUT=NFACES-NFACES_CUTCELLS  ! start cutcell counter after 'regular' cells
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+         IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
+            ICF = CCVAR(I,J,K,IBM_IDCF)
+            DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+               CALL GET_INBCUTFACE_SCALAR_SLICE(ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
+               NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  IFACECUT = IFACECUT + 1
+                  VALS(IFACECUT) = VAL_CF
+               ENDDO
+            ENDDO
+         ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ELSE IF (SLICETYPE_LOCAL=='EXIMBND_FACES') THEN
+   IFACECUT=NFACES-NFACES_CUTCELLS  ! start cutcell counter after 'regular' cells
+   DO IEXIM=1,IBM_NEXIMFACE_MESH
+      CALL GET_EXIMFACE_SCALAR_SLICE(IEXIM,IND,Y_INDEX,Z_INDEX,VAL_CF)
+      DO IVCF = 1,2
+         IFACECUT = IFACECUT + 1
+         VALS(IFACECUT) = VAL_CF
+      ENDDO
+   ENDDO
 ENDIF
 
 END SUBROUTINE GET_GEOMVALS
@@ -6596,7 +6729,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
    CASE(27) ! SOLID DENSITY
       SF => SURFACE(SURF_INDEX)
       II1 = DV%I_DEPTH
-      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          IF (DV%DEPTH > TWO_EPSILON_EB) THEN
             DEPTH = DV%DEPTH
          ELSE
@@ -6642,7 +6775,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
    CASE(33) ! SOLID SPECIFIC HEAT
       SF => SURFACE(SURF_INDEX)
       II1 = DV%I_DEPTH
-      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          IF (DV%DEPTH > TWO_EPSILON_EB) THEN
             DEPTH = DV%DEPTH
          ELSE
@@ -6675,7 +6808,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
    CASE(34) ! SOLID CONDUCTIVITY
       SF => SURFACE(SURF_INDEX)
       II1 = DV%I_DEPTH
-      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          IF (DV%DEPTH > TWO_EPSILON_EB) THEN
             DEPTH = DV%DEPTH
          ELSE
@@ -7459,7 +7592,7 @@ PROF_LOOP: DO N=1,N_PROF
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE PROF_LOOP
    SURF_INDEX =  M%WALL(IW)%SURF_INDEX
    SF  => SURFACE(SURF_INDEX)
-   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
       IF (NWP==0) CYCLE PROF_LOOP
       X_S_NEW(0:NWP) = WC%ONE_D%X(0:NWP)
