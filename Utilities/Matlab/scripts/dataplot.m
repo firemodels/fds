@@ -504,7 +504,7 @@ for i=2:n_plots
             set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
             set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
-            display(['Printing plot ',num2str(i),'...'])
+            display(['dataplot ',num2str(i),'...'])
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
