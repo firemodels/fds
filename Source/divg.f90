@@ -340,7 +340,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN_GET = 2._EB*WC%RHODW(:)*(ZZP(IIG,JJG,KKG,:)-WC%ONE_D%ZZ_F(:))*WC%RDN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
-         CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_G,H_S)
+         CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%ONE_D%TMP_F,H_S)
 
          SELECT CASE(IOR)
             CASE( 1)
@@ -825,7 +825,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ENDIF
 
    ZZ_GET(1:N_TRACKED_SPECIES) = WC%ONE_D%ZZ_F(1:N_TRACKED_SPECIES)
-   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_G)
+   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
 
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
