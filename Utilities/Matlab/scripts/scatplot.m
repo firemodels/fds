@@ -357,7 +357,7 @@ for j=2:length(Q);
         set(gcf,'Units',Paper_Units);
         set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
         set(gcf,'Position',[0 0 PDF_Paper_Width Scat_Paper_Height]);
-        display(['Printing scatter plot ',num2str(j),'...'])
+        display(['scatplot ',num2str(j),'...'])
         print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
 
         % Print histogram of ln(M/E) and normal distribution
