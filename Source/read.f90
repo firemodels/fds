@@ -5845,8 +5845,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
-      IF (ADIABATIC .AND. MATL_ID(IL,1)/='null') THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' is ADIABATIC and cannot have a MATL_ID'
+      IF ((ADIABATIC.OR.NET_HEAT_FLUX<1.E12_EB.OR.ABS(CONVECTIVE_HEAT_FLUX)>TWO_EPSILON_EB.OR.TMP_FRONT>-TMPM) &
+         .AND. MATL_ID(IL,1)/='null') THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified flux or temperature and a MATL_ID'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (THICKNESS(IL)<=0._EB .AND. MATL_ID(IL,1)/='null') THEN
