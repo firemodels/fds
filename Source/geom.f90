@@ -387,13 +387,13 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_RHO0W_INTERP, &
           CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
-          INIT_IBM,SET_CUTCELLS_3D,TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CUTCELL_FH,GET_CUTCELL_HP, &
-          GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_VELO_IBM,GET_BOUNDFACE_GEOM_INFO_H, &
+          SET_CUTCELLS_3D,TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CUTCELL_FH,GET_CUTCELL_HP, &
+          GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H,GET_INBCUTFACE_SCALAR_SLICE, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
-          INIT_CUTCELL_DATA,INIT_FACE, &
+          INIT_CUTCELL_DATA, &
           LINEARFIELDS_INTERP_TEST,MASS_CONSERVE_INIT,NUMBER_UNKH_CUTCELLS,POTENTIAL_FLOW_INIT,&
-          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,LINKED_LIST_INSERT,&
+          READ_GEOM,&
           SET_CCIBM_MATVEC_DATA,SET_DOMAINDIFFLX_3D,SET_DOMAINADVFLX_3D, &
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D, &
           WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA, &
@@ -28996,79 +28996,6 @@ END FUNCTION COMPARE_FACES
 
 END SUBROUTINE READ_GEOM
 
-! ---------------------------- GENERATE_CUTCELLS ----------------------------------------
-
-SUBROUTINE GENERATE_CUTCELLS
-USE BOXTETRA_ROUTINES, ONLY: GET_TETRABOX_VOLUME
-
-! preliminary routine to classify type of cell (cut, solid or gas)
-
-TYPE (MESH_TYPE), POINTER :: M
-INTEGER :: I, J, K, IV
-REAL(EB) :: XB(6)
-REAL(EB), POINTER, DIMENSION(:) :: X, Y, Z
-REAL(EB) :: TETBOX_VOLUME, BOX_VOLUME
-REAL(EB) :: INTERSECTION_VOLUME
-REAL(EB), POINTER, DIMENSION(:) :: V0, V1, V2, V3
-INTEGER :: VINDEX, N_CUTCELLS, N_SOLIDCELLS, N_GASCELLS, N_TOTALCELLS
-INTEGER :: IZERO
-INTEGER, PARAMETER :: SOLID=0, GAS=1, CUTCELL=2
-INTEGER :: NX, NXY, IJK
-REAL(EB) :: AREAS(6), CENTROID(3)
-
-M=>MESHES(1) ! for now, only deal with a single mesh case
-X(0:M%IBAR)=>M%X(0:IBAR)
-Y(0:M%JBAR)=>M%Y(0:JBAR)
-Z(0:M%KBAR)=>M%Z(0:KBAR)
-
-IF (.NOT.ALLOCATED(M%CUTCELL_LIST)) THEN
-   ALLOCATE(M%CUTCELL_LIST(0:M%IBAR*M%JBAR*M%KBAR),STAT=IZERO)
-   CALL ChkMemErr('GENERATE_CUTCELLS','CUTCELL_LIST',IZERO)
-ENDIF
-
-N_CUTCELLS=0
-N_SOLIDCELLS=0
-N_GASCELLS=0
-N_TOTALCELLS=M%IBAR*M%JBAR*M%KBAR
-NX = M%IBAR
-NXY = M%IBAR*M%JBAR
-DO K = 0, M%KBAR - 1
-   XB(5:6) = (/Z(K),Z(K+1)/)
-   DO J = 0, M%JBAR - 1
-      XB(3:4) = (/Y(J),Y(J+1)/)
-      DO I = 0, M%IBAR - 1
-         XB(1:2) = (/X(I),X(I+1)/)
-         BOX_VOLUME = (XB(6)-XB(5))*(XB(4)-XB(3))*(XB(2)-XB(1))
-
-         INTERSECTION_VOLUME=0.0_EB
-         DO IV=1,N_VOLU
-            VINDEX=VOLUME(IV)%VERTEX(1)
-            V0(1:3)=>VERTEX(VINDEX)%XYZ(1:3)
-            VINDEX=VOLUME(IV)%VERTEX(2)
-            V1(1:3)=>VERTEX(VINDEX)%XYZ(1:3)
-            VINDEX=VOLUME(IV)%VERTEX(3)
-            V2(1:3)=>VERTEX(VINDEX)%XYZ(1:3)
-            VINDEX=VOLUME(IV)%VERTEX(4)
-            V3(1:3)=>VERTEX(VINDEX)%XYZ(1:3)
-            CALL GET_TETRABOX_VOLUME(XB,V3,V0,V1,V2,TETBOX_VOLUME,AREAS,CENTROID)
-            INTERSECTION_VOLUME = INTERSECTION_VOLUME + TETBOX_VOLUME
-         ENDDO
-         IJK = K*NXY + J*NX + I
-         IF ( INTERSECTION_VOLUME <= 0.0001_EB*BOX_VOLUME ) THEN
-            N_GASCELLS=N_GASCELLS+1
-         ELSEIF (ABS(BOX_VOLUME-INTERSECTION_VOLUME) <= 0.0001_EB*BOX_VOLUME ) THEN
-            N_SOLIDCELLS = N_SOLIDCELLS + 1
-         ELSE
-            M%CUTCELL_LIST(N_CUTCELLS) = IJK
-            N_CUTCELLS = N_CUTCELLS + 1
-         ENDIF
-
-      ENDDO
-   ENDDO
-ENDDO
-M%N_CUTCELLS = N_CUTCELLS
-
-END SUBROUTINE GENERATE_CUTCELLS
 
 ! ---------------------------- INIT_SPHERE ----------------------------------------
 
@@ -29784,138 +29711,53 @@ END SUBROUTINE EXPAND_GROUPS
 ! ---------------------------- CONVERTGEOM ----------------------------------------
 
 SUBROUTINE CONVERTGEOM(TIME)
-   REAL(EB), INTENT(IN) :: TIME
 
-   INTEGER :: N_VERTS, N_FACES, N_VOLUS
-   INTEGER :: N_VERTS_S, N_FACES_S, N_VOLUS_S
-   INTEGER :: N_VERTS_D, N_FACES_D, N_VOLUS_D
-   INTEGER :: I
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: VOLUS, FACES, MATL_IDS, SURF_IDS
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VERTS, TFACES
-   INTEGER :: IZERO
-   LOGICAL :: EX
-   INTEGER :: NS, NNN
-   CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-   CHARACTER(60) :: SURFACE_LABEL
+REAL(EB), INTENT(IN) :: TIME
 
-   CALL PROCESS_GEOM(.FALSE.,TIME, N_VERTS_S, N_FACES_S, N_VOLUS_S)  ! scale, rotate, translate static GEOM vertices
-   CALL PROCESS_GEOM( .TRUE.,TIME, N_VERTS_D, N_FACES_D, N_VOLUS_D)  ! scale, rotate, translate dynamic GEOM vertices
+INTEGER :: N_VERTS, N_FACES, N_VOLUS
+INTEGER :: N_VERTS_S, N_FACES_S, N_VOLUS_S
+INTEGER :: N_VERTS_D, N_FACES_D, N_VOLUS_D
+INTEGER, ALLOCATABLE, DIMENSION(:) :: VOLUS, FACES, MATL_IDS, SURF_IDS
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VERTS, TFACES
+INTEGER :: IZERO
 
-   N_VERTS = N_VERTS_S + N_VERTS_D
-   N_FACES = N_FACES_S + N_FACES_D
-   N_VOLUS = N_VOLUS_S + N_VOLUS_D
+CALL PROCESS_GEOM(.FALSE.,TIME, N_VERTS_S, N_FACES_S, N_VOLUS_S)  ! scale, rotate, translate static GEOM vertices
+CALL PROCESS_GEOM( .TRUE.,TIME, N_VERTS_D, N_FACES_D, N_VOLUS_D)  ! scale, rotate, translate dynamic GEOM vertices
 
-   ALLOCATE(VERTS(MAX(1,3*N_VERTS)),STAT=IZERO)   ! create arrays to contain all vertices and faces
-   CALL ChkMemErr('CONVERTGEOM','VERTS',IZERO)
+N_VERTS = N_VERTS_S + N_VERTS_D
+N_FACES = N_FACES_S + N_FACES_D
+N_VOLUS = N_VOLUS_S + N_VOLUS_D
 
-   ALLOCATE(TFACES(MAX(1,6*N_FACES)),STAT=IZERO)   ! create arrays to contain all vertices and faces
-   CALL ChkMemErr('CONVERTGEOM','TVERTS',IZERO)
+ALLOCATE(VERTS(MAX(1,3*N_VERTS)),STAT=IZERO)   ! create arrays to contain all vertices and faces
+CALL ChkMemErr('CONVERTGEOM','VERTS',IZERO)
 
-   ALLOCATE(FACES(MAX(1,3*N_FACES)),STAT=IZERO)
-   CALL ChkMemErr('CONVERTGEOM','FACES',IZERO)
+ALLOCATE(TFACES(MAX(1,6*N_FACES)),STAT=IZERO)   ! create arrays to contain all vertices and faces
+CALL ChkMemErr('CONVERTGEOM','TVERTS',IZERO)
 
-   ALLOCATE(SURF_IDS(MAX(1,N_FACES)),STAT=IZERO)
-   CALL ChkMemErr('CONVERTGEOM','SURF_IDS',IZERO)
+ALLOCATE(FACES(MAX(1,3*N_FACES)),STAT=IZERO)
+CALL ChkMemErr('CONVERTGEOM','FACES',IZERO)
 
-   ALLOCATE(VOLUS(MAX(1,4*N_VOLUS)),STAT=IZERO)
-   CALL ChkMemErr('CONVERTGEOM','VOLUS',IZERO)
+ALLOCATE(SURF_IDS(MAX(1,N_FACES)),STAT=IZERO)
+CALL ChkMemErr('CONVERTGEOM','SURF_IDS',IZERO)
 
-   ALLOCATE(MATL_IDS(MAX(1,N_VOLUS)),STAT=IZERO)
-   CALL ChkMemErr('CONVERTGEOM','MATL_IDS',IZERO)
+ALLOCATE(VOLUS(MAX(1,4*N_VOLUS)),STAT=IZERO)
+CALL ChkMemErr('CONVERTGEOM','VOLUS',IZERO)
 
-   IF (N_VERTS_S>0 .AND. (N_FACES_S>0 .OR. N_VOLUS_S>0)) THEN ! merge static geometry
-      CALL MERGE_GEOMS(VERTS(1:3*N_VERTS_S),N_VERTS_S,&
-         FACES(1:3*N_FACES_S),TFACES(1:3*N_FACES_S),SURF_IDS(1:N_FACES_S),N_FACES_S,&
-         VOLUS(1:3*N_VOLUS_S),MATL_IDS(1:N_VOLUS_S),N_VOLUS_S,.FALSE.)
-   ENDIF
-   IF (N_VERTS_D>0 .AND. (N_FACES_D>0 .OR. N_VOLUS_D>0)) THEN ! merge dynamic geometry
-      CALL MERGE_GEOMS(VERTS(3*N_VERTS_S+1:3*N_VERTS),N_VERTS_D,&
-         FACES(3*N_FACES_S+1:3*N_FACES),TFACES(3*N_FACES_S+1:3*N_FACES),SURF_IDS(N_FACES_S+1:N_FACES),N_FACES_D,&
-         VOLUS(3*N_VOLUS_S+1:3*N_VOLUS),MATL_IDS(N_VOLUS_S+1:N_VOLUS),N_VOLUS_D,.TRUE.)
-   ENDIF
+ALLOCATE(MATL_IDS(MAX(1,N_VOLUS)),STAT=IZERO)
+CALL ChkMemErr('CONVERTGEOM','MATL_IDS',IZERO)
 
-! copy geometry info from input data structures to computational data structures
+IF (N_VERTS_S>0 .AND. (N_FACES_S>0 .OR. N_VOLUS_S>0)) THEN ! merge static geometry
+   CALL MERGE_GEOMS(VERTS(1:3*N_VERTS_S),N_VERTS_S,&
+      FACES(1:3*N_FACES_S),TFACES(1:3*N_FACES_S),SURF_IDS(1:N_FACES_S),N_FACES_S,&
+      VOLUS(1:3*N_VOLUS_S),MATL_IDS(1:N_VOLUS_S),N_VOLUS_S,.FALSE.)
+ENDIF
+IF (N_VERTS_D>0 .AND. (N_FACES_D>0 .OR. N_VOLUS_D>0)) THEN ! merge dynamic geometry
+   CALL MERGE_GEOMS(VERTS(3*N_VERTS_S+1:3*N_VERTS),N_VERTS_D,&
+      FACES(3*N_FACES_S+1:3*N_FACES),TFACES(3*N_FACES_S+1:3*N_FACES),SURF_IDS(N_FACES_S+1:N_FACES),N_FACES_D,&
+      VOLUS(3*N_VOLUS_S+1:3*N_VOLUS),MATL_IDS(N_VOLUS_S+1:N_VOLUS),N_VOLUS_D,.TRUE.)
+ENDIF
 
-   N_VERT = N_VERTS
-   IF (N_VERT>0) THEN
-      ALLOCATE(VERTEX(N_VERT),STAT=IZERO)
-      DO I=1,N_VERT
-         VERTEX(I)%X = VERTS(3*I-2)
-         VERTEX(I)%Y = VERTS(3*I-1)
-         VERTEX(I)%Z = VERTS(3*I)
-         VERTEX(I)%XYZ(1:3) = VERTS(3*I-2:3*I)
-      ENDDO
-   ENDIF
-
-   IF (N_FACES>0) THEN
-      N_FACE = N_FACES
-
-      ! Allocate FACET array
-
-      IF (ALLOCATED(FACET)) DEALLOCATE(FACET)
-      ALLOCATE(FACET(N_FACE),STAT=IZERO)
-      CALL ChkMemErr('CONVERTGEOM','FACET',IZERO)
-
-      FACE_LOOP: DO I=1,N_FACE
-
-         SURFACE_LABEL = TRIM(SURFACE(SURF_IDS(I))%ID)
-
-         ! put in some error checking to make sure face indices are not out of bounds
-
-         FACET(I)%VERTEX(1) = FACES(3*I-2)
-         FACET(I)%VERTEX(2) = FACES(3*I-1)
-         FACET(I)%VERTEX(3) = FACES(3*I)
-
-         ! Check the SURF_ID against the list of SURF's
-
-         EX = .FALSE.
-         DO NS=0,N_SURF
-            IF (SURFACE_LABEL==SURFACE(NS)%ID) EX = .TRUE.
-         ENDDO
-         IF (.NOT.EX) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',SURFACE_LABEL,' not found'
-            CALL SHUTDOWN(MESSAGE)
-         ENDIF
-
-         ! Assign SURF_INDEX, Index of the Boundary Condition
-
-         FACET(I)%SURF_ID = SURFACE_LABEL
-         FACET(I)%SURF_INDEX = DEFAULT_SURF_INDEX
-         DO NNN=0,N_SURF
-            IF (SURFACE_LABEL==SURFACE(NNN)%ID) FACET(I)%SURF_INDEX = NNN
-         ENDDO
-
-         ! Allocate 1D arrays
-
-         IF (.NOT.ALLOCATED(FACET(I)%RHODW)) THEN
-            ALLOCATE(FACET(I)%RHODW(N_TRACKED_SPECIES),STAT=IZERO)
-            CALL ChkMemErr('CONVERTGEOM','FACET%RHODW',IZERO)
-         ENDIF
-
-         IF (.NOT.ALLOCATED(FACET(I)%ZZ_F)) THEN
-            ALLOCATE(FACET(I)%ZZ_F(N_TRACKED_SPECIES),STAT=IZERO)
-            CALL ChkMemErr('CONVERTGEOM','FACET%ZZ_F',IZERO)
-         ENDIF
-
-      ENDDO FACE_LOOP
-
-      CALL INIT_FACE
-   ENDIF
-
-   N_VOLU = N_VOLUS
-   IF (N_VOLU>0) THEN
-      IF (ALLOCATED(VOLUME)) DEALLOCATE(VOLUME)
-      ALLOCATE(VOLUME(N_VOLU),STAT=IZERO)
-      CALL ChkMemErr('CONVERTGEOM','VOLUME',IZERO)
-
-      DO I=1,N_VOLU
-         VOLUME(I)%VERTEX(1:4) = VOLUS(4*I-3:4*I)
-         VOLUME(I)%MATL_ID = TRIM(MATERIAL(MATL_IDS(I))%ID)
-      ENDDO
-   ENDIF
-
-   IF (CUTCELLS) CALL GENERATE_CUTCELLS()
-
+RETURN
 END SUBROUTINE CONVERTGEOM
 
 ! ---------------------------- REORDER_FACE ----------------------------------------
@@ -30073,761 +29915,6 @@ SUBROUTINE WRITE_GEOM_DATA(VERTS, NVERTS, TRIANGLES, NTRIANGLES, VERTDATA, NVERT
    CLOSE(LU_GEOM_DIAG(2))
 
 END SUBROUTINE WRITE_GEOM_DATA
-
-! ---------------------------- READ_VERT ----------------------------------------
-
-SUBROUTINE READ_VERT
-
-REAL(EB) :: X(3)=0._EB
-INTEGER :: I,IOS,IZERO
-NAMELIST /VERT/ X
-
-N_VERT=0
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-COUNT_VERT_LOOP: DO
-   CALL CHECKREAD('VERT',LU_INPUT,IOS)
-   IF (IOS==1) EXIT COUNT_VERT_LOOP
-   READ(LU_INPUT,NML=VERT,END=14,ERR=15,IOSTAT=IOS)
-   N_VERT=N_VERT+1
-   15 IF (IOS>0) CALL SHUTDOWN('ERROR: problem with VERT line')
-ENDDO COUNT_VERT_LOOP
-14 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-IF (N_VERT==0) RETURN
-
-! Allocate VERTEX array
-
-ALLOCATE(VERTEX(N_VERT),STAT=IZERO)
-CALL ChkMemErr('READ_VERT','VERTEX',IZERO)
-
-READ_VERT_LOOP: DO I=1,N_VERT
-
-   CALL CHECKREAD('VERT',LU_INPUT,IOS)
-   IF (IOS==1) EXIT READ_VERT_LOOP
-
-   ! Read the VERT line
-
-   READ(LU_INPUT,VERT,END=36)
-
-   VERTEX(I)%X = X(1)
-   VERTEX(I)%Y = X(2)
-   VERTEX(I)%Z = X(3)
-
-ENDDO READ_VERT_LOOP
-36 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-END SUBROUTINE READ_VERT
-
-! ---------------------------- READ_FACE ----------------------------------------
-
-SUBROUTINE READ_FACE
-
-INTEGER :: N(3),I,IOS,IZERO,NNN,NS
-LOGICAL :: EX
-CHARACTER(LABEL_LENGTH) :: SURF_ID='INERT'
-CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-NAMELIST /FACE/ N,SURF_ID
-
-N_FACE=0
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-COUNT_FACE_LOOP: DO
-   CALL CHECKREAD('FACE',LU_INPUT,IOS)
-   IF (IOS==1) EXIT COUNT_FACE_LOOP
-   READ(LU_INPUT,NML=FACE,END=16,ERR=17,IOSTAT=IOS)
-   N_FACE=N_FACE+1
-   16 IF (IOS>0) CALL SHUTDOWN('ERROR: problem with FACE line')
-ENDDO COUNT_FACE_LOOP
-17 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-IF (N_FACE==0) RETURN
-
-! Allocate FACET array
-
-ALLOCATE(FACET(N_FACE),STAT=IZERO)
-CALL ChkMemErr('READ_FACE','FACET',IZERO)
-
-READ_FACE_LOOP: DO I=1,N_FACE
-
-   CALL CHECKREAD('FACE',LU_INPUT,IOS)
-   IF (IOS==1) EXIT READ_FACE_LOOP
-
-   ! Read the FACE line
-
-   READ(LU_INPUT,FACE,END=37)
-
-   IF (ANY(N>N_VERT)) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: problem with FACE line ',TRIM(CHAR(I)),', N>N_VERT'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-
-   FACET(I)%VERTEX(1) = N(1)
-   FACET(I)%VERTEX(2) = N(2)
-   FACET(I)%VERTEX(3) = N(3)
-
-   ! Check the SURF_ID against the list of SURF's
-
-   EX = .FALSE.
-   DO NS=0,N_SURF
-      IF (TRIM(SURF_ID)==SURFACE(NS)%ID) EX = .TRUE.
-   ENDDO
-   IF (.NOT.EX) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-
-   ! Assign SURF_INDEX, Index of the Boundary Condition
-
-   FACET(I)%SURF_ID = TRIM(SURF_ID)
-   FACET(I)%SURF_INDEX = DEFAULT_SURF_INDEX
-   DO NNN=0,N_SURF
-      IF (SURF_ID==SURFACE(NNN)%ID) FACET(I)%SURF_INDEX = NNN
-   ENDDO
-
-   ! Allocate 1D arrays
-
-   ALLOCATE(FACET(I)%RHODW(N_TRACKED_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('READ_FACE','FACET%RHODW',IZERO)
-   ALLOCATE(FACET(I)%ZZ_F(N_TRACKED_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('READ_FACE','FACET%ZZ_F',IZERO)
-
-ENDDO READ_FACE_LOOP
-37 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-CALL INIT_FACE
-
-END SUBROUTINE READ_FACE
-
-! ---------------------------- INIT_FACE ----------------------------------------
-
-SUBROUTINE INIT_FACE
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
-IMPLICIT NONE
-
-INTEGER :: I,IZERO
-REAL(EB) :: N_VEC(3),N_LENGTH,U_VEC(3),V_VEC(3),V1(3),V2(3),V3(3)
-TYPE(FACET_TYPE), POINTER :: FC
-TYPE(SURFACE_TYPE), POINTER :: SF
-REAL(EB), PARAMETER :: TOL=1.E-10_EB
-
-DO I=1,N_FACE
-
-   FC=>FACET(I)
-
-   V1 = (/VERTEX(FC%VERTEX(1))%X,VERTEX(FC%VERTEX(1))%Y,VERTEX(FC%VERTEX(1))%Z/)
-   V2 = (/VERTEX(FC%VERTEX(2))%X,VERTEX(FC%VERTEX(2))%Y,VERTEX(FC%VERTEX(2))%Z/)
-   V3 = (/VERTEX(FC%VERTEX(3))%X,VERTEX(FC%VERTEX(3))%Y,VERTEX(FC%VERTEX(3))%Z/)
-
-   U_VEC = V2-V1
-   V_VEC = V3-V1
-
-   CALL CROSS_PRODUCT(N_VEC,U_VEC,V_VEC)
-   N_LENGTH = SQRT(DOT_PRODUCT(N_VEC,N_VEC))
-
-   IF (N_LENGTH>TOL) THEN
-      FC%NVEC = N_VEC/N_LENGTH
-   ELSE
-      FC%NVEC = 0._EB
-   ENDIF
-
-   FC%AW = TRIANGLE_AREA(V1,V2,V3)
-   IF (SURFACE(FC%SURF_INDEX)%TMP_FRONT>0._EB) THEN
-      FC%TMP_F = SURFACE(FC%SURF_INDEX)%TMP_FRONT
-   ELSE
-      FC%TMP_F = TMPA
-   ENDIF
-   FC%TMP_G = TMPA
-   FC%BOUNDARY_TYPE = SOLID_BOUNDARY
-
-   IF (RADIATION) THEN
-      SF => SURFACE(FC%SURF_INDEX)
-      IF (ALLOCATED(FC%ILW)) DEALLOCATE(FC%ILW)
-      ALLOCATE(FC%ILW(1:SF%NRA,1:SF%NSB),STAT=IZERO)
-      CALL ChkMemErr('INIT_FACE','FC%ILW',IZERO)
-   ENDIF
-
-ENDDO
-
-! Surface work arrays
-
-IF (RADIATION) THEN
-   IF (ALLOCATED(FACE_WORK1)) DEALLOCATE(FACE_WORK1)
-   ALLOCATE(FACE_WORK1(N_FACE),STAT=IZERO)
-   CALL ChkMemErr('INIT_FACE','FACE_WORK1',IZERO)
-   IF (ALLOCATED(FACE_WORK2)) DEALLOCATE(FACE_WORK2)
-   ALLOCATE(FACE_WORK2(N_FACE),STAT=IZERO)
-   CALL ChkMemErr('INIT_FACE','FACE_WORK2',IZERO)
-ENDIF
-
-END SUBROUTINE INIT_FACE
-
-! ---------------------------- READ_VOLU ----------------------------------------
-
-SUBROUTINE READ_VOLU
-
-INTEGER :: N(4),I,IOS,IZERO
-CHARACTER(LABEL_LENGTH) :: MATL_ID
-NAMELIST /VOLU/ N,MATL_ID
-
-N_VOLU=0
-REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-COUNT_VOLU_LOOP: DO
-   CALL CHECKREAD('VOLU',LU_INPUT,IOS)
-   IF (IOS==1) EXIT COUNT_VOLU_LOOP
-   READ(LU_INPUT,NML=VOLU,END=18,ERR=19,IOSTAT=IOS)
-   N_VOLU=N_VOLU+1
-   18 IF (IOS>0) CALL SHUTDOWN('ERROR: problem with VOLU line')
-ENDDO COUNT_VOLU_LOOP
-19 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-IF (N_VOLU==0) RETURN
-
-! Allocate VOLUME array
-
-ALLOCATE(VOLUME(N_VOLU),STAT=IZERO)
-CALL ChkMemErr('READ_VOLU','VOLU',IZERO)
-
-READ_VOLU_LOOP: DO I=1,N_VOLU
-
-   CALL CHECKREAD('VOLU',LU_INPUT,IOS)
-   IF (IOS==1) EXIT READ_VOLU_LOOP
-
-   ! Read the VOLU line
-
-   READ(LU_INPUT,VOLU,END=38)
-
-   VOLUME(I)%VERTEX(1) = N(1)
-   VOLUME(I)%VERTEX(2) = N(2)
-   VOLUME(I)%VERTEX(3) = N(3)
-   VOLUME(I)%VERTEX(4) = N(4)
-   VOLUME(I)%MATL_ID = TRIM(MATL_ID)
-
-ENDDO READ_VOLU_LOOP
-38 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-END SUBROUTINE READ_VOLU
-
-! ---------------------------- INIT_IBM ----------------------------------------
-
-SUBROUTINE INIT_IBM(T,NM)
-USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
-USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH_FUNCTION
-USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR,IIG,JJG,KKG
-INTEGER :: NP,NXP,IZERO,LU,CUTCELL_COUNT,OWNER_INDEX,VERSION,NV,NF,NVO,DUMMY_INTEGER
-TYPE (MESH_TYPE), POINTER :: M
-REAL(EB) :: BB(6),V1(3),V2(3),V3(3),V4(3),AREA,PC(18),XPC(60),V_POLYGON_CENTROID(3),VC,AREA_CHECK
-LOGICAL :: EX,OP
-CHARACTER(60) :: FN
-CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-REAL(FB) :: TIME_STRU
-REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E+10_EB,MIN_AREA=1.E-16_EB,TOL=1.E-9_EB
-!LOGICAL :: END_OF_LIST
-TYPE(FACET_TYPE), POINTER :: FC=>NULL()
-TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
-TYPE(CUTCELL_TYPE), POINTER :: CC=>NULL()
-TYPE(GEOMETRY_TYPE), POINTER :: G
-
-IF (EVACUATION_ONLY(NM)) RETURN
-M => MESHES(NM)
-
-! reinitialize complex geometry from geometry coordinate (.gc) file based on DT_GEOC frequency
-
-IF (T<GEOC_CLOCK) RETURN
-GEOC_CLOCK = GEOC_CLOCK + DT_GEOC
-IF (ABS(T-T_BEGIN)<TWO_EPSILON_EB) THEN
-   IZERO = 0
-   IF (.NOT.ALLOCATED(M%CUTCELL_INDEX)) THEN
-      ALLOCATE(M%CUTCELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-      CALL ChkMemErr('INIT_IBM','M%CUTCELL_INDEX',IZERO)
-   ENDIF
-ENDIF
-
-M%CUTCELL_INDEX = 0
-CUTCELL_COUNT = 0
-
-GEOC_LOOP: DO N=1,N_GEOMETRY
-G => GEOMETRY(N)
-   IF (TRIM(G%GEOC_FILENAME)=='null' .OR. T==0.0) CYCLE
-
-   FN = TRIM(G%GEOC_FILENAME)
-   INQUIRE(FILE=FN,EXIST=EX,OPENED=OP,NUMBER=LU)
-   IF (.NOT.EX) CALL SHUTDOWN('ERROR: GEOMetry Coordinate file does not exist.')
-   IF (OP) CLOSE(LU)
-   LU_GEOC = GET_FILE_NUMBER()
-
-   GEOC_CHECK_LOOP: DO I=1,30
-      OPEN(LU_GEOC,FILE=FN,ACTION='READ',FORM='UNFORMATTED')
-      READ(LU_GEOC) OWNER_INDEX     ! 1 - written by FEM, 0 - already read by FDS
-      IF (OWNER_INDEX==1) EXIT GEOC_CHECK_LOOP
-
-       CLOSE(LU_GEOC)
-       IF (I==1) THEN
-          WRITE (LU_ERR,'(4X,A)')  'waiting ANSYS new geometry ... '
-          LU_GEOC = GET_FILE_NUMBER()
-          OPEN(LU_GEOC,FILE=FN,ACTION='WRITE',FORM='UNFORMATTED')
-          OWNER_INDEX=2           ! 2 - .be already written
-          WRITE(LU_GEOC) OWNER_INDEX
-          CLOSE(LU_GEOC)
-       ELSE
-          WRITE(LU_ERR,'(4X,A,I2,A)')  'waiting ... ', I-1,' min'
-       ENDIF
-       CALL SLEEP(60)
-       IF (I==30) CALL SHUTDOWN('ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE')
-   ENDDO GEOC_CHECK_LOOP
-
-   IF (OWNER_INDEX==1) THEN
-      READ(LU_GEOC) VERSION
-      READ(LU_GEOC) TIME_STRU ! stime
-      READ(LU_GEOC) NV, NF, NVO
-
-      IF (NV>0 .AND. .NOT.ALLOCATED(FB_REAL_VERT_ARRAY)) THEN
-         ALLOCATE(FB_REAL_VERT_ARRAY(NV*3),STAT=IZERO)
-         CALL ChkMemErr('INIT_IBM','FB_REAL_VERT_ARRAY',IZERO)
-      ENDIF
-      IF (NF>0) THEN
-         IF (.NOT.ALLOCATED(INT_FACE_VALS_ARRAY)) THEN
-            ALLOCATE(INT_FACE_VALS_ARRAY(NF*3),STAT=IZERO)
-            CALL ChkMemErr('INIT_IBM','INT_FACE_VALS_ARRAY',IZERO)
-         ENDIF
-         IF (.NOT.ALLOCATED(INT_SURF_VALS_ARRAY)) THEN
-            ALLOCATE(INT_SURF_VALS_ARRAY(NF),STAT=IZERO)
-            CALL ChkMemErr('INIT_IBM','INT_SURF_VALS_ARRAY',IZERO)
-         ENDIF
-      ENDIF
-      IF (NVO>0) THEN
-         IF (.NOT.ALLOCATED(INT_VOLS_VALS_ARRAY)) THEN
-            ALLOCATE(INT_VOLS_VALS_ARRAY(NVO*4),STAT=IZERO)
-            CALL ChkMemErr('INIT_IBM','INT_VOLS_VALS_ARRAY',IZERO)
-         ENDIF
-         IF (.NOT.ALLOCATED(INT_MATL_VALS_ARRAY)) THEN
-            ALLOCATE(INT_MATL_VALS_ARRAY(NVO),STAT=IZERO)
-            CALL ChkMemErr('INIT_IBM','INT_MATL_VALS_ARRAY',IZERO)
-         ENDIF
-      ENDIF
-
-      IF (NV>0) THEN
-         READ(LU_GEOC) ((FB_REAL_VERT_ARRAY((I-1)*3+J),J=1,3),I=1,NV)
-         G%VERTS = REAL(FB_REAL_VERT_ARRAY,EB)
-      ENDIF
-
-      DO I=1,NV
-         VERTEX(I)%X = REAL(FB_REAL_VERT_ARRAY((I-1)*3+1),EB)
-         VERTEX(I)%Y = REAL(FB_REAL_VERT_ARRAY((I-1)*3+2),EB)
-         VERTEX(I)%Z = REAL(FB_REAL_VERT_ARRAY((I-1)*3+3),EB)
-      ENDDO
-      IF (NF>0) READ(LU_GEOC) ((INT_FACE_VALS_ARRAY((I-1)*3+J),J=1,3),I=1,NF)
-      IF (NF>0) READ(LU_GEOC) (INT_SURF_VALS_ARRAY(I),I=1,NF)
-      IF (NVO>0) READ(LU_GEOC) ((INT_VOLS_VALS_ARRAY((I-1)*4+J),J=1,4),I=1,NVO)
-      IF (NVO>0) READ(LU_GEOC) (INT_MATL_VALS_ARRAY(I),I=1,NVO)
-
-      WRITE(LU_ERR,'(4X,A,F10.2,A,F10.2)')  'GEOM was updated at ',T,' s, GEOM Time:', TIME_STRU
-      CLOSE(LU_GEOC)
-
-      OPEN(LU_GEOC,FILE=FN,FORM='UNFORMATTED',STATUS='OLD')
-      OWNER_INDEX=0.0
-      WRITE(LU_GEOC) OWNER_INDEX     ! 1 - written by FEM, 0 - already read by FDS
-      CLOSE(LU_GEOC)
-      CALL WRITE_GEOM(T)
-   ENDIF
-
-ENDDO GEOC_LOOP
-
-! define geometry data structures whenever geometry changes
-
-IF (GEOMETRY_CHANGE_STATE==1) CALL CONVERTGEOM(T)
-
-FACE_LOOP: DO N=1,N_FACE
-
-   ! re-initialize the cutcell linked list
-   IF (ASSOCIATED(FACET(N)%CUTCELL_LIST)) CALL CUTCELL_DESTROY(FACET(N)%CUTCELL_LIST)
-
-   V1 = (/VERTEX(FACET(N)%VERTEX(1))%X,VERTEX(FACET(N)%VERTEX(1))%Y,VERTEX(FACET(N)%VERTEX(1))%Z/)
-   V2 = (/VERTEX(FACET(N)%VERTEX(2))%X,VERTEX(FACET(N)%VERTEX(2))%Y,VERTEX(FACET(N)%VERTEX(2))%Z/)
-   V3 = (/VERTEX(FACET(N)%VERTEX(3))%X,VERTEX(FACET(N)%VERTEX(3))%Y,VERTEX(FACET(N)%VERTEX(3))%Z/)
-   FACET(N)%AW = TRIANGLE_AREA(V1,V2,V3)
-
-   BB(1) = MIN(V1(1),V2(1),V3(1))
-   BB(2) = MAX(V1(1),V2(1),V3(1))
-   BB(3) = MIN(V1(2),V2(2),V3(2))
-   BB(4) = MAX(V1(2),V2(2),V3(2))
-   BB(5) = MIN(V1(3),V2(3),V3(3))
-   BB(6) = MAX(V1(3),V2(3),V3(3))
-
-   I_MIN = MAX(1,FLOOR((BB(1)-M%XS)/M%DX(1))-1) ! assumes uniform grid for now
-   J_MIN = MAX(1,FLOOR((BB(3)-M%YS)/M%DY(1))-1)
-   K_MIN = MAX(1,FLOOR((BB(5)-M%ZS)/M%DZ(1))-1)
-
-   I_MAX = MIN(M%IBAR,CEILING((BB(2)-M%XS)/M%DX(1))+1)
-   J_MAX = MIN(M%JBAR,CEILING((BB(4)-M%YS)/M%DY(1))+1)
-   K_MAX = MIN(M%KBAR,CEILING((BB(6)-M%ZS)/M%DZ(1))+1)
-
-   DO K=K_MIN,K_MAX
-      DO J=J_MIN,J_MAX
-         DO I=I_MIN,I_MAX
-
-            BB(1) = M%X(I-1)
-            BB(2) = M%X(I)
-            BB(3) = M%Y(J-1)
-            BB(4) = M%Y(J)
-            BB(5) = M%Z(K-1)
-            BB(6) = M%Z(K)
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-
-            IF (IERR==1) THEN
-               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
-               IF (IERR1==-1) CYCLE ! remove the possibility of double counting
-
-               CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
-               CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
-               IF (IERR2==1)  THEN
-                  AREA = POLYGON_AREA(NXP,XPC)
-                  IF (AREA > MIN_AREA) THEN
-
-                     ! check if the cutcell area needs to be assigned to a neighbor cell
-                     V_POLYGON_CENTROID = POLYGON_CENTROID(NXP,XPC)
-                     CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,V_POLYGON_CENTROID,&
-                                                M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
-                     IF (IOR/=0) THEN ! assign the cutcell area to a neighbor cell
-                        SELECT CASE(IOR)
-                           CASE(1)
-                              IF (I==M%IBAR) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I+1,J,K)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I+1,J,K) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I+1,J,K)
-                               ENDIF
-                           CASE(-1)
-                              IF (I==1) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I-1,J,K)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I-1,J,K) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I-1,J,K)
-                               ENDIF
-                           CASE(2)
-                              IF (J==M%JBAR) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I,J+1,K)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I,J+1,K) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I,J+1,K)
-                               ENDIF
-                           CASE(-2)
-                              IF (J==1) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I,J-1,K)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I,J-1,K) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I,J-1,K)
-                               ENDIF
-                           CASE(3)
-                              IF (K==M%KBAR) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I,J,K+1)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I,J,K+1) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I,J,K+1)
-                               ENDIF
-                           CASE(-3)
-                              IF (K==1) THEN
-                                 IOR=0
-                                 EXIT
-                              ENDIF
-                              IF (M%CUTCELL_INDEX(I,J,K-1)==0) THEN
-                                 CUTCELL_COUNT = CUTCELL_COUNT+1
-                                 IC = CUTCELL_COUNT
-                                 M%CUTCELL_INDEX(I,J,K-1) = IC
-                               ELSE
-                                 IC = M%CUTCELL_INDEX(I,J,K-1)
-                               ENDIF
-                        END SELECT
-                     ENDIF
-
-                     IF (IOR==0) THEN
-                        IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
-                           CUTCELL_COUNT = CUTCELL_COUNT+1
-                           IC = CUTCELL_COUNT
-                           M%CUTCELL_INDEX(I,J,K) = IC
-                        ELSE
-                           IC = M%CUTCELL_INDEX(I,J,K)
-                        ENDIF
-                     ENDIF
-
-                     CALL CUTCELL_INSERT(IC,AREA,FACET(N)%CUTCELL_LIST)
-                  ENDIF
-               ENDIF
-            ENDIF
-
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDDO FACE_LOOP
-
-! Create arrays to hold cutcell indices
-
-CUTCELL_INDEX_IF: IF (CUTCELL_COUNT>0) THEN
-
-   IF (ALLOCATED(M%I_CUTCELL)) DEALLOCATE(M%I_CUTCELL)
-   IF (ALLOCATED(M%J_CUTCELL)) DEALLOCATE(M%J_CUTCELL)
-   IF (ALLOCATED(M%K_CUTCELL)) DEALLOCATE(M%K_CUTCELL)
-   IF (ALLOCATED(M%CUTCELL))   DEALLOCATE(M%CUTCELL)
-
-   ALLOCATE(M%I_CUTCELL(CUTCELL_COUNT),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','M%I_CUTCELL',IZERO)
-   M%I_CUTCELL = -1
-
-   ALLOCATE(M%J_CUTCELL(CUTCELL_COUNT),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','M%J_CUTCELL',IZERO)
-   M%J_CUTCELL = -1
-
-   ALLOCATE(M%K_CUTCELL(CUTCELL_COUNT),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','M%K_CUTCELL',IZERO)
-   M%K_CUTCELL = -1
-
-   ALLOCATE(M%CUTCELL(CUTCELL_COUNT),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','M%CUTCELL',IZERO)
-
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IC = M%CUTCELL_INDEX(I,J,K)
-            IF (IC>0) THEN
-               M%I_CUTCELL(IC) = I
-               M%J_CUTCELL(IC) = J
-               M%K_CUTCELL(IC) = K
-               M%P_MASK(I,J,K) = 0
-
-               ! new stuff -- specific to tet_fire_1.fds
-               CC=>M%CUTCELL(IC)
-               VC = M%DX(I)*M%DY(J)*M%DZ(K)
-               CC%A(1) = M%DY(J)*M%DZ(K)
-               CC%A(2) = M%DY(J)*M%DZ(K)
-               CC%A(3) = M%DX(I)*M%DZ(K)
-               CC%A(4) = M%DX(I)*M%DZ(K)
-               CC%A(5) = M%DX(I)*M%DY(J)
-               CC%A(6) = M%DX(I)*M%DY(J)
-
-               IF (I==4 .OR. J==13 .OR. K==13) THEN
-                  CC%VOL = VC
-                  IF (I==4) THEN
-                     CC%S = CC%A(2)
-                     CC%N = (/-1._EB,0._EB,0._EB/)
-                  ENDIF
-                  IF (J==13) THEN
-                     CC%S = CC%A(3)
-                     CC%N = (/0._EB,1._EB,0._EB/)
-                  ENDIF
-                  IF (K==13) THEN
-                     CC%S = CC%A(5)
-                     CC%N = (/0._EB,0._EB,1._EB/)
-                  ENDIF
-               ELSE
-                  V1 = (/X(I-1),Y(J),Z(K-1)/)
-                  V2 = (/X(I-1),Y(J),Z(K)/)
-                  V3 = (/X(I-1),Y(J-1),Z(K)/)
-                  V4 = (/X(I),Y(J),Z(K)/)
-                  CC%VOL = VC - TETRAHEDRON_VOLUME(V1,V2,V3,V4)
-                  CC%A(1) = 0.5_EB*CC%A(1)
-                  CC%A(4) = 0.5_EB*CC%A(4)
-                  CC%A(6) = 0.5_EB*CC%A(6)
-                  ! area = 1/2 * base * height
-                  CC%S = 0.5_EB * SQRT(M%DX(I)**2 + M%DY(J)**2) * SQRT(0.5_EB*MAX((M%DX(I)**2-M%DY(J)**2),0._EB) + M%DZ(K)**2)
-                  CC%N = (/M%DX(I),M%DY(J),-M%DZ(K)/)
-                  CC%N = CC%N/SQRT(DOT_PRODUCT(CC%N,CC%N)) ! normalize
-               ENDIF
-
-               CC%RHO = RHOA
-               CC%TMP = TMPA
-               ALLOCATE(CC%ZZ(N_TRACKED_SPECIES),STAT=IZERO)
-               CALL ChkMemErr('INIT_IBM','M%CUTCELL%ZZ',IZERO)
-
-               !print *, CC%VOL, VC
-
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF CUTCELL_INDEX_IF
-
-!CL=>FACET(1)%CUTCELL_LIST
-!IF ( ASSOCIATED(CL) ) THEN
-!    END_OF_LIST=.FALSE.
-!    DO WHILE (.NOT.END_OF_LIST)
-!       print *, CL%INDEX, CL%AREA
-!       CL=>CL%NEXT
-!       IF ( .NOT.ASSOCIATED(CL) ) THEN
-!          print *,'done printing linked list!'
-!          END_OF_LIST=.TRUE.
-!       ENDIF
-!    ENDDO
-!ENDIF
-
-! Set up any face parameters related to cutcells and check area sums
-
-DO N=1,N_FACE
-
-   FC=>FACET(N)
-   CL=>FC%CUTCELL_LIST
-
-   FC%DN=0._EB
-   FC%RDN=0._EB
-   AREA_CHECK=0._EB
-
-   CUTCELL_LOOP: DO
-      IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP ! if the next index does not exist, exit the loop
-      IC = CL%INDEX
-      IIG = M%I_CUTCELL(IC)
-      JJG = M%J_CUTCELL(IC)
-      KKG = M%K_CUTCELL(IC)
-      VC = M%DX(IIG)*M%DY(JJG)*M%DZ(KKG)
-
-      FC%DN = FC%DN + CL%AREA*VC
-
-      AREA_CHECK = AREA_CHECK + CL%AREA
-
-      CL=>CL%NEXT ! point to the next index in the linked list
-   ENDDO CUTCELL_LOOP
-
-   IF (ABS(FC%AW-AREA_CHECK)>CUTCELL_TOLERANCE) THEN
-      WRITE(MESSAGE,'(A,1I4)') 'ERROR: cutcell area checksum failed for facet ',N
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-
-   IF (FC%DN>CUTCELL_TOLERANCE) THEN
-      FC%DN = FC%DN**ONTH ! wall normal length scale
-      FC%RDN = 1._EB/FC%DN
-   ENDIF
-
-ENDDO
-
-! Read boundary condition from file
-
-BNDC_LOOP: DO N=1,N_GEOMETRY
-   IF (TRIM(GEOMETRY(N)%BNDC_FILENAME)=='null') CYCLE
-
-   FN = TRIM(GEOMETRY(N)%BNDC_FILENAME)
-   INQUIRE(FILE=FN,EXIST=EX,OPENED=OP,NUMBER=LU)
-   IF (.NOT.EX) CALL SHUTDOWN('Error: boundary condition file does not exist.')
-   IF (OP) CLOSE(LU)
-   LU_BNDC = GET_FILE_NUMBER()
-
-   BNDC_CHECK_LOOP: DO I=1,30
-      OPEN(LU_BNDC,FILE=FN,ACTION='READ',FORM='UNFORMATTED')
-      READ(LU_BNDC) OWNER_INDEX     ! 1 means written by FEM, 0 by FDS
-      READ(LU_BNDC) VERSION         ! version
-      READ(LU_BNDC) TIME_STRU       ! stime
-      IF (OWNER_INDEX /=1 .OR. T-REAL(TIME_STRU,EB)>DT_BNDC*0.1_EB) THEN
-         CLOSE(LU_BNDC)
-         WRITE(LU_ERR,'(4X,A,F10.2,A)')  'BNDC not updated at ',T,' s'
-         ! this call was breaking an FDS build - ***gf
-         ! CALL sleep(1)
-      ELSE
-         WRITE(LU_ERR,'(4X,A,F10.2,A)')  'BNDC was updated at ',T,' s'
-         EXIT BNDC_CHECK_LOOP
-      ENDIF
-      IF (I==30) THEN
-         IF (OWNER_INDEX==0) THEN
-            CALL SHUTDOWN("ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE")
-         ELSE
-            CALL SHUTDOWN("ERROR: TIME MARKS do not match")
-         ENDIF
-      ENDIF
-   ENDDO BNDC_CHECK_LOOP
-
-   IF (ALLOCATED(FB_REAL_FACE_VALS_ARRAY)) DEALLOCATE(FB_REAL_FACE_VALS_ARRAY)
-   ALLOCATE(FB_REAL_FACE_VALS_ARRAY(N_FACE),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','FB_REAL_FACE_VALS_ARRAY',IZERO)
-
-   IF (T>=REAL(TIME_STRU,EB)) THEN
-      ! n_vert_s_vals,n_vert_d_vals,n_face_s_vals,n_face_d_vals
-      READ(LU_BNDC) (DUMMY_INTEGER,I=1,4)
-      READ(LU_BNDC) (FB_REAL_FACE_VALS_ARRAY(I),I=1,N_FACE)
-      DO I=1,N_FACE
-         FC=>FACET(I)
-         FC%TMP_F = REAL(FB_REAL_FACE_VALS_ARRAY(I),EB) + TMPM
-      ENDDO
-      IBM_FEM_COUPLING=.TRUE. ! immersed boundary method / finite-element method coupling
-   ELSE
-      BACKSPACE LU_BNDC
-   ENDIF
-
-ENDDO BNDC_LOOP
-
-END SUBROUTINE INIT_IBM
-
-! ---------------------------- LINKED_LIST_INSERT ----------------------------------------
-
-! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists
-RECURSIVE SUBROUTINE LINKED_LIST_INSERT(ITEM,ROOT)
-   IMPLICIT NONE
-   TYPE(LINKED_LIST_TYPE), POINTER :: ROOT
-   INTEGER :: ITEM,IZERO
-   IF (.NOT.ASSOCIATED(ROOT)) THEN
-      ALLOCATE(ROOT,STAT=IZERO)
-      CALL ChkMemErr('LINKED_LIST_INSERT','ROOT',IZERO)
-      NULLIFY(ROOT%NEXT)
-      ROOT%INDEX = ITEM
-   ELSE
-      CALL LINKED_LIST_INSERT(ITEM,ROOT%NEXT)
-   ENDIF
-END SUBROUTINE LINKED_LIST_INSERT
-
-! ---------------------------- CUTCELL_INSERT ----------------------------------------
-
-RECURSIVE SUBROUTINE CUTCELL_INSERT(ITEM,AREA,ROOT)
-   IMPLICIT NONE
-   TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: ROOT
-   INTEGER :: ITEM,IZERO
-   REAL(EB):: AREA
-   IF (.NOT.ASSOCIATED(ROOT)) THEN
-      ALLOCATE(ROOT,STAT=IZERO)
-      CALL ChkMemErr('CUTCELL_INSERT','ROOT',IZERO)
-      NULLIFY(ROOT%NEXT)
-      ROOT%INDEX = ITEM
-      ROOT%AREA = AREA
-   ELSE
-      CALL CUTCELL_INSERT(ITEM,AREA,ROOT%NEXT)
-   ENDIF
-END SUBROUTINE CUTCELL_INSERT
-
-! ---------------------------- CUTCELL_DESTROY ----------------------------------------
-
-SUBROUTINE CUTCELL_DESTROY(ROOT)
-IMPLICIT NONE
-TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: ROOT,CURRENT
-DO WHILE (ASSOCIATED(ROOT))
-  CURRENT => ROOT
-  ROOT => CURRENT%NEXT
-  DEALLOCATE(CURRENT)
-ENDDO
-RETURN
-END SUBROUTINE CUTCELL_DESTROY
 
 ! ---------------------------- TRIANGLE_BOX_INTERSECT ----------------------------------------
 
@@ -31108,76 +30195,76 @@ ENDDO FACE_LOOP
 
 END FUNCTION POINT_IN_TETRAHEDRON
 
-! ---------------------------- POINT_IN_POLYHEDRON ----------------------------------------
-
-LOGICAL FUNCTION POINT_IN_POLYHEDRON(XP,BB)
-IMPLICIT NONE
-
-REAL(EB) :: XP(3),BB(6),XX(3),YY(3),ZZ(3),RAY_DIRECTION(3)
-INTEGER :: I,J,N_INTERSECTIONS,IRAY
-REAL(EB), PARAMETER :: EPS=1.E-6_EB
-
-! Schneider and Eberly, Geometric Tools for Computer Graphics, Morgan Kaufmann, 2003. Section 13.4
-
-POINT_IN_POLYHEDRON=.FALSE.
-
-! test global bounding box
-
-IF ( XP(1)<BB(1) .OR. XP(1)>BB(2) ) RETURN
-IF ( XP(2)<BB(3) .OR. XP(2)>BB(4) ) RETURN
-IF ( XP(3)<BB(5) .OR. XP(3)>BB(6) ) RETURN
-
-N_INTERSECTIONS=0
-
-RAY_DIRECTION = (/0._EB,0._EB,1._EB/)
-
-FACE_LOOP: DO I=1,N_FACE
-
-   ! test bounding box
-   XX(1) = VERTEX(FACET(I)%VERTEX(1))%X
-   XX(2) = VERTEX(FACET(I)%VERTEX(2))%X
-   XX(3) = VERTEX(FACET(I)%VERTEX(3))%X
-
-   IF (XP(1)<MINVAL(XX)) CYCLE FACE_LOOP
-   IF (XP(1)>MAXVAL(XX)) CYCLE FACE_LOOP
-
-   YY(1) = VERTEX(FACET(I)%VERTEX(1))%Y
-   YY(2) = VERTEX(FACET(I)%VERTEX(2))%Y
-   YY(3) = VERTEX(FACET(I)%VERTEX(3))%Y
-
-   IF (XP(2)<MINVAL(YY)) CYCLE FACE_LOOP
-   IF (XP(2)>MAXVAL(YY)) CYCLE FACE_LOOP
-
-   ZZ(1) = VERTEX(FACET(I)%VERTEX(1))%Z
-   ZZ(2) = VERTEX(FACET(I)%VERTEX(2))%Z
-   ZZ(3) = VERTEX(FACET(I)%VERTEX(3))%Z
-
-   IF (XP(3)>MAXVAL(ZZ)) CYCLE FACE_LOOP
-
-   RAY_TEST_LOOP: DO J=1,3
-      IRAY = RAY_TRIANGLE_INTERSECT(I,XP,RAY_DIRECTION)
-      SELECT CASE(IRAY)
-         CASE(0)
-            ! does not intersect
-            EXIT RAY_TEST_LOOP
-         CASE(1)
-            ! ray intersects triangle
-            N_INTERSECTIONS=N_INTERSECTIONS+1
-            EXIT RAY_TEST_LOOP
-         CASE(2)
-            ! ray intersects edge, try new ray (shift origin)
-            IF (J==1) XP=XP+(/EPS,0._EB,0._EB/) ! shift in x direction
-            IF (J==2) XP=XP+(/0._EB,EPS,0._EB/) ! shift in y direction
-            IF (J==3) WRITE(LU_ERR,*) 'WARNING: ray test failed'
-      END SELECT
-   ENDDO RAY_TEST_LOOP
-
-ENDDO FACE_LOOP
-
-IF ( MOD(N_INTERSECTIONS,2)/=0 ) POINT_IN_POLYHEDRON=.TRUE.
-
-END FUNCTION POINT_IN_POLYHEDRON
-
+! ! ---------------------------- POINT_IN_POLYHEDRON ----------------------------------------
+!
+! LOGICAL FUNCTION POINT_IN_POLYHEDRON(XP,BB)
+! IMPLICIT NONE
+!
+! REAL(EB) :: XP(3),BB(6),XX(3),YY(3),ZZ(3),RAY_DIRECTION(3)
+! INTEGER :: I,J,N_INTERSECTIONS,IRAY
+! REAL(EB), PARAMETER :: EPS=1.E-6_EB
+!
+! ! Schneider and Eberly, Geometric Tools for Computer Graphics, Morgan Kaufmann, 2003. Section 13.4
+!
+! POINT_IN_POLYHEDRON=.FALSE.
+!
+! ! test global bounding box
+!
+! IF ( XP(1)<BB(1) .OR. XP(1)>BB(2) ) RETURN
+! IF ( XP(2)<BB(3) .OR. XP(2)>BB(4) ) RETURN
+! IF ( XP(3)<BB(5) .OR. XP(3)>BB(6) ) RETURN
+!
+! N_INTERSECTIONS=0
+!
+! RAY_DIRECTION = (/0._EB,0._EB,1._EB/)
+!
+! FACE_LOOP: DO I=1,N_FACE
+!
+!    ! test bounding box
+!    XX(1) = VERTEX(FACET(I)%VERTEX(1))%X
+!    XX(2) = VERTEX(FACET(I)%VERTEX(2))%X
+!    XX(3) = VERTEX(FACET(I)%VERTEX(3))%X
+!
+!    IF (XP(1)<MINVAL(XX)) CYCLE FACE_LOOP
+!    IF (XP(1)>MAXVAL(XX)) CYCLE FACE_LOOP
+!
+!    YY(1) = VERTEX(FACET(I)%VERTEX(1))%Y
+!    YY(2) = VERTEX(FACET(I)%VERTEX(2))%Y
+!    YY(3) = VERTEX(FACET(I)%VERTEX(3))%Y
+!
+!    IF (XP(2)<MINVAL(YY)) CYCLE FACE_LOOP
+!    IF (XP(2)>MAXVAL(YY)) CYCLE FACE_LOOP
+!
+!    ZZ(1) = VERTEX(FACET(I)%VERTEX(1))%Z
+!    ZZ(2) = VERTEX(FACET(I)%VERTEX(2))%Z
+!    ZZ(3) = VERTEX(FACET(I)%VERTEX(3))%Z
+!
+!    IF (XP(3)>MAXVAL(ZZ)) CYCLE FACE_LOOP
+!
+!    RAY_TEST_LOOP: DO J=1,3
+!       IRAY = RAY_TRIANGLE_INTERSECT(I,XP,RAY_DIRECTION)
+!       SELECT CASE(IRAY)
+!          CASE(0)
+!             ! does not intersect
+!             EXIT RAY_TEST_LOOP
+!          CASE(1)
+!             ! ray intersects triangle
+!             N_INTERSECTIONS=N_INTERSECTIONS+1
+!             EXIT RAY_TEST_LOOP
+!          CASE(2)
+!             ! ray intersects edge, try new ray (shift origin)
+!             IF (J==1) XP=XP+(/EPS,0._EB,0._EB/) ! shift in x direction
+!             IF (J==2) XP=XP+(/0._EB,EPS,0._EB/) ! shift in y direction
+!             IF (J==3) WRITE(LU_ERR,*) 'WARNING: ray test failed'
+!       END SELECT
+!    ENDDO RAY_TEST_LOOP
+!
+! ENDDO FACE_LOOP
+!
+! IF ( MOD(N_INTERSECTIONS,2)/=0 ) POINT_IN_POLYHEDRON=.TRUE.
+!
+! END FUNCTION POINT_IN_POLYHEDRON
+!
 ! ---------------------------- VALID_TRIANGLE ----------------------------------------
 
 LOGICAL FUNCTION VALID_TRIANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3)
@@ -31616,85 +30703,85 @@ SUBROUTINE TRIANGULATE2(DIR, VERTS,NVERTS,VERT_OFFSET,FACES)
   ENDDO
 END SUBROUTINE TRIANGULATE2
 
-! ---------------------------- RAY_TRIANGLE_INTERSECT ----------------------------------------
-
-INTEGER FUNCTION RAY_TRIANGLE_INTERSECT(TRI,XP,D)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
-IMPLICIT NONE
-
-INTEGER, INTENT(IN) :: TRI
-REAL(EB), INTENT(IN) :: XP(3),D(3)
-REAL(EB) :: E1(3),E2(3),P(3),S(3),Q(3),U,V,TMP,V1(3),V2(3),V3(3),T !,XI(3)
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
-
-! Schneider and Eberly, Section 11.1
-
-V1(1) = VERTEX(FACET(TRI)%VERTEX(1))%X
-V1(2) = VERTEX(FACET(TRI)%VERTEX(1))%Y
-V1(3) = VERTEX(FACET(TRI)%VERTEX(1))%Z
-
-V2(1) = VERTEX(FACET(TRI)%VERTEX(2))%X
-V2(2) = VERTEX(FACET(TRI)%VERTEX(2))%Y
-V2(3) = VERTEX(FACET(TRI)%VERTEX(2))%Z
-
-V3(1) = VERTEX(FACET(TRI)%VERTEX(3))%X
-V3(2) = VERTEX(FACET(TRI)%VERTEX(3))%Y
-V3(3) = VERTEX(FACET(TRI)%VERTEX(3))%Z
-
-E1 = V2-V1
-E2 = V3-V1
-
-CALL CROSS_PRODUCT(P,D,E2)
-
-TMP = DOT_PRODUCT(P,E1)
-
-IF ( ABS(TMP)<EPS ) THEN
-   RAY_TRIANGLE_INTERSECT=0
-   RETURN
-ENDIF
-
-TMP = 1._EB/TMP
-S = XP-V1
-
-U = TMP*DOT_PRODUCT(S,P)
-IF (U<-EPS .OR. U>(1._EB+EPS)) THEN
-   ! ray does not intersect triangle
-   RAY_TRIANGLE_INTERSECT=0
-   RETURN
-ENDIF
-
-IF (U<EPS .OR. U>(1._EB-EPS)) THEN
-   ! ray intersects edge
-   RAY_TRIANGLE_INTERSECT=2
-   RETURN
-ENDIF
-
-CALL CROSS_PRODUCT(Q,S,E1)
-V = TMP*DOT_PRODUCT(D,Q)
-IF (V<-EPS .OR. (U+V)>(1._EB+EPS)) THEN
-   ! ray does not intersect triangle
-   RAY_TRIANGLE_INTERSECT=0
-   RETURN
-ENDIF
-
-IF (V<EPS .OR. (U+V)>(1._EB-EPS)) THEN
-   ! ray intersects edge
-   RAY_TRIANGLE_INTERSECT=2
-   RETURN
-ENDIF
-
-T = TMP*DOT_PRODUCT(E2,Q)
-!XI = XP + T*D ! the intersection point
-
-IF (T>0._EB) THEN
-   RAY_TRIANGLE_INTERSECT=1
-ELSE
-   RAY_TRIANGLE_INTERSECT=0
-ENDIF
-RETURN
-
-END FUNCTION RAY_TRIANGLE_INTERSECT
-
+! ! ---------------------------- RAY_TRIANGLE_INTERSECT ----------------------------------------
+!
+! INTEGER FUNCTION RAY_TRIANGLE_INTERSECT(TRI,XP,D)
+! USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(IN) :: TRI
+! REAL(EB), INTENT(IN) :: XP(3),D(3)
+! REAL(EB) :: E1(3),E2(3),P(3),S(3),Q(3),U,V,TMP,V1(3),V2(3),V3(3),T !,XI(3)
+! REAL(EB), PARAMETER :: EPS=1.E-10_EB
+!
+! ! Schneider and Eberly, Section 11.1
+!
+! V1(1) = VERTEX(FACET(TRI)%VERTEX(1))%X
+! V1(2) = VERTEX(FACET(TRI)%VERTEX(1))%Y
+! V1(3) = VERTEX(FACET(TRI)%VERTEX(1))%Z
+!
+! V2(1) = VERTEX(FACET(TRI)%VERTEX(2))%X
+! V2(2) = VERTEX(FACET(TRI)%VERTEX(2))%Y
+! V2(3) = VERTEX(FACET(TRI)%VERTEX(2))%Z
+!
+! V3(1) = VERTEX(FACET(TRI)%VERTEX(3))%X
+! V3(2) = VERTEX(FACET(TRI)%VERTEX(3))%Y
+! V3(3) = VERTEX(FACET(TRI)%VERTEX(3))%Z
+!
+! E1 = V2-V1
+! E2 = V3-V1
+!
+! CALL CROSS_PRODUCT(P,D,E2)
+!
+! TMP = DOT_PRODUCT(P,E1)
+!
+! IF ( ABS(TMP)<EPS ) THEN
+!    RAY_TRIANGLE_INTERSECT=0
+!    RETURN
+! ENDIF
+!
+! TMP = 1._EB/TMP
+! S = XP-V1
+!
+! U = TMP*DOT_PRODUCT(S,P)
+! IF (U<-EPS .OR. U>(1._EB+EPS)) THEN
+!    ! ray does not intersect triangle
+!    RAY_TRIANGLE_INTERSECT=0
+!    RETURN
+! ENDIF
+!
+! IF (U<EPS .OR. U>(1._EB-EPS)) THEN
+!    ! ray intersects edge
+!    RAY_TRIANGLE_INTERSECT=2
+!    RETURN
+! ENDIF
+!
+! CALL CROSS_PRODUCT(Q,S,E1)
+! V = TMP*DOT_PRODUCT(D,Q)
+! IF (V<-EPS .OR. (U+V)>(1._EB+EPS)) THEN
+!    ! ray does not intersect triangle
+!    RAY_TRIANGLE_INTERSECT=0
+!    RETURN
+! ENDIF
+!
+! IF (V<EPS .OR. (U+V)>(1._EB-EPS)) THEN
+!    ! ray intersects edge
+!    RAY_TRIANGLE_INTERSECT=2
+!    RETURN
+! ENDIF
+!
+! T = TMP*DOT_PRODUCT(E2,Q)
+! !XI = XP + T*D ! the intersection point
+!
+! IF (T>0._EB) THEN
+!    RAY_TRIANGLE_INTERSECT=1
+! ELSE
+!    RAY_TRIANGLE_INTERSECT=0
+! ENDIF
+! RETURN
+!
+! END FUNCTION RAY_TRIANGLE_INTERSECT
+!
 ! ---------------------------- TRILINEAR ----------------------------------------
 
 REAL(EB) FUNCTION TRILINEAR(UU,DXI,LL)
@@ -31955,101 +31042,6 @@ G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 
 END SUBROUTINE GETGRAD
 
-! ---------------------------- GET_VELO_IBM ----------------------------------------
-
-SUBROUTINE GET_VELO_IBM(VELO_IBM,U_VELO,IERR,VELO_INDEX,XVELO,TRI_INDEX,IBM_INDEX,DXC,NM)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
-IMPLICIT NONE
-
-REAL(EB), INTENT(OUT) :: VELO_IBM
-INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(IN) :: XVELO(3),DXC(3),U_VELO(3)
-INTEGER, INTENT(IN) :: VELO_INDEX,TRI_INDEX,IBM_INDEX,NM
-REAL(EB) :: NN(3),R(3),V1(3),V2(3),V3(3),T,U_DATA(0:1,0:1,0:1),XI(3),DXI(3),C(3,3),SS(3),PP(3),U_STRM,U_ORTH,U_NORM,KE
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
-! Cartesian grid coordinate system orthonormal basis vectors
-REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
-
-IERR=0
-VELO_IBM=0._EB
-
-V1 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(1))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Z/)
-V2 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(2))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Z/)
-V3 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(3))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Z/)
-NN = FACET(TRI_INDEX)%NVEC
-
-R = XVELO-V1
-IF ( NORM2(R)<EPS ) R = XVELO-V2 ! select a different vertex
-
-T = DOT_PRODUCT(R,NN)
-
-IF (IBM_INDEX==0 .AND. T<EPS) RETURN ! the velocity point is on or interior to the surface
-
-IF (IBM_INDEX==1) THEN
-   XI = XVELO + T*NN
-   CALL GETU(U_DATA,DXI,XI,VELO_INDEX,NM)
-   VELO_IBM = 0.5_EB*TRILINEAR(U_DATA,DXI,DXC)
-   RETURN
-ENDIF
-
-IF (IBM_INDEX==2) THEN
-
-   ! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO
-   CALL CROSS_PRODUCT(PP,NN,U_VELO) ! PP = NN x U_VELO
-   IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
-      ! tangent vector is completely arbitrary, just perpendicular to NN
-      IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
-      IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
-   ENDIF
-   PP = PP/NORM2(PP) ! normalize to unit vector
-   CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
-
-   !! check unit normal vectors
-   !print *,DOT_PRODUCT(SS,SS) ! should be 1
-   !print *,DOT_PRODUCT(SS,PP) ! should be 0
-   !print *,DOT_PRODUCT(SS,NN) ! should be 0
-   !print *,DOT_PRODUCT(PP,PP) ! should be 1
-   !print *,DOT_PRODUCT(PP,NN) ! should be 0
-   !print *,DOT_PRODUCT(NN,NN) ! should be 1
-   !print *                    ! blank line
-
-   ! directional cosines (see Pope, Eq. A.11)
-   C(1,1) = DOT_PRODUCT(E1,SS)
-   C(1,2) = DOT_PRODUCT(E1,PP)
-   C(1,3) = DOT_PRODUCT(E1,NN)
-   C(2,1) = DOT_PRODUCT(E2,SS)
-   C(2,2) = DOT_PRODUCT(E2,PP)
-   C(2,3) = DOT_PRODUCT(E2,NN)
-   C(3,1) = DOT_PRODUCT(E3,SS)
-   C(3,2) = DOT_PRODUCT(E3,PP)
-   C(3,3) = DOT_PRODUCT(E3,NN)
-
-   ! transform velocity (see Pope, Eq. A.17)
-   U_STRM = C(1,1)*U_VELO(1) + C(2,1)*U_VELO(2) + C(3,1)*U_VELO(3)
-   U_ORTH = C(1,2)*U_VELO(1) + C(2,2)*U_VELO(2) + C(3,2)*U_VELO(3)
-   U_NORM = C(1,3)*U_VELO(1) + C(2,3)*U_VELO(2) + C(3,3)*U_VELO(3)
-
-   !! check U_ORTH, should be zero
-   !print *, U_ORTH
-
-   KE = 0.5_EB*(U_STRM**2 + U_NORM**2)
-
-   ! here's a crude model: set U_NORM to zero
-   U_NORM = 0._EB
-   U_STRM = 0.5_EB*SQRT(2._EB*KE)
-
-   ! transform velocity back to Cartesian component I_VEL
-   VELO_IBM = C(VELO_INDEX,1)*U_STRM + C(VELO_INDEX,3)*U_NORM
-   RETURN
-ENDIF
-
-IERR=1
-
-END SUBROUTINE GET_VELO_IBM
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! Cut-cell subroutines by Charles Luo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! ---------------------------- TRI_PLANE_BOX_INTERSECT ----------------------------------------
 
