@@ -14,7 +14,6 @@
       MATL_ID    = 'vegetation'
       THICKNESS  = 0.0005
       LENGTH     = 0.02
-      TMP_FRONT  = 20.
       GEOMETRY   = 'CYLINDRICAL' /
       
 &MATL ID = 'vegetation'

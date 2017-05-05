@@ -13,7 +13,6 @@
 &SURF ID         = 'spherical particle'
       MATL_ID    = 'vegetation'
       THICKNESS  = 0.0005
-      TMP_FRONT  = 20.
       GEOMETRY   = 'SPHERICAL' /
       
 &MATL ID = 'vegetation'
