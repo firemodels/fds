@@ -3789,8 +3789,8 @@ USE COMPLEX_GEOMETRY
             DO J = J1+1, J2
                IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! a cutcell so count number of faces
-                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                  DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                      NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
                   ENDDO
@@ -3805,8 +3805,8 @@ USE COMPLEX_GEOMETRY
             DO I = I1+1, I2
                IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
-                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                  DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                      NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
                   ENDDO
@@ -3821,8 +3821,8 @@ USE COMPLEX_GEOMETRY
             DO J = J1+1, J2
                IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
-                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                  DO IFACE=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE ! Adds also SOLID side faces.
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                      NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
                   ENDDO
@@ -3838,8 +3838,8 @@ USE COMPLEX_GEOMETRY
             DO I = 1, IBAR
                IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN ! There are INBOUNDARY cut-faces on this cell:
                   ICF = CCVAR(I,J,K,IBM_IDCF)
-                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE ! Adds also SOLID side faces.
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                  DO IFACE=1,CUT_FACE(ICF)%NFACE ! Adds also SOLID side faces.
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
                      NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
                   ENDDO
@@ -4004,16 +4004,16 @@ USE COMPLEX_GEOMETRY
             DO J=1,NJ-1
                IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices
-                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
                      VERTBEG = 3*VERTBEG - 2
                      VERTEND = IVERTCUT + NVF
                      VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
-                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
+                        IVERTCF=CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
 
                      FACEBEG = 3*(IFACECUT+1) - 2
@@ -4028,7 +4028,7 @@ USE COMPLEX_GEOMETRY
                         ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
+                        IF(IFACECF > CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 ! after TRIANGULATE is verified remove the following 3 lines of code (and similar lines in 2 locations below)
 !                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
 !                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
@@ -4068,16 +4068,16 @@ USE COMPLEX_GEOMETRY
             DO I=1,NI-1
                IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
-                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
                      VERTBEG = 3*VERTBEG - 2
                      VERTEND = IVERTCUT + NVF
                      VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
-                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
+                        IVERTCF=CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
                      FACEBEG = 3*(IFACECUT+1) - 2
                      FACEEND = FACEBEG + 3*(NVF-2) - 1
@@ -4089,7 +4089,7 @@ USE COMPLEX_GEOMETRY
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
+                        IF(IFACECF > CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 !                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
 !                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
 !                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
@@ -4128,16 +4128,16 @@ USE COMPLEX_GEOMETRY
             DO I=1,NI-1
                IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
-                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                     NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
                      VERTBEG = 3*VERTBEG - 2
                      VERTEND = IVERTCUT + NVF
                      VERTEND = 3*VERTEND
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
-                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
+                        IVERTCF=CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                      ENDDO
                      FACEBEG = 3*(IFACECUT+1) - 2
                      FACEEND = FACEBEG + 3*(NVF-2) - 1
@@ -4149,7 +4149,7 @@ USE COMPLEX_GEOMETRY
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
                         LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
-                        IF(IFACECF > IBM_CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
+                        IF(IFACECF > CUT_FACE(ICF)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side cut-faces.
 !                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
 !                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
 !                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1
@@ -4183,16 +4183,16 @@ USE COMPLEX_GEOMETRY
             DO I=1,IBAR
             IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
                ICF = CCVAR(I,J,K,IBM_IDCF)
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               DO IFACECF=1,CUT_FACE(ICF)%NFACE
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   VERTBEG = IVERTCUT + 1
                   VERTBEG = 3*VERTBEG - 2
                   VERTEND = IVERTCUT + NVF
                   VERTEND = 3*VERTEND
                   DO IVCF=1,NVF
                      IVERTCUT = IVERTCUT + 1
-                     IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                     VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
+                     IVERTCF=CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                     VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF),FB)
                   ENDDO
                   FACEBEG = 3*(IFACECUT+1) - 2
                   FACEEND = FACEBEG + 3*(NVF-2) - 1
@@ -4328,17 +4328,17 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
             CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
                ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! is a cut cell
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+               DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-               DO IFACECF=IBM_CUT_FACE(ICF)%NFACE+1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
@@ -4366,17 +4366,17 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
             CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
                ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+               DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-               DO IFACECF=IBM_CUT_FACE(ICF)%NFACE+1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
@@ -4404,17 +4404,17 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
             CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
                ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)
-               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+               DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-               DO IFACECF=IBM_CUT_FACE(ICF)%NFACE+1,IBM_CUT_FACE(ICF)%NFACE+IBM_CUT_FACE(ICF)%NSFACE
-                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
+                  NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
@@ -4444,9 +4444,9 @@ ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
          DO I=1,IBAR
          IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
             ICF = CCVAR(I,J,K,IBM_IDCF)
-            DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+            DO IFACECF=1,CUT_FACE(ICF)%NFACE
                CALL GET_INBCUTFACE_SCALAR_SLICE(ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
-               NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+               NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                DO IVCF = 1, NVF-2 ! for now assume face is convex
                   IFACECUT = IFACECUT + 1
                   VALS(IFACECUT) = VAL_CF

@@ -1619,7 +1619,7 @@ CASE(GLMAT_WHLDOM)
    !                   IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START)
    !                ELSEIF (CCVAR(I,J,K,1)==0) THEN
    !                   ICC=CCVAR(I,J,K,4)
-   !                   IROW= IBM_CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START)
+   !                   IROW= CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START)
    !                ENDIF
    !                WRITE(33,'(4I8,5F24.18)') NM,I,J,K,XC(I),YC(J),ZC(K),F_H(IROW),X_H(IROW)
    !             ENDDO
