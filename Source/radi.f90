@@ -758,9 +758,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDDO
    ENDIF
 
-   ! Compute absorption coefficient KAPPA
+   ! Compute absorption coefficient of the gases, KAPPA_GAS
 
-   KAPPA = KAPPA0
+   KAPPA_GAS = KAPPA0
 
    IF (KAPPA_ARRAY) THEN
       TYY_FAC = N_KAPPA_T / (RTMPMAX-RTMPMIN)
@@ -773,7 +773,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                TYY = MAX(0 , MIN(N_KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * TYY_FAC)))
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(ZZ_GET,TYY,IBND)
+               KAPPA_GAS(I,J,K) = KAPPA_GAS(I,J,K) + GET_KAPPA(ZZ_GET,TYY,IBND)
             ENDDO
          ENDDO
       ENDDO
@@ -793,7 +793,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-               KFST4_GAS(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
             ENDDO
          ENDDO
       ENDDO
@@ -810,10 +810,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  KFST4_GAS(I,J,K) = KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+                  KFST4_GAS(I,J,K) = KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
                   IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) THEN
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                     RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
+                     RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
                   ENDIF
                ENDDO
@@ -839,7 +839,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K)
+                  KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
                ENDDO
             ENDDO
          ENDDO
@@ -850,7 +850,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Calculate extinction coefficient
 
-   EXTCOE = KAPPA + KAPPA_PART + SCAEFF*RSA_RAT
+   EXTCOE = KAPPA_GAS + KAPPA_PART + SCAEFF*RSA_RAT
 
    ! Update intensity field
 
@@ -1268,7 +1268,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ! Save source term for the energy equation (QR = -DIV Q)
 
    IF (WIDE_BAND_MODEL) THEN
-      QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4_GAS
+      QR = QR + KAPPA_GAS*UIID(:,:,:,IBND)-KFST4_GAS
       IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
          QR_W = QR_W + KAPPA_PART*UIID(:,:,:,IBND) - KFST4_PART
       ENDIF
@@ -1292,7 +1292,7 @@ ENDIF
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 
 IF (.NOT. WIDE_BAND_MODEL) THEN
-   QR  = KAPPA*UII - KFST4_GAS
+   QR  = KAPPA_GAS*UII - KFST4_GAS
    IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) QR_W = QR_W + KAPPA_PART*UII - KFST4_PART
 ENDIF
 
