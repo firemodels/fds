@@ -2282,9 +2282,7 @@ there is no need to say anything about its material composition or thickness.
 \subsection{Special Topic: Convective Heat Transfer Options}
 \label{info:convection}
 
-This section is labeled as a special topic because normally you do not need to modify the convective heat transfer
-model in FDS. However, there are special cases for which the default model may not be adequate, and this section
-describes some options.
+This section is labeled as a special topic because normally you do not need to modify the convective heat transfer model in FDS. However, there are special cases for which the default model may not be adequate, and this section describes some options.
 
 \subsubsection{Default Convective Heat Transfer Model}
 
@@ -2308,44 +2306,26 @@ By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{
 \begin{equation}
 h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm p} \, u_\tau}{T^+}
 \end{equation}
-Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular
-surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
+Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}.
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\ 
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
-Instead of altering the convective heat transfer coefficient, you may specify
-a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a
-{\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface
-temperature required to
-ensure that the combined radiative and convective heat flux from the surface is equal to the
-{\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX},
-in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both
-{\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a
-surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or
-{\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or
-{\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
 
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
 \label{info:adiabatic}
 
-For some special applications, it is often desired that a solid
-surface be adiabatic, that is, there is no net heat transfer
-(radiative and convective) from the gas to the solid. For this case,
-all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, and nothing else.  FDS will compute a wall temperature
-so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will
-result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}.
-
+For some special applications, it is often desired that a solid surface be adiabatic, that is, there is no net heat transfer (radiative and convective) from the gas to the solid. For this case, all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, and nothing else.  FDS will compute a wall temperature so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will result in FDS defining {\ct NET\_HEAT\_FLUX=0} and {\ct EMISSIVITY=1}.
 
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
-
-
 
 \clearpage
 
@@ -2353,25 +2333,11 @@ No solid surface is truly adiabatic; thus, the specification of an adiabatic bou
 \section{Heat Conduction in Solids}
 \label{info:MATL}
 
-Specified temperature or heat flux boundary conditions are
-easy to apply, but only of limited usefulness in real fire scenarios.
-In most cases, walls, ceilings and floors are made up of several layers
-of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make
-up boundary solid surfaces. A solid boundary can consist of
-multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different
-materials, and each layer can consist of multiple material
-components.
+Specified temperature or heat flux boundary conditions are easy to apply, but only of limited usefulness in real fire scenarios. In most cases, walls, ceilings and floors are made up of several layers of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make up boundary solid surfaces. A solid boundary can consist of multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different materials, and each layer can consist of multiple material components.
 
 \subsection{Structure of Solid Boundaries}
 
-Material layers and components are
-specified on the {\ct SURF} line via the array called {\ct MATL\_ID(IL,IC)}.
-The argument {\ct IL} is an integer indicating the
-layer index, starting at 1, the layer at the exterior boundary. The
-argument {\ct IC} is an integer indicating the component index. For
-example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material
-component of the second layer is {\ct BRICK}. In practice, the
-materials are often listed as in the following example:
+Material layers and components are specified on the {\ct SURF} line via the array called {\ct MATL\_ID(IL,IC)}. The argument {\ct IL} is an integer indicating the layer index, starting at 1, the layer at the exterior boundary. The argument {\ct IC} is an integer indicating the component index. For example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material component of the second layer is {\ct BRICK}. In practice, the materials are often listed as in the following example:
 \begin{lstlisting}
 &MATL ID             = 'INSULATOR'
       CONDUCTIVITY   = 0.041
@@ -2389,10 +2355,7 @@ Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the m
 When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
 calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
-Mixtures of solid materials within the same layer can be defined using
-the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
-two indices as the {\ct MATL\_ID} keyword. For example, if the
-brick layer contains some additional water, the input could look like this:
+Mixtures of solid materials within the same layer can be defined using the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same two indices as the {\ct MATL\_ID} keyword. For example, if the brick layer contains some additional water, the input could look like this:
 \begin{lstlisting}
 &MATL ID            = 'WATER'
       CONDUCTIVITY  = 0.60
@@ -2407,42 +2370,19 @@ brick layer contains some additional water, the input could look like this:
       BACKING                   = 'EXPOSED'
       THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
 \end{lstlisting}
-In this example, the first layer of material, Layer~1, is composed of a mixture of
-brick and water. This is given by the {\ct MATL\_ID} array which specifies
-Component~1 of Layer~1 to be brick, and Component~2 of
-Layer~1 to be water. The mass fraction of each is specified via {\ct MATL\_MASS\_FRACTION}. In this
-case, brick is 95~\%, by mass, of Layer 1, and water is 5~\%.
+In this example, the first layer of material, Layer~1, is composed of a mixture of brick and water. This is given by the {\ct MATL\_ID} array which specifies Component~1 of Layer~1 to be brick, and Component~2 of Layer~1 to be water. The mass fraction of each is specified via {\ct MATL\_MASS\_FRACTION}. In this case, brick is 95~\%, by mass, of Layer 1, and water is 5~\%.
 
-It is important to notice that the components of the solid mixtures
-are treated as pure substances with no voids. The density of the
-mixture is
+It is important to notice that the components of the solid mixtures are treated as pure substances with no voids. The density of the mixture is
 \be
 \rho = \left(\sum_i\frac{Y_i}{\rho_i}\right)^{-1}
 \ee
-where $Y_i$ are the material mass fractions and $\rho_i$ are the
-material bulk densities defined on the {\ct MATL} lines. In the
-example above, the resulting density of the wall would be about
-1553~kg/m$^3$. The fact that the wall density is smaller than the
-density of pure brick may be confusing, but can be explained easily.
-If the wall can contain water, the whole volume of the wall can not be
-pure brick. Instead there are voids (pores) that are
-filled with water. If the water is taken away, there is only about
-1476~kg/m$^3$ of brick left. To have a density of 1600~kg/m$^3$ for a
-partially void wall, a higher density should be used for the pure
-brick.
+where $Y_i$ are the material mass fractions and $\rho_i$ are the material bulk densities defined on the {\ct MATL} lines. In the example above, the resulting density of the wall would be about 1553~kg/m$^3$. The fact that the wall density is smaller than the density of pure brick may be confusing, but can be explained easily. If the wall can contain water, the whole volume of the wall can not be pure brick. Instead there are voids (pores) that are filled with water. If the water is taken away, there is only about 1476~kg/m$^3$ of brick left. To have a density of 1600~kg/m$^3$ for a partially void wall, a higher density should be used for the pure brick.
 
 \subsection{Thermal Properties}
 
 \label{info:thermal_properties}
 
-For any solid material, specify its thermal
-{\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$),
-{\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY} (0.9 by default).
-Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of
-temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot.
-Temperature-dependence is specified using the {\ct RAMP} convention.
-As an example, consider marinite, a wall material suitable for high temperature applications:
-
+For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {\ct DENSITY} (kg/m$^3$), {\ct SPECIFIC\_HEAT} (\si{kJ/(kg.K)}), and {\ct EMISSIVITY} (0.9 by default). Both {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} can be functions of temperature. {\ct DENSITY} and {\ct EMISSIVITY} cannot. Temperature-dependence is specified using the {\ct RAMP} convention. As an example, consider marinite, a wall material suitable for high temperature applications:
 \begin{lstlisting}
 &MATL ID                 = 'MARINITE'
       EMISSIVITY         = 0.8
@@ -2457,16 +2397,9 @@ As an example, consider marinite, a wall material suitable for high temperature 
 &RAMP ID='c_ramp', T=316., F=1.339 /
 &RAMP ID='c_ramp', T=425., F=1.423 /
 \end{lstlisting}
-Notice that with temperature-dependent quantities, the {\ct RAMP} parameter
-{\ct T} means Temperature, and {\ct F} is the value of either
-the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the
-{\ct MATL} line, but rather the {\ct RAMP} names.
+Notice that with temperature-dependent quantities, the {\ct RAMP} parameter {\ct T} means Temperature, and {\ct F} is the value of either the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the {\ct MATL} line, but rather the {\ct RAMP} names.
 
-The solid
-material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows
-the radiation to penetrate and absorb into the solid. Correspondingly,
-the emission of the material is based on the internal temperatures,
-not just the surface.
+The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface.
 
 
 
@@ -9795,99 +9728,100 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SURF} (Surface Properties)} \\
 \hline \hline
 \endhead
-{\ct ADIABATIC}                       & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
-{\ct BACKING}                         & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
-{\ct BURN\_AWAY}                      & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
-{\ct CELL\_SIZE\_FACTOR}              & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
-{\ct C\_FORCED\_CONSTANT}             & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_PR\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE}                   & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE\_EXP}              & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_HORIZONTAL}                   & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
-{\ct C\_VERTICAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
-{\ct COLOR    }                       & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
-{\ct CONVECTION\_LENGTH\_SCALE}       & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
-{\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
-{\ct CONVERT\_VOLUME\_TO\_MASS}       & Logical         & Section~\ref{info:MASS_FLUX}              &                     & {\ct .FALSE.}           \\ \hline
-{\ct DEFAULT}                         & Logical         & Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
-{\ct DT\_INSERT}                      & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
-{\ct EMISSIVITY}                      & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
-{\ct EMISSIVITY\_BACK}                & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
-{\ct EVAC\_DEFAULT}                   & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
-{\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
-{\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
-{\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
-{\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}          & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
-{\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
-{\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
-{\ct HT3D}                            & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
-{\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
-{\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
-{\ct INNER\_RADIUS}                   & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct INTERNAL\_HEAT\_SOURCE}          & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & kW/m$^3$            &                         \\ \hline
-{\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
-{\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
-{\ct LENGTH}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct MASS\_FLUX(:)}                   & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct MASS\_FLUX\_TOTAL}               & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct MASS\_FLUX\_VAR}                 & Real            & Section~\ref{info:MASS_FLUX_VAR}          &                     &                         \\ \hline
-{\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
-{\ct MASS\_TRANSFER\_COEFFICIENT}     & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
-{\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-{\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-{\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
-{\ct MLRPUA }                         & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct N\_LAYER\_CELLS\_MAX}            & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
-{\ct NET\_HEAT\_FLUX}                 & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
-{\ct NO\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
-{\ct NPPC}                            & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}            & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct PART\_ID}                        & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
-{\ct PLE}                             & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
-{\ct PROFILE}                         & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
-{\ct RADIUS}                          & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct RAMP\_EF}                        & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_MF(:)}                     & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_PART}                      & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_Q}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_T}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_T\_I}                      & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
-{\ct RAMP\_V}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RAMP\_V\_X}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
-{\ct RAMP\_V\_Y}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
-{\ct RAMP\_V\_Z}                      & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
-{\ct RGB(3)}                          & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
-{\ct ROUGHNESS}                       & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
-{\ct SPEC\_ID}                        & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
-{\ct SPREAD\_RATE}                    & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
-{\ct STRETCH\_FACTOR(:) }             & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct TAU\_EF}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TAU\_MF(:)}                      & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TAU\_PART}                       & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TAU\_Q}                          & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TAU\_T}                          & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TAU\_V}                          & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
-{\ct TEXTURE\_HEIGHT}                 & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
-{\ct TEXTURE\_MAP}                    & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
-{\ct TEXTURE\_WIDTH}                  & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
-{\ct TGA\_ANALYSIS}                   & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct .FALSE.}           \\ \hline
-{\ct TGA\_FINAL\_TEMPERATURE}         & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
-{\ct TGA\_HEATING\_RATE}              & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
-{\ct THICKNESS(NL)}                   & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
-{\ct TMP\_BACK}                       & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
-{\ct TMP\_FRONT}                      & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
-{\ct TMP\_INNER(:)}                   & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
-{\ct TRANSPARENCY}                    & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
-{\ct VEL    }                         & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
-{\ct VEL\_BULK}                       & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
-{\ct VEL\_GRAD}                       & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
-{\ct VEL\_T }                         & Real Pair       & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
-{\ct VOLUME\_FLOW}                    & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          &                         \\ \hline
-{\ct WIDTH}                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-{\ct XYZ(3)}                          & Real Triplet    & Section~\ref{info:spread}                 & m                   &                         \\ \hline
-{\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
+{\ct ADIABATIC}                         & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct BACKING}                           & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BURN\_AWAY}                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct CELL\_SIZE\_FACTOR}                & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
+{\ct C\_FORCED\_CONSTANT}               & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_PR\_EXP}                & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_RE}                     & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_FORCED\_RE\_EXP}                & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
+{\ct C\_HORIZONTAL}                     & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
+{\ct C\_VERTICAL}                       & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
+{\ct COLOR    }                         & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
+{\ct CONVECTION\_LENGTH\_SCALE}         & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
+{\ct CONVECTIVE\_HEAT\_FLUX}            & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
+{\ct CONVERT\_VOLUME\_TO\_MASS}         & Logical         & Section~\ref{info:MASS_FLUX}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct DEFAULT}                           & Logical         & Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
+{\ct DT\_INSERT}                        & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
+{\ct EMISSIVITY}                        & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
+{\ct EMISSIVITY\_BACK}                  & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
+{\ct EVAC\_DEFAULT}                     & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
+{\ct EXTERNAL\_FLUX}                    & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
+{\ct E\_COEFFICIENT}                    & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
+{\ct FREE\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
+{\ct GEOMETRY}                          & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}            & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
+{\ct \footnotesize HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
+{\ct HEAT\_TRANSFER\_MODEL}             & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct HRRPUA}                            & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
+{\ct HT3D}                              & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
+{\ct ID}                                & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
+{\ct IGNITION\_TEMPERATURE}             & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
+{\ct INNER\_RADIUS}                     & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
+{\ct INTERNAL\_HEAT\_SOURCE}            & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & kW/m$^3$            &                         \\ \hline
+{\ct LAYER\_DIVIDE}                     & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
+{\ct LEAK\_PATH}                        & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
+{\ct LENGTH}                            & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
+{\ct MASS\_FLUX(:)}                     & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MASS\_FLUX\_TOTAL}                 & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MASS\_FLUX\_VAR}                   & Real            & Section~\ref{info:MASS_FLUX_VAR}          &                     &                         \\ \hline
+{\ct MASS\_FRACTION(:)}                 & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct MASS\_TRANSFER\_COEFFICIENT}       & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
+{\ct MATL\_ID(NL,NC)}                   & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
+{\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
+{\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
+{\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
+{\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
+{\ct PLE}                               & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
+{\ct PROFILE}                           & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
+{\ct RADIUS}                            & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
+{\ct RAMP\_EF}                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_MF(:)}                       & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_PART}                        & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_Q}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_I}                        & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
+{\ct RAMP\_V}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_V\_X}                        & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct RAMP\_V\_Y}                        & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct RAMP\_V\_Z}                        & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
+{\ct RGB(3)}                            & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
+{\ct ROUGHNESS}                         & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
+{\ct SPEC\_ID}                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct SPREAD\_RATE}                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
+{\ct STRETCH\_FACTOR(:) }               & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
+{\ct TAU\_EF}                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_MF(:)}                        & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_PART}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_Q}                            & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_T}                            & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_V}                            & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TEXTURE\_HEIGHT}                   & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
+{\ct TEXTURE\_MAP}                      & Character       & Section~\ref{info:texture_map}            &                     &                         \\ \hline
+{\ct TEXTURE\_WIDTH}                    & Real            & Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
+{\ct TGA\_ANALYSIS}                     & Logical         & Section~\ref{info:TGA_DSC_MCC}            &                     & {\ct .FALSE.}           \\ \hline
+{\ct TGA\_FINAL\_TEMPERATURE}           & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
+{\ct TGA\_HEATING\_RATE}                & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
+{\ct THICKNESS(NL)}                     & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
+{\ct TMP\_BACK}                         & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_FRONT}                        & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER(:)}                     & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TRANSPARENCY}                      & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+{\ct VEL    }                           & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
+{\ct VEL\_BULK}                         & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
+{\ct VEL\_GRAD}                         & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
+{\ct VEL\_T }                           & Real Pair       & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
+{\ct VOLUME\_FLOW}                      & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          &                         \\ \hline
+{\ct WIDTH}                             & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
+{\ct XYZ(3)}                            & Real Triplet    & Section~\ref{info:spread}                 & m                   &                         \\ \hline
+{\ct Z0 }                               & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
 
 % Undocumented: FIRELINE_MLR_MAX,N_CELLS_MAX
