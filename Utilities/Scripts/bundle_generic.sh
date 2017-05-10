@@ -150,6 +150,10 @@ wind2fdsdir=intel$FDSOS
 wind2fds=wind2fds$FDSOS
 wind2fdsout=wind2fds$OUT
 
+hashfiledir=intel$FDSOS
+hashfile=hashfile$FDSOS
+hashfileout=hashfile$OUT
+
 smokediffdir=intel$FDSOS
 smokediff=smokediff$FDSOS
 smokediffout=smokediff$OUT
@@ -184,6 +188,7 @@ smokeziproot=$scp_fds_smvroot/smv/Build/smokezip
 dem2fdsroot=$scp_fds_smvroot/smv/Build/dem2fds
 smvscriptdir=$scp_fds_smvroot/smv/scripts
 wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
+hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
@@ -225,6 +230,7 @@ SCP $fdshost $smokediffroot/$smokediffdir   $smokediff  $bundledir/bin $smokedif
 SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin $smokezipout
 SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin $dem2fdsout
 SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin $wind2fdsout
+SCP $fdshost $hashfileroot/$hashfiledir     $hashfile   $bundledir/bin $hashfileout
 
 mdversion=_$SMVVERSION.md5
 MD5DIR=$bundledir/bin/MD5
@@ -234,6 +240,7 @@ MD5HASH $bundledir/bin $smokediffout  > $MD5DIR/$smokediffout$mdversion
 MD5HASH $bundledir/bin $smokezipout   > $MD5DIR/$smokezipout$mdversion
 MD5HASH $bundledir/bin $dem2fdsout    > $MD5DIR/$dem2fdsout$mdversion
 MD5HASH $bundledir/bin $wind2fdsout   > $MD5DIR/$wind2fdsout$mdversion
+MD5HASH $bundledir/bin $hashfileout   > $MD5DIR/$hashfile$mdversion
 
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
 CPDIR $texturedir $bundledir/bin/textures

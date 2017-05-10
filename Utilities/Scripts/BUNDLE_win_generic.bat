@@ -18,6 +18,7 @@ set in_smokezip=%svn_root%\smv\Build\smokezip
 set in_dem2fds=%svn_root%\smv\Build\dem2fds
 set in_smvscriptdir=%svn_root%\smv\scripts
 set in_wind2fds=%svn_root%\smv\Build\wind2fds
+set in_hashfile=%svn_root%\smv\Build\hashfile
 set in_testmpi=%svn_root%\fds\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\smv\Build\background
 set in_smv=%svn_root%\smv\Build\smokeview\intel_win_%platform%
@@ -100,6 +101,7 @@ CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe    
 CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
 CALL :COPY  %in_dem2fds%\intel_win_%platform%\dem2fds_win_%platform%.exe         %out_smv%\dem2fds.exe 
 CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
+CALL :COPY  %in_hashfile%\intel_win_%platform%\hashfile_win_%platform%.exe       %out_smv%\hashfile.exe 
 CALL :COPY  %in_smvscriptdir%\jp2conv.bat                                        %out_smv%\jp2conv.bat
 
 set curdir=%CD%
