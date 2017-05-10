@@ -440,6 +440,10 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
    JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
 
+   I = CUT_CELL(ICC)%IJK(IAXIS)
+   J = CUT_CELL(ICC)%IJK(JAXIS)
+   K = CUT_CELL(ICC)%IJK(KAXIS)
+
    ! ADD CUT_CELL properties:
    ONE_D%TMP_G = CUT_CELL(ICC)%TMP(JCC)
    ONE_D%RSUM_G= CUT_CELL(ICC)%RSUM(JCC)
@@ -449,14 +453,13 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = PREDFCT *CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC) + &
                               (1._EB-PREDFCT)*CUT_CELL(ICC)% ZZ(1:N_TRACKED_SPECIES,JCC)
 
+   ! Viscosity, Use MU from bearing cartesian cell:
+   ONE_D%MU_G = MU(I,J,K)
+   
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
    ! This can be optimized by moving the computaiton of U_CAVG out, before call to WALL_BC.
    U_CAVG(IAXIS:KAXIS)   = 0._EB
    AREA_TANG(IAXIS:KAXIS)= 0._EB
-
-   I = CUT_CELL(ICC)%IJK(IAXIS)
-   J = CUT_CELL(ICC)%IJK(JAXIS)
-   K = CUT_CELL(ICC)%IJK(KAXIS)
 
    NFCELL=CUT_CELL(ICC)%CCELEM(1,JCC)
    DO ICCF=1,NFCELL
