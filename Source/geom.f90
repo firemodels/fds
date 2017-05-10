@@ -440,6 +440,10 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
    JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
 
+   I = CUT_CELL(ICC)%IJK(IAXIS)
+   J = CUT_CELL(ICC)%IJK(JAXIS)
+   K = CUT_CELL(ICC)%IJK(KAXIS)
+
    ! ADD CUT_CELL properties:
    ONE_D%TMP_G = CUT_CELL(ICC)%TMP(JCC)
    ONE_D%RSUM_G= CUT_CELL(ICC)%RSUM(JCC)
@@ -449,14 +453,13 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = PREDFCT *CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC) + &
                               (1._EB-PREDFCT)*CUT_CELL(ICC)% ZZ(1:N_TRACKED_SPECIES,JCC)
 
+   ! Viscosity, Use MU from bearing cartesian cell:
+   ONE_D%MU_G = MU(I,J,K)
+   
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
    ! This can be optimized by moving the computaiton of U_CAVG out, before call to WALL_BC.
    U_CAVG(IAXIS:KAXIS)   = 0._EB
    AREA_TANG(IAXIS:KAXIS)= 0._EB
-
-   I = CUT_CELL(ICC)%IJK(IAXIS)
-   J = CUT_CELL(ICC)%IJK(JAXIS)
-   K = CUT_CELL(ICC)%IJK(KAXIS)
 
    NFCELL=CUT_CELL(ICC)%CCELEM(1,JCC)
    DO ICCF=1,NFCELL
@@ -1896,6 +1899,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
 REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF,RHOPV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
+TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
+INTEGER :: IND1, IND2
 
 ALLOCATE( ZZ_CC(1:N_TOTAL_SCALARS) )
 
@@ -2058,6 +2063,23 @@ MESH_LOOP : DO NM=1,NMESHES
       ENDDO
    ENDDO
 
+   ! CFACES:
+   DO ICF=1,N_CFACE_CELLS
+      CFA  => CFACE(ICF)
+      IND1 = CFA%CUT_FACE_IND1
+      IND2 = CFA%CUT_FACE_IND2
+      ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+      JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
+
+      ! Here are some hacky initializations:
+      ! Set TMP_F to ambient in under laying cartesian cell.
+      CFA%ONE_D%TMP_F = TMP_0(CUT_FACE(IND1)%IJK(KAXIS))
+      CFA%ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
+      CFA%ONE_D%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
+
+   ENDDO
+
+
 ENDDO MESH_LOOP
 
 DEALLOCATE( ZZ_CC )
@@ -2196,7 +2218,8 @@ INTEGER :: INDZ
 
 ! Pressure sums re-integration vars:
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-INTEGER :: IW,IPZ
+TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
+INTEGER :: IW,IPZ, IND1,IND2
 REAL(EB) :: VC, VC1
 
 ! Dummy on T:
@@ -3308,6 +3331,23 @@ CONDUCTION_HEAT_IF : IF( DO_CONDUCTION_HEAT_FLUX ) THEN
       ENDDO ! IFACE
 
    ENDDO ! ICF
+
+   ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
+   DO ICF=1,N_CFACE_CELLS
+      CFA  => CFACE(ICF)
+      IND1 = CFA%CUT_FACE_IND1
+      IND2 = CFA%CUT_FACE_IND2
+      ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+      !IF (ICC > MESHES(NM)%N_CUTCELL_MESH) CYCLE ! Cut-cell is guard-cell cc.
+      JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
+      IF (PREDICTOR) THEN
+         CUT_CELL(ICC)%DS(JCC) = &
+         CUT_CELL(ICC)%DS(JCC) - ( CFA%ONE_D%QCONF*CFA%ONE_D%RDN ) * CUT_FACE(IND1)%AREA(IND2) ! QCONF(+) into solid.
+      ELSE
+         CUT_CELL(ICC)%D(JCC) = &
+         CUT_CELL(ICC)%D(JCC)  - ( CFA%ONE_D%QCONF*CFA%ONE_D%RDN ) * CUT_FACE(IND1)%AREA(IND2) ! QCONF(+) into solid.
+      ENDIF
+   ENDDO
 
    ! EXIM faces:
    CCM1=0.5_EB; CCP1=0.5_EB
