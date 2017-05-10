@@ -6,8 +6,8 @@ $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
 
-$QFDS -d Complex_Geometry sphere_helium_1mesh.fds
-$QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
+#$QFDS -d Complex_Geometry sphere_helium_1mesh.fds
+#$QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
