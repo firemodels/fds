@@ -1793,7 +1793,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   I = CUT_CELL(ICC)%IJK(IAXIS)
                   J = CUT_CELL(ICC)%IJK(JAXIS)
                   K = CUT_CELL(ICC)%IJK(KAXIS)
-                  DCFXN2 = 0.5_EB*(NVEC(IAXIS)*DX(I)+NVEC(JAXIS)*DY(J)+NVEC(KAXIS)*DZ(K))
+                  DCFXN2 = 0.5_EB*ABS(NVEC(IAXIS)*DX(I)+NVEC(JAXIS)*DY(J)+NVEC(KAXIS)*DZ(K))
                   WRITE(LU_ERR,*) 'Dist from CC to INB cut-face < GEOMEPS=',ICF,IFACE,DCFXN,'Will use 1/2*dot(DX,n)=',DCFXN2
                   DCFXN = DCFXN2
                ENDIF
