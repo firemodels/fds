@@ -621,7 +621,6 @@ USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE
-REAL(EB), PARAMETER :: Q_MINIMUM=10000._EB
 INTEGER  :: N,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -811,7 +810,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   KFST4_GAS(I,J,K) = KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-                  IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) THEN
+                  IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
                      RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
@@ -826,7 +825,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+                  IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
                ENDDO
             ENDDO
          ENDDO
