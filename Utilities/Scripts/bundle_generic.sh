@@ -5,27 +5,6 @@
 errlog=/tmp/errlog.$$
 OPENMPI_VERSION=2.1.0
 
-# ---------------- MDHASH -----------------
-
-MD5HASH ()
-{
-local DIR=$1
-local FILE=$2
-
-local curdir=`pwd`
-cd $DIR
-
-if [ "`uname`" == "Darwin" ] ; then
-  hash=`cat $FILE | md5`
-  echo "$hash   $FILE"
-else
-  md5sum $FILE
-fi
-
-cd $curdir
-}
-
-
 # -------------------- SCP -------------------
 
 SCP ()
@@ -131,49 +110,38 @@ CPDIR ()
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 manifest=manifest$FDSOS.html
-OUT=$MAJOR$FDSOS
-OUT=
 
 smokeviewdir=intel$FDSOS
 smokeview=smokeview$FDSOS
-smokeviewout=smokeview$OUT
 
 smokezipdir=intel$FDSOS
 smokezip=smokezip$FDSOS
-smokezipout=smokezip$OUT
 
 dem2fdsdir=intel$FDSOS
 dem2fds=dem2fds$FDSOS
-dem2fdsout=dem2fds$OUT
 
 wind2fdsdir=intel$FDSOS
 wind2fds=wind2fds$FDSOS
-wind2fdsout=wind2fds$OUT
+
+hashfiledir=intel$FDSOS
+hashfile=hashfile$FDSOS
 
 smokediffdir=intel$FDSOS
 smokediff=smokediff$FDSOS
-smokediffout=smokediff$OUT
 
 backgrounddir=intel$FDSOS
 background=background
-backgroundout=background
 
 fdsdir=intel$FDSOS
 fds=fds_intel$FDSOS
-fdsout=fds$OUT
 
 openmpidir=~/FDS_Guides
 
 fdsmpidir=mpi_intel$FDSOS
 fdsmpi=fds_mpi_intel$FDSOS
-fdsmpiout=fds$MAJOR\_mpi$FDSOS
-fdsmpiout=fds_mpi
-fdsmpiout=fds$OUT
 
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS
-fds2asciiout=fds2ascii$OUT
-
 
 scp_fds_smvroot=$fds_smvroot
 fds_smvroot=~/$fds_smvroot
@@ -184,6 +152,7 @@ smokeziproot=$scp_fds_smvroot/smv/Build/smokezip
 dem2fdsroot=$scp_fds_smvroot/smv/Build/dem2fds
 smvscriptdir=$scp_fds_smvroot/smv/scripts
 wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
+hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
@@ -208,7 +177,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
-mkdir $bundledir/bin/MD5
+mkdir $bundledir/bin/hash
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
@@ -219,45 +188,48 @@ echo ""
 
 # smokeview
 
-SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
-SCP $smvhost $smvbindir                     $smokeview  $bundledir/bin $smokeviewout
-SCP $fdshost $smokediffroot/$smokediffdir   $smokediff  $bundledir/bin $smokediffout
-SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin $smokezipout
-SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin $dem2fdsout
-SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin $wind2fdsout
+SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin background
+SCP $smvhost $smvbindir                     $smokeview  $bundledir/bin smokeview
+SCP $fdshost $smokediffroot/$smokediffdir   $smokediff  $bundledir/bin smokediff
+SCP $fdshost $smokeziproot/$smokezipdir     $smokezip   $bundledir/bin smokezip
+SCP $fdshost $dem2fdsroot/$dem2fdsdir       $dem2fds    $bundledir/bin dem2fds
+SCP $fdshost $wind2fdsroot/$wind2fdsdir     $wind2fds   $bundledir/bin wind2fds
+SCP $fdshost $hashfileroot/$hashfiledir     $hashfile   $bundledir/bin hashfile
 
-mdversion=_$SMVVERSION.md5
-MD5DIR=$bundledir/bin/MD5
-MD5HASH $bundledir/bin $backgroundout > $MD5DIR/$backgroundout$mdversion
-MD5HASH $bundledir/bin $smokeviewout  > $MD5DIR/$smokeviewout$mdversion
-MD5HASH $bundledir/bin $smokediffout  > $MD5DIR/$smokediffout$mdversion
-MD5HASH $bundledir/bin $smokezipout   > $MD5DIR/$smokezipout$mdversion
-MD5HASH $bundledir/bin $dem2fdsout    > $MD5DIR/$dem2fdsout$mdversion
-MD5HASH $bundledir/bin $wind2fdsout   > $MD5DIR/$wind2fdsout$mdversion
+CURDIR=`pwd`
+cd $bundledir/bin
+hashfile background > hash/background.sha1
+hashfile smokeview  > hash/smokeview.sha1
+hashfile smokediff  > hash/smokediff.sha1
+hashfile smokezip   > hash/smokezip.sha1
+hashfile dem2fds    > hash/dem2fds.sha1
+hashfile wind2fds   > hash/wind2fds.sha1
+hashfile hashfile   > hash/hashfile.sha1
+cd $CURDIR
 
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
 CPDIR $texturedir $bundledir/bin/textures
 
 # FDS 
 
-SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin $fdsmpiout
-SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
+SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin fds
+SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin fds2ascii
 
-mdversion=_$FDSVERSION.md5
-MD5HASH $bundledir/bin $fdsmpiout    > $MD5DIR/$fdsmpiout$mdversion
-MD5HASH $bundledir/bin $fds2asciiout > $MD5DIR/$fds2asciiout$mdversion
+CURDIR=`pwd`
+cd $bundledir/bin
+hashfile fds       > hash/fds.sha1
+hashfile fds2ascii > hash/fds2ascii.sha1
+cd $CURDIR
 
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
    openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
-   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_linux_bundle.md5s
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    ostype=OSX
    ossize=intel64
    openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
-   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_osx_bundle.md5s
 fi
 
 echo ""
@@ -350,10 +322,10 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
-MD5HASH . $bundlebase.sh > $bundledir/bin/MD5/$bundlebase.sh.md5
-MD5HASH . $bundlebase.sh > $uploaddir/$bundlebase.sh.md5
-cat $bundledir/bin/MD5/*.md5 > $MD5SUMMARY
+$makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
+
+cat $bundledir/bin/hash/*.sha1 >  $bundlebase.sha1
+hashfile $bundlebase.sh        >> $bundlebase.sha1
 
 if [ -e $errlog ]; then
   numerrs=`cat $errlog | wc -l `
@@ -368,3 +340,4 @@ if [ -e $errlog ]; then
   fi
   rm $errlog
 fi
+
