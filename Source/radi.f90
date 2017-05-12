@@ -28,7 +28,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
 
 ! A few miscellaneous constants
 
-FOUR_SIGMA = 4._EB*SIGMA
+FOUR_SIGMA = 4._EB*SIGMA ! Stefan-Boltzmann constant
 RPI_SIGMA  = RPI*SIGMA
 
 NRA = NUMBER_RADIATION_ANGLES
