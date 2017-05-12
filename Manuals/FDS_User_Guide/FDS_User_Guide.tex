@@ -2310,7 +2310,7 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\ 
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
 {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
 
 
@@ -9390,7 +9390,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
-{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       & 1.                        \\ \hline
+{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       &                           \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
 {\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
