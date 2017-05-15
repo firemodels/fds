@@ -883,7 +883,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
             TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                                                                  (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
+                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) + Q(I,J,K) )
 
             IF (PYROLYSIS_HT3D) TMP_NEW(I,J,K) = TMP_NEW(I,J,K) + DT_SUB/(RHO_S*C_S) * Q_DOT_PPP_S(I,J,K)
 
