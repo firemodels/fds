@@ -2573,18 +2573,11 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 2'
       CASE (EXTINCTION_3)
          EXTINCTION_MODEL = 'EXTINCTION 3'
-      CASE (EXTINCTION_4)
-         EXTINCTION_MODEL = 'EXTINCTION 4'
-      CASE (EXTINCTION_5)
-         EXTINCTION_MODEL = 'EXTINCTION 5'
-      CASE (EXTINCTION_6)
-         EXTINCTION_MODEL = 'EXTINCTION 6'
    END SELECT
 
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
    IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
    IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
-   IF (RN%ALT_INDEX>0) WRITE(LU_OUTPUT,'(/3X,A,A)')   'Alternate Reaction of ID:  ', TRIM(RN%ALT_REAC_ID)
 
    WRITE(LU_OUTPUT,'(/3X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
    WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
@@ -2632,8 +2625,6 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    ENDIF
    IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
       WRITE(LU_OUTPUT,'(3X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
-      IF (RN%ALT_INDEX>0) WRITE(LU_OUTPUT,'(3X,A,A)') &
-                                     'Alternate REAC ID:  ', REACTION(RN%ALT_INDEX)%ID
       WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Ignition Temperature (K):       ', RN%AUTO_IGNITION_TEMPERATURE
       WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
    ENDIF
