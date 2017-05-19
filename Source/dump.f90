@@ -4447,7 +4447,7 @@ ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
          IF (CCVAR(I,J,K,IBM_IDCF) > 0) THEN
             ICF = CCVAR(I,J,K,IBM_IDCF)
             DO IFACECF=1,CUT_FACE(ICF)%NFACE
-               VAL_CF = SOLID_PHASE_OUTPUT(NM,IND,Y_INDEX,Z_INDEX,-11, &
+               VAL_CF = SOLID_PHASE_OUTPUT(NM,ABS(IND),Y_INDEX,Z_INDEX,-11, &
                                            OPT_CFACE_INDEX=CUT_FACE(ICF)%CFACE_INDEX(IFACECF))
                NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                DO IVCF = 1, NVF-2 ! face is convex
@@ -4844,6 +4844,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          CLOSE(LU_SLCF(IQ,NM))
       ELSE
+         STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
          ! write geometry for slice file
          IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
          ! geometry and data file at first time step
@@ -7901,6 +7902,26 @@ FILE_LOOP: DO NF=1,N_BNDF
       ENDIF
 
    ENDDO PATCH_LOOP
+
+   ! IF (CC_IBM) THEN
+   !    ! write geometry for slice file
+   !    IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
+   !    ! geometry and data file at first time step
+   !       OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+   !       CALL DUMP_SLICE_GEOM(LU_SLCF_GEOM(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2)
+   !       CLOSE(LU_SLCF_GEOM(IQ,NM))
+   !
+   !       OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+   !       CALL DUMP_SLICE_GEOM_DATA(NM,LU_SLCF(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2,IND,Y_INDEX,Z_INDEX)
+   !       CLOSE(LU_SLCF(IQ,NM))
+   !    ELSE
+   !    ! data file at subsequent time steps
+   !       OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+   !       CALL DUMP_SLICE_GEOM_DATA(NM,LU_SLCF(IQ,NM),SL%SLICETYPE,0,STIME,I1,I2,J1,J2,K1,K2,IND,Y_INDEX,Z_INDEX)
+   !       CLOSE(LU_SLCF(IQ,NM))
+   !    ENDIF
+   ! ENDIF
+
 ENDDO FILE_LOOP
 
 END SUBROUTINE DUMP_BNDF
