@@ -706,7 +706,7 @@ IF (UPDATE_INTENSITY) THEN
       WALL(IW)%ONE_D%QRADIN = 0._EB
    ENDDO
    DO IW=1,N_FACE
-      FACET(IW)%QRADIN = 0._EB
+!      FACET(IW)%QRADIN = 0._EB
    ENDDO
 ENDIF
 
@@ -733,7 +733,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Compute absorption coefficient KAPPA
 
-   KAPPA = KAPPA0
+   KAPPA_GAS = KAPPA0
 
    IF (KAPPA_ARRAY) THEN
       TYY_FAC = N_KAPPA_T / (RTMPMAX-RTMPMIN)
@@ -746,7 +746,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                TYY = MAX(0 , MIN(N_KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * TYY_FAC)))
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(ZZ_GET,TYY,IBND)
+               KAPPA_GAS(I,J,K) = KAPPA_GAS(I,J,K) + GET_KAPPA(ZZ_GET,TYY,IBND)
             ENDDO
          ENDDO
       ENDDO
@@ -766,7 +766,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               KFST4(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
             ENDDO
          ENDDO
       ENDDO
@@ -783,10 +783,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  KFST4(I,J,K) = KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+                  KFST4(I,J,K) = KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
                   IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) THEN
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                     RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
+                     RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4(I,J,K)*VOL
                   ENDIF
                ENDDO
@@ -812,7 +812,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  KFST4(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K)
+                  KFST4(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
                ENDDO
             ENDDO
          ENDDO
@@ -823,7 +823,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Calculate extinction coefficient
 
-   EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
+   EXTCOE = KAPPA_GAS + KAPPAW + SCAEFF*RSA_RAT
 
    ! Update intensity field
 
@@ -852,14 +852,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
       BBF = 1.0_EB
       DO IW = 1,N_FACE
-         IF (FACET(IW)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
-            BBF = BBFA
-         ELSE
-            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),FACET(IW)%TMP_F)
-            SF => SURFACE(FACET(IW)%SURF_INDEX)
-            IF (.NOT. SF%INTERNAL_RADIATION) FACET(IW)%QRADOUT = SF%EMISSIVITY*SIGMA*FACET(IW)%TMP_F**4
-         ENDIF
-         OUTRAD_F(IW) = BBF*RPI*FACET(IW)%QRADOUT
+!         IF (FACET(IW)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
+!            BBF = BBFA
+!         ELSE
+!            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),FACET(IW)%TMP_F)
+!            SF => SURFACE(FACET(IW)%SURF_INDEX)
+!            IF (.NOT. SF%INTERNAL_RADIATION) FACET(IW)%QRADOUT = SF%EMISSIVITY*SIGMA*FACET(IW)%TMP_F**4
+!         ENDIF
+!         OUTRAD_F(IW) = BBF*RPI*FACET(IW)%QRADOUT
       ENDDO
 
       ! Compute boundary condition term incoming radiation integral
@@ -870,11 +870,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDDO
 
       DO IW = 1,N_FACE
-         IF (FACET(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
+!         IF (FACET(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
          DO N=1,NRA
             DLA = (/DLX(N),DLY(N),DLZ(N)/)
-            DLF = DOT_PRODUCT(FACET(IW)%NVEC,DLA) ! face normal * radiation angle
-            IF (DLF<0._EB) INRAD_F(IW) = INRAD_F(IW) - DLF*FACET(IW)%ILW(N,IBND)
+!            DLF = DOT_PRODUCT(FACET(IW)%NVEC,DLA) ! face normal * radiation angle
+!            IF (DLF<0._EB) INRAD_F(IW) = INRAD_F(IW) - DLF*FACET(IW)%ILW(N,IBND)
          ENDDO
       ENDDO
 
@@ -1129,7 +1129,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ! Save source term for the energy equation (QR = -DIV Q)
 
    IF (WIDE_BAND_MODEL) THEN
-      QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
+      QR = QR + KAPPA_GAS*UIID(:,:,:,IBND)-KFST4
       IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
          QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
       ENDIF
@@ -1153,7 +1153,7 @@ ENDIF
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 
 IF (.NOT. WIDE_BAND_MODEL) THEN
-   QR  = KAPPA*UII - KFST4
+   QR  = KAPPA_GAS*UII - KFST4
    IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) QR_W = QR_W + KAPPAW*UII - KFST4W
 ENDIF
 
