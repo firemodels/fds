@@ -42,7 +42,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY,COSINE_ARRAY_2
 ! A few miscellaneous constants
 
 FOUR_SIGMA = 4._EB*SIGMA            ! Four times the Stefan-Boltzmann constant
-RPI_SIGMA  = RPI*SIGMA		    ! Stefan-Boltzmann constant divided by PI (RPI = reciprocal pi)
+RPI_SIGMA  = RPI*SIGMA              ! Stefan-Boltzmann constant divided by PI (RPI = reciprocal pi)
 
 NRA = NUMBER_RADIATION_ANGLES
 NSB = NUMBER_SPECTRAL_BANDS
@@ -630,13 +630,13 @@ CONTAINS
 SUBROUTINE RADIATION_FVM2(T,NM,RAD_ITER)
 
   ! This is a subroutine that will become a modification of RADIATION_FVM for calculating the radiation physics correctly for systems
-  ! with immersed boundaries (cut cells, cut surfaces and so on). Initially, to make this code shorter and easier to handle this does  
+  ! with immersed boundaries (cut cells, cut surfaces and so on). Initially, to make this code shorter and easier to handle this does
   ! not contain the axisymmetric or 2D solvers, or inclusion of Lagrangian particles (they will be added later).
   !
   ! ************************
   ! ** Under Construction **
   ! ************************
-  
+
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
@@ -729,7 +729,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       BBFA = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMPA)
    ENDIF
 
- 
+
 
    ! Compute absorption coefficient KAPPA
 
@@ -1053,7 +1053,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                ENDDO ! IPROP
 
-            
+
 
             ! Boundary values: Incoming radiation
 
@@ -1063,7 +1063,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY)   CYCLE WALL_LOOP2
                IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY)   CYCLE WALL_LOOP2
                IOR = WALL(IW)%ONE_D%IOR
-               
+
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
                IIG = WALL(IW)%ONE_D%IIG
                JJG = WALL(IW)%ONE_D%JJG
@@ -1109,7 +1109,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
 
-                    
+
 
          ENDDO ANGLE_LOOP
 
@@ -1159,7 +1159,7 @@ ENDIF
 
 END SUBROUTINE RADIATION_FVM2
 
-  
+
 SUBROUTINE RADIATION_FVM(T,NM,RAD_ITER)
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
