@@ -2,6 +2,17 @@ MODULE PRECISION_PARAMETERS
 
 ! Set important parameters having to do with variable precision and array allocations
 
+! A partial list of the parameters defined here:
+! ONTH, THFO, ... Self evident ratios
+! SR3      square root of 3
+! EIONTH   cubic root of 18
+! PI       the number pi = 3.14159265359
+! TWOPI    the number 2pi = 6.28318530718
+! PIO2     pi over 2, approx. 1.57079632679
+! SQRTPI   square root of pi, approx. 1.77245385091
+! RPI      reciprocal pi, approx. 0.31830988618
+
+
 IMPLICIT NONE
 
 ! Precision of "Four Byte" and "Eight Byte" reals
@@ -32,6 +43,7 @@ INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20
 INTEGER, PARAMETER :: LABEL_LENGTH=60, MESSAGE_LENGTH=200
 
 ! Special numbers
+! Numbers such as the largest number that is < 1 in 8-byte accuracy (ALMOST_ONE) are defined here
 
 REAL(EB), PARAMETER :: ALMOST_ONE=1._EB-EPSILON(1._EB),MICRON=1.E-6_EB,NANOMETER=1.E-9_EB,&
                        TWO_EPSILON_EB=2._EB*EPSILON(1._EB),TINY_EB=TINY(1._EB),HUGE_EB=HUGE(1._EB)
