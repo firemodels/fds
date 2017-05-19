@@ -3234,7 +3234,7 @@ SELECT CASE(GAS_NAME)
       EPSOK = 481.8_EB
       FORMULA = 'CH3OH'
       H_F = -205._EB
-      PR_GAS = 9.5_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
+      PR_GAS = 0.95_EB ! Faghri&Zhang Transport Phenomena in Multiphase Systems
       IF (RADCAL_NAME=='null') RADCAL_NAME='METHANOL'
    CASE('N-DECANE')
       SIGMA = 5.233_EB

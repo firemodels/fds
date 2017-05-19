@@ -12,8 +12,6 @@ PRIVATE
 
 PUBLIC COMBUSTION
 
-LOGICAL:: DEBUG
-
 CONTAINS
 
 SUBROUTINE COMBUSTION(T,DT,NM)
@@ -81,8 +79,6 @@ IF (REIGNITION_MODEL) AIT_P = AIT
 DO K=1,KBAR
    DO J=1,JBAR
       ILOOP: DO I=1,IBAR
-         DEBUG = .FALSE.
-         !IF (I==7 .AND. J==8 .AND. K==1) DEBUG=.TRUE.
          ! Check to see if a reaction is possible
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
          IF (CC_IBM) THEN
@@ -236,8 +232,7 @@ ELSE
       MIX_TIME_OUT= MAX(TAU_CHEM,TAU_D)
    ENDIF
 ENDIF
-IF (DEBUG) WRITE(*,*) 'MIXT', MIX_TIME_OUT,DT/REAL(N_FIXED_CHEMISTRY_SUBSTEPS,EB)
-IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_GET
+
 IF (TRANSPORT_UNMIXED_FRACTION) THEN
    ZETA_0 = ZETA_INOUT
 ELSE
@@ -289,8 +284,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
 
    INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
-      IF (SUPPRESSION .AND. TIME_ITER==1) CALL GET_EXTINCT(EXTINCT,ZZ_MIXED,TMP_MIXED,TAU_RES,AIT_LOC,CO_PASS)
-      IF (DEBUG) WRITE(*,*) 'GE',EXTINCT_MOD,COMBUSTION_ODE_SOLVER,EXTINCT
+      IF (SUPPRESSION .AND. TIME_ITER==1) CALL GET_EXTINCT(EXTINCT,ZZ_MIXED,TMP_MIXED,AIT_LOC,CO_PASS)
       IF (ALL(EXTINCT)) EXIT INTEGRATION_LOOP
       INTEGRATOR_SELECT: SELECT CASE (COMBUSTION_ODE_SOLVER)
 
@@ -300,9 +294,6 @@ CO_EXTINCT: DO CO_PASS = 1,2
 
             CALL FIRE_FORWARD_EULER(ZZ_MIXED_NEW,ZZ_MIXED,ZZ_UNMIXED,ZETA,ZETA_0,DT_SUB,TMP_MIXED,TMP_UNMIXED,RHO_HAT,&
                                     CELL_MASS,TAU_MIX,PBAR_0,DELTA,VEL_RMS,EXTINCT,Q_REAC_SUB,TIME_ITER,TOTAL_MIXED_MASS)
-            IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_MIXED_NEW
-            IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_UNMIXED
-            IF (DEBUG) WRITE(*,*) Q_REAC_SUB,EXTINCT
             ZETA_0 = ZETA
             ZZ_MIXED = ZZ_MIXED_NEW
             IF (SIMPLE_CHEMISTRY .AND. N_FIXED_CHEMISTRY_SUBSTEPS<0 .AND. TIME_ITER>1) THEN
@@ -405,19 +396,13 @@ CO_EXTINCT: DO CO_PASS = 1,2
 
    Q_OUT = -RHO_IN*SUM(SPECIES_MIXTURE%H_F*(ZZ_GET-ZZ_0))/DT ! FDS Tech Guide (5.14)
 
-   NEW_EXTINCT_IF:IF (EXTINCT_MOD == EXTINCTION_5) THEN
+   NEW_EXTINCT_IF:IF (EXTINCT_MOD == EXTINCTION_3) THEN
       ! First pass check for fuel oxidation (step 1) extinction. Cycle if step 1 is extinct (and step 2 was not by AIT)
       ! Second pass check for CO oxidiation (step 2) extinction.
       ! If all steps extinct, zero out heat release and reset ZZ to ZZ_0
-      IF (DEBUG) THEN
-      WRITE(*,*) 'COP',CO_PASS
-      WRITE(*,'(6(1X,F10.5))') ZZ_0
-      WRITE(*,'(6(1X,F10.5))') ZZ_GET
-      WRITE(*,'(6(1X,F10.5))') ZZ_MIXED
-      WRITE(*,'(6(1X,F10.5))') ZZ_UNMIXED
-      ENDIF
-      IF (SUPPRESSION) CALL EXTINCT_5(ZZ_0,ZZ_MIXED,EXTINCT,TMP_IN,CO_PASS)
-      IF (DEBUG) WRITE(*,*) EXTINCT
+
+      IF (SUPPRESSION) CALL EXTINCT_3(ZZ_0,ZZ_MIXED,EXTINCT,TMP_IN,CO_PASS)
+
       SELECT CASE(CO_PASS)
          CASE(1)
             IF (.NOT. EXTINCT(1)) THEN
@@ -445,9 +430,11 @@ CO_EXTINCT: DO CO_PASS = 1,2
                Q_REAC_SUM(:) = 0._EB
             ENDIF
       END SELECT
-   ELSEIF(EXTINCT_MOD == EXTINCTION_6) THEN NEW_EXTINCT_IF
-      IF (SUPPRESSION) CALL EXTINCT_6(ZZ_0,ZZ_MIXED,EXTINCT,TMP_IN)
-      IF (DEBUG) WRITE(*,*) 'E6',EXTINCT
+
+   ELSEIF(EXTINCT_MOD == EXTINCTION_2) THEN NEW_EXTINCT_IF
+
+      IF (SUPPRESSION) CALL EXTINCT_2(ZZ_0,ZZ_MIXED,EXTINCT,TMP_IN)
+
       IF (.NOT. EXTINCT(1)) THEN
          EXIT CO_EXTINCT
       ELSE
@@ -461,6 +448,7 @@ CO_EXTINCT: DO CO_PASS = 1,2
          Q_REAC_SUM(:) = 0._EB
       ENDIF
       EXIT CO_EXTINCT
+
    ELSE NEW_EXTINCT_IF
       EXIT CO_EXTINCT
    ENDIF NEW_EXTINCT_IF
@@ -516,10 +504,7 @@ ZETA_OUT = MAX(0._EB,ZETA_IN*EXP(-DT_LOC/TAU_MIX)) ! FDS Tech Guide (5.28)
 TOTAL_MIXED_MASS = (1._EB-ZETA_OUT)*CELL_MASS
 MIXED_MASS = MAX(0._EB,MIXED_MASS_0 - (ZETA_OUT - ZETA_IN)*ZZ_UNMIXED*CELL_MASS) ! after mixing step, FDS Tech Guide (5.36)
 ZZ_0 = MIXED_MASS/MAX(TOTAL_MIXED_MASS,TWO_EPSILON_EB) ! FDS Tech Guide (5.37)
-IF (DEBUG) WRITE(*,*) 'M',ZETA_IN,ZETA_OUT
-IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_IN
-IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_UNMIXED
-IF (DEBUG) WRITE(*,'(6(1X,F10.5))') ZZ_0
+
 ! Enforce realizability on mass fractions
 
 CALL GET_REALIZABLE_MF(ZZ_0)
@@ -778,13 +763,11 @@ END SELECT KINETICS_SELECT
 END SUBROUTINE REACTION_RATE
 
 
-SUBROUTINE GET_EXTINCT(EXTINCT,ZZ_MIXED_IN,TMP_MIXED,TAU_RES,AIT_LOC,CO_PASS)
+SUBROUTINE GET_EXTINCT(EXTINCT,ZZ_MIXED_IN,TMP_MIXED,AIT_LOC,CO_PASS)
 LOGICAL, INTENT(INOUT) :: EXTINCT(1:N_REACTIONS)
 INTEGER, INTENT(IN) :: CO_PASS
-REAL(EB), INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED,TAU_RES,AIT_LOC
+REAL(EB), INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED,AIT_LOC
 LOGICAL :: FUNC_EXTINCT
-INTEGER :: I
-TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
 
 EXTINCT=.FALSE.
 FUNC_EXTINCT=.FALSE.
@@ -793,31 +776,12 @@ IF (ANY(REACTION(:)%FAST_CHEMISTRY)) THEN
       CASE(EXTINCTION_1)
          FUNC_EXTINCT = EXTINCT_1(ZZ_MIXED_IN,TMP_MIXED,AIT_LOC)
          EXTINCT      = FUNC_EXTINCT
-      CASE(EXTINCTION_2)
-         FUNC_EXTINCT = EXTINCT_2(ZZ_MIXED_IN,TMP_MIXED,AIT_LOC)
-         EXTINCT      = FUNC_EXTINCT
+      CASE(EXTINCTION_2) ! experimental
+         EXTINCT = EXTINCT_2_AIT(TMP_MIXED,AIT_LOC)
       CASE(EXTINCTION_3) ! experimental
-         EXTINCT      = EXTINCT_3(ZZ_MIXED_IN,TMP_MIXED,AIT_LOC)
-      CASE(EXTINCTION_4) ! experimental
-         FUNC_EXTINCT = EXTINCT_4(ZZ_MIXED_IN,TMP_MIXED,TAU_RES)
-         EXTINCT      = FUNC_EXTINCT
-      CASE(EXTINCTION_5) ! experimental
-         EXTINCT = EXTINCT_5_AIT(TMP_MIXED,AIT_LOC,CO_PASS)
-      CASE(EXTINCTION_6) ! experimental
-         EXTINCT = EXTINCT_6_AIT(TMP_MIXED,AIT_LOC)
+         EXTINCT = EXTINCT_3_AIT(TMP_MIXED,AIT_LOC,CO_PASS)
    END SELECT
 ENDIF
-
-! Process alternate reaction pathways signaled by ALT_REAC_ID
-DO I = 1,N_REACTIONS
-   RN => REACTION(I)
-   IF (RN%ALT_INDEX>0) THEN
-      SELECT CASE (EXTINCT(RN%ALT_INDEX))
-         CASE(.TRUE. ); EXTINCT(I)=.FALSE.
-         CASE(.FALSE.); EXTINCT(I)=.TRUE.
-      END SELECT
-   ENDIF
-ENDDO
 
 END SUBROUTINE GET_EXTINCT
 
@@ -853,362 +817,14 @@ ENDDO REACTION_LOOP
 END FUNCTION EXTINCT_1
 
 
-LOGICAL FUNCTION EXTINCT_2(ZZ_MIXED_IN,TMP_MIXED,AIT_IN)
-USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
-REAL(EB),INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED,AIT_IN
-REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(1:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(1:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
-           ZZ_GET_P(1:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N,AIT_LOC
-INTEGER :: NR
-TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-
-EXTINCT_2 = .FALSE.
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
-
-   IF (AIT_IN < 1.E10_EB) THEN
-      AIT_LOC = AIT_IN
-   ELSE
-      AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
-   ENDIF
-   AIT_IF: IF ( TMP_MIXED < AIT_LOC ) THEN
-      EXTINCT_2 = .TRUE.
-   ELSE AIT_IF
-      ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
-      ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
-      ZZ_P = 1._EB - ZZ_F - ZZ_A
-
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.15)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.16)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
-
-      ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
-      ! mixtures.  At this point these composition vectors are not normalized.
-
-      ZZ_GET_F = 0._EB
-      ZZ_GET_A = 0._EB
-      ZZ_GET_P = ZZ_MIXED_IN
-
-      ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
-      ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
-
-      ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
-      ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
-
-      ! Normalize concentrations
-      ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
-      ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
-      ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
-
-      ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)
-
-      ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
-      IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
-         ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.18)
-   ENDIF AIT_IF
-
-ENDDO REACTION_LOOP
-
-END FUNCTION EXTINCT_2
-
-
-FUNCTION EXTINCT_3(ZZ_MIXED_IN,TMP_MIXED,AIT_IN)
-USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
-
-LOGICAL, DIMENSION(1:N_REACTIONS) :: EXTINCT_3
-REAL(EB),INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED,AIT_IN
-REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(1:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(1:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
-           ZZ_GET_P(1:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N,AIT_LOC
-INTEGER :: NR
-TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-
-EXTINCT_3 = .FALSE.
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
-
-   IF (AIT_IN < 1.E10_EB) THEN
-      AIT_LOC = AIT_IN
-   ELSE
-      AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
-   ENDIF
-
-   AIT_IF: IF ( TMP_MIXED < AIT_LOC ) THEN
-      EXTINCT_3(NR) = .TRUE.
-   ELSE AIT_IF
-      ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
-      ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
-      ZZ_P = 1._EB - ZZ_F - ZZ_A
-
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.15)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.16)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
-
-      ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
-      ! mixtures.  At this point these composition vectors are not normalized.
-
-      ZZ_GET_F = 0._EB
-      ZZ_GET_A = 0._EB
-      ZZ_GET_P = ZZ_MIXED_IN
-
-      ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
-      ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
-
-      ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from product composition
-      ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A,0._EB) ! remove all air from product composition
-
-      ! Normalize concentrations
-      ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
-      ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
-      ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
-
-      ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)
-
-      ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
-      IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
-           ZZ_HAT_F*H_F_N                           + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) THEN
-         EXTINCT_3(NR) = .TRUE. ! FDS Tech Guide (5.18)
-      ENDIF
-   ENDIF AIT_IF
-
-ENDDO REACTION_LOOP
-
-END FUNCTION EXTINCT_3
-
-
-LOGICAL FUNCTION EXTINCT_4(ZZ_MIXED_IN,TMP_MIXED,TAU_RES)
-! Vaidya Sankaran, UTRC, 2014 (experimental)
-
-USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
-REAL(EB),INTENT(IN)::ZZ_MIXED_IN(0:N_TRACKED_SPECIES),TMP_MIXED,TAU_RES
-REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(0:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(0:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
-           ZZ_GET_P(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N
-INTEGER :: NR,NS
-TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-
-TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-REAL(EB) :: TAU_CHEM,YN2,YCO,YH2O,YCO2,addN2,fprod,fN2,fCO2,fH2O,YDIL_NORM
-REAL(EB) :: MWN2,MWO2,MWCO,MWCO2,MWH2O
-INTEGER  :: IDN2,IDO2,IDCO,IDCO2,IDH2O
-
-EXTINCT_4 = .FALSE.
-REACTION_LOOP: DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
-
-   AIT_IF: IF (TMP_MIXED < RN%AUTO_IGNITION_TEMPERATURE) THEN
-
-      EXTINCT_4 = .TRUE.
-
-   ELSE AIT_IF
-
-      ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
-      ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
-      ZZ_P = 1._EB - ZZ_F - ZZ_A
-
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S)             ! burned fuel, FDS Tech Guide (5.15)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S                                             ! FDS Tech Guide (5.16)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
-
-      MWCO2 = 1.0_EB ; MWH2O = 1.0_EB ; MWCO = 1.0_EB
-      YCO2  = 0.0_EB ;  YH2O = 0.0_EB ;  YCO = 0.0_EB
-      DO NS = 0,N_TRACKED_SPECIES
-         SM => SPECIES_MIXTURE(NS)
-         SELECT CASE(TRIM(SM%ID))
-            CASE('NITROGEN')
-               IDN2 = NS
-               MWN2 = SM%MW
-               YN2  = ZZ_MIXED_IN(IDN2)
-            CASE('OXYGEN')
-               IDO2 = NS
-               MWO2 = SM%MW
-            CASE('CARBON MONOXIDE')
-               IDCO = NS
-               MWCO = SM%MW
-               YCO  = ZZ_MIXED_IN(IDCO)
-            CASE('WATER VAPOR')
-               IDH2O = NS
-               MWH2O = SM%MW
-               YH2O  = ZZ_MIXED_IN(IDH2O)
-            CASE('CARBON DIOXIDE')
-               IDCO2 = NS
-               MWCO2 = SM%MW
-               YCO2  = ZZ_MIXED_IN(IDCO2)
-         END SELECT
-      ENDDO
-
-      !Added nitrogen = Total N2 - N2 associated with left over O2 - N2 in the combustion products
-      !N2_associated with o2 in AIR = (0.77/0.23)*(ZZ_A)
-      !N2_in_comb_prod =   (0.77/0.23)*(ZZ_A + YCO*0.5_EB*MWO2/MWCO + YH2O*0.5_EB*MWO2/MWH2O + YCO2*MWO2/MWCO2)
-      ADDN2  = YN2 - (0.77_EB/0.23_EB)*(ZZ_A + YCO*0.5_EB*MWO2/MWCO + YH2O*0.5_EB*MWO2/MWH2O + YCO2*MWO2/MWCO2)
-      ADDN2  = MAX(ADDN2,0._EB)
-
-      !fraction of the products+diluent in the reaction zone
-      FPROD = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))
-      !fraction of the added nitrogen in the reaction zone
-      FN2  = FPROD*ADDN2
-      !fraction of the combustion product CO2 in the reaction zone
-      FCO2 = FPROD*ZZ_MIXED_IN(IDCO2)
-      !fraction of the combustion product H2O in the reaction zone
-      FH2O = FPROD*ZZ_MIXED_IN(IDH2O)
-      !normalized mass-fraction of N2 and combustion products
-      YDIL_NORM = FN2/0.412_EB + FCO2/0.375_EB + FH2O/0.227_EB
-
-      EXT_CRIT_12: IF (YDIL_NORM > 1._EB) THEN
-
-         ! 1st criterion: UTRC, 2014
-         EXTINCT_4 = .TRUE.
-
-      ELSE EXT_CRIT_12
-
-         !TAU_RES  = MU(I,J,K)/(0.5_EB*RHO(I,J,K)*(U(I,J,K)**2+V(I,J,K)**2+W(I,J,K)**2))
-         TAU_CHEM = 0.069_EB*EXP(2.48_EB*YDIL_NORM)*0.001_EB
-
-         EXT_CRIT_23: IF (TAU_CHEM > TAU_RES) THEN
-            ! 2nd criterion: UTRC, 2014
-            EXTINCT_4 = .TRUE.
-         ELSE EXT_CRIT_23
-            ! 3rd criterion based on computed Critical Flame Temperature: UTRC, 2014
-
-            ZZ_GET_F = 0._EB
-            ZZ_GET_A = 0._EB
-            ZZ_GET_P = ZZ_MIXED_IN
-
-            ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
-            ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
-
-            ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from products
-            ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A    ,0._EB) ! remove all air from products
-
-            ! Normalize concentrations
-            ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
-            ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
-            ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
-
-            RN%CRIT_FLAME_TMP=1464.386823_EB*(TAU_RES*1000.0_EB)**(-0.053780_EB)
-
-            ! Equation for water-vapor
-            IF(YH2O > 0.0) THEN
-             RN%CRIT_FLAME_TMP=(1._EB-YH2O)*RN%CRIT_FLAME_TMP + (YH2O)*1545.118849_EB*(TAU_RES*1000.0_EB)**(-0.033793_EB)
-            ENDIF
-
-            IF(RN%CRIT_FLAME_TMP<=1450._EB) RN%CRIT_FLAME_TMP=1450._EB   ! lower limit T_CFT for most hydro-carbons
-            IF(RN%CRIT_FLAME_TMP>=1800._EB) RN%CRIT_FLAME_TMP=1800._EB   ! upper limit T_CFT for most hydro-carbons
-
-            ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)
-
-            ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp
-            IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
-                 ZZ_HAT_F* H_F_N + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) THEN
-               EXTINCT_4 = .TRUE.
-            ENDIF
-
-         ENDIF EXT_CRIT_23
-      ENDIF EXT_CRIT_12
-   ENDIF AIT_IF
-
-ENDDO REACTION_LOOP
-
-END FUNCTION EXTINCT_4
-
-FUNCTION EXTINCT_5_AIT(TMP_MIXED,AIT_IN,CO_PASS)
-LOGICAL:: EXTINCT_5_AIT(1:N_REACTIONS)
-REAL(EB),INTENT(IN)::TMP_MIXED,AIT_IN
-INTEGER, INTENT(IN)::CO_PASS
-REAL(EB):: AIT_LOC
-TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
-
-EXTINCT_5_AIT = .FALSE.
-RN => REACTION(CO_PASS)
-
-IF (AIT_IN < 1.E10_EB) THEN
-   AIT_LOC = AIT_IN
-ELSE
-   AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
-ENDIF
-
-IF ( TMP_MIXED < AIT_LOC ) EXTINCT_5_AIT = .TRUE.
-
-END FUNCTION EXTINCT_5_AIT
-
-
-SUBROUTINE EXTINCT_5(ZZ_0_IN,ZZ_IN,EXTINCT,TMP_IN,CO_PASS)
-USE PHYSICAL_FUNCTIONS,ONLY:GET_ENTHALPY
-REAL(EB),INTENT(IN)::TMP_IN,ZZ_0_IN(1:N_TRACKED_SPECIES),ZZ_IN(1:N_TRACKED_SPECIES)
-INTEGER, INTENT(IN):: CO_PASS
-LOGICAL, INTENT(INOUT):: EXTINCT(1:N_REACTIONS)
-REAL(EB):: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,H,H_CRIT,Q,Q_CRIT
-INTEGER:: NS
-
-DO NS = 1,N_TRACKED_SPECIES
-   IF (NS==REACTION(1)%FUEL_SMIX_INDEX .OR. NS==REACTION(2)%FUEL_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = ZZ_0_IN(NS)
-      ZZ_HAT(NS) = ZZ_IN(NS)
-   ELSEIF(NS==REACTION(1)%AIR_SMIX_INDEX) THEN
-      ZZ_HAT_0(NS) = ZZ_0_IN(NS) - ZZ_IN(NS)
-      ZZ_HAT(NS) = 0._EB
-   ELSE
-      ZZ_HAT_0(NS) = (ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX) - ZZ_IN(REACTION(1)%AIR_SMIX_INDEX))/ &
-                      ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX)*ZZ_0_IN(NS)
-      ZZ_HAT(NS) = ZZ_IN(NS)-ZZ_0_IN(NS)+ ZZ_HAT_0(NS)
-   ENDIF
-END DO
-
-IF (DEBUG) THEN
-WRITE(*,*) 'E5',TMP_IN
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT_0
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT
-ENDIF
-
-ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
-ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
-
-! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
-
-CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN)  ! H of products participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(CO_PASS)%CRIT_FLAME_TMP) !H of products at the critical flame temperature
-Q = H_0 - H ! Combustion heat release rate
-Q_CRIT = H_CRIT - H !Heat release rate required to avoid extinction
-IF (Q  < Q_CRIT) EXTINCT(CO_PASS) = .TRUE.
-
-IF (DEBUG) THEN
-WRITE(*,*) 'E5',EXTINCT(CO_PASS)
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT_0
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT
-WRITE(*,'(5(1X,E14.6))') H_0,H,H_CRIT,Q,Q_CRIT
-ENDIF
-
-
-END SUBROUTINE EXTINCT_5
-
-
-FUNCTION EXTINCT_6_AIT(TMP_MIXED,AIT_IN)
-LOGICAL:: EXTINCT_6_AIT(1:N_REACTIONS)
+FUNCTION EXTINCT_2_AIT(TMP_MIXED,AIT_IN)
+LOGICAL:: EXTINCT_2_AIT(1:N_REACTIONS)
 REAL(EB),INTENT(IN)::TMP_MIXED,AIT_IN
 REAL(EB):: AIT_LOC
 INTEGER :: NR
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
 
-EXTINCT_6_AIT = .FALSE.
+EXTINCT_2_AIT = .FALSE.
 REACTION_LOOP: DO NR=1,N_REACTIONS
    RN => REACTION(NR)
    IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
@@ -1219,13 +835,13 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
    ENDIF
 
-   IF ( TMP_MIXED < AIT_LOC ) EXTINCT_6_AIT(NR) = .TRUE.
+   IF ( TMP_MIXED < AIT_LOC ) EXTINCT_2_AIT(NR) = .TRUE.
 ENDDO REACTION_LOOP
 
-END FUNCTION EXTINCT_6_AIT
+END FUNCTION EXTINCT_2_AIT
 
 
-SUBROUTINE EXTINCT_6(ZZ_0_IN,ZZ_IN,EXTINCT,TMP_IN)
+SUBROUTINE EXTINCT_2(ZZ_0_IN,ZZ_IN,EXTINCT,TMP_IN)
 USE PHYSICAL_FUNCTIONS,ONLY:GET_ENTHALPY
 REAL(EB),INTENT(IN)::TMP_IN,ZZ_0_IN(1:N_TRACKED_SPECIES),ZZ_IN(1:N_TRACKED_SPECIES)
 LOGICAL, INTENT(INOUT):: EXTINCT(1:N_REACTIONS)
@@ -1248,12 +864,6 @@ DO NS = 1,N_TRACKED_SPECIES
    ENDIF
 END DO
 
-IF (DEBUG) THEN
-WRITE(*,*) 'E6A',TMP_IN
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT_0
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT
-ENDIF
-
 ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
 ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 
@@ -1266,14 +876,65 @@ Q = H_0 - H ! Combustion heat release rate
 Q_CRIT = H_CRIT - H !Heat release rate required to avoid extinction
 IF (Q  < Q_CRIT) EXTINCT = .TRUE.
 
-IF (DEBUG) THEN
-WRITE(*,*) 'E6B'
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT_0
-WRITE(*,'(6(1X,F10.6))') ZZ_HAT
-WRITE(*,'(5(1X,E14.6))') H_0,H,H_CRIT,Q,Q_CRIT
+END SUBROUTINE EXTINCT_2
+
+
+FUNCTION EXTINCT_3_AIT(TMP_MIXED,AIT_IN,CO_PASS)
+LOGICAL:: EXTINCT_3_AIT(1:N_REACTIONS)
+REAL(EB),INTENT(IN)::TMP_MIXED,AIT_IN
+INTEGER, INTENT(IN)::CO_PASS
+REAL(EB):: AIT_LOC
+TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
+
+EXTINCT_3_AIT = .FALSE.
+RN => REACTION(CO_PASS)
+
+IF (AIT_IN < 1.E10_EB) THEN
+   AIT_LOC = AIT_IN
+ELSE
+   AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
 ENDIF
 
-END SUBROUTINE EXTINCT_6
+IF ( TMP_MIXED < AIT_LOC ) EXTINCT_3_AIT = .TRUE.
+
+END FUNCTION EXTINCT_3_AIT
+
+
+SUBROUTINE EXTINCT_3(ZZ_0_IN,ZZ_IN,EXTINCT,TMP_IN,CO_PASS)
+USE PHYSICAL_FUNCTIONS,ONLY:GET_ENTHALPY
+REAL(EB),INTENT(IN)::TMP_IN,ZZ_0_IN(1:N_TRACKED_SPECIES),ZZ_IN(1:N_TRACKED_SPECIES)
+INTEGER, INTENT(IN):: CO_PASS
+LOGICAL, INTENT(INOUT):: EXTINCT(1:N_REACTIONS)
+REAL(EB):: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,H,H_CRIT,Q,Q_CRIT
+INTEGER:: NS
+
+DO NS = 1,N_TRACKED_SPECIES
+   IF (NS==REACTION(1)%FUEL_SMIX_INDEX .OR. NS==REACTION(2)%FUEL_SMIX_INDEX) THEN
+      ZZ_HAT_0(NS) = ZZ_0_IN(NS)
+      ZZ_HAT(NS) = ZZ_IN(NS)
+   ELSEIF(NS==REACTION(1)%AIR_SMIX_INDEX) THEN
+      ZZ_HAT_0(NS) = ZZ_0_IN(NS) - ZZ_IN(NS)
+      ZZ_HAT(NS) = 0._EB
+   ELSE
+      ZZ_HAT_0(NS) = (ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX) - ZZ_IN(REACTION(1)%AIR_SMIX_INDEX))/ &
+                      ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX)*ZZ_0_IN(NS)
+      ZZ_HAT(NS) = ZZ_IN(NS)-ZZ_0_IN(NS)+ ZZ_HAT_0(NS)
+   ENDIF
+END DO
+
+ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
+ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+
+! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
+
+CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN)  ! H of products participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(CO_PASS)%CRIT_FLAME_TMP) !H of products at the critical flame temperature
+Q = H_0 - H ! Combustion heat release rate
+Q_CRIT = H_CRIT - H !Heat release rate required to avoid extinction
+IF (Q  < Q_CRIT) EXTINCT(CO_PASS) = .TRUE.
+
+END SUBROUTINE EXTINCT_3
 
 
 REAL(EB) FUNCTION FLAME_SPEED_FACTOR(ZZ_0,DT_LOC,RHO_0,TMP_0,PBAR_0,NR,DELTA,VEL_RMS)
