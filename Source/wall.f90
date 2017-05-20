@@ -92,16 +92,16 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 IF (VEG_LEVEL_SET_UNCOUPLED) RETURN
 
 IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
+   UU => US
+   VV => VS
+   WW => WS
    RHOP => RHOS
    ZZP  => ZZS
    PBAR_P => PBAR_S
 ELSE
-   UU => US
-   VV => VS
-   WW => WS
+   UU => U
+   VV => V
+   WW => W
    RHOP => RHO
    ZZP  => ZZ
    PBAR_P => PBAR
