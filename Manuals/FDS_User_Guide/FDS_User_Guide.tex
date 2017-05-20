@@ -2780,7 +2780,7 @@ powder. The concrete's mass is not conserved {\em in the model}
 because it has essentially disappeared from that particular surface.
 
 For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for each reaction, $j$. These values are
-used only if the corresponding heats of combustion for the gaseous species are greater than zero.
+used only if the corresponding heats of combustion for the gaseous species are greater than zero.  Note that {\ct HEAT\_OF\_COMBUSTION(j)} discussed here is not necessarily the same as the {\ct HEAT\_OF\_COMBUSTION} of the surrogate {\ct FUEL} used for gas phase combustion (e.g., {\ct 'PROPANE'}).  When the heats of combustion differ, the mass flux of the surrogate {\ct FUEL} in the gas phase is adjusted so that the correct heat release rate is attained.  This is further discussed in the next section.
 
 In the example below, the pyrolysis of wood is included within a simulation that uses
 a finite-rate reaction instead of the default mixing-controlled model. Notice in this case that
