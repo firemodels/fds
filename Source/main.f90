@@ -1223,7 +1223,6 @@ PRESSURE_ITERATION_LOOP: DO
 
    ! Exchange both H or HS and FVX, FVY, FVZ and then estimate values of U, V, W (US, VS, WS) at next time step.
 
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
    CALL MESH_EXCHANGE(5)
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -2016,9 +2015,13 @@ TNOW = SECOND()
 
 ! Special circumstances when doing the radiation exchange (CODE=2)
 
-IF (CODE==2) THEN
-   IF (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION) RETURN
-ENDIF
+IF (CODE==2 .AND. (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION)) RETURN
+
+! Ensure that all MPI processes wait here until all are ready to proceed
+
+CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+
+! Loop over all meshes that have information to send
 
 SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
