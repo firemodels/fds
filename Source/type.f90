@@ -411,7 +411,7 @@ END TYPE CFACE_TYPE
 INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  = 16 ! Size definition parameter. Max number of cut-cell per cart cell.
 INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  = 96 ! Size definition parameter. Max number of cut-faces per cart cell.
 INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =128
-INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  = IBM_MAXVERTS_CELL
+INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  =256
 INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL= 96 ! Size definition parameter.
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
 
