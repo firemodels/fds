@@ -4697,8 +4697,8 @@ Note that this parameter is only appropriate when the simple chemistry model is 
 \end{description}
 The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
 \begin{description}
-\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232378)
-\item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.000595)
+\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default for dry air is 0.232378)
+\item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default for dry air is 0.000595)
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
 A few sample {\ct REAC} lines are given here.
@@ -9190,10 +9190,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
-{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.5               \\ \hline
-{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.4               \\ \hline
-{\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        & 0.000595          \\ \hline
-{\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        & 0.232378          \\ \hline
+{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
+{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+{\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
+{\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 %{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
