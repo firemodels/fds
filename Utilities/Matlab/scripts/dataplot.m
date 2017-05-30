@@ -268,6 +268,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(j) = semilogy(X,Y,char(style(j))); hold on
                     end
+                    set(K(j),'linewidth',Line_Width)
                 end
             end
         catch
@@ -387,6 +388,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(length(S1)+j) = semilogy(X,Y,char(style(j)));
                     end
+                    set(K(length(S1)+j),'linewidth',Line_Width)
                 else
                     if strcmp(Plot_Type,'linear')
                         K(length(K_save)+j) = plot(X,Y,char(style(j)));
@@ -397,6 +399,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(length(K_save)+j) = semilogy(X,Y,char(style(j)));
                     end
+                    set(K(length(K_save)+j),'linewidth',Line_Width)
                 end
 
             end
