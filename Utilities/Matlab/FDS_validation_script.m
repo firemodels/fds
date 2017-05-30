@@ -90,5 +90,6 @@ VTT_Sprays
 fm_datacenter_veltest
 umd_line_burner
 % umd_line_burner_2
+% waterloo_methanol
 
 display('validation scripts completed successfully!')

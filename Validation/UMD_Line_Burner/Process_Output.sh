@@ -16,3 +16,8 @@ cp $DDIR/propane_XO2*hrr.csv $WDIR
 cp $DDIR/methane_XO2*devc.csv $WDIR
 cp $DDIR/propane_XO2*devc.csv $WDIR
 
+cp $DDIR/methane_2step_XO2*hrr.csv $WDIR
+cp $DDIR/propane_2step_XO2*hrr.csv $WDIR
+
+cp $DDIR/methane_2step_XO2*devc.csv $WDIR
+cp $DDIR/propane_2step_XO2*devc.csv $WDIR

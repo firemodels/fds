@@ -1,8 +1,10 @@
 %Topi Sikanen
 % 3.8.2016
 
-expdir = '../../Validation/Submodules/macfp-db/Liquid_Pool_Fires/Waterloo_Methanol/Experimental_Data/';
-fdsdir = '../../Validation/Waterloo_Methanol/FDS_Output_Files/';
+plot_style
+
+expdir = '../../../exp/Submodules/macfp-db/Liquid_Pool_Fires/Waterloo_Methanol/Experimental_Data/';
+fdsdir = '../../../out/Waterloo_Methanol/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Waterloo_Methanol/';
 
 for predc={'Prescribed','Predicted'},

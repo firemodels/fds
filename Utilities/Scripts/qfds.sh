@@ -472,8 +472,6 @@ if [ "$queue" != "none" ] ; then
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
-#SBATCH $walltimestring_slurm
-#SBATCH --mem-per-cpu=3000
 #SBATCH -e $outerr
 #SBATCH -o $outlog
 #SBATCH -p $queue

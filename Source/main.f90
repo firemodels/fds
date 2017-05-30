@@ -1223,7 +1223,6 @@ PRESSURE_ITERATION_LOOP: DO
 
    ! Exchange both H or HS and FVX, FVY, FVZ and then estimate values of U, V, W (US, VS, WS) at next time step.
 
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
    CALL MESH_EXCHANGE(5)
 
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -1303,7 +1302,7 @@ ENDIF
 ! Compute the corrective factor for the RTE. Note that the max value of 100 is arbitrary.
 
 IF (KFST4_SUM_ALL>TWO_EPSILON_EB) &
-   RTE_SOURCE_CORRECTION_FACTOR = WGT*RTE_SOURCE_CORRECTION_FACTOR + (1._EB-WGT)*MIN(100._EB,MAX(1._EB,RAD_Q_SUM_ALL/KFST4_SUM_ALL))
+   RTE_SOURCE_CORRECTION_FACTOR = WGT*RTE_SOURCE_CORRECTION_FACTOR + (1._EB-WGT)*MIN(C_MAX,MAX(C_MIN,RAD_Q_SUM_ALL/KFST4_SUM_ALL))
 
 ! Reset the components of the corrective factor to zero.
 
@@ -2016,9 +2015,13 @@ TNOW = SECOND()
 
 ! Special circumstances when doing the radiation exchange (CODE=2)
 
-IF (CODE==2) THEN
-   IF (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION) RETURN
-ENDIF
+IF (CODE==2 .AND. (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION)) RETURN
+
+! Ensure that all MPI processes wait here until all are ready to proceed
+
+CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+
+! Loop over all meshes that have information to send
 
 SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 

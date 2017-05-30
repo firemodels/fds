@@ -2310,7 +2310,7 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\ 
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
 {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
 
 
@@ -2780,7 +2780,7 @@ powder. The concrete's mass is not conserved {\em in the model}
 because it has essentially disappeared from that particular surface.
 
 For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for each reaction, $j$. These values are
-used only if the corresponding heats of combustion for the gaseous species are greater than zero.
+used only if the corresponding heats of combustion for the gaseous species are greater than zero.  Note that {\ct HEAT\_OF\_COMBUSTION(j)} discussed here is not necessarily the same as the {\ct HEAT\_OF\_COMBUSTION} of the surrogate {\ct FUEL} used for gas phase combustion (e.g., {\ct 'PROPANE'}).  When the heats of combustion differ, the mass flux of the surrogate {\ct FUEL} in the gas phase is adjusted so that the correct heat release rate is attained.  This is further discussed in the next section.
 
 In the example below, the pyrolysis of wood is included within a simulation that uses
 a finite-rate reaction instead of the default mixing-controlled model. Notice in this case that
@@ -5294,7 +5294,7 @@ temperature are relatively small.
 \label{info:CHI_R}
 \label{ramp_chi_r}
 
-The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. Some of that energy may be reabsorbed elsewhere, yielding a net radiative loss from the fire or compartment that is less than the {\ct RADIATIVE\_FRACTION}, depending mainly on the size of the fire and the soot loading. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
+The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
 
 \begin{table}[!ht]
 \caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
@@ -5326,6 +5326,14 @@ Species                 &   $\chi_{\rm r}$   \\ \hline \hline
 All other species        & 0.35 \\ \hline\end{tabular}
 \end{center}
 \end{table}
+
+\paragraph{Fine-tuning the radiative fraction}
+
+The total radiative loss from the computational domain is reported as a function of time in the column {\ct Q\_RADI} in the output file {\ct CHID\_hrr.csv}. The absolute value of {\ct Q\_RADI} divided by the total heat release rate, {\ct HRR}, is typically greater than the specified {\ct RADIATIVE\_FRACTION}. There are two reasons for this. First, The the source term in the radiative transport equation is modified only in grid cells for which the radiative fraction, $\chi_{\rm r}$, times the local heat release rate per unit volume, $\dot{q}'''$, is greater than 10~kW/m$^3$
+\be
+   \chi_{\rm r} \, \dot{q}''' > 10 \; \hbox{kW/m}^3 \label{clip}
+\ee
+Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, FDS applies a correction factor to increase the value of the source term in the radiative transport equation to compensate for the fact that flame temperatures are not resolved on relatively coarse meshes. This correction factor, by default, will only increase, not decrease, the value of the source term. You can change these two default behavior as follows. First, you can force the source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. Second, you can allow the source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
 
 \paragraph{Multi-fuel radiative fraction}
 
@@ -5395,50 +5403,24 @@ The original version of RadCal included only absorption data for methane, which 
 
 \label{info:RADI_Absorption}
 
-The absorption and scattering of thermal radiation by Lagrangian
-particles is included in the radiation transport equation.
-The radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
-{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two
-quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
+The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
-The radiative properties of the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. The heptane values can
-be overridden by specifying them on the {\ct PART} line.
+The radiative properties of the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. The heptane values can be overridden by specifying them on the {\ct PART} line.
 
-Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature.
-It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C.
-{\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function.
-Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost
-of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
-is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time
-situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters {\ct MIE\_MINIMUM\_DIAMETER} and
-{\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie coefficient tables can be specified using {\ct MIE\_NDG} parameter.
+Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature. It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C. {\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function. Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG} is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters {\ct MIE\_MINIMUM\_DIAMETER} and {\ct MIE\_MAXIMUM\_DIAMETER}. Also, the size of the Mie coefficient tables can be specified using {\ct MIE\_NDG} parameter.
 
-The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
-soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
-possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
+The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
 
 \subsection{Wide Band Model}
 
 \label{info:RADI_Wide_Band}
 
-The radiation solver has two modes of
-operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide}.
-If the optional six band model is desired,
-set {\ct WIDE\_BAND\_MODEL=.TRUE.} It is recommended that this option
-only be used when the fuel is relatively non-sooting because it
-adds significantly to the cost of the calculation. Read the FDS Technical
-Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
-{\ct WIDE\_BAND\_MODEL=.TRUE.}, the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}
-becomes practically useless, because it then
-corresponds to one individual band of the spectrum.
+The radiation solver has two modes of operation -- a gray gas model (default) and a wide band model. Both are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. If the optional six band model is desired, set {\ct WIDE\_BAND\_MODEL=.TRUE.} on the {\ct RADI} line. It is recommended that this option only be used when the fuel is relatively non-sooting because it adds significantly to the cost of the calculation. 
 
-It is also possible to set your own band limits for the wide band model by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
+Note also that when {\ct WIDE\_BAND\_MODEL=.TRUE.}, the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'} becomes practically useless, because it then corresponds to one individual band of the spectrum. Also, do not specify a {\ct RADIATIVE\_FRACTION} because it will not be used.
 
-
-
-
-
+There are only a handful of fuel species known to FDS for which the band limits have been set for the six-band model. These fuels are {\ct 'ETHANE'}, {\ct 'ETHYLENE'}, {\ct 'METHANE'}, {\ct 'METHANOL'}, {\ct 'N-HEPTANE}, {\ct 'PROPANE'}, {\ct 'PROPYLENE'}, and {\ct 'TOLUENE'}.  It is possible to set your own band limits for the wide band model by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
 
 
 
@@ -9390,7 +9372,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
-{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       & 1.                        \\ \hline
+{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       &                           \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
 {\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
@@ -9522,6 +9504,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
 {\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         & $\mu$m            &                   \\ \hline
+{\ct C\_MAX                   }     & Real          & Section~\ref{info:CHI_R}                  &                   & 100               \\ \hline
+{\ct C\_MIN                   }     & Real          & Section~\ref{info:CHI_R}                  &                   & 1                 \\ \hline
 {\ct INITIAL\_RADIATION\_ITERATIONS}& Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
@@ -9530,6 +9514,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
+{\ct QR\_CLIP                  }    & Real          & Section~\ref{info:CHI_R}                  & kW/m$^3$          & 10                \\ \hline
 {\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
 {\ct RADIATION\_ITERATIONS}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 1                 \\ \hline
 {\ct RADTMP                   }     & Real          & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
