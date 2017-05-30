@@ -20711,7 +20711,7 @@ REAL(EB):: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH
 
-REAL(EB) :: TNOW,TNOW2
+REAL(EB) :: TNOW
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
 
@@ -21151,7 +21151,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ENDDO X1AXIS_LOOP
 
    ! Now Define the INBOUNDARY cut-edge inside Cartesian cells:
-   TNOW2=SECOND()
    CALL GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
 
    ! 1. Cartesian GASPHASE cut-faces:
@@ -21169,12 +21168,9 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! Guard-cell Cartesian GASPHASE and INBOUNDARY cut-faces:
    CALL GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,.FALSE.)
    CALL GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,.FALSE.)
-   WRITE(LU_ERR,*) 'FACE/CELL CUTEDGES/FACES time=',SECOND()-TNOW2,' sec.'
 
    ! Finally: Definition of cut-cells:
-   TNOW2=SECOND()
    CALL GET_CARTCELL_CUTCELLS(NM)
-   WRITE(LU_ERR,*) 'CUTCELLS time=',SECOND()-TNOW2,' sec.'
 
    ! Deallocate arrays:
    ! Face centered positions and cell sizes:
@@ -21208,14 +21204,11 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 ENDDO
 
-TNOW2=SECOND()
 ! Fill Guardcells for CCVAR IBM_CGSC and CUT_CELL for meshes assigned to MPI process:
 CALL SET_GC_CUTCELLS_3D
 
 ! Allocate and define entries for solid side CFACES:
 CALL GET_INBCUTFACES_TO_CFACE
-
-WRITE(LU_ERR,*) 'CG and INBCUTFACES_TO_CFACE time=',SECOND()-TNOW2,' sec.'
 
 ! Write out:
 ! Increasee SET_CUTCELLS_3D call counter by 1:
