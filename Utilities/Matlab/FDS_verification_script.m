@@ -20,6 +20,7 @@
 close all
 clear all
 
+restoredefaultpath
 addpath 'scripts'
 
 % Scripts to run prior to dataplot
