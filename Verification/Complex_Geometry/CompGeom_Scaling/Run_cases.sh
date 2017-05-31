@@ -16,3 +16,8 @@ $QFDS -p 1 -o 1 compgeom_scale_64x64_1mesh_5120T.fds
 $QFDS -p 1 -o 1 compgeom_scale_64x64_1mesh_20480T.fds
 $QFDS -p 1 -o 1 compgeom_scale_64x64_1mesh_81920T.fds
 $QFDS -p 1 -o 1 compgeom_scale_64x64_1mesh_327680T.fds
+
+# Scaling with increasing number of cells:
+$QFDS -p 1 -o 1 compgeom_scale_32x32_1mesh_5120T.fds
+$QFDS -p 1 -o 1 compgeom_scale_128x128_1mesh_5120T.fds
+$QFDS -p 1 -o 1 compgeom_scale_256x256_1mesh_5120T.fds
