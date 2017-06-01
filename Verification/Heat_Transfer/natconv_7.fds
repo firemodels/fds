@@ -1,4 +1,4 @@
-&HEAD CHID='rayleigh_6', TITLE='LES of free convection in enclosed space, Ra = 2.85e5' /
+&HEAD CHID='natconv_7', TITLE='LES of free convection in enclosed space, Ra = 6.58e6' /
 
 &MESH IJK=16,32,128, XB=0,.1,-.1,.1,0,1.6/
 
@@ -21,10 +21,10 @@
 &VENT PBZ=1.6, SURF_ID='insulated' /
 
 &SURF ID = 'insulated', COLOR = 'GRAY', HEAT_TRANSFER_COEFFICIENT=0./
-&SURF ID = 'T1', COLOR = 'RED',  TMP_FRONT = 22., TAU_T=0. /
+&SURF ID = 'T1', COLOR = 'RED',  TMP_FRONT = 70., TAU_T=0. /
 &SURF ID = 'T2', COLOR = 'BLUE', TMP_FRONT = 20., TAU_T=0. /
 
-&INIT XB=0,.05,-.1,.1,0,1.6, TEMPERATURE=22./
+&INIT XB=0,.05,-.1,.1,0,1.6, TEMPERATURE=70./
 
 &BNDF QUANTITY='YPLUS' /
 &BNDF QUANTITY='HEAT TRANSFER COEFFICIENT'/
