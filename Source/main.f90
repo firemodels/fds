@@ -240,7 +240,10 @@ ENDDO
 
 ! Initial complex geometry CC setup
 
-IF (CC_IBM) CALL CCIBM_SET_DATA
+IF (CC_IBM) THEN
+   CALL CCIBM_SET_DATA
+   CALL STOP_CHECK(1)
+ENDIF
 
 ! Initialize GLMat solver for H:
 IF (GLMAT_SOLVER) THEN
