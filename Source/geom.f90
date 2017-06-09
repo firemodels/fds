@@ -21685,9 +21685,8 @@ REAL(EB),INTENT(IN) :: X1PLN, DX2_MIN, DX3_MIN, PLNORMAL(MAX_DIM)
 LOGICAL, INTENT(IN) :: TRI_ONPLANE_ONLY
 
 ! Local variables:
-INTEGER :: N_VERTS_TOT, N_FACES_TOT
 INTEGER :: IG, IWSEL, IEDGE, INOD, ISGL, ISEG, ITRI, NINDTRI, EDGE_TRI
-REAL(EB):: LEDGE, MAX_LEDGE, DXYZE(MAX_DIM), XYZV(MAX_DIM,NODS_WSEL)
+REAL(EB):: LEDGE, DXYZE(MAX_DIM), XYZV(MAX_DIM,NODS_WSEL)
 INTEGER :: ELEM(NODS_WSEL), WSELEM(NODS_WSEL), IND_P(NODS_WSEL), NTRIS, NSEGS
 REAL(EB):: MINX1V, MAXX1V, DOT1, DOT2, DOT3
 LOGICAL :: OUTPLANE, INTFLG, INLIST
@@ -21708,48 +21707,56 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: SEGAUX, INDSEGAUX, SEGTYPEAUX
 REAL(EB):: X3_1, X2_1, X3_2, X2_2, SLEN, SBOD
 INTEGER :: ISEG_NEW, NBCROSS
 
+REAL(EB), SAVE :: MAX_LEDGE
+LOGICAL,  SAVE :: FIRST_CALL=.TRUE.
+INTEGER,  SAVE :: N_VERTS_TOT, N_FACES_TOT
+
 REAL(EB) :: TNOW
 
 TNOW = SECOND()
 
-! Define BODINT_PLANE allocation sizes, hard wired for now:
-! Maximum number of vertices and elements in BODINT_PLANE:
-N_VERTS_TOT=0; N_FACES_TOT=0
-DO IG=1,N_GEOMETRY
-   N_VERTS_TOT = N_VERTS_TOT + GEOMETRY(IG)%N_VERTS
-   N_FACES_TOT = N_FACES_TOT + GEOMETRY(IG)%N_FACES
-ENDDO
-
-! Conservative estimate:
-IBM_MAX_NNODS = 2 * N_VERTS_TOT
-IBM_MAX_NSGLS = N_VERTS_TOT
-IBM_MAX_NSEGS = N_FACES_TOT
-IBM_MAX_NTRIS = N_FACES_TOT
-
-! Maximum number of grid crossings on BODINT_PLANE segments:
-MAX_LEDGE = GEOMEPS ! Initialize to a small number.
-DO IG=1,N_GEOMETRY
-   DO IWSEL=1,GEOMETRY(IG)%N_FACES
-      WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-
-      ! Obtain edges length, test against MAX_LEDGE:
-      DO IEDGE=1,3
-
-         ! DX = XYZ2 - XYZ1:
-         DXYZE(IAXIS:KAXIS) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2)) - &
-                              GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-         LEDGE = sqrt( DXYZE(IAXIS)**2._EB + DXYZE(JAXIS)**2._EB + DXYZE(KAXIS)**2._EB )
-
-         MAX_LEDGE = MAX(MAX_LEDGE,LEDGE)
-
-         WSELEM=CSHIFT(WSELEM,1)  ! Shift cyclically array by 1 entry. This rotates nodes connectivities.
-                                  ! i.e: initially WSELEM=(/1,2,3/), 1st call gives WSELEM=(/2,3,1/), 2nd
-                                  ! call gives WSELEM=(/3,1,2/).
-
-      ENDDO
+IF (FIRST_CALL) THEN
+   ! Define BODINT_PLANE allocation sizes, hard wired for now:
+   ! Maximum number of vertices and elements in BODINT_PLANE:
+   N_VERTS_TOT=0; N_FACES_TOT=0
+   DO IG=1,N_GEOMETRY
+      N_VERTS_TOT = N_VERTS_TOT + GEOMETRY(IG)%N_VERTS
+      N_FACES_TOT = N_FACES_TOT + GEOMETRY(IG)%N_FACES
    ENDDO
 
-ENDDO
+   ! Conservative estimate:
+   IBM_MAX_NNODS = 2 * N_VERTS_TOT
+   IBM_MAX_NSGLS = N_VERTS_TOT
+   IBM_MAX_NSEGS = N_FACES_TOT
+   IBM_MAX_NTRIS = N_FACES_TOT
+
+   ! Maximum number of grid crossings on BODINT_PLANE segments:
+   MAX_LEDGE = GEOMEPS ! Initialize to a small number.
+   DO IG=1,N_GEOMETRY
+      DO IWSEL=1,GEOMETRY(IG)%N_FACES
+         WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+
+         ! Obtain edges length, test against MAX_LEDGE:
+         DO IEDGE=1,3
+
+            ! DX = XYZ2 - XYZ1:
+            DXYZE(IAXIS:KAXIS) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2)) - &
+                                 GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+            LEDGE = sqrt( DXYZE(IAXIS)**2._EB + DXYZE(JAXIS)**2._EB + DXYZE(KAXIS)**2._EB )
+
+            MAX_LEDGE = MAX(MAX_LEDGE,LEDGE)
+
+            WSELEM=CSHIFT(WSELEM,1)  ! Shift cyclically array by 1 entry. This rotates nodes connectivities.
+                                     ! i.e: initially WSELEM=(/1,2,3/), 1st call gives WSELEM=(/2,3,1/), 2nd
+                                     ! call gives WSELEM=(/3,1,2/).
+
+         ENDDO
+      ENDDO
+
+   ENDDO
+
+   FIRST_CALL=.FALSE.
+ENDIF
 
 IBM_MAX_NBCROSS = MAX(4,CEILING(3._EB*MAX_LEDGE/MIN(DX2_MIN, DX3_MIN))) ! Rough estimate.
 
