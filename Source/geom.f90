@@ -21685,8 +21685,8 @@ REAL(EB),INTENT(IN) :: X1PLN, DX2_MIN, DX3_MIN, PLNORMAL(MAX_DIM)
 LOGICAL, INTENT(IN) :: TRI_ONPLANE_ONLY
 
 ! Local variables:
-INTEGER :: IG, IWSEL, IEDGE, INOD, ISGL, ISEG, ITRI, NINDTRI, EDGE_TRI
-REAL(EB):: LEDGE, DXYZE(MAX_DIM), XYZV(MAX_DIM,NODS_WSEL)
+INTEGER :: IG, IBIN, IWSEL, IWSELDUM, IEDGE, INOD, ISGL, ISEG, ITRI, NINDTRI, EDGE_TRI
+REAL(EB):: LEDGE, XYZV(MAX_DIM,NODS_WSEL)
 INTEGER :: ELEM(NODS_WSEL), WSELEM(NODS_WSEL), IND_P(NODS_WSEL), NTRIS, NSEGS
 REAL(EB):: DOT1, DOT2, DOT3
 LOGICAL :: INTFLG, INLIST
@@ -21733,26 +21733,8 @@ IF (FIRST_CALL) THEN
    ! Maximum number of grid crossings on BODINT_PLANE segments:
    MAX_LEDGE = GEOMEPS ! Initialize to a small number.
    DO IG=1,N_GEOMETRY
-      DO IWSEL=1,GEOMETRY(IG)%N_FACES
-         WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-
-         ! Obtain edges length, test against MAX_LEDGE:
-         DO IEDGE=1,3
-
-            ! DX = XYZ2 - XYZ1:
-            DXYZE(IAXIS:KAXIS) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2)) - &
-                                 GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
-            LEDGE = sqrt( DXYZE(IAXIS)**2._EB + DXYZE(JAXIS)**2._EB + DXYZE(KAXIS)**2._EB )
-
-            MAX_LEDGE = MAX(MAX_LEDGE,LEDGE)
-
-            WSELEM=CSHIFT(WSELEM,1)  ! Shift cyclically array by 1 entry. This rotates nodes connectivities.
-                                     ! i.e: initially WSELEM=(/1,2,3/), 1st call gives WSELEM=(/2,3,1/), 2nd
-                                     ! call gives WSELEM=(/3,1,2/).
-
-         ENDDO
-      ENDDO
-
+      LEDGE = GEOMETRY(IG)%MAX_LEDGE ! This has been computed at setup in GET_GEOM_TRIBIN
+      MAX_LEDGE = MAX(MAX_LEDGE,LEDGE)
    ENDDO
 
    IF ( ALLOCATED(BODINT_PLANE%XYZ)  )      DEALLOCATE(BODINT_PLANE%XYZ)
@@ -21800,10 +21782,18 @@ ENDIF
 ! Main Loop over Geometries:
 MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
 
-   ! Loop surface triangles:
-   DO IWSEL =1,GEOMETRY(IG)%N_FACES
+   ! Find for this geometry where does the plane lay on triangle bins:
+   IBIN_DO : DO IBIN=1,GEOMETRY(IG)%TBAXIS(X1AXIS)%N_BINS
 
-      ! Test low-high vertices of triangle along x1axis vs plane (O(NT) operation):
+   IF ( X1PLN < GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_LOW-GEOMEPS)  CYCLE
+   IF ( X1PLN > GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_HIGH+GEOMEPS) CYCLE
+
+   ! Loop surface triangles:
+!   DO IWSEL =1,GEOMETRY(IG)%N_FACES
+   DO IWSELDUM=1,GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL
+      IWSEL=GEOMETRY(IG)%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(IWSELDUM)
+
+      ! ! Test low-high vertices of triangle along x1axis vs plane (O(NT) operation):
       IF( (GEOMETRY(IG)%FACECUBE( LOW_IND,X1AXIS,IWSEL)-X1PLN) > GEOMEPS) CYCLE
       IF( (X1PLN-GEOMETRY(IG)%FACECUBE(HIGH_IND,X1AXIS,IWSEL)) > GEOMEPS) CYCLE
 
@@ -22381,6 +22371,10 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
       print*, "Error GET_BODINT_PLANE: Missed wet surface Triangle =",IWSEL
 
    ENDDO ! IWSEL
+
+   EXIT IBIN_DO ! No need to test more bins.
+
+   ENDDO IBIN_DO
 
 ENDDO MAIN_GEOM_LOOP
 
@@ -29151,20 +29145,158 @@ ENDDO
 
 CALL CONVERTGEOM(T_BEGIN)
 
-DO I = 1, N_GEOMETRY
-   G=>GEOMETRY(I)
-   ALLOCATE(G%FACECUBE(LOW_IND:HIGH_IND,IAXIS:KAXIS,G%N_FACES))
-   DO II = 0,G%N_FACES-1
-      WSELEM(NOD1:NOD3) = G%FACES(3*II+1:3*II+3)
-      DO X1AXIS=IAXIS,KAXIS
-         X1V(NOD1:NOD3) = G%VERTS(3*(WSELEM(NOD1:NOD3)-1)+X1AXIS)
-         G%FACECUBE( LOW_IND,X1AXIS,II+1) = MINVAL(X1V(NOD1:NOD3))
-         G%FACECUBE(HIGH_IND,X1AXIS,II+1) = MAXVAL(X1V(NOD1:NOD3))
-      ENDDO
-   ENDDO
-ENDDO
+CALL GET_GEOM_TRIBIN
+
 
 CONTAINS
+
+! --------------------------- GET_GEOM_TRIBIN --------------------------------------
+
+SUBROUTINE GET_GEOM_TRIBIN
+
+! This routine separates lists of triangles for each GEOMETRY in interval
+! bins in each direction. They are used in SET_CUTCELLS_3D/GET_BODINT_PLANE to optimize
+! cut-cell generation.
+
+! Local Variables:
+INTEGER :: IG, IWSEL, IEDGE, IVERT, NTL, SZE, IBIN, ILO_BIN, IHI_BIN
+REAL(EB):: LEDGE, DXYZE(MAX_DIM), LX1, DELBIN, X1V_LO, X1V_HI
+REAL(EB), PARAMETER :: GAMMA_MULT = 5._EB
+INTEGER,  PARAMETER :: DELTA_TBIN = 1000
+INTEGER, ALLOCATABLE, DIMENSION(:) :: TRI_LIST
+
+
+! Loop geometries:
+LOOP_GEOM : DO IG = 1, N_GEOMETRY
+
+   G=>GEOMETRY(IG)
+
+   ! Define Geometry containing box:
+   DO X1AXIS=IAXIS,KAXIS
+      G%GEOM_BOX( LOW_IND,X1AXIS) = 1._EB/GEOMEPS ! Initialize min location in X1AXIS dir to large (+) number.
+      G%GEOM_BOX(HIGH_IND,X1AXIS) =-1._EB/GEOMEPS ! Initialize max location in X1AXIS dir to large (-) number.
+      DO IVERT=1,G%N_VERTS
+         G%GEOM_BOX( LOW_IND,X1AXIS) = MIN(G%GEOM_BOX( LOW_IND,X1AXIS),G%VERTS(MAX_DIM*(IVERT-1)+X1AXIS))
+         G%GEOM_BOX(HIGH_IND,X1AXIS) = MAX(G%GEOM_BOX(HIGH_IND,X1AXIS),G%VERTS(MAX_DIM*(IVERT-1)+X1AXIS))
+      ENDDO
+      ! WRITE(LU_ERR,*) 'GEOM_BOX=',X1AXIS,G%GEOM_BOX( LOW_IND,X1AXIS),G%GEOM_BOX(HIGH_IND,X1AXIS)
+   ENDDO
+
+   ! Define EDGE sizes and FACE cointaining boxes:
+   G%MAX_LEDGE = GEOMEPS       ! Initialize to a small number.
+   G%MIN_LEDGE = 1._EB/GEOMEPS ! Initialize to a large number.
+   G%MEAN_LEDGE= 0._EB         ! Initialize to 0.
+   ! Allocate bounding cube for triangles: We might end up getting rid of this eventually.
+   ALLOCATE(G%FACECUBE(LOW_IND:HIGH_IND,IAXIS:KAXIS,G%N_FACES))
+
+   ! Loop Faces:
+   DO IWSEL = 0,G%N_FACES-1
+      WSELEM(NOD1:NOD3) = G%FACES(3*IWSEL+1:3*IWSEL+3)
+
+      ! Define FACECUBE for triangle IWSEL:
+      DO X1AXIS=IAXIS,KAXIS
+         X1V(NOD1:NOD3) = G%VERTS(MAX_DIM*(WSELEM(NOD1:NOD3)-1)+X1AXIS)
+         G%FACECUBE( LOW_IND,X1AXIS,IWSEL+1) = MINVAL(X1V(NOD1:NOD3))
+         G%FACECUBE(HIGH_IND,X1AXIS,IWSEL+1) = MAXVAL(X1V(NOD1:NOD3))
+      ENDDO
+
+      ! Obtain edges length, test against MAX_LEDGE:
+      DO IEDGE=1,3
+         ! DX = XYZ2 - XYZ1:
+         DXYZE(IAXIS:KAXIS) = G%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2)) - &
+                              G%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+         LEDGE = sqrt( DXYZE(IAXIS)**2._EB + DXYZE(JAXIS)**2._EB + DXYZE(KAXIS)**2._EB )
+
+         G%MAX_LEDGE = MAX(G%MAX_LEDGE,LEDGE)
+         G%MIN_LEDGE = MIN(G%MIN_LEDGE,LEDGE)
+         G%MEAN_LEDGE= G%MEAN_LEDGE + LEDGE
+
+         WSELEM=CSHIFT(WSELEM,1)  ! Shift cyclically array by 1 entry. This rotates nodes connectivities.
+                                  ! i.e: initially WSELEM=(/1,2,3/), 1st call gives WSELEM=(/2,3,1/), 2nd
+                                  ! call gives WSELEM=(/3,1,2/).
+      ENDDO
+
+   ENDDO
+   ! Mean length of Edge:
+   G%MEAN_LEDGE = G%MEAN_LEDGE / REAL(G%N_FACES*EDGS_WSEL,EB) !Num EDGES summed in NUM_FACES * NUM edges on a face.
+
+   ! Now define Bin sizes to distribute Faces subsets:
+   DO X1AXIS=IAXIS,KAXIS
+      LX1 = G%GEOM_BOX(HIGH_IND,X1AXIS) - G%GEOM_BOX( LOW_IND,X1AXIS)
+      ! Define number of bins in direction X1AXIS:
+      G%TBAXIS(X1AXIS)%N_BINS = CEILING(LX1/(GAMMA_MULT*G%MEAN_LEDGE))
+
+      ! Allocate TRIBIN field:
+      IF(ALLOCATED(G%TBAXIS(X1AXIS)%TRIBIN)) DEALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN)
+      ALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(1:G%TBAXIS(X1AXIS)%N_BINS))
+
+      ! Set BIN boundaries and make initial allocation of TRI_LIST for each bin:
+      DELBIN = LX1 / REAL(G%TBAXIS(X1AXIS)%N_BINS,EB)
+      DO IBIN=1,G%TBAXIS(X1AXIS)%N_BINS
+         G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_LOW  = G%GEOM_BOX( LOW_IND,X1AXIS) + REAL(IBIN-1,EB)*DELBIN
+         G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_HIGH = G%GEOM_BOX( LOW_IND,X1AXIS) + REAL(IBIN  ,EB)*DELBIN
+         G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL = 0
+         ALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(DELTA_TBIN))
+      ENDDO
+
+      ! Finally, populate TRI_LIST for X1AXIS bins:
+      DO IWSEL = 0,G%N_FACES-1
+         WSELEM(NOD1:NOD3) = G%FACES(3*IWSEL+1:3*IWSEL+3)
+         X1V(NOD1:NOD3) = G%VERTS(MAX_DIM*(WSELEM(NOD1:NOD3)-1)+X1AXIS)
+         X1V_LO = MINVAL(X1V(NOD1:NOD3));
+         X1V_HI = MAXVAL(X1V(NOD1:NOD3));
+
+         ! DO IBIN=1,G%TBAXIS(X1AXIS)%N_BINS
+         !    IF(X1V_HI < G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_LOW-GEOMEPS)  CYCLE
+         !    IF(X1V_LO > G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_HIGH+GEOMEPS) CYCLE
+         !    NTL = G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL + 1
+         !    SZE = SIZE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST,DIM=1)
+         !    IF (NTL > SZE) THEN
+         !       ! Reallocate:
+         !       ALLOCATE(TRI_LIST(1:SZE)); TRI_LIST(1:SZE)=G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE)
+         !       DEALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST)
+         !       ALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE+DELTA_TBIN))
+         !       G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE) = TRI_LIST(1:SZE)
+         !       DEALLOCATE(TRI_LIST)
+         !    ENDIF
+         !    ! Add Triangle index to BINs TRI_LIST
+         !    G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL = NTL
+         !    G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(NTL) = IWSEL+1
+         ! ENDDO
+
+         ILO_BIN = MAX(1,CEILING((X1V_LO-GEOMEPS-G%GEOM_BOX( LOW_IND,X1AXIS))/DELBIN))
+         IHI_BIN = MIN(G%TBAXIS(X1AXIS)%N_BINS,CEILING((X1V_HI+GEOMEPS-G%GEOM_BOX( LOW_IND,X1AXIS))/DELBIN))
+         DO IBIN=ILO_BIN,IHI_BIN
+            NTL = G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL + 1
+            SZE = SIZE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST,DIM=1)
+            IF (NTL > SZE) THEN
+               ! Reallocate:
+               ALLOCATE(TRI_LIST(1:SZE)); TRI_LIST(1:SZE)=G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE)
+               DEALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST)
+               ALLOCATE(G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE+DELTA_TBIN))
+               G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(1:SZE) = TRI_LIST(1:SZE)
+               DEALLOCATE(TRI_LIST)
+            ENDIF
+            ! Add Triangle index to BINs TRI_LIST
+            G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL = NTL
+            G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%TRI_LIST(NTL) = IWSEL+1
+         ENDDO
+      ENDDO
+
+   END DO
+
+   ! WRITE(LU_ERR,*) 'GEOMETRY=',IG,'NBINS=',G%TBAXIS(IAXIS)%N_BINS,G%TBAXIS(JAXIS)%N_BINS,G%TBAXIS(KAXIS)%N_BINS
+   ! DO X1AXIS=IAXIS,KAXIS
+   !    DO IBIN=1,G%TBAXIS(X1AXIS)%N_BINS
+   !       WRITE(LU_ERR,*) X1AXIS,'IBIN, NTL=',IBIN,G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%NTL, &
+   !       G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_LOW,G%TBAXIS(X1AXIS)%TRIBIN(IBIN)%X1_HIGH
+   !    END DO
+   ! END DO
+
+ENDDO LOOP_GEOM
+
+RETURN
+END SUBROUTINE GET_GEOM_TRIBIN
 
 ! ---------------------------- GET_GEOM_INFO ----------------------------------------
 
