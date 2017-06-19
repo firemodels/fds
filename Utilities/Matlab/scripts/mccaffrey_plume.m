@@ -1,6 +1,6 @@
 % McDermott
 % 7-7-14
-% mccaffrey_plumes.m
+% mccaffrey_plume.m
 
 close all
 clear all
@@ -14,9 +14,9 @@ rho = 1.18;
 cp = 1;
 T0 = 273.15 + 20;
 
-DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5); % m
+DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5) % m
 
-repo = '/Volumes/rmcdermo-1/GitHub/FireModels_rmcdermo/fds/';
+repo = '/Volumes/rmcdermo/GitHub/FireModels_rmcdermo/fds/';
 
 %datadir = '../../Validation/McCaffrey_Plume/FDS_Output_Files/';
 datadir = [repo,'Validation/McCaffrey_Plume/Current_Results/'];
