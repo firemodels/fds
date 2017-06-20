@@ -606,6 +606,7 @@ SUBROUTINE COMPUTE_RADIATION(T,NM,RAD_ITER)
 
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY : SECOND
+USE COMPLEX_GEOMETRY
 REAL(EB) :: TNOW,T
 INTEGER, INTENT(IN) :: NM,RAD_ITER
 
@@ -645,23 +646,31 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
 USE MPI
+USE COMPLEX_GEOMETRY
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
-            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE
+            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE, FCT
 REAL(EB), PARAMETER :: Q_MINIMUM=100._EB
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
-            ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
-            KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
+            ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, NFC, IFACE, &
+            KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, NFACE, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,ARRAY_INDEX,NRA, N_PART, &
-            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL, IERR
+            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL, IERR, FADD, ICF, &
+            ILO, IHI, JLO, JHI, KLO, KHI, IADD, JADD, KADD, ICF2, X1AXIS
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART,DLF,DLA(3),KAPPA_1
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
+REAL(EB) :: CRTF_AREA
 INTEGER :: IID,JJD,KKD,IP
+INTEGER :: N_CARTFACE_CELL
 LOGICAL :: UPDATE_INTENSITY, UPDATE_QRW2
+LOGICAL, POINTER, DIMENSION(:) :: PROJ_FLAG
 REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPAW,KFST4,KFST4W,EXTCOE,SCAEFF,IL_UP
-REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F
+REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F,NVEC,SOLID_AREA,GAS_AREA
+REAL(EB), ALLOCATABLE :: LOCAL_SOLID_AREA(:,:)
+REAL(EB) :: NCDOT
 INTEGER, INTENT(IN) :: NM,RAD_ITER
+INTEGER, ALLOCATABLE :: LOCAL_LIST_CFACE(:,:)
 TYPE (OMESH_TYPE), POINTER :: M2=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
@@ -681,6 +690,8 @@ OUTRAD_W => WALL_WORK1
 INRAD_W  => WALL_WORK2
 OUTRAD_F => FACE_WORK1
 INRAD_F  => FACE_WORK2
+
+N_CARTFACE_CELL = 6
 
 ! Ratio of solid angle, used in scattering
 
@@ -1026,6 +1037,147 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                    I = IJK_SLICE(1,IJK)
                    J = IJK_SLICE(2,IJK)
                    K = IJK_SLICE(3,IJK)
+                   
+                   IF (CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE) THEN
+
+                   ! Here's the part of code that inspects whether there are cut faces intersecting the edges of cell I,J,K
+                   ! In particular, the array LOCAL_SOLID_AREA will contain information about the projections of solid cut faces
+                   ! on the cartesian rectangular faces.
+
+                   PROJ_FLAG(1:N_CARTFACE_CELL) = .TRUE. ! Init to is projection .
+                   DO X1AXIS = IAXIS,KAXIS ! The two faces normal to x , y and z axes .
+
+                   ! Define limits depending on X1AXIS :
+
+                   SELECT CASE(X1AXIS)
+                   CASE(IAXIS)
+                   ILO = -1; IHI = 0; JLO = 0; JHI = 0; KLO = 0; KHI = 0;
+                   CRTF_AREA = DY(J)*DZ(K)
+                   CASE(JAXIS)
+                   ILO = 0; IHI = 0; JLO = -1; JHI = 0; KLO = 0; KHI = 0;
+                   CRTF_AREA = DX(I)*DZ(K)
+                   CASE(KAXIS)
+                   ILO = 0; IHI = 0; JLO = 0; JHI = 0; KLO = -1; KHI = 0;
+                   CRTF_AREA = DX(I)*DY(J)
+                   END SELECT
+
+                   ! Now compute :
+
+                   FADD=0
+                   DO KADD = KLO,KHI
+                   DO JADD = JLO,JHI
+                   DO IADD = ILO,IHI
+                   FADD = FADD +1
+                   SELECT CASE (FCVAR (I + IADD,J + JADD,K + KADD,IBM_FGSC,X1AXIS))
+                   CASE (IBM_SOLID)
+                   
+                   ! Regular Solid face .
+
+                   GAS_AREA(FADD) = 0._EB
+                   CASE(IBM_GASPHASE) ! Regular gas face .
+                   GAS_AREA (FADD) = CRTF_AREA
+                   PROJ_FLAG(FADD) = .FALSE. ! No projection .
+                   CASE(IBM_CUTCFE)
+
+                   ! Contains cut - faces .
+                   ! This face has gas cut - faces , find total gas area :
+
+                   ICF = FCVAR(I + IADD,J + JADD,K + KADD,IBM_IDCF,X1AXIS)
+                   NFACE = CUT_FACE(ICF)%NFACE
+                   GAS_AREA(FADD) = SUM(CUT_FACE(ICF)%AREA(1:NFACE))
+                   END SELECT
+                   SOLID_AREA(FADD) = CRTF_AREA - GAS_AREA(FADD)
+                   END DO
+                   END DO
+                   END DO
+                   END DO
+
+
+                   ICF = CCVAR(I,J,K,IBM_IDCF)
+
+                   ! Cycle if Cartesian cell has no INBOUNDARY cut - faces :
+                   ! All areas in GAS_AREA should be the cartesian face
+                   ! areas , and the cell boundary is touched by the solid
+                   ! on one point .
+
+                   IF (ICF < 1) CYCLE
+
+                   ! Loop INBOUNDARY cut - faces :
+
+                   NFACE = CUT_FACE(ICF)%NFACE
+
+                   ! Here Allocate list of Cartesian faces per cut - face :
+
+                   IF(ALLOCATED(LOCAL_LIST_CFACE)) DEALLOCATE(LOCAL_LIST_CFACE)
+                   ALLOCATE(LOCAL_LIST_CFACE(N_CARTFACE_CELL+1,NFACE))
+                   LOCAL_LIST_CFACE(N_CARTFACE_CELL+1,NFACE ) = 0
+
+                   ! Allocate local solid projected area per cut - face :
+
+                   IF(ALLOCATED(LOCAL_SOLID_AREA)) DEALLOCATE(LOCAL_SOLID_AREA)
+                   ALLOCATE(LOCAL_SOLID_AREA(N_CARTFACE_CELL,NFACE))
+                   LOCAL_SOLID_AREA(N_CARTFACE_CELL,NFACE) = 0._EB
+
+                   ! Now loop boundary cut - faces :
+
+                   DO ICF2=1,NFACE
+
+                   ! Which CFACE entry does this cut - face correspond to :
+
+                   IFACE = CUT_FACE(ICF)%CFACE_INDEX(ICF2)
+
+                   ! Normal Vector :
+
+                   NVEC(IAXIS:KAXIS) = CFACE(IFACE)%NVEC(IAXIS:KAXIS)
+
+                   ! For each Cartesian face , test the dot product of
+                   ! CFACE NVEC and the normal into the cell , if
+                   ! positive -> we have solid projection :
+
+                   FADD=0
+                   DO X1AXIS = IAXIS,KAXIS
+                   DO IADD = -1,1,2 ! Low , high cartesian face .
+                   FADD = FADD + 1
+                   FCT = REAL(-IADD,EB)
+                   NCDOT = FCT*NVEC(X1AXIS) 
+
+                   ! dot ( NVEC , NCRT ) , where
+                   ! NCRT is the cartesian face normal unit vector
+                   ! into the cell .
+
+                   IF (NCDOT < 0._EB) CYCLE ! No solid projection , drop .
+
+                   ! Add to list of cartesian faces associated with
+                   ! the cut - face :
+
+                   NFC = LOCAL_LIST_CFACE(1,ICF2) + 1
+
+                   ! Number of associated faces :
+
+                   LOCAL_LIST_CFACE(1,ICF2) = NFC
+
+                   ! Cartesian face entry for cut - face ICF , ICF2 or
+                   ! CFACE IFACE :
+
+                   LOCAL_LIST_CFACE(NFC+1,ICF2) = FADD
+
+                   ! Projected area :
+
+                   LOCAL_SOLID_AREA (NFC,ICF2) = NCDOT*CUT_FACE(ICF)%AREA(ICF2)
+                   END DO
+                   END DO
+                   END DO
+
+                   ! Here we can do a test where the sum of projected areas for a
+                   ! given (1: N_CARTFACE_CELL ) castesian face FADD in
+                   ! LOCAL_SOLID_AREA should be the same as SOLID_AREA ( FADD ).
+                   ! Here we can copy the list LOCAL_LIST_CFACE , and
+                   ! LOCAL_SOLID_AREA areas for the cell faces somewhere else ,
+                   ! Even in fields of CUT_FACE or CFACE . Probably CFACE is
+                   ! Better as everything in the Radiation solver is related
+                   ! to the CFACE data structure ?
+
+                   ENDIF
 
                    AY1 = DZ(K) * ABS(DLY(N))
                    AX  = DY(J) * DZ(K) * ABS(DLX(N))
