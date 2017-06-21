@@ -373,8 +373,8 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
       ELSE
          OM_RHOP => OM%RHO
          OM_ZZP => OM%ZZ
-         IF (SOLID_HT3D) OM_TMP => OM%TMP
       ENDIF
+      IF (SOLID_HT3D) OM_TMP => OM%TMP
       MM => MESHES(EWC%NOM)
 
       ! Gather data from other mesh
