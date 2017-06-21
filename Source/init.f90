@@ -915,6 +915,27 @@ ENDDO OBST_LOOP_2
 
 IF (ANY(OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
 
+! Solid phase chemical heat source term
+
+IF (SOLID_HT3D) THEN
+   ALLOCATE(M%Q_DOT_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','Q_DOT_PPP_S',IZERO)
+   M%Q_DOT_PPP_S = 0._EB
+   ! Set internal heat source for 3d heat transfer
+   OBST_LOOP_3: DO N=1,M%N_OBST
+      OB=>M%OBSTRUCTION(N)
+      DO K=OB%K1+1,OB%K2
+         DO J=OB%J1+1,OB%J2
+            DO I=OB%I1+1,OB%I2
+               M%Q_DOT_PPP_S(I,J,K) = OB%INTERNAL_HEAT_SOURCE
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO OBST_LOOP_3
+ENDIF
+
+! Experimental coupling between 1D pyrolysis model and 3D heat transfer solver
+
 IF (COUPLED_1D3D_HEAT_TRANSFER) THEN
    ! fine-grained 1D work arrays
    ALLOCATE(M%ONE_D_WORK1(0:NWP_MAX),STAT=IZERO); CALL ChkMemErr('INIT','ONE_D_WORK1',IZERO)
@@ -934,19 +955,6 @@ IF (COUPLED_1D3D_HEAT_TRANSFER) THEN
    M%ONE_D_WORK6 = 0._EB
    M%ONE_D_WORK7 = 0._EB
    M%ONE_D_WORK8 = 0._EB
-   ! solid phase chemical heat source term
-   IF (ANY(SURFACE%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED)) THEN
-      PYROLYSIS_HT3D = .TRUE.
-      STORE_Q_DOT_PPP_S = .TRUE.
-   ENDIF
-ENDIF
-
-! solid phase chemical heat source term
-
-IF (STORE_Q_DOT_PPP_S) THEN
-   ALLOCATE(M%Q_DOT_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','Q_DOT_PPP_S',IZERO)
-   M%Q_DOT_PPP_S = 0._EB
 ENDIF
 
 ! Allocate local auto-ignition temperature
