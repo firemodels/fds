@@ -75,19 +75,19 @@ datab=cat(2,primitive_data_2,lumped_data_f(:,2:3),lumped_data_ox(:,2:3));
 
 fid = fopen([FDS_Output_Files,'methane_flame_lumpedprimitive.csv'],'wt','n');
 
-fprintf(fid,'%s, %s, %s, %s, %s, %s, %s, %s\n',header1{1,:});
-fprintf(fid,'\n%s, %s, %s, %s, %s, %s, %s, %s\n',header2{1,:});
+fprintf(fid,'%s,%s,%s,%s,%s,%s,%s\n','s','kg','kg','kg','kg','kg','kg');
+fprintf(fid,'%s,%s,%s,%s,%s,%s,%s\n',header2{1,:});
 for i=1:length(primitive_data)
-    fprintf(fid,'\n%f, %f, %f, %f, %f, %f, %f, %f\n',data(i,:));
+    fprintf(fid,'%f,%f,%f,%f,%f,%f,%f\n',data(i,:));
 end
 fclose(fid);
 
 fid = fopen([FDS_Output_Files,'methane_flame_multilumped.csv'],'wt','n');
 
-fprintf(fid,'%s, %s, %s, %s, %s, %s, %s, %s\n',header1b{1,:});
-fprintf(fid,'\n%s, %s, %s, %s, %s, %s, %s, %s\n',header2b{1,:});
+fprintf(fid,'%s,%s,%s,%s,%s,%s,%s\n','s','kg','kg','kg','kg','kg','kg');
+fprintf(fid,'%s,%s,%s,%s,%s,%s,%s\n',header2b{1,:});
 for i=1:length(primitive_data_2)
-    fprintf(fid,'\n%f, %f, %f, %f, %f, %f, %f, %f\n',datab(i,:));
+    fprintf(fid,'%f,%f,%f,%f,%f,%f,%f\n',datab(i,:));
 end
 fclose(fid);
 

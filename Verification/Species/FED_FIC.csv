@@ -1,4 +1,4 @@
-Time,"FED (O2, CO2, CO)",FED (Asphyxiants),FED (Irritants),FED (All),"FIC (O2, CO2, CO)",FIC (Asphyxiants),FIC (Irritants),FIC (All)
+Time,FED (O2 CO2 CO),FED (Asphyxiants),FED (Irritants),FED (All),FIC (O2 CO2 CO),FIC (Asphyxiants),FIC (Irritants),FIC (All)
 0,0,0,0,0,0,0,0.8574,0.4287
 20,0.11988,0.19481,0.0016517,0.10274,0,0,0.8574,0.4287
 40,0.23976,0.38961,0.0033034,0.20547,0,0,0.8574,0.4287
