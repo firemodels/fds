@@ -181,7 +181,10 @@ for i=2:n_plots
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
            continue
         end
-        [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
+        % [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
+        EXP = importdata(d1_Filename,',',d1_Col_Name_Row);
+        H = strrep(EXP.colheaders,'"','');
+        M = EXP.data;
         R1 = parsepipe(d1_Ind_Col_Name);
         S1 = parsepipe(d1_Dep_Col_Name);
         style = parsepipe(d1_Style);
@@ -189,8 +192,8 @@ for i=2:n_plots
         % Skips case upon any Matlab error
         try
             for j=1:length(S1)
-                d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
-                d1_Dep_Col = find(strcmp(H,S1(j)));
+                d1_Ind_Col = find(strcmp(strtrim(H),strtrim(R1(min(j,length(R1))))));
+                d1_Dep_Col = find(strcmp(strtrim(H),strtrim(S1(j))));
                 Save_Measured_Quantity(i,j) = S1(j);
                 clear indices
                 % Clear flag for stat_x_y metric
@@ -282,7 +285,10 @@ for i=2:n_plots
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
         end
-        [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
+        % [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
+        CMP = importdata(d2_Filename,',',d2_Col_Name_Row);
+        H = strrep(CMP.colheaders,'"','');
+        M = CMP.data;
         R2 = parsepipe(d2_Ind_Col_Name);
         S2 = parsepipe(d2_Dep_Col_Name);
         style = parsepipe(d2_Style);
@@ -298,9 +304,9 @@ for i=2:n_plots
                 % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
                 Save_Predicted_Quantity(i,j) = S2(j);
-                d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
+                d2_Ind_Col = find(strcmp(strtrim(H),strtrim(R2(min(j,length(R2))))));
                 for jj=1:length(SP)
-                    d2_Dep_Col(jj) = find(strcmp(H,SP(jj)));
+                    d2_Dep_Col(jj) = find(strcmp(strtrim(H),strtrim(SP(jj))));
                 end
                 clear indices
 
