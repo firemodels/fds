@@ -52,18 +52,25 @@ symbol_vect_noleg = [{'p'},{'s'},{'d'}];
 line_color_vect={[20/255,168/255,113/225],[186/255,62/255,62/255],[64/255,97/255,191/255]};
 
 figure(1)
+set(gcf,'Visible',Figure_Visibility);
 p1 = tight_subplot(1,1, [.01 .01],[.13 .08],[.11 .019]);
 figure(2)
+set(gcf,'Visible',Figure_Visibility);
 p2 = tight_subplot(1,1, [.01 .01],[.13 .08],[.141 .019]);
 figure(3)
+set(gcf,'Visible',Figure_Visibility);
 sp1 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 figure(4)
+set(gcf,'Visible',Figure_Visibility);
 sp2 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 figure(5)
+set(gcf,'Visible',Figure_Visibility);
 sp3 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 figure(6)
+set(gcf,'Visible',Figure_Visibility);
 sp4 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 figure(7)
+set(gcf,'Visible',Figure_Visibility);
 sp5 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 
 
