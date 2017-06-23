@@ -181,10 +181,7 @@ for i=2:n_plots
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
            continue
         end
-        % [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
-        EXP = importdata(d1_Filename,',',d1_Col_Name_Row);
-        H = strrep(EXP.colheaders,'"','');
-        M = EXP.data;
+        [H M] = dvcread(d1_Filename,d1_Col_Name_Row,d1_Data_Row);
         R1 = parsepipe(d1_Ind_Col_Name);
         S1 = parsepipe(d1_Dep_Col_Name);
         style = parsepipe(d1_Style);
@@ -285,10 +282,7 @@ for i=2:n_plots
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
         end
-        % [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
-        CMP = importdata(d2_Filename,',',d2_Col_Name_Row);
-        H = strrep(CMP.colheaders,'"','');
-        M = CMP.data;
+        [H M] = dvcread(d2_Filename,d2_Col_Name_Row,d2_Data_Row);
         R2 = parsepipe(d2_Ind_Col_Name);
         S2 = parsepipe(d2_Dep_Col_Name);
         style = parsepipe(d2_Style);
