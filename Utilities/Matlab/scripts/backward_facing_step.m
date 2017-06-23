@@ -51,35 +51,44 @@ symbol_vect_noleg = [{'p'},{'s'},{'d'}];
 
 line_color_vect={[20/255,168/255,113/225],[186/255,62/255,62/255],[64/255,97/255,191/255]};
 
-figure(1)
-set(gcf,'Visible',Figure_Visibility);
+plot_style
+
+f1 = figure(1);
+set(f1,'Visible',Figure_Visibility)
 p1 = tight_subplot(1,1, [.01 .01],[.13 .08],[.11 .019]);
-figure(2)
-set(gcf,'Visible',Figure_Visibility);
+
+f2 = figure(2);
+set(f2,'Visible',Figure_Visibility);
 p2 = tight_subplot(1,1, [.01 .01],[.13 .08],[.141 .019]);
-figure(3)
-set(gcf,'Visible',Figure_Visibility);
+
+f3 = figure(3);
+set(f3,'Visible',Figure_Visibility);
 sp1 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
-figure(4)
-set(gcf,'Visible',Figure_Visibility);
+
+f4 = figure(4);
+set(f4,'Visible',Figure_Visibility);
 sp2 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
-figure(5)
-set(gcf,'Visible',Figure_Visibility);
+
+f5 = figure(5);
+set(f5,'Visible',Figure_Visibility);
 sp3 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
-figure(6)
-set(gcf,'Visible',Figure_Visibility);
+
+f6 = figure(6);
+set(f6,'Visible',Figure_Visibility);
 sp4 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
-figure(7)
-set(gcf,'Visible',Figure_Visibility);
+
+f7 = figure(7);
+set(f7,'Visible',Figure_Visibility);
 sp5 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 
+return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % streamwise data along bottom of channel for determining reattachment location
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure(1)
-plot_style
+
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 set(gcf,'Visible',Figure_Visibility);
@@ -163,7 +172,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure(2)
-plot_style
+
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'Visible',Figure_Visibility);
@@ -226,7 +235,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cp'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(3);
-plot_style
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -305,7 +314,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_U'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(4);
-plot_style
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -381,7 +390,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_W'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(5);
-plot_style
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -459,7 +468,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_uu'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(6);
-plot_style
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -538,7 +547,7 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_ww'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(7);
-plot_style
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
