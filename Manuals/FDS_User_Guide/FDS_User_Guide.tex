@@ -6553,10 +6553,10 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{1/m} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/beam_detector_nosmoke} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/beam_detector_smoke}
-\end{tabular*}
+\begin{center}
+\includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_nosmoke}
+\includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_smoke}
+\end{center}
 \caption[Results of the {\ct beam\_detector} test case]{Output of the {\ct beam\_detector} test case.}
 \label{beam_detector}
 \end{figure}

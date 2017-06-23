@@ -371,6 +371,7 @@ TYPE IBM_CUTEDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEELEM  ! Cut-Edge connectivities.
    INTEGER,  DIMENSION(MAX_DIM+2)                  ::     IJK  ! [ i j k X2AXIS cetype]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  INDSEG  ! [ntr tr1 tr2 ibod]
+   INTEGER,  ALLOCATABLE, DIMENSION(:)             ::NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE IBM_CUTEDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
@@ -431,7 +432,7 @@ END TYPE CFACE_TYPE
 ! Cartesian Cells Cut-Cells data structure:
 INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  = 16 ! Size definition parameter. Max number of cut-cell per cart cell.
 INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  =128 ! Size definition parameter. Max number of cut-faces per cart cell.
-INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =128
+INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =192
 INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  =256
 INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL=IBM_MAXCFELEM_CELL ! Size definition parameter.
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
