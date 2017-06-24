@@ -2,7 +2,10 @@
 platform=intel64
 dir=`pwd`
 target=${dir##*/}
-source $IFORT_COMPILER/bin/compilervars.sh $platform
+
+if [ "$IFORT_COMPILER" != "" ]; then
+  source $IFORT_COMPILER/bin/compilervars.sh $platform
+fi
 source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
 VERSION=`ifort -v 2>&1 | awk '{print $3}' | awk -F'.' '{print $1}'`
 
