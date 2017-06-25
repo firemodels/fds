@@ -103,10 +103,10 @@ fi
 
 # test smoke opacity levels in beam_detector case
 
-cd $SVNROOT/fds/Verification/Detectors
-../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 2 0
-../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 3 0
-../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 4 0
+#cd $SVNROOT/fds/Verification/Detectors
+#../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 2 0
+#../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 3 0
+#../scripts/compare_csv.sh beam_detector_ss_check.csv beam_detector_ss.csv 4 0
 
 cd $CURDIR
 echo $progname complete
