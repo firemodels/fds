@@ -7193,7 +7193,11 @@ By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation
 
 Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF} entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity component slices will be created.
 
-Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, etc.
+Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.  If {\ct CELL\_CENTERED=.TRUE.} is combined with {\ct VECTOR=.TRUE.} then the staggered velocity components will be displayed.  For example,
+\begin{lstlisting}
+&SLCF PBY=0, QUANTITY='VELOCITY', VELOCITY=.TRUE., CELL_CENTERED=.TRUE. /
+\end{lstlisting}
+will show the staggered velocity components as cell face normal vectors in Smokeview.
 
 Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file. A short Fortran program {\ct fds2ascii.f90} produces a text file from a line, plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
