@@ -2,8 +2,16 @@
 platform=intel64
 dir=`pwd`
 target=${dir##*/}
-source $IFORT_COMPILER/bin/compilervars.sh $platform
+
+if [ "$IFORT_COMPILER" != "" ]; then
+  source $IFORT_COMPILER/bin/compilervars.sh $platform
+fi
 source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
+VERSION=`ifort -v 2>&1 | awk '{print $3}' | awk -F'.' '{print $1}'`
 
 echo Building $target
-make -j4 VPATH="../../Source" -f ../makefile $target
+if [ "$VERSION" == "16" ]; then
+  make -j4 FOPENMPFLAGS="-openmp -openmp-link static" VPATH="../../Source" -f ../makefile $target
+else
+  make -j4 VPATH="../../Source" -f ../makefile $target
+fi
