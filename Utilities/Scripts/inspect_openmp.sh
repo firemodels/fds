@@ -50,7 +50,7 @@ case=$1
 
 # Perform OpenMP thread checking (locate deadlocks and data races)
 
-source /opt/intel/inspector_xe/inspxe-vars.sh quiet
+source /opt/intel/inspector/inspxe-vars.sh quiet
 
 TARGET=$GITROOT/fds/Build/intel_linux_64_inspect
 
