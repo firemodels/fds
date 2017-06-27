@@ -19,7 +19,7 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, LOGLAW_HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
-          FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL
+          FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL
 
 CONTAINS
 
@@ -1270,6 +1270,69 @@ END SELECT
 H_FORCED = NUSSELT*K_G/CONV_LENGTH
 
 END SUBROUTINE FORCED_CONVECTION_MODEL
+
+
+SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
+
+!!!!! EXPERIMENTAL !!!!!
+
+! Rayleigh number scaling in nondimensional thermal wall units
+!
+! The formulation is based on the discussion of natural convection systems in
+! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
+
+REAL(EB), INTENT(OUT) :: H
+REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G
+REAL(EB) :: NUSSELT,Q,ZC,NU_G,DS,ALPHA,Z_PLUS,THETA,Q_OLD,ERROR
+INTEGER :: ITER
+INTEGER, PARAMETER :: RAYLEIGH_MAX_ITER=10
+REAL(EB), PARAMETER :: Z_T=12._EB,C_T=12._EB**(-0.2_EB) ! C_T = Z_T**(-1/5)
+
+ZC = 0.5_EB*DZ
+NU_G = MU_G/RHO_G
+ALPHA = K_G/(RHO_G*CP_G)
+THETA = TMP_W*K_G*ALPHA*NU_G/GRAV
+
+! Step 1: assuming linear variation, compute heat flux magnitude
+
+DS = ZC
+NUSSELT = 1._EB
+H = NUSSELT*K_G/ZC
+Q = H*ABS(TMP_W-TMP_G)
+
+RAYLEIGH_LOOP: DO ITER=1,RAYLEIGH_MAX_ITER
+
+   ! Step 2: compute new thermal diffusive length scale, delta*, from modified Grashof number * Pr
+
+   DS = (THETA/Q)**0.25_EB
+
+   ! Step 3: compute new z+ (thermal)
+
+   Z_PLUS = ZC/DS ! Ra = (z+)**4
+
+   ! Step 4: based on z+, choose Ra scaling law
+
+   IF (Z_PLUS<=1._EB) THEN
+      NUSSELT = 1._EB
+   ELSEIF (Z_PLUS>1._EB .AND. Z_PLUS<=Z_T) THEN
+      NUSSELT = Z_PLUS**0.8_EB
+   ELSE
+      NUSSELT = C_T * Z_PLUS
+   ENDIF
+
+   ! Step 5: update heat transfer coefficient
+
+   H = NUSSELT*K_G/ZC
+   Q_OLD = Q
+   Q = H*ABS(TMP_W-TMP_G)
+
+   ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
+
+   IF (ERROR<0.001_EB) EXIT RAYLEIGH_LOOP ! this usually takes 5 or 6 iterations
+
+ENDDO RAYLEIGH_LOOP
+
+END SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL
 
 
 SUBROUTINE LOGLAW_HEAT_FLUX_MODEL(H,YPLUS,U_TAU,K,RHO,CP,MU)
