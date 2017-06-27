@@ -1883,7 +1883,7 @@ IF (CC_IBM) THEN
          WRITE(LU_SMV,'(1X,A)') TRIM(OUTPUT_QUANTITY(BF%INDEX)%UNITS(1:30))
       ENDDO
    ENDDO
-ENDIF   
+ENDIF
 
 ENDIF MASTER_NODE_IF
 
@@ -3784,7 +3784,7 @@ USE COMPLEX_GEOMETRY
 
    INTEGER :: DIR,SLICE
    INTEGER :: I, J, K
-   INTEGER :: ICF, IFACE, NVF, IEXIM
+   INTEGER :: ICF, IFACE, NVF, IEXIM, ICC, JCC, ICF2, IFACE2, NFC, ICCF
 
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 
@@ -3827,7 +3827,7 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE IF (DIR==2) THEN
-        NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
+         NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
          DO K = K1+1, K2
             DO I = I1+1, I2
                IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
@@ -3843,7 +3843,7 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE
-        NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
+         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
          DO I = I1+1, I2
             DO J = J1+1, J2
                IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
@@ -3879,6 +3879,40 @@ USE COMPLEX_GEOMETRY
       DO IEXIM=1,IBM_NEXIMFACE_MESH
          NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
          NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+      ENDDO
+   ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
+      DO K = 1, KBAR
+         DO J = 1, JBAR
+            DO I = 1, IBAR
+               IF (CCVAR(I,J,K,IBM_IDCC) <= 0) CYCLE
+               ICC = CCVAR(I,J,K,IBM_IDCC)
+               DO JCC=1,CUT_CELL(ICC)%NCELL
+                  NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
+                  ! Loop on faces corresponding to cut-cell ICC2:
+                  DO ICCF=1,NFC
+                     IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
+                     SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
+                     CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                        NVF = 4
+                        NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                        NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                     CASE(IBM_FTYPE_CFGAS)
+                        ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                        NVF=CUT_FACE(ICF2)%CFELEM(1,IFACE2)
+                        NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                        NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                     CASE(IBM_FTYPE_CFINB)
+                        ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                        NVF=CUT_FACE(ICF2)%CFELEM(1,IFACE2)
+                        NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                        NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                     END SELECT
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
       ENDDO
    ENDIF
    NFACES = NFACES + NFACES_CUTCELLS
