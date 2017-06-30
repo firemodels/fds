@@ -460,13 +460,13 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (NMESHES>1) THEN
          WRITE(FN_BNDF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
          IF (CC_IBM) THEN
-            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.ge'
+            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
             WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be'
          ENDIF
       ELSE
          WRITE(FN_BNDF(N,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.bf'
          IF (CC_IBM) THEN
-            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.ge'
+            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.gbf'
             WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.be'
          ENDIF
       ENDIF
@@ -981,7 +981,7 @@ DO N=1,M%N_SLCF
       ELSE
          IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
          M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(A,1x,I6)') 'GEOM',0
+         WRITE(M%STRING(M%N_STRINGS),'(A,1x,I6)') 'SGEOM',0
          M%N_STRINGS = M%N_STRINGS + 1
          WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF_GEOM(N,NM))
       ENDIF
@@ -1872,7 +1872,7 @@ IF (CC_IBM) THEN
 
       DO I = 1, NMESHES
 
-         WRITE(LU_SMV,'(/A)') 'GEOM 0'
+         WRITE(LU_SMV,'(/A)') 'BGEOM 0'
          WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
 
          WRITE(LU_SMV,'(/A)') 'BNDE'
