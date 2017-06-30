@@ -1272,7 +1272,7 @@ H_FORCED = NUSSELT*K_G/CONV_LENGTH
 END SUBROUTINE FORCED_CONVECTION_MODEL
 
 
-SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_PLUS,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
+SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
 
 !!!!! EXPERIMENTAL !!!!!
 
@@ -1281,24 +1281,23 @@ SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_PLUS,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
 ! The formulation is based on the discussion of natural convection systems in
 ! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
 
-REAL(EB), INTENT(OUT) :: H,Z_PLUS
+REAL(EB), INTENT(OUT) :: H,Z_STAR
 REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G
-REAL(EB) :: NUSSELT,Q,ZC,NU_G,DS,ALPHA,THETA,Q_OLD,ERROR
+REAL(EB) :: NUSSELT,Q,ZC,NU_G,DS,ALPHA,THETA,Q_OLD,ERROR,Z_T,C_T
 INTEGER :: ITER
 INTEGER, PARAMETER :: RAYLEIGH_MAX_ITER=10
-REAL(EB), PARAMETER :: Z_T=12._EB,C_T=12._EB**(-0.2_EB) ! C_T = Z_T**(-1/5)
+
+Z_T = Z_STAR_TRANSITION
+C_T = Z_T**(-0.2_EB)
 
 ZC = 0.5_EB*DZ
 NU_G = MU_G/RHO_G
 ALPHA = K_G/(RHO_G*CP_G)
 THETA = TMP_W*K_G*ALPHA*NU_G/GRAV
 
-! Step 1: assuming linear variation, compute heat flux magnitude
+! Step 1: assume a heat transfer coefficient
 
-DS = ZC
-Z_PLUS = 1._EB
-NUSSELT = 1._EB
-H = NUSSELT*K_G/ZC
+H = 10._EB ! initial guess
 Q = H*ABS(TMP_W-TMP_G)
 
 RAYLEIGH_LOOP: DO ITER=1,RAYLEIGH_MAX_ITER
@@ -1307,18 +1306,18 @@ RAYLEIGH_LOOP: DO ITER=1,RAYLEIGH_MAX_ITER
 
    DS = (THETA/Q)**0.25_EB
 
-   ! Step 3: compute new z+ (thermal)
+   ! Step 3: compute new z* (thermal)
 
-   Z_PLUS = ZC/DS ! Ra = (z+)**4
+   Z_STAR = ZC/DS ! Ra* = (z*)**4
 
-   ! Step 4: based on z+, choose Ra scaling law
+   ! Step 4: based on z*, choose Ra scaling law
 
-   IF (Z_PLUS<=1._EB) THEN
+   IF (Z_STAR<=1._EB) THEN
       NUSSELT = 1._EB
-   ELSEIF (Z_PLUS>1._EB .AND. Z_PLUS<=Z_T) THEN
-      NUSSELT = Z_PLUS**0.8_EB
+   ELSEIF (Z_STAR>1._EB .AND. Z_STAR<=Z_T) THEN
+      NUSSELT = Z_STAR**0.8_EB
    ELSE
-      NUSSELT = C_T * Z_PLUS
+      NUSSELT = C_T * Z_STAR
    ENDIF
 
    ! Step 5: update heat transfer coefficient
