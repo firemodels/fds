@@ -3944,6 +3944,7 @@ USE COMPLEX_GEOMETRY
    INTEGER VERTBEG, VERTEND, FACEBEG, FACEEND
    LOGICAL IS_SOLID
    INTEGER :: ICF, NVF, IVCF, IADD, JADD, KADD, IEXIM, X1AXIS
+   INTEGER :: II, JJ, KK, ICC, JCC, NFC, ICCF, LOWHIGH, ILH, ICF2, IFACE2
    INTEGER, ALLOCATABLE, DIMENSION(:) :: LOCTYPE
 
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
@@ -4317,6 +4318,122 @@ USE COMPLEX_GEOMETRY
          LOCATIONS(IFACECUT) = 1 + 16
          FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
       ENDDO
+   ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
+      IVERTCUT=NVERTS-NVERTS_CUTCELLS ! start cutcell counters after 'regular' cells
+      IFACECUT=NFACES-NFACES_CUTCELLS
+      DO KK = 1, KBAR
+         DO JJ = 1, JBAR
+            DO II = 1, IBAR
+               IF (CCVAR(II,JJ,KK,IBM_IDCC) <= 0) CYCLE
+               ICC = CCVAR(II,JJ,KK,IBM_IDCC)
+               DO JCC=1,CUT_CELL(ICC)%NCELL
+                  NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
+                  ! Loop on faces corresponding to cut-cell ICC2:
+                  DO ICCF=1,NFC
+                     IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
+                     SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
+                     CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                        LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+                        X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+                        ILH     = LOWHIGH - 1
+                        I=II; J=JJ; K=KK;
+                        SELECT CASE(X1AXIS)
+                        CASE(IAXIS)
+                           I=II-FCELL+ILH
+                           DO KADD=-1,0
+                              DO JADD=-1,0
+                                 IVERTCUT = IVERTCUT + 1
+                                 VERTS(3*IVERTCUT-2) = REAL(X(I     ),FB)
+                                 VERTS(3*IVERTCUT-1) = REAL(Y(J+JADD),FB)
+                                 VERTS(3*IVERTCUT)   = REAL(Z(K+KADD),FB)
+                              ENDDO
+                           ENDDO
+                        CASE(JAXIS)
+                           J=JJ-FCELL+ILH
+                           DO IADD=-1,0
+                              DO KADD=-1,0
+                                 IVERTCUT = IVERTCUT + 1
+                                 VERTS(3*IVERTCUT-2) = REAL(X(I+IADD),FB)
+                                 VERTS(3*IVERTCUT-1) = REAL(Y(J     ),FB)
+                                 VERTS(3*IVERTCUT)   = REAL(Z(K+KADD),FB)
+                              ENDDO
+                           ENDDO
+                        CASE(KAXIS)
+                           K=KK-FCELL+ILH
+                           DO JADD=-1,0
+                              DO IADD=-1,0
+                                 IVERTCUT = IVERTCUT + 1
+                                 VERTS(3*IVERTCUT-2) = REAL(X(I+IADD),FB)
+                                 VERTS(3*IVERTCUT-1) = REAL(Y(J+JADD),FB)
+                                 VERTS(3*IVERTCUT)   = REAL(Z(K     ),FB)
+                              ENDDO
+                           ENDDO
+                        END SELECT
+                        IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 1 + 16
+                        FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT-3, IVERTCUT-2, IVERTCUT   /) ! Local Nodes 1, 2, 4
+
+                        IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 1 + 16
+                        FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
+                     CASE(IBM_FTYPE_CFGAS)
+                        ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                        X1AXIS  = CUT_FACE(ICF2)%IJK(KAXIS+1); DIR = X1AXIS
+                        NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2)
+                        VERTBEG = IVERTCUT + 1
+                        VERTBEG = 3*VERTBEG - 2
+                        VERTEND = IVERTCUT + NVF
+                        VERTEND = 3*VERTEND
+                        DO IVCF=1,NVF
+                           IVERTCUT = IVERTCUT + 1
+                           IVERTCF=CUT_FACE(ICF2)%CFELEM(IVCF+1,IFACE2)
+                           VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF2)%XYZVERT(1:3,IVERTCF),FB)
+                        ENDDO
+                        FACEBEG = 3*(IFACECUT+1) - 2
+                        FACEEND = FACEBEG + 3*(NVF-2) - 1
+                        FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                        VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                        VERT_OFFSET = IVERTCUT - NVF
+                        ALLOCATE(LOCTYPE(NVF-2))
+                        CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
+                        DO IVCF = 1, NVF-2 ! for now assume face is convex
+                           IFACECUT = IFACECUT + 1
+                           LOCATIONS(IFACECUT) = 2 + LOCTYPE(IVCF)
+                           IF(IFACE2 > CUT_FACE(ICF2)%NFACE) LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Solid side.
+                        ENDDO
+                        DEALLOCATE(LOCTYPE)
+                     CASE(IBM_FTYPE_CFINB)
+                        ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                        NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2); DIR = 0
+                        VERTBEG = IVERTCUT + 1
+                        VERTBEG = 3*VERTBEG - 2
+                        VERTEND = IVERTCUT + NVF
+                        VERTEND = 3*VERTEND
+                        DO IVCF=1,NVF
+                           IVERTCUT = IVERTCUT + 1
+                           IVERTCF=CUT_FACE(ICF2)%CFELEM(IVCF+1,IFACE2)
+                           VERTS(3*IVERTCUT-2:3*IVERTCUT) = REAL(CUT_FACE(ICF2)%XYZVERT(1:3,IVERTCF),FB)
+                        ENDDO
+                        FACEBEG = 3*(IFACECUT+1) - 2
+                        FACEEND = FACEBEG + 3*(NVF-2) - 1
+                        FACEPTR(1:3*(NVF-2))        =>FACES(FACEBEG:FACEEND)
+                        VERTPTR(1:1+VERTEND-VERTBEG)=>VERTS(VERTBEG:VERTEND)
+                        VERT_OFFSET = IVERTCUT - NVF
+                        ALLOCATE(LOCTYPE(NVF-2))
+                        CALL TRIANGULATE(DIR,VERTPTR,NVF,VERT_OFFSET,FACEPTR,LOCTYPE)
+                        DO IVCF = 1, NVF-2 ! for now assume face is convex
+                           IFACECUT = IFACECUT + 1
+                           LOCATIONS(IFACECUT) = 1 + LOCTYPE(IVCF) ! Consider them as SOLID.
+                        ENDDO
+                        DEALLOCATE(LOCTYPE)
+                     END SELECT
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
@@ -4339,7 +4456,7 @@ CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 INTEGER :: CELLTYPE
 INTEGER :: ICF, NVF, IFACECF, IVCF, IFACECUT
 
-INTEGER :: X1AXIS, IEXIM
+INTEGER :: X1AXIS, IEXIM, II, JJ, KK, ICC, JCC, NFC, ICCF, ICF2, IFACE2
 REAL(EB):: VAL_CF
 
 SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
@@ -4392,7 +4509,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4400,7 +4517,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4430,7 +4547,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4438,7 +4555,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4468,7 +4585,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                DO IFACECF=1,CUT_FACE(ICF)%NFACE
                   CALL GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACECF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4476,7 +4593,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
                DO IFACECF=CUT_FACE(ICF)%NFACE+1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
-                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                  DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
                      VALS(IFACECUT) = VAL_CF
                   ENDDO
@@ -4525,6 +4642,50 @@ ELSE IF (SLICETYPE_LOCAL=='EXIMBND_FACES') THEN
       DO IVCF = 1,2
          IFACECUT = IFACECUT + 1
          VALS(IFACECUT) = VAL_CF
+      ENDDO
+   ENDDO
+ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
+   IFACECUT=NFACES-NFACES_CUTCELLS
+   VAL_CF=0.
+   DO KK = 1, KBAR
+      DO JJ = 1, JBAR
+         DO II = 1, IBAR
+            IF (CCVAR(II,JJ,KK,IBM_IDCC) <= 0) CYCLE
+            ICC = CCVAR(II,JJ,KK,IBM_IDCC)
+            DO JCC=1,CUT_CELL(ICC)%NCELL
+               NFC=CUT_CELL(ICC)%CCELEM(1,JCC)
+               ! Loop on faces corresponding to cut-cell ICC2:
+               DO ICCF=1,NFC
+                  IFACE=CUT_CELL(ICC)%CCELEM(ICCF+1,JCC)
+                  SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
+                  CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                     DO IVCF = 1,2
+                        IFACECUT = IFACECUT + 1
+                        VALS(IFACECUT) = VAL_CF
+                     ENDDO
+
+                  CASE(IBM_FTYPE_CFGAS)
+                     ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                     IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                     NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2)
+                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                        IFACECUT = IFACECUT + 1
+                        VALS(IFACECUT) = VAL_CF
+                     ENDDO
+
+                  CASE(IBM_FTYPE_CFINB)
+                     ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                     IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                     NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2); DIR = 0
+                     DO IVCF = 1, NVF-2 ! face is convex
+                        IFACECUT = IFACECUT + 1
+                        VALS(IFACECUT) = VAL_CF
+                     ENDDO
+
+                  END SELECT
+               ENDDO
+            ENDDO
+         ENDDO
       ENDDO
    ENDDO
 ENDIF

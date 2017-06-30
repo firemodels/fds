@@ -24720,14 +24720,14 @@ REAL(EB):: ANGCOUNT, DANG, DANGI
 LOGICAL :: FOUNDSEG, PTSFLAG
 INTEGER :: ICF1, ICF2, ICF_PT, IPT, NP, NP1, NP2, NFACE2, NCUTFACE, NVERTFACE
 REAL(EB), DIMENSION(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)           ::     XY
-REAL(EB):: AREA, AREA1, AREA2, AREAH, CX2, CX3
+REAL(EB):: AREA, AREA1, AREA2, AREAH, CX2, CX3, DIST12, D12
 REAL(EB), DIMENSION(IAXIS:JAXIS) :: XYC1, XYC2, XYH
 REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::   AREAV  ! Cut-faces areas.
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  INXAREA, INXSQAREA
 INTEGER,  DIMENSION(IBM_MAXCFELEM_FACE) :: FINFACE
-INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE):: CFE
-INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH
+INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE):: CFE,CFEL
+INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH,ILOC
 
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:,:) :: IJK_COUNTED
 
@@ -25468,11 +25468,30 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    NP     = (NP1+1) + (NP2+1)
                    CFE(1) = NP
 
-                   DO II2=2,np1+1
-                      CFE(II2) = CFELEM(II2,icf1)
+                   DO II2=2,NP1+1
+                      CFE(II2) = CFELEM(II2,ICF1)
                    ENDDO
-                   II2 = (np1+1) + 1
-                   CFE(II2) = CFELEM(2,icf1)
+                   II2 = (NP1+1) + 1
+                   CFE(II2) = CFELEM(2,ICF1)
+
+                   ! Load last point location:
+                   ILOC = 2
+                   DIST12 = 1._EB / GEOMEPS
+                   XYC1(1:2) = (/ XYZVERT(X2AXIS,CFE(II2)), XYZVERT(X3AXIS,CFE(II2)) /)
+                   DO COUNT=2,NP2+1
+                      XYC2(1:2) = (/ XYZVERT(X2AXIS,CFELEM(COUNT,ICF2)), XYZVERT(X3AXIS,CFELEM(COUNT,ICF2)) /)
+                      D12 = SQRT( (XYC1(1)-XYC2(1))**2._EB + (XYC1(2)-XYC2(2))**2._EB )
+                      IF( D12 < DIST12 ) THEN
+                         DIST12 = D12
+                         ILOC = COUNT
+                      ENDIF
+                   ENDDO
+                   IF (ILOC > 2) THEN
+                      ! Rebuild CFELEM(:,ICF2) such that the first point is ILOC:
+                      CFEL(2:2+(NP2+1)-ILOC)    = CFELEM(ILOC:NP2+1,ICF2)
+                      CFEL(3+(NP2+1)-ILOC:NP2+1)= CFELEM(2:ILOC-1 ,ICF2)
+                      CFELEM(2:NP2+1 ,ICF2)     = CFEL(2:NP2+1)
+                   ENDIF
 
                    COUNT = 1
                    DO II2=(NP1+1)+2,(NP1+1)+1+NP2
@@ -31184,15 +31203,15 @@ END FUNCTION POINT_IN_TETRAHEDRON
 !
 ! ---------------------------- VALID_TRIANGLE ----------------------------------------
 
-LOGICAL FUNCTION VALID_TRIANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3)
+LOGICAL FUNCTION VALID_TRIANGLE(DIR, VERTS, NVERTS, IV1, IV2, IV3,VERT_FLAG)
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3
+INTEGER, INTENT(IN) :: DIR, NVERTS, IV1, IV2, IV3, VERT_FLAG(0:300)
 REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
 
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), POINTER, DIMENSION(:) :: V, V1, V2, V3
-REAL(FB) :: U1(3), U2(3), U1XU2
+REAL(FB) :: U1(3), U2(3), U1XU2, D123
 
 INTEGER :: I
 
@@ -31229,13 +31248,53 @@ U1XU2 = U1(1)*U2(2)-U1(2)*U2(1) ! U1 x U2
 IF (U1XU2 < EPS_FB) RETURN
 
 DO I = 1, NVERTS
+  IF (VERT_FLAG(I) == 0) CYCLE
   IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
   V(1:3)=>VERTS(3*I-2:3*I)
+  ! These CYCLE tests are done to treat holes properly:
+  D123=SQRT( (V(1)-V1(1))**2._EB + (V(2)-V1(2))**2._EB + (V(3)-V1(3))**2._EB )
+  IF (D123 < EPS_FB) CYCLE
+  D123=SQRT( (V(1)-V2(1))**2._EB + (V(2)-V2(2))**2._EB + (V(3)-V2(3))**2._EB )
+  IF (D123 < EPS_FB) CYCLE
+  D123=SQRT( (V(1)-V3(1))**2._EB + (V(2)-V3(2))**2._EB + (V(3)-V3(3))**2._EB )
+  IF (D123 < EPS_FB) CYCLE
   IF (POINT_IN_TRIANGLE_FB(V, V1, V2, V3)) RETURN
 ENDDO
 
 VALID_TRIANGLE = .TRUE.
 END FUNCTION VALID_TRIANGLE
+
+! ------------------------- PT_LINE_DISTANCE_2D ------------------------------------
+
+! REAL(FB) FUNCTION PT_LINE_DISTANCE_2D(X0,Y0,X1,Y1,X2,Y2)
+!
+! REAL(FB), INTENT(IN) :: X0,Y0,X1,Y1,X2,Y2
+!
+! ! Local Variables:
+! REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
+! REAL(FB) :: X3,Y3
+! REAL(FB) :: DX01,DY01,DX21,DY21,DSQ
+! REAL(FB) :: DPRM = -1._FB
+!
+! DX01 = X0 - X1
+! DY01 = Y0 - Y1
+! DX21 = X2 - X1
+! DY21 = Y2 - Y1
+! DSQ  = DX21**2._FB + DY21**2._FB
+! IF (DSQ > EPS_FB**2) DPRM=(DX01*DX21+DY01*DY21)/DSQ
+! IF (DPRM < EPS_FB) THEN
+!    X3=X1; Y3=Y1
+! ELSE IF (DPRM > (1._FB+EPS_FB)) THEN
+!    X3=X2; Y3=Y2
+! ELSE
+!    X3 = X1 + DPRM*DX21
+!    Y3 = Y1 + DPRM*DY21
+! ENDIF
+!
+! PT_LINE_DISTANCE_2D = SQRT( (X0-X3)**2._FB + (Y0-Y3)**2._FB )
+!
+! END FUNCTION PT_LINE_DISTANCE_2D
+
 
 ! ----------------------------- DIFF_ANGLE -----------------------------------------
 
@@ -31247,9 +31306,10 @@ REAL(FB), INTENT(IN), TARGET :: VERTS(3*NVERTS)
 LOGICAL, INTENT(IN) :: ABS_FLG
 
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
+REAL(FB), PARAMETER :: EPS_MID= 1.E-4_FB
 REAL(FB), POINTER, DIMENSION(:) :: V1, V2, V3
 REAL(FB) :: U1(3), U2(3), CRPD(3)
-LOGICAL :: TEST_FLAG
+LOGICAL :: TEST_FLAG=.FALSE.
 
 DIFF_ANGLE = .FALSE.
 
@@ -31291,7 +31351,7 @@ END SELECT
 U1(1:2) = U1(1:2) / SQRT(U1(1)**2._FB+U1(2)**2._FB) ! Normalize
 U2(1:2) = U2(1:2) / SQRT(U2(1)**2._FB+U2(2)**2._FB) ! Normalize
 IF (ABS_FLG) THEN
-   TEST_FLAG=ABS(U1(1)*U2(2)-U1(2)*U2(1)) < EPS_FB
+   TEST_FLAG=ABS(U1(1)*U2(2)-U1(2)*U2(1)) < EPS_MID
 ELSE
    TEST_FLAG=    U1(1)*U2(2)-U1(2)*U2(1)  < EPS_FB
 ENDIF
@@ -31370,8 +31430,8 @@ INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
 INTEGER, INTENT(OUT) :: LOCTYPE(NVERTS-2)
 
 INTEGER :: IFACE, NLIST, NLIST_OLD
-INTEGER :: VERT_LIST(0:100), VERT_FLAG(0:100), EDGE_LIST(2,1:100)
-LOGICAL :: NODE_EXISTS(100)
+INTEGER :: VERT_LIST(0:300), VERT_FLAG(0:300), EDGE_LIST(2,1:300)
+LOGICAL :: NODE_EXISTS(300)
 INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT, IEDGE
 LOGICAL HAVE_TRIANGLE
 REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
@@ -31500,7 +31560,7 @@ OUTER: DO WHILE (NLIST>=3)
       V1 = VERT_LIST(IVERT)
       V2 = VERT_LIST(IVERT+1)
       IF(.NOT.NODE_EXISTS(IVERT+1))EXIT INNER
-      IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2)) THEN
+      IF(NLIST==3.OR.VALID_TRIANGLE(DIR,VERTS,NVERTS,V0,V1,V2,VERT_FLAG)) THEN
          FACES(IFACE  ) = VERT_OFFSET+V0
          FACES(IFACE+1) = VERT_OFFSET+V1
          FACES(IFACE+2) = VERT_OFFSET+V2
