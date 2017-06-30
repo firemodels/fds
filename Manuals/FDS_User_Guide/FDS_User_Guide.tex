@@ -7979,10 +7979,10 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \subsection{Near-Wall Grid Resolution}
 \label{info:yplus}
 
-Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
+Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
 
 \begin{lstlisting}
-&BNDF QUANTITY='YPLUS' /
+&BNDF QUANTITY='VISCOUS WALL UNITS' /
 \end{lstlisting}
 
 \noindent
@@ -8471,7 +8471,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QSCA}$^{**}$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^{*}$                             & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
-%{\ct SCALAR RESOLUTION}$^{***}$                 & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -8479,8 +8478,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
-%{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+{\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
@@ -8490,7 +8489,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 {\ct WAVELET ERROR}$^{***}$                     & Section~\ref{info:meshquality}                    &                & S            \\ \hline
-{\ct YPLUS}                                     & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 \end{longtable}
 
 \noindent
