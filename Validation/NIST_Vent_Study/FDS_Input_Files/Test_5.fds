@@ -1,23 +1,23 @@
 &HEAD CHID='Test_5', TITLE='Propane burner in a small compartment' /
 
-&MESH IJK=32,32,28, XB=-0.2,0.6,-0.2,0.6,0.0,0.7, MULT_ID='mesh' /
+&MESH IJK=40,40,35, XB=-0.2,0.6,-0.2,0.6,0.0,0.7, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.8, DY=0.8, DZ=0.7, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &MISC TMPA=18. /
 
-&TIME T_END=6100., TIME_SHRINK_FACTOR=10. /
+&TIME T_END=6300., TIME_SHRINK_FACTOR=5. /
 
 &MATL ID='GYPSUM BOARD'
       FYI='US Gypsum Type X, Manzello, SiF 08',
       SPECIFIC_HEAT=1.089
       CONDUCTIVITY=0.15
-      DENSITY=711.0/
+      DENSITY=673./
 
 &SURF ID            = 'WALL'
       DEFAULT       = .TRUE.
       COLOR         = 'BEIGE'
       MATL_ID       = 'GYPSUM BOARD'
-      THICKNESS     = 0.016 /
+      THICKNESS     = 0.0159 /
 
 &MATL ID            = 'STEEL'
       SPECIFIC_HEAT = 0.465
@@ -48,7 +48,7 @@
 
 &REAC FUEL='PROPANE', SOOT_YIELD=0.024 /
 
-&SURF ID='FIRE', HRRPUA=240., COLOR='ORANGE', RAMP_Q='fire ramp' /
+&SURF ID='FIRE', HRRPUA=250., TMP_FRONT=300., COLOR='ORANGE', RAMP_Q='fire ramp' /
 &RAMP ID='fire ramp', T=   0., F=0. /
 &RAMP ID='fire ramp', T=   2., F=1. /
 &RAMP ID='fire ramp', T=6000., F=1. /
