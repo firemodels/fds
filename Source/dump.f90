@@ -1391,6 +1391,18 @@ DO I=1,N_DEVC_FILES
    WRITE(LU_SMV,'(1X,A)') TRIM(FN_DEVC(I))
 ENDDO
 
+DO I=1,N_CTRL_FILES
+   WRITE(LU_SMV,'(/A)') 'CSVF'
+   WRITE(LU_SMV,'(1X,A)') 'ctrl'
+   WRITE(LU_SMV,'(1X,A)') TRIM(FN_CTRL(I))
+ENDDO
+
+IF (MASS_FILE) THEN
+   WRITE(LU_SMV,'(/A)') 'CSVF'
+   WRITE(LU_SMV,'(1X,A)') 'mass'
+   WRITE(LU_SMV,'(1X,A)') TRIM(FN_MASS)
+ENDIF
+
 ! Write out file names specified using CSVF
 
 DO N = 1, N_CSVF
