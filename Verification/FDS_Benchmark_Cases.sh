@@ -17,3 +17,6 @@ $QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test128e.fds
 $QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test128f.fds
 $QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test128g.fds
 $QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test128h.fds
+
+$QFDS -t -o 1 -A -d Timing_Benchmarks race_test_1.fds
+$QFDS -t -o 4 -A -d Timing_Benchmarks race_test_4.fds
