@@ -2271,6 +2271,19 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \end{figure}
 
 
+\section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
+\label{race_test}
+
+OpenMP is used in FDS to sub-divide the work of the do-loops among multiple cores belonging to the same processor. Figure~\ref{race_test_fig} displays two pairs of temperature traces from two calculations, one using one OpenMP thread and one using four. The results of the two calculations ought to be identical, in which case the respective pairs of temperature traces ought to completely overlap.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/race_test}
+\caption[Result of the \textct{race\_test}]{Temperature time histories of two calculations that use different numbers of OpenMP threads. The pairs of temperature traces ought to be identical.}
+\label{race_test_fig}
+\end{figure}
+
+
 
 \chapter{Thermal Radiation}
 
