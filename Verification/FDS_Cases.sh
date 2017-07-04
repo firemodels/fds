@@ -451,6 +451,9 @@ $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
 
+$QFDS -o 1 -d Thread_Check race_test_1.fds
+$QFDS -o 4 -d Thread_Check race_test_4.fds
+
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds
 $QFDS -d Turbulence csmag_64.fds
