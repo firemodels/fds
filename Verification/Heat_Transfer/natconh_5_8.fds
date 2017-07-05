@@ -1,6 +1,6 @@
 &HEAD CHID='natconh_5_8', TITLE='LES of free convection in enclosed space, Ra = 1.77e05' /
 
-&MESH IJK=32,32,8, XB=-.08,.08,-.08,.08,0,.02/
+&MESH IJK=64,64,8, XB=-.08,.08,-.08,.08,0,.02/
 
 &TIME T_END=9.0/
 
