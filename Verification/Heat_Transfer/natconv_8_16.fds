@@ -1,4 +1,4 @@
-&HEAD CHID='natconv_16_16', TITLE='LES of free convection in enclosed space, Ra = 4.28e07' /
+&HEAD CHID='natconv_8_16', TITLE='LES of free convection in enclosed space, Ra = 4.28e07' /
 
 &MULT DY=0.4,DZ=0.4, J_UPPER=1,K_UPPER=7, ID='m1'/ one mesh in X, two in Y, eight in Z
 &MESH IJK=16,32,32, XB=0,.2,-0.4,0,0,0.4, MULT_ID='m1'/
