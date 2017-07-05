@@ -1887,7 +1887,7 @@ IF (CC_IBM) THEN
          WRITE(LU_SMV,'(/A)') 'BGEOM 0'
          WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
 
-         WRITE(LU_SMV,'(/A)') 'BNDE'
+         WRITE(LU_SMV,'(/A,2I6)') 'BNDE',I,1
          WRITE(LU_SMV,'(1X,A)') FN_BNDG(N,I)
          WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
          WRITE(LU_SMV,'(1X,A)') TRIM(BF%SMOKEVIEW_LABEL(1:30))
