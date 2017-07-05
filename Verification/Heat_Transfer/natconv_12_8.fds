@@ -1,4 +1,4 @@
-&HEAD CHID='natconv_Ra_4p28e10_8', TITLE='LES of free convection in enclosed space, Ra = 4.28e10' /
+&HEAD CHID='natconv_12_8', TITLE='LES of free convection in enclosed space, Ra = 4.28e10' /
 
 &MESH IJK=8,16,128, XB=0,2,-4,4,0,32/
 
