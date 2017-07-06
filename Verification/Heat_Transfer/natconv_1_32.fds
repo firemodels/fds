@@ -3,7 +3,7 @@
 &MULT DY=0.002,DZ=0.002, J_UPPER=3,K_UPPER=15, ID='m1'/ one mesh in X, four in Y, 16 in Z
 &MESH IJK=32,32,32, XB=0,.002,-0.004,-0.002,0,0.002, MULT_ID='m1'/
 
-&TIME T_END=0./0.27/
+&TIME T_END=0.27/
 
 &DUMP DT_DEVC=.01/
 
