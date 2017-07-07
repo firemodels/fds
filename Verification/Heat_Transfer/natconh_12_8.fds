@@ -2,7 +2,7 @@
 
 &MESH IJK=64,64,8, XB=-8,8,-8,8,0,2/
 
-&TIME T_END=3700./
+&TIME T_END=3227.0/
 
 &DUMP DT_DEVC=10/
 
