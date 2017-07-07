@@ -594,6 +594,83 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 \label{NIST_Smoke_Alarms_Drawing}
 \end{figure}
 
+\section{NIST Vent Study}
+
+X reduced-scale compartment experiments were conducted at NIST from May to August 2017. The compartment featured a two-floor design, with interior dimensions of 119.4 cm by 121.9 cm by 58.7 cm for the first floor, and 119.4 cm by 121.9 cm by 61.0 cm for the second floor. 5/8th inch type-X gypsum board was utilized for the interior of the compartment, with 2x4's functioning as the external supports. Thermo-physical properties of the gypsum board used in the compartment are given in Ref.~\cite{     }. For the entire series of experiements, a 103.23 cm$^2$ propane burner was utilized. The burner featured a flow rate of 1.65 sL/min, which through equation~\ref{Conversion_Equation}, is shown to produce a 2.5 kW fire.
+
+\be
+   1.65 \frac{L}{min} \times \frac{min}{60 s} \times \frac{m^3}{1000 L} \times \frac{1.967 kg Propane}{1 m^3} \times \frac{46,300 kJ}{1 kg Propane} = 2.50 \frac{kJ}{s}
+\label{Conversion_Equation}
+\ee
+
+-thermocouples/position
+-daq - labview
+-test process/vent adjustments 
+-established repeatability
+
+Compartment Features: Positions indicate center of item with respect to floor-specific origin (shown in Fig.~\ref{NIST_Vent_Study_2}).  %How to properly reference image
+
+Floor 1
+\begin{enumerate}
+\item Door: 20 cm by 30 cm high, center positioned at x=59.69 cm, y=0 cm, z=17.23 cm
+\item Burner: 10.16 cm by 10.16 cm by 6.35 cm high, center positioned at x= 30.48 cm, y= 30.48 cm, z=3.18 cm %check burner size
+\item Ceiling LT: Square,  100 cm$^2$ (shown in Table~\ref{tab:NIST_Vent_Study}), center positioned at x= 0 cm, y=  cm, z= 58.7 cm
+\item Ceiling RT: Variable size and shape (shown in Table~\ref{tab:NIST_Vent_Study}), center positioned at x= , y= , z= 58.7 cm 
+\item Thermocouples 1-8: x=?, y=cm inside container %how to present data
+\end{enumerate}
+
+Floor 2
+\begin{enumerate}
+\item LT Window: 10 cm by 20 cm high, center positioned at x=0, y= 78.66, z= 58.7 cm
+\item FT Window: 10 cm by 20 cm high, center positioned at x= 59.69, y= 0 cm   , z= 58.7 cm
+\item RT Window: 10 cm by 20 cm high, center positioned at  x= 119.4 cm, y= 78.66 cm, z= 58.7 cm
+\item  Floor 2  Ceiling Vent: Square, 100 cm$^2$, center positioned at x= 30.48 cm, y= 30.48 cm, z= 61 cm
+\item Thermocouples 8-17: %
+\end{enumerate}
+
+
+\begin{table}[h!]
+\caption{Vent State by Experiment: Time Opened} 
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Test&FR    &LT    &RT    &Ceiling&Ceiling&Ceiling&Ceiling&Ceiling&Floor 2\\
+No. &Window&Window&Window&LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ \hline \hline
+1   &  0 s     &  0 s     &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
+2   &  0 s     &  0 s     &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
+3   &  3600 s     &  2400 s     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square & Closed\\ \hline
+4   &  0 s     &  0 s     &  0 s     &  Closed     &  0 s    &  0 cm$^2$     & 400 cm$^2$  &  Square & Closed \\ \hline
+5   &  0 s     &  0 s     &  0 s     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed \\ \hline
+6   &  3600 s     &  2400 s     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
+7   &  0 s     &  0 s     &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed \\ \hline
+8   &  0 s     &  0 s     &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed\\ \hline
+9   &  4800 s     &  3600 s     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
+10   &  0 s     &  0 s     &  0 s     &  Closed    &  0 s        &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+11   &  0 s     &  0 s     &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+12   &  3600 s     &  2400 s     &   CLosed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+13   &  0 s     &  0 s     &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 0 s \\ \hline
+14   &  0 s     &  0 s     &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& ? s \\ \hline %floor 2 vent time
+15   &  4800 s     & 3600 s     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& ? s \\ \hline % floor 2 vent time
+\end{tabular}
+\end{center}
+\label{tab:NIST_Vent_Study}
+\end{table}
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_2}
+\caption[Geometry of the compartment from the NIST Vent Study: Location of ceiling vents.]{Geometry of the compartment from the NIST Vent Study: Location of ceiling vents.}
+\label{NIST_Vent_Study_1}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_1}
+\caption[Geometry of the compartment from the NIST Vent Study: Burner location.]{Geometry of the compartment from the NIST Vent Study: Burner location.}
+\label{NIST_Vent_Study_2}
+\end{figure}
+
+
+
+\clearpage
 
 \section{NRCC Facade Heat Flux Measurements}
 
