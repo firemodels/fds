@@ -5295,32 +5295,32 @@ DEVICE_LOOP: DO N=1,N_DEVC
             CASE DEFAULT SOLID_STATS_SELECT
 
                WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-                  IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
-                  IF (WALL(IW)%XW<DV%X1-MICRON .OR. WALL(IW)%XW>DV%X2+MICRON .OR. &
-                      WALL(IW)%YW<DV%Y1-MICRON .OR. WALL(IW)%YW>DV%Y2+MICRON .OR. &
-                      WALL(IW)%ZW<DV%Z1-MICRON .OR. WALL(IW)%ZW>DV%Z2+MICRON) CYCLE WALL_CELL_LOOP
-                  SURF_INDEX = WALL(IW)%SURF_INDEX
-                  IF (DV%SURF_ID=='null' .OR. SURFACE(SURF_INDEX)%ID==DV%SURF_ID) THEN
-                     NOT_FOUND = .FALSE.
-                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
-                     SELECT CASE(DV%STATISTICS)
-                        CASE('MAX')
-                           IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/WALL(IW)%ONE_D%II,WALL(IW)%ONE_D%JJ,WALL(IW)%ONE_D%KK/)
-                           STAT_VALUE = MAX(STAT_VALUE,VALUE)
-                        CASE('MIN')
-                           IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/WALL(IW)%ONE_D%II,WALL(IW)%ONE_D%JJ,WALL(IW)%ONE_D%KK/)
-                           STAT_VALUE = MIN(STAT_VALUE,VALUE)
-                        CASE('MEAN')
-                           STAT_VALUE = STAT_VALUE + VALUE
-                           STAT_COUNT = STAT_COUNT + 1
-                        CASE('SURFACE INTEGRAL')
-                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                              STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW
-                        CASE('SURFACE AREA')
-                           IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                              STAT_VALUE = STAT_VALUE + WALL(IW)%AW
-                     END SELECT
-                  ENDIF
+                  WC => WALL(IW)
+                  IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
+                  SURF_INDEX = WC%SURF_INDEX
+                  IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE WALL_CELL_LOOP
+                  IF (WC%XW<DV%X1-0.5_EB*DX(WC%ONE_D%II)-MICRON .OR. WC%XW>DV%X2+0.5_EB*DX(WC%ONE_D%II)+MICRON .OR. &
+                      WC%YW<DV%Y1-0.5_EB*DY(WC%ONE_D%JJ)-MICRON .OR. WC%YW>DV%Y2+0.5_EB*DY(WC%ONE_D%JJ)+MICRON .OR. &
+                      WC%ZW<DV%Z1-0.5_EB*DZ(WC%ONE_D%KK)-MICRON .OR. WC%ZW>DV%Z2+0.5_EB*DZ(WC%ONE_D%KK)+MICRON) CYCLE WALL_CELL_LOOP
+                  NOT_FOUND = .FALSE.
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
+                  SELECT CASE(DV%STATISTICS)
+                     CASE('MAX')
+                        IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK/)
+                        STAT_VALUE = MAX(STAT_VALUE,VALUE)
+                     CASE('MIN')
+                        IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK/)
+                        STAT_VALUE = MIN(STAT_VALUE,VALUE)
+                     CASE('MEAN')
+                        STAT_VALUE = STAT_VALUE + VALUE
+                        STAT_COUNT = STAT_COUNT + 1
+                     CASE('SURFACE INTEGRAL')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           STAT_VALUE = STAT_VALUE + VALUE*WC%AW
+                     CASE('SURFACE AREA')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           STAT_VALUE = STAT_VALUE + WC%AW
+                  END SELECT
                ENDDO WALL_CELL_LOOP
 
          END SELECT SOLID_STATS_SELECT
