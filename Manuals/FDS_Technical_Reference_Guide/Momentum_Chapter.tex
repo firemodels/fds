@@ -266,12 +266,15 @@ where species 0 is nitrogen.
 
 First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
 \be
-   \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
+    \left( \rho \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
 \ee
 Next, we make the following substitutions:
 \begin{enumerate}
 \item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
 $\nabla p=\rho_n \bg + \nabla \tp$.
+\be
+   \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
+\ee
 \item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $
 \item Divide all terms by the density, $\rho$
 \item Decompose the pressure term:
