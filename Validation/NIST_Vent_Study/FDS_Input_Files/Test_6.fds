@@ -69,7 +69,7 @@
 &HOLE XB= 0.80,1.00, 0.80,1.00,0.57,0.601 / Ceiling Vent
 &HOLE XB= 0.50,0.70,-0.03,0.03,0.02,0.32 /  Door
 &HOLE XB=-0.03,0.03, 0.70,0.80,0.80,1.00, DEVC_ID='window clock 1' /  Left Window
-&HOLE XB= 1.17,1.23, 0.70,0.80,0.80,1.00 /  Right Window
+HOLE XB= 1.17,1.23, 0.70,0.80,0.80,1.00 /  Right Window
 &HOLE XB= 0.55,0.65,-0.03,0.03,0.80,1.00, DEVC_ID='window clock 2' /  Front Window
 
 &DEVC ID='window clock 1', QUANTITY='TIME', SETPOINT=2400., INITIAL_STATE=.FALSE., XYZ=0,0,0 /
