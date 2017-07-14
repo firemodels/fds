@@ -45,7 +45,7 @@ END SUBROUTINE COMPUTE_VELOCITY_FLUX
 SUBROUTINE COMPUTE_VISCOSITY(T,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE
-USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,RNG_EDDY_VISCOSITY
+USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,RNG_EDDY_VISCOSITY,WALE_VISCOSITY
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
@@ -296,6 +296,34 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
          ENDDO
       ENDDO
 
+   CASE (WALE) SELECT_TURB
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
+               ! compute velocity gradient tensor
+               DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+               DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+               DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+               DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+               DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1))
+               DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+               DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+               DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+               A_IJ(1,1)=DUDX; A_IJ(1,2)=DUDY; A_IJ(1,3)=DUDZ
+               A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
+               A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
+
+               CALL WALE_VISCOSITY(NU_EDDY,A_IJ,STRAIN_RATE(I,J,K),DELTA)
+
+               MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
+            ENDDO
+         ENDDO
+      ENDDO
+
 END SELECT SELECT_TURB
 
 ! Compute resolved kinetic energy per unit mass
@@ -355,8 +383,26 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
          IF (LES) THEN
             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG),DY(JJG),DZ(KKG))
-            VDF = 1._EB-EXP(-WC%Y_PLUS*RAPLUS)
-            NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
+            SELECT CASE(NEAR_WALL_TURB_MODEL)
+               CASE DEFAULT ! Constant Smagorinsky with Van Driest damping
+                  VDF = 1._EB-EXP(-WC%Y_PLUS*RAPLUS)
+                  NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
+               CASE(WALE)
+                  ! compute velocity gradient tensor
+                  DUDX = RDX(IIG)*(UU(IIG,JJG,KKG)-UU(IIG-1,JJG,KKG))
+                  DVDY = RDY(JJG)*(VV(IIG,JJG,KKG)-VV(IIG,JJG-1,KKG))
+                  DWDZ = RDZ(KKG)*(WW(IIG,JJG,KKG)-WW(IIG,JJG,KKG-1))
+                  DUDY = 0.25_EB*RDY(JJG)*(UU(IIG,JJG+1,KKG)-UU(IIG,JJG-1,KKG)+UU(IIG-1,JJG+1,KKG)-UU(IIG-1,JJG-1,KKG))
+                  DUDZ = 0.25_EB*RDZ(KKG)*(UU(IIG,JJG,KKG+1)-UU(IIG,JJG,KKG-1)+UU(IIG-1,JJG,KKG+1)-UU(IIG-1,JJG,KKG-1))
+                  DVDX = 0.25_EB*RDX(IIG)*(VV(IIG+1,JJG,KKG)-VV(IIG-1,JJG,KKG)+VV(IIG+1,JJG-1,KKG)-VV(IIG-1,JJG-1,KKG))
+                  DVDZ = 0.25_EB*RDZ(KKG)*(VV(IIG,JJG,KKG+1)-VV(IIG,JJG,KKG-1)+VV(IIG,JJG-1,KKG+1)-VV(IIG,JJG-1,KKG-1))
+                  DWDX = 0.25_EB*RDX(IIG)*(WW(IIG+1,JJG,KKG)-WW(IIG-1,JJG,KKG)+WW(IIG+1,JJG,KKG-1)-WW(IIG-1,JJG,KKG-1))
+                  DWDY = 0.25_EB*RDY(JJG)*(WW(IIG,JJG+1,KKG)-WW(IIG,JJG-1,KKG)+WW(IIG,JJG+1,KKG-1)-WW(IIG,JJG-1,KKG-1))
+                  A_IJ(1,1)=DUDX; A_IJ(1,2)=DUDY; A_IJ(1,3)=DUDZ
+                  A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
+                  A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
+                  CALL WALE_VISCOSITY(NU_EDDY,A_IJ,STRAIN_RATE(IIG,JJG,KKG),DELTA)
+            END SELECT
             IF (CELL_COUNTER(IIG,JJG,KKG)==0) MU(IIG,JJG,KKG) = 0._EB
             CELL_COUNTER(IIG,JJG,KKG) = CELL_COUNTER(IIG,JJG,KKG) + 1
             WGT = 1._EB/REAL(CELL_COUNTER(IIG,JJG,KKG),EB)
