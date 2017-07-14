@@ -1,4 +1,4 @@
-&HEAD CHID='Test_6', TITLE='Propane burner in a small compartment' /
+&HEAD CHID='Test_14', TITLE='Propane burner in a small compartment' /
 
 &MESH IJK=40,40,35, XB=-0.2,0.6,-0.2,0.6,0.0,0.7, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.8, DY=0.8, DZ=0.7, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
@@ -30,6 +30,7 @@
       CONDUCTIVITY  = 204.
       DENSITY       = 2707. /
 
+
 &SURF ID            = 'STEEL PLATE'
       MATL_ID       = 'STEEL'
       THICKNESS     = 0.003
@@ -40,6 +41,7 @@
       THICKNESS     = 0.013
       COLOR         = 'SILVER' /
 
+
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 &VENT MB='YMIN', SURF_ID='OPEN' /
@@ -48,7 +50,7 @@
 
 &REAC FUEL='PROPANE', SOOT_YIELD=0.024 /
 
-&SURF ID='FIRE', HRRPUA=250., TMP_FRONT=300., COLOR='ORANGE', RAMP_Q='fire ramp' /
+&SURF ID='FIRE', HRRPUA=250., TMP_FRONT=300., COLOR='ORANGE', RAMP_Q='fire ramp' / 
 &RAMP ID='fire ramp', T=   0., F=0. /
 &RAMP ID='fire ramp', T=   2., F=1. /
 &RAMP ID='fire ramp', T=6000., F=1. /
@@ -63,17 +65,22 @@
 &OBST XB= 0.00,1.20, 0.00,1.20,0.58,0.6 /
 &OBST XB=-0.02,1.22,-0.02,1.22,1.2,1.22 /
 
-&OBST XB= 0.80,1.00, 0.80,1.00,0.60,0.62, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock' / Ceiling Vent Cover
-&DEVC ID='cover clock', QUANTITY='TIME', SETPOINT=1200., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+&OBST XB= 0.80,1.00, 0.80,1.00,0.63,0.65, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock' / Ceiling Vent Cover
+&DEVC ID='cover clock', QUANTITY='TIME', SETPOINT=2400., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
 
-&HOLE XB= 0.80,1.00, 0.80,1.00,0.57,0.601 / Ceiling Vent
+&OBST XB= 0.25,0.35, 0.85,0.95,0.63,0.65, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock 1' / Ceiling Vent Cover
+&DEVC ID='cover clock 1', QUANTITY='TIME', SETPOINT=1200., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+
+&OBST XB= 0.25,0.35, 0.25,0.35,1.23,1.25, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock 2' / Roof Vent Cover
+&DEVC ID='cover clock 2', QUANTITY='TIME', SETPOINT=3600., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+
+&HOLE XB= 0.80,1.00, 0.80,1.00,0.57,0.63 / Ceiling Vent
+&HOLE XB= 0.25,0.35, 0.85,0.95,0.57,0.63 / Ceiling Vent
+&HOLE XB= 0.25,0.35, 0.25,0.35,1.17,1.23 / Roof Vent
 &HOLE XB= 0.50,0.70,-0.03,0.03,0.02,0.32 /  Door
-&HOLE XB=-0.03,0.03, 0.70,0.80,0.80,1.00, DEVC_ID='window clock 1' /  Left Window
-&HOLE XB= 1.17,1.23, 0.70,0.80,0.80,1.00 /  Right Window
-&HOLE XB= 0.55,0.65,-0.03,0.03,0.80,1.00, DEVC_ID='window clock 2' /  Front Window
-
-&DEVC ID='window clock 1', QUANTITY='TIME', SETPOINT=2400., INITIAL_STATE=.FALSE., XYZ=0,0,0 /
-&DEVC ID='window clock 2', QUANTITY='TIME', SETPOINT=3600., INITIAL_STATE=.FALSE., XYZ=0,0,0 /
+&HOLE XB=-0.03,0.03, 0.70,0.80,0.80,1.00 /  Window
+&HOLE XB= 1.17,1.23, 0.70,0.80,0.80,1.00 /  Window
+&HOLE XB= 0.55,0.65,-0.03,0.03,0.80,1.00 /  Window
 
 &PROP ID='SHEATHED TC', DIAMETER=0.003 /
 
