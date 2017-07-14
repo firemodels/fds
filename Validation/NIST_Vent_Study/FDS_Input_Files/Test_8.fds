@@ -68,8 +68,8 @@
 &OBST XB= 0.80,1.00, 0.80,1.00,0.63,0.65, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock' / Ceiling Vent Cover
 &DEVC ID='cover clock', QUANTITY='TIME', SETPOINT=2400., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
 
-&OBST XB= 0.25,0.35, 0.85,0.95,0.63,0.65, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock' / Ceiling Vent Cover
-&DEVC ID='cover clock', QUANTITY='TIME', SETPOINT=1200., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+&OBST XB= 0.25,0.35, 0.85,0.95,0.63,0.65, SURF_ID='ALUMINUM SLAB', DEVC_ID='cover clock 1' / Ceiling Vent Cover
+&DEVC ID='cover clock 1', QUANTITY='TIME', SETPOINT=1200., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
 
 
 &HOLE XB= 0.80,1.00, 0.80,1.00,0.57,0.63 / Ceiling Vent
