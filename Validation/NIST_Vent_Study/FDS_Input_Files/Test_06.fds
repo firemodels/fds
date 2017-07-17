@@ -1,4 +1,4 @@
-&HEAD CHID='Test_6', TITLE='Propane burner in a small compartment' /
+&HEAD CHID='Test_06', TITLE='Propane burner in a small compartment' /
 
 &MESH IJK=40,40,35, XB=-0.2,0.6,-0.2,0.6,0.0,0.7, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.8, DY=0.8, DZ=0.7, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
