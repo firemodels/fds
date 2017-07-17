@@ -1092,14 +1092,14 @@ END SUBROUTINE RNG_EDDY_VISCOSITY
 
 SUBROUTINE WALE_VISCOSITY(NU_T,G,S,DELTA)
 
-! Wall Adaptive Local Eddy (WALE) Viscosity
+! Wall Adapted Local Eddy (WALE) Viscosity
 
 ! F. Nicoud, F. Ducros. Subgrid-scale stress modelling based on the square of the velocity gradient tensor.
 ! Flow, Turbulence, and Combustion, Vol. 62, pp. 183-200, 1999.
 
 REAL(EB), INTENT(OUT) :: NU_T
 REAL(EB), INTENT(IN) :: S,G(3,3),DELTA
-REAL(EB) :: G2(3,3),SD(3,3),SD2,ONTH_G2_KK
+REAL(EB) :: G2(3,3),SD(3,3),SD2,ONTH_G2_KK,DENOM
 INTEGER :: I,J
 REAL(EB), PARAMETER :: C_M=0.65_EB ! C_M**2 = 10.6 * C_S**2
 
@@ -1129,7 +1129,12 @@ DO J=1,3
    ENDDO
 ENDDO
 
-NU_T = (C_M*DELTA)**2 * SD2**1.5_EB / ( S**5 + SD2**1.25_EB )
+DENOM = S**5 + SD2**1.25_EB
+IF (DENOM>TWO_EPSILON_EB) THEN
+   NU_T = (C_M*DELTA)**2 * SD2**1.5_EB / DENOM
+ELSE
+   NU_T = 0._EB
+ENDIF
 
 END SUBROUTINE WALE_VISCOSITY
 
