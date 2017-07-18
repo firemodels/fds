@@ -10,117 +10,26 @@
 
 &RAMP ID='k_LB_int', T=107., F=0.0541 /
 &RAMP ID='k_LB_int', T=127., F=0.0548 /
-&RAMP ID='k_LB_int', T=147., F=0.0548 /
-&RAMP ID='k_LB_int', T=167., F=0.0564 /
-&RAMP ID='k_LB_int', T=187., F=0.0573 /
-&RAMP ID='k_LB_int', T=207., F=0.0583 /
-&RAMP ID='k_LB_int', T=227., F=0.0594 /
-&RAMP ID='k_LB_int', T=247., F=0.0604 /
-&RAMP ID='k_LB_int', T=267., F=0.0618 /
-&RAMP ID='k_LB_int', T=287., F=0.0632 /
 &RAMP ID='k_LB_int', T=307., F=0.0646 /
-&RAMP ID='k_LB_int', T=327., F=0.0662 /
-&RAMP ID='k_LB_int', T=347., F=0.0679 /
-&RAMP ID='k_LB_int', T=367., F=0.0697 /
-&RAMP ID='k_LB_int', T=387., F=0.0716 /
-&RAMP ID='k_LB_int', T=407., F=0.0736 /
 &RAMP ID='k_LB_int', T=427., F=0.0757 /
 
-&RAMP ID='k_LB_char', T=307., F=0.0293 /
-&RAMP ID='k_LB_char', T=327., F=0.0324 /
 &RAMP ID='k_LB_char', T=347., F=0.0357 /
-&RAMP ID='k_LB_char', T=367., F=0.0393 /
-&RAMP ID='k_LB_char', T=387., F=0.0431 /
-&RAMP ID='k_LB_char', T=407., F=0.0472 /
-&RAMP ID='k_LB_char', T=427., F=0.0515 /
 &RAMP ID='k_LB_char', T=447., F=0.0560 /
-&RAMP ID='k_LB_char', T=467., F=0.0608 /
-&RAMP ID='k_LB_char', T=487., F=0.0658 /
-&RAMP ID='k_LB_char', T=507., F=0.0712 /
-&RAMP ID='k_LB_char', T=527., F=0.0768 /
-&RAMP ID='k_LB_char', T=547., F=0.0827 /
-&RAMP ID='k_LB_char', T=567., F=0.0889 /
-&RAMP ID='k_LB_char', T=587., F=0.0954 /
-&RAMP ID='k_LB_char', T=607., F=0.1022 /
 &RAMP ID='k_LB_char', T=627., F=0.1094 /
-&RAMP ID='k_LB_char', T=647., F=0.1168 /
-&RAMP ID='k_LB_char', T=667., F=0.1246 /
-&RAMP ID='k_LB_char', T=687., F=0.1327 /
-&RAMP ID='k_LB_char', T=707., F=0.1412 /
-&RAMP ID='k_LB_char', T=727., F=0.15 /
-&RAMP ID='k_LB_char', T=747., F=0.1592 /
-&RAMP ID='k_LB_char', T=767., F=0.1687 /
-&RAMP ID='k_LB_char', T=787., F=0.1787 /
-&RAMP ID='k_LB_char', T=807., F=0.1890 /
-&RAMP ID='k_LB_char', T=827., F=0.1997 /
 &RAMP ID='k_LB_char', T=847., F=0.2107 /
 
 &RAMP ID='k_FL_int', T=107., F=0.0912 /
-&RAMP ID='k_FL_int', T=127., F=0.0980 /
-&RAMP ID='k_FL_int', T=147., F=0.1056 /
-&RAMP ID='k_FL_int', T=167., F=0.1139 /
-&RAMP ID='k_FL_int', T=187., F=0.1230 /
-&RAMP ID='k_FL_int', T=207., F=0.1329 /
-&RAMP ID='k_FL_int', T=227., F=0.1438 /
 &RAMP ID='k_FL_int', T=247., F=0.1555 /
-&RAMP ID='k_FL_int', T=267., F=0.1681 /
-&RAMP ID='k_FL_int', T=287., F=0.1817 /
-&RAMP ID='k_FL_int', T=307., F=0.1963 /
-&RAMP ID='k_FL_int', T=327., F=0.2120 /
-&RAMP ID='k_FL_int', T=347., F=0.2287 /
 &RAMP ID='k_FL_int', T=367., F=0.2466 /
-&RAMP ID='k_FL_int', T=387., F=0.2656 /
-&RAMP ID='k_FL_int', T=407., F=0.2858 /
 &RAMP ID='k_FL_int', T=427., F=0.3073 /
 
 &RAMP ID='k_FL_char', T=307., F=0.293 /
-&RAMP ID='k_FL_char', T=327., F=0.324 /
-&RAMP ID='k_FL_char', T=347., F=0.357 /
-&RAMP ID='k_FL_char', T=367., F=0.393 /
-&RAMP ID='k_FL_char', T=387., F=0.431 /
 &RAMP ID='k_FL_char', T=407., F=0.472 /
-&RAMP ID='k_FL_char', T=427., F=0.515 /
-&RAMP ID='k_FL_char', T=447., F=0.560 /
-&RAMP ID='k_FL_char', T=467., F=0.608 /
-&RAMP ID='k_FL_char', T=487., F=0.658 /
-&RAMP ID='k_FL_char', T=507., F=0.712 /
-&RAMP ID='k_FL_char', T=527., F=0.768 /
-&RAMP ID='k_FL_char', T=547., F=0.827 /
-&RAMP ID='k_FL_char', T=567., F=0.889 /
-&RAMP ID='k_FL_char', T=587., F=0.954 /
 &RAMP ID='k_FL_char', T=607., F=1.022 /
-&RAMP ID='k_FL_char', T=627., F=1.094 /
-&RAMP ID='k_FL_char', T=647., F=1.168 /
-&RAMP ID='k_FL_char', T=667., F=1.246 /
-&RAMP ID='k_FL_char', T=687., F=1.327 /
-&RAMP ID='k_FL_char', T=707., F=1.412 /
-&RAMP ID='k_FL_char', T=727., F=1.5 /
-&RAMP ID='k_FL_char', T=747., F=1.592 /
-&RAMP ID='k_FL_char', T=767., F=1.687 /
-&RAMP ID='k_FL_char', T=787., F=1.787 /
-&RAMP ID='k_FL_char', T=807., F=1.890 /
-&RAMP ID='k_FL_char', T=827., F=1.997 /
 &RAMP ID='k_FL_char', T=847., F=2.107 /
 
 &RAMP ID='k_Kaowool', T=20., F=0.0487 /
-&RAMP ID='k_Kaowool', T=40., F=0.0492 /
-&RAMP ID='k_Kaowool', T=60., F=0.0497 /
-&RAMP ID='k_Kaowool', T=80., F=0.0502 /
-&RAMP ID='k_Kaowool', T=100., F=0.0509 /
-&RAMP ID='k_Kaowool', T=120., F=0.0516 /
-&RAMP ID='k_Kaowool', T=140., F=0.0524 /
-&RAMP ID='k_Kaowool', T=160., F=0.0533 /
-&RAMP ID='k_Kaowool', T=180., F=0.0543 /
-&RAMP ID='k_Kaowool', T=200., F=0.0553 /
-&RAMP ID='k_Kaowool', T=220., F=0.0565 /
 &RAMP ID='k_Kaowool', T=240., F=0.0577 /
-&RAMP ID='k_Kaowool', T=260., F=0.0590 /
-&RAMP ID='k_Kaowool', T=280., F=0.0604 /
-&RAMP ID='k_Kaowool', T=300., F=0.0618 /
-&RAMP ID='k_Kaowool', T=320., F=0.0633 /
-&RAMP ID='k_Kaowool', T=340., F=0.0650 /
-&RAMP ID='k_Kaowool', T=360., F=0.0666 /
-&RAMP ID='k_Kaowool', T=380., F=0.0684 /
 &RAMP ID='k_Kaowool', T=400., F=0.0703 /
 
 &MATL ID='MOISTURE'
@@ -167,7 +76,7 @@
       A(1) = 2.61e-2
       E(1) = 1.70E4
       EMISSIVITY=0.85
-      DENSITY=173.
+      DENSITY=170.
       SPEC_ID='CB GAS'
       NU_SPEC=0.41
       MATL_ID='LB char2'
@@ -177,7 +86,7 @@
 
 &MATL ID='LB char2'
       EMISSIVITY=0.85
-      DENSITY=102.
+      DENSITY=100.
       CONDUCTIVITY_RAMP = 'k_LB_char'
       SPECIFIC_HEAT=1.30 /
 
