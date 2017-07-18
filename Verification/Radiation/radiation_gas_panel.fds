@@ -1,4 +1,4 @@
-&HEAD CHID='radiation_test', TITLE='' /
+&HEAD CHID='radiation_gas_panel', TITLE='' /
 &TIME T_END=1.5 /
 &MISC TMPA=5 / 
 
