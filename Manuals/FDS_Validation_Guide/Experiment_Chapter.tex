@@ -598,46 +598,16 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 
 
 \section{NIST Vent Study}
-
-X reduced-scale enclosure experiments were conducted at NIST from May to August, 2017. 
-
+%As part of CFAST Validation for buildings with varied natural ventilation, 
+15 reduced-scale enclosure experiments were conducted at NIST from May to August, 2017. 
 \subsection{Enclosure Geometry}
+\label{Enclosure_Geometry}
 
-The enclosure consisted of two compartments stacked one on top of the other. The interior lateral dimensions of each compartment were 119~cm by 122~cm. The height of the lower compartment was 59~cm, and the upper was 61~cm. 
-
-\begin{figure}[h]
-%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_2}
-\caption[Geometry of the compartment from the NIST Vent Study: Location of ceiling vents.]{Geometry of the compartment from the NIST Vent Study: Location of ceiling vents.}
-\label{NIST_Vent_Study_1}
-\end{figure}
-
-\begin{figure}[h!]
-%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_1}
-\caption[Geometry of the compartment from the NIST Vent Study: Burner location.]{Geometry of the compartment from the NIST Vent Study: Burner location.}
-\label{NIST_Vent_Study_2}
-\end{figure}
-
-Floor 1
-\begin{enumerate}
-\item Door: 20 cm by 30 cm high, center positioned at x=59.69 cm, y=0 cm, z=17.23 cm
-\item Burner: 10.16 cm by 10.16 cm by 6.35 cm high, center positioned at x= 30.48 cm, y= 30.48 cm, z=3.18 cm %check burner size
-\item Ceiling LT: Square,  100 cm$^2$ (shown in Table~\ref{tab:NIST_Vent_Study}), center positioned at x= 0 cm, y=  cm, z= 58.7 cm
-\item Ceiling RT: Variable size and shape (shown in Table~\ref{tab:NIST_Vent_Study}), center positioned at x= , y= , z= 58.7 cm
-\item Thermocouples 1-8: x=?, y=cm inside container %how to present data
-\end{enumerate}
-
-Floor 2
-\begin{enumerate}
-\item LT Window: 10 cm by 20 cm high, center positioned at x=0, y= 78.66, z= 58.7 cm
-\item FT Window: 10 cm by 20 cm high, center positioned at x= 59.69, y= 0 cm   , z= 58.7 cm
-\item RT Window: 10 cm by 20 cm high, center positioned at  x= 119.4 cm, y= 78.66 cm, z= 58.7 cm
-\item  Floor 2  Ceiling Vent: Square, 100 cm$^2$, center positioned at x= 30.48 cm, y= 30.48 cm, z= 61 cm
-\item Thermocouples 8-17: %
-\end{enumerate}
+The enclosure consisted of two compartments stacked one on top of the other. The interior lateral dimensions of each compartment were 119~cm by 121~cm. The height of the lower compartment was 59~cm, and the upper was 61~cm. The enclosure was located inside a room that was approximately 297~cm by 310~cm. The height of the room was 275~cm, with an exhaust duct loacted above the compartment. The room had a tile floor, however, a gypsum board floor was cut to fit and placed within the lower compartment. 
 
 \subsection{Material Properties}
 
-The walls, ceiling and floor of each compartment was 1.6~cm (5/8~in) Type~X gypsum board. Wood studs formed the exterior frame. Thermo-physical properties of the gypsum board are given in Ref.~\cite{Manzello:SiF08}.
+The walls, ceiling and floor of each compartment was 1.6~cm (5/8~in) Type~X gypsum board. Wood studs formed the exterior frame. Thermo-physical properties of the gypsum board are given in Ref.~\cite{Manzello:SiF08}. 6.35~cm magnetic tape was used to seal the butted edges within the upper compartment. Additionally, a  layer of K-wool, shown in Fig.~\ref{NIST_Vent_Study_1} was used to insulate the second floor.
 
 \subsection{Burner}
 
@@ -647,16 +617,43 @@ For the entire series of experiments, a 10~cm square propane burner was utilized
 \label{Conversion_Equation}
 \ee
 
--thermocouples/position
--daq - labview
--test process/vent adjustments
--established repeatability
+%{Thermocouples} ----heights still need to be specified 
+%8 K~Type thermocouples were inserted into each floor to measure the vertical temperature profile. The thermocouples were aligned with the center of the right ceiling vent, positioned in a vertical array at x= 
 
-Compartment Features: Positions indicate center of item with respect to floor-specific origin (shown in Fig.~\ref{NIST_Vent_Study_2}).  %How to properly reference image
+\subsection{Test Procedure}
+Each experiment was performed for approximately 6300~s following ignition. This consisted of 6000~s with the burner on and an additional 300~s following extinguish. As indicated in Table~\ref{tab:NIST_Vent_Study}, modifications to the compartment were performed both before and during experiements. Changes to vent properties, such as shape or size, only occured in between experiements. The vent state (open/closed) was modified both before and during experiments at 1200~s increments. 
+
+For Test No. 1-4, two trials were performed. In each case, the percent difference from trial 1 to trial 2 remained within 3 percent. On average, this  corresponded to a difference of less than 1 degrees celcius assuming equal ambient temperatures at ignition. For this reason, it was concluded that the experiments had basic repeatability. For Test No. 4-12, the behaivor of the thermocouples remained consistent and only one trial was performed for each test. However, for Test No. 13, temperature values were found to be 50 percent higher than any previous case. This was found to be the product of an unknown issue with the mass flow generator.
+
+For tests 13-15, a Dwyer rotameter was used in place of the mass flow controller. The rotameter had a flow range of 4~L/min air. To acheive a flow rate of 1.65 sL/min propane, the propane-air conversion factor of 1.23 was utilized. This provided a value of roughly  2~L/min. Test No.7 was repeated using this value. Temperature values remained 6-8 degrees celcius outisde of the original range. The test was repeated once more to allow further adjustments to be made to the rotameter. A final value between 1.9~L/min and 2.0~L/min was utilized for the remaining tests.
+
+%-daq:collecting temperature value every second - averaging to hot layers/depths
+\subsection{Leak Analysis}
+
+
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Plan}
+%\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
+\label{NIST_Vent_Study_3}
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Front}
+\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
+\label{NIST_Vent_Study_1}
+\end{figure}
+
+%\begin{figure}[h]
+%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_4}
+%\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
+%\label{NIST_Vent_Study_1}
+%\end{figure}
+
+%\begin{figure}[h!]
+%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_1}
+%\caption[Geometry of the compartment from the NIST Vent Study: Layer Identification]{Geometry of the compartment from the NIST Vent Study: Layer Identification}
+%\label{NIST_Vent_Study_2}
+%\end{figure}
+
 
 \subsection{Test Matrix}
-
-
 \begin{table}[h!]
 \caption{Vent State by Experiment: Time Opened}
 \begin{center}
@@ -677,8 +674,8 @@ No. &Window&Window&Window&LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ \hl
 11   &  0 s     &  0 s     &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
 12   &  3600 s     &  2400 s     &   CLosed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
 13   &  0 s     &  0 s     &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 0 s \\ \hline
-14   &  0 s     &  0 s     &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& ? s \\ \hline %floor 2 vent time
-15   &  4800 s     & 3600 s     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& ? s \\ \hline % floor 2 vent time
+14   &  0 s     &  0 s     &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline 
+15   &   Closed     & Closed     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline 
 \end{tabular}
 \end{center}
 \label{tab:NIST_Vent_Study}
