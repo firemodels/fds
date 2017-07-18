@@ -272,6 +272,7 @@ $QFDS -d Radiation radiation_box__20__100.fds
 $QFDS -d Radiation radiation_box__20_2000.fds
 $QFDS -d Radiation radiation_box__20__300.fds
 $QFDS -d Radiation radiation_box__20___50.fds
+$QFDS -d Radiation radiation_gas_panel.fds
 $QFDS -d Radiation radiation_plane_layer_1_1.fds
 $QFDS -d Radiation radiation_plane_layer_1_2.fds
 $QFDS -d Radiation radiation_plane_layer_1_3.fds
