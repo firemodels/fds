@@ -598,7 +598,7 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 
 
 \section{NIST Vent Study}
-%As part of CFAST Validation for buildings with varied natural ventilation, 
+
 15 reduced-scale enclosure experiments were conducted at NIST from May to August, 2017. 
 \subsection{Enclosure Geometry}
 \label{Enclosure_Geometry}
@@ -617,8 +617,20 @@ For the entire series of experiments, a 10~cm square propane burner was utilized
 \label{Conversion_Equation}
 \ee
 
-%{Thermocouples} ----heights still need to be specified 
-%8 K~Type thermocouples were inserted into each floor to measure the vertical temperature profile. The thermocouples were aligned with the center of the right ceiling vent, positioned in a vertical array at x= 
+\subsection{Thermocouples}
+8 K~Type thermocouples were inserted into each floor to measure the vertical temperature profile. The thermocouples formed a vertical array at x=84~cm. TC-1 was defined as the uppermost thermocouple, with heights defined as the vertical distance from the compartment specific ceiling.
+
+\begin{table}[h!]
+\caption{TC height}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+TC No.& 1& 2& 3 & 4& 5& 6& 7& 8& 9&10&11&12&13&14&15&16\\ \hline
+Height& 6.0& 11.4& 17.8& 22.9& 27.9& 33.0& 43.2& 53.3& ?& ?& ?& ?& ?& ?&?&?\\ \hline
+\end{tabular}
+\end{center}
+\label{Tab.TC}
+\end{table}
 
 \subsection{Test Procedure}
 Each experiment was performed for approximately 6300~s following ignition. This consisted of 6000~s with the burner on and an additional 300~s following extinguish. As indicated in Table~\ref{tab:NIST_Vent_Study}, modifications to the compartment were performed both before and during experiements. Changes to vent properties, such as shape or size, only occured in between experiements. The vent state (open/closed) was modified both before and during experiments at 1200~s increments. 
@@ -633,25 +645,11 @@ For tests 13-15, a Dwyer rotameter was used in place of the mass flow controller
 
 \begin{figure}[h!]
 \includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Plan}
-%\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
 \label{NIST_Vent_Study_3}
 \includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Front}
 \caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
 \label{NIST_Vent_Study_1}
 \end{figure}
-
-%\begin{figure}[h]
-%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_4}
-%\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
-%\label{NIST_Vent_Study_1}
-%\end{figure}
-
-%\begin{figure}[h!]
-%\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_1}
-%\caption[Geometry of the compartment from the NIST Vent Study: Layer Identification]{Geometry of the compartment from the NIST Vent Study: Layer Identification}
-%\label{NIST_Vent_Study_2}
-%\end{figure}
-
 
 \subsection{Test Matrix}
 \begin{table}[h!]
@@ -672,7 +670,7 @@ No. &Window&Window&Window&LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ \hl
 9   &  4800 s     &  3600 s     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
 10   &  0 s     &  0 s     &  0 s     &  Closed    &  0 s        &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
 11   &  0 s     &  0 s     &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
-12   &  3600 s     &  2400 s     &   CLosed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+12   &  3600 s     &  2400 s     &   Closed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
 13   &  0 s     &  0 s     &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 0 s \\ \hline
 14   &  0 s     &  0 s     &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline 
 15   &   Closed     & Closed     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline 
@@ -680,9 +678,6 @@ No. &Window&Window&Window&LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ \hl
 \end{center}
 \label{tab:NIST_Vent_Study}
 \end{table}
-
-
-
 
 
 \clearpage
