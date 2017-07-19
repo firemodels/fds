@@ -1123,7 +1123,7 @@ DO J=1,3
    ENDDO
 ENDDO
 
-! fourth order contratction
+! fourth order contraction
 
 IV_SO = 0._EB
 DO L=1,3
