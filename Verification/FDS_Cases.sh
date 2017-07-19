@@ -466,6 +466,8 @@ $QFDS -d Turbulence vreman_32.fds
 $QFDS -d Turbulence vreman_64.fds
 $QFDS -d Turbulence rng_32.fds
 $QFDS -d Turbulence rng_64.fds
+$QFDS -d Turbulence wale_32.fds
+$QFDS -d Turbulence wale_64.fds
 $QFDS -d Turbulence yplus_8.fds
 $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
