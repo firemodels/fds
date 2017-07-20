@@ -52,7 +52,8 @@ $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
 $QFDS -d Fires fire_const_gamma.fds
 
-$QFDS -d Flowfields divergence_test.fds
+$QFDS -d Flowfields divergence_test_1.fds
+$QFDS -d Flowfields divergence_test_2.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
