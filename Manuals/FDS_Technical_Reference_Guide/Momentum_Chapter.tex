@@ -190,7 +190,7 @@ For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the con
 \subsection{Wall Adapting Local Eddy-viscosity (WALE) Model}
 \label{sec:wale}
 
-The Wall Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $\sim y^3$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
+The Wall Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
 \begin{equation}
 \label{eq:wale}
 \mu_{\si{t}} = \rho (C_{\si{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
@@ -590,6 +590,11 @@ where $A$ is a dimensionless empirical constant equal to 26.  The term in bracke
    \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
 \end{equation}
 where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
+
+\subsection{Alternate Near-Wall Eddy Viscosity Model}
+\label{sec:wall_wale_model}
+
+The WALE model (see Sec.~\ref{sec:wale}) is also available as a near-wall eddy viscosity model.  In fact, this is WALE's main purpose.  With the WALE model the eddy viscosity goes to zero at the correct rate, $\nu_t = O(y^3)$, without the need for an explicit damping function.
 
 \subsection{Open Boundaries}
 
