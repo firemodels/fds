@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#export FIREBOTROOT=/home2/smokevis2/firebot/FireModels_central/fds/ # blaze firebot
-FIREBOTROOT=/home4/firebot/FireModels_central/fds/ # burn firebot
+export FIREBOTROOT=/home2/smokevis2/firebot/FireModels_central/fds/ # blaze firebot
+#FIREBOTROOT=/home4/firebot/FireModels_central/fds/ # burn firebot
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
 export FIREBOTVER=$FIREBOTROOT/Verification/
 export FIREBOTVAL=$FIREBOTROOT/Validation/

@@ -1603,6 +1603,23 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
 
 \clearpage
 
+\subsection{WALE (\texorpdfstring{\textct{wale}}{wale})}
+\label{WALE_model}
+
+The WALE (Wall Adapting Local Eddy-viscosity) model of Nicoud and Ducros \cite{Nicoud:1999} was developed as a near-wall eddy viscosity model with the proper scaling behavior without the need for a damping function like Van Driest damping (see \cite{Wilcox:1}).  Details of the model are provided in the FDS Technical Guide \cite{FDS_Math_Guide}.  While WALE is designed for use a near-wall model, WALE can also perform as a bulk flow eddy viscosity model.  Here we confirm the appropriate choice of WALE model constant, $C_{\rm w}=0.60$ in FDS, by performing simulation of decaying isotropic turbulence, as was also performed in \cite{Nicoud:1999}.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using the WALE model]{\label{fig_wale_cbc} WALE model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
 
 \section{Jet Centerline Velocity Decay (\texorpdfstring{\textct{jet}}{jet})}
 

@@ -1101,7 +1101,7 @@ REAL(EB), INTENT(OUT) :: NU_T
 REAL(EB), INTENT(IN) :: G_IJ(3,3),DELTA
 REAL(EB) :: S_IJ(3,3),O_IJ(3,3),S2,O2,IV_SO,SD2,DENOM
 INTEGER :: I,J,K,L
-REAL(EB), PARAMETER :: C_W=0.65_EB ! C_W**2 = 10.6 * C_S**2
+! REAL(EB), PARAMETER :: C_W=0.60_EB ! C_W**2 \approx 10.6 * C_S**2
 
 ! compute strain and rotation tensors
 
@@ -1142,7 +1142,7 @@ SD2 = ONSI*(S2*S2 + O2*O2) + TWTH*S2*O2 + 2._EB*IV_SO
 
 DENOM = S2**2.5_EB + SD2**1.25_EB
 IF (DENOM>TWO_EPSILON_EB) THEN
-   NU_T = (C_W*DELTA)**2 * SD2**1.5_EB / DENOM
+   NU_T = (C_WALE*DELTA)**2 * SD2**1.5_EB / DENOM
 ELSE
    NU_T = 0._EB
 ENDIF
