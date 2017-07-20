@@ -1,4 +1,4 @@
-&HEAD CHID='divergence_test' /
+&HEAD CHID='divergence_test_1' /
 
 &MESH IJK=20,20,20, XB=0,1,0,1,0,1/
 
