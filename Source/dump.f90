@@ -2559,9 +2559,9 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', CPBAR_Z(ITMP,N)*TMPA
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(ITMP,N)*500._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(ITMP,N)*1000._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(ITMP,N)*1500._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(500,N)*500._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(1000,N)*1000._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(1500,N)*1500._EB
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
