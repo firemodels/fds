@@ -187,10 +187,10 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
 
 For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the constant coefficient Smagorinsky model.  Unlike constant coefficient Smagorinsky, however, the RNG turns itself off in regions of low turbulence.  The cutoff constant, $C=10$, has been tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case (see FDS Verification Guide \cite{FDS_Verification_Guide}).
 
-\subsection{Wall Adapting Local Eddy-viscosity (WALE) Model}
+\subsection{Wall-Adapting Local Eddy-viscosity (WALE) Model}
 \label{sec:wale}
 
-The Wall Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
+The Wall-Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
 \begin{equation}
 \label{eq:wale}
 \mu_{\si{t}} = \rho (C_{\si{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
@@ -207,7 +207,7 @@ The strain and rotation tensors are given by
 S_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \quad ; \quad \Omega_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} - \frac{\partial u_j}{\partial x_i} \right)
 \end{equation}
 
-The model constant can be linked to the Smagorinsky constant for several flow fields with the relation, $C_{\rm w}^2 \approx 10.6 \, C_{\rm s}^2$.  For $C_{\rm s}=0.2$, this leads to $C_{\rm w} = 0.65$.  The WALE model is verified for decaying isotropic turbulence in the FDS Verification Guide \cite{FDS_Verification_Guide}.  Thus, it is apparent that WALE may also be used as a bulk flow eddy-viscosity model.  However, this has not been tested in fire applications.
+Nicoud and Ducros \cite{Nicoud:1999} suggest the model constant should be in the range $0.55 \le C_{\rm w} \le 0.60$.  FDS uses $C_{\rm w} = 0.60$ based on results for decaying isotropic turbulence \cite{FDS_Verification_Guide}.  It is apparent that WALE may also be used as a bulk flow eddy-viscosity model.  However, this has not been tested in fire applications.
 
 \subsection{Thermal Conduction and Gas Species Diffusion}
 
