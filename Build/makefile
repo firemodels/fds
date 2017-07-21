@@ -333,14 +333,26 @@ mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
 mpi_intel_linux_64ib_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+ifdef MKLROOT # This assumes the MKL library is available.
+ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
+# Use cluster_sparse_solver with openmpi blacs
+mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib_dv : LFLAGSMKL = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
+else
+# Use pardiso, non-mpi OpenMP threaded version.
+mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs -DWITH_PARDISO -I$(MKLROOT)/include $(GITINFO)
+mpi_intel_linux_64ib_dv : LFLAGSMKL = -L$(MKLROOT)/lib -mkl
+endif
+else # MKL is not available.
 mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO)
+mpi_intel_linux_64ib_dv : LFLAGSMKL =
+endif
 mpi_intel_linux_64ib_dv : LFLAGS = -static-intel
 mpi_intel_linux_64ib_dv : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib_dv : obj = fds_mpi_intel_linux_64ib_dv
 mpi_intel_linux_64ib_dv : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
-
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # OSX
 
