@@ -1101,7 +1101,6 @@ REAL(EB), INTENT(OUT) :: NU_T
 REAL(EB), INTENT(IN) :: G_IJ(3,3),DELTA
 REAL(EB) :: S_IJ(3,3),O_IJ(3,3),S2,O2,IV_SO,SD2,DENOM
 INTEGER :: I,J,K,L
-! REAL(EB), PARAMETER :: C_W=0.60_EB ! C_W**2 \approx 10.6 * C_S**2
 
 ! compute strain and rotation tensors
 
