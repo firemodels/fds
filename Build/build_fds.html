@@ -12,8 +12,11 @@ function get_fullpath(command,platform){
   var fullpath = directoryPath.concat(command).concat(platform);
   return fullpath;
 }
+function run_script(script){
+  MyObject.Run(get_fullpath("../Utilities/Scripts/webRUN_script.bat ",script));
+}
 function build_fds(args){
-  MyObject.Run(get_fullpath("Scripts/BUILDfds.bat ",args));
+  MyObject.Run(get_fullpath("Scripts/webBUILDfds.bat ",args));
 }
 </script>
 </HEAD>
@@ -50,14 +53,14 @@ function build_fds(args){
 
 <tr><th>Windows</th></tr>
 <tr align="center">
-<td><a href="Scripts/BUILDtestmpiwin64.bat">Build</a></td>
+<td><button onclick="run_script('\\fds\\Build\\Scripts\\webBUILDtestmpiwin64.bat')">Build</button></td>
 </tr>
 </table>
 
 <h3>Other</h3>
 
 <ul>
-<li><a href="Scripts/EDIT_build_fds.bat">Edit</a> this page
+<li><button onclick="run_script('\\fds\\Build\\Scripts\\webEDIT_build_fds.bat')">Edit this page</button>
 <li><a href="../../smv/Build/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>
 

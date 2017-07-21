@@ -594,6 +594,96 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 \label{NIST_Smoke_Alarms_Drawing}
 \end{figure}
 
+\clearpage
+
+
+\section{NIST Vent Study}
+
+A series of 15 reduced-scale enclosure experiments were conducted during the summer of 2017 by Summer Undergraduate Research Fellows (SURF) Fateema Farzana and Cory Schovanec. There is no test report or paper describing these experiments; only what is included here.
+
+\subsection{Enclosure Geometry}
+\label{Enclosure_Geometry}
+
+A drawing of the enclosure is given in Fig.~\ref{NIST_Vent_Study_Drawing}. The enclosure consisted of two compartments stacked one on top of the other. The interior lateral dimensions of each compartment were 119~cm by 121~cm. The height of the lower compartment was 59~cm, and the upper was 61~cm. The enclosure was located within a vented laboratory space that was approximately 3~m by 3~m by 2.8~m high. The floor of this space was tiled, but a single sheet of gypsum board served as the lower floor of the test enclosure.
+
+\subsection{Material Properties}
+
+The walls, ceiling and floor of each compartment was 1.6~cm (5/8~in) Type~X gypsum board. Wood studs formed the exterior frame. Thermo-physical properties of the gypsum board were taken from in Ref.~\cite{Manzello:SiF08} and manufacturer literature. It was assumed that the specific heat was 1.089~kJ/(kg $\cdot$ K), thermal conductivity 0.15~W/m/K, and density 673~kg/m$^3$.  Additionally, a  layer of K-wool, shown in Fig.~\ref{NIST_Vent_Study_Drawing} was used to seal the gap between the removable roof and the second story walls. Aluminum tape was used to seal all other seams.
+
+\subsection{Burner}
+
+For all experiments, a 10~cm square propane burner fueled at a rate of 1.65~L/min generated a 2.5~kW fire according to the following calculation:
+\be
+   1.65 \frac{\rm L}{\rm min} \times \frac{1}{60} \frac{\rm min}{\rm s} \times \frac{1}{1000} \frac{{\rm m}^3}{\rm L} \times 1.967 \, \frac{\rm kg}{{\rm m}^3} \times 46,300 \, \frac{\rm kJ}{\rm kg} = 2.50 \; {\rm kW}
+\label{Conversion_Equation}
+\ee
+Note that the mass flow controller assumed standard conditions to be 0~$^\circ$C and 101325~Pa. 
+
+\subsection{Thermocouples}
+
+Eight Type-K thermocouples were inserted at each level to measure the vertical temperature profile. The thermocouples formed a vertical array at 84~cm from the left wall of the enclosure, and 23~cm from the front wall. TC-1 was defined as the uppermost thermocouple, with heights defined as the vertical distance from the compartment specific ceiling.
+
+\begin{table}[h!]
+\caption{Heights of the thermocouples above the floor of each level of the enclosure}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+TC Number   & 1& 2& 3 & 4& 5& 6& 7& 8& 9&10&11&12&13&14&15&16\\ \hline
+Height (cm) & 6.0& 11.4& 17.8& 22.9& 27.9& 33.0& 43.2& 53.3& ?& ?& ?& ?& ?& ?&?&?\\ \hline
+\end{tabular}
+\end{center}
+\label{Tab.TC}
+\end{table}
+
+\subsection{Test Procedure}
+
+Each experiment lasted 100~min with a 5~min cool down period. Table~\ref{tab:NIST_Vent_Study} indicates the times when vents and windows were opened after the start of each experiment. 
+
+For Test No. 1-4, two trials were performed. In each case, the difference in temperature remained within 3 percent, a difference of less than 1~$^\circ$C. For this reason, no further replicates were conducted.  
+
+For Tests~13-15, a Dwyer flowmeter was used in place of the mass flow controller. The flowmeter had a flow range of 4~L/min air.
+
+\subsection{Leak Analysis}
+
+
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Plan}
+\includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Front}
+\caption[Geometry of the compartment from the NIST Vent Study]{Geometry of the compartment from the NIST Vent Study}
+\label{NIST_Vent_Study_Drawing}
+\end{figure}
+
+\subsection{Test Matrix}
+\begin{table}[h!]
+\caption{Vent State by Experiment: Time Opened}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Test & Front    & Left    & Right     & Ceiling&Ceiling&Ceiling&Ceiling&Ceiling&Floor 2\\
+No.  & Window   & Window  & Window    & LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ 
+     & (min)    & (min)   & (min)     & (min)  & (min) & (min) & (min) & (min)  & (min) \\ \hline \hline
+1    & 0        &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
+2    & 0        &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
+3    & 60       &  40     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square & Closed\\ \hline
+4    & 0        &  0      &  0 s     &  Closed     &  0 s    &  0 cm$^2$     & 400 cm$^2$  &  Square & Closed \\ \hline
+5    & 0        &  0      &  0 s     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed \\ \hline
+6    & 60       &  40     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
+7    &  0       &  0      &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed \\ \hline
+8    &  0       &  0      &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed\\ \hline
+9    &  80      &  60     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
+10   &  0       &  0      &  0 s     &  Closed    &  0 s        &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+11   &  0       &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+12   &  60      &  40     &   Closed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
+13   &  0       &  0      &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 0 s \\ \hline
+14   &  0       &  0      &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline
+15   &  Closed  & Closed     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:NIST_Vent_Study}
+\end{table}
+
+
+\clearpage
 
 \section{NRCC Facade Heat Flux Measurements}
 
