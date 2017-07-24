@@ -939,8 +939,8 @@ two parameters, as in this example:
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{lstlisting}
 \begin{description}
-\item {\ct CHID} is a string of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
-\item {\ct TITLE} is a string of 60 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
+\item {\ct CHID} is a string of 40 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
+\item {\ct TITLE} is a string of 256 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
 
@@ -1424,7 +1424,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \begin{table}[ht]
 \caption[Turbulence model options]{Turbulence model options.}
 \label{turb_table}
-\begin{center}
+\centering
 \begin{tabular}{|lll|}
 \hline
 {\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient(s)  \hfill  \\ \hline
@@ -1432,12 +1432,16 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 {\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
 {\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
-{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\ \hline
+{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\
+{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity model \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
 \end{tabular}
-\end{center}
 \end{table}
 
+\subsubsection*{Near-Wall Turbulence Model}
 
+By default, FDS uses constant coefficient Smagorinsky \cite{Smagorinsky:1} with Van Driest damping (see \cite{Wilcox:1}) for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near the wall.  The damping function is added to the eddy viscosity so that the viscosity goes to zero at the correct rate as you approach the wall where the no slip condition applies.
+
+An alternative to the damping function is to use the WALE model of Nicoud and Ducros \cite{Nicoud:1999}.  To implement WALE as the near-wall model use {\ct NEAR\_WALL\_TURBULENCE\_MODEL='WALE'} on the {\ct MISC} line.  Note that even if you have set WALE as the bulk turbulence model, you must also explicitly set WALE as the near-wall turbulence model if that is desired.
 
 
 
@@ -6553,10 +6557,10 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{1/m} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/beam_detector_nosmoke} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/beam_detector_smoke}
-\end{tabular*}
+\begin{center}
+\includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_nosmoke}
+\includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_smoke}
+\end{center}
 \caption[Results of the {\ct beam\_detector} test case]{Output of the {\ct beam\_detector} test case.}
 \label{beam_detector}
 \end{figure}
@@ -7193,7 +7197,11 @@ By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation
 
 Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF} entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity component slices will be created.
 
-Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, etc.
+Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.  If {\ct CELL\_CENTERED=.TRUE.} is combined with {\ct VECTOR=.TRUE.} then the staggered velocity components will be displayed.  For example,
+\begin{lstlisting}
+&SLCF PBY=0, QUANTITY='VELOCITY', VELOCITY=.TRUE., CELL_CENTERED=.TRUE. /
+\end{lstlisting}
+will show the staggered velocity components as cell face normal vectors in Smokeview.
 
 Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file. A short Fortran program {\ct fds2ascii.f90} produces a text file from a line, plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
@@ -7513,7 +7521,7 @@ Note that the {\ct DEVC} line does not contain device coordinates, but rather a 
 \end{lstlisting}
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
 
-\paragraph{\ct 'RADIANCE'}  This is the term for the radiation intensity at a point in the gas, $\bx$, with solid angle, $\bs$, where the summation is over all spectral bands:
+\paragraph{\ct 'RADIANCE'}  This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
@@ -7521,6 +7529,7 @@ This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that 
 \begin{lstlisting}
 &DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
+The units for {\ct 'RADIANCE'} are kW/m$^2$/sr.
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -7975,10 +7984,10 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \subsection{Near-Wall Grid Resolution}
 \label{info:yplus}
 
-Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
+Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
 
 \begin{lstlisting}
-&BNDF QUANTITY='YPLUS' /
+&BNDF QUANTITY='VISCOUS WALL UNITS' /
 \end{lstlisting}
 
 \noindent
@@ -8467,7 +8476,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QSCA}$^{**}$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^{*}$                             & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
-%{\ct SCALAR RESOLUTION}$^{***}$                 & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -8475,8 +8483,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
-%{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+{\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
@@ -8486,7 +8494,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 {\ct WAVELET ERROR}$^{***}$                     & Section~\ref{info:meshquality}                    &                & S            \\ \hline
-{\ct YPLUS}                                     & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 \end{longtable}
 
 \noindent
@@ -9095,6 +9102,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
+{\ct C\_WALE}                                   & Real          & Section~\ref{info:LES}                                &               & 0.60              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
@@ -9137,6 +9145,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 %{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
 %{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                              &               & {\ct .FALSE.}     \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline

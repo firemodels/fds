@@ -3297,10 +3297,10 @@ END DO
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
 !$OMP PARALLEL DO PRIVATE(ic) SCHEDULE(STATIC)
-DO  M=1,MP
+DO  K=1,L1
    DO  I=3,IDO,2
       IC = IDP2-I
-      DO  K=1,L1
+      DO  M=1,MP
          CH(M,I-1,1,K) = CC(M,I-1,K,1)+((WA1(I-2)*CC(M,I-1,K,2)+  &
                WA1(I-1)*CC(M,I,K,2))+(WA2(I-2)*CC(M,I-1,K,3)+WA2(I-1)* CC(M,I,K,3)))
          CH(M,I,1,K) = CC(M,I,K,1)+((WA1(I-2)*CC(M,I,K,2)-WA1(I-1)*  &
