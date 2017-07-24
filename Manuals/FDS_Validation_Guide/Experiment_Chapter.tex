@@ -621,15 +621,17 @@ Note that the mass flow controller assumed standard conditions to be 0~$^\circ$C
 
 \subsection{Thermocouples}
 
-Eight Type-K thermocouples were inserted at each level to measure the vertical temperature profile. The thermocouples formed a vertical array at 84~cm from the left wall of the enclosure, and 23~cm from the front wall. TC-1 was defined as the uppermost thermocouple, with heights defined as the vertical distance from the compartment specific ceiling.
+Eight Type-K thermocouples were inserted at each level to measure the vertical temperature profile. The thermocouples formed a vertical array at 84~cm from the left wall of the enclosure, and 17~cm from the front wall. TC-1 was defined as the uppermost thermocouple, with heights defined as the vertical distance from the compartment specific floor.
 
 \begin{table}[h!]
 \caption{Heights of the thermocouples above the floor of each level of the enclosure}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-TC Number   & 1& 2& 3 & 4& 5& 6& 7& 8& 9&10&11&12&13&14&15&16\\ \hline
-Height (cm) & 6.0& 11.4& 17.8& 22.9& 27.9& 33.0& 43.2& 53.3& ?& ?& ?& ?& ?& ?&?&?\\ \hline
+Floor 1 TC's   & 1& 2& 3 & 4& 5& 6& 7&8\\ \hline
+Height (cm) & 53.0& 47.6& 41.2& 36.1& 31.1& 26.0& 15.8& 5.7\\ \hline
+Floor 2 TC's & 9&10&11&12&13&14&15&16\\ \hline
+Height (cm) &56.5&50.75&45.5&41.0&36.0&29.75& 19.8&10.5\\ \hline 
 \end{tabular}
 \end{center}
 \label{Tab.TC}
@@ -645,6 +647,8 @@ For Tests~13-15, a Dwyer flowmeter was used in place of the mass flow controller
 
 \subsection{Leak Analysis}
 
+A Minneapolis Duct Blaster was set up on the second floor. The left and right ceiling vents were closed. Testing at a pressure of 25 pascals, the total leakage area was found to be 17.7 ~cm$^2$. 
+
 
 \begin{figure}[h!]
 \includegraphics[width=\textwidth]{FIGURES/NIST_Vent_Study/Latex_Drawing_Plan}
@@ -659,24 +663,24 @@ For Tests~13-15, a Dwyer flowmeter was used in place of the mass flow controller
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
 \hline
-Test & Front    & Left    & Right     & Ceiling&Ceiling&Ceiling&Ceiling&Ceiling&Floor 2\\
-No.  & Window   & Window  & Window    & LT     &RT     &LT Area&RT Area&RT Shape&Ceiling\\ 
-     & (min)    & (min)   & (min)     & (min)  & (min) & (min) & (min) & (min)  & (min) \\ \hline \hline
-1    & 0        &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
-2    & 0        &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square& Closed \\ \hline
-3    & 60       &  40     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &  Square & Closed\\ \hline
-4    & 0        &  0      &  0 s     &  Closed     &  0 s    &  0 cm$^2$     & 400 cm$^2$  &  Square & Closed \\ \hline
-5    & 0        &  0      &  0 s     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed \\ \hline
-6    & 60       &  40     &  Closed     &  Closed     &  1200 s    &  0 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
-7    &  0       &  0      &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed \\ \hline
-8    &  0       &  0      &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& Closed\\ \hline
-9    &  80      &  60     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square & Closed\\ \hline
-10   &  0       &  0      &  0 s     &  Closed    &  0 s        &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
-11   &  0       &  0      &  0 s     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
-12   &  60      &  40     &   Closed     &  Closed    &  1200 s    &  0 cm$^2$     &  100 cm$^2$  &Circular& Closed\\ \hline
-13   &  0       &  0      &  0 s     &  0 s     &  0 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 0 s \\ \hline
-14   &  0       &  0      &  0 s     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline
-15   &  Closed  & Closed     &  Closed     &  1200 s     &  2400 s    &  100 cm$^2$     &  400 cm$^2$  &  Square& 3600 s \\ \hline
+Test & Front    & Left    & Right     & Left&Right&Left&Right&Right&Floor 2\\
+No.  & Window   & Window  & Window    & Ceiling     &Ceiling     &Ceiling Area&Ceiling Area&Ceiling &Ceiling\\ 
+     & (min)    & (min)   & (min)     & (min)  & (min) & (cm$^2$) & (cm$^2$) & Shape & (min) \\ \hline \hline
+1    & 0        &  0      &  0      &  Closed    &  20     &  0      &  100   &  Square& Closed \\ \hline
+2    & 0        &  0      &  0      &  Closed    &  20     &  0    &  100  &  Square& Closed \\ \hline
+3    & 60       &  40     &  Closed     &  Closed     &  20     &  0      &  100   &  Square & Closed\\ \hline
+4    & 0        &  0      &  0      &  Closed     &  0     &  0     & 400   &  Square & Closed \\ \hline
+5    & 0        &  0      &  0     &  Closed     &  20     &  0      &  400   &  Square & Closed \\ \hline
+6    & 60       &  40     &  Closed     &  Closed     &  20     &  0      &  400   &  Square & Closed\\ \hline
+7    &  0       &  0      &  0      &  0      &  0     &  100     &  400  &  Square& Closed \\ \hline
+8    &  0       &  0      &  0     &  20      &  40    &  100    &  400   &  Square& Closed\\ \hline
+9    &  80      &  60     &  Closed     &  20      &  40    &  100     &  400  &  Square & Closed\\ \hline
+10   &  0       &  0      &  0      &  Closed    &  0         &  0      &  100   &Circular& Closed\\ \hline
+11   &  0       &  0      &  0      &  Closed    &  20     &  0    &  100  &Circular& Closed\\ \hline
+12   &  60      &  40     &   Closed     &  Closed    &  20    &  0      &  100   &Circular& Closed\\ \hline
+13   &  0       &  0      &  0      &  0      &  0     &  100     &  400  &  Square& 0  \\ \hline
+14   &  0       &  0      &  0      &  20     &  40     &  100      &  400   &  Square& 60 \\ \hline
+15   &  Closed  & Closed     &  Closed     &  20      &  40     &  100      &  400   &  Square& 60 \\ \hline
 \end{tabular}
 \end{center}
 \label{tab:NIST_Vent_Study}
