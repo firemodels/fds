@@ -116,7 +116,7 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
 &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
 \end{align}
-Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
+Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.  See Appendix \ref{app:lilly_analysis}.
 
 \subsection{Wind Fields via Mean Forcing or Nudging}
 
@@ -138,7 +138,7 @@ Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity c
 \be
 \mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
-where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.  The value of $C_{\rm s}=0.2$ is nominally the value obtained from Lilly's analysis \cite{Lilly:1967} (production equals dissipation) for a spectral cutoff filter (implicit filters for energy conserving schemes more closely resemble a spectral cutoff than a box filter \cite{McDermott:2005b}).  This value is also confirmed in tests of decaying isotropic turbulence in the FDS Verification Guide \cite{FDS_Verification_Guide}.
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.  The value of $C_{\rm s}=0.2$ is nominally the value obtained from Lilly's analysis \cite{Lilly:1967} (production equals dissipation) for a spectral cutoff filter (implicit filters for energy conserving schemes more closely resemble a spectral cutoff than a box filter \cite{McDermott:2005b}).  The constant value is derived theoretically in Appendix \ref{app:lilly_analysis} and also confirmed in tests of decaying isotropic turbulence in the FDS Verification Guide \cite{FDS_Verification_Guide}.
 
 \subsection{Dynamic Smagorinsky Model}
 
@@ -156,7 +156,7 @@ where $\bar{u}$ is the average value of $u$ at the grid cell center (representin
 \be
    \bar{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{\bar{u}}_{ijk} = \frac{\bar{u}_{ijk}}{2} + \frac{\bar{u}_{i-1,jk} + \bar{u}_{i+1,jk} }{4}
 \ee
-The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
+The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The constant value is also derived theoretically in Appendix \ref{app:lilly_analysis}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
 \subsection{Vreman's Model}
 \label{sec:vreman}

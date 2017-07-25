@@ -7991,9 +7991,9 @@ Large-eddy simulations of boundary layer flows fall into two general categories:
 \end{lstlisting}
 
 \noindent
-The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the local viscous length scale, $\delta_\nu$ \cite{Pope:2000}:
+The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the maximum between the local viscous length scale, $\delta_\nu$ \cite{Pope:2000} or the sand grain roughness, $s$, for rough walls:
 \be
-y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
+y^+ = \frac{\delta n/2}{\max(\delta_\nu,s)} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
 \ee
 where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_{\rm w}$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
 \begin{lstlisting}
