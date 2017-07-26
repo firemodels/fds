@@ -20,17 +20,17 @@ end
 M = csvread([data_dir,'radiation_gas_panel_devc.csv'],2);
 
 % Collect heat fluxes computed by FDS.
-xFDS = [.10,  .15,   .18,  .20,  .23,  .25,  .28,  .38,  .46,  .61,  .76];
+xFDS = [.10,  .15, .25, .38, .61, .76];
 yFDS = [4,5,6];
 
 % Heat fluxes computed using Boltzmann's law and configuration
 % factors.
-xCF = [.10,  .15,   .18,  .20,  .23,  .25,  .28,  .38,  .46,  .61,  .76];
-yCF = [71.7, 564.4, 45.7, 40.7, 34.3, 30.8, 26.3, 16.3, 11.8, 7.10, 4.70];
+xCF = [.10,  .15,    .25,  .38,  .46,  .76];
+yCF = [71.7, 564.4,  30.8, 16.3, 11.8, 4.70];
 
 % Heat fluxes reported by Simms.
-xSimms = [.10,  .15, .18,   .20,  .23,  .25,  .28,  .38,  .46,  .61, ..76];
-ySimms = [69.4, 53.3 ,45.2, 40.6, 34.6, 32.2, 26.9, 17.0, 12.4, 7.45, 4.92];
+xSimms = [.10,  .15,  .25,  .38,  .61, ..76];
+ySimms = [69.4, 53.3, 32.2, 17.0, 7.45, 4.92];
 
 % Plot heat flux versus distance.
 figure
