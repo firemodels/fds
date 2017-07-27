@@ -939,8 +939,8 @@ two parameters, as in this example:
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{lstlisting}
 \begin{description}
-\item {\ct CHID} is a string of 30 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
-\item {\ct TITLE} is a string of 60 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
+\item {\ct CHID} is a string of 40 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
+\item {\ct TITLE} is a string of 256 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
 
@@ -1424,7 +1424,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \begin{table}[ht]
 \caption[Turbulence model options]{Turbulence model options.}
 \label{turb_table}
-\begin{center}
+\centering
 \begin{tabular}{|lll|}
 \hline
 {\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient(s)  \hfill  \\ \hline
@@ -1432,12 +1432,16 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 {\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
 {\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
-{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\ \hline
+{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\
+{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity model \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
 \end{tabular}
-\end{center}
 \end{table}
 
+\subsubsection*{Near-Wall Turbulence Model}
 
+By default, FDS uses constant coefficient Smagorinsky \cite{Smagorinsky:1} with Van Driest damping (see \cite{Wilcox:1}) for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near the wall.  The damping function is added to the eddy viscosity so that the viscosity goes to zero at the correct rate as you approach the wall where the no slip condition applies.
+
+An alternative to the damping function is to use the WALE model of Nicoud and Ducros \cite{Nicoud:1999}.  To implement WALE as the near-wall model use {\ct NEAR\_WALL\_TURBULENCE\_MODEL='WALE'} on the {\ct MISC} line.  Note that even if you have set WALE as the bulk turbulence model, you must also explicitly set WALE as the near-wall turbulence model if that is desired.
 
 
 
@@ -7987,9 +7991,9 @@ Large-eddy simulations of boundary layer flows fall into two general categories:
 \end{lstlisting}
 
 \noindent
-The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the local viscous length scale, $\delta_\nu$ \cite{Pope:2000}:
+The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the maximum between the local viscous length scale, $\delta_\nu$ \cite{Pope:2000} or the sand grain roughness, $s$, for rough walls:
 \be
-y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
+y^+ = \frac{\delta n/2}{\max(\delta_\nu,s)} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
 \ee
 where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_{\rm w}$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
 \begin{lstlisting}
@@ -9098,6 +9102,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
+{\ct C\_WALE}                                   & Real          & Section~\ref{info:LES}                                &               & 0.60              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
@@ -9140,6 +9145,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 %{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
 %{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                              &               & {\ct .FALSE.}     \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline

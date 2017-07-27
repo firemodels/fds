@@ -2484,18 +2484,27 @@ WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
-   SELECT CASE (TURB_MODEL)
+   TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
       CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')           '   Dynamic Smagorinsky Model'
+         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity: Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Vreman Model (C_VREMAN)        ',C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Vreman Model (C_VREMAN)        ',C_VREMAN
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
-   END SELECT
+         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity: RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
+      CASE(WALE)
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: WALE Model (C_WALE)            ',C_WALE
+   END SELECT TURB_MODEL_SELECT
+   NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
+      CASE DEFAULT
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Near-wall Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY) ',&
+            C_SMAGORINSKY
+      CASE(WALE)
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Near-wall Eddy Viscosity: WALE Model (C_WALE)  ',C_WALE
+   END SELECT NEAR_WALL_SELECT
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
 ENDIF
@@ -2559,9 +2568,9 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', CPBAR_Z(ITMP,N)*TMPA
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(ITMP,N)*500._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(ITMP,N)*1000._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(ITMP,N)*1500._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(500,N)*500._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(1000,N)*1000._EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(1500,N)*1500._EB
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)

@@ -18,6 +18,10 @@ $QFDS $DEBUG $QUEUE -d $INDIR natconv_10_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconv_11_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconv_12_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconv_13_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconv_14_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconv_15_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconv_16_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconv_17_8.fds
 
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_1_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_2_16.fds
@@ -32,6 +36,10 @@ $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_10_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_11_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_12_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_13_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_14_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_15_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_16_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconv_17_16.fds
 
 $QFDS $DEBUG $QUEUE -d $INDIR natconh_1_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconh_2_8.fds
@@ -48,6 +56,10 @@ $QFDS $DEBUG $QUEUE -d $INDIR natconh_12_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconh_13_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconh_14_8.fds
 $QFDS $DEBUG $QUEUE -d $INDIR natconh_15_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconh_16_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconh_17_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconh_18_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR natconh_19_8.fds
 
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_1_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_2_16.fds
@@ -64,5 +76,9 @@ $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_12_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_13_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_14_16.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_15_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_16_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_17_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_18_16.fds
+$QFDS $DEBUG -p 16 $QUEUE -d $INDIR natconh_19_16.fds
 
 echo FDS cases submitted

@@ -1603,6 +1603,23 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
 
 \clearpage
 
+\subsection{WALE (\texorpdfstring{\textct{wale}}{wale})}
+\label{WALE_model}
+
+The WALE (Wall Adapting Local Eddy-viscosity) model of Nicoud and Ducros \cite{Nicoud:1999} was developed as a near-wall eddy viscosity model with the proper scaling behavior without the need for a damping function like Van Driest damping (see \cite{Wilcox:1}).  Details of the model are provided in the FDS Technical Guide \cite{FDS_Math_Guide}.  While WALE is designed for use a near-wall model, WALE can also perform as a bulk flow eddy viscosity model.  Here we confirm the appropriate choice of WALE model constant, $C_{\rm w}=0.60$ in FDS, by performing simulation of decaying isotropic turbulence, as was also performed in \cite{Nicoud:1999}.
+
+\begin{figure}[h]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_spectra} }
+   \end{tabular*}
+   \caption[Integrated and spectral energy decay for CBC experiment using the WALE model]{\label{fig_wale_cbc} WALE model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+\clearpage
+
 
 \section{Jet Centerline Velocity Decay (\texorpdfstring{\textct{jet}}{jet})}
 
@@ -2216,15 +2233,29 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \end{figure}
 
 
-\section{Checking the divergence constraint (\texorpdfstring{\textct{divergence\_test}}{divergence\_test})}
+\section{Checking the divergence constraint}
 \label{divergence_test}
 
-Because of the low Mach number approximation, an initially divergence free flow field ought to remain divergence free if there are no heat sources or sinks. In this example, air is pushed through a 1~m cube at a speed of 1~m/s. The air is extracted at the same rate, and there should be no pressure rise and the flow should remain divergence free. There are also a few obstructions that are created and removed during the simulation to check that this does not cause any errors. Figure~\ref{divergence_test_fig} displays the minimum and maximum divergence as a function of time. These ought to remain below approximately $1 \times 10^{-10}$~s$^{-1}$ in absolute value.
+The test cases in this section involve the divergence of the flow, $\nabla \cdot \bu$, an important quantity in the low Mach number formulation of the Navier-Stokes equations. 
+
+\subsection{Isothermal flow (\texorpdfstring{\textct{divergence\_test\_1}}{divergence\_test\_1})}
+\label{divergence_test_1}
+
+In the first example, air is pushed through a 1~m cube at a speed of 1~m/s. The air is extracted at the same rate, and there should be no pressure rise and the flow should remain divergence free. There are also a few obstructions that are created and removed during the simulation to check that this does not cause any errors. The left hand plot of Fig.~\ref{divergence_test_fig} displays the minimum and maximum divergence as a function of time. These ought to remain below approximately $1 \times 10^{-10}$~s$^{-1}$ in absolute value.
+
+\subsection{Sealed compartment (\texorpdfstring{\textct{divergence\_test\_2}}{divergence\_test\_2})}
+\label{divergence_test_2}
+
+In the second example, air is introduced into a sealed compartment at a steady rate via a single solid Lagrangian particle. In other words, the air is not introduced at the boundary, but rather within the center of the compartment. The pressure, density, and temperature increase, but the volume integral of the divergence remains zero according to the Divergence Theorem:
+\be
+   \int_\Omega \nabla \cdot \bu \, \d V = \int_{\partial \Omega} \bu \cdot \d \bS = 0
+\ee
+The right hand plot of Fig.~\ref{divergence_test_fig} displays the volume integral of the divergence as a function of time. This ought to remain within machine accuracy, certainly less than $1 \times 10^{-10}$~m$^3$/s in absolute value.
 
 \begin{figure}[!ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test}
-\caption[The \textct{divergence\_test} case]{Minimum and maximum divergence for the \textct{divergence\_test} case.}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test_2}
+\caption[The \textct{divergence\_test} cases]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
 \label{divergence_test_fig}
 \end{figure}
 
@@ -2311,7 +2342,7 @@ A comparison of exact values and FDS predictions at three different angular reso
 
 
 
-\section{Radiation inside a Box (\texorpdfstring{\textct{radiation\_in\_a\_box}}{radiation\_in\_a\_box}) }
+\section{Radiation inside a Box (\texorpdfstring{\textct{radiation\_box}}{radiation\_box}) }
 \label{radiation_in_a_box}
 \label{radiation_box}
 
@@ -2319,7 +2350,7 @@ This verification case tests the computation of three-dimensional configuration 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=4.0in]{FIGURES/box}
-\caption{\label{fig_box_radiation} Radiation in a box geometry.}
+\caption{\label{fig_box_radiation} Radiation inside a box geometry.}
 \end{figure}
 The configuration factors are calculated at the diagonal of the cold wall opposite to the hot wall. The exact values of the configuration factor from plane element $\d A$ to parallel rectangle $H$ are calculated using the analytical solution~\cite{Siegel:1}
 \begin{center}

@@ -1090,48 +1090,58 @@ ENDIF
 END SUBROUTINE RNG_EDDY_VISCOSITY
 
 
-SUBROUTINE WALE_VISCOSITY(NU_T,G,S,DELTA)
+SUBROUTINE WALE_VISCOSITY(NU_T,G_IJ,DELTA)
 
-! Wall Adapted Local Eddy (WALE) Viscosity
+! Wall Adapting Local Eddy-viscosity (WALE)
 
 ! F. Nicoud, F. Ducros. Subgrid-scale stress modelling based on the square of the velocity gradient tensor.
 ! Flow, Turbulence, and Combustion, Vol. 62, pp. 183-200, 1999.
 
 REAL(EB), INTENT(OUT) :: NU_T
-REAL(EB), INTENT(IN) :: S,G(3,3),DELTA
-REAL(EB) :: G2(3,3),SD(3,3),SD2,ONTH_G2_KK,DENOM
-INTEGER :: I,J
-REAL(EB), PARAMETER :: C_M=0.65_EB ! C_M**2 = 10.6 * C_S**2
+REAL(EB), INTENT(IN) :: G_IJ(3,3),DELTA
+REAL(EB) :: S_IJ(3,3),O_IJ(3,3),S2,O2,IV_SO,SD2,DENOM
+INTEGER :: I,J,K,L
 
-! compute inner product of velocity gradient tensor
+! compute strain and rotation tensors
 
 DO J=1,3
    DO I=1,3
-      G2(I,J) = DOT_PRODUCT(G(I,:),G(:,J))
+      S_IJ(I,J) = 0.5_EB * ( G_IJ(I,J) + G_IJ(J,I) )
+      O_IJ(I,J) = 0.5_EB * ( G_IJ(I,J) - G_IJ(J,I) )
    ENDDO
 ENDDO
-ONTH_G2_KK = ONTH * ( G2(1,1) + G2(2,2) + G2(3,3) )
 
-SD(1,1) = G2(1,1) - ONTH_G2_KK
-SD(2,2) = G2(2,2) - ONTH_G2_KK
-SD(3,3) = G2(3,3) - ONTH_G2_KK
-SD(1,2) = 0.5_EB * ( G2(1,2) + G2(2,1) )
-SD(1,3) = 0.5_EB * ( G2(1,3) + G2(3,1) )
-SD(2,3) = 0.5_EB * ( G2(2,3) + G2(3,2) )
-SD(2,1) = SD(1,2)
-SD(3,1) = SD(1,3)
-SD(3,2) = SD(2,3)
+! contraction of strain and rotation tensors
 
-SD2 = 0._EB
+S2 = 0._EB
+O2 = 0._EB
 DO J=1,3
    DO I=1,3
-      SD2 = SD2 + SD(I,J)*SD(I,J)
+      S2 = S2 + S_IJ(I,J)*S_IJ(I,J)
+      O2 = O2 + O_IJ(I,J)*O_IJ(I,J)
    ENDDO
 ENDDO
 
-DENOM = S**5 + SD2**1.25_EB
+! fourth order contraction
+
+IV_SO = 0._EB
+DO L=1,3
+   DO K=1,3
+      DO J=1,3
+         DO I=1,3
+            IV_SO = IV_SO + S_IJ(I,K)*S_IJ(K,J)*O_IJ(J,L)*O_IJ(L,I)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+! using Caley-Hamilton theorem
+
+SD2 = ONSI*(S2*S2 + O2*O2) + TWTH*S2*O2 + 2._EB*IV_SO
+
+DENOM = S2**2.5_EB + SD2**1.25_EB
 IF (DENOM>TWO_EPSILON_EB) THEN
-   NU_T = (C_M*DELTA)**2 * SD2**1.5_EB / DENOM
+   NU_T = (C_WALE*DELTA)**2 * SD2**1.5_EB / DENOM
 ELSE
    NU_T = 0._EB
 ENDIF
