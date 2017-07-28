@@ -67,7 +67,7 @@ plot(xSimms,ySimms,'-d', 'MarkerSize', 15, 'MarkerFaceColor', 'red'  );
 
 xlabel('Distance from center of gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 ylabel('Heat flux (kW/m^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-axis([0 max(M(:,1)) -0.5 1])
+axis([0 max(M10(:,1)) -0.5 1])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
