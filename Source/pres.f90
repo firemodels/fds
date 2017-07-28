@@ -1427,7 +1427,7 @@ INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR
 INTEGER :: PERM(1)
 #endif
 INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K
-TYPE (WALL_TYPE), POINTER :: WC
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 REAL(EB) :: IDX, AF, VAL, TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 
@@ -1479,6 +1479,8 @@ CASE(GLMAT_WHLDOM)
       WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          WC => WALL(IW)
+
+         IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
 
          ! NEUMANN boundaries:
          IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
@@ -1832,9 +1834,10 @@ SUBROUTINE COPY_H_OMESH_TO_MESH
 
 ! Local Variables:
 INTEGER  :: NM,NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
-TYPE (OMESH_TYPE), POINTER :: OM
-TYPE (WALL_TYPE), POINTER :: WC
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+LOGICAL :: FLG
 
 ! Loop:
 PREDCORR_LOOP : IF (PREDICTOR) THEN
@@ -1849,13 +1852,24 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
 
          WC=>WALL(IW)
          EWC=>EXTERNAL_WALL(IW)
-         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1
+         IF (PRES_ON_WHOLE_DOMAIN) THEN
+            ! Matrix connectivities kept in cases of BOUNDARY_TYPE=INTERPOLATED_BOUNDARY, NULL_BOUNDARY, or
+            ! SOLID_BOUNDARY where there is an OMESH, case of OBSTS right in the boundary of meshes.
+            FLG = WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY
+            FLG = FLG .OR. (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. EWC%NOM > 0)
+            IF (.NOT.FLG) CYCLE EXTERNAL_WALL_LOOP_1
+         ELSE
+            ! Case of solving for H only on the gas phase, connectivity kept only for INTERPOLATED_BOUNDARY.
+            IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1
+         ENDIF
 
          II  = WC%ONE_D%II
          JJ  = WC%ONE_D%JJ
          KK  = WC%ONE_D%KK
          IOR = WC%ONE_D%IOR
          NOM = EWC%NOM
+         ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+         IF(NOM < 1) CYCLE
          OM => OMESH(NOM)
 
          ! This assumes all meshes at the same level of refinement:
@@ -1894,13 +1908,24 @@ ELSE ! PREDCORR_LOOP
 
          WC=>WALL(IW)
          EWC=>EXTERNAL_WALL(IW)
-         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_2
+         IF (PRES_ON_WHOLE_DOMAIN) THEN
+            ! Matrix connectivities kept in cases of BOUNDARY_TYPE=INTERPOLATED_BOUNDARY, NULL_BOUNDARY, or
+            ! SOLID_BOUNDARY where there is an OMESH, case of OBSTS right in the boundary of meshes.
+            FLG = WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY
+            FLG = FLG .OR. (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. EWC%NOM > 0)
+            IF (.NOT.FLG) CYCLE EXTERNAL_WALL_LOOP_2
+         ELSE
+            ! Case of solving for H only on the gas phase, connectivity kept only for INTERPOLATED_BOUNDARY.
+            IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_2
+         ENDIF
 
          II  = WC%ONE_D%II
          JJ  = WC%ONE_D%JJ
          KK  = WC%ONE_D%KK
          IOR = WC%ONE_D%IOR
          NOM = EWC%NOM
+         ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+         IF(NOM < 1) CYCLE
          OM => OMESH(NOM)
 
          ! This assumes all meshes at the same level of refinement:
@@ -1940,9 +1965,10 @@ INTEGER, INTENT(IN) :: VAR_CC
 
 ! Local Variables:
 INTEGER  :: NM,NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
-TYPE (OMESH_TYPE), POINTER :: OM
-TYPE (WALL_TYPE), POINTER :: WC
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+LOGICAL :: FLG
 
 MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
@@ -1960,13 +1986,24 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          WC=>WALL(IW)
          EWC=>EXTERNAL_WALL(IW)
-         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+         IF (PRES_ON_WHOLE_DOMAIN) THEN
+            ! Matrix connectivities kept in cases of BOUNDARY_TYPE=INTERPOLATED_BOUNDARY, NULL_BOUNDARY, or
+            ! SOLID_BOUNDARY where there is an OMESH, case of OBSTS right in the boundary of meshes.
+            FLG = WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY
+            FLG = FLG .OR. (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. EWC%NOM > 0)
+            IF (.NOT.FLG) CYCLE EXTERNAL_WALL_LOOP
+         ELSE
+            ! Case of solving for H only on the gas phase, connectivity kept only for INTERPOLATED_BOUNDARY.
+            IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+         ENDIF
 
          II  = WC%ONE_D%II
          JJ  = WC%ONE_D%JJ
          KK  = WC%ONE_D%KK
          IOR = WC%ONE_D%IOR
          NOM = EWC%NOM
+         ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+         IF(NOM < 1) CYCLE
          OM => OMESH(NOM)
 
          ! This assumes all meshes at the same level of refinement:
@@ -2401,8 +2438,10 @@ INTEGER :: ILOC,JLOC,IROW,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 REAL(EB):: AF,IDX,BIJ,KFACE(1:2,1:2)
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 INTEGER :: IIG,JJG,KKG,II,JJ,KK,IOR,LOCROW,IW
 INTEGER :: WC_JD(1:2,1:2)
+LOGICAL :: FLG
 
 ! Allocate D_MAT_H:
 IF (GLMAT_SETUP_FLAG == GLMAT_WHLDOM) THEN
@@ -2527,8 +2566,13 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
 
          WC => WALL(IW)
-         IF ( .NOT.(WC%BOUNDARY_TYPE==    PERIODIC_BOUNDARY .OR. &
-                    WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) ) CYCLE
+         EWC=>EXTERNAL_WALL(IW)
+         FLG = WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY
+         IF(PRES_ON_WHOLE_DOMAIN) &
+         FLG = FLG .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. EWC%NOM > 0)
+         IF ( .NOT.FLG ) CYCLE
+         ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+         IF(EWC%NOM < 1) CYCLE
 
          WC_JD(1,1) = WC%JD11_INDEX
          WC_JD(1,2) = WC%JD12_INDEX
@@ -2941,7 +2985,9 @@ INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,
 LOGICAL :: INLIST
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 INTEGER :: WC_JD(1:2,1:2)
+LOGICAL :: FLG
 
 NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only nonzeros are for meshes
                                         ! that belong to this process.
@@ -3041,8 +3087,13 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
 
      WC => WALL(IW)
-     IF ( .NOT.(WC%BOUNDARY_TYPE==    PERIODIC_BOUNDARY .OR. &
-                WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) ) CYCLE
+     EWC=>EXTERNAL_WALL(IW)
+     FLG = WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY
+     IF(PRES_ON_WHOLE_DOMAIN) &
+     FLG = FLG .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. EWC%NOM > 0)
+     IF ( .NOT.FLG ) CYCLE
+     ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+     IF(EWC%NOM < 1) CYCLE
 
      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
@@ -3184,7 +3235,11 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       WC_JD(1:2,1:2) = IS_UNDEFINED
 
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+      IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+      IF(IW <= N_EXTERNAL_WALL_CELLS) THEN
+         ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
+         EWC=>EXTERNAL_WALL(IW); IF(EWC%NOM < 1) CYCLE
+      ENDIF
 
       IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
       II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
