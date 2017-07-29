@@ -1622,47 +1622,42 @@ In cylindrical and spherical coordinates, the equation becomes:
 \label{heat_cond_cyl2}
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s
 \end{equation}
-where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
+where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}. The discretization scheme is the same regardless of whether the coordinate system is Cartesian, cylindrical, or spherical. The size of the cell nearest the boundary is set by default to be
+\be
+   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_c \, c_s}} 
+\ee
+where $\dt_0$ is a somewhat arbitrary time scale set to 1. In other words, the Fourier number based on the cell size is assumed of order unity. The user has flexibility in changing both the initial cell size and the degree of stretching. 
+
 
 \begin{figure}[t]
-    \centering
-   \begin{tikzpicture}[font = \large]
-    \node at (-2.0,2.5) [label=above:Front] {};
-    \node at (4.5,2.5) [label=above:Back] {};
-
-    \node at (-2.5,0) [label=below:$x(0)$] {};
-    \node at (0,0) [label=below:$x(1)$] {};
-    \node at (2.5,0) [label=below:$x(N-1)$] {};
-    \node at (5,0) [label=below:$x(N)$] {};
-
-    \node at (-3.75,0) [label={above:$i = 0$}] {};
-    \node at (-1.25,0) [label={above:$i = 1$}] {};
-    \node at (1.25,0) [label=above:...] {};
-    \node at (3.75,0) [label={above:$i = N$}] {};
-    \node at (6.25,0) [label={above:$i = N+1$}] {};
-
-    \node at (1.25,3.5) [label=above: Virtual Nodes] {};
-    \draw [<-,line width=2pt] (6.25,2.75) arc (0:30:25 and 2.5);
-    \draw [<-,line width=2pt] (-3.75,2.75) arc (180:150:25 and 2.5);
-
-    \draw [dashed, line width=1.5pt] (-2.5,0) -- (-5,0);
-    \draw [dashed, line width=1.5pt] (-5,0) -- (-5,2.5);
-    \draw [dashed, line width=1.5pt] (-2.5,2.5) -- (-5,2.5);
-   \draw [line width=1.5pt] (-2.5,0) rectangle (0,2.5);
-   \draw [line width=1.5pt] (0,0) rectangle (2.5,2.5);
-    \draw [line width=1.5pt] (2.5,0) rectangle (5,2.5);
-    \draw [dashed, line width=1.5pt] (5,0) -- (7.5,0);
-    \draw [dashed, line width=1.5pt] (7.5,0) -- (7.5,2.5);
-    \draw [dashed, line width=1.5pt] (5,2.5) -- (7.5,2.5);
-
-    \draw [->,line width=2pt] (5,-1.1) -- (1.25,-1.1);
-    \node at (2.5,-1.1) [label=below:$r_{i}$] {};
-   \end{tikzpicture}
-    \caption[Solid phase nodes and indexes]{Solid phase nodes and indexes. $r$ is the radius from the back of the material.}
-    \label{fig_solid_nodes}
+\setlength{\unitlength}{.9in}
+\begin{picture}(6.5,1.5)
+\put(0,0){\framebox(1,1){Gas Cell}}
+\put(1.00,0){\framebox(0.10,1){1}}
+\put(1.10,0){\framebox(0.20,1){2}}
+\put(1.30,0){\framebox(0.40,1){3}}
+\put(1.70,0){\framebox(0.80,1){$T_{\rm s,4}$}}
+\put(2.50,0){\framebox(1.60,1){$T_{\rm s,5}$}}
+\put(4.10,0){\framebox(1.60,1){$T_{\rm s,6}$}}
+\put(5.70,0){\framebox(0.80,1){$T_{\rm s,7}$}}
+\put(6.50,0){\framebox(0.40,1){8}}
+\put(6.90,0){\framebox(0.20,1){9}}
+\put(7.10,0){\framebox(0.10,1){\parbox[c]{.1in}{1\\0}}}
+\put(1.00,1){\line(-1,1){0.25}}
+\put(1.10,1){\line( 0,1){0.25}}
+\put(1.30,1){\line( 1,1){0.25}}
+\put(7.20,1){\line( 0,1){0.25}}
+\put(0.50,1.35){$x_0$}
+\put(0.95,1.35){$x_1$}
+\put(1.50,1.35){$x_2$}
+\put(7.00,1.35){$x_{10}$}
+\end{picture}
+\caption[Layout of solid phase cells]{Layout of solid phase cells. In this example, each solid phase cell is stretched by a factor of 2 until the halfway point of the solid is reached, after which the cells shrink by a factor of 2. The interface between gas and solid phase is at $x_0$. The back side boundary condition is applied at $x_{10}$. ``Virtual'' cells 0 and $N+1=11$ are located to the left and right of the solid, and are the same size as cells 1 and $N=10$.}
+\label{fig_solid_nodes}
 \end{figure}
 
 The temperature at the center of each solid cell, $T_{s,i}$, is updated in time using a Crank-Nicolson scheme:
+
 \begin{align}
 \label{crank-nicolson}
 (\rho_s \, c_s)_i \frac{T_{s,i}^{n+1}-T_{s,i}^{n}}{\delta t}
@@ -1687,7 +1682,7 @@ Note that $T_{s,0}$ does not represent the gas temperature, but rather it is use
 \label{conv}
   \dot{q}_c'' = h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right)
 \end{equation}
-where $T_g$ is the gas temperature in the first grid cell abutting the surface, and $T_{s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{s,0})$ and $T_{s,1})$.
+where $T_g$ is the gas temperature in the first grid cell abutting the surface, and $T_{s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{s,0}$ and $T_{s,1}$.
 $(T^{n+1})^4$ can be approximated using a Taylor series expansion:
 \begin{equation}
 \label{T_taylor}
