@@ -47,14 +47,14 @@ xFDS       = [.10,  .15, .25, .38, .61, .76];
 yFDS       = [M10(end,end),       M15(end,end),       M25(end,end),       M38(end,end),       M61(end,end),       M76(end,end)];
 yOffsetFDS = [M10Offset(end,end), M15Offset(end,end), M25Offset(end,end), M38Offset(end,end), M61Offset(end,end), M76Offset(end,end)];
 
-% Heat fluxes computed using Boltzmann's law and configuration factors.
-xCF       = [.10,  .15,    .25,  .38,  .46,  .76];
-yCF       = [71.7, 564.4,  30.8, 16.3, 11.8, 4.70];
-yCFOffset = [71.7, 564.4,  30.8, 16.3, 11.8, 4.70];
+% On- and off-axis heat fluxes computed using Boltzmann's law and configuration factors.
+xCF       = [.10,  .15,  .25,  .38,  .46,  .76];
+yCF       = [71.7, 54.4, 30.8, 16.3, 11.8, 4.70];
+yCFOffset = [38.4, 24.0, 17.4, 11.5, 9.0,  4.18];
 
 % Heat fluxes reported by Simms.
 xSimms = [.10,  .15,  .25,  .38,  .61,  .76];
-ySimms = [69.4, 53.3, 32.2, 17.0, 7.45, 4.92];
+ySimms = [70.2, 51.8, 31.5, 16.9, 7.61, 5.52];
 
 % Plot heat flux versus distance.
 figure
