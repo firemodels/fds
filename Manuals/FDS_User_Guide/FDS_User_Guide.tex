@@ -5420,7 +5420,7 @@ The radiation properties of most common gases involved in combustion processes (
 
 \label{info:RADI_Wide_Band}
 
-The radiation solver has two modes of operation -- a gray gas model (default) and a wide band model. Both are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. If the optional six band model is desired, set {\ct WIDE\_BAND\_MODEL=.TRUE.} on the {\ct RADI} line. It is recommended that this option only be used when the fuel is relatively non-sooting because it adds significantly to the cost of the calculation. 
+The radiation solver has two modes of operation -- a gray gas model (default) and a wide band model. Both are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. If the optional six band model is desired, set {\ct WIDE\_BAND\_MODEL=.TRUE.} on the {\ct RADI} line. It is recommended that this option only be used when the fuel is relatively non-sooting because it adds significantly to the cost of the calculation.
 
 Note also that when {\ct WIDE\_BAND\_MODEL=.TRUE.}, the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'} becomes practically useless, because it then corresponds to one individual band of the spectrum. Also, do not specify a {\ct RADIATIVE\_FRACTION} because it will not be used.
 
@@ -7663,11 +7663,7 @@ The following example is used to write out a histogram of droplet size using 20 
 \subsection{Useful Solid Phase Outputs}
 \label{info:material_components}
 
-In addition to the profile ({\ct PROF}) output, there are various additional quantities that are useful for monitoring reacting
-surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
-element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the
-solid surface element, computed as an integral of material density over wall
-thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}.
+In addition to the profile ({\ct PROF}) output, there are various additional quantities that are useful for monitoring reacting surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the solid surface element, computed as an integral of material density over wall thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}. For the quantity {\ct 'SURFACE DENSITY'}, you can add a {\ct MATL\_ID} to get the surface density of a single component of the solid material.
 
 \subsubsection{Thermogravimetric Analysis (TGA) Output}
 
@@ -7676,6 +7672,7 @@ Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very s
    \hbox{\ct 'NORMALIZED MASS'} &=& \sum_\alpha  m''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(dimensionless)} \\
    \hbox{\ct 'NORMALIZED MASS LOSS RATE'} &=& \sum_\alpha  \dot{m}''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0)  \quad \quad \left( \si{1/s} \right)
 \end{eqnarray*}
+For the quantity {\ct 'NORMALIZED MASS'}, you can add a {\ct MATL\_ID} to get the normalized mass of a single component of the solid material, $m''_\alpha (t) / \sum_\alpha  m''_\alpha (0)$.
 
 \subsubsection{Micro-Combustion Calorimetry (MCC) Output}
 
@@ -8293,9 +8290,9 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_RADCAL_Absorption}     & 1/m            & D,I,P,S      \\ \hline
 {\ct ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
-{\ct AEROSOL VOLUME FRACTION}$^*$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
-{\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct AMPUA\_Z}$^{*}$                            & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
+{\ct AMPUA}$^2$                                 & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct AMPUA\_Z}$^1$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
@@ -8306,8 +8303,8 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
-{\ct CPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
+{\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
+{\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
@@ -8333,16 +8330,16 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
 {\ct MASS FLOW WALL}                            & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
-{\ct MASS FLUX}$^*$                             & Mass flux at solid surface                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
+{\ct MASS FLUX}$^1$                             & Mass flux at solid surface                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
+{\ct MASS FLUX X}$^1$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FLUX Y}$^1$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FLUX Z}$^1$                           & $\rho w Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FRACTION}$^1$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
-{\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
-{\ct MPUV\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
+{\ct MPUA}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct MPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct MPUV}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
+{\ct MPUV\_Z}$^1$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
 {\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
@@ -8350,9 +8347,9 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
-{\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
-{\ct PARTICLE FLUX Z}$^{**}$                    & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
+{\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
+{\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
+{\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                & kg             & PA           \\ \hline
 {\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
 {\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
@@ -8372,7 +8369,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
 {\ct SURFACE DENSITY}                           & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
-{\ct SURFACE DEPOSITION}$^*$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
+{\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
@@ -8382,12 +8379,12 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct V-VELOCITY}                                & Gas velocity component, $v$                   & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & Gas velocity component, $w$                   & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
-{\ct VELOCITY}$^{***}$                          & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
+{\ct VELOCITY}$^3$                              & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$ & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
-{\ct VOLUME FRACTION}$^{*}$                     & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct VOLUME FRACTION}$^1$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & Surface temperature                           & $^\circ$C      & B,D          \\ \hline
@@ -8396,11 +8393,12 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 
 \noindent
 \begin{tabbing}
-$^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                       \> Do not use for {\ct MIXTURE FRACTION}. \\
-$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
-$^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
-                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
+$^1$  \hspace{0.05in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                      \> Do not use for {\ct MIXTURE FRACTION}. \\
+$^2$                  \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
+$^3$                  \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
+                      \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
+$^4$                  \> Quantify allows for an optional {\ct MATL\_ID}.
 
 \end{tabbing}
 
@@ -8424,12 +8422,12 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
-{\ct ADA}$^{**}$                                & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADA\_Z}$^{*}$                              & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADD}$^{**}$                                & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADD\_Z}$^{*}$                              & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADT}$^{**}$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct ADT\_Z}$^{*}$                              & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADA}$^2$                                   & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADA\_Z}$^1$                                & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADD}$^2$                                   & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADD\_Z}$^1$                                & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADT}$^2$                                   & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADT\_Z}$^1$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 %{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
@@ -8444,7 +8442,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
-{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
+{\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
@@ -8465,16 +8463,16 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
-{\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & D            \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
+{\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}            &                & D            \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^1$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
-{\ct QABS}$^{**}$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QABS\_Z}$^{*}$                             & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QSCA}$^{**}$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
-{\ct QSCA\_Z}$^{*}$                             & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
@@ -8493,14 +8491,15 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
-{\ct WAVELET ERROR}$^{***}$                     & Section~\ref{info:meshquality}                    &                & S            \\ \hline
+{\ct WAVELET ERROR}$^3$                         & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 \end{longtable}
 
 \noindent
 \begin{tabbing}
-$^{*}$ \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-$^{**}$  \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
-$^{***}$ \>  Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \
+$^1$ \hspace{0.05in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^2$                 \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
+$^3$                 \> Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \\
+$^4$                 \> Quantity allows for an optional {\ct MATL\_ID}. 
 \end{tabbing}
 
 \clearpage
