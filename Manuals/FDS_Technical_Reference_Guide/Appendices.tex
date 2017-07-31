@@ -1624,9 +1624,9 @@ In cylindrical and spherical coordinates, the equation becomes:
 \end{equation}
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}. The discretization scheme is the same regardless of whether the coordinate system is Cartesian, cylindrical, or spherical. The size of the cell nearest the boundary is set by default to be
 \be
-   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_c \, c_s}} 
+   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_c \, c_s}}
 \ee
-where $\dt_0$ is a somewhat arbitrary time scale set to 1. In other words, the Fourier number based on the cell size is assumed of order unity. The user has flexibility in changing both the initial cell size and the degree of stretching. 
+where $\dt_0$ is a somewhat arbitrary time scale set to 1. In other words, the Fourier number based on the cell size is assumed of order unity. The user has flexibility in changing both the initial cell size and the degree of stretching.
 
 
 \begin{figure}[t]
@@ -1662,7 +1662,7 @@ The temperature at the center of each solid cell, $T_{s,i}$, is updated in time 
 \label{crank-nicolson}
 (\rho_s \, c_s)_i \frac{T_{s,i}^{n+1}-T_{s,i}^{n}}{\delta t}
 & = \frac{1}{2 \, r_{c,i}^I \, \delta r_i} \left( r_{i}^{I} \, k_{s,i+\frac{1}{2}} \frac{T_{s,i+1}^{n}-T_{s,i}^{n}}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^{I} \, k_{s,i-\frac{1}{2}} \frac{T_{s,i}^{n}-T_{s,i-1}^{n}}{\delta r_{i-\frac{1}{2}}} \right) \notag \\[0.1in]
-& +\frac{1}{2 \, r_{c,i}^I \, \delta r_i} \left( r_{i}^{I} \, k_{s,i+\frac{1}{2}} \frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^{I} \, k_{s,i-\frac{1}{2}} \frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\delta r_{i-\frac{1}{2}}} \right) + \dot{q}'''_s
+& +\frac{1}{2 \, r_{c,i}^I \, \delta r_i} \left( r_{i}^{I} \, k_{s,i+\frac{1}{2}} \frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^{I} \, k_{s,i-\frac{1}{2}} \frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\delta r_{i-\frac{1}{2}}} \right) + \dot{q}'''_{s,i}
 \end{align}
 $k_{i+\frac{1}{2}}$ is the thermal conductivity at the border of the cells $i$ and $i+1$, $\delta r_i$ is the width of cell $i$, and  $\delta r_{i+\frac{1}{2}}$ is the distance from the center of cell $i$ to the center of cell $i+1$. The radial coordinate, $r_{c,i}$, denotes the cell center:
 \begin{equation}
@@ -1734,7 +1734,7 @@ where
 \begin{split}
 & A_i = -\frac{k_{i+\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i} \; \frac{1}{r_{c,i}^I \delta r_i} \; \frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}}  \\
 & B_i = -\frac{k_{i-\frac{1}{2}} \, \delta t}{2(\rho_s c_s)_i} \; \frac{1}{r_{c,i}^I \delta r_i} \; \frac{r_{i-1}^I}{\delta r_{i-\frac{1}{2}}}   \\
-& C_i = T_{s,i}^{n}-A_i \, (T_{i+1}^n-T_i^n) + B_i \, (T_{i}^n-T_{i-1}^n)  \\
+& C_i = T_{s,i}^{n}-A_i \, (T_{i+1}^n-T_i^n) + B_i \, (T_{i}^n-T_{i-1}^n) + \dt \, \dot{q}_{s,i}'''/(\rho_s c_s)_i \\
 & D_i = 1-A_i-B_i
 \end{split}
 \end{equation}
