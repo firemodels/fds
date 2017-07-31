@@ -411,7 +411,7 @@ Radiative heat  transfer is  included in FDS  via the solution  of the radiation
 limited  cases using  a wide band  model. The equation  is solved using  a technique  similar to  finite volume  methods  for convective transport,
 thus the  name given  to it  is the  Finite  Volume Method (FVM).  There  are  several  limitations  of  the  model.  First,  the absorption
 coefficient  for the smoke-laden gas is  a complex function of  its  composition, wavelength, and temperature.  Because  of  the  simplified combustion  model,
-the  chemical  composition of  the  smokey  gases, especially  the  soot content,  can  effect  both  the absorption  and emission  of thermal
+the  chemical  composition of  the  smoky  gases, especially  the  soot content,  can  affect  both  the absorption  and emission  of thermal
 radiation.  Second, the  radiation transport  is discretized via  approximately 100 solid angles. For  targets far away from  a  localized source  of
 radiation,  like  a growing  fire,  the discretization can  lead to a non-uniform distribution  of the radiant energy. This can be seen in the
 visualization of surface temperatures, where  ``hot spots'' show  the effect  of the  finite number  of solid angles. The  problem can  be lessened
@@ -1007,7 +1007,7 @@ The Poisson equation for $H$ becomes
 %\end{enumerate}
 %This procedure represents a single stage in the RK2 time integration scheme.
 
-Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $L_2$ error at time $t = 0.9$ s\footnote{At $t=1$ s the $H$ manufactured solution is trivially zero everywhere and fortuitous error cancellation occurs.} as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $L_2$ error at time $t = 0.9$ s\footnote{At $t=1$ s the $H$ manufactured solution is trivially zero everywhere and fortuitous error cancellation occurs.} as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hydrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
 \begin{figure}[ht]
 \centering
@@ -2236,7 +2236,7 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \section{Checking the divergence constraint}
 \label{divergence_test}
 
-The test cases in this section involve the divergence of the flow, $\nabla \cdot \bu$, an important quantity in the low Mach number formulation of the Navier-Stokes equations. 
+The test cases in this section involve the divergence of the flow, $\nabla \cdot \bu$, an important quantity in the low Mach number formulation of the Navier-Stokes equations.
 
 \subsection{Isothermal flow (\texorpdfstring{\textct{divergence\_test\_1}}{divergence\_test\_1})}
 \label{divergence_test_1}
@@ -4066,14 +4066,14 @@ Using Eq.~(\ref{d2YdT2}) to eliminate $A_\alpha$ yields:
 \be
    \ln \left( \frac{Y_{\alpha,{\rm p}}}{Y_{\alpha,0}} \right) = - \frac{E_\alpha}{E_\alpha+2 R T_{\alpha,{\rm p}}} \approx -1  \quad \quad (E_\alpha \gg 2 R T_{\alpha,{\rm p}})
 \ee
-or more simply, $Y_{\alpha,{\rm p}} \approx Y_{\alpha,0}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+or more simply, $Y_{\alpha,{\rm p}} \approx Y_{\alpha,0}/{\rm e}$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
 \be
    E_\alpha = RT_{\alpha,{\rm p}}^2 \, \frac{A_\alpha}{\beta} \, \exp \left( -\frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) = \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}}
-   \approx \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}}  \label{E_formula}
+   \approx \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{{\rm e} \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}}  \label{E_formula}
 \ee
 Then $A_\alpha$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
-   A_\alpha = \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \approx \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \label{A_formula}
+   A_\alpha = \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \approx \frac{{\rm e} \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \label{A_formula}
 \ee
 Note that the formulae for $A_\alpha$ and $E_\alpha$ can be evaluated with parameters that are obtained directly by inspection of the plot of mass loss rate versus temperature. For each peak, the values of $T_{\alpha,{\rm p}}$ are easy to obtain by inspection. The initial mass fractions, $Y_{\alpha,0}$, can be estimated based on the relative area underneath each peak. The values of $Y_{\alpha,0}$ should sum to 1.
 
@@ -4102,16 +4102,14 @@ The solid curve of the left hand plot of Fig.~\ref{tga_sample_plot} shows the me
 \caption[Results of a TGA analysis]{Results of a TGA analysis. At left is the normalized sample mass as a function of the temperature. At right is the corresponding mass loss rate.}
 \label{tga_sample_plot}
 \end{figure}
-The first decision to make is the number of reactions. Usually, this corresponds to the number of peaks in the mass loss rate curve, but for realistic cases, some judgment is needed. In this example, it is assumed that there are two material components, each of which is undergoing a single reaction in the neighborhood of a certain temperature. By inspection, $T_{1,{\rm p}}=300 \; ^\circ$C and $T_{2,{\rm p}}=500 \; ^\circ$C. The next piece of information from the measurement is the residue fraction, which is obtained from the plot on the left, $\nu_{\rm r}=0.53$. From Eq.~(\ref{rr_calc}), the reaction rates are obtained by converting the peak mass loss rates from the plot on the right: $r_{1,{\rm p}}=0.00045/0.47$~s$^{-1}$ and $r_{2,{\rm p}}=0.0001/0.47$~s$^{-1}$.  Finally, the initial mass fractions of the two components are estimated from the relative areas under the peaks in the right hand plot. In this case, $Y_{1,{\rm p}}=0.6$ and $Y_{2,{\rm p}}=0.4$.
+The first decision to make is the number of reactions. Usually, this corresponds to the number of peaks in the mass loss rate curve, but for realistic cases, some judgment is needed. In this example, it is assumed that there are two material components, each of which is undergoing a single reaction in the neighborhood of a certain temperature. By inspection, $T_{1,{\rm p}}=300 \; ^\circ$C and $T_{2,{\rm p}}=500 \; ^\circ$C. The next piece of information from the measurement is the residue fraction, which is obtained from the plot on the left, $\nu_{\rm r}=0.53$. From Eq.~(\ref{rr_calc}), the reaction rates are obtained by converting the peak mass loss rates from the plot on the right: $r_{1,{\rm p}}=0.00045/0.47$~s$^{-1}$ and $r_{2,{\rm p}}=0.0001/0.47$~s$^{-1}$.  Finally, the initial mass fractions of the two components are estimated from the relative areas under the peaks in the right hand plot. In this case, $Y_{1,0}=0.6$ and $Y_{2,0}=0.4$.
 
 In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via the following lines:
 \begin{lstlisting}
 &SURF ID             = 'SAMPLE'
       ...
-      MATL_ID(1,1) = 'component 1'
-      MATL_ID(1,2) = 'component 2'
-      MATL_MASS_FRACTION(1,1) = 0.6
-      MATL_MASS_FRACTION(1,2) = 0.4 /
+      MATL_ID(1,1:2) = 'component 1','component 2'
+      MATL_MASS_FRACTION(1,1:2) = 0.6,0.4 /
 
 &MATL ID                    = 'component 1'
       ...
@@ -4135,7 +4133,7 @@ In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via t
       NU_MATL               = 0.53
       MATL_ID               = 'residue' /
 \end{lstlisting}
-Note that {\ct REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,{\rm p}}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
+Note that {\ct REFERENCE\_RATE}, the FDS input parameter, represents the quantity, $r_{\alpha,{\rm p}}/Y_{\alpha,0}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
 
 
 \subsection{Effect of the TGA Heating Rata (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}

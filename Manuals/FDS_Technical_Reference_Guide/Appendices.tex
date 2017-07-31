@@ -1579,7 +1579,7 @@ I_{\lambda}(\mathbf{x},\mathbf{s}) +\kappa_{\rm p}(\mathbf{x},\lambda) \; I_{{\r
 
 The burning rate of liquid pool fires depends in part on the convective and radiative heat feedback from the flames to the fuel surface. For large pool fires, radiation heat transfer dominates. Studies have been conducted to determine the spectra of emitted radiation~\cite{Suo-Anttila:PCT2009} as well as to characterize radiation absorption by gases within the flame~\cite{Wakatsuki:CST2008}. Depending on the fuel, thermal radiation can be absorbed at the surface or in depth. For fuels such as wood, most of the incident radiation is absorbed within a thin layer near the surface. For semi-transparent materials such as plastics or liquid fuels, thermal radiation may penetrate deeper. The in-depth radiation absorption by semi-transparent fuels has been studied for PMMA~\cite{Stoliarov:CF2009}, polymer films~\cite{Tsilingiris:ECM2003} and liquid pool fires~\cite{Suo-Anttila:PCT2009}. Most of the research related to the in-depth radiation absorption in liquids considers the boil-over of liquid pool fires on water~\cite{Broeckmann:JLPPI1995}. The effect of in-depth radiation absorption on evaporation of fuel droplets has also received some attention~\cite{Sazhin:IJHMT2004b}. Most liquids are highly selective absorbers, absorbing intensively in some wavelength regions while being transparent in others. This results in radiation transport models that are both computationally expensive and for which experimental data is scarce. In this appendix, we attempt to characterize the absorption of radiation by liquid fuels using effective absorption coefficients similar to those used in Refs.~\cite{Madhav:IJMP1995} and \cite{Manohar:JHT1995}.
 
-Where data on absorption coefficients of liquids exists in the open literature, such as the Coblentz Society data found on the NIST Chemistry WebBook~\cite{Coblentz:1}, it usually  only contains data for wavelengths from approximately \SI{2.5}{\micro m} upwards. A large part of the total energy in the emission spectrum of flames may easily be contained in wavelengths shorter than \SI{2.5}{\micro m}. However absorption spectra that begin from \SI{1}{\micro m} exists for a few liquids, including toluene~(\cite{Bertie:JMS2005}, \cite{Bertie:AS1994a}), methanol~\cite{Bertie:AS1993a}, benzene~\cite{Bertie:AS1993b} and water~\cite{Bertie:AS1996}. Furthermore, Ref.~\cite{Suo-Anttila:PCT2009} includes spectrally resolved transmission spectra of ethanol, heptane, JP-8, and an ethanol-toluene blend. Complex refractive index spectra for a few diesel fuels were reported in Ref.~\cite{Sazhin:IJHMT2004b}. Different diesel fuels have slightly different absorption spectra, due to differing additives. However the data reported in Ref.~\cite{Sazhin:IJHMT2004b} can perhaps be used to obtain an order of magnitude estimate for the absorption coefficient of diesel fuel.
+Where data on absorption coefficients of liquids exists in the open literature, such as the Coblentz Society data found on the NIST Chemistry WebBook~\cite{Coblentz:1}, it usually  only contains data for wavelengths from approximately \SI{2.5}{\micro m} upwards. A large part of the total energy in the emission spectrum of flames may easily be contained in wavelengths shorter than \SI{2.5}{\micro m}. However, absorption spectra that begin from \SI{1}{\micro m} exists for a few liquids, including toluene~(\cite{Bertie:JMS2005}, \cite{Bertie:AS1994a}), methanol~\cite{Bertie:AS1993a}, benzene~\cite{Bertie:AS1993b} and water~\cite{Bertie:AS1996}. Furthermore, Ref.~\cite{Suo-Anttila:PCT2009} includes spectrally resolved transmission spectra of ethanol, heptane, JP-8, and an ethanol-toluene blend. Complex refractive index spectra for a few diesel fuels were reported in Ref.~\cite{Sazhin:IJHMT2004b}. Different diesel fuels have slightly different absorption spectra, due to differing additives. However, the data reported in Ref.~\cite{Sazhin:IJHMT2004b} can perhaps be used to obtain an order of magnitude estimate for the absorption coefficient of diesel fuel.
 
 Often we are not interested in resolving the spectra of the transmitted radiation; rather, we are interested in modeling the total transmitted radiation. In these cases, it is convenient to write the radiation transport equations in terms of mean absorption coefficients. This is done to avoid the time-consuming integrations over all wavelengths. For this reason, a number of mean absorption coefficients have been introduced, such as the Rosselland-mean absorption coefficient and the Planck-mean absorption coefficient. These correspond to the optically-thin approximation and the Rosselland diffusion approximation of radiation transport. The absorption coefficients of liquids are highly wavelength dependent and are even transparent in some areas. In this case, the Planck-mean absorption coefficients are too large by several orders of magnitude. It is preferable to determine an effective absorption coefficient that attempts to replicate the absorption of radiation over a certain path length over which the majority of the radiation is absorbed.
 
@@ -1622,47 +1622,42 @@ In cylindrical and spherical coordinates, the equation becomes:
 \label{heat_cond_cyl2}
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} \left( r^I k_s \frac{\partial T_s}{\partial r} \right) + \dot{q}'''_s
 \end{equation}
-where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}.
+where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}. The discretization scheme is the same regardless of whether the coordinate system is Cartesian, cylindrical, or spherical. The size of the cell nearest the boundary is set by default to be
+\be
+   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_c \, c_s}} 
+\ee
+where $\dt_0$ is a somewhat arbitrary time scale set to 1. In other words, the Fourier number based on the cell size is assumed of order unity. The user has flexibility in changing both the initial cell size and the degree of stretching. 
+
 
 \begin{figure}[t]
-    \centering
-   \begin{tikzpicture}[font = \large]
-    \node at (-2.0,2.5) [label=above:Front] {};
-    \node at (4.5,2.5) [label=above:Back] {};
-
-    \node at (-2.5,0) [label=below:$x(0)$] {};
-    \node at (0,0) [label=below:$x(1)$] {};
-    \node at (2.5,0) [label=below:$x(N-1)$] {};
-    \node at (5,0) [label=below:$x(N)$] {};
-
-    \node at (-3.75,0) [label={above:$i = 0$}] {};
-    \node at (-1.25,0) [label={above:$i = 1$}] {};
-    \node at (1.25,0) [label=above:...] {};
-    \node at (3.75,0) [label={above:$i = N$}] {};
-    \node at (6.25,0) [label={above:$i = N+1$}] {};
-
-    \node at (1.25,3.5) [label=above: Virtual Nodes] {};
-    \draw [<-,line width=2pt] (6.25,2.75) arc (0:30:25 and 2.5);
-    \draw [<-,line width=2pt] (-3.75,2.75) arc (180:150:25 and 2.5);
-
-    \draw [dashed, line width=1.5pt] (-2.5,0) -- (-5,0);
-    \draw [dashed, line width=1.5pt] (-5,0) -- (-5,2.5);
-    \draw [dashed, line width=1.5pt] (-2.5,2.5) -- (-5,2.5);
-   \draw [line width=1.5pt] (-2.5,0) rectangle (0,2.5);
-   \draw [line width=1.5pt] (0,0) rectangle (2.5,2.5);
-    \draw [line width=1.5pt] (2.5,0) rectangle (5,2.5);
-    \draw [dashed, line width=1.5pt] (5,0) -- (7.5,0);
-    \draw [dashed, line width=1.5pt] (7.5,0) -- (7.5,2.5);
-    \draw [dashed, line width=1.5pt] (5,2.5) -- (7.5,2.5);
-
-    \draw [->,line width=2pt] (5,-1.1) -- (1.25,-1.1);
-    \node at (2.5,-1.1) [label=below:$r_{i}$] {};
-   \end{tikzpicture}
-    \caption[Solid phase nodes and indexes]{Solid phase nodes and indexes. $r$ is the radius from the back of the material.}
-    \label{fig_solid_nodes}
+\setlength{\unitlength}{.9in}
+\begin{picture}(6.5,1.5)
+\put(0,0){\framebox(1,1){Gas Cell}}
+\put(1.00,0){\framebox(0.10,1){1}}
+\put(1.10,0){\framebox(0.20,1){2}}
+\put(1.30,0){\framebox(0.40,1){3}}
+\put(1.70,0){\framebox(0.80,1){$T_{\rm s,4}$}}
+\put(2.50,0){\framebox(1.60,1){$T_{\rm s,5}$}}
+\put(4.10,0){\framebox(1.60,1){$T_{\rm s,6}$}}
+\put(5.70,0){\framebox(0.80,1){$T_{\rm s,7}$}}
+\put(6.50,0){\framebox(0.40,1){8}}
+\put(6.90,0){\framebox(0.20,1){9}}
+\put(7.10,0){\framebox(0.10,1){\parbox[c]{.1in}{1\\0}}}
+\put(1.00,1){\line(-1,1){0.25}}
+\put(1.10,1){\line( 0,1){0.25}}
+\put(1.30,1){\line( 1,1){0.25}}
+\put(7.20,1){\line( 0,1){0.25}}
+\put(0.50,1.35){$x_0$}
+\put(0.95,1.35){$x_1$}
+\put(1.50,1.35){$x_2$}
+\put(7.00,1.35){$x_{10}$}
+\end{picture}
+\caption[Layout of solid phase cells]{Layout of solid phase cells. In this example, each solid phase cell is stretched by a factor of 2 until the halfway point of the solid is reached, after which the cells shrink by a factor of 2. The interface between gas and solid phase is at $x_0$. The back side boundary condition is applied at $x_{10}$. ``Virtual'' cells 0 and $N+1=11$ are located to the left and right of the solid, and are the same size as cells 1 and $N=10$.}
+\label{fig_solid_nodes}
 \end{figure}
 
 The temperature at the center of each solid cell, $T_{s,i}$, is updated in time using a Crank-Nicolson scheme:
+
 \begin{align}
 \label{crank-nicolson}
 (\rho_s \, c_s)_i \frac{T_{s,i}^{n+1}-T_{s,i}^{n}}{\delta t}
@@ -1687,7 +1682,7 @@ Note that $T_{s,0}$ does not represent the gas temperature, but rather it is use
 \label{conv}
   \dot{q}_c'' = h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right)
 \end{equation}
-where $T_g$ is the gas temperature in the first grid cell abutting the surface, and $T_{s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{s,0})$ and $T_{s,1})$.
+where $T_g$ is the gas temperature in the first grid cell abutting the surface, and $T_{s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{s,0}$ and $T_{s,1}$.
 $(T^{n+1})^4$ can be approximated using a Taylor series expansion:
 \begin{equation}
 \label{T_taylor}
