@@ -45,7 +45,7 @@ M76Offset = csvread([data_dir,'radiation_gas_panel_76cm_offset_devc.csv'],2);
 % Collect heat fluxes computed by FDS.
 xFDS       = [.10,  .15, .25, .38, .61, .76];
 yFDS       = [M10(end,end),       M15(end,end),       M25(end,end),       M38(end,end),       M61(end,end),       M76(end,end)];
-yOffsetFDS = [M10Offset(end,end), M15Offset(end,end), M25Offset(end,end), M38Offset(end,end), M61Offset(end,end), M76Offset(end,end)];
+yFDSOffset = [M10Offset(end,end), M15Offset(end,end), M25Offset(end,end), M38Offset(end,end), M61Offset(end,end), M76Offset(end,end)];
 
 % On- and off-axis heat fluxes computed using Boltzmann's law and configuration factors.
 xCF       = [.10,  .15,  .25,  .38,  .46,  .76];
@@ -61,13 +61,15 @@ figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-plot(xFDS,  yFDS,  '-o', 'MarkerSize', 15, 'MarkerFaceColor', 'blue' ); hold on
-plot(xCF,   yCF,   '-s', 'MarkerSize', 15, 'MarkerFaceColor', 'green'); hold on
-plot(xSimms,ySimms,'-d', 'MarkerSize', 15, 'MarkerFaceColor', 'red'  );
+plot(xFDS,  yFDS,      '-o', 'MarkerSize', 15, 'MarkerFaceColor', 'blue' ); hold on
+plot(xCF,   yCF,       '-s', 'MarkerSize', 15, 'MarkerFaceColor', 'green'); hold on
+plot(xSimms,ySimms,    '-d', 'MarkerSize', 15, 'MarkerFaceColor', 'red'  ); hold on
 
-xlabel('Distance from center of gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('Heat flux (kW/m^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-axis([0 max(M10(:,1)) -0.5 1])
+plot(xFDS,  yFDSOffset, '-s', 'MarkerSize', 15, 'MarkerFaceColor', 'blue');  hold on
+plot(xCF,   yCFOffset,  '-s', 'MarkerSize', 15, 'MarkerFaceColor', 'green'); hold on
+
+xlabel('Distance from center of gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
+ylabel('Heat flux (kW/m^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
