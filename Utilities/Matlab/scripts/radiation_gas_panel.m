@@ -65,9 +65,6 @@ plot(xSimms,ySimms,    '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'red'); hold o
 plot(xCF,   yCF,       '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
 plot(xFDS,  yFDS,      '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'blue'); hold on
 
-plot(xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
-plot(xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue'); hold on
-
 xlabel('Perpendicular distance from gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
 ylabel('Heat flux (kW/m^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
 set(gca,'FontName',Font_Name)
@@ -78,14 +75,23 @@ ylim([0, 80])
 
 xticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
 
-lh1=legend({'Simms', 'Configuration factor', 'FDS'}, 'Position', [0.6 0.6 0.3 0.2]);
+lh1=legend({'Simms', 'Configuration factor', 'FDS'}, 'Position', [0.6 0.7 0.3 0.2]);
 lh1.Title.String = 'On-axis';
-
-%lh2=legend({'Configuration factor', 'FDS'}, 'Position', [0.6 0.6 0.3 0.3]);
-%lh2.Title.String = 'Off-axis';
-
 set(lh1,'FontSize',Key_Font_Size)
-%set(lh2,'FontSize',Key_Font_Size)
+
+% Matlab will draw only one legend per set of axes.  
+% Draw a second set of axes `under' the first to
+% overcome this limitation.
+ax1=gca;
+
+ax2=axes('Position',get(ax1,'Position'),'xlim',get(ax1,'xlim'),'ylim',get(ax1,'ylim'),'Visible','off','Color','none');
+
+plot(xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
+plot(xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue');  hold on
+
+lh2=legend({'Configuration factor', 'FDS'}, 'Position', [0.6 0.4 0.3 0.2]);
+lh2.Title.String='Off-axis';
+set(lh2,'FontSize',Key_Font_Size)
 
 % Add Git revision if file is available
 
