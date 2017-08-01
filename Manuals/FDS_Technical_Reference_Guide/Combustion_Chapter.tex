@@ -88,8 +88,8 @@ provided $A$ has full rank and $\mathbf{Y}$ is realizable (i.e., the forward tra
 
 The default reaction equation in FDS, known as ``simple chemistry,'' is defined as follows:
 \begin{multline}\label{eq:full_lump}
-\nu_{0}\underbrace{(\upsilon_{\mathrm{O}_{2},0} \, \mathrm{O}_2 +\upsilon_{\mathrm{N}_{2},0} \, \mathrm{N}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},0} \, \mathrm{H}_2 \, \mathrm{O}+\upsilon_{\mathrm{CO}_{2},0} \, \mathrm{CO}_2)}_\text{Background,~$Z_0$} \; + \; \nu_{1} \, \underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_1$} \quad \longrightarrow \\
-\nu_{2}\underbrace{(\upsilon_{\mathrm{CO}_{2},2} \, \mathrm{CO}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},2} \, \mathrm{H}_2 \, \mathrm{O} + \upsilon_{\mathrm{N}_{2},2} \, \mathrm{N}_2+\upsilon_{\mathrm{CO},2} \, \mathrm{CO} + \upsilon_{\mathrm{S},2} \, \mathrm{Soot})}_\text{Products,~$Z_2$}
+\nu_{1}\underbrace{(\upsilon_{\mathrm{O}_{2},1} \, \mathrm{O}_2 +\upsilon_{\mathrm{N}_{2},1} \, \mathrm{N}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},1} \, \mathrm{H}_2 \, \mathrm{O}+\upsilon_{\mathrm{CO}_{2},1} \, \mathrm{CO}_2)}_\text{Background,~$Z_1$} \; + \; \nu_{2} \, \underbrace{\mbox{C}_m\mbox{H}_n\mbox{O}_a\mbox{N}_b}_\text{Fuel,~$Z_2$} \quad \longrightarrow \\
+\nu_{3}\underbrace{(\upsilon_{\mathrm{CO}_{2},3} \, \mathrm{CO}_2 + \upsilon_{\mathrm{H}_{2} \, \mathrm{O},3} \, \mathrm{H}_2 \, \mathrm{O} + \upsilon_{\mathrm{N}_{2},3} \, \mathrm{N}_2+\upsilon_{\mathrm{CO},3} \, \mathrm{CO} + \upsilon_{\mathrm{S},3} \, \mathrm{Soot})}_\text{Products,~$Z_3$}
 \end{multline}
 Here, the volume fraction of primitive species $\alpha$ in lumped species $i$ is denoted by $\upsilon_{\alpha\,i}$ and the stoichiometric coefficients for the lumped species $i$ are denoted by $\nu_{i}$.
 
