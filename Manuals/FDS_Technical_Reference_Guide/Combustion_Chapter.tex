@@ -37,13 +37,13 @@ This is equivalent to
 \begin{equation}\label{eq:lumped_expand}
 \mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Air, $Z_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~$Z_1$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_2$}}
 \end{equation}
-where 9.52~moles of Air react with 1~mole of Fuel to produce 10.52~moles of Products. Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}). Note that 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients. The lumped species mass fractions are denoted $Z_i$, $i=0,1,...,N_Z$, where $N_Z$ is the number of tracked species.  The Background species, $Z_0$, is found from $Z_0=1-\sum_{i=1}^{N_{Z}} Z_i$. In the case of Eq.~(\ref{eq:lumped_expand}), two transport equations are solved (Fuel and Products).
+where 9.52~moles of Air react with 1~mole of Fuel to produce 10.52~moles of Products. Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}). Note that 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients. The lumped species mass fractions are denoted $Z_i$, $i=1,...,N_Z$, where $N_Z$ is the number of tracked species.
 
 The linear transformation from lumped species to primitive species is given by
 \begin{equation}\label{eq:transform}
 \textbf{Y}=A\textbf{Z}
 \end{equation}
-where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $(N_{z}+1)$ columns).  Each column of $A$ represents a different lumped species.  The elements of $A$ are the mass fractions for each primitive species in a given lumped species:
+where $A$ is the transformation matrix ($N_{y}$ rows $\times$ $N_{z}$ columns).  Each column of $A$ represents a different lumped species.  The elements of $A$ are the mass fractions for each primitive species in a given lumped species:
 \begin{equation}\label{eq:A_def}
 a_{\alpha\,i} = \frac{\upsilon_{\alpha\,i}W_{\alpha}}{\displaystyle \sum_{\beta}\upsilon_{\beta i}W_{\beta}}
 \end{equation}
