@@ -106,6 +106,7 @@ DO K=1,KBAR
                                 ZETA_P(I,J,K),AIT_P(I,J,K),PBAR(K,PRESSURE_ZONE(I,J,K)),&
                                 LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K)),DX(I)*DY(J)*DZ(K))
          !***************************************************************************************
+         IF (OUTPUT_CHEM_IT) CHEM_SUBIT(I,J,K) = CHEM_SUBIT_TMP
          IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
             REAC_SOURCE_TERM(I,J,K,:) = REAC_SOURCE_TERM_TMP
             Q_REAC(I,J,K,:) = Q_REAC_TMP
