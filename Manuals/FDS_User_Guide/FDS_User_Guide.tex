@@ -4525,7 +4525,7 @@ Species molecular mass also affects the spectrum: a heavier species of a given m
 
 \subsubsection{Gibbs Energy}
 
-If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS can use the forward reaction kinetics along with the equilibrium values of the reaction to determine the reverse kinetics.  The equilibrium is determined by minimizing the Gibbs energy.  The temperature vs. Gibbs energy (kJ/mol) for a species can be specified with {\ct RAMP\_G\_F}.
+If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS will use the forward reaction kinetics along with the equilibrium values of the reaction to determine the value of the rate constant for the reverse reaction.  The equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.
 
 \subsubsection{Liquids}
 
