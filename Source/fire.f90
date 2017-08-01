@@ -724,7 +724,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB .AND. YY_PRIMITIVE(NS) < ZZ_MIN_GLOBAL) CYCLE REACTION_LOOP_2
             ENDDO
-            DZ_F = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0)) ! dZ/dt, FDS Tech Guide, Eq. (5.49)
+            DZ_F = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0)) ! dZ/dt, FDS Tech Guide, Eq. (5.47)
             DO NS=1,N_SPECIES
                IF(RN%N_S(NS) > -998._EB) DZ_F = YY_PRIMITIVE(NS)**RN%N_S(NS)*DZ_F
             ENDDO
@@ -739,8 +739,8 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
                DZ_F = DZ_F/RN%K
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
-            Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DF_F=dZ/dt, hence need DT_LOC
-            DZZ = DZZ + RN%NU_MW_O_MW_F*DZ_F*DT_LOC/RN%K
+            Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
+            DZZ = DZZ + RN%NU_MW_O_MW_F*DZ_F*DT_LOC
          ENDDO REACTION_LOOP_2
          IF (REACTANTS_PRESENT) THEN
             DT_TMP = HUGE_EB
