@@ -43,23 +43,22 @@ M61Offset = csvread([data_dir,'radiation_gas_panel_61cm_offset_devc.csv'],2);
 M76Offset = csvread([data_dir,'radiation_gas_panel_76cm_offset_devc.csv'],2);
 
 % Collect heat fluxes computed by FDS.
-xFDS       = [.10,  .15, .25, .38, .61, .76];
-yFDS       = [M10(end,end),       M15(end,end),       M25(end,end),       M38(end,end),       M61(end,end),       M76(end,end)];
-yFDSOffset = [M10Offset(end,end), M15Offset(end,end), M25Offset(end,end), M38Offset(end,end), M61Offset(end,end), M76Offset(end,end)];
+xFDS       = [.10,  .15, .25, .38, .46, .61, .76];
+yFDS       = [M10(end,end),       M15(end,end),       M25(end,end),       M38(end,end),       M46(end,end),       M61(end,end),       M76(end,end)];
+yFDSOffset = [M10Offset(end,end), M15Offset(end,end), M25Offset(end,end), M38Offset(end,end), M46Offset(end,end), M61Offset(end,end), M76Offset(end,end)];
 
 % On- and off-axis heat fluxes computed using Boltzmann's law and configuration factors.
-xCF       = [.10,  .15,  .25,  .38,  .46,  .76];
-yCF       = [71.7, 54.4, 30.8, 16.3, 11.8, 4.70];
-yCFOffset = [38.4, 24.0, 17.4, 11.5, 9.0,  4.18];
+xCF       = [.10,  .15,  .25,  .38,  .46,  .61,  .76 ];
+yCF       = [71.7, 54.4, 30.8, 16.3, 11.8, 7.10, 4.70];
+yCFOffset = [38.4, 24.0, 17.4, 11.5, 9.0,  5.97, 4.18];
 
 % Heat fluxes reported by Simms.
-xSimms = [.10,  .15,  .25,  .38,  .61,  .76];
-ySimms = [70.2, 51.8, 31.5, 16.9, 7.61, 5.52];
+xSimms = [.10,  .15,  .25,  .38,  .46,  .61,  .76 ];
+ySimms = [70.2, 51.8, 31.5, 16.9, 12.7, 7.61, 5.52];
 
 % Plot heat flux versus distance.
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+fig=figure();
+ax1=get(fig,'CurrentAxes');
 
 plot(xSimms,ySimms,    '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'red'); hold on
 plot(xCF,   yCF,       '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
@@ -86,10 +85,15 @@ ax1=gca;
 
 ax2=axes('Position',get(ax1,'Position'),'xlim',get(ax1,'xlim'),'ylim',get(ax1,'ylim'),'Visible','off','Color','none');
 
-plot(xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
-plot(xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue');  hold on
+hold(ax2,'on'); % "do not erase" when plotting
 
-lh2=legend({'Configuration factor', 'FDS'}, 'Position', [0.6 0.4 0.3 0.2]);
+set(ax2,'FontName',Font_Name)
+set(ax2,'FontSize',Title_Font_Size)
+
+plot(ax2, xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green');
+plot(ax2, xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue');
+
+lh2=legend(ax2, {'Configuration factor', 'FDS'}, 'Position', [0.6 0.5 0.3 0.15]);
 lh2.Title.String='Off-axis';
 set(lh2,'FontSize',Key_Font_Size)
 
