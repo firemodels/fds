@@ -281,6 +281,8 @@ $QFDS -d Radiation radiation_gas_panel_25cm.fds
 $QFDS -d Radiation radiation_gas_panel_25cm_offset.fds
 $QFDS -d Radiation radiation_gas_panel_38cm.fds
 $QFDS -d Radiation radiation_gas_panel_38cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_46cm.fds
+$QFDS -d Radiation radiation_gas_panel_46cm_offset.fds
 $QFDS -d Radiation radiation_gas_panel_61cm.fds
 $QFDS -d Radiation radiation_gas_panel_61cm_offset.fds
 $QFDS -d Radiation radiation_gas_panel_76cm.fds
