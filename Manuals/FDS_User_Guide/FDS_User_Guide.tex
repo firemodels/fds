@@ -4903,6 +4903,8 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 
 \label{info:Complex_Fuel}
 
+\paragraph{Simple Chemistry Compatible Fuels}
+
 For complex fuel molecules that contain only C, H, N, and O the simple chemistry reaction parameters can still be applied. Consider natural gas, which is often a mixture of several component gases. To build the fuel mixture, the primitive (component) species need be defined. Each primitive species will get a {\ct LUMPED\_COMPONENT\_ONLY} designation, which means that each of these species will not be explicitly tracked as they are components to a mixture.  Note that these lumped components can only contain C, H, N, and O atoms. The lumped fuel, {\ct 'natural gas'}, can be created using the defined primitive components and subsequently the reaction can be defined using simple chemistry (Section \ref{info:simple_chemistry}):
 \begin{lstlisting}
 &SPEC ID='METHANE',       LUMPED_COMPONENT_ONLY=.TRUE./
@@ -4919,6 +4921,9 @@ For complex fuel molecules that contain only C, H, N, and O the simple chemistry
 &REAC FUEL='natural gas'
       SOOT_YIELD=0.01 /
 \end{lstlisting}
+
+\paragraph{Non-Simple Chemistry Compatible Fuels}
+
 Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, and its molecular weight, $W_\alpha$, according to the formula:
 \begin{equation}\label{eq:stoic_yield}
@@ -4963,7 +4968,7 @@ Since this is not a simple chemistry problem, either the enthalpy of formation o
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
       NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
 \end{lstlisting}
-Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 
 \begin{figure}[ht]
