@@ -2486,17 +2486,22 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY)                         ',&
+            C_SMAGORINSKY
       CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity: Dynamic Smagorinsky Model'
+         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity:           Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF)                       ',&
+            C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Vreman Model (C_VREMAN)        ',C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Vreman Model (C_VREMAN)                             ',&
+            C_VREMAN
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity: RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
+         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF)                      ',&
+            C_RNG,C_RNG_CUTOFF
       CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: WALE Model (C_WALE)            ',C_WALE
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           WALE Model (C_WALE)                                 ',&
+            C_WALE
    END SELECT TURB_MODEL_SELECT
    NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
       CASE DEFAULT
@@ -2579,6 +2584,12 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (ABS(G_F_Z(ITMP,N))>TWO_EPSILON_EB) THEN
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '  Gibbs Energy (J/kmol) Ambient, ',ITMP,' K: ', 1.E6_EB*G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', 1.E6_EB*G_F_Z( 500,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', 1.E6_EB*G_F_Z(1000,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', 1.E6_EB*G_F_Z(1500,N)
+   ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)

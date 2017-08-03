@@ -15,7 +15,7 @@
       EMISSIVITY=0.87
       DENSITY=1520.
       SPEC_ID='METHANE'
-      NU_SPEC=0.7
+      NU_SPEC=0.68
       MATL_ID='RESIDUE'
       NU_MATL=0.32
       HEAT_OF_REACTION=355.
