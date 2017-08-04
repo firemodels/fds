@@ -2588,25 +2588,29 @@ Because the heat flux from the hot plate to the shield is equal to the heat flux
 \ee
 The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
+\pagebreak
 
-
-\section{Radiation received from a gas panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
+\section{Radiation from a gas-fired panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
 \label{radiation_gas_panel}
 
-A  gas-fired panel is often used in laboratory experiments to provide
-a source of heat flux.  Here the heat flux received from a 1ft^2 gas
-panel is computed at various distances along the center axis of the
-panel and along the axis extending from (xx, xx); see Figure XX.  We
+In laboratory experiments, a gas-fired panel is often used to provide
+a source of heat flux.  Here, the heat flux received from a 1ft$^2$ gas
+panel is computed at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m
+distance from the panel along its center axis, and along the
+perpendicular axis displaced (0.14, 0.14) m from its center.  We
 compare the results computed by FDS to those calculated using the
-Stephan-Bolzmann Law and configuration factors and, along the center
-line, with measurements taken by Simms (ref; see Table 3).  The
-temperature of the panel is $1250^\circ$K and its emissivity is
-0.7. See Fig.~\ref{radiation_gas_panel_plot}.
+Stephan-Bolzmann Law and configuration factors and, along the panel
+axis, with measurements taken by Simms \cite{Simms:1963} (see Table
+3). In agreement with the values used by Simms, the temperature of the 
+panel is taken to be $1250^\circ$K and its emissivity 0.7. See
+Fig.~\ref{radiation_gas_panel_plot}.  
 \begin{figure}[ht]
 \centering
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
 \caption[The \textct{radiation\_gas\_panel} case]{Heat flux from a gas
-  panel.}
+  panel at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m, along the
+  perpendicular from the panel center and along the perpendicular axis
+  displaced (0.14, 0.14) m from the panel center.}
 \label{radiation_gas_panel_plot}
 \end{figure}
 

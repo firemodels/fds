@@ -68,7 +68,7 @@ plot(xSimms,ySimms,    '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'red'); hold o
 plot(xCF,   yCF,       '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'green'); hold on
 plot(xFDS,  yFDS,      '-o', 'MarkerSize', 10, 'MarkerFaceColor', 'blue'); hold on
 
-xlabel('Perpendicular distance from gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
+xlabel('Perpendicular distance from the gas panel (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
 ylabel('Heat flux (kW/m^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name); hold on
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
