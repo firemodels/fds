@@ -79,7 +79,7 @@ ylim([0, 80])
 xticks([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
 
 lh1=legend({'Simms', 'Configuration factor', 'FDS'}, 'Position', [0.6 0.7 0.3 0.2]);
-lh1.Title.String = 'On-axis';
+lh1.Title.String = 'Center axis';
 set(lh1,'FontSize',Key_Font_Size)
 
 % Matlab will draw only one legend per set of axes.  
@@ -98,7 +98,7 @@ plot(ax2, xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green')
 plot(ax2, xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue');
 
 lh2=legend(ax2, {'Configuration factor', 'FDS'}, 'Position', [0.6 0.5 0.3 0.15]);
-lh2.Title.String='Off-axis';
+lh2.Title.String='Off-center axis';
 set(lh2,'FontSize',Key_Font_Size)
 
 % Add Git revision if file is available
