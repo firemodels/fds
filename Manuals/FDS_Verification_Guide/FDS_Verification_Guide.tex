@@ -2593,7 +2593,7 @@ The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 \section{Radiation from a gas-fired panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
 \label{radiation_gas_panel}
 
-A gas-fired panel is often used to provide a source of heat flux in
+A radiant gas-fired panel is often used to provide a source of heat flux in
 laboratory experiments.  Here, the heat flux received from a 1ft$^2$
 gas panel is computed at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m
 distance from the panel along its center axis, and along the
@@ -2604,31 +2604,35 @@ compare the results computed by FDS to those calculated using the
 Stephan-Bolzmann law and configuration factors and, along the panel
 axis, with measurements taken by Simms \cite{Simms:1963} (see Table
 3 therein). In agreement with the values used by Simms, the
-temperature of the panel is taken to be $1250^\circ$K and its
-emissivity 0.7.
+temperature and emissivity of the panel are taken to be $1250^\circ$K
+and 0.7, respectively, and the ambient temperature taken to be
+$273^\circ$K.
 
-The configuration factor $dF_{2 \rightarrow d1}$ describing the
-radiant energy emitted from a square panel with dimension $h$ received
-by a differential area $dA_1$ located on the perpendicular extending
-from the panel at $(\overline{x}, \overline{y})$ relative to its center
-is computed using Equation~\eqref{eq:2->d1 configuration factor -
-  general}.  Figure~\ref{radiation_gas_panel_plot} shows the
-configuration for $(\overline{x}, \overline{y}) = (0, 0)$.
+The configuration factor $dF_{2 \rightarrow d1}$ describing the energy
+exchange between a radiant square panel with dimension $h$ and a
+target with differential area $dA_1$ located on a perpendicular
+extending from the panel at $(\overline{x}, \overline{y})$ relative to
+its center is computed using Equation~\eqref{eq:2->d1 configuration
+  factor - general}. Figure~\ref{radiation_gas_panel_plot} illustrates
+the configuration for $(\overline{x}, \overline{y}) = (0, 0)$. 
 \begin{align}
  dF_{2 \rightarrow d1} (\overline{x}, \overline{y}) 
     &= \frac{dA_1}{\pi A_2}
         \int_{-h/2}^{h/2} \int_{-h/2}^{h/2} \frac{R^2}{\left[ (x-\overline{x})^2 + (y-\overline{y})^2 + R^2 \right]^2} dx dy.
  \label{eq:2->d1 configuration factor - general}
 \end{align}
-
+  
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{FIGURES/radiation_gas_panel_configuration}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
-\caption[The \textct{radiation\_gas\_panel} case]{Heat flux from a gas
-  panel at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m, along the
-  perpendicular from the panel center, and along the perpendicular axis
-  displaced (0.14, 0.14) m from the panel center.}
+\caption[The \textct{radiation\_gas\_panel} case]{\emph{Left}: A
+  radiant panel and target dA$_1$ located a distance $R$ from
+  the panel on its center axis.  \emph{Right}: Heat flux from a
+  radiant panel at $1250^\circ$K  with emissivity 0.7 at 0.1, 0.15,
+  0.25, 0.38, 0.46, 0.61 and 0.76 m, along the panel's center axis,
+  and along the perpendicular axis displaced (0.14, 0.14) m from the
+  panel center.}
 \label{radiation_gas_panel_plot}
 \end{figure}
 
