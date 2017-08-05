@@ -98,7 +98,7 @@ plot(ax2, xCF,   yCFOffset,  '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'green')
 plot(ax2, xFDS,  yFDSOffset, '-s', 'MarkerSize', 10, 'MarkerFaceColor', 'blue');
 
 lh2=legend(ax2, {'Configuration factor', 'FDS'}, 'Position', [0.6 0.5 0.3 0.15]);
-lh2.Title.String='Off-center axis';
+lh2.Title.String='(0.14, 0.14) m axis';
 set(lh2,'FontSize',Key_Font_Size)
 
 % Add Git revision if file is available
