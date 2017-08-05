@@ -3818,7 +3818,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (TRIM(RN%SPEC_ID_N_S_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
             RN%SPEC_ID_N_S(NS2) = RN%SPEC_ID_N_S_READ(NS)
             RN%N_S(NS2)       = RN%N_S_READ(NS)
-            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2)) ! FDS Tech Guide, Eq. (5.48), product term
+            RN%A_PRIME        = RN%A_PRIME * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2)) ! FDS Tech Guide, Eq. (5.46), product term
             RN%RHO_EXPONENT   = RN%RHO_EXPONENT + RN%N_S(NS2)
             NAME_FOUND = .TRUE.
             EXIT
@@ -3830,8 +3830,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
-   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.51)
-   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.48)
+   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.49)
+   RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.46)
 
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate for FAST_CHEMISTRY (this will get removed when we overhaul combustion)
    ! Fictitious Arrhenius rate is dC_F/dt = -1E10*C_F*C_A
@@ -12636,10 +12636,11 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
       IF (Z_INDEX>=0) THEN
          IF (TRIM(QUANTITY)=='MIXTURE FRACTION') THEN
             SMOKEVIEW_LABEL = TRIM(QUANTITY)
+            SMOKEVIEW_BAR_LABEL = TRIM(OUTPUT_QUANTITY(ND)%SHORT_NAME)
          ELSE
             SMOKEVIEW_LABEL = TRIM(SPECIES_MIXTURE(Z_INDEX)%ID)//' '//TRIM(QUANTITY)
+            SMOKEVIEW_BAR_LABEL = TRIM(OUTPUT_QUANTITY(ND)%SHORT_NAME)//'_'//TRIM(SPECIES_MIXTURE(Z_INDEX)%ID)
          ENDIF
-         SMOKEVIEW_BAR_LABEL = TRIM(OUTPUT_QUANTITY(ND)%SHORT_NAME)//'_'//TRIM(SPECIES_MIXTURE(Z_INDEX)%ID)
       ELSEIF (Y_INDEX>0) THEN
          SMOKEVIEW_LABEL = TRIM(SPECIES(Y_INDEX)%ID)//' '//TRIM(QUANTITY)
          SMOKEVIEW_BAR_LABEL = TRIM(OUTPUT_QUANTITY(ND)%SHORT_NAME)//'_'//TRIM(SPECIES(Y_INDEX)%FORMULA)
