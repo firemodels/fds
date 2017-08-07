@@ -506,6 +506,15 @@ export FDSBINDIR=\$FDS_root/bin
 export MPIDIST=\\\$ARG1
 BASH
 
+if [ "$ostype" == "OSX" ]; then
+cat << BASH >> \$BASHFDS
+
+# set stack size to unlimted
+
+ulimit -s 65530
+BASH
+fi
+
 if [ "$ostype" != "OSX" ]; then
 cat << BASH >> \$BASHFDS
 
