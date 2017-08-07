@@ -98,5 +98,6 @@ disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
 disp('ht3d_cond...');                     ht3d_cond
 disp('vegetation...');                    vegetation
+disp('radiation_gas_panel...');           radiation_gas_panel
 
 display('verification scripts completed successfully!')
