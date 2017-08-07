@@ -509,9 +509,9 @@ BASH
 if [ "$ostype" == "OSX" ]; then
 cat << BASH >> \$BASHFDS
 
-# set stack size to unlimted
+# set stack size to 2^16 - 4
 
-ulimit -s 65530
+ulimit -s 65532
 BASH
 fi
 
@@ -525,7 +525,7 @@ if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
 
-# set stack size to unlimted
+# set stack size to unlimited
 
 ulimit -s unlimited
 BASH
