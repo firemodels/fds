@@ -9810,7 +9810,7 @@ USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC
 REAL(EB) :: DIAMETER,TEMPERATURE,DENSITY,RR_SUM,ZZ_GET(1:N_TRACKED_SPECIES),MASS_PER_VOLUME, &
             MASS_PER_TIME,DT_INSERT,UVW(3),HRRPUV,XYZ(3),DX,DY,DZ,HEIGHT,RADIUS,MASS_FRACTION(MAX_SPECIES), &
-            PARTICLE_WEIGHT_FACTOR,AUTO_IGNITION_TEMPERATURE
+            PARTICLE_WEIGHT_FACTOR,AUTO_IGNITION_TEMPERATURE,VOLUME_FRACTION(MAX_SPECIES)
 INTEGER  :: NM,N,NN,NNN,II,JJ,KK,NS,NS2,NUMBER_INITIAL_PARTICLES,N_PARTICLES,N_INIT_NEW,N_INIT_READ,N_PARTICLES_PER_CELL
 LOGICAL  :: CELL_CENTERED
 EQUIVALENCE(NUMBER_INITIAL_PARTICLES,N_PARTICLES)
@@ -9821,8 +9821,8 @@ TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE(DEVICE_TYPE), POINTER :: DV
 NAMELIST /INIT/ AUTO_IGNITION_TEMPERATURE,CELL_CENTERED,CTRL_ID,DENSITY,DEVC_ID,DIAMETER,DT_INSERT,DX,DY,DZ,&
                 HEIGHT,HRRPUV,ID,MASS_FRACTION,&
-                MASS_PER_TIME,MASS_PER_VOLUME,MULT_ID,N_PARTICLES,N_PARTICLES_PER_CELL,PART_ID,RADIUS,SHAPE,&
-                SPEC_ID,TEMPERATURE,UVW,XB,XYZ,PARTICLE_WEIGHT_FACTOR,&
+                MASS_PER_TIME,MASS_PER_VOLUME,MULT_ID,N_PARTICLES,N_PARTICLES_PER_CELL,PART_ID,PARTICLE_WEIGHT_FACTOR,&
+                RADIUS,SHAPE,SPEC_ID,TEMPERATURE,UVW,VOLUME_FRACTION,XB,XYZ,&
                 NUMBER_INITIAL_PARTICLES !Backwards compatability
 
 N_INIT = 0
@@ -9851,6 +9851,10 @@ COUNT_LOOP: DO
          WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: MULT line ',TRIM(MULT_ID),' not found on INIT line', N_INIT_READ
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
+   ENDIF
+   IF(ANY(MASS_FRACTION>0._EB) .AND. ANY(VOLUME_FRACTION>0._EB)) THEN
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: INIT line ', N_INIT_READ, ". Do not specify both MASS_FRACTION and VOLUME_FRACTION."
+      CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    N_INIT = N_INIT + N_INIT_NEW
 ENDDO COUNT_LOOP
@@ -10016,43 +10020,79 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IF (DENSITY > 0._EB) RHOMAX = MAX(RHOMAX,IN%DENSITY)
             IF (AUTO_IGNITION_TEMPERATURE < 1.E20_EB) REIGNITION_MODEL = .TRUE.
 
-            SPEC_INIT_IF:IF (ANY(MASS_FRACTION > TWO_EPSILON_EB)) THEN
+            SPEC_INIT_IF:IF (ANY(MASS_FRACTION > 0._EB)) THEN
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
-               ELSE
-                  DO NS=1,MAX_SPECIES
-                     IF (SPEC_ID(NS)=='null') EXIT
-                     DO NS2=1,N_TRACKED_SPECIES
-                        IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
-                           IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
-                           EXIT
-                        ENDIF
-                        IF (NS2==N_TRACKED_SPECIES)  THEN
-                           WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
-                              TRIM(SPEC_ID(NS)),' not found'
-                              CALL SHUTDOWN(MESSAGE) ; RETURN
-                        ENDIF
-                     ENDDO
-                  ENDDO
-
-                  IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
-                     WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
-                  IF (IN%MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
-                     IN%MASS_FRACTION(1) = 1._EB-SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
-                  ELSE
-                     WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
-                                                 '. Cannot specify background species for MASS_FRACTION'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
-                  ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
-                  CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
                ENDIF
+               DO NS=1,MAX_SPECIES
+                  IF (SPEC_ID(NS)=='null') EXIT
+                  DO NS2=1,N_TRACKED_SPECIES
+                     IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                        IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
+                        EXIT
+                     ENDIF
+                     IF (NS2==N_TRACKED_SPECIES)  THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
+                           TRIM(SPEC_ID(NS)),' not found'
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+                  ENDDO
+               ENDDO
+
+               IF (SUM(IN%MASS_FRACTION) > 1._EB) THEN
+                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               IF (IN%MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
+                  IN%MASS_FRACTION(1) = 1._EB-SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
+               ELSE
+                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
+                                                '. Cannot specify background species for MASS_FRACTION'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
+
+            ELSEIF (ANY(VOLUME_FRACTION>0._EB)) THEN SPEC_INIT_IF
+               IF (SUM(VOLUME_FRACTION) > 1._EB) THEN
+                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified volume fractions > 1'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               IF (SPEC_ID(1)=='null') THEN
+                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with VOLUME_FRACTION'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               DO NS=1,MAX_SPECIES
+                  IF (SPEC_ID(NS)=='null') EXIT
+                  DO NS2=1,N_TRACKED_SPECIES
+                     IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                        MASS_FRACTION(NS2)=VOLUME_FRACTION(NS)*SPECIES_MIXTURE(NS2)%MW
+                        EXIT
+                     ENDIF
+                     IF (NS2==N_TRACKED_SPECIES)  THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,' tracked species ',&
+                           TRIM(SPEC_ID(NS)),' not found'
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+                  ENDDO
+               ENDDO
+               IF (MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
+                  MASS_FRACTION(1) = (1._EB-SUM(VOLUME_FRACTION))*SPECIES_MIXTURE(1)%MW
+               ELSE
+                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
+                                                '. Cannot specify background species for VOLUME_FRACTION'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES)/SUM(MASS_FRACTION(1:N_TRACKED_SPECIES))
+               IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES) 
+               ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
+
             ELSE SPEC_INIT_IF
                   IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
                   RR_SUM = RSUM0
+
             ENDIF SPEC_INIT_IF
 
             IF (TEMPERATURE > 0._EB) TMPMIN = MIN(TMPMIN,IN%TEMPERATURE)
@@ -10206,6 +10246,7 @@ SHAPE                     = 'BLOCK'
 SPEC_ID                   = 'null'
 TEMPERATURE               = -1000._EB
 UVW                       = 0._EB
+VOLUME_FRACTION           =  0._EB
 XB(1)                     = -1000000._EB
 XB(2)                     =  1000000._EB
 XB(3)                     = -1000000._EB
