@@ -1577,6 +1577,8 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
 \end{lstlisting}
 Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
 
+{\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
+
 \subsection*{Temperature}
 
 To modify the local initial temperature, add lines of the form,
@@ -8958,6 +8960,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
+{\ct VOLUME\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
 {\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
 {\ct XYZ(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
