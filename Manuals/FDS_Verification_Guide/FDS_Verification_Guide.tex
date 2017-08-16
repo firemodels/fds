@@ -411,7 +411,7 @@ Radiative heat  transfer is  included in FDS  via the solution  of the radiation
 limited  cases using  a wide band  model. The equation  is solved using  a technique  similar to  finite volume  methods  for convective transport,
 thus the  name given  to it  is the  Finite  Volume Method (FVM).  There  are  several  limitations  of  the  model.  First,  the absorption
 coefficient  for the smoke-laden gas is  a complex function of  its  composition, wavelength, and temperature.  Because  of  the  simplified combustion  model,
-the  chemical  composition of  the  smokey  gases, especially  the  soot content,  can  effect  both  the absorption  and emission  of thermal
+the  chemical  composition of  the  smoky  gases, especially  the  soot content,  can  affect  both  the absorption  and emission  of thermal
 radiation.  Second, the  radiation transport  is discretized via  approximately 100 solid angles. For  targets far away from  a  localized source  of
 radiation,  like  a growing  fire,  the discretization can  lead to a non-uniform distribution  of the radiant energy. This can be seen in the
 visualization of surface temperatures, where  ``hot spots'' show  the effect  of the  finite number  of solid angles. The  problem can  be lessened
@@ -591,8 +591,8 @@ As mentioned, with $\nu=0$ the solution is periodic in time and this figure demo
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_start} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_end} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_64_start} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_64_end} }
    \end{tabular*}
    \caption[Initial and final states of Navier-Stokes solution]{Initial and final states of the $u$-component of velocity.}
    \label{fig_ns2d_smv}
@@ -605,10 +605,10 @@ of velocity, $(x_{N/2},\bar{z}_{N/2})$, which is different in each case, $N =\{8
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_8_nupt1} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_16_nupt1} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_32_nupt1} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_nupt1} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_8_nupt1} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_16_nupt1} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_32_nupt1} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_64_nupt1} }
    \end{tabular*}
    \caption[Velocity time history, qualitative convergence]{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
    The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
@@ -629,8 +629,8 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_error} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_nupt1_error} }
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_error} } &
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/ns2d_nupt1_error} }
    \end{tabular*}
    \caption[Navier-Stokes convergence study]{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The asterisks represent the RMS error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
@@ -736,8 +736,8 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Fig.~\ref{fig_pulsa
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/pulsating_time_series} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/pulsating_convergence}
    \end{tabular*}
    \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
@@ -821,8 +821,8 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_convergence}
    \end{tabular*}
    \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
@@ -1007,7 +1007,7 @@ The Poisson equation for $H$ becomes
 %\end{enumerate}
 %This procedure represents a single stage in the RK2 time integration scheme.
 
-Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $L_2$ error at time $t = 0.9$ s\footnote{At $t=1$ s the $H$ manufactured solution is trivially zero everywhere and fortuitous error cancellation occurs.} as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $L_2$ error at time $t = 0.9$ s\footnote{At $t=1$ s the $H$ manufactured solution is trivially zero everywhere and fortuitous error cancellation occurs.} as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hydrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
 \begin{figure}[ht]
 \centering
@@ -1109,7 +1109,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The $L_2$ error at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
@@ -1268,8 +1268,8 @@ To ensure that the numerical solution converges to the analytical solution, we s
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
    \end{tabular*}
    \caption[Velocity in the \textct{vort2d} test case]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_axisvelocity}
@@ -1279,7 +1279,7 @@ A plot of $u$-velocity values just along the $z$-axis provides a simple characte
 
 \begin{figure}[h!]
    \centering
-    \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_error}
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_error}
     \caption[Convergence study for the \textct{vort2d} test case]{RMS error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
     \label{fig_vort2d_error}
 \end{figure}
@@ -1299,8 +1299,8 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
    \end{tabular*}
    \caption[Time history of velocity at a point showing qualitative convergence]{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_pointvelocity}
@@ -1321,7 +1321,7 @@ The first case, {\ct bound\_test\_1}, consists of two independent reactions, one
 
 \begin{figure}[!ht]
    \centering
-   \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_1}
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_1}
    \caption[Results of the {\ct bound\_test\_1} case]{Results of the {\ct bound\_test\_1} case.}
    \label{fig:bound_test_1}
 \end{figure}
@@ -1335,7 +1335,7 @@ The second test case, {\ct bound\_test\_2}, is more challenging---we add a third
 The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2}.  As discussed in the FDS Tech Guide \cite{FDS_Math_Guide}, the right-hand-side of the chemistry ODE is set up assuming a large Arrhenius constant and no activation energy and (in this case) second-order concentration dependence for each reaction.  It can be shown through numerical experiments that this assumption is equivalent to applying Curl's mixing model (Coalescence-Dispersion) \cite{Curl:1} in a batch reactor with infinitely fast chemistry.
 \begin{figure}[!ht]
    \centering
-   \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_2}
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/bound_test_2}
    \caption[Results of the {\ct bound\_test\_2} case]{Results of the {\ct bound\_test\_2} case.}
    \label{fig:bound_test_2}
 \end{figure}
@@ -1347,9 +1347,9 @@ This is a test of isothermal advection and mixing of gases with different molecu
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_T} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_HS} \\
-      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_isothermal_W}}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_isothermal_T} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_isothermal_HS} \\
+      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_isothermal_W}}
    \end{tabular*}
    \caption[Results of the {\ct helium\_1d\_isothermal} cases]{Results of the {\ct helium\_1d\_isothermal} cases.}
    \label{fig_helium_1d_isothermal}
@@ -1362,8 +1362,8 @@ In this test, a jet of helium is generated from a floor vent.  The mass flux is 
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_air_jet_floor_minT} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_air_jet_floor_maxT}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_air_jet_floor_minT} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_air_jet_floor_maxT}
    \end{tabular*}
    \caption[Results of the {\ct helium\_air\_jet\_floor} case]{Results of the {\ct helium\_air\_jet\_floor} case.}
    \label{helium_air_jet}
@@ -1376,8 +1376,8 @@ Hydrogen gas (2~g/mol) is injected into a small compartment filled with sulfur h
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/mwtest_cfl_minT} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/mwtest_cfl_maxT}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/mwtest_cfl_minT} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/mwtest_cfl_maxT}
    \end{tabular*}
    \caption[Results of the {\ct mwtest\_cfl} case]{Results of the {\ct mwtest\_cfl} case.}
    \label{mwtest_cfl_fig}
@@ -1390,9 +1390,9 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_default} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_dt_p001} \\
-      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_default} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_dt_p001} \\
+      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}}
    \end{tabular*}
    \caption[Results of the {\ct tmp\_lower\_limit} cases]{Results of the {\ct tmp\_lower\_limit} cases.}
    \label{tmp_lower_limit_fig}
@@ -1430,9 +1430,9 @@ In Fig.~\ref{fig_helium_1d_const_gamma} we plot the simulation results for tempe
 
 \begin{figure}[ht!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
-      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_W}}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_T} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_HS} \\
+      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/helium_1d_const_gamma_W}}
    \end{tabular*}
    \caption[Results of the {\ct helium\_1d\_const\_gamma} cases]{Results of the {\ct helium\_1d\_const\_gamma} cases.}
    \label{fig_helium_1d_const_gamma}
@@ -1445,8 +1445,8 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
 
 \begin{figure}[ht!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
    \end{tabular*}
    \caption[Results of the {\ct fire\_const\_gamma} case]{Results of the {\ct fire\_const\_gamma} case.}
    \label{fig_fire_const_gamma}
@@ -1460,12 +1460,12 @@ This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_ev
 \begin{figure}[ht!]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_enthalpy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_humidity} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_temperature} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_pressure} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evap_1_const_gamma_water_mass}
 \end{tabular*}
 \caption[Sample case \textct{water\_evap\_1\_const\_gamma}]{Output of the \textct{water\_evap\_1\_const\_gamma} test case.}
 \label{water_evap_1_const_gamma_plots}
@@ -1493,8 +1493,8 @@ Because the viscous scales are unresolved, a subgrid stress model is required. H
 The decay curves for two grid resolutions are shown on the left in Fig.~\ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the dash-dot line in the top-left plot in Fig.~\ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the dashed curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_000} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_689} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_64_000} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_64_689} }
    \end{tabular*}
    \caption[Initial and final states for isotropic turbulence]{Initial and final states of velocity magnitude for the isotropic turbulence field.}
    \label{fig_cbc_smv}
@@ -1504,10 +1504,10 @@ To the right of each decay curve plotted in Fig.~\ref{fig_cbc_energy} is the cor
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/csmag_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using constant Smagorinsky]{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
 \end{figure}
@@ -1537,10 +1537,10 @@ Next, in Fig.~\ref{fig_dynsmag_cbc}, we show results for the dynamic model analo
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/dsmag_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/dsmag_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/dsmag_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/dsmag_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using dynamic Smagorinsky]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -1554,10 +1554,10 @@ In this section we present the results for the FDS implantation of the Deardorff
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/deardorff_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/deardorff_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/deardorff_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/deardorff_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/deardorff_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using Deardorff's model]{\label{fig_deardorff_cbc} Deardorff model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -1571,10 +1571,10 @@ The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative t
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/vreman_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/vreman_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/vreman_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/vreman_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/vreman_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using Vreman's model]{\label{fig_vreman_cbc} Vreman model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -1593,10 +1593,10 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/rng_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/rng_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/rng_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/rng_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/rng_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using RNG model]{\label{fig_rng_cbc} RNG model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -1610,10 +1610,10 @@ The WALE (Wall Adapting Local Eddy-viscosity) model of Nicoud and Ducros \cite{N
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_32_spectra} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_decay} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/wale_64_spectra} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/wale_32_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/wale_32_spectra} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/wale_64_decay} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/wale_64_spectra} }
    \end{tabular*}
    \caption[Integrated and spectral energy decay for CBC experiment using the WALE model]{\label{fig_wale_cbc} WALE model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -1684,7 +1684,7 @@ The mean pressure drop is prescribed to be $\d p/ \d x = -1$ Pa m$^{-1}$ resulti
 is determined from the steady-state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Fig.~\ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/poiseuille_convergence}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/poiseuille_convergence}
 \caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
 \label{fig_poiseuille_convergence}
 \end{figure}
@@ -1776,8 +1776,8 @@ Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from F
 where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_profile} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_convergence}
    \end{tabular*}
    \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
    \label{blasius}
@@ -1809,7 +1809,7 @@ In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wal
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/yplus}
 \caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
 \label{fig_yplus}
 \end{figure}
@@ -1844,8 +1844,8 @@ where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. The mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the buffer layer points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
    \end{tabular*}
    \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
 \end{figure}
@@ -1875,10 +1875,10 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_u_strm} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_u_prof} \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
    \end{tabular*}
    \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
 \end{figure}
@@ -1900,7 +1900,7 @@ through multiple meshes and its mass is conserved. An obstruction is created tha
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/simple_duct_mass}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/simple_duct_mass}
 \caption[The \textct{simple\_duct} test case]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
 \label{simple_duct_fig}
 \end{figure}
@@ -1942,10 +1942,10 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_2} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/species_conservation_4}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/species_conservation_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/species_conservation_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/species_conservation_3} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/species_conservation_4}
 \end{tabular*}
 \caption[The \textct{species\_conservation} test cases]{Results of the \textct{species\_conservation} test cases. Case~1: Hot gas is injected at a very low flow rate into a 4~m cube. Case~2: Air is injected into one side of a partitioned compartment. Case~3: A solid cube vaporizes yielding four gases whose total mass is 0.8~kg. A small amount of nitrogen is created to fill the void left by the vaporized solid cube. Case~4: A patch of solid surface reacts to form four gases whose total mass is 0.4~kg.}
 \label{species_conservation}
@@ -1977,10 +1977,10 @@ In this case, the particles are replaced by a small, solid block blowing propane
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_2} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_4}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_offgas_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_offgas_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_offgas_3} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_offgas_4}
 \end{tabular*}
 \caption[The \textct{particle\_offgas} test cases]{Results of the \textct{particle\_offgas} test cases. Upper left, Case 1: minimum and maximum temperature when air only is injected. Upper right, Case~2: min/max temperature when carbon dioxide is injected into air. Lower left, Case~3: minimum temperature when propane gas is injected and burned. Lower right, Case~4: minimum temperature when propane gas is injected from a solid block and burned. }
 \label{particle_offgas_plots}
@@ -1993,7 +1993,7 @@ In this case, the particles are replaced by a small, solid block blowing propane
 In order for species mass fractions to be physically realizable they must all be positive (semi-definite) and sum to unity, $Y_\alpha\ge0$ and $\sum_\alpha Y_\alpha=1$.  In this test case, a simple methane burner is used to test the realizability of mass fractions.  A device is placed near the base of the center of the flame to measure the local mass fractions.  In Fig.~\ref{fig:realizable_mass_fractions} we plot the time history of the mass fractions for Fuel, Air, and Products along with the sum (dashed line).  This sum should remain perfectly one at all times.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/realizable_mass_fractions}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/realizable_mass_fractions}
 \caption[The \textct{realizable\_mass\_fractions} test case]{Results of the \textct{realizable\_mass\_fractions} test case.  The sum of the mass fractions (dashed line) should remain perfectly one at all times.}
 \label{fig:realizable_mass_fractions}
 \end{figure}
@@ -2041,10 +2041,10 @@ This example checks that if nitrogen is added to a sealed compartment with adiab
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_pressure} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic_enthalpy}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic_pressure} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic_temperature} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic_enthalpy}
 \end{tabular*}
 \caption[The \textct{isentropic} test case]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
 \label{isentropic_fig}
@@ -2077,10 +2077,10 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_pressure} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_enthalpy}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic2_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic2_pressure} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic2_temperature} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/isentropic2_enthalpy}
 \end{tabular*}
 \caption[The \textct{isentropic2} test case]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
 \label{isentropic2_fig}
@@ -2100,8 +2100,8 @@ Because of the large difference in specific heats, the average velocity of the g
 The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
 \caption[The \textct{energy\_budget\_dns} test case]{(Left) Equality of convective and diffusive enthalpy flux at steady state. (Right) The integrated divergence or net volume flow.}
 \label{energy_budget_dns}
 \end{figure}
@@ -2116,7 +2116,7 @@ This case tests the ability of FDS to properly account for temperature dependent
 The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1 \times 10 \times (20+273.15) = 4104.65$ \si{kJ/(m^2.s)}.  The mixture heat capacity at the outlet is 5.5 \si{kJ/(kg.K)} and the flux is 2 \si{kg/(m^2.s)}.  Therefore the outlet temperature is $4104.65/2/5.5 - 273.15 = 100$ \si{\degree C}.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_tmix}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_tmix}
 \caption[The \textct{energy\_budget\_tmix} test case]{\label{fig_outlet_temperature} Outlet temperature for \textct{energy\_budget\_tmix} case.  Black circles represent the correct result of 100 \si{\degree C}.}
 \end{figure}
 
@@ -2127,8 +2127,8 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 \si{m^3} box is filled with 1 kg of a gas with a specific heat of 1 \si{kJ/(kg.K)}, a molecular weight of 28 g/mol, and an initial temperature of 20 \si{\degree C}.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 \si{W/(m.K)},  a specific heat of 1 \si{kJ/(kg.K)}, an initial temperature of 150 \si{\degree C}, and a density of 1,000 \si{kg/m^3}.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state, the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 \si{\degree C}.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_P}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_solid_P}
 \caption[The \textct{energy\_budget\_solid} test case]{\label{fig_solid_energy} Outputs of temperature (left) and pressure (right) for the \textct{energy\_budget\_solid} case.  Circles represent the correct result.}
 \end{figure}
 
@@ -2171,10 +2171,10 @@ A closed box, 1~m on a side, has 6 injection vents, one centered on each face. A
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_mpi} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_mpi_plot}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test_mpi} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test_mpi_plot}
 \end{tabular*}
 \caption[The \textct{symmetry\_test} cases]{Flow field (left) and velocity component plots (right) for the \textct{symmetry\_test} cases.}
 \label{symmetry_test_fig}
@@ -2188,8 +2188,8 @@ In this case, a steel pan is placed inside a small compartment with a small door
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_2_plot}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/symmetry_test_2_plot}
 \end{tabular*}
 \caption[The \textct{symmetry\_test\_2} case]{Flow field (left) and temperature plot (right) for the \textct{symmetry\_test\_2} case.}
 \label{symmetry_test_2_fig}
@@ -2204,8 +2204,8 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cyl_test} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cyl_test_3-4}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cyl_test} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cyl_test_3-4}
 \end{tabular*}
 \caption[The \textct{cyl\_test} test cases]{Temperature traces from axially-symmetric calculations with different values of $\delta y$.}
 \label{cyl_test_fig}
@@ -2225,8 +2225,8 @@ In this example, a simple jet is created by pushing air through a square duct. T
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
 \end{tabular*}
 \caption[The \textct{velocity\_bc\_test} test case]{Centerline time-averaged pressure (left) and velocity (right) profiles for the \textct{velocity\_bc\_test} case.}
 \label{velocity_bc_test_plot}
@@ -2236,7 +2236,7 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \section{Checking the divergence constraint}
 \label{divergence_test}
 
-The test cases in this section involve the divergence of the flow, $\nabla \cdot \bu$, an important quantity in the low Mach number formulation of the Navier-Stokes equations. 
+The test cases in this section involve the divergence of the flow, $\nabla \cdot \bu$, an important quantity in the low Mach number formulation of the Navier-Stokes equations.
 
 \subsection{Isothermal flow (\texorpdfstring{\textct{divergence\_test\_1}}{divergence\_test\_1})}
 \label{divergence_test_1}
@@ -2253,8 +2253,8 @@ In the second example, air is introduced into a sealed compartment at a steady r
 The right hand plot of Fig.~\ref{divergence_test_fig} displays the volume integral of the divergence as a function of time. This ought to remain within machine accuracy, certainly less than $1 \times 10^{-10}$~m$^3$/s in absolute value.
 
 \begin{figure}[!ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test_1}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_1}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_2}
 \caption[The \textct{divergence\_test} cases]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
 \label{divergence_test_fig}
 \end{figure}
@@ -2266,8 +2266,8 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_T} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_P}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/lapse_rate_T} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/lapse_rate_P}
 \end{tabular*}
 \caption[The \textct{lapse\_rate} test case]{Centerline temperature (left) and pressure (right) profiles for the \textct{lapse\_rate} case.}
 \label{lapse_rate_fig}
@@ -2281,8 +2281,8 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.png} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.pdf}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/random_meshes.png} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/random_meshes.pdf}
 \end{tabular*}
 \caption[The \textct{random\_meshes} test case]{Five overlapping meshes (left) and the net volume flow through the domain (right).}
 \label{random_meshes_fig}
@@ -2296,7 +2296,7 @@ It is not uncommon for subtle differences between two nearly identical input fil
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/hole_no_hole}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hole_no_hole}
 \caption[Results of the \textct{hole/no hole} test case]{Heat release rates of two nearly identical calculations.}
 \label{hole_fig}
 \end{figure}
@@ -2309,7 +2309,7 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/race_test}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test}
 \caption[Result of the \textct{race\_test}]{Temperature time histories of two calculations that use different numbers of OpenMP threads. The pairs of temperature traces ought to be identical.}
 \label{race_test_fig}
 \end{figure}
@@ -2335,7 +2335,7 @@ This verification case tests the computation of radiative heat flux from a hot p
 A comparison of exact values and FDS predictions at three different angular resolutions is shown in Fig.~\ref{fig_plate_view_factor}.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/plate_view_factor}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/plate_view_factor}
 \caption[The {\ct plate\_view\_factor} test case]{Convergence study showing increased accuracy of radiative transport equation with increasing number of angles.}
 \label{fig_plate_view_factor}
 \end{figure}
@@ -2368,8 +2368,8 @@ Different variations of the case include the mesh resolution (20$^3$ and 100$^3$
 \begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_box_20} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_box_100}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_box_20} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_box_100}
 \end{tabular*}
 \caption{Incident heat flux.}\label{fig_incident_heat_flux}
 \end{figure}
@@ -2386,7 +2386,7 @@ where $h$ is the distance from the center of the polygon to the center point of 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiating_polygon_square}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiating_polygon_square}
 \caption[The {\ct radiating\_polygon} test case]{Incident heat flux from a hot square plate as a function of distance to the center of the plate.}
 \label{radiating_polygon_figure}
 \end{figure}
@@ -2433,10 +2433,10 @@ This case tests the calculation of the radiation heat flux from a collection of 
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_2} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_heat_flux}  &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_intensity}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_spheres_heat_flux}  &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_spheres_intensity}
 \end{tabular*}
 \caption[Radiation from hot spheres]{The total heat losses, radiative heat flux, and integrated intensity of a collection of loosely and densely packed radiating spheres.}
 \label{hot_spheres_plot}
@@ -2461,8 +2461,8 @@ By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cyl}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_absorption_cart} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_absorption_cyl}
 \end{tabular*}
 \caption[Radiation absorption by liquid droplets]{Transfer of absorbed thermal radiation energy into increased average droplet temperature.}
 \label{droplet_absorption_figures}
@@ -2481,9 +2481,9 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cart} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cyl}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_sph}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cart} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cyl}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_sph}
 \end{tabular*}
 \caption[Radiation absorbed by solid particles]{Temperature increase of solid particles due to absorbed radiation.}
 \label{particle_absorption_figures}
@@ -2500,7 +2500,7 @@ This case also demonstrates the finite convergence rate of the radiation calcula
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_attenuation}
 \caption[Radiation attenuation by Lagrangian particles]{Attenuation of thermal radiation by four different classes of Lagrangian particles.}
 \label{part_attenuation_figure}
 \end{figure}
@@ -2526,7 +2526,7 @@ t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_{\rm s}^3}\r
 Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the analytical solution.
 \begin{figure}[h]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_heating}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/TC_heating}
 \caption[Transient thermocouple heating]{Increasing temperature of a thermocouple surrounded by walls at 600~\si{\degree C}.}
 \label{TC_heating_plot}
 \end{figure}
@@ -2548,7 +2548,7 @@ The thermocouple model in FDS uses the integrated intensity divided by 4, $U/4$,
 This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared to the ideal value as computed in Eq.~(\ref{ideal_TC}).
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_view_factor}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/TC_view_factor}
 \caption[Radiation/thermocouple test case]{Temperature of a thermocouple equidistant from walls at temperatures of 20~\si{\degree C} and 500~\si{\degree C}.}
 \label{TC_view_factor_plot}
 \end{figure}
@@ -2561,7 +2561,7 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 This case tests the functionality of particle ``targets;'' that is, massless Lagrangian particles that serve to record the heat flux at a given point with a given orientation. Essentially, the particle is an infinitesimally small heat flux gauge. Two unit cubes are set up, each with a top surface set to 1000~$^\circ$C. In one cube, a small solid obstruction is created with a device embedded in its top facing upwards. In the other cube, a plate-shaped particle is placed at the same location and given an upward facing orientation. The radiative heat flux to both the obstruction and the particle should be the same, as shown in Fig.~\ref{target_test_plot}.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/target_test}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/target_test}
 \caption[The \textct{target\_test} case]{Heat flux from a hot plate to two different types of targets.}
 \label{target_test_plot}
 \end{figure}
@@ -2577,8 +2577,8 @@ A lead radiation shield with a thickness of 0.1~mm is placed between two infinit
 \ee
 where $T_{1}$ and $T_{2}$ are the hot and cold plate temperatures, respectively, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the emissivity values for the hot plate, cold plate, and lead shield, respectively. When the shield is removed at 400~s, the heat flux should increase to 19.8~kW/m$^2$.  The predicted heat flux is given in Fig.~\ref{radiation_shield_plot}.
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_flux}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_temp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_shield_flux}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_shield_temp}
 \caption[The \textct{radiation\_shield} test case]{(Left) Heat flux to a cold plate separated from a hot plate by a heat shield. At 400~s, the shield is removed. (Right) Temperature of the heat shield.}
 \label{radiation_shield_plot}
 \end{figure}
@@ -2588,6 +2588,53 @@ Because the heat flux from the hot plate to the shield is equal to the heat flux
 \ee
 The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
+\pagebreak
+
+\section{Radiation from a gas-fired panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
+\label{radiation_gas_panel}
+
+A radiant gas-fired panel is often used to provide a source of heat flux in
+laboratory experiments.  Here, the heat flux received from a 1ft$^2$
+gas panel is computed at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m
+distance from the panel along its center axis, and along the
+perpendicular axis displaced (0.14, 0.14) m from its center. The
+center-axis configuration is illustrated in
+Figure~\ref{radiation_gas_panel_plot}.  We 
+compare the results computed by FDS to those calculated using the
+Stephan-Bolzmann law and configuration factors and, along the panel
+axis, with measurements taken by Simms \cite{Simms:1963} (see Table
+3 therein). In agreement with the values used by Simms, the
+temperature and emissivity of the panel are taken to be $1250^\circ$K
+and 0.7, respectively, and the ambient temperature taken to be
+$273^\circ$K.
+
+The configuration factor $dF_{2 \rightarrow d1}$ describing the energy
+exchange between a radiant square panel with dimension $h$ and a
+target with differential area $dA_1$ located on a perpendicular
+extending from the panel at $(\overline{x}, \overline{y})$ relative to
+its center is computed using Equation~\eqref{eq:2->d1 configuration
+  factor - general}. Figure~\ref{radiation_gas_panel_plot} illustrates
+the configuration for $(\overline{x}, \overline{y}) = (0, 0)$. 
+\begin{align}
+ dF_{2 \rightarrow d1} (\overline{x}, \overline{y}) 
+    &= \frac{dA_1}{\pi A_2}
+        \int_{-h/2}^{h/2} \int_{-h/2}^{h/2} \frac{R^2}{\left[ (x-\overline{x})^2 + (y-\overline{y})^2 + R^2 \right]^2} dx dy.
+ \label{eq:2->d1 configuration factor - general}
+\end{align}
+  
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{FIGURES/radiation_gas_panel_configuration}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
+\caption[The \textct{radiation\_gas\_panel} case]{\emph{Left}: A
+  radiant panel and target dA$_1$ located a distance $R$ from
+  the panel on its center axis.  \emph{Right}: Heat flux from a
+  radiant panel at $1250^\circ$K  with emissivity 0.7 at 0.1, 0.15,
+  0.25, 0.38, 0.46, 0.61 and 0.76 m, along the panel's center axis,
+  and along the perpendicular axis displaced (0.14, 0.14) m from the
+  panel center.}
+\label{radiation_gas_panel_plot}
+\end{figure}
 
 
 
@@ -2608,7 +2655,7 @@ same amount of each product species should be produced in each case. The followi
 mass of the three combustion products. The figure compares the simple chemistry versus the primitive species versus the lumped species.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/methane_flame_reac_comp}
 \caption[Yield of combustion products for alternative reactions]{The combustion product masses using three alternative definitions of the reaction:  Simple chemistry vs. primitive species vs. lumped species. }
 \label{fig_methane_flame_yields}
 \end{figure}
@@ -2642,7 +2689,7 @@ The cases presented in the section are designed to examine species evolutions fo
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
 \caption[Species evolution in a 1-step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_spec}
 \end{figure}
@@ -2657,8 +2704,8 @@ PV = n \R T
 \end{equation}
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step methane EDC reaction]{Time evolution of temperature and pressure for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_meth_temppres}
@@ -2672,15 +2719,15 @@ The results for the propane case are shown in Figs.~\ref{fig:EDC_1Step_prop_spec
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
 \caption[Species evolution in a 1-step propane EDC reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step propane EDC reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_temppres}
@@ -2690,15 +2737,15 @@ In the previous two examples, each computational cell contained a stoichiometric
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
 \caption[Species evolution in 1-Step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s. }
 \label{fig:EDC_meth_non_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
 \end{tabular*}
 \caption[Temperature and pressure evolution in a 1-step Methane EDC reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_meth_non_temppres}
@@ -2713,7 +2760,7 @@ Each cell in the model reaction is initialized with an oxygen rich mixture and t
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
 \caption[Species evolution in 2-step methane EDC reaction]{Time evolution of species mass fraction for a series, fuel-limited EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.05$~s.}
 \label{fig:EDC_2Step_fuel}
 \end{figure}
@@ -2728,7 +2775,7 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
 \caption[Results of the {\ct reactionrate\_series\_reaction} case]{Results of the {\ct reactionrate\_series\_reaction} case.}
 \label{fig:reactionrate_series_reaction}
 \end{figure}
@@ -2742,7 +2789,7 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:EDC_2Ste
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2fuel}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2fuel}
 \caption[Species evolution in two parallel EDC reactions]{Time evolution of species mass fraction for oxygen-limited EDC two fuel reaction set with a fixed mixing time of $\tau_{\rm mix}=0.1$~s.}
 \label{fig:EDC_2Step_ox}
 \end{figure}
@@ -2767,7 +2814,7 @@ The lumped species used in these reactions are defined by:
 The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_lumped_two_air}.
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
 \caption[Results of the {\ct reactionrate\_lumped\_two\_species} case]{Results of the {\ct reactionrate\_lumped\_two\_species} case.}
 \label{fig:reactionrate_lumped_two_air}
 \end{figure}
@@ -2800,7 +2847,7 @@ The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha
 \end{table}
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_0order_1step}
 \caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
@@ -2817,7 +2864,7 @@ The second finite rate test case is a one-step, second-order propane reaction, E
 \end{table}
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
 \caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
@@ -2874,14 +2921,14 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
 \caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2step}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
 \caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions.}
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
@@ -2903,15 +2950,15 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
 \caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure}
 \end{tabular*}
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
@@ -3010,14 +3057,14 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_spec}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{(Left) Lumped species mass fractions as a function of mixture fraction.}
 \label{fig:burke_schumann_spec}
 \end{figure}
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_temp}
 \caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
@@ -3054,8 +3101,8 @@ For the same initial conditions, FDS predictions for burning or extinction (clos
 When using a non-predefined fuel, one may have heat of combustion data representing complete combustion but species yield data representing typical large scale conditions.  When using simple chemistry, the input keyword \textct{IDEAL=.TRUE.} on the \textct{REAC} line will have FDS reduce the heat of combustion to account for any minor products of combustion (e.g., CO and H$_2$O).  This is done by removing energy from the heat of combustion to account for carbon that goes to CO and soot rather than CO$_2$ and for hydrogen that goes to soot rather than H$_2$O.  A custom fuel (methane) is defined with CO and soot yields of 0.1, a heat of combustion of 50000 kJ/kg, and a 40 kW fire.  Two input files are created, one with the \textct{HEAT\_OF\_COMBUSTION} defined with \textct{IDEAL=.TRUE.} and the second with \textct{IDEAL=.FALSE.}.  In the \textct{IDEAL=.FALSE.} case where the heat of combustion is not adjusted we expect a fuel mass flow rate of 0.0008 \si{kg/(m^2.s)}.  With the heat of combustion adjusted we expect a higher fuel mass flow rate of 0.000877 \si{kg/(m^2.s)}, as shown in Fig.~\ref{fig:HoC}.
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HoC_Ideal} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HoC_NonIdeal}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HoC_Ideal} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HoC_NonIdeal}
 \end{tabular*}
 \caption[\textct{HoC\_Ideal} and \textct{HoC\_NonIdeal} test cases]{Demonstration of correct adjust to heat of combustion for minor products of combustion.}
 \label{fig:HoC}
@@ -3227,7 +3274,7 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 \begin{figure}[ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/smoke_detector}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/smoke_detector}
 \end{tabular}
 \caption[Smoke detector chamber obscuration for \textct{smoke\_detector} case]{Time evolution of smoke detector chamber obscuration for \textct{smoke\_detector} case}
 \label{fig:smoke_detector}
@@ -3353,10 +3400,10 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_a} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_c} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_d}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_a} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_c} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_d}
 \end{tabular*}
 \caption[The \textct{heat\_conduction} test cases]{Comparison of heat conduction calculations with analytical solutions.}
 \label{heat_conduction}
@@ -3402,8 +3449,8 @@ lines are FDS results and the circles are the HEATING results. An example input 
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_kc_surf} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/heat_conduction_kc_back}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_kc_surf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_kc_back}
 \end{tabular*}
 \caption[The \textct{heat\_conduction\_kc} test case]{Comparison of heat conduction calculations with a finite-element model.}
 \label{heat_conduction_kc_fig}
@@ -3418,7 +3465,7 @@ This example tests the convective cooling algorithm. A 1~m thick solid slab that
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/convective_cooling}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/convective_cooling}
 \caption[The \textct{convective\_cooling} test case]{Predicted vs.~exact back side temperatures of a thick slab cooled by convection alone.}
 \label{convective_cooling_fig}
 \end{figure}
@@ -3427,7 +3474,7 @@ To test the second-order accuracy of the solid phase conduction algorithm, this 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/convective_cooling_error}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/convective_cooling_error}
 \caption[Convergence study for the \textct{convective\_cooling} test case]{Convergence study for the \textct{convective\_cooling} test case.}
 \label{convective_cooling_convergence}
 \end{figure}
@@ -3442,7 +3489,7 @@ This example tests the simple thermocouple model in FDS. It consists of a box wh
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermocouples}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/thermocouples}
 \caption[The \textct{thermocouples} test case]{Comparison of thermally thin and thick heat conduction into a small sphere.}
 \label{thermocouples_fig}
 \end{figure}
@@ -3471,8 +3518,8 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_plate} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/insulated_steel_pipe}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_plate} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe}
 \end{tabular*}
 \caption[The \textct{insulated\_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe.}
 \label{insulated_steel_fig}
@@ -3489,8 +3536,8 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/back_wall_test_flux} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/back_wall_test_temp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_flux} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_temp}
 \end{tabular*}
 \caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or one cell thick.}
 \label{back_wall_test_fig}
@@ -3516,10 +3563,10 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_pres} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_temp} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_pres} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_con_flux_pres} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_con_flux_temp} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_net_flux_pres} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp}
 \end{tabular*}
 \caption[The \textct{adiabatic\_con\_flux} and \textct{adiabatic\_net\_flux} test cases]{Pressure and average temperature of a small compartment with specified heat flux boundary conditions.}
 \label{adiabatic_flux}
@@ -3561,8 +3608,8 @@ Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for ea
 \begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
 \end{tabular*}
 \caption[The \textct{ht3d\_nx\_x} test cases]{One-dimensional heat diffusion in a square bar. (Left) Initial and final profiles for each case.  (Right) Spatial order-of-accuracy plot showing second-order convergence for all three spatial directions.}
 \label{fig:ht3d_diff}
@@ -3584,7 +3631,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_slab}
 \caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3D heat transfer.}
 \label{fig:ht3d_slab}
 \end{figure}
@@ -3601,7 +3648,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \vskip\baselineskip
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.25in]{FIGURES/FE_Ts_contour} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_ibeam_3600} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: contours]{Three-dimensional heat diffusion in an I-beam, comparison between a commercial finite-element code (ANSYS, left, courtesy Chao Zhang) and FDS (right).  The beam boundary conditions are adiabatic except for a hot patch maintained at \SI{800}{\degreeCelsius} on the front right of the bottom flange.  The initial temperature of the steel is \SI{20}{\degreeCelsius} and the calculations are run for \SI{3600}{s}.}
 \label{fig:ht3d_ibeam_contours}
@@ -3611,7 +3658,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \hspace{.5in}\includegraphics[height=2.25in]{FIGURES/ht3d_ibeam_devc_loc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_ibeam_TS} \\
 \end{tabular*}
 \caption[The \textct{ibeam-ht3d} test case: time history]{(Left) Device locations corresponding to the legend entries in the plot to the right. (Right) Time history of the surface temperature.  Symbols represent the finite-element model (FEM) results and the lines represent the FDS results.}
 \label{fig:ht3d_ibeam_time_history}
@@ -3629,7 +3676,7 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_2mesh}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_2mesh}
 \caption[The \textct{ht3d\_2mesh} test cases]{Test of 3D heat transfer across mesh boundaries.}
 \label{fig:ht3d_2mesh}
 \end{figure}
@@ -3669,12 +3716,12 @@ The analytical mass losses are calculated by multiplying the mass per unit area 
 
 \begin{figure}[!htb]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cyl_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cyl_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cyl_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cyl_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_gas}
 \end{tabular*}
 \caption[The \textct{ surf\_mass\_vent\_char} test cases]{Comparison of analytical and predicted mass change for charring surfaces that are introduced as \textct{VENT}s.}
 \label{surf_mass_vent_char}
@@ -3683,12 +3730,12 @@ The analytical mass losses are calculated by multiplying the mass per unit area 
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cart_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cart_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cyl_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cyl_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cart_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cart_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cyl_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cyl_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_gas}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_vent\_nonchar} test cases]{Comparison of analytical and predicted mass change for non-charring surfaces that are introduced as \textct{VENT}s.}
 \label{surf_mass_vent_nonchar}
@@ -3720,12 +3767,12 @@ The analytical and computed results for charring material are compared in Fig.~\
 \begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_gas}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_part\_char} test cases]{Comparison of analytical and predicted mass change for charring particle surfaces.}
 \label{surf_mass_part_char}
@@ -3734,12 +3781,12 @@ The analytical and computed results for charring material are compared in Fig.~\
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_gas} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_gas} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_gas}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_part\_nonchar} test cases]{Comparison of analytical and predicted mass change for non-charring particle surfaces.}
 \label{surf_mass_part_nonchar}
@@ -3761,7 +3808,7 @@ This is a test case for mass conservation involving multiple particles. The case
 The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}. The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
 \caption[The \textct{surf\_mass\_part\_char\_cyl\_gas\_advanced} test case]{Comparison of analytical and predicted mass change for a charring, cylindrical surface associated with particles in three variations.}
 \label{surf_mass_part_char_advanced}
 \end{figure}
@@ -3784,12 +3831,12 @@ The analytical and computed results are compared in Fig.~\ref{surf_mass_part_cha
 
 \begin{figure}[!htb]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_split} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_split} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_split} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_split} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, mass conservation]{Comparison of analytical and predicted mass change for split particle surfaces.}
 \label{surf_mass_part_fuel_split}
@@ -3797,12 +3844,12 @@ The analytical and computed results are compared in Fig.~\ref{surf_mass_part_cha
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_energy_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_energy_split} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_energy_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_energy_split} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_energy_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_energy_split} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_energy_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_energy_split} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, energy conservation]{Comparison of analytical and predicted total energy release for split particle surfaces.}
 \label{surf_mass_part_fuel_energy_split}
@@ -3819,9 +3866,9 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_cart} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_cyl} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_spher}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_two_species_cart} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_two_species_cyl} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_two_species_spher}
 \caption[The \textct{surf\_mass\_two\_species} test cases]{Comparison of analytical and predicted mass change for particles that generate water and fuel gas.}
 \label{surf_mass_two_species}
 \end{figure}
@@ -3861,8 +3908,8 @@ To test the liquid fuel evaporation model, a 1~cm deep pool of heptane is expose
 
 \begin{figure}[!htb]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel_nonconforming}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel_nonconforming}
 \end{tabular*}
 \caption[The \textct{surf\_mass\_vent\_liquid\_fuel} test cases]{Comparison of analytical and predicted mass change for a liquid surface.}
 \label{surf_mass_vent_liquid}
@@ -3875,7 +3922,7 @@ For thermally thick materials, the surface emissivity is computed as a mass-weig
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/emissivity}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/emissivity}
 \caption[The \textct{emissivity} test case]{Testing the emissivity of solid materials.}
 \label{emissivity}
 \end{figure}
@@ -3910,10 +3957,10 @@ Swell 3          & 1000 &0.9  &1000 &0.1  &F &450  &1000 &1000 &0.001   &0.001 \
 \begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/shrink_mass_conservation} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/swell_mass_conservation} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/shrink_thickness} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/swell_thickness} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/shrink_mass_conservation} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/swell_mass_conservation} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/shrink_thickness} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/swell_thickness} \\
 \end{tabular*}
 \caption[The \textct{shrink\_swell} test case]{Testing the shrinking and swelling surfaces.}
 \label{shrink_swell2}
@@ -3936,7 +3983,7 @@ In this example, the initial exposure to the front side of the slab is 3~kW/m$^2
 The density and conductivity of both materials are 30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from 1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/enthalpy}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/enthalpy}
 \caption[The \textct{enthalpy} test case]{Testing the enthalpy of solid materials.}
 \label{fig:solid_phase_enthalpy}
 \end{figure}
@@ -3992,8 +4039,8 @@ shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
 \begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/pcm_slab_T}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_T}
 \end{tabular*}
 \caption[The \textct{pcm\_slab} test cases]{Comparison of analytical and simulated results for the two-region Neumann problem with phase change.}
 \label{pcm_slab}
@@ -4025,7 +4072,7 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/two_step_solid_reaction}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/two_step_solid_reaction}
 \caption[The \textct{two\_step\_solid\_reaction} test case]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
 \label{fig:two_step_solid_reaction}
 \end{figure}
@@ -4066,14 +4113,14 @@ Using Eq.~(\ref{d2YdT2}) to eliminate $A_\alpha$ yields:
 \be
    \ln \left( \frac{Y_{\alpha,{\rm p}}}{Y_{\alpha,0}} \right) = - \frac{E_\alpha}{E_\alpha+2 R T_{\alpha,{\rm p}}} \approx -1  \quad \quad (E_\alpha \gg 2 R T_{\alpha,{\rm p}})
 \ee
-or more simply, $Y_{\alpha,{\rm p}} \approx Y_{\alpha,0}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+or more simply, $Y_{\alpha,{\rm p}} \approx Y_{\alpha,0}/{\rm e}$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
 \be
    E_\alpha = RT_{\alpha,{\rm p}}^2 \, \frac{A_\alpha}{\beta} \, \exp \left( -\frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) = \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}}
-   \approx \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}}  \label{E_formula}
+   \approx \frac{RT_{\alpha,{\rm p}}^2}{\beta} \frac{{\rm e} \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}}  \label{E_formula}
 \ee
 Then $A_\alpha$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
-   A_\alpha = \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \approx \frac{e \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \label{A_formula}
+   A_\alpha = \frac{r_{\alpha,{\rm p}}}{Y_{\alpha,{\rm p}}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \approx \frac{{\rm e} \, r_{\alpha,{\rm p}}}{Y_{\alpha,0}} \, \exp \left( \frac{E_\alpha}{RT_{\alpha,{\rm p}}} \right) \label{A_formula}
 \ee
 Note that the formulae for $A_\alpha$ and $E_\alpha$ can be evaluated with parameters that are obtained directly by inspection of the plot of mass loss rate versus temperature. For each peak, the values of $T_{\alpha,{\rm p}}$ are easy to obtain by inspection. The initial mass fractions, $Y_{\alpha,0}$, can be estimated based on the relative area underneath each peak. The values of $Y_{\alpha,0}$ should sum to 1.
 
@@ -4097,21 +4144,19 @@ The examples in the following section describe how to interpret output from benc
 
 The solid curve of the left hand plot of Fig.~\ref{tga_sample_plot} shows the measured normalized mass of a small solid sample undergoing heating at a rate of 5~$^\circ$C/min in the TGA apparatus. The solid curve of the right hand plot is the mass loss rate, or minus the first derivative of the plot on the left. The goal of this example is to obtain the kinetic parameters, $E_\alpha$ and $A_\alpha$, from Eqs.~(\ref{E_formula}) and (\ref{A_formula}) to solve numerically the ODE, Eqs.~(\ref{dYdt}) and (\ref{dYrdt}).
 \begin{figure}[!htb]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mass}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mlr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/tga_sample_mass}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/tga_sample_mlr}
 \caption[Results of a TGA analysis]{Results of a TGA analysis. At left is the normalized sample mass as a function of the temperature. At right is the corresponding mass loss rate.}
 \label{tga_sample_plot}
 \end{figure}
-The first decision to make is the number of reactions. Usually, this corresponds to the number of peaks in the mass loss rate curve, but for realistic cases, some judgment is needed. In this example, it is assumed that there are two material components, each of which is undergoing a single reaction in the neighborhood of a certain temperature. By inspection, $T_{1,{\rm p}}=300 \; ^\circ$C and $T_{2,{\rm p}}=500 \; ^\circ$C. The next piece of information from the measurement is the residue fraction, which is obtained from the plot on the left, $\nu_{\rm r}=0.53$. From Eq.~(\ref{rr_calc}), the reaction rates are obtained by converting the peak mass loss rates from the plot on the right: $r_{1,{\rm p}}=0.00045/0.47$~s$^{-1}$ and $r_{2,{\rm p}}=0.0001/0.47$~s$^{-1}$.  Finally, the initial mass fractions of the two components are estimated from the relative areas under the peaks in the right hand plot. In this case, $Y_{1,{\rm p}}=0.6$ and $Y_{2,{\rm p}}=0.4$.
+The first decision to make is the number of reactions. Usually, this corresponds to the number of peaks in the mass loss rate curve, but for realistic cases, some judgment is needed. In this example, it is assumed that there are two material components, each of which is undergoing a single reaction in the neighborhood of a certain temperature. By inspection, $T_{1,{\rm p}}=300 \; ^\circ$C and $T_{2,{\rm p}}=500 \; ^\circ$C. The next piece of information from the measurement is the residue fraction, which is obtained from the plot on the left, $\nu_{\rm r}=0.53$. From Eq.~(\ref{rr_calc}), the reaction rates are obtained by converting the peak mass loss rates from the plot on the right: $r_{1,{\rm p}}=0.00045/0.47$~s$^{-1}$ and $r_{2,{\rm p}}=0.0001/0.47$~s$^{-1}$.  Finally, the initial mass fractions of the two components are estimated from the relative areas under the peaks in the right hand plot. In this case, $Y_{1,0}=0.6$ and $Y_{2,0}=0.4$.
 
 In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via the following lines:
 \begin{lstlisting}
 &SURF ID             = 'SAMPLE'
       ...
-      MATL_ID(1,1) = 'component 1'
-      MATL_ID(1,2) = 'component 2'
-      MATL_MASS_FRACTION(1,1) = 0.6
-      MATL_MASS_FRACTION(1,2) = 0.4 /
+      MATL_ID(1,1:2) = 'component 1','component 2'
+      MATL_MASS_FRACTION(1,1:2) = 0.6,0.4 /
 
 &MATL ID                    = 'component 1'
       ...
@@ -4135,7 +4180,7 @@ In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via t
       NU_MATL               = 0.53
       MATL_ID               = 'residue' /
 \end{lstlisting}
-Note that {\ct REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,{\rm p}}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
+Note that {\ct REFERENCE\_RATE}, the FDS input parameter, represents the quantity, $r_{\alpha,{\rm p}}/Y_{\alpha,0}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
 
 
 \subsection{Effect of the TGA Heating Rata (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}
@@ -4174,11 +4219,11 @@ where $\nu_{\rm r}$ is the fraction of the original mass that remains as residue
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/cable_11_insulation_mcc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_jacket_mcc} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cable_11_jacket_mcc} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/cable_23_insulation_mcc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_23_jacket_mcc} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cable_23_jacket_mcc} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/cable_701_insulation_mcc} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_701_jacket_mcc}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cable_701_jacket_mcc}
 \end{tabular*}
 \caption[Results of a micro-calorimetry analysis of cable materials]{Results of a micro-calorimetry analyses of cable insulation (left) and jacket materials (right).}
 \label{mcc_plots}
@@ -4241,8 +4286,8 @@ Consider a 1~m square duct that is 10~m long.  The boundary conditions are perio
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_momentum}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_velocity}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_momentum}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fluid_part_velocity}
 \caption[Test of fluid-particle momentum transfer for nonstationary particles]{Outputs of the \textct{fluid\_part\_mom} cases.  (Top) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols).  The analytical solutions for the fluid and particle equations are shown by the solid blue and red lines, respectively. The total momentum should be constant, as indicated by the green symbols. (Bottom) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because, by construction, the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
 \label{fig_fluid_part_mom}
 \end{figure}
@@ -4265,12 +4310,12 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_A} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_D} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_B} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_E} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_C} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_drag_F}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_D} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_F}
 \end{tabular*}
 \caption[Sample cases \textct{particle\_drag}]{Outputs of the \textct{particle\_drag} test cases compared with analytical solutions.}
 \label{particle_drag_plots}
@@ -4293,8 +4338,8 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_drag_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/sphere_drag_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/sphere_drag_2}
 \end{tabular*}
 \caption[The {\ct sphere\_drag} cases]{Outputs of the {\ct sphere\_drag} test cases compared with analytical solutions.}
 \label{sphere_drag_fig}
@@ -4326,8 +4371,8 @@ Using the subscript 1 to denote the upstream region of the duct, and 2 the downs
 The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} for the various different methods of representing the particles in the model.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_1}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/vegetation_drag_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/vegetation_drag_1}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/vegetation_drag_2}
 \caption[The {\ct vegetation\_drag} test cases]{Pressure drop in duct filled with pine needles for three different particle insertion methods.}
 \label{vegetation_drag_fig}
 \end{figure}
@@ -4344,8 +4389,8 @@ These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with ei
 where $K$ and $Y$ are empirical constants defined in the FDS User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/screen_drag_1}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/screen_drag_2}
 \caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.  The three cases represent different values of \textct{FREE\_AREA\_FRACTION} (0.1, 0.4, and 0.8) within the channel.}
 \label{screen_drag_plots}
 \end{figure}
@@ -4361,7 +4406,7 @@ where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/porous_media}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/porous_media}
 \caption[Results of the \textct{porous\_media} test case]{Pressure drop caused by a block of aluminum foam.}
 \label{porous_media_plot}
 \end{figure}
@@ -4386,8 +4431,8 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/position_convergence}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/position_convergence}
 \end{tabular*}
 \caption[Convergence analysis of the \textct{terminal\_velocity} case]{(Left) FDS convergence for the particle velocity in the \textct{terminal\_velocity} case. (Right) FDS convergence for the particle position in the \textct{ terminal\_velocity} case.}
 \label{fig_terminal_velocity_convergence}
@@ -4460,11 +4505,11 @@ Initial height                    & $h$                  & 8 m \\
 Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS solutions to the ``flat fire'' solution given above. The ``flat fire'' solution should have a slightly faster vertical velocity component, $w_{\rm p}$, at extended times because the speed of the particle is approximated with $u_{\rm p}$, which is lower than the true speed. This ensures the drag force is lower than it should be, and consequently $|w_{\rm p}|$ is larger in the ``flat fire'' solution. In the lower left plot in Fig.~\ref{flat_fire_plots} $|w_{\rm p}|$ computed by FDS using the second order accurate scheme is slightly less than the ``flat fire'' solution.
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_x} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_z} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_u} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_w} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_x} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_z} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_u} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_w} &
 \end{tabular*}
 \caption[Results of the \textct{flat\_fire} test case.]{Results of the \textct{flat\_fire} test case.}
 \label{flat_fire_plots}
@@ -4509,12 +4554,12 @@ The solid horizontal lines denote the expected steady-state values.
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_humidity} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_temperature} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_water_mass}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_enthalpy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_humidity} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_temperature} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_pressure} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_water_mass}
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_1}]{Output of the \textct{water\_evaporation\_1} test case.}
 \label{water_evaporation_1_plots}
@@ -4530,12 +4575,12 @@ The initial mass fraction of water vapor is 0. It is expected that the water wil
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_humidity} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_temperature} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_W_density}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_enthalpy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_humidity} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_temperature} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_pressure} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_W_density}
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_2}]{Output of the \textct{water\_evaporation\_2} test case.}
 \label{water_evaporation_2_plots}
@@ -4553,12 +4598,12 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_humidity}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_temperature}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_pressure}&
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_density}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_enthalpy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_humidity}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_density} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_temperature}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_pressure}&
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_W_density}
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_3}]{Output of the \textct{water\_evaporation\_3} test case.}
 \label{water_evaporation_3_plots}
@@ -4578,7 +4623,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
 \caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.}
 \label{water_evaporation_4_plot}
 \end{figure}
@@ -4592,7 +4637,7 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
 \caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
 \label{water_evaporation_5_plot}
 \end{figure}
@@ -4612,8 +4657,8 @@ The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pres
 \begin{figure}[h!]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_T} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_P}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_6_T} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_6_P}
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_6}]{Output of \textct{water\_evaporation} case 6.}
 \label{water_evaporation_6_plots}
@@ -4631,7 +4676,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_7}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_7}
 \caption[Sample case \textct{water\_evaporation\_7}]{Output of \textct{water\_evaporation} case 7.}
 \label{water_evaporation_7_plot}
 \end{figure}
@@ -4646,8 +4691,8 @@ In this case, we compare FDS predictions against the evaporation model of Li and
 \begin{figure}[h!]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_8_z} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_8_d}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_8_z} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_8_d}
 \end{tabular*}
 \caption[Sample case \textct{water\_evaporation\_8}]{Output of \textct{water\_evaporation} case 8.}
 \label{water_evaporation_8_plots}
@@ -4662,8 +4707,8 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_open_nozzles} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_water_mass}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flow_rate_2_open_nozzles} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/flow_rate_2_water_mass}
 \end{tabular*}
 \caption[The \textct{flow\_rate\_2} case]{Output of the \textct{flow\_rate\_2} test case.}
 \label{flow_rate_2_figure}
@@ -4685,8 +4730,8 @@ where $f(z,t)$ is the particle number density at lateral distance $z$ from the s
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_walk_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_walk_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/random_walk_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/random_walk_2}
 \end{tabular*}
 \caption[Turbulent dispersion of tracer particles]{Turbulent dispersion of tracer particles \textct{random\_walk} test cases.}
 \label{random_walk_fig}
@@ -4708,7 +4753,7 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_flow_loss}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_flow_loss}
 \caption[The \textct{HVAC\_flow\_loss} test case]{Duct velocities in three ducts with different loss coefficients.}
 \label{fig_HVAC_loss}
 \end{figure}
@@ -4723,8 +4768,8 @@ These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. Howeve
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1}  &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1}  &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2}
    \end{tabular*}
    \caption[The \textct{HVAC\_tee\_loss} test cases]{Duct velocities with varied node loss. \textct{HVAC\_tee\_loss\_1} (left) and \textct{HVAC\_tee\_loss\_2} (right).}
    \label{fig_HVAC_node}
@@ -4740,8 +4785,8 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation_plot} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_conservation} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_conservation_plot} }
    \end{tabular*}
    \caption[The \textct{HVAC\_mass\_conservation} case]{SPEC1 mass fraction at 1 s (left) and SPEC1 and total mass (right).}
    \label{fig_HVAC_mass}
@@ -4762,10 +4807,10 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_energy_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_velocity} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_energy_pressure} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_e_p_velocity} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure}
 \end{tabular*}
 \caption[The \textct{HVAC\_energy\_pressure} case]{Clockwise from top left: Temperature at 1 s, duct velocities, total enthalpy in the domain, and duct node pressures for the top duct.}
 \label{fig_HVAC_e_p}
@@ -4795,10 +4840,10 @@ The sample case \textct{HVAC\_filter} demonstrates the use of the filter input. 
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_p} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_t} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_filter_p} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_filter_t} } \\
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
    \end{tabular*}
    \caption[Results for the \textct{HVAC\_filter} sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right).}
    \label{fig_filter}
@@ -4869,8 +4914,8 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2} }
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_2} }
    \end{tabular*}
    \caption[The \textct{leak\_test\_2} test case]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and a plot of zone pressures (right).}
    \label{fig_HVAC_leak_fan}
@@ -4912,7 +4957,7 @@ We undertake a convergence study to demonstrate that the adopted numerical metho
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_1}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_1}
 \caption[\textct{HVAC\_mass\_transport\_conv\_x} test case result.]{Species~\num{1} mass fraction in the downstream duct node for the cell size convergence study. The mass fraction starts at zero and then linearly increases due to the initial conditions in the duct. At \SI{1}{\second} the mass fraction reaches its maximum and remains at this value until the end of the simulation. The figure illustrates that at lower cell counts (blue line) there is increased numerical diffusivity and that, for higher cell counts (cyan line), the numerical solution converges towards the analytical solution (black dashed line).}
 \label{fig_HVAC_mass_transport_conv_1}
 \end{figure}
@@ -4932,7 +4977,7 @@ A single \SI{10}{\meter} long duct connects the two compartments. The duct is in
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport}
 \caption[\textct{HVAC\_mass\_transport} test case.]{Species \num{1} mass fraction in the downstream duct node.}
 \label{fig_HVAC_mass_transport}
 \end{figure}
@@ -4946,7 +4991,7 @@ A sensitivity analysis is carried out to verify that results are not sensitive t
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_x}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_x}
 \caption[\textct{HVAC\_mass\_transport\_x} test case.]{Species \num{1} mass fraction in the downstream duct node for different duct definitions. Although different numbers of ducts are used, the number of cells is identical for all cases. Therefore the output for all cases should also be identical.}
 \label{fig_HVAC_mass_transport_x}
 \end{figure}
@@ -4957,7 +5002,7 @@ The two compartments are connected by two ducts, A and B, each being \SI{10}{\me
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1a}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1a}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Total mass in the FDS domain and total mass in the left and right compartments.}
 \label{fig_HVAC_mass_transport_conservation_1a}
 \end{figure}
@@ -4975,7 +5020,7 @@ The case setup is identical to that of Section~\ref{HVAC_mass_transport_conserva
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_2}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_2} test case.]{Total species~1 and 2 masses in the FDS domain. The initial equilibrium is prior to species~1 entering duct~B and species~2 entering duct~A.}
 \label{fig_HVAC_mass_transport_conservation_2}
 \end{figure}
@@ -4986,7 +5031,7 @@ The case setup is identical to that of Section~\ref{HVAC_mass_transport_conserva
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_3}
 \caption[\textct{HVAC\_mass\_transport\_conservtation\_3} test case.]{Total species~1 and 2 masses in the FDS domain. Due to the initial contents of the two ducts (species~2) the mass ratio of species~1 and 2 is \(0.4 \colon 0.6\); therefore at equilibrium this ratio should be observed throughout the domain.}
 \label{fig_HVAC_mass_transport_conservation_3}
 \end{figure}
@@ -4997,7 +5042,7 @@ The two compartments are connected by an HVAC network comprising a single \SI{5}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_branch}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_branch}
 \caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species \num{1} mass fraction in the downstream duct nodes. The distance from the inlet to outlet~A and from the inlet to outlet~B is \SI{10}{\meter} and \SI{15}{\meter} respectively. Given a constant velocity of \SI[per-mode=symbol]{1}{\meter\per\second} through the network, the transport time from inlet to outlets~A and B should be \SI{10}{\second} and \SI{15}{\second} respectively.}
 \label{fig_HVAC_mass_transport_branch}
 \end{figure}
@@ -5008,7 +5053,7 @@ The left compartment is separated into two sub-compartments, A and B. These sub-
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_transport_combine}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_combine}
 \caption[\textct{HVAC\_mass\_transport\_branch} test case.]{Species mass fractions at the outlet duct node. Species~3 starts and remains at \SI[per-mode=symbol]{1}{\kilogram\per\kilogram} for \SI{2}{\second} as the initial contents of the duct flows out of the outlet. At \SI{2}{\second} the species from the sub-compartment connected via the shorter duct and the remaining initial species from the longer duct flows out of the outlet. At \SI{3}{\second} the species from the sub-compartment connected by the longer duct reaches the outlet and the mass fraction is split between the species from the two upstream sub-compartments - no initial species remains in the ducts.}
 \label{fig_HVAC_mass_transport_combine}
 \end{figure}
@@ -5058,7 +5103,7 @@ The total mass, which is the sum of fuel gas mass, water vapor mass
 and solid mass, should remain constant over time.
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/vege_mass_conservation}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/vege_mass_conservation}
 \caption[\textct{Vegetation\_vege\_mass\_conservation} test
 case.]{Total mass should remain constant over time.}
 \label{fig_vege_mass_conservation}
@@ -5095,7 +5140,7 @@ angles gives the equation for conservation of radiant energy.
 \kappa_{\mathrm{veg}} \left[ 4 \pi I_{\mathrm{b}}
   \left(T_{\mathrm{veg}}\right) - U(s) \right].
 \label{eq:conservation of radiant energy}
-\ee	
+\ee
 Here
 \begin{itemize}
  \item $s$ is a unit vector in the direction of the radiation intensity
@@ -5122,7 +5167,7 @@ $\kappa_{\mathrm{veg}} = 1$ (\texorpdfstring{\textct{radiation\_gas-veg\_consist
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_gas}
 \caption[\textct{Vegetation\_radiation\_veg-gas\_consistency\_gas}
 test case.]{Radiant energy computed with $\kappa_{\mathrm{gas}}
   = 1$, $\kappa_{\mathrm{veg}} = 0$ is plotted along with end-time values
@@ -5141,7 +5186,7 @@ $\kappa_{\mathrm{veg}} = 0$ (\texorpdfstring{\textct{radiation\_gas-veg\_consist
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_veg}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_veg}
 \caption[\textct{Vegetation\_radiation\_veg-gas\_consistency\_veg} test case.]{Radiant energy computed with $\kappa_{\mathrm{gas}}
   = 0$, $\kappa_{\mathrm{veg}} = 1$ is plotted along with end-time values
   for the radiant energy pre-computed with  $\kappa_{\mathrm{gas}} = 1$,
@@ -5279,9 +5324,9 @@ Computation of the these quantities by their typical statistical definition woul
 \begin{figure}[h!]
 \centering
 \begin{tabular}{l}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_cov} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/rms_cov_corr_corr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_cov_corr_cov} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_cov_corr_corr}
 \end{tabular}
 \caption[Sample case \textct{rms\_cov\_corr}]{Output of the \textct{rms\_cov\_corr} test case.  By construction, the statistic matches the analytical result at time $t = \mbox{\ct T\_END}$.}
 \label{rms_cov_corr_plots}

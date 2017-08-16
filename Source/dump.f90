@@ -2486,17 +2486,22 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY)                         ',&
+            C_SMAGORINSKY
       CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity: Dynamic Smagorinsky Model'
+         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity:           Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF)                       ',&
+            C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Vreman Model (C_VREMAN)        ',C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Vreman Model (C_VREMAN)                             ',&
+            C_VREMAN
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity: RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
+         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF)                      ',&
+            C_RNG,C_RNG_CUTOFF
       CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: WALE Model (C_WALE)            ',C_WALE
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           WALE Model (C_WALE)                                 ',&
+            C_WALE
    END SELECT TURB_MODEL_SELECT
    NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
       CASE DEFAULT
@@ -2579,6 +2584,12 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (ABS(G_F_Z(ITMP,N))>TWO_EPSILON_EB) THEN
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '  Gibbs Energy (J/kmol) Ambient, ',ITMP,' K: ', 1.E6_EB*G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', 1.E6_EB*G_F_Z( 500,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', 1.E6_EB*G_F_Z(1000,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', 1.E6_EB*G_F_Z(1500,N)
+   ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
@@ -6796,7 +6807,7 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX,OPT_CFACE_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S
 REAL(EB) :: AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(CFACE_TYPE), POINTER :: CFA
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
@@ -6940,8 +6951,19 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
 
    CASE(25,26) ! SURFACE DENSITY, NORMALIZED MASS
-      SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
-      IF (INDX==26) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
+      SF => SURFACE(SURF_INDEX)
+      IF (DV%MATL_ID/='null') THEN
+         DO NN=1,SF%N_MATL
+            IF (DV%MATL_ID==SF%MATL_NAME(NN)) THEN
+               M_INDEX = NN
+               EXIT
+            ENDIF
+         ENDDO
+         SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX,MATL_INDEX=M_INDEX)
+      ELSE
+         SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
+      ENDIF
+      IF (INDX==26) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SF%SURFACE_DENSITY
 
    CASE(27) ! SOLID DENSITY
       SF => SURFACE(SURF_INDEX)
