@@ -1620,6 +1620,8 @@ By default, FDS will suspend the pressure iterations if the error does not drop 
 
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
+For Linux and Mac OS targets, and non overlapping meshes at same refinement level, the parameter {\ct GLMAT\_SOLVER} set to {\ct .TRUE.} allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is Intel\textsuperscript{\textregistered} MKL Pardiso for serial targets, and Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver for MPI targets. Two solution modes are defined by the logical parameter {\ct PRES\_ON\_WHOLE\_DOMAIN}: if {\ct .TRUE.} (default) the $H$ equation is solved in cells covered by obstacles as well as gas phase cells in the spirit of FDS default solver. If {\ct .FALSE.} the pressure is solved only on gas cells, employing solid boundary conditions for pressure in immersed obstacles. This method is more computationally and memory intensive than the default solver with default options, but eliminates velocity penetration errors in obstacles as well as inter-mesh boundaries.
+
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
@@ -9330,6 +9332,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
 {\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
+{\ct GLMAT\_SOLVER}                 & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
+{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
