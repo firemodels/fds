@@ -1935,7 +1935,6 @@ RAMP_TMP0_Z       = 'null'
 RAMP_FVX_T        = 'null'
 RAMP_FVY_T        = 'null'
 RAMP_FVZ_T        = 'null'
-STRATIFICATION    = .TRUE.
 U0                = 0._EB
 V0                = 0._EB
 W0                = 0._EB
