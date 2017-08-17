@@ -154,7 +154,7 @@ MATL_ID=file(1:end-4);
 % Vertices:
 [wid]=fprintf(fid,'VERTS=\n');
 for inod=1:nnodes
-    [wid]=fprintf(fid,' %10.4f,   %10.4f,   %10.4f,\n',XYZ(inod,IAXIS:KAXIS));
+    [wid]=fprintf(fid,' %14.8f,   %14.8f,   %14.8f,\n',XYZ(inod,IAXIS:KAXIS));
 end
 
 % Tetrahedra:
