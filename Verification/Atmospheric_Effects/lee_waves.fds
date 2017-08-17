@@ -7,7 +7,7 @@ It is a two-dimensional calculation of wind flow over a mountain range.
 
 &TIME T_END=6000.0 / 
 
-&MISC U0=5.0,LAPSE_RATE=0.005 /
+&WIND U0=5.0,LAPSE_RATE=0.005 /
 &RADI RADIATION=.FALSE./
 &SURF ID='WIND',VEL=-5.0,PROFILE='ATMOSPHERIC',PLE=0. /
 &SURF ID='SLIP',FREE_SLIP=.TRUE. /

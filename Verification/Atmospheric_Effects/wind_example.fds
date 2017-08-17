@@ -5,7 +5,7 @@
 
 &TIME T_BEGIN=-5., T_END=60. /
 
-&MISC U0=10., RAMP_U0_T='u-ramp', RAMP_U0_Z='prof', MEAN_FORCING(1)=.TRUE.,
+&WIND U0=10., RAMP_U0_T='u-ramp', RAMP_U0_Z='prof', MEAN_FORCING(1)=.TRUE.,
       V0=10., RAMP_V0_T='v-ramp', RAMP_V0_Z='prof', MEAN_FORCING(2)=.TRUE.,
       DT_MEAN_FORCING=1.
       NEW_MOMENTUM_NUDGING=T

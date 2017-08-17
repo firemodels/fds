@@ -7,9 +7,10 @@
 
 &TIME T_BEGIN=-200., T_END=400. /
 
+&MISC TMPA=35.0, P_INF=90080, HUMIDITY=4.0, PROCESS_ALL_MESHES=.TRUE.  /
+
 &MISC U0=0.998, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', DT_MEAN_FORCING=1., 
-      V0=0.058, MEAN_FORCING(2)=.TRUE., RAMP_V0_Z='u profile', RAMP_TMP0_Z='T profile',
-      TMPA=35.0, P_INF=90080, HUMIDITY=4.0, PROCESS_ALL_MESHES=.TRUE.  /
+      V0=0.058, MEAN_FORCING(2)=.TRUE., RAMP_V0_Z='u profile', RAMP_TMP0_Z='T profile' /
 
 &RAMP ID='u profile', Z= 0.001 , F= -1.5484  /
 &RAMP ID='u profile', Z= 0.100 , F= 1.8800  /
