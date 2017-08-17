@@ -11,10 +11,10 @@
       NOISE=.FALSE.
       DNS=.TRUE.
       PERIODIC_TEST=11
-      U0=1
       P_INF=243738.74668
-       
       PROJECTION=.TRUE./
+
+&WIND U0=1. /
 
 &RADI RADIATION=.FALSE./
 
