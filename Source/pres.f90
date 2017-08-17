@@ -2131,7 +2131,7 @@ CASE(GLMAT_WHLDOM)
    !       WRITE(20,'(2I6,F18.12)') IROW,JD_MAT_H(JCOL,IROW),D_MAT_H(JCOL,IROW)
    !    ENDDO
    ! ENDDO
-   ! WRITE(20,'(A)') 'EOF'
+   ! ! WRITE(20,'(A)') 'EOF'
    ! CLOSE(20)
    ! WRITE(0,*) 'H Matrix file written...'
    ! PAUSE
@@ -2584,7 +2584,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          IOR = WC%ONE_D%IOR
          ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
-         IF ( CC_IBM ) THEN
+         IF ( .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
             IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
             IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
          ENDIF
@@ -2767,7 +2767,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
       ! Check if CC_IBM -> If face is type IS_CUTCFE==IBM_CUTCFE cycle:
-      IF ( CC_IBM ) THEN
+      IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
          IOR = WC%ONE_D%IOR
          SELECT CASE(IOR)
          CASE( IAXIS)
@@ -2921,7 +2921,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
       ! Check if CC_IBM -> If face is type IS_CUTCFE==IBM_CUTCFE cycle:
-      IF ( CC_IBM ) THEN
+      IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
          IOR = WC%ONE_D%IOR
          SELECT CASE(IOR)
          CASE( IAXIS)
@@ -3099,7 +3099,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
      ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
-     IF ( CC_IBM ) THEN
+     IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
         IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
         IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
      ENDIF
@@ -3245,7 +3245,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
 
       ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
-      IF ( CC_IBM ) THEN
+      IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
          IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
          IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IS_GASPHASE) CYCLE
       ENDIF
