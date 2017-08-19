@@ -122,7 +122,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpng','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile')
 
 
 %%  estimating L1 & L2 norm errors
@@ -172,7 +172,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpng','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1')
 
 % Plot L2 error convergence
 figure
@@ -200,4 +200,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpng','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2')
