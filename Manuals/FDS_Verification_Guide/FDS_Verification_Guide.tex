@@ -3681,6 +3681,60 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{fig:ht3d_2mesh}
 \end{figure}
 
+\subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
+\label{sec:ht3d_sphere}
+\label{ht3d_sphere_75}
+\label{ht3d_sphere_51}
+\label{ht3d_sphere_25}
+
+In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 $kw/m^3$. The initial temperature at the boundary is set to 20~$^\circ$C. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as : 
+\begin{equation}
+\label{eq:sphere}
+\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) \right] + \dot{q}^{\prime\prime\prime} 
+\end{equation}
+With 
+\begin{equation}
+\label{eq:sphere_int}
+T \bigm|_{t=0} =T_0 \qquad; \qquad T\bigm|_{r=a} = T_0 \qquad; \qquad \frac{\partial T}{\partial r} \bigm|_{r=0}=0
+\end{equation}
+The solution is from \cite{ Carslaw:1} whereas the notation is adopted from \cite{lautenberger2014gpyro3d}, the exact solution to Eq.~(\ref{eq:sphere}) \& Eq.~(\ref{eq:sphere_int}) is  
+\begin{equation}
+\label{eq:sphere_sol}
+T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
+\end{equation} 
+
+Where: 
+$T_0$ is the initial temperature ($^\circ$C), $\alpha $ is the thermal diffusivity ($m^2/s$), and r is the radius of the sphere in ~(cm). 
+
+The solution is run for 180s from an initial condition of \SI{20}{\degreeCelsius}. in Fig.~\ref{fig:ht3d_sphere_time} we show the time history of the temperature evolution in the sphere's radius (left) temperature contours($^{\circ}$C) and (right) a comparison between the analytical and numerical solution($^{\circ}$C). 
+
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+ & \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_75_165}
+\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}  \\
+\end{tabular*}
+
+\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) temperature contours($^{\circ}$C). (Right) a comparison between the analytical and numerical solution($^{\circ}$C).}
+\label{fig:ht3d_sphere_time} 
+\end{figure}
+
+Fig.~\ref{fig:ht3d_sphere_conv}  shows the L1 and L2 norm errors decay at O($\Delta x$).
+\begin{figure}[ht]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+ & \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
+\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2}  \\
+\end{tabular*} 
+ 
+\caption[The \textct{ht3d\_sphere} test cases]{L1(left) and L2(right) norm errors in temperature ($^{\circ}$C) for the convergence study with different cell numbers (75, 51, 25) from left to right). The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay at O($\Delta x$).}
+\label{fig:ht3d_sphere_conv}
+\end{figure}
+
+
+
+
+
 
 \chapter{Pyrolysis}
 
