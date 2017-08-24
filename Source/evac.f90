@@ -7,7 +7,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2012
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2017
 !
 !!!!!!!!!!!!!!
 !
@@ -379,7 +379,8 @@ MODULE EVAC
   !
   !
   !
-  LOGICAL :: NOT_RANDOM, L_FALLING_MODEL=.FALSE.
+  LOGICAL :: NOT_RANDOM, L_FALLING_MODEL=.FALSE., DISCARD_SMOKE_INFO=.FALSE.
+
   INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM, SMOKE_KS_SPEED_FUNCTION, &
              FED_ACTIVITY, I_HERDING_TYPE
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
@@ -576,7 +577,7 @@ CONTAINS
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
          MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
          SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY, &
-         CROWBAR_DT_READ, MASS_OF_AGENT
+         CROWBAR_DT_READ, MASS_OF_AGENT, DISCARD_SMOKE_INFO
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
     !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
@@ -1551,6 +1552,7 @@ CONTAINS
       OUTPUT_CONTACT_FORCE = .FALSE.
       OUTPUT_TOTAL_FORCE   = .FALSE.
       OUTPUT_NERVOUSNESS   = .FALSE.
+      DISCARD_SMOKE_INFO   = .FALSE. ! Set true in input file for debug purposes only
       !Issue1547: This subroutine reads the PERS namelists. All the namelist entries should
       !Issue1547: have some default values that are used if no value is given in the input.
       !Issue1547: This way you will not have any uninitialized variables in Fortran.
@@ -6997,9 +6999,12 @@ CONTAINS
                    HUMAN_GRID(I,J)%TMP_G = TMPOUT3
                    HUMAN_GRID(I,J)%RADFLUX = TMPOUT4
                 END IF   ! calculate and save FED
-
              END DO     ! J=1,JBAR
           END DO       ! I=1,IBAR
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%FED_CO_CO2_O2 = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%TMP_G         = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%SOOT_DENS     = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%RADFLUX       = 0.0_EB
 
        END DO MESH_LOOP
 
@@ -7009,7 +7014,7 @@ CONTAINS
           !
           IF (L_FED_SAVE) THEN
 
-             IF ( EVAC_CORRS(I)%FED_MESH > 0 ) THEN
+             IF ( EVAC_CORRS(I)%FED_MESH > 0 .AND. .NOT.DISCARD_SMOKE_INFO) THEN
                 ! Here the fire properties are saved to the arrays.
                 I1 = EVAC_CORRS(I)%II(1)
                 J1 = EVAC_CORRS(I)%JJ(1)
@@ -7026,7 +7031,7 @@ CONTAINS
                 EVAC_CORRS(I)%RADFLUX(1) = 0.0_EB
              END IF                ! FED_MESH > 0, i.e. fire grid found
 
-             IF ( EVAC_CORRS(I)%FED_MESH2 > 0 ) THEN
+             IF ( EVAC_CORRS(I)%FED_MESH2 > 0 .AND. .NOT.DISCARD_SMOKE_INFO) THEN
                 I1 = EVAC_CORRS(I)%II(2)
                 J1 = EVAC_CORRS(I)%JJ(2)
                 K1 = EVAC_CORRS(I)%KK(2)
@@ -7059,6 +7064,10 @@ CONTAINS
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE) ; RETURN
+             END IF
+             IF (DISCARD_SMOKE_INFO) THEN
+                TMPOUT1 = 0.0_EB; TMPOUT2 = 0.0_EB; TMPOUT3 = 0.0_EB; TMPOUT4 = 0.0_EB
+                TMPOUT5 = 0.0_EB; TMPOUT6 = 0.0_EB; TMPOUT7 = 0.0_EB; TMPOUT8 = 0.0_EB
              END IF
              EVAC_CORRS(I)%FED_CO_CO2_O2(1) = TMPOUT1
              EVAC_CORRS(I)%SOOT_DENS(1) = TMPOUT2
