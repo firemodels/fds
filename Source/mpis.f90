@@ -2,6 +2,11 @@ MODULE MPI
 
 USE PRECISION_PARAMETERS, ONLY : DPC, EB
 
+   TYPE :: MESH_STRUCT
+      REAL(EB) :: DBLS(7)
+      INTEGER :: INTS(16)
+   END TYPE MESH_STRUCT
+
        integer LAM_MAJOR_VERSION, LAM_MINOR_VERSION
        integer LAM_RELEASE_VERSION
        integer LAM_ALPHA_VERSION, LAM_BETA_VERSION
@@ -32,7 +37,11 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        integer MPI_ROOT, MPI_CANCEL_SOURCE
        integer MPI_MODE_WRONLY,MPI_MODE_CREATE
        integer MPI_OFFSET_KIND
+       integer MPI_ADDRESS_KIND
+       integer MPI_DOUBLE
 
+       parameter (MPI_DOUBLE=46)
+       parameter (MPI_ADDRESS_KIND=8)
        parameter (MPI_OFFSET_KIND=4)
        parameter (MPI_SUCCESS=0)
        parameter (MPI_ANY_SOURCE=-1)
@@ -288,7 +297,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
     module procedure mpi_recv_int0    , mpi_recv_int1,    &
                      mpi_recv_real0   , mpi_recv_real1,   &
                      mpi_recv_logical0, mpi_recv_logical1,&
-                     mpi_recv_char0   , mpi_recv_char1
+                     mpi_recv_char0   , mpi_recv_char1, mpi_recv_mesh_struct
   end interface mpi_recv
 
   interface mpi_send
@@ -1318,6 +1327,23 @@ subroutine mpi_recv_char1 ( data, n, datatype, iproc, itag, comm, istatus, ierro
   dummyc = data(1)
   dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
 end subroutine
+subroutine mpi_recv_mesh_struct ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+   TYPE :: MESH_STRUCT
+      REAL(EB) :: DBLS(7)
+      INTEGER :: INTS(16)
+   END TYPE MESH_STRUCT
+   TYPE(MESH_STRUCT) :: data
+  integer:: n
+  integer:: comm
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+
 
 
 subroutine mpi_send_int0( data, n, datatype, iproc, itag, comm, ierror )
