@@ -17,8 +17,8 @@ cp = 1005;
 kappa = 0.41;
 p_0 = 100000;
 
-L = -350.;
-z_0 = 0.005;
+L = -100.;
+z_0 = 0.01;
 z_r = 2.;
 u_r = 5.;
 p_r = p_0-rho_0*g*(z_r-z_0);
@@ -27,7 +27,7 @@ theta_0 = (p_0/p_r)^0.285*(T_r+(g/cp)*(z_0-z_r));
 u_star = kappa*u_r/log(z_r/z_0);
 theta_star = u_star^2*theta_0/(g*kappa*L);
 
-z = [z_0 10*z_0 1 2 3 4 5 6 7 8 9 10 15 20 25 30];
+z = [z_0 10*z_0 1 2 3 4 5 6 7 8 9 10 15 20 25 30 50 100];
 
 figure(1)
 set(gca,'Units',Plot_Units)
@@ -81,4 +81,13 @@ set(gcf,'Units',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['tmp_' 'L=' num2str(L,'%4.0f\n')])
+
+% Print out the u and T profiles
+
+fid = fopen('Monin_Obukhov_Profile.csv','wt','n');
+fprintf(fid,'%s\n','z,u,T');
+for j=1:numel(z)
+   fprintf(fid,'%5.1f, %5.2f, %5.1f\n',z(j),u(j),T(j)-273);
+end
+fclose(fid);
 
