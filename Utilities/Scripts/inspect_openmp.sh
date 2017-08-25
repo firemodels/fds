@@ -52,13 +52,14 @@ case=$1
 
 source /opt/intel/inspector/inspxe-vars.sh quiet
 
-TARGET=$GITROOT/fds/Build/intel_linux_64_inspect
+INSPECTDIR=$GITROOT/fds/Build/mpi_intel_linux_64_inspect
+INSPECTAPP=$INSPECTDIR/fds_mpi_intel_linux_64_inspect
 
 if [ "$showinput" == "" ] ; then
   if [ -d $RESULT_DIR ] ; then
     rm -r $RESULT_DIR
   fi
-  cd $TARGET
+  cd $INSPECTDIR
   make -f ../makefile clean
   ./make_fds.sh
 fi
@@ -69,11 +70,11 @@ if [ "$showinput" == "1" ] ; then
   echo inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/fds/Source \
-          -- $GITROOT/fds/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
+          -- $INSPECTAPP $case
   exit
 fi
 cd $CURDIR
 inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/fds/Source \
-          -- $GITROOT/fds/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
+          -- $INSPECTAPP $case
