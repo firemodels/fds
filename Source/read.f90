@@ -524,25 +524,21 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Determine which PROCESS to assign the MESH to
 
-            IF (USE_MPI) THEN
-               IF (MPI_PROCESS>-1) THEN
-                  CURRENT_MPI_PROCESS = MPI_PROCESS
-                  IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
-                     IF (N_MPI_PROCESSES > 1) THEN
-                        WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
-                        CALL SHUTDOWN(MESSAGE) ; RETURN
-                     ELSE
-                        ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
-                        WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
-                        IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-                        CURRENT_MPI_PROCESS=0
-                     ENDIF
+            IF (MPI_PROCESS>-1) THEN
+               CURRENT_MPI_PROCESS = MPI_PROCESS
+               IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
+                  IF (N_MPI_PROCESSES > 1) THEN
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ELSE
+                     ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
+                     WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
+                     IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                     CURRENT_MPI_PROCESS=0
                   ENDIF
-               ELSE
-                  CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
                ENDIF
-            ELSE ! .NOT. USE_MPI
-               CURRENT_MPI_PROCESS=0
+            ELSE
+               CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
             ENDIF
 
             ! Fill in MESH related variables
@@ -584,9 +580,9 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ENDIF
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
-            IF (MYID==0 .AND. USE_MPI .AND. VERBOSE) &
+            IF (MYID==0 .AND. VERBOSE) &
                WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-            IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
+            IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
@@ -694,26 +690,24 @@ NM_EVAC = NM
 
 ! Check for bad mesh ordering if MPI_PROCESS used
 
-IF (USE_MPI) THEN
-   DO NM=1,NMESHES
-      IF (NM==1) CYCLE
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      IF (PROCESS(NM) < PROCESS(NM-1)) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: MPI_PROCESS for MESH ', NM,' < MPI_PROCESS for MESH ',NM-1,&
-                                        '. Reorder MESH lines.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-   ENDDO
-   DO NM=1,NMESHES
-      IF (NM==1 .OR. .NOT.EVACUATION_ONLY(NM)) CYCLE
-      IF (.NOT.EVACUATION_SKIP(NM)) CYCLE
-      IF (PROCESS(NM) < PROCESS(NM-1)) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: MPI_PROCESS for evacuation MESH ', NM,' < MPI_PROCESS for MESH ',NM-1,&
-                                        '. Reorder MESH lines.'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-   ENDDO
-ENDIF
+DO NM=1,NMESHES
+   IF (NM==1) CYCLE
+   IF (EVACUATION_ONLY(NM)) CYCLE
+   IF (PROCESS(NM) < PROCESS(NM-1)) THEN
+      WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: MPI_PROCESS for MESH ', NM,' < MPI_PROCESS for MESH ',NM-1,&
+                                     '. Reorder MESH lines.'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+ENDDO
+DO NM=1,NMESHES
+   IF (NM==1 .OR. .NOT.EVACUATION_ONLY(NM)) CYCLE
+   IF (.NOT.EVACUATION_SKIP(NM)) CYCLE
+   IF (PROCESS(NM) < PROCESS(NM-1)) THEN
+      WRITE(MESSAGE,'(A,I0,A,I0,A)') 'ERROR: MPI_PROCESS for evacuation MESH ', NM,' < MPI_PROCESS for MESH ',NM-1,&
+                                     '. Reorder MESH lines.'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+ENDDO
 
 ! Define the additional evacuation door flow meshes
 
@@ -814,8 +808,8 @@ LOOP_EMESHES: DO N = 1, NEVAC_MESHES
    ENDIF
 
    PROCESS(NM) = CURRENT_MPI_PROCESS
-   IF (MYID==0 .AND. USE_MPI .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-   IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
+   IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+   IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
    ! Mesh boundary colors
 
@@ -952,8 +946,8 @@ LOOP_STAIRS: DO N = 1, N_STRS
    ENDIF
 
    PROCESS(NM) = CURRENT_MPI_PROCESS
-   IF (MYID==0 .AND. USE_MPI .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-   IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
+   IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+   IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
    ! Mesh boundary colors
 
