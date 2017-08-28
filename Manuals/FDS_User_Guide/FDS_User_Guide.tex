@@ -4041,11 +4041,191 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 \end{figure}
 
 
+
+
 \chapter{Atmospheric Effects and Wind}
 
-The chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}.
+This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions. 
 
-\section{Temperature Stratification}
+There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+
+
+\section{Wind Method 1: Monin-Obukhov Similarity}
+\label{info:WIND}
+
+\subsection{Basic Equations}
+
+The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+\begin{eqnarray}
+   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
+   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
+\end{eqnarray}
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
+\begin{eqnarray}
+   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+\end{eqnarray}
+The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
+
+In the event that these various parameters are not reported or known, they can be estimated from the basic meteorological conditions. From just a single measured mean wind velocity, $u_{\rm ref}$, taken at a height, $z_{\rm ref}$, the friction velocity can be calculated from:
+\be
+   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
+\ee
+The Obukhov length, $L$, can be chosen from Table~\ref{OL}.
+\begin{table}[!ht]
+\centering
+\caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
+\begin{tabular}{|l|c|c|} \hline
+Stability           & Value Range            & Suggested Value  \\  \hline \hline
+Very Unstable       & $-200 \le L < 0$       & $-100$           \\ \hline
+Unstable            & $-500 \le L < -200$    & $-350$           \\ \hline
+Neutral             & $|L|>500$              & $1000000$        \\ \hline
+Stable              & $200 < L \le 500$      & $350$            \\ \hline
+Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
+\end{tabular}
+\label{OL}
+\end{table}
+Suggested values of the aerodynamic roughness length, $z_0$, are given in Table~\ref{z0}.
+\begin{table}[!ht]
+\centering
+\caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
+\begin{tabular}{|c|c|c|} \hline
+$z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
+0.0002       & sea               & sea, paved areas, snow-covered flat plain, tidal flats, smooth desert \\ \hline
+0.005        & smooth            & beaches, pack ice, snow-covered fields                                \\ \hline
+0.03         & open              & grass prairie, farm fields, tundra, airports, heather                 \\ \hline
+0.1          & roughly open      & low crops and occasional obstacles (single bushes)                    \\ \hline
+0.25         & rough             & high crops, scattered obstacles such as trees or hedgerows, vineyards \\ \hline
+0.5          & very rough        & mixed farm fields and forest clumps, orchards, scattered buildings    \\ \hline
+1.0          & closed            & suburbs, villages, forests                                            \\ \hline
+>2           & chaotic           & large towns and cities, irregular forests                             \\ \hline
+\end{tabular}
+\label{z0}
+\end{table}
+
+\noindent The scaling potential temperature, $\theta_*$, can be obtained from the relation:
+\be
+   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
+\ee
+Alternatively, the scaling potential temperature can be estimated from the expression for the the sensible heat flux:
+\be
+   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above.
+
+Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the sign of $L$ determines whether the atmosphere is stable or unstable; that is, whether the temperature increases or decreases relative to the ground temperature.
+
+\begin{figure}[p]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-350}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-350}
+   \end{tabular*}
+   \caption[Sample vertical wind and temperature profiles]{Sample vertical wind and temperature profiles.}
+   \label{wind_profiles}
+\end{figure}
+
+
+\subsection{Adding a Wind to FDS}
+
+
+In simulations where wind and atmospheric effects are of interest, you usually have a limited amount of information about the conditions; typically a wind speed, direction, basic topography, and weather conditions. For example, for a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day, you could specify the following parameters:
+\begin{lstlisting}
+&WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
+
+&VENT MB='ZMIN', SURF_ID='GROUND' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+\end{lstlisting}
+It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+
+You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
+
+The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
+
+\subsubsection{Example Wind Simulation}
+\label{wind_example}
+
+An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the first plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
+\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified vertical wind speed profile.}
+\label{wind_example_fig}
+\end{figure}
+
+
+\subsection{Additional Parameters Related to Wind}
+
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} or its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), on the {\ct WIND} line, FDS will drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+\be
+   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
+\ee
+Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+\begin{lstlisting}
+&RAMP ID='t-ramp', T=  0., F=0. /
+&RAMP ID='t-ramp', T=100., F=1. /
+
+&RAMP ID='z-ramp', Z=  0., F=1.0 /
+&RAMP ID='z-ramp', Z=200., F=1.5 /
+&RAMP ID='z-ramp', Z=500., F=1.8 /
+\end{lstlisting}
+The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
+
+\subsection{Shielding Indoor Volumes from the Wind}
+\label{info:BLOCK_WIND}
+
+There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are only grid cells that are solid or not solid. Thus, a wind field will be induced everywhere in the computational domain. You may omit a region of the flow domain from the wind using the {\ct HOLE} feature. For example, to block the wind from a given volume, add a line of the form:
+\begin{lstlisting}
+&HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
+\end{lstlisting}
+
+
+
+\section{Wind Method 2: Letting the Wind Develop Naturally}
+\label{info:force_vector}
+
+Similar to the mean forcing feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+\begin{equation}
+\frac{\partial u_i}{\partial t} + \dots = -F_i/\rho
+\end{equation}
+This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
+\begin{lstlisting}
+&WIND FORCE_VECTOR(1)=0.01 /
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+\end{lstlisting}
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
+
+
+
+
+
+
+\section{Wind Method 3: The ``Wall of Wind''}
+\label{info:wall_of_wind}
+\label{info:INITIALIZATION_ONLY}
+
+An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
+
+To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error
+
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0}, and also set {\ct INITIALIZATION\_ONLY=.TRUE.} This will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+
+
+
+
+
+\section{Temperature Stratification without Wind}
 \label{info:stratification}
 
 Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct WIND} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
@@ -4105,68 +4285,9 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \end{figure}
 
 
-\section{Wind}
-\label{info:WIND}
-
-If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct WIND} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both the velocity components {\ct U0} and {\ct V0} to 7.07~m/s ($10 \, \cos(\pi/4) = 7.07$). Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
-
-The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct WIND}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters:
-\begin{lstlisting}
-&WIND ..., MEAN_FORCING(1:2)=.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=0.1,
-      RAMP_U0_T='t-ramp', ... , RAMP_V0_Z='z-ramp' /
-\end{lstlisting}
-Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
-
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
-\begin{lstlisting}
-&RAMP ID='t-ramp', T=  0., F=0. /
-&RAMP ID='t-ramp', T=100., F=1. /
-
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
-\end{lstlisting}
-The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m).
-
-For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
-
-\subsubsection{Example Wind Simulation}
-\label{wind_example}
-
-An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The background wind velocity components vary with height, $z$, and time, $t$:
-\be
-   u(z,t) = 10 \, \cos \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}  \quad ; \quad v(z,t) = 10 \, \sin \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}
-\ee
-The 360$^\circ$ turn of the wind in 50~s is not realistic, but this case is intended to test the ramp functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} was set to 1~s. This time scale falls into the denominator of the forcing term that ``nudges'' the simulated wind to follow the specified time history. If it is too small, the ``nudging'' term becomes too dominant. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
-
-\begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified wind profile.}
-\label{wind_example_fig}
-\end{figure}
-
-\subsection{Specifying a ``Wall of Wind''}
-
-An alternative to {\ct MEAN\_FORCING} is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the {\ct MEAN\_FORCING} technique described above is preferable because it handles the lateral boundaries of the computational domain in a more natural way.
-
-To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 
-\subsection{Special Topic: Specifying a Force Field}
-\label{info:force_vector}
 
-Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
-\begin{equation}
-\frac{\partial u_i}{\partial t} = -F_i/\rho
-\end{equation}
-This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
-\begin{lstlisting}
-&WIND FORCE_VECTOR(1)=0.01 /
-&VENT MB='XMIN', SURF_ID='PERIODIC' /
-&VENT MB='XMAX', SURF_ID='PERIODIC' /
-\end{lstlisting}
-You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
 
 
 
@@ -8801,16 +8922,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &           \\ \hline
-{\ct CTRL\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct DEVC\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct EVACUATION}   & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                  &       &           \\ \hline
-{\ct ID }          & Character         & Identifier for input line                              &       &           \\ \hline
-{\ct MESH\_ID }    & Character         & Reference~\cite{FDS_Evac_Users_Guide}                  &       &           \\ \hline
-{\ct MULT\_ID }    & Character         & Section~\ref{info:MULT}                                &       &           \\ \hline
-{\ct RGB(3)   }    & Integer Triplet   & Section~\ref{info:colors}                              &       &           \\ \hline
-{\ct TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct XB(6)    }    & Real Sextuplet    & Section~\ref{info:MULT}                                & m     &           \\ \hline
+{\ct BLOCK\_WIND}  & Logical           & Section~\ref{info:BLOCK_WIND}                          &       &  {\ct .FALSE.}  \\ \hline
+{\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &                 \\ \hline
+{\ct CTRL\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct DEVC\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct EVACUATION}   & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
+{\ct ID }          & Character         & Identifier for input line                              &       &                 \\ \hline
+{\ct MESH\_ID }    & Character         & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
+{\ct MULT\_ID }    & Character         & Section~\ref{info:MULT}                                &       &                 \\ \hline
+{\ct RGB(3)   }    & Integer Triplet   & Section~\ref{info:colors}                              &       &                 \\ \hline
+{\ct TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct XB(6)    }    & Real Sextuplet    & Section~\ref{info:MULT}                                & m     &                 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9919,15 +10041,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 %{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                               &               & 0.                \\ \hline
-{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.E10             \\ \hline
+{\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
+{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.                \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
+{\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
-{\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:WIND}                       &               & {\ct .FALSE.}     \\ \hline
+{\ct INITIALIZATION\_ONLY}                      & Logical       & Section~\ref{info:INITIALIZATION_ONLY}        &               & {\ct .FALSE.}     \\ \hline
 %{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                      &               & {\ct .FALSE.}     \\ \hline
+{\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
+{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
 {\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
@@ -9936,9 +10062,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 %{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Section~\ref{info:WIND}                       &               & 0.                \\ \hline
+{\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
+{\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
+{\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
 %{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition               &               & {\ct .FALSE.}     \\ \hline
+{\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
+{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
