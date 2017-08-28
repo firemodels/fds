@@ -7,9 +7,9 @@
 &MISC NOISE=.FALSE.,
       DNS=.TRUE.,
       GVEC=0,0,0, 
-      STRATIFICATION=.FALSE.
-      U0=50
-      /
+      STRATIFICATION=.FALSE. /
+
+&WIND U0=50. /
 
 &DUMP DT_SLCF=10000 /
 &RADI RADIATION = .FALSE. /
