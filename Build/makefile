@@ -233,7 +233,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none $(GITINFO)
 mpi_intel_linux_64_inspect : LFLAGS = -static-intel
-mpi_intel_linux_64_inspect : FCOMPL = $(MPIFORT)
+mpi_intel_linux_64_inspect : FCOMPL = mpiifort
 mpi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64_inspect : obj = fds_mpi_intel_linux_64_inspect
 mpi_intel_linux_64_inspect : setup $(obj_mpi)
