@@ -4045,7 +4045,7 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 \chapter{Atmospheric Effects and Wind}
 
-This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions. 
+This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
 
 There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
 
@@ -7761,7 +7761,7 @@ Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very s
    \hbox{\ct 'NORMALIZED MASS'} &=& \sum_\alpha  m''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(dimensionless)} \\
    \hbox{\ct 'NORMALIZED MASS LOSS RATE'} &=& \sum_\alpha  \dot{m}''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0)  \quad \quad \left( \si{1/s} \right)
 \end{eqnarray*}
-For the quantity {\ct 'NORMALIZED MASS'}, you can add a {\ct MATL\_ID} to get the normalized mass of a single component of the solid material, $m''_\alpha (t) / \sum_\alpha  m''_\alpha (0)$.
+For both of these quantities, you can add a {\ct MATL\_ID} to get the normalized mass or mass loss rate of a single component of the solid material, $m''_\alpha (t) / \sum_\alpha  m''_\alpha (0)$.
 
 \subsubsection{Micro-Combustion Calorimetry (MCC) Output}
 
@@ -8553,7 +8553,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}            &                & D            \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^1$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
