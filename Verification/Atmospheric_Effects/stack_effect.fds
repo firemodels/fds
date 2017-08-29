@@ -4,6 +4,9 @@ A simple two-dimensional case demonstrating how to model stack effect in buildin
 
 &MESH IJK=300,1,100, XB=0.0,300.0,-1.0,1.0,0,100.0 /
 
+&MISC TMPA=10. /
+&WIND LAPSE_RATE=0.0 /
+
 &TIME T_END=100. / 
 &ZONE XB=20,100,-1,1,0,100/
 &PRES VELOCITY_TOLERANCE=0.01/
@@ -23,7 +26,6 @@ A simple two-dimensional case demonstrating how to model stack effect in buildin
 
 &RADI RADIATION=.FALSE./
 &SURF ID='WALL',DEFAULT=.TRUE.,HEAT_TRANSFER_COEFFICIENT=0./
-&MISC LAPSE_RATE=0.0, TMPA=10. /
 &INIT XB=20,300,-1,1,0,100, TEMPERATURE=20. /
 
 &OBST XB=19,20,-1,1, 0,100/  Left Facade
