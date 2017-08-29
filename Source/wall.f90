@@ -1200,6 +1200,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    IF (CALL_PYROLYSIS) THEN
       ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)         = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)       *AREA_SCALING
       ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES)  = ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES)*AREA_SCALING
+      ONE_D%MASSFLUX_MATL(1:SF%N_MATL)            = ONE_D%MASSFLUX_MATL(1:SF%N_MATL)*AREA_SCALING
    ENDIF
 
    ! Add evaporated particle species to gas phase and compute resulting contribution to the divergence
@@ -1395,6 +1396,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          IF (CORRECTOR) ONE_D%UW  = 0._EB
          ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = 0._EB
          ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%MASSFLUX_MATL(1:SF%N_MATL) = 0._EB
          RETURN
       ENDIF
 
@@ -1965,6 +1967,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)        = 0._EB
    ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+   ONE_D%MASSFLUX_MATL(1:SF%N_MATL)           = 0._EB
    ONE_D%CHANGE_THICKNESS                     = .FALSE.
 
    POINT_LOOP1: DO I=1,NWP
@@ -2013,6 +2016,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                DO NS = 1,N_TRACKED_SPECIES
                   ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
                   ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX
+                  ONE_D%MASSFLUX_MATL(N)    = ONE_D%MASSFLUX_MATL(N)    +                           ML%NU_GAS(NS,1)*MFLUX
                ENDDO
                J = 0
                ! Always remesh for liquid fuels
@@ -2067,6 +2071,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   DO NS = 1,N_TRACKED_SPECIES
                      ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
                      ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
+                     ONE_D%MASSFLUX_MATL(N)    = ONE_D%MASSFLUX_MATL(N)    +                           ML%NU_GAS(NS,J)*MFLUX_S
                   ENDDO
                   Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
                   ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
@@ -2107,6 +2112,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   DO NS = 1,N_TRACKED_SPECIES
                      ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
                      ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
+                     ONE_D%MASSFLUX_MATL(N)    = ONE_D%MASSFLUX_MATL(N)    +                           ML%NU_GAS(NS,J)*MFLUX_S
                   ENDDO
                   Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
                   ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
@@ -2229,6 +2235,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ONE_D%QCONF        = 0._EB
          ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)  = 0._EB
          ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%MASSFLUX_MATL(1:SF%N_MATL) = 0._EB
          ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS)     = 0
          ONE_D%BURNAWAY          = .TRUE.
          IF (I_OBST > 0) THEN
