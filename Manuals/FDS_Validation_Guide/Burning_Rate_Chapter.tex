@@ -129,6 +129,9 @@ nitrogen environment.}
 \subsection{Polycarbonate (PC)}
 
 Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
+\be
+   \hbox{PC} \to 0.21 \, \hbox{Char} + 0.79 \, \hbox{Gas} 
+\ee
 
 \begin{table}[h!]
 \caption[Properties of polycarbonate (PC).]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
@@ -177,8 +180,8 @@ Table~\ref{Properties_PVC} lists the measured properties of poly(vinyl chloride)
 
 It is assumed that the polymer decomposes via a two-step reaction:
 \begin{eqnarray}
-   \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
-   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}
+   \hbox{Polymer} &\to& 0.44 \, \hbox{Char 1} + 0.56 \, \hbox{Gas 1}  \\
+   \hbox{Char 1}  &\to& 0.47 \, \hbox{Char 2} + 0.53 \, \hbox{Gas 2}
 \end{eqnarray}
 
 
@@ -240,9 +243,9 @@ Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   
 
 Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone)\footnote{Trade name VICTREX PEEK 450G. The sample has been thoroughly dried.}. Its property values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. It is assumed that the polymer decomposes via a four-step reaction:
 \begin{eqnarray}
-   \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
-   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}  \\
-   \hbox{Char 2}  &\to& \hbox{Char 3} + \hbox{Gas 2}  \\
+   \hbox{Polymer} &\to& 0.62 \, \hbox{Char 1} + 0.38 \, \hbox{Gas 1}  \\
+   \hbox{Char 1}  &\to& 0.88 \, \hbox{Char 2} + 0.12 \, \hbox{Gas 2}  \\
+   \hbox{Char 2}  &\to& 0.88 \, \hbox{Char 3} + 0.12 \, \hbox{Gas 2}  \\
    \hbox{Char 3}  &\to& \hbox{Gas 2}
 \end{eqnarray}
 It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
@@ -366,7 +369,9 @@ in both the Gasification Apparatus and Cone Calorimeter.}
 \subsection{PBT with Glass Fibers (PBT-GF)}
 
 Samples of poly(butylene terephtalate) (PBT), blended with 30~\% by mass glass fibers\footnote{Tradename Arnite TV4-261, DSM Engineering Plastics}, have been burned without oxygen in the Gasification Apparatus and with oxygen in the Cone Calorimeter. The properties of PBT-GF are listed in Table~\ref{Properties_PBT-GF}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
-
+\be
+   \hbox{PBT-GF} \to 0.32 \, \hbox{Char} + 0.68 \, \hbox{Gas}
+\ee
 The results of the simulations are shown in Fig.~\ref{HRR_PBTGF}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 33~\%, 50~kW/m$^2$ by 16~\%, and 70~kW/m$^2$ by 5~\%~\cite{Kempel:1}.
 
 \begin{table}[h!]
@@ -425,7 +430,7 @@ In the experiments, samples of seven different polymers were exposed to several 
 
 These three polymers are assumed to pyrolyze according to the following single step process:
 \begin{equation}
-   \hbox{Polymer}  \to \hbox{Char} + \hbox{Gas}
+   \hbox{Polymer}  \to \nu_{\rm r} \, \hbox{Char} + (1-\nu_{\rm r}) \, \hbox{Gas}
 \end{equation}
 The properties of the virgin polymer, the char, and the reaction kinetics are listed in Table~\ref{Properties_ABS_HIPS_PMMA}.
 
@@ -487,8 +492,8 @@ Residue Fraction            &               & 0.023                   & 0.043   
 
 This polymer is assumed to pyrolyze according to the following two step process:
 \begin{eqnarray}
-   \hbox{Polymer}       &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac1of2} \\
-   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac2of2}
+   \hbox{Polymer}       &\to& 0.45 \, \hbox{Intermediate} + 0.55 \, \hbox{Gas}  \label{reac1of2} \\
+   \hbox{Intermediate}  &\to& 0.31 \, \hbox{Char} +         0.69 \, \hbox{Gas}  \label{reac2of2}
 \end{eqnarray}
 The properties of the polymer and the reaction kinetics are listed in Table~\ref{Properties_Kydex} and the mass loss rate comparisons are shown on the following page. Note that nominal exposing heat flux values of 30~kW/m$^2$, 50~kW/m$^2$, and 70~kW/m$^2$ were changed slightly in the simulations to account for the fact that the intumescing material surface moved closer to the heater during the course of the experiment~\cite{Li:PDS_2015}.
 
@@ -543,8 +548,8 @@ Gas Heat of Combustion                   & kJ/kg         & 12650                
 These three polymers are assumed to pyrolyze following the three-step process:
 \begin{eqnarray}
    \hbox{Polymer}       &\to& \hbox{Melt}  \label{reac1of3} \\
-   \hbox{Melt}          &\to& \hbox{Intermediate} + \hbox{Gas}  \label{reac2of3} \\
-   \hbox{Intermediate}  &\to& \hbox{Char} + \hbox{Gas} \label{reac3of3}
+   \hbox{Melt}          &\to& \nu_{\rm r,2} \, \hbox{Intermediate} + (1-\nu_{\rm r,2}) \, \hbox{Gas}  \label{reac2of3} \\
+   \hbox{Intermediate}  &\to& \nu_{\rm r,3} \, \hbox{Char} +         (1-\nu_{\rm r,3}) \, \hbox{Gas}  \label{reac3of3}
 \end{eqnarray}
 The property data is listed in Table~\ref{Properties_PEI_PET_POM} and the mass loss rate comparisons are shown on the subsequent pages.
 
@@ -622,10 +627,10 @@ Table~\ref{Properties_Cardboard} lists the measured properties of a double-wall 
 
 The reaction mechanism for the cardboard material includes one reaction to describe the release of residual moisture and three sequential reactions to describe the thermal degradation of the virgin material to a final residual char. Each of the initial solid components (LB, CFL, and BFL) undergoes the same four-step mechanism.
 \begin{eqnarray}
-   \hbox{Moisture} &\to& \hbox{Water Vapor}  \\
-   \hbox{Virgin Cardboard}  &\to& \hbox{Intermediary Solid} + \hbox{Fuel Gas 2}  \\
-   \hbox{Intermediary Solid}  &\to& \hbox{Char 1} + \hbox{Fuel Gas 3}  \\
-   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Fuel Gas 4}
+   \hbox{Moisture}            &\to& \hbox{Water Vapor}  \\
+   \hbox{Virgin Cardboard}    &\to& 0.90 \, \hbox{Intermediary Solid} + 0.10 \, \hbox{Fuel Gas 2}  \\
+   \hbox{Intermediary Solid}  &\to& 0.37 \, \hbox{Char 1}             + 0.63 \, \hbox{Fuel Gas 3}  \\
+   \hbox{Char 1}              &\to& 0.59 \, \hbox{Char 2}             + 0.41 \, \hbox{Fuel Gas 4}
 \end{eqnarray}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|l|l|}

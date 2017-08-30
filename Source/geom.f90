@@ -8517,14 +8517,16 @@ MESH_LOOP : DO NM=1,NMESHES
    ENDDO ICC_LOOP
 
    ! Finally set HP to zero inside immersed solids:
-   DO K=0,KBP1
-     DO J=0,JBP1
-        DO I=0,IBP1
-           IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
-           HP(I,J,K) = 0._EB
+   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+      DO K=0,KBP1
+        DO J=0,JBP1
+           DO I=0,IBP1
+              IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
+              HP(I,J,K) = 0._EB
+           ENDDO
         ENDDO
-     ENDDO
-   ENDDO
+      ENDDO
+   ENDIF
 
    ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
    IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
@@ -20009,11 +20011,17 @@ IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
 
       ICC=CCVAR(II,JJ,KK,IBM_IDCC)
 
-      IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
-         MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
+      IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+         IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
+            MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
+         ELSE
+            MESHES(NM)%CCVAR(II,JJ,KK,IBM_UNKH) = INT(OM%HS(IIO,JJO,KKO))
+         ENDIF
       ELSE
          MESHES(NM)%CCVAR(II,JJ,KK,IBM_UNKH) = INT(OM%HS(IIO,JJO,KKO))
+         IF (ICC > 0) MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = MESHES(NM)%CCVAR(II,JJ,KK,IBM_UNKH)
       ENDIF
+
 
       OM%HS(IIO,JJO,KKO) = 0._EB ! (VAR_CC == UNKH)
 
@@ -20040,12 +20048,21 @@ INTEGER :: I,J,K,ICC
 
 IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
 
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
-      J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
-      K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
-      HS(I,J,K)= REAL(MESHES(NM)%CUT_CELL(ICC)%UNKH(1),EB)
-   ENDDO
+   IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
+         J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
+         K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
+         HS(I,J,K)= REAL(MESHES(NM)%CUT_CELL(ICC)%UNKH(1),EB)
+      ENDDO
+   ELSE
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
+         J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
+         K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
+         MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(HS(I,J,K))
+      ENDDO
+   ENDIF
 
 ELSE
 

@@ -393,7 +393,7 @@ Listed below are suggested ways to decrease CPU time, but these options should b
 
 \begin{enumerate}
 \item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$.
-\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} together with {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
+\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line together with {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
 \item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation.
 \item In situations where the heat transfer conditions are stationary or change only gradually, you can reduce the cost of the radiation solution by reducing the temporal resolution. More details in Section~\ref{info:RADI_Resolution}. A sensitivity study should be performed to determine the loss of accuracy.
 \end{enumerate}
@@ -695,7 +695,7 @@ Along with the FDS User's Guide, there are resources available on the Internet. 
 
 \section{The Version Number}
 
-If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
 
 Get in the habit of checking the version number of your executable, periodically checking for new releases which might already have addressed your problem, and telling us what version you are using if you report a problem.
 
@@ -911,6 +911,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct TIME}  & Simulation Time              & \ref{info:TIME} & \ref{tbl:TIME}  \\ \hline
 {\ct TRNX}  & Mesh Stretching              & \ref{info:TRNX} & \ref{tbl:TRNX}  \\ \hline
 {\ct VENT}  & Vent Parameters              & \ref{info:VENT} & \ref{tbl:VENT}  \\ \hline
+{\ct WIND}  & Wind Parameters              & \ref{info:WIND} & \ref{tbl:WIND}  \\ \hline
 {\ct ZONE}  & Pressure Zone Parameters     & \ref{info:ZONE} & \ref{tbl:ZONE}  \\ \hline
 \end{tabular}
 \end{center}
@@ -939,7 +940,7 @@ two parameters, as in this example:
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{lstlisting}
 \begin{description}
-\item {\ct CHID} is a string of 40 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
+\item {\ct CHID} stands for \emph{Character ID}, it is a string of 40 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
 \item {\ct TITLE} is a string of 256 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
@@ -1272,20 +1273,7 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 
 
 
-\subsection{Special Topic: Specifying a Force Field}
-\label{info:force_vector}
 
-Similar to the {\ct MEAN\_FORCING} feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
-\begin{equation}
-\frac{\partial u_i}{\partial t} = -F_i/\rho
-\end{equation}
-This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
-\begin{lstlisting}
-&MISC FORCE_VECTOR(1)=0.01 /
-&VENT MB='XMIN', SURF_ID='PERIODIC' /
-&VENT MB='XMAX', SURF_ID='PERIODIC' /
-\end{lstlisting}
-You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on {\ct MISC}.
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
@@ -1577,6 +1565,8 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
 \end{lstlisting}
 Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
 
+{\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
+
 \subsection*{Temperature}
 
 To modify the local initial temperature, add lines of the form,
@@ -1629,6 +1619,8 @@ If either the error in the normal component of the velocity at a mesh interface 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
+
+For Linux and Mac OS targets, and non overlapping meshes at same refinement level, the parameter {\ct GLMAT\_SOLVER} set to {\ct .TRUE.} allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is Intel\textsuperscript{\textregistered} MKL Pardiso for serial targets, and Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver for MPI targets. Two solution modes are defined by the logical parameter {\ct PRES\_ON\_WHOLE\_DOMAIN}: if {\ct .TRUE.} (default) the $H$ equation is solved in cells covered by obstacles as well as gas phase cells in the spirit of FDS default solver. If {\ct .FALSE.} the pressure is solved only on gas cells, employing solid boundary conditions for pressure in immersed obstacles. This method is more computationally and memory intensive than the default solver with default options, but eliminates velocity penetration errors in obstacles as well as inter-mesh boundaries.
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
@@ -1958,7 +1950,7 @@ The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. 
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:mean_forcing} for an alternative approach.
+The {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
 
 Vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -3828,16 +3820,7 @@ For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIOD
 \subsubsection{Example Case: Pressure Rise in a Compartment}
 \label{pressure_rise}
 
-This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
-0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the
-start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct
-STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pressure and density with height.
-The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
-temperature and density to rise during the 60~s injection period. Afterwards, the
-temperature, density, and pressure should remain constant, according to the equation of state.
-Figure~\ref{pressure_rise_fig} shows the results of this calculation.  The density matches exactly showing
-that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with
-the ideal values obtained from the first law of thermodynamics.
+This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of 0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pressure and density with height. The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure, temperature and density to rise during the 60~s injection period. Afterwards, the temperature, density, and pressure should remain constant, according to the equation of state. Figure~\ref{pressure_rise_fig} shows the results of this calculation.  The density matches exactly showing that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with the ideal values obtained from the first law of thermodynamics.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -4058,18 +4041,198 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 \end{figure}
 
 
-\chapter{Atmospheric Effects}
 
-The chapter describes techniques for modeling the atmospheric boundary layer.
 
-\section{Temperature Stratification}
+\chapter{Atmospheric Effects and Wind}
+
+This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
+
+There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+
+
+\section{Wind Method 1: Monin-Obukhov Similarity}
+\label{info:WIND}
+
+\subsection{Basic Equations}
+
+The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+\begin{eqnarray}
+   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
+   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
+\end{eqnarray}
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
+\begin{eqnarray}
+   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+\end{eqnarray}
+The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
+
+In the event that these various parameters are not reported or known, they can be estimated from the basic meteorological conditions. From just a single measured mean wind velocity, $u_{\rm ref}$, taken at a height, $z_{\rm ref}$, the friction velocity can be calculated from:
+\be
+   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
+\ee
+The Obukhov length, $L$, can be chosen from Table~\ref{OL}.
+\begin{table}[!ht]
+\centering
+\caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
+\begin{tabular}{|l|c|c|} \hline
+Stability           & Value Range            & Suggested Value  \\  \hline \hline
+Very Unstable       & $-200 \le L < 0$       & $-100$           \\ \hline
+Unstable            & $-500 \le L < -200$    & $-350$           \\ \hline
+Neutral             & $|L|>500$              & $1000000$        \\ \hline
+Stable              & $200 < L \le 500$      & $350$            \\ \hline
+Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
+\end{tabular}
+\label{OL}
+\end{table}
+Suggested values of the aerodynamic roughness length, $z_0$, are given in Table~\ref{z0}.
+\begin{table}[!ht]
+\centering
+\caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
+\begin{tabular}{|c|c|c|} \hline
+$z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
+0.0002       & sea               & sea, paved areas, snow-covered flat plain, tidal flats, smooth desert \\ \hline
+0.005        & smooth            & beaches, pack ice, snow-covered fields                                \\ \hline
+0.03         & open              & grass prairie, farm fields, tundra, airports, heather                 \\ \hline
+0.1          & roughly open      & low crops and occasional obstacles (single bushes)                    \\ \hline
+0.25         & rough             & high crops, scattered obstacles such as trees or hedgerows, vineyards \\ \hline
+0.5          & very rough        & mixed farm fields and forest clumps, orchards, scattered buildings    \\ \hline
+1.0          & closed            & suburbs, villages, forests                                            \\ \hline
+>2           & chaotic           & large towns and cities, irregular forests                             \\ \hline
+\end{tabular}
+\label{z0}
+\end{table}
+
+\noindent The scaling potential temperature, $\theta_*$, can be obtained from the relation:
+\be
+   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
+\ee
+Alternatively, the scaling potential temperature can be estimated from the expression for the the sensible heat flux:
+\be
+   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above.
+
+Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the sign of $L$ determines whether the atmosphere is stable or unstable; that is, whether the temperature increases or decreases relative to the ground temperature.
+
+\begin{figure}[p]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-350}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-350}
+   \end{tabular*}
+   \caption[Sample vertical wind and temperature profiles]{Sample vertical wind and temperature profiles.}
+   \label{wind_profiles}
+\end{figure}
+
+
+\subsection{Adding a Wind to FDS}
+
+
+In simulations where wind and atmospheric effects are of interest, you usually have a limited amount of information about the conditions; typically a wind speed, direction, basic topography, and weather conditions. For example, for a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day, you could specify the following parameters:
+\begin{lstlisting}
+&WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
+
+&VENT MB='ZMIN', SURF_ID='GROUND' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+\end{lstlisting}
+It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+
+You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
+
+The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
+
+\subsubsection{Example Wind Simulation}
+\label{wind_example}
+
+An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the first plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
+\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified vertical wind speed profile.}
+\label{wind_example_fig}
+\end{figure}
+
+
+\subsection{Additional Parameters Related to Wind}
+
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} or its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), on the {\ct WIND} line, FDS will drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+\be
+   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
+\ee
+Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+\begin{lstlisting}
+&RAMP ID='t-ramp', T=  0., F=0. /
+&RAMP ID='t-ramp', T=100., F=1. /
+
+&RAMP ID='z-ramp', Z=  0., F=1.0 /
+&RAMP ID='z-ramp', Z=200., F=1.5 /
+&RAMP ID='z-ramp', Z=500., F=1.8 /
+\end{lstlisting}
+The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
+
+\subsection{Shielding Indoor Volumes from the Wind}
+\label{info:BLOCK_WIND}
+
+There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are only grid cells that are solid or not solid. Thus, a wind field will be induced everywhere in the computational domain. You may omit a region of the flow domain from the wind using the {\ct HOLE} feature. For example, to block the wind from a given volume, add a line of the form:
+\begin{lstlisting}
+&HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
+\end{lstlisting}
+
+
+
+\section{Wind Method 2: Letting the Wind Develop Naturally}
+\label{info:force_vector}
+
+Similar to the mean forcing feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+\begin{equation}
+\frac{\partial u_i}{\partial t} + \dots = -F_i/\rho
+\end{equation}
+This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
+\begin{lstlisting}
+&WIND FORCE_VECTOR(1)=0.01 /
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+\end{lstlisting}
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
+
+
+
+
+
+
+\section{Wind Method 3: The ``Wall of Wind''}
+\label{info:wall_of_wind}
+\label{info:INITIALIZATION_ONLY}
+
+An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
+
+To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error
+
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0}, and also set {\ct INITIALIZATION\_ONLY=.TRUE.} This will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+
+
+
+
+
+\section{Temperature Stratification without Wind}
 \label{info:stratification}
 
-Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
+Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct WIND} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
-Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct MISC} line if you want a non-linear change in temperature with height. For example,
+Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct WIND} line if you want a non-linear change in temperature with height. For example,
 \begin{lstlisting}
-&MISC ..., RAMP_TMP0_Z='T profile', TMPA=34.5, ...  /
+&WIND ..., RAMP_TMP0_Z='T profile', ...  /
 
 &RAMP ID='T profile', Z= 0.001 , F= 1.0258  /
 &RAMP ID='T profile', Z= 0.500 , F= 1.0019  /
@@ -4078,15 +4241,15 @@ Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct MISC} line if you
 &RAMP ID='T profile', Z= 3.000 , F= 0.9977  /
 &RAMP ID='T profile', Z= 4.000 , F= 0.9972  /
 \end{lstlisting}
-The value of {\ct F} is the ratio of the temperature in degrees K to {\ct TMPA}.
+The value of {\ct Z} is the height (m) above the ground. The value of {\ct F} is the ratio of the temperature at the given height in degrees K to the ambient temperature in degrees K, {\ct TMPA}+273.
 
-By default, FDS assumes that the density and pressure decrease with height, regardless of the application or domain size. For most simulations, this effect is negligible, but it can be turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
+By default, FDS assumes that the density and pressure decrease with height, regardless of the application or domain size. For most simulations, this effect is negligible, but it can be turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line.
 
 \subsection{Stack Effect}
 \label{info:stackeffect}
 \label{stack_effect}
 
-Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature profile that is entered on the {\ct MISC} line.
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature profile that is entered on the {\ct WIND} line.
 
 For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s. The leakage paths can be defined in terms of HVAC components. Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
 
@@ -4122,114 +4285,35 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \end{figure}
 
 
-\section{Wind}
-\label{info:mean_forcing}
 
-If you want to simulate a wind, set {\ct U0}, {\ct V0}, and {\ct W0} to the three components of the prevailing wind field on the {\ct MISC} line. By default, their values are 0~m/s. For example, if the mean wind is 10~m/s in the northeast direction, set both the velocity components {\ct U0} and {\ct V0} to 7.07~m/s ($10 \cos(\pi/4) = 7.07$). Setting these values, however, does not ensure that this flow field will persist. There are several ways to maintain the wind field. One way is to specify the normal component of the wind velocity at one or two exterior boundaries of the computational domain. This is essentially like creating a giant wall of fans on one side of the domain and a passive open boundary on the other. This is not a particularly good strategy to use because the lateral (i.e. tangential to the wind field) boundary conditions are not well-defined.
 
-The better way to specify a wind field is as follows. Suppose there are anemometers located at specific locations within the domain which continuously record wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models. In FDS, you may invoke the most rudimentary of data assimilation techniques, a method called \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, specify the mean wind using {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), along with the logical parameter {\ct MEAN\_FORCING(1:2)=.TRUE.} on {\ct MISC}.  This will cause FDS to drive the mean velocity components toward the values of {\ct U0} and {\ct V0}.  For example, to point the wind in the northeast direction (assuming that the positive $x$ axis points eastward) at 10~m/s, set the following parameters on the {\ct MISC} line:
-\begin{lstlisting}
-&MISC ..., MEAN_FORCING(1:2)=.TRUE., U0=7.07, V0=7.07, DT_MEAN_FORCING=0.1,
-      RAMP_U0_T='t-ramp', ... , RAMP_V0_Z='z-ramp' /
-\end{lstlisting}
-Note that you must also specify a time scale for relaxation, {\ct DT\_MEAN\_FORCING}. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
 
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
-\begin{lstlisting}
-&RAMP ID='t-ramp', T=  0., F=0. /
-&RAMP ID='t-ramp', T=100., F=1. /
 
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
-\end{lstlisting}
-The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m).
 
-For an outdoor flow, all other boundaries (except the ground) should be set to {\ct OPEN}. You may omit a region of the flow domain from forcing using the {\ct HOLE} feature.  If a {\ct HOLE} is used with {\ct MEAN\_FORCING} it is advisable to also set {\ct PROJECTION=.TRUE.} on {\ct MISC}; otherwise the combination of {\ct U0} in the bulk region and zero velocity in the {\ct HOLE} region creates an initial divergence error that will take some time to wash out of the domain.
-
-\subsubsection{Example Wind Simulation}
-\label{wind_example}
-
-An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The background wind velocity components vary with height, $z$, and time, $t$:
-\be
-   u(z,t) = 10 \, \cos \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}  \quad ; \quad v(z,t) = 10 \, \sin \left( \frac{2 \pi \, t}{50} \right) \; \left( \frac{z}{5} \right)^{0.2} \quad \hbox{m/s}
-\ee
-The 360$^\circ$ turn of the wind in 50~s is not realistic, but this case is intended to test the ramp functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} was set to 1~s. This time scale falls into the denominator of the forcing term that ``nudges'' the simulated wind to follow the specified time history. If it is too small, the ``nudging'' term becomes too dominant. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
-
-\begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified wind profile.}
-\label{wind_example_fig}
-\end{figure}
-
-\subsection{Specifying a ``Wall of Wind''}
-
-An alternative to {\ct MEAN\_FORCING} is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the {\ct MEAN\_FORCING} technique described above is preferable because it handles the lateral boundaries of the computational domain in a more natural way.
-
-To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 
 \chapter{User-Specified Functions}
 \label{info:RAMP}
 
-Many of the parameters specified in the FDS input file are fixed constants. However, there are several parameters that may vary in
-time, temperature, or space. The namelist groups,
-{\ct RAMP} and {\ct TABL}, allow you to control the behavior of these parameters.  {\ct RAMP} allows you
-to specify a function with one independent variable (such as time) and one dependent variable (such as velocity).
-{\ct TABL} allows you to specify a function of multiple independent variables (such as a solid angle) and multiple
-dependent variables (such as a sprinkler flow rate and droplet speed).
+Many of the parameters specified in the FDS input file are fixed constants. However, there are several parameters that may vary in time, temperature, or space. The namelist groups, {\ct RAMP} and {\ct TABL}, allow you to control the behavior of these parameters.  {\ct RAMP} allows you to specify a function with one independent variable (such as time) and one dependent variable (such as velocity). {\ct TABL} allows you to specify a function of multiple independent variables (such as a solid angle) and multiple dependent variables (such as a sprinkler flow rate and droplet speed).
 
 
 
 \section{Time-Dependent Functions}
 \label{info:RAMP_Time}
 
-At the start of any calculation, the temperature is ambient
-everywhere, the flow velocity is zero everywhere, nothing is burning,
-and the mass fractions of all species are uniform.  When the
-calculation starts temperatures, velocities, burning rates,
-etc., are ramped-up from their starting values because nothing can
-happen instantaneously. By default, everything is ramped-up to their
-prescribed values in approximately 1~s. However, you can control the rate at which
-things turn on, or turn off, by specifying time histories either with
-pre-defined functions or with user-defined functions.  The parameters {\ct
-TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
-rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
-normal velocity ({\ct VEL}, {\ct VOLUME\_FLOW}), or {\ct
-MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
-TAU} seconds and remain there. To prescribe different heat release rate ramps, the
-{\ct TAU\_Q} parameter can be defined as a negative value ($t$-squared growth rate) or
-a positive value ($\tanh$ growth rate), which results in a time-dependent
-heat release rate as
+At the start of any calculation, the temperature is ambient everywhere, the flow velocity is zero everywhere, nothing is burning, and the mass fractions of all species are uniform.  When the calculation starts temperatures, velocities, burning rates, etc., are ramped-up from their starting values because nothing can happen instantaneously. By default, everything is ramped-up to their prescribed values in approximately 1~s. However, you can control the rate at which things turn on, or turn off, by specifying time histories either with pre-defined functions or with user-defined functions.  The parameters {\ct TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or normal velocity ({\ct VEL}, {\ct VOLUME\_FLOW}), or {\ct MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct TAU} seconds and remain there. To prescribe different heat release rate ramps, the {\ct TAU\_Q} parameter can be defined as a negative value ($t$-squared growth rate) or a positive value ($\tanh$ growth rate), which results in a time-dependent heat release rate as
 \begin{equation}
 \dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \left( \frac{t}{\tau} \right)^2            &  \mbox{if {\ct TAU\_Q} is negative} \\[.1in]
                                       \dot Q_0 \cdot \tanh \left( \frac{t}{\tau} \right)  &  \mbox{if {\ct TAU\_Q} is positive}  \end{array} \right.
 \end{equation}
-where $\dot Q_0$ is the user-specified heat release rate. If the
-fire ramps up following a $t$-squared curve, then it remains constant after
-{\ct TAU\_Q} seconds.  These rules apply to {\ct TAU\_T} and {\ct TAU\_V} as well.
-The default value for all {\ct TAU}s is 1~s.  If something other than a tanh or
-$t$-squared ramp up is desired, then a user-defined function must be input. To
-do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
-character string designating the ramp function to use for that
-particular surface type, then somewhere in the input file generate
-lines of the form:
+where $\dot Q_0$ is the user-specified heat release rate. If the fire ramps up following a $t$-squared curve, then it remains constant after {\ct TAU\_Q} seconds.  These rules apply to {\ct TAU\_T} and {\ct TAU\_V} as well. The default value for all {\ct TAU}s is 1~s.  If something other than a tanh or $t$-squared ramp up is desired, then a user-defined function must be input. To do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a character string designating the ramp function to use for that particular surface type, then somewhere in the input file generate lines of the form:
 \begin{lstlisting}
  &RAMP ID='rampname1', T= 0.0, F=0.0 /
  &RAMP ID='rampname1', T= 5.0, F=0.5 /
  &RAMP ID='rampname1', T=10.0, F=0.7 /
 \end{lstlisting}
-Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
-release rate, wall temperature, velocity, mass fraction, etc., to apply.
-Linear interpolation\footnote{By default, FDS uses a linear interpolation routine to find time or temperature-dependent values between user-specified points.
-The default number of interpolation points is 5000, more than enough for most applications. However, you can change this value
-by specifying {\ct NUMBER\_INTERPOLATION\_POINTS} on any {\ct RAMP} line.} is used to fill in intermediate time points.
-Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the lines must
-be listed with monotonically increasing {\ct T}.
-Note also that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a given
-surface quantity, both cannot be prescribed.
-As an example, a simple blowing vent can be controlled via the lines:
+Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat release rate, wall temperature, velocity, mass fraction, etc., to apply. Linear interpolation\footnote{By default, FDS uses a linear interpolation routine to find time or temperature-dependent values between user-specified points. The default number of interpolation points is 5000, more than enough for most applications. However, you can change this value by specifying {\ct NUMBER\_INTERPOLATION\_POINTS} on any {\ct RAMP} line.} is used to fill in intermediate time points. Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the lines must be listed with monotonically increasing {\ct T}. Note also that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a given surface quantity, both cannot be prescribed. As an example, a simple blowing vent can be controlled via the lines:
 \begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
 &RAMP ID='BLOWER RAMP', T= 0.0, F=0.0 /
@@ -4504,7 +4588,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.}).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
 The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
@@ -4525,7 +4609,7 @@ Species molecular mass also affects the spectrum: a heavier species of a given m
 
 \subsubsection{Gibbs Energy}
 
-If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS can use the forward reaction kinetics along with the equilibrium values of the reaction to determine the reverse kinetics.  The equilibrium is determined by minimizing the Gibbs energy.  The temperature vs. Gibbs energy (kJ/mol) for a species can be specified with {\ct RAMP\_G\_F}.
+If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct REAC} input, FDS will use the forward reaction kinetics along with the equilibrium values of the reaction to determine the value of the rate constant for the reverse reaction.  The equilibrium constant is determined from the Gibbs free energy.  The Gibbs free energy (kJ/mol) as a function of temperature for a species can be specified with {\ct RAMP\_G\_F} on the {\ct SPEC} line.
 
 \subsubsection{Liquids}
 
@@ -4903,6 +4987,8 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 
 \label{info:Complex_Fuel}
 
+\paragraph{Simple Chemistry Compatible Fuels}
+
 For complex fuel molecules that contain only C, H, N, and O the simple chemistry reaction parameters can still be applied. Consider natural gas, which is often a mixture of several component gases. To build the fuel mixture, the primitive (component) species need be defined. Each primitive species will get a {\ct LUMPED\_COMPONENT\_ONLY} designation, which means that each of these species will not be explicitly tracked as they are components to a mixture.  Note that these lumped components can only contain C, H, N, and O atoms. The lumped fuel, {\ct 'natural gas'}, can be created using the defined primitive components and subsequently the reaction can be defined using simple chemistry (Section \ref{info:simple_chemistry}):
 \begin{lstlisting}
 &SPEC ID='METHANE',       LUMPED_COMPONENT_ONLY=.TRUE./
@@ -4919,6 +5005,9 @@ For complex fuel molecules that contain only C, H, N, and O the simple chemistry
 &REAC FUEL='natural gas'
       SOOT_YIELD=0.01 /
 \end{lstlisting}
+
+\paragraph{Non-Simple Chemistry Compatible Fuels}
+
 Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, and its molecular weight, $W_\alpha$, according to the formula:
 \begin{equation}\label{eq:stoic_yield}
@@ -4963,7 +5052,7 @@ Since this is not a simple chemistry problem, either the enthalpy of formation o
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
       NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
 \end{lstlisting}
-Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 
 \begin{figure}[ht]
@@ -7672,7 +7761,7 @@ Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very s
    \hbox{\ct 'NORMALIZED MASS'} &=& \sum_\alpha  m''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0) \quad \quad \hbox{(dimensionless)} \\
    \hbox{\ct 'NORMALIZED MASS LOSS RATE'} &=& \sum_\alpha  \dot{m}''_\alpha (t) \Big/ \sum_\alpha  m''_\alpha (0)  \quad \quad \left( \si{1/s} \right)
 \end{eqnarray*}
-For the quantity {\ct 'NORMALIZED MASS'}, you can add a {\ct MATL\_ID} to get the normalized mass of a single component of the solid material, $m''_\alpha (t) / \sum_\alpha  m''_\alpha (0)$.
+For both of these quantities, you can add a {\ct MATL\_ID} to get the normalized mass or mass loss rate of a single component of the solid material, $m''_\alpha (t) / \sum_\alpha  m''_\alpha (0)$.
 
 \subsubsection{Micro-Combustion Calorimetry (MCC) Output}
 
@@ -7957,7 +8046,7 @@ Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} g
 Here again you must add a {\ct QUANTITY2} to the device line.
 
 \subsection{Wind and the Pressure Coefficient}
-\label{info:wind}
+\label{info:pressure_coefficient}
 
 In the field of wind engineering, a commonly used quantity is known as
 the {\ct PRESSURE\_COEFFICIENT}:
@@ -8354,7 +8443,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
 {\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp-p_\infty$         & Pa             & D,I,P,S      \\ \hline
-{\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:wind}                       &                & B,D          \\ \hline
+{\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
 {\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                  & kW/m$^2$       & D            \\ \hline
@@ -8464,7 +8553,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & D            \\ \hline
 {\ct NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}            &                & D            \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^1$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}            & 1/s            & D            \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
@@ -8499,7 +8588,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 $^1$ \hspace{0.05in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
 $^2$                 \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \\
-$^4$                 \> Quantity allows for an optional {\ct MATL\_ID}. 
+$^4$                 \> Quantity allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
 \clearpage
@@ -8833,16 +8922,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &           \\ \hline
-{\ct CTRL\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct DEVC\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct EVACUATION}   & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                  &       &           \\ \hline
-{\ct ID }          & Character         & Identifier for input line                              &       &           \\ \hline
-{\ct MESH\_ID }    & Character         & Reference~\cite{FDS_Evac_Users_Guide}                  &       &           \\ \hline
-{\ct MULT\_ID }    & Character         & Section~\ref{info:MULT}                                &       &           \\ \hline
-{\ct RGB(3)   }    & Integer Triplet   & Section~\ref{info:colors}                              &       &           \\ \hline
-{\ct TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &           \\ \hline
-{\ct XB(6)    }    & Real Sextuplet    & Section~\ref{info:MULT}                                & m     &           \\ \hline
+{\ct BLOCK\_WIND}  & Logical           & Section~\ref{info:BLOCK_WIND}                          &       &  {\ct .FALSE.}  \\ \hline
+{\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &                 \\ \hline
+{\ct CTRL\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct DEVC\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct EVACUATION}   & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
+{\ct ID }          & Character         & Identifier for input line                              &       &                 \\ \hline
+{\ct MESH\_ID }    & Character         & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
+{\ct MULT\_ID }    & Character         & Section~\ref{info:MULT}                                &       &                 \\ \hline
+{\ct RGB(3)   }    & Integer Triplet   & Section~\ref{info:colors}                              &       &                 \\ \hline
+{\ct TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &                 \\ \hline
+{\ct XB(6)    }    & Real Sextuplet    & Section~\ref{info:MULT}                                & m     &                 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -8953,6 +9043,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
+{\ct VOLUME\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
 {\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
 {\ct XYZ(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
@@ -9112,23 +9203,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
-%{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                                       &               & 0.                \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
-{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:mean_forcing}                       & s             & 1.E10             \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 %{\ct EVAPORATION}                               & Logical       & Allow evaporation                                     &               & {\ct .TRUE.}      \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Section~\ref{info:flux_limiters}                      &               & 2                 \\ \hline
-{\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Section~\ref{info:freeze_velocity}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9136,14 +9223,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
-{\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:chem_integration}                   &               &  1000             \\ \hline
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                              &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
-{\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 %{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
-%{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                              &               & {\ct .FALSE.}     \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
@@ -9158,19 +9242,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PROCESS\_ALL\_MESHES}                      & Logical       & Section~\ref{sec:periodic}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct PROJECTION}                                & Logical       & Formal projection                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
-{\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
-{\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
-{\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}                       &               &                   \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
-{\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}                     &               &                   \\ \hline
-{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
-{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
-{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
-{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
-{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
-{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:mean_forcing}                       &               &                   \\ \hline
 %{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
@@ -9179,8 +9253,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
-%{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Distance for linear damping of DT_MEAN_FORCING at bc  &               & 0.                \\ \hline
-{\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline
 %{\ct TENSOR\_DIFFUSIVITY}                       & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
@@ -9192,7 +9264,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:mean_forcing}                        & m/s           & 0.                \\ \hline
 %{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
@@ -9202,7 +9273,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
-%{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
@@ -9384,6 +9454,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
 {\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
+{\ct GLMAT\_SOLVER}                 & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
+{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
@@ -9444,7 +9516,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.       \\ \hline
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
-{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
+{\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.       \\ \hline
 {\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.        \\ \hline
 {\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
 {\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
@@ -9948,6 +10020,59 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6) }                & Real Sextuplet    & Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
+
+
+\vspace{\baselineskip}
+
+
+
+\section{\texorpdfstring{{\tt WIND}}{WIND} (Wind and Atmospheric Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Wind and atmospheric parameters ({\ct WIND} namelist group)]{For more information see Section~\ref{info:WIND}.}
+\label{tbl:WIND} \\
+\hline
+\multicolumn{5}{|c|}{{\ct WIND} (Wind and atmospheric parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct WIND} (Wind and atmospheric parameters)} \\
+\hline \hline
+\endhead
+%{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                               &               & 0.                \\ \hline
+{\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
+{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.                \\ \hline
+{\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
+{\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
+{\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
+{\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
+{\ct INITIALIZATION\_ONLY}                      & Logical       & Section~\ref{info:INITIALIZATION_ONLY}        &               & {\ct .FALSE.}     \\ \hline
+%{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                      &               & {\ct .FALSE.}     \\ \hline
+{\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
+{\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
+{\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
+{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
+{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+%{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Section~\ref{info:WIND}                       &               & 0.                \\ \hline
+{\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
+{\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
+{\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
+{\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
+{\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
+%{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition               &               & {\ct .FALSE.}     \\ \hline
+{\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
+{\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
 
 
 \section{\texorpdfstring{{\tt ZONE}}{ZONE} (Pressure Zone Parameters)}

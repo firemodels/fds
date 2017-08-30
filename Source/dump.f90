@@ -2486,17 +2486,22 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY)    ',C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY)                         ',&
+            C_SMAGORINSKY
       CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity: Dynamic Smagorinsky Model'
+         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity:           Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Deardorff Model (C_DEARDORFF)  ',C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF)                       ',&
+            C_DEARDORFF
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: Vreman Model (C_VREMAN)        ',C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Vreman Model (C_VREMAN)                             ',&
+            C_VREMAN
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity: RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
+         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF)                      ',&
+            C_RNG,C_RNG_CUTOFF
       CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity: WALE Model (C_WALE)            ',C_WALE
+         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           WALE Model (C_WALE)                                 ',&
+            C_WALE
    END SELECT TURB_MODEL_SELECT
    NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
       CASE DEFAULT
@@ -2579,6 +2584,12 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
+   IF (ABS(G_F_Z(ITMP,N))>TWO_EPSILON_EB) THEN
+      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '  Gibbs Energy (J/kmol) Ambient, ',ITMP,' K: ', 1.E6_EB*G_F_Z(ITMP,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', 1.E6_EB*G_F_Z( 500,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', 1.E6_EB*G_F_Z(1000,N)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', 1.E6_EB*G_F_Z(1500,N)
+   ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
@@ -6866,7 +6877,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
 
    CASE( 7) ! BURNING RATE
       IF (N_REACTIONS>0) THEN
-         SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX_ACTUAL(REACTION(1)%FUEL_SMIX_INDEX)
+         SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX_SPEC(REACTION(1)%FUEL_SMIX_INDEX)
       ELSE
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
@@ -6892,17 +6903,26 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = ONE_D%QCONF*0.001_EB/SURFACE(SURF_INDEX)%SURFACE_DENSITY
    CASE(15,16) ! MASS FLUX, NORMALIZED MASS LOSS RATE
       IF (Z_INDEX >=0) THEN
-         SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX_ACTUAL(Z_INDEX)
+         SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX_SPEC(Z_INDEX)
       ELSEIF (Y_INDEX > 0) THEN
          SOLID_PHASE_OUTPUT = 0._EB
-         MFT = SUM(ONE_D%MASSFLUX_ACTUAL)
+         MFT = SUM(ONE_D%MASSFLUX_SPEC)
          IF (MFT>TWO_EPSILON_EB) THEN
-            ZZ_GET = ONE_D%MASSFLUX_ACTUAL/MFT
+            ZZ_GET = ONE_D%MASSFLUX_SPEC/MFT
             CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES)
             SOLID_PHASE_OUTPUT = Y_SPECIES*MFT
          ENDIF
+      ELSEIF (DV%MATL_ID/='null') THEN
+         SF => SURFACE(SURF_INDEX)
+         DO NN=1,SF%N_MATL
+            IF (DV%MATL_ID==SF%MATL_NAME(NN)) THEN
+               M_INDEX = NN
+               EXIT
+            ENDIF
+         ENDDO
+         SOLID_PHASE_OUTPUT = ONE_D%MASSFLUX_MATL(M_INDEX)
       ELSE
-         SOLID_PHASE_OUTPUT = 0._EB
+         SOLID_PHASE_OUTPUT = SUM(ONE_D%MASSFLUX_SPEC(:))
       ENDIF
       IF (INDX==16) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SURFACE(SURF_INDEX)%SURFACE_DENSITY
    CASE(17) ! RADIANCE
@@ -7949,8 +7969,8 @@ WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP2
    IF (I_FUEL>0) &
-   M_DOT(1,NM) = M_DOT(1,NM) +     WC%ONE_D%MASSFLUX_ACTUAL(I_FUEL)*WC%AW*WC%ONE_D%AREA_ADJUST
-   M_DOT(3,NM) = M_DOT(3,NM) + SUM(WC%ONE_D%MASSFLUX_ACTUAL)       *WC%AW*WC%ONE_D%AREA_ADJUST
+   M_DOT(1,NM) = M_DOT(1,NM) +     WC%ONE_D%MASSFLUX_SPEC(I_FUEL)*WC%AW*WC%ONE_D%AREA_ADJUST
+   M_DOT(3,NM) = M_DOT(3,NM) + SUM(WC%ONE_D%MASSFLUX_SPEC)       *WC%AW*WC%ONE_D%AREA_ADJUST
 ENDDO WALL_LOOP2
 
 Q_DOT_SUM(:,NM) = Q_DOT_SUM(:,NM) + DT*Q_DOT(:,NM)

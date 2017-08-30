@@ -506,6 +506,15 @@ export FDSBINDIR=\$FDS_root/bin
 export MPIDIST=\\\$ARG1
 BASH
 
+if [ "$ostype" == "OSX" ]; then
+cat << BASH >> \$BASHFDS
+
+# set stack size to 2^16 - 4
+
+ulimit -s 65532
+BASH
+fi
+
 if [ "$ostype" != "OSX" ]; then
 cat << BASH >> \$BASHFDS
 
@@ -516,7 +525,7 @@ if [ "\\\$ARG2" != "" ]; then
   INTEL_SHARELIB=\\\$ARG2
 fi
 
-# set stack size to unlimted
+# set stack size to unlimited
 
 ulimit -s unlimited
 BASH
