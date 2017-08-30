@@ -1717,32 +1717,32 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    WS = W
 ELSE FREEZE_VELOCITY_IF
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
-IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
+   IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+   IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
 
 ENDIF FREEZE_VELOCITY_IF
 
@@ -1811,34 +1811,40 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    W = WS
 ELSE FREEZE_VELOCITY_IF
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.) ! Store U velocities on OBST surfaces.
+   IF (STORE_OLD_VELOCITY) THEN
+      U_OLD = U
+      V_OLD = V
+      W_OLD = W
+   ENDIF
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
+   IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.) ! Store U velocities on OBST surfaces.
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
-IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
+   IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+   IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
 
 ENDIF FREEZE_VELOCITY_IF
 
