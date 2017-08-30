@@ -13,6 +13,7 @@ cd FAA_Cargo_Compartments;  ./Run_All.sh -y; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh -y; cd ..
 cd FM_SNL;  ./Run_All.sh -y; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh -y; cd ..
+cd Heated_Channel_Flow; ./Run_All.sh -y; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh -y; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh -y; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh -y; cd ..
