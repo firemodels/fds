@@ -52,6 +52,10 @@ export FDSBINDIR=$HOME/FDS/FDS6/bin
 # (comment if using repo fds)
 #INTEL_SHARED_LIB=$FDSBINDIR/INTELLIBS16
 
+# Set number of OMP threads
+#
+export OMP_NUM_THREADS=4
+
 export LD_LIBRARY_PATH=$INTEL_SHARED_LIB:$LD_LIBRARY_PATH
 export PATH=$PATH:$FDSBINDIR
 #-----------------------------------------------------
