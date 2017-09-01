@@ -872,8 +872,7 @@ END IF
 
 ! Additional force terms
 
-IF (ANY(MEAN_FORCING) .AND. .NOT.NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING           ! Mean forcing
-IF (ANY(MEAN_FORCING) .AND.      NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING_2         ! Test new mean forcing
+IF (ANY(MEAN_FORCING))             CALL MOMENTUM_NUDGING           ! Mean forcing
 IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
 IF (WFDS_BNDRYFUEL)                CALL VEGETATION_DRAG            ! Surface vegetation drag
@@ -888,8 +887,10 @@ SUBROUTINE MOMENTUM_NUDGING
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
 REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
+INTEGER  :: NSC,I_LO,J_LO,I_HI,J_HI
 
 DT_LOC = MAX(DT,DT_MEAN_FORCING)
+NSC    = SPONGE_CELLS
 
 MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
    SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
@@ -950,7 +951,18 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
             ENDIF
             UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             DU_FORCING = (UBAR-UMEAN)/DT_LOC
-            FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
+            ! Apply the average force term to bulk of domain, and apply more aggressive forcing at boundary
+            I_LO = 0
+            I_HI = IBAR
+            IF (APPLY_SPONGE_LAYER(1)) THEN
+               FVX(0:NSC-1,:,K)         = FVX(0:NSC-1,:,K)         - (UBAR-UU(0:NSC-1,:,K))/DT_LOC
+               I_LO = NSC
+            ENDIF
+            IF (APPLY_SPONGE_LAYER(-1)) THEN
+               FVX(IBAR-NSC+1:IBAR,:,K) = FVX(IBAR-NSC+1:IBAR,:,K) - (UBAR-UU(IBAR-NSC+1:IBAR,:,K))/DT_LOC
+               I_HI = IBAR-NSC
+            ENDIF
+            FVX(I_LO:I_HI,:,K) = FVX(I_LO:I_HI,:,K) - DU_FORCING
          ENDDO K_LOOP_U
    END SELECT SELECT_RAMP_U
 ENDIF MEAN_FORCING_X
@@ -1013,7 +1025,18 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
             ENDIF
             VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             DV_FORCING = (VBAR-VMEAN)/DT_LOC
-            FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
+            ! Apply the average force term to bulk of domain, and apply more aggressive forcing at boundary
+            J_LO = 0
+            J_HI = JBAR
+            IF (APPLY_SPONGE_LAYER(2)) THEN
+               FVY(:,0:NSC-1,K)         = FVY(:,0:NSC-1,K)         - (VBAR-VV(:,0:NSC-1,K))/DT_LOC
+               J_LO = NSC
+            ENDIF
+            IF (APPLY_SPONGE_LAYER(-2)) THEN
+               FVY(:,JBAR-NSC+1:JBAR,K) = FVY(:,JBAR-NSC+1:JBAR,K) - (VBAR-VV(:,JBAR-NSC+1:JBAR,K))/DT_LOC
+               J_HI = JBAR-NSC
+            ENDIF
+            FVY(:,J_LO:J_HI,K) = FVY(:,J_LO:J_HI,K) - DV_FORCING
          ENDDO K_LOOP_V
    END SELECT SELECT_RAMP_V
 ENDIF MEAN_FORCING_Y
@@ -1076,76 +1099,21 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ENDIF
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
             DW_FORCING = (WBAR-WMEAN)/DT_LOC
-            FVZ(:,:,K) = FVZ(:,:,K) - DW_FORCING
+            ! Apply the average force term to bulk of domain, and apply more aggressive forcing at boundary
+            IF (APPLY_SPONGE_LAYER(-3) .AND. K==KBAR) THEN
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+                  ENDDO
+               ENDDO
+            ELSE
+               FVZ(:,:,K) = FVZ(:,:,K) - DW_FORCING
+            ENDIF
          ENDDO K_LOOP_W
    END SELECT SELECT_RAMP_W
 ENDIF MEAN_FORCING_Z
 
 END SUBROUTINE MOMENTUM_NUDGING
-
-
-SUBROUTINE MOMENTUM_NUDGING_2
-
-! Same as MOMENTUM_NUDGING, but force term uses local velocity component.
-! Based on Yamada, T. Downscaling Mesoscale Meteorological Models for Computational Wind Engineering Applications,
-! Journal of Wind Engineering and Industrial Aerodynamics, Vol. 99, Issue 4, April 2011, pages 199-219.
-
-! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
-
-REAL(EB) :: UBAR,VBAR,WBAR,DT_LOC,DIST
-
-MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
-   DO K=1,KBAR
-      UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-      DO J=1,JBAR
-         DO I=0,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-
-            DIST = MIN( ABS(X(I)-XS_MIN), ABS(XF_MAX-X(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_X
-
-MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
-   DO K=1,KBAR
-      VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-      DO J=0,JBAR
-         DO I=1,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-
-            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(Y(J)-YS_MIN), ABS(YF_MAX-Y(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_Y
-
-MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   DO K=0,KBAR
-      WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-
-            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_Z
-
-END SUBROUTINE MOMENTUM_NUDGING_2
 
 
 SUBROUTINE DIRECT_FORCE()
@@ -1888,7 +1856,7 @@ USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN,DUMMY
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
@@ -2117,37 +2085,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
-            IF (VT%IS_WIND_BOUNDARY .OR. ANY(MEAN_FORCING)) THEN
 
-               ! For a wind open boundary, determine the direction of the normal component of velocity
-
-               SELECT CASE(IEC)
-                  CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
-                  CASE(2)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
-                  CASE(3)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
-               END SELECT
-
-            ELSE
-
-               ! For non-wind case, always use free-slip tangential BCs
-
-               TWOUN = -REAL(IOR,EB)
-
-            ENDIF
-
-            FLOW_DIRECTION_IF: IF ( REAL(IOR,EB)*TWOUN < 0._EB ) THEN  ! For outflow, use zero gradient (free-slip) BCs
+            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
 
                SELECT CASE(IEC)
                   CASE(1)
@@ -2167,7 +2106,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
                END SELECT
 
-            ELSE FLOW_DIRECTION_IF  ! For inflow, use prescribed far-field velocity
+            ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
 
                UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
                VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
@@ -2191,7 +2130,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
                END SELECT
 
-            ENDIF FLOW_DIRECTION_IF
+            ENDIF WIND_NO_WIND_IF
 
             IF (IWM/=0 .AND. IWP/=0) THEN
                CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN
