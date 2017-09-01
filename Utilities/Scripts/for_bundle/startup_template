@@ -1,0 +1,70 @@
+# notes:
+# 1.  should only need "part 0" and "part 1" if a user is using the repo 
+#     and does not have fds installed
+# 2.  should only need "part 0" and "part 2" if a user is using the installed
+#     fds and is not using the repo
+# 3.  except that INTEL_SHARED_LIB for installed fds may not be compatible 
+#     with INTEL_SHARED_LIB needed for installed bundle fds.  The solution is
+#     to set this variable when running qfds.sh . The parameter #PBS -v seems
+#     to be the way to do this but I have not been able to get this to work.
+# 4.  The variables MPIDIST_ETH, MPIDST_IB and MPIDIST are necessary until 
+#     I figure out how to run fds on ethernet hardware using an infiniband
+#     openmpi
+#
+
+# to do:
+# add the following commands to your startup file and customize for your 
+# environment try using just part 0 and part 1 to build and run repo fds 
+# then repeat using just part 0 and part 1 to build and run repo fds then 
+# repeat using just part 0
+#
+# Let me know if you see any problems.  I've edited this file since I've 
+# tested it so there errors may have crept in
+
+#-------- part 0--------------------------------------
+# variable needed for both installed fds and repo fds
+
+# mpi library locations
+export MPIDIST_ETH=/shared/openmpi_64
+export MPIDIST_IB=/shared/openmpi_64ib
+
+export MPIDIST=$MPIDIST_IB
+
+# variables needed by qfds.sh when running fds
+export FDSNETWORK=infiniband
+export PATH=$PATH:$MPIDIST/bin
+
+# set stack size
+
+ulimit -s ulimited
+
+#-------- part 1--------------------------------------
+# variable needed when building or running a repo fds
+
+# compiler location
+export IFORT_COMPILER=/opt/intel17
+export IFORT_COMPILER_LIB=$IFORT_COMPILER/lib
+
+# Intel shared compiler libraries needed when running repo built fds
+# (comment if using intalled FDS)
+INTEL_SHARED_LIB=$IFORT_COMPILER_LIB/intel64
+
+export LD_LIBRARY_PATH=/usr/lib64:$INTEL_SHARED_LIB:$LD_LIBRARY_PATH
+
+#-------- part 2--------------------------------------
+# variables needed when running an installed fds
+
+# fds location
+export FDSBINDIR=$HOME/FDS/FDS6/bin
+
+# Intel shared compiler libraries needed when installed fds
+# (comment if using repo fds)
+#INTEL_SHARED_LIB=$FDSBINDIR/INTELLIBS16
+
+# Set number of OMP threads
+#
+export OMP_NUM_THREADS=4
+
+export LD_LIBRARY_PATH=$INTEL_SHARED_LIB:$LD_LIBRARY_PATH
+export PATH=$PATH:$FDSBINDIR
+#-----------------------------------------------------

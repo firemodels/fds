@@ -9,7 +9,7 @@ fi
 VERSION=`ifort -v 2>&1 | awk '{print $3}' | awk -F'.' '{print $1}'`
 source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
 
-echo Building $target
+echo Building $target with $MPIDIST
 if [ "$VERSION" == "16" ]; then
   make -j4 FOPENMPFLAGS="-openmp -openmp-link static" VPATH="../../Source" -f ../makefile $target
 else

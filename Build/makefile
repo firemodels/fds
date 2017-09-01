@@ -261,7 +261,14 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-
+mpi_intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin -assume realloc_lhs $(GITINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
+mpi_intel_osx_64_dv : LFLAGS = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static
+mpi_intel_osx_64_dv : FCOMPL = mpifort
+mpi_intel_osx_64_dv : obj = fds_mpi_intel_osx_64_dv
+mpi_intel_osx_64_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 lahey_linux_mpi : FFLAGS = -O --tpp --staticlink --nap --nchk --npca --nsav --ntrace
 lahey_linux_mpi : FCOMPL = hf77
