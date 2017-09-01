@@ -4145,6 +4145,8 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
+If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$. 
+
 You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
 
 The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
@@ -4188,6 +4190,11 @@ There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are o
 \begin{lstlisting}
 &HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
 \end{lstlisting}
+
+\subsection{Issues Related to Mean Forcing}
+\label{info:SPONGE_CELLS}
+
+When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
 
 
 
@@ -10048,7 +10055,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct INITIALIZATION\_ONLY}                      & Logical       & Section~\ref{info:INITIALIZATION_ONLY}        &               & {\ct .FALSE.}     \\ \hline
-%{\ct NEW\_MOMENTUM\_NUDGING}                    & Logical       & Use MOMENTUM\_NUDGING\_2                      &               & {\ct .FALSE.}     \\ \hline
 {\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
@@ -10061,13 +10067,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-%{\ct SPONGE\_LAYER\_DISTANCE}                   & Real          & Section~\ref{info:WIND}                       &               & 0.                \\ \hline
+{\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
-%{\ct WIND\_BOUNDARY}                            & Logical       & Use new open boundary condition               &               & {\ct .FALSE.}     \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
 {\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
 \end{longtable}
