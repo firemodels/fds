@@ -13,7 +13,6 @@ VPATH = ../Source
 MPIFORT=mpifort
 
 
-
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   BUILD_DATE := $(shell date /t) $(shell time /t)
@@ -71,7 +70,6 @@ obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o 
           read.o wall.o fire.o divg.o velo.o pres.o init.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
-
 
 # General Purpose Rules
 
