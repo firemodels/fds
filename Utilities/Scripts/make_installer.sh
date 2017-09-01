@@ -481,17 +481,8 @@ export PATH=\\\$FDSBINDIR:\\\$PATH
 
 export OMP_NUM_THREADS=4
 BASH
-if [ "$ostype" == "OSX" ]; then
-cat << BASH >> \$BASHRCFDS
-ulimit -s 65532
-BASH
-else
-cat << BASH >> \$BASHRCFDS
-ulimit -s unlimited
-BASH
-fi
 
-#--- creat
+#--- create startup file for FDS
 
 cp \$BASHRCFDS \$FDS_root/bin/FDSVARS.sh
 chmod +x \$FDS_root/bin/FDSVARS.sh
