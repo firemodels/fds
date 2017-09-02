@@ -3,7 +3,7 @@
 # this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
 
 errlog=/tmp/errlog.$$
-OPENMPI_VERSION=2.0.2
+OPENMPI_VERSION=2.1.1
 
 # -------------------- SCP -------------------
 
