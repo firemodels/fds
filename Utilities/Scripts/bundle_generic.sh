@@ -3,7 +3,7 @@
 # this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
 
 errlog=/tmp/errlog.$$
-OPENMPI_VERSION=2.1.0
+OPENMPI_VERSION=2.0.2
 
 # -------------------- SCP -------------------
 
@@ -222,13 +222,9 @@ hashfile fds2ascii > hash/fds2ascii.sha1
 cd $CURDIR
 
 if [ "$PLATFORM" == "LINUX64" ]; then
-   ostype=LINUX
-   ossize=intel64
    openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
-   ostype=OSX
-   ossize=intel64
    openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
 fi
 
@@ -322,7 +318,7 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
+$makeinstaller -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
 
 cat $bundledir/bin/hash/*.sha1 >  $bundlebase.sha1
 hashfile $bundlebase.sh        >> $bundlebase.sha1

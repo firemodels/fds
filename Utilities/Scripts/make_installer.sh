@@ -2,11 +2,10 @@
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: make_installer.sh -o ostype -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
+  echo "Usage: make_installer.sh -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  -o ostype - OSX or LINUX"
   echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  -d installdir - default install directory"
   echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
@@ -14,14 +13,19 @@ then
   exit
 fi
 
-OPENMPI_VERSION=2.1.0
+OPENMPI_VERSION=2.0.2
 
 INSTALLDIR=
 FDS_TAR=
-ostype=
 INSTALLER=
+ostype="LINUX"
+ostype2="Linux"
+if [ "`uname`" == "Darwin" ] ; then
+  ostype="OSX"
+  ostype2="OSX"
+fi
 
-while getopts 'd:i:o:' OPTION
+while getopts 'd:i:' OPTION
 do
 case $OPTION in
   d)
@@ -30,20 +34,11 @@ case $OPTION in
   i)
   FDS_TAR="$OPTARG"
   ;;
-  o)
-  ostype="$OPTARG"
-  ;;
 esac
 done 
 shift $(($OPTIND-1))
 
 INSTALLER=$1
-
-if [ "$ostype" == "" ]
-then
-echo "*** fatal error: OS type (OSX or LINUX) not specified"
-exit 0
-fi
 
 if [ "$FDS_TAR" == "" ]
 then
@@ -73,20 +68,12 @@ if [ "$ostype" == "OSX" ]; then
 fi
 OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
 
-size2=64
-
-ostype2=$ostype
-if [ "$ostype" == "LINUX" ]
-then
-ostype2=Linux
-fi
-
 cat << EOF > $INSTALLER
 #!/bin/bash
 
 OVERRIDE=\$1
 echo ""
-echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
+echo "Installing 64 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation [default]"
