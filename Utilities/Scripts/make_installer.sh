@@ -13,8 +13,6 @@ then
   exit
 fi
 
-OPENMPI_VERSION=2.1.1
-
 INSTALLDIR=
 FDS_TAR=
 INSTALLER=
