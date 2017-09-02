@@ -13,9 +13,10 @@ export PLATFORM=LINUX64
 export FDSEDITION=$4
 export FDSVERSION=$5
 export SMVVERSION=$6
-export MAJOR=$7
-export COMPFROM=$8
-export MISCFROM=$9
+export OPENMPI_VERSION=$7
+export MAJOR=$8
+export COMPFROM=$9
+export MISCFROM=$10
 
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION

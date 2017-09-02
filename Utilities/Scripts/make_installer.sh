@@ -2,11 +2,10 @@
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: make_installer.sh -o ostype -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
+  echo "Usage: make_installer.sh -i FDS_TAR.tar.gz -d installdir INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  -o ostype - OSX or LINUX"
   echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  -d installdir - default install directory"
   echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
@@ -14,14 +13,17 @@ then
   exit
 fi
 
-OPENMPI_VERSION=2.1.0
-
 INSTALLDIR=
 FDS_TAR=
-ostype=
 INSTALLER=
+ostype="LINUX"
+ostype2="Linux"
+if [ "`uname`" == "Darwin" ] ; then
+  ostype="OSX"
+  ostype2="OSX"
+fi
 
-while getopts 'd:i:o:' OPTION
+while getopts 'd:i:' OPTION
 do
 case $OPTION in
   d)
@@ -30,20 +32,11 @@ case $OPTION in
   i)
   FDS_TAR="$OPTARG"
   ;;
-  o)
-  ostype="$OPTARG"
-  ;;
 esac
 done 
 shift $(($OPTIND-1))
 
 INSTALLER=$1
-
-if [ "$ostype" == "" ]
-then
-echo "*** fatal error: OS type (OSX or LINUX) not specified"
-exit 0
-fi
 
 if [ "$FDS_TAR" == "" ]
 then
@@ -73,20 +66,12 @@ if [ "$ostype" == "OSX" ]; then
 fi
 OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
 
-size2=64
-
-ostype2=$ostype
-if [ "$ostype" == "LINUX" ]
-then
-ostype2=Linux
-fi
-
 cat << EOF > $INSTALLER
 #!/bin/bash
 
 OVERRIDE=\$1
 echo ""
-echo "Installing $size2 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
+echo "Installing 64 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation [default]"
@@ -186,7 +171,6 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
-BASHUNINSTALL=/tmp/uninstall_fds.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -293,97 +277,17 @@ fi
 #--- specify MPI location
 
 cat << EOF >> $INSTALLER
-valid_answer=
-while true; do
-  OPTION=0
-  OPTION1=
-  OPTION2=
-  OPTION3=
-  OPTION4=
-  echo ""
-  echo "OpenMPI install options"
-
-  OPTION=\$(echo \$OPTION + 1 | bc)
-  OPTION2=\$OPTION
-  echo "  Press \$OPTION2 to install in \$FDS_root/bin/openmpi_64 [default]"
-
-  OPTION=\$(echo \$OPTION + 1 | bc)
-  OPTION1=\$OPTION
-  echo "  Press \$OPTION1 to install later"
-  echo "     See \$FDS_root/bin/README.html for details"
-
-  mpipath=
-  mpipatheth=
-  mpiused=
-  if [ -d /shared/openmpi_64 ] ; then
-     mpipath=\$MPIDIST_ETH
-     mpipatheth=/shared/openmpi_64
-     OPTION=\$(echo \$OPTION + 1 | bc)
-     OPTION3=\$OPTION
-     echo "  Press \$OPTION3 to use /shared/openmpi_64"
-  fi
-  mpipathib=
-  if [ -d /shared/openmpi_64ib ] ; then
-     mpipathib=/shared/openmpi_64ib
-     mpipath=\$MPIDIST_IB
-     OPTION=\$(echo \$OPTION + 1 | bc)
-     OPTION4=\$OPTION
-     echo "  Press \$OPTION4 to use /shared/openmpi_64ib"
-  fi
-
-  if [ "\$OVERRIDE" == "y" ]
-  then
-    answer="1"
-  else
-    read answer
-  fi
-  if [[ "\$answer" == "\$OPTION2" || "\$answer" == "" ]]; then
-     answer=\$OPTION2
-     eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
-     mpiused=\$FDS_root/bin/openmpi_64
-     valid_answer=1
-  else
-    eval MPIDIST_FDS=
-  fi
-  eval MPIDIST_FDSROOT=\$FDS_root/bin
-  eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
-  if [[ "\$answer" == "\$OPTION3" ]]; then
-     mpipath2=\\\$MPIDIST_ETH
-     mpiused=\$mpipatheth
-     valid_answer=1
-  fi
-  if [[ "\$answer" == "\$OPTION4" ]]; then
-     mpipath2=\\\$MPIDIST_IB
-     mpiused=\$mpipathib
-     valid_answer=1
-  fi
-  if [[ "\$valid_answer" == "" ]]; then
-    echo ""
-    echo "An invalid option was selected"
-  else
-    break;
-  fi
-done
-
-mpipathfds=
-if [ "\$MPIDIST_FDS" != "" ]; then
-   mpipathfds=\$MPIDIST_FDS
-   mpipath=\$MPIDIST_FDS
-   if [[ "\$answer" == "\$OPTION2" ]]; then
-     mpipath2=\\\$MPIDIST_FDS
-   fi
-fi
+eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
+mpiused=\$FDS_root/bin/openmpi_64
+eval MPIDIST_FDSROOT=\$FDS_root/bin
+eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
 
 #--- do we want to proceed
 
 while true; do
    echo ""
    echo "Installation directory: \$FDS_root"
-   if [ "\$mpiused" == "" ] ; then
-     echo "     OpenMPI directory: to be specified later" 
-   else
-     echo "     OpenMPI directory: \$mpiused"
-   fi
+   echo "     OpenMPI directory: \$mpiused"
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
@@ -402,7 +306,6 @@ echo ""
 echo "Installation beginning"
  
 MKDIR \$FDS_root 1
-MKDIR \$FDS_root/Uninstall 1
 
 #--- copy installation files into the FDS_root directory
 
@@ -416,51 +319,6 @@ if [ "\$MPIDIST_FDSROOT" != "" ]; then
   tar xvf $OPENMPIFILE >& /dev/null
 fi
 echo "Copy complete."
-
-#--- create uninstall file
-
-cat << BASH > \$BASHUNINSTALL
-#/bin/bash
-FDSDIR=\$FDS_root
-UNINSTALL=
-BASH
-if [ "$ostype" == "OSX" ] ; then
-cat << BASH >> \$BASHUNINSTALL
-BASHRC=~/.bash_profile
-BASH
-else
-cat << BASH >> \$BASHUNINSTALL
-BASHRC=~/.bashrc
-BASH
-fi
-cat << BASH >> \$BASHUNINSTALL
-while true; do
-  read -p "Do you wish to remove \\\$FDSDIR ? (yes/no) " yn
-  case \\\$yn in
-      [Yy]* ) 
-        UNINSTALL=1
-        break;;
-      [Nn]* ) 
-        break;;
-      * ) 
-        echo "Please answer yes or no.";;
-  esac
-done
-if [[ "\\\$UNINSTALL" == "1" ]]; then
-  if [[ -d \\\$FDSDIR ]]; then
-    echo removing \\\$FDSDIR
-    rm -r \\\$FDSDIR
-  else
-    echo "***warning: The directory \\\$FDSDIR does not exist."
-  fi
-  echo "Uninstall of FDS and Smokeview complete."
-else
-  echo "Uninstall of FDS and Smokeview cancelled."
-fi
-BASH
-
-chmod +x \$BASHUNINSTALL
-mv \$BASHUNINSTALL \$FDS_root/Uninstall/uninstall_fds.sh
 
 #--- create BASH startup file
 
@@ -477,7 +335,7 @@ export $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$PATH
+export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
 
 export OMP_NUM_THREADS=4
 BASH
@@ -492,7 +350,19 @@ EOF
 
 cat << EOF >> $INSTALLER
 echo ""
-echo "*** Log out and log back in so changes will take effect."
+echo "-----------------------------------------------"
+echo "Wrap up"
+echo ""
+echo "1. Add the following line to one of your startup files"
+echo "   to complete the installation:"
+echo ""
+echo "source \$FDS_root/bin/FDSVARS.sh"
+echo ""
+echo "2. See the readme file at \$FDS_root/bin/README.html for"
+echo "   notes on setting up your environment if you plan to use"
+echo "   a fds git repo."
+echo ""
+echo "3. Log out and log back in so changes will take effect."
 echo ""
 echo "Installation complete."
 exit 0
