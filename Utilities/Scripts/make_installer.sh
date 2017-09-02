@@ -171,6 +171,7 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
+FDSMODULE=/tmp/fds_module.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -318,7 +319,45 @@ if [ "\$MPIDIST_FDSROOT" != "" ]; then
   cd \$MPIDIST_FDSROOT
   tar xvf $OPENMPIFILE >& /dev/null
 fi
+
+
 echo "Copy complete."
+
+#--- create fds module
+
+MKDIR \$FDS_root/bin/modules
+
+cat << MODULE > \$FDSMODULE
+#%Module1.0#####################################################################
+###
+### fds modulefile
+###
+### modulefiles/fds
+###
+
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tAdds FDS bin location to your PATH environment variable"
+}
+
+module-whatis   "Loads fds paths and librarys."
+
+set     version      "1.0"
+
+prepend-path    PATH    \$FDS_root/bin
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/openmpi_64
+
+setenv  MPIDIST \$FDS_root/bin/openmpi_64
+setenv  OMP_NUM_THREAD 4
+
+conflict fds
+
+MODULE
+
+cp \$FDSMODULE \$FDS_root/bin/modules/fds
+rm \$FDSMODULE
 
 #--- create BASH startup file
 
@@ -326,6 +365,7 @@ cat << BASH > \$BASHRCFDS
 #/bin/bash
 
 export FDSBINDIR=\$FDS_root/bin
+export MPIDIST=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
@@ -335,7 +375,7 @@ export $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
+export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
 
 export OMP_NUM_THREADS=4
 BASH
