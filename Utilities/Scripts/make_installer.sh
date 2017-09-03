@@ -341,7 +341,7 @@ proc ModulesHelp { } {
         puts stderr "\tAdds FDS bin location to your PATH environment variable"
 }
 
-module-whatis   "Loads fds paths and librarys."
+module-whatis   "Loads fds paths and libraries."
 
 set     version      "1.0"
 
@@ -353,7 +353,6 @@ setenv  MPIDIST \$FDS_root/bin/openmpi_64
 setenv  OMP_NUM_THREAD 4
 
 conflict fds
-
 MODULE
 
 cp \$FDSMODULE \$FDS_root/bin/modules/fds
