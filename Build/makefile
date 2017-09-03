@@ -117,22 +117,31 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-mpi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
-mpi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO)
-mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-mpi_intel_win_64 : FCOMPL = ifort
-mpi_intel_win_64 : obj = fds_mpi_win_64
-mpi_intel_win_64 : setup_win $(objwin_mpi)
+impi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+impi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO)
+impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
+impi_intel_win_64 : FCOMPL = ifort
+impi_intel_win_64 : obj = fds_mpi_win_64
+impi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
-mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
-mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
-mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-mpi_intel_win_64_db : FCOMPL = ifort
-mpi_intel_win_64_db : obj = fds_mpi_win_64_db
-mpi_intel_win_64_db : setup_win $(objwin_mpi)
+impi_intel_win_64_dv : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+impi_intel_win_64_dv : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback $(GITINFO)
+impi_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
+impi_intel_win_64_dv : FCOMPL = ifort
+impi_intel_win_64_dv : obj = fds_mpi_win_64_dv
+impi_intel_win_64_dv : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+
+impi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+impi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO)
+impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
+impi_intel_win_64_db : FCOMPL = ifort
+impi_intel_win_64_db : obj = fds_mpi_win_64_db
+impi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
 # Intel Compiler for Linux
@@ -302,10 +311,10 @@ mpi_pgi_linux_64 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 #AIX, JUMP, MPI-Version
-aix_mpi : FFLAGS  = -O2 -q64 -qtune=auto -qarch=auto $(GITINFOXLF)
-aix_mpi : FCOMPL  = mpxlf90
-aix_mpi : obj     = fds_jump_mpi_64
-aix_mpi : $(obj_mpi)
+mpi_xlf_aix : FFLAGS  = -O2 -q64 -qtune=auto -qarch=auto $(GITINFOXLF)
+mpi_xlf_aix : FCOMPL  = mpxlf90
+mpi_xlf_aix : obj     = fds_jump_mpi_64
+mpi_xlf_aix : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 
