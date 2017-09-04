@@ -58,13 +58,6 @@ ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 endif
 endif
 
-undersc:=_
-empty:=
-space:=$(empty) $(empty)
-GIT_DATE_TAU := $(subst $(space),$(undersc),$(GIT_DATE))
-BUILD_DATE_TAU := $(shell date "+%b_%d_%Y_%T")
-GITINFO_TAU=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\"$(GIT_DATE_TAU)\" -DBUILDDATE_PP=\"$(BUILD_DATE_TAU)\"
-
 obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
           ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o velo.o pres.o init.o main.o
@@ -188,15 +181,6 @@ mpi_intel_linux_64ib : FCOMPL = $(MPIFORT)
 mpi_intel_linux_64ib : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
 mpi_intel_linux_64ib : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
-
-mpi_intel_linux_64ib_tau : FFLAGS = -m64 -O2 -ipo -g -traceback -no-wrap-margin -assume realloc_lhs -fpp -DGITHASH_PP=\"$(GIT_HASH)\"
-mpi_intel_linux_64ib_tau : LFLAGSMKL =
-mpi_intel_linux_64ib_tau : LFLAGS = -static-intel
-mpi_intel_linux_64ib_tau : FCOMPL = ${TAU_DIR}/x86_64/bin/tau_f90.sh
-mpi_intel_linux_64ib_tau : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
-mpi_intel_linux_64ib_tau : obj = fds_mpi_intel_linux_64ib_tau
-mpi_intel_linux_64ib_tau : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
