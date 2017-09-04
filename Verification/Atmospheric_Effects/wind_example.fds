@@ -5,7 +5,7 @@
 
 &TIME T_BEGIN=-5., T_END=60. /
 
-&WIND SPEED=5., RAMP_DIRECTION='theta', Z_0=0.01, OBUKHOV_LENGTH=-100. /
+&WIND SPEED=5., RAMP_DIRECTION='theta', Z_0=0.01, L=-100. /
 
 &RAMP ID='theta', T= 0., F=270. /
 &RAMP ID='theta', T=50., F=-90. /
