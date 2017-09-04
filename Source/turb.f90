@@ -1321,7 +1321,10 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
       NUSSELT = 0.037_EB*RE**0.8_EB*PR_ONTH
    CASE (SURF_CYLINDRICAL)
       ! Incropera and DeWitt, 3rd, 1990, Eq. 7.55, 40 < Re < 4000
-      NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
+!     NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
+      IF (RE <  4._EB)                  NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH
+      IF (RE >= 4._EB .AND. RE <40._EB) NUSSELT = 0.911_EB*RE**0.385_EB*PR_ONTH
+      IF (RE >= 40._EB)                 NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
    CASE (SURF_SPHERICAL)
       ! Incropera and DeWitt, 3rd, 1990, Eq. 7.59
       NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH
