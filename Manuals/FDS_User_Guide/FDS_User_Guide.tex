@@ -2606,6 +2606,19 @@ Below is an example input file section:
 &OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
 \end{lstlisting}
 
+Notice that we can account for volumetric heat sources, below is an example from ({\ct ht3d\_source\_term} file:
+\begin{lstlisting}
+&INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
+\end{lstlisting}
+
+HT3d can also use internal heat source as shown in the example below:
+\begin{lstlisting}
+&MATL ID='orange', .../
+&SURF ID='SPHERE', HT3D=.TRUE./
+&OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
+\end{lstlisting}
+
+Note that you should not specify the internal heat source at the SURF line.
 
 \clearpage
 
