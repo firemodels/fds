@@ -7,82 +7,24 @@
 
 &TIME T_BEGIN=-200., T_END=400. /
 
-&MISC U0=1., V0=1., MEAN_FORCING(1)=.TRUE., MEAN_FORCING(2)=.TRUE., RAMP_U0_Z='u profile', RAMP_V0_Z='u profile', RAMP_U0_T='u time', RAMP_V0_T='v time', RAMP_TMP0_Z='T profile', DT_MEAN_FORCING=1., TMPA=16.1, P_INF=101325, HUMIDITY=77., PROCESS_ALL_MESHES=.TRUE.  /
+&MISC P_INF=101325, HUMIDITY=77., PROCESS_ALL_MESHES=.TRUE.  /
 
-&RAMP ID='u profile', Z= 0.001 , F= 3.0055  /
-&RAMP ID='u profile', Z= 0.100 , F= 6.5399  /
-&RAMP ID='u profile', Z= 0.500 , F= 7.7618  /
-&RAMP ID='u profile', Z= 1.000 , F= 8.2770  /
-&RAMP ID='u profile', Z= 1.900 , F= 8.7411  /
-&RAMP ID='u profile', Z= 3.000 , F= 9.0596  /
-&RAMP ID='u profile', Z= 4.000 , F= 9.2536  /
-&RAMP ID='u profile', Z= 5.000 , F= 9.4000  /
-&RAMP ID='u profile', Z= 6.000 , F= 9.5166  /
-&RAMP ID='u profile', Z= 7.000 , F= 9.6130  /
-&RAMP ID='u profile', Z= 8.000 , F= 9.6948  /
-&RAMP ID='u profile', Z= 9.000 , F= 9.7656  /
-&RAMP ID='u profile', Z= 10.000 , F= 9.8278  /
-&RAMP ID='u profile', Z= 15.000 , F= 10.0569  /
-&RAMP ID='u profile', Z= 20.000 , F= 10.2094  /
-&RAMP ID='u profile', Z= 25.000 , F= 10.3218  /
-&RAMP ID='u profile', Z= 30.000 , F= 10.4098  /
+&WIND L=-81.2, U_STAR=0.315, Z_0=0.00002, THETA_STAR=-0.088, RAMP_DIRECTION='theta', TMP_REF=16.1, Z_REF=2. /
 
-&RAMP ID='T profile', Z= 0.001 , F= 1.0055  /
-&RAMP ID='T profile', Z= 0.100 , F= 1.0021  /
-&RAMP ID='T profile', Z= 0.500 , F= 1.0009  /
-&RAMP ID='T profile', Z= 1.000 , F= 1.0005  /
-&RAMP ID='T profile', Z= 1.900 , F= 1.0000  /
-&RAMP ID='T profile', Z= 3.000 , F= 0.9997  /
-&RAMP ID='T profile', Z= 4.000 , F= 0.9995  /
-&RAMP ID='T profile', Z= 5.000 , F= 0.9993  /
-&RAMP ID='T profile', Z= 6.000 , F= 0.9992  /
-&RAMP ID='T profile', Z= 7.000 , F= 0.9991  /
-&RAMP ID='T profile', Z= 8.000 , F= 0.9990  /
-&RAMP ID='T profile', Z= 9.000 , F= 0.9989  /
-&RAMP ID='T profile', Z= 10.000 , F= 0.9988  /
-&RAMP ID='T profile', Z= 15.000 , F= 0.9985  /
-&RAMP ID='T profile', Z= 20.000 , F= 0.9982  /
-&RAMP ID='T profile', Z= 25.000 , F= 0.9980  /
-&RAMP ID='T profile', Z= 30.000 , F= 0.9978  /
-
-&RAMP ID='u time', T= 0 , F= 0.9397  /
-&RAMP ID='u time', T= 10 , F= 0.9063  /
-&RAMP ID='u time', T= 20 , F= 0.9397  /
-&RAMP ID='u time', T= 30 , F= 0.9848  /
-&RAMP ID='u time', T= 40 , F= 1.0000  /
-&RAMP ID='u time', T= 50 , F= 1.0000  /
-&RAMP ID='u time', T= 60 , F= 0.9962  /
-&RAMP ID='u time', T= 70 , F= 0.9986  /
-&RAMP ID='u time', T= 80 , F= 1.0000  /
-&RAMP ID='u time', T= 90 , F= 0.9994  /
-&RAMP ID='u time', T= 100 , F= 0.9962  /
-&RAMP ID='u time', T= 110 , F= 0.9962  /
-&RAMP ID='u time', T= 120 , F= 0.9962  /
-&RAMP ID='u time', T= 130 , F= 1.0000  /
-&RAMP ID='u time', T= 140 , F= 0.9994  /
-&RAMP ID='u time', T= 150 , F= 0.9962  /
-&RAMP ID='u time', T= 160 , F= 0.9962  /
-&RAMP ID='u time', T= 170 , F= 0.9962  /
+&RAMP ID='theta', T=   0., F=290. /
+&RAMP ID='theta', T=  40., F=270. /
+&RAMP ID='theta', T=  50., F=270. /
+&RAMP ID='theta', T=  60., F=275. /
+&RAMP ID='theta', T=  70., F=273. /
+&RAMP ID='theta', T=  80., F=270. /
+&RAMP ID='theta', T=  90., F=268. /
+&RAMP ID='theta', T= 100., F=265. /
+&RAMP ID='theta', T= 110., F=265. /
+&RAMP ID='theta', T= 120., F=265. /
+&RAMP ID='theta', T= 130., F=270. /
+&RAMP ID='theta', T= 140., F=272. /
+&RAMP ID='theta', T= 150., F=275. /
     
-&RAMP ID='v time', T= 0 , F= -0.3420  /
-&RAMP ID='v time', T= 10 , F= -0.4225  /
-&RAMP ID='v time', T= 20 , F= -0.3420  /
-&RAMP ID='v time', T= 30 , F= -0.1736  /
-&RAMP ID='v time', T= 40 , F= 0.0000  /
-&RAMP ID='v time', T= 50 , F= 0.0000  /
-&RAMP ID='v time', T= 60 , F= -0.0871  /
-&RAMP ID='v time', T= 70 , F= -0.0523  /
-&RAMP ID='v time', T= 80 , F= 0.0000  /
-&RAMP ID='v time', T= 90 , F= 0.0349  /
-&RAMP ID='v time', T= 100 , F= 0.0871  /
-&RAMP ID='v time', T= 110 , F= 0.0871  /
-&RAMP ID='v time', T= 120 , F= 0.0871  /
-&RAMP ID='v time', T= 130 , F= 0.0000  /
-&RAMP ID='v time', T= 140 , F= -0.0349  /
-&RAMP ID='v time', T= 150 , F= -0.0871  /
-&RAMP ID='v time', T= 160 , F= -0.0871  /
-&RAMP ID='v time', T= 170 , F= -0.0871  /
-
 &RADI RADIATION=.FALSE. /
 
 &SPEC ID='METHANE' /

@@ -7,45 +7,9 @@
 
 &TIME T_BEGIN=-200., T_END=400. /
 
-&MISC U0= 0.987, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', DT_MEAN_FORCING=1., 
-      V0=-0.164, MEAN_FORCING(2)=.TRUE., RAMP_V0_Z='u profile', RAMP_TMP0_Z='T profile',
-      TMPA=32.2, P_INF=90890, PROCESS_ALL_MESHES=.TRUE.  /
+&MISC P_INF=90890, PROCESS_ALL_MESHES=.TRUE.  /
 
-&RAMP ID='u profile', Z= 0.001 , F= -0.3067  /
-&RAMP ID='u profile', Z= 0.100 , F= 0.3876  /
-&RAMP ID='u profile', Z= 0.500 , F= 0.6845  /
-&RAMP ID='u profile', Z= 1.000 , F= 0.8611  /
-&RAMP ID='u profile', Z= 1.900 , F= 1.0896  /
-&RAMP ID='u profile', Z= 3.000 , F= 1.3206  /
-&RAMP ID='u profile', Z= 4.000 , F= 1.5117  /
-&RAMP ID='u profile', Z= 5.000 , F= 1.6933  /
-&RAMP ID='u profile', Z= 6.000 , F= 1.8688  /
-&RAMP ID='u profile', Z= 7.000 , F= 2.0402  /
-&RAMP ID='u profile', Z= 8.000 , F= 2.2086  /
-&RAMP ID='u profile', Z= 9.000 , F= 2.3746  /
-&RAMP ID='u profile', Z= 10.000 , F= 2.5389  /
-&RAMP ID='u profile', Z= 15.000 , F= 3.3420  /
-&RAMP ID='u profile', Z= 20.000 , F= 4.1277  /
-&RAMP ID='u profile', Z= 25.000 , F= 4.9040  /
-&RAMP ID='u profile', Z= 30.000 , F= 5.6742  /
-
-&RAMP ID='T profile', Z= 0.001 , F= 0.9965  /
-&RAMP ID='T profile', Z= 0.100 , F= 0.9986  /
-&RAMP ID='T profile', Z= 0.500 , F= 0.9995  /
-&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
-&RAMP ID='T profile', Z= 1.900 , F= 1.0007  /
-&RAMP ID='T profile', Z= 3.000 , F= 1.0013  /
-&RAMP ID='T profile', Z= 4.000 , F= 1.0019  /
-&RAMP ID='T profile', Z= 5.000 , F= 1.0024  /
-&RAMP ID='T profile', Z= 6.000 , F= 1.0029  /
-&RAMP ID='T profile', Z= 7.000 , F= 1.0034  /
-&RAMP ID='T profile', Z= 8.000 , F= 1.0039  /
-&RAMP ID='T profile', Z= 9.000 , F= 1.0043  /
-&RAMP ID='T profile', Z= 10.000 , F= 1.0048  /
-&RAMP ID='T profile', Z= 15.000 , F= 1.0071  /
-&RAMP ID='T profile', Z= 20.000 , F= 1.0093  /
-&RAMP ID='T profile', Z= 25.000 , F= 1.0115  /
-&RAMP ID='T profile', Z= 30.000 , F= 1.0137  /
+&WIND L=4.96, U_STAR=0.061, Z_0=0.008, THETA_STAR=0.058, DIRECTION=279.4, TMP_REF=32.2, Z_REF=1. /
 
 &RADI RADIATION=.FALSE. /
 
