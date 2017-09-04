@@ -1,0 +1,33 @@
+#%Module1.0#####################################################################
+###
+### gitfds modulefile
+###
+### modulefiles/gitfds
+###
+
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tUpdates to PATH and LD_LIBRARY_PATH for repo fds"
+}
+
+module-whatis   "Loads paths and libraries needed to build and run a repo fds"
+
+set     version      "1.0"
+
+if [ expr [ module-info mode load ] ] {
+  module remove fds
+}
+
+setenv MPIDIST_ETH /shared/openmpi_64
+setenv MPIDIST_IB /shared/openmpi_64ib
+
+setenv MPIDIST /shared/openmpi_64ib
+
+setenv IFORT_COMPILER /opt/intel17
+setenv IFORT_COMPILER_LIB /opt/intel17/lib
+
+prepend-path	LD_LIBRARY_PATH /usr/lib64
+prepend-path	LD_LIBRARY_PATH /opt/intel17/lib/intel64
+
+conflict gitfds
