@@ -7505,6 +7505,11 @@ The usefulness of the AST is that it represents an effective exposure temperatur
 \end{lstlisting}
 This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
 
+FDS creates a Lagrangian particle for the device that records the AST at a particular point with a particular {\ct ORIENTATION}. FDS does this by internally creating an {\ct INIT} line to position the particle. For other quantities, the new {\ct DEVC} line need the same ID of the {\ct INIT} line with {\ct INIT\_ID} as the {\ct DEVC} line for the {\ct ADIABATIC SURFACE TEMPERATURE}. For example, you can output the heat transfer coefficient using the following lines:  
+\begin{lstlisting}
+&DEVC ID='HTC', XYZ=..., QUANTITY='HEAT TRANSFER COEFFICIENT', INIT_ID='AST' /
+\end{lstlisting}
+
 \subsubsection{Example: AST vs. Surface Temperature}
 \label{adiabatic_surface_temperature}
 
