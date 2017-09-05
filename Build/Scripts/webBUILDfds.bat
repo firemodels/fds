@@ -25,7 +25,7 @@ Title Building FDS for %platform%
 %svn_drive%
 
 if "%platform%" == "windows" (
-  cd %svn_root%\fds\Build\mpi_intel_win_64
+  cd %svn_root%\fds\Build\impi_intel_win_64
   erase *.obj *.mod *.exe
   call make_fds
   goto eof
