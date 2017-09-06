@@ -1,4 +1,4 @@
-../../../../../Build/intel_linux_64/fds_intel_linux_64 simple_panel_hot.fds 
+../../../../../Build/impi_intel_linux_64/fds_impi_intel_linux_64 simple_panel_hot.fds 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i read_geometry_hot.ans
 ../../intel_linux_64/fds2ftmi_linux_64 simple_panel_hot 0.05 2 0 600 2 0 0 1 simple_panel_hot_to_ansys 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i run_simple_panel_hot.ans 

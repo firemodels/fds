@@ -4145,7 +4145,7 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
-If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$. 
+If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
 
 You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
 
@@ -7644,6 +7644,11 @@ The usefulness of the AST is that it represents an effective exposure temperatur
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
 This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+In fact, FDS creates a Lagrangian particle that records the AST at the desired location. FDS creates an {\ct INIT} line to position the particle. If you want to output other quantities at this point that are related to the AST, you can create another {\ct DEVC} at the same location and use {\ct INIT\_ID} to identify the {\ct DEVC} line for the {\ct ADIABATIC SURFACE TEMPERATURE}. For example, you can output the heat transfer coefficient used in calculating the AST as follows:
+\begin{lstlisting}
+&DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS', ... /
+&DEVC ID='HTC', XYZ=..., QUANTITY='HEAT TRANSFER COEFFICIENT', INIT_ID='AST' /
+\end{lstlisting}
 
 \subsubsection{Example: AST vs. Surface Temperature}
 \label{adiabatic_surface_temperature}
