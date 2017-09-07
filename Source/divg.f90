@@ -1162,7 +1162,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
                 SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
                 WC%NODE_INDEX > 0                        .OR. &
-                ANY(SF%LEAK_PATH>0._EB))                      &
+                ANY(SF%LEAK_PATH>0))                          &
                 CYCLE WALL_LOOP3
 
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
@@ -1310,7 +1310,7 @@ ELSE PREDICT_NORMALS
          IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
              WC%NODE_INDEX > 0                        .OR. &
-             ANY(SF%LEAK_PATH>0._EB)) CYCLE
+             ANY(SF%LEAK_PATH>0)) CYCLE
       ENDIF
       WC%ONE_D%UW = WC%ONE_D%UWS
    ENDDO
