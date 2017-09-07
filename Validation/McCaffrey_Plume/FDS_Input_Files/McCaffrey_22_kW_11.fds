@@ -1,23 +1,27 @@
 &HEAD CHID='McCaffrey_22_kW_11', TITLE='McCaffrey, NBSIR 79-1910, 21.7 kW Natural Gas' /
 
-&MESH IJK=55,55,103, XB=-.75,.75,-.75,.75,-.3,2.5 /
+[McCaffrey, 1979] B. J. McCaffrey. Purely Buoyant Diffusion Flames: Some Experimental Results.
+National Bureau of Standards, NBSIR 79-1910, 1979.
+
+[McCaffrey, 1981] B. J. McCaffrey. Some Measurements of the Radiative Power Output of Diffusion Flames.
+In Western-States Section of the Combustion Institute, Paper No. WSS/CT 81-15, 1981.
+
+&MESH IJK=55,55,77, XB=-.75,.75,-.75,.75,-.3,1.8 /
 
 &TIME T_END=30. /
 &DUMP DT_DEVC_LINE=20. /
 
-&SURF ID='burner', HRRPUA=241., ADIABATIC=.TRUE., COLOR='RED' /
+&SURF ID='burner', HRRPUA=241., COLOR='RED' /
 &OBST XB=-0.15,0.15,-.15,0.15,-.10,0.00,SURF_IDS='burner','INERT','INERT' /
 
 &SPEC ID='LNG', FORMULA='C1.2143H4.4286'/
 &REAC FUEL='LNG', RADIATIVE_FRACTION=0.21, HEAT_OF_COMBUSTION=45000. /
 
-&RADI RTE_SOURCE_CORRECTION=F /
-
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 &VENT MB='YMIN', SURF_ID='OPEN' /
 &VENT MB='YMAX', SURF_ID='OPEN' /
-VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
 &DEVC ID='tc', XB= 0.00, 0.00,0.00,0.00,0.01389,1.7861, POINTS=66, QUANTITY='THERMOCOUPLE', Z_ID='Height' /
