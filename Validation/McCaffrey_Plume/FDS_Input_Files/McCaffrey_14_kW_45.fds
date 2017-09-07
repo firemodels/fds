@@ -1,9 +1,10 @@
 &HEAD CHID='McCaffrey_14_kW_45', TITLE='McCaffrey, NBSIR 79-1910, 14.4 kW Natural Gas' /
 
-MESH IJK=225,225,315, XB=-.75,.75,-.75,.75,-.3,1.8 / equivalent single mesh
+[McCaffrey, 1979] B. J. McCaffrey. Purely Buoyant Diffusion Flames: Some Experimental Results.
+National Bureau of Standards, NBSIR 79-1910, 1979.
 
-MULT ID='m1', DX=0.5,DY=0.5,DZ=0.7, I_UPPER=2,J_UPPER=2,K_UPPER=2 /
-MESH IJK=75,75,105, XB=-.75,-.25,-.75,-.25,-.3,.4, MULT_ID='m1'/
+[McCaffrey, 1981] B. J. McCaffrey. Some Measurements of the Radiative Power Output of Diffusion Flames.
+In Western-States Section of the Combustion Institute, Paper No. WSS/CT 81-15, 1981.
 
 &MULT ID='m1', DX=0.3,DY=0.3,DZ=0.42, I_UPPER=4,J_UPPER=4,K_UPPER=4 / 125 mesh case
 &MESH IJK=45,45,63, XB=-0.75,-0.45,-0.75,-0.45,-0.30,0.12, MULT_ID='m1'/
@@ -11,13 +12,11 @@ MESH IJK=75,75,105, XB=-.75,-.25,-.75,-.25,-.3,.4, MULT_ID='m1'/
 &TIME T_END=30. /
 &DUMP DT_DEVC_LINE=20. /
 
-&SURF ID='burner', HRRPUA=160., ADIABATIC=.TRUE., COLOR='RED' /
+&SURF ID='burner', HRRPUA=160., COLOR='RED' /
 &OBST XB=-0.15,0.15,-.15,0.15,-.10,0.00,SURF_IDS='burner','INERT','INERT' /
 
 &SPEC ID='LNG', FORMULA='C1.2143H4.4286'/
 &REAC FUEL='LNG', RADIATIVE_FRACTION=0.17, HEAT_OF_COMBUSTION=45000. /
-
-&RADI RTE_SOURCE_CORRECTION=F /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
