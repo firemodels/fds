@@ -89,8 +89,7 @@ christifire
 pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
-umd_line_burner
-% umd_line_burner_2
+umd_line_burner_3
 % waterloo_methanol
 
 display('validation scripts completed successfully!')
