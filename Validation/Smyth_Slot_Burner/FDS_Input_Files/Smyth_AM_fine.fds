@@ -31,6 +31,8 @@
       NU= -1,-1.5,1,2
       CRITICAL_FLAME_TEMPERATURE=867./
 
+! A in R2 is tuned to match Smyth CO data
+
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
       A = 8e10
