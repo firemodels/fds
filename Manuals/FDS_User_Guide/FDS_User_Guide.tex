@@ -8244,7 +8244,7 @@ In combustion, knowing if, when, or where chemical reactions have been extinguis
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii}
 
-Often it is desired to present results of calculations in some form other than those offered by Smokeview. In this case, there is a short Fortran 90 program called {\ct fds2ascii.f90}, with a PC compiled version called {\ct fds2ascii.exe}. To run the program, just type:
+As part of the standard FDS-SMV distribution package, there is a short Fortran program called {\ct fds2ascii}\footnote{The source code is located in the GitHub repository, {\ct \footnotesize firemodels/fds}, in the directory, {\ct \footnotesize Utilities/fds2ascii}.}. To run the program, just type:
 \begin{lstlisting}
 fds2ascii
 \end{lstlisting}
@@ -8278,7 +8278,16 @@ y
 bucket_test_1_fds2ascii.csv
   Writing to file...      bucket_test_1_fds2ascii.csv
 \end{lstlisting}
-These commands tell {\ct fds2ascii} that you want to convert (binary) boundary file data into a text file. You want to sample every data point within the specified volume, you want only those surfaces that point upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is 1 -- that is just the number used to list the available files). The data will be time-averaged, and it will be output to a file listed at the end of the session.
+These commands tell {\ct fds2ascii} that you want to convert (binary) boundary file data into a text file. You want to sample every data point within the specified volume, you want only those surfaces that point upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is 1 -- that is just the number used to list the available files). The data will be time-averaged, and it will be output to a file listed at the end of the session. Here is a more detailed explanation of the questions:
+\begin{description}
+\item[Enter Job ID string (CHID):] Enter the name of the job that you entered into the FDS input file under the parameter {\ct CHID}. Do not include the {\ct .fds} suffix.
+\item[What type of file to parse?] The program can only read Plot3D ({\ct PL3D}), slice ({\ct SLCF}), or boundary ({\ct BNDF}) files.
+\item[Enter Sampling Factor for Data:] If you want to print out every point, enter 1; every other point, enter 2; and so on.
+\item[Domain selection:] The answer is a one or two letter code. If the first letter is {\ct y} or {\ct Y}, this means you want to print out a subset of the data for the entire domain. If {\ct n} or {\ct N}, you do not want to limit the data. The answer of {\ct z} or {\ct Z} is only for cases where you have an outdoor fire scenario over rough terrain, and you want to offset the $z$ coordinate so that it denotes height off the ground. If the second letter of the two letter code is {\ct a} or {\ct A}, this means that you want the program to \underline{a}utomatically select the appropriate files. If the first letter of the two letter code is {\ct y} or {\ct Y}, you will be prompted for 6 numbers denoting the minimum and maximum values of $x$, $y$, and $z$.
+\item[Enter starting and ending time for averaging (s):] The slice and boundary file data will be time-averaged over the designated time interval.
+\item[How many variables to read:] Enter the number of different output quantities that you want to include in your output file.
+\item[Enter orientation: (plus or minus 1, 2 or 3):] For a boundary file, you must designate the orientation of the surfaces you want to print out. +1 means surfaces facing the positive $x$ direction, -2 means negative $y$, and so on.
+\end{description}
 
 
 \clearpage

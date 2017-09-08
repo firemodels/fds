@@ -23,6 +23,8 @@ PROCESS()
   fi
   if [ $nfds -gt 0 ]; then
     echo "$case: cases=$nfds finished=$nout successful=$nsuccess status=$status"
+  else
+    echo "$case: No cases run"
   fi
   cd $curdir
 }
