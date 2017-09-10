@@ -3095,6 +3095,9 @@ WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
 WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
 WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
+#ifdef COMPVER_PP
+WRITE(LU,'(A,A)')      ' Compiler         : ',TRIM(COMPVER_PP)
+#endif
 WRITE(LU,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
                       WRITE(LU,'(A,I6)')  ' MPI Enabled; Number of MPI Processes:     ',N_MPI_PROCESSES
 IF (.NOT. USE_OPENMP) WRITE(LU,'(A)')     ' OpenMP Disabled'
