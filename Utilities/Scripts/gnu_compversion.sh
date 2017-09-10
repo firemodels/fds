@@ -25,7 +25,7 @@ if [ "$gfortran_installed" == "0" ]; then
   exit
 fi
 
-gfortran -v > gfortran_version 2>&1 
+gfortran --version |head -1> gfortran_version 2>&1 
 GFORTRANVERSION=`cat gfortran_version | awk '{print $4}' `
 rm gfortran_version
 echo "\"Gnu gfortran $GFORTRANVERSION\""
