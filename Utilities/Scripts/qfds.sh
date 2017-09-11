@@ -449,7 +449,7 @@ fi
 # setup for systems using the queuing system SLURM
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  MPIRUN="srun"
+  MPIRUN="mpirun"
   QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
