@@ -37,7 +37,7 @@ if "%platform%" == "linux" (
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.fds mpi_intel_osx_64
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh mpi_intel_osx_64
   plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
   pause
   goto eof
