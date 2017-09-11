@@ -32,7 +32,6 @@ addpath 'scripts'
 % Scripts that run prior to dataplot
 
 flame_height
-cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 layer_height
