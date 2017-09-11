@@ -131,8 +131,8 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
-fdsdir=intel$FDSOS
-fds=fds_intel$FDSOS
+fdsdir=intel$FDSOS$IB
+fds=fds_intel$FDSOS$IB
 
 openmpidir=~/FDS_Guides
 

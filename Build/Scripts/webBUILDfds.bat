@@ -31,13 +31,13 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.fds mpi_intel_linux_64
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64 make_fds.sh
+  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh fds/Build/mpi_intel_linux_64%linux_ib%
+  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64%linux_ib% make_fds.sh
   pause
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.fds mpi_intel_osx_64
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh mpi_intel_osx_64
   plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
   pause
   goto eof

@@ -17,6 +17,7 @@ export OPENMPI_VERSION=$7
 export MAJOR=$8
 export COMPFROM=$9
 export MISCFROM=$10
+export IB=$11 
 
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
