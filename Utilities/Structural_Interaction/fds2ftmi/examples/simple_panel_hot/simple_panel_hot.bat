@@ -1,4 +1,4 @@
-..\..\..\..\..\Build\intel_win_64\fds_win_64 simple_panel_hot.fds 
+..\..\..\..\..\Build\impi_intel_win_64\fds_mpi_win_64 simple_panel_hot.fds 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i read_geometry_hot.ans -o simple_panel_hot_ansys 
 ..\..\intel_win_64\fds2ftmi_win_64 simple_panel_hot 0.05 2 0 600 2 0 0 1 simple_panel_hot_to_ansys 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i run_simple_panel_hot.ans -o simple_panel_hot_ansys  

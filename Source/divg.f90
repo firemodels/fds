@@ -1162,7 +1162,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
                 SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
                 WC%NODE_INDEX > 0                        .OR. &
-                ANY(SF%LEAK_PATH>0._EB))                      &
+                ANY(SF%LEAK_PATH>0))                          &
                 CYCLE WALL_LOOP3
 
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
@@ -1310,7 +1310,7 @@ ELSE PREDICT_NORMALS
          IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
              WC%NODE_INDEX > 0                        .OR. &
-             ANY(SF%LEAK_PATH>0._EB)) CYCLE
+             ANY(SF%LEAK_PATH>0)) CYCLE
       ENDIF
       WC%ONE_D%UW = WC%ONE_D%UWS
    ENDDO
@@ -1387,7 +1387,6 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
       P_0=P_INF; TMP_0=TMPA
       PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
       RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
-      FRHO= 0._EB;
       USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
       PRESSURE_ZONE = 0
 

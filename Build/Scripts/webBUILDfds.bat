@@ -1,6 +1,5 @@
 @echo off
 set platform=%1
-set buildtype=%2
 
 :: batch file to build FDS on Windows, Linux or OSX platforms
 
@@ -20,46 +19,26 @@ goto:eof
 
 call %envfile%
 echo.
-echo  Building %buildtype% FDS for %platform%
-Title Building %buildtype% FDS for %platform%
+echo  Building FDS for %platform%
+Title Building FDS for %platform%
 
 %svn_drive%
 
-set type=
-if "%buildtype%" == "debug" (
-  set mpi=
-  set type=_db
-)
-if "%buildtype%" == "dev" (
-  set mpi=
-  set type=_dv
-)
-if "%buildtype%" == "release" (
-  set mpi=mpi_
-  set type=
-)
-
 if "%platform%" == "windows" (
-  cd %svn_root%\fds\Build\%mpi%intel_win_64%type%
-  if "%buildtype%" == "release" (
-    erase *.obj *.mod *.exe
-  )
+  cd %svn_root%\fds\Build\impi_intel_win_64
+  erase *.obj *.mod *.exe
   call make_fds
   goto eof
 )
 if "%platform%" == "linux" (
-  if "%buildtype%" == "release" (
-    plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%mpi%intel_linux_64%type% clean_fds.sh
-  )
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%mpi%intel_linux_64%type% make_fds.sh
+  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.fds mpi_intel_linux_64
+  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_linux_64 make_fds.sh
   pause
   goto eof
 )
 if "%platform%" == "osx" (
-  if "%buildtype%" == "release" (
-    plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%mpi%intel_osx_64%type% clean_fds.sh
-  )
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%mpi%intel_osx_64%type% make_fds.sh
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.fds mpi_intel_osx_64
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
   pause
   goto eof
 )
