@@ -41,23 +41,3 @@ IJK_LOC=str((NX,NY,NZ))
 XB_LOC=str(XB0)
 
 print('&MESH IJK='+IJK_LOC[1:-1]+', XB='+XB_LOC[1:-1]+'/')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
