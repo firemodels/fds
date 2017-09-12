@@ -392,6 +392,7 @@ cat << BASH > \$BASHRCFDS
 
 export FDSBINDIR=\$FDS_root/bin
 export MPIDIST=\\\$FDSBINDIR/openmpi_64
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
