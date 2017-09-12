@@ -13,7 +13,6 @@ SCP ()
   FROMFILE=$3
   TODIR=$4
   TOFILE=$5
-
   scp $HOST\:$FROMDIR/$FROMFILE $TODIR/$TOFILE 2>/dev/null
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
@@ -131,13 +130,10 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
-fdsdir=intel$FDSOS$IB
-fds=fds_intel$FDSOS$IB
-
 openmpidir=~/FDS_Guides
 
-fdsmpidir=mpi_intel$FDSOS
-fdsmpi=fds_mpi_intel$FDSOS
+fdsmpidir=mpi_intel$FDSOS$IB
+fdsmpi=fds_mpi_intel$FDSOS$IB
 
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS
