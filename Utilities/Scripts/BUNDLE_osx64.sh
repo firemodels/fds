@@ -21,5 +21,6 @@ export IB=
 
 export FDSOS=_osx_64
 export INSTALLDIR=FDS/$FDSEDITION
+export FDSMODULE=$FDSEDITION
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh
