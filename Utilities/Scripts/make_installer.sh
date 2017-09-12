@@ -171,7 +171,8 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
-FDSMODULE=/tmp/fds_module.\$\$
+FDSMODULEtmp=/tmp/fds_module.\$\$
+STARTUPtmp=/tmp/readme.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -327,7 +328,7 @@ echo "Copy complete."
 
 MKDIR \$FDS_root/bin/modules
 
-cat << MODULE > \$FDSMODULE
+cat << MODULE > \$FDSMODULEtmp
 #%Module1.0#####################################################################
 ###
 ### fds modulefile
@@ -355,8 +356,34 @@ setenv  OMP_NUM_THREAD 4
 conflict fds
 MODULE
 
-cp \$FDSMODULE \$FDS_root/bin/modules/fds
-rm \$FDSMODULE
+cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
+rm \$FDSMODULEtmp
+
+#--- create startup readme file
+
+
+cat << STARTUP > \$STARTUPtmp
+<h3>Environment Variables - Using the installation fds</h3>
+<ul>
+<li>Add following line to one of your startup files
+to complete the installation.<br>
+<pre>
+source \$FDS_root/bin/FDSVARS.sh
+</pre>
+or the following if you are using modules
+<pre>
+export MODULEPATH \$FDS_root/bin/modules:\\\$MODULEPATH
+module load $FDSMODULE
+</pre>
+
+<li>Log out and log back in so changes will take effect.
+
+<li>To uninstall fds simply erase the directory \$FDS_root 
+and remove changes you made to your startup files.
+
+<li>See <a href="README_repo.html">README_repo.html</a> 
+for more details on setting up the environment to use fds in a git repo.
+STARTUP
 
 #--- create BASH startup file
 
@@ -379,11 +406,14 @@ export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
 export OMP_NUM_THREADS=4
 BASH
 
-#--- create startup file for FDS
+#--- create startup and readme files
 
 cp \$BASHRCFDS \$FDS_root/bin/FDSVARS.sh
 chmod +x \$FDS_root/bin/FDSVARS.sh
 rm \$BASHRCFDS
+
+cp \$STARTUPtmp \$FDS_root/Documentation/README_startup.html
+#rm \$STARTUPtmp
 
 EOF
 
@@ -392,16 +422,21 @@ echo ""
 echo "-----------------------------------------------"
 echo "Wrap up"
 echo ""
-echo "1. Add the following line to one of your startup files"
-echo "   to complete the installation:"
+echo "1. Add following line to one of your startup files"
+echo "   to complete the installation."
 echo ""
 echo "source \$FDS_root/bin/FDSVARS.sh"
 echo ""
-echo "2. See the readme file at \$FDS_root/bin/README.html for"
-echo "   notes on setting up your environment if you plan to use"
-echo "   a fds git repo."
+echo "   or the following if you are using modules"
 echo ""
-echo "3. Log out and log back in so changes will take effect."
+echo "export MODULEPATH \$FDS_root/bin/modules:\\\$MODULEPATH"
+echo "module load $FDSMODULE"
+echo ""
+echo "2. Log out and log back in so changes will take effect."
+echo ""
+echo "To uninstall fds simply erase the directory "
+echo "\$FDS_root and remove changes you made"
+echo "to your startup files."
 echo ""
 echo "Installation complete."
 exit 0
