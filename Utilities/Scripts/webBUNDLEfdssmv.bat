@@ -32,7 +32,7 @@ if "%platform%" == "windows" (
 )
 if "%platform%" == "linux" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux64
-  plink %linux_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_edition%  %fds_version% %smv_version% %openmpi_version% %fdssmv_major_version% %compiler_dir% %misc_dir% %linux_ib%
+  plink %linux_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_edition%  %fds_version% %smv_version% %openmpi_version% %fdssmv_major_version% %compiler_dir% %misc_dir%
 
   echo Downloading compressed archive to:
   echo   %svn_root%\fds\Utilities\uploads\!bundledir!.sh
