@@ -1,4 +1,4 @@
-c@echo off
+@echo off
 
 :: setup environment variables (defining where repository resides etc) 
 
