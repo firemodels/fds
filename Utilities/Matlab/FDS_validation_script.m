@@ -32,7 +32,6 @@ addpath 'scripts'
 % Scripts that run prior to dataplot
 
 flame_height
-cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 layer_height
@@ -89,8 +88,7 @@ christifire
 pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
-umd_line_burner
-% umd_line_burner_2
+umd_line_burner_3
 % waterloo_methanol
 
 display('validation scripts completed successfully!')

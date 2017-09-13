@@ -1193,8 +1193,7 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 
 Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
 the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with
-gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for
-Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
+gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
 
 \newpage
 
@@ -1370,6 +1369,51 @@ There were a variety of heat flux gauges installed in the test compartment. Most
 \label{NIST_WTC_Lower_Column_Flux}
 \end{figure}
 
+\clearpage
+
+\subsection{UMD Line Burner}
+
+In the UMD line burner experiments, radiative heat flux was measured at a distance of 1 m normal to the flame sheet.  In the FDS calculations the domain is extended to encompass the heat flux measurement location; two devices are placed at the 1 m distance on either side of the flame as shown in Fig.~\ref{fig_umd_integrated_intensity}.  These cases are run with a relatively large number of radiation solid angles, 700, to ensure no ray effects from the discrete ordinates method.  Fig.~\ref{fig_umd_integrated_intensity} also shows a slice contour of integrated radiation intensity to confirm the pattern is smooth.
+
+The calculations are setup to run for one minute of real time with a ramp on the input radiative fraction tied to the oxygen concentration in the nitrogen coflow (blue region of the image).  The radiative fraction versus oxygen volume fraction is provided by White et al.~\cite{White:2015}.  Fig.~\ref{fig_umd_chi_r_check} shows the verification check for the input radiative fraction for both the methane and propane cases.
+
+FDS does not use a simple local radiative emission scheme.  Instead, a correction is applied to the emission term to ensure the global radiative fraction is achieved for the plume.  It is therefore important to double check that the correct global radiative fraction is indeed achieved by the flow solver.  To this end, in Fig.~\ref{fig_umd_global_chi_r} we plot the global radiative fraction taken from the output to the {\ct \_hrr} file.
+
+With these verification checks in place, we are now in a position to examine the simulated target heat flux at 1 m from the flame.  Fig.~\ref{fig_umd_heat_flux} shows the measured and computed heat flux for the methane and propane cases.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[height=3in]{FIGURES/UMD_Line_Burner/integrated_intensity}
+\caption{UMD Line Burner contour of integrated radiation intensity.}
+\label{fig_umd_integrated_intensity}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_Chi_r_ramp_check} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_Chi_r_ramp_check}
+\end{tabular*}
+\caption{UMD Line Burner radiative fraction input ramp check.}
+\label{fig_umd_chi_r_check}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_global_Chi_R} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_global_Chi_R}
+\end{tabular*}
+\caption{UMD Line Burner global radiative.}
+\label{fig_umd_global_chi_r}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_rad_heat_flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_rad_heat_flux}
+\end{tabular*}
+\caption{UMD Line Burner N2 dilution radiative heat flux to target.}
+\label{fig_umd_heat_flux}
+\end{figure}
 
 \clearpage
 
