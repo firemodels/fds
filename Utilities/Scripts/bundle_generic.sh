@@ -230,7 +230,7 @@ if [ "$OSXBUNDLE" == "yes" ]; then
   CP $fds_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
 fi
 
-CP $fds_bundle README.html   $bundledir/bin README.html
+CP $fds_bundle README_repo.html   $bundledir/Documentation README_repo.html
 
 CP $smv_bundle smokeview.ini $bundledir/bin smokeview.ini
 
