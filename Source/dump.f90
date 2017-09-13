@@ -3397,7 +3397,6 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
-CHARACTER(40) :: STEP_STRING,SIM_TIME_STRING,TIME_STEP_STRING
 CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
 REAL(EB) :: TNOW
@@ -3406,17 +3405,27 @@ TNOW = SECOND()
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
 
-WRITE(STEP_STRING,'(1X,A,G0.9)')  'Time Step: ',ICYC
-WRITE(TIME_STEP_STRING,'(A,G0.7,A)') ', Time Step: ',DT,' s'
-
-IF (T<3600._EB) THEN
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T,' s'
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSE
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T/3600._EB,' h'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ENDIF
 
-SIMPLE_OUTPUT = TRIM(STEP_STRING)//TRIM(SIM_TIME_STRING)//TRIM(TIME_STEP_STRING)
-SIMPLE_OUTPUT_ERR = TRIM(STEP_STRING)//TRIM(SIM_TIME_STRING)
+! Simple output without DT for .err file
+
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSE
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ENDIF
 
 ! Write simple output string to .err file
 
