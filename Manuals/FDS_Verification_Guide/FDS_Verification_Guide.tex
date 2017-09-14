@@ -3707,16 +3707,16 @@ where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The 
 T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
 \end{equation} 
 
-The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsius}. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s (left) and a comparison between the analytical and numerical solutions at several points in time (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
+The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsius}. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case\footnote{The reason for displaying the medium resolution image is that the high resolution case is run with multiple meshes and the overlap of the slice files shows mesh artifacts.} (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
 
 \begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
- & \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_75_165}
+ & \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_51_165}
 \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}  \\
 \end{tabular*}
 
-\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s. (Right) A comparison between the analytical and numerical solution.}
+\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s for $n=51$ cells across diameter. (Right) A comparison between the analytical and numerical solution for $n=75$ cells across diameter.}
 \label{fig:ht3d_sphere_time} 
 \end{figure}
 
