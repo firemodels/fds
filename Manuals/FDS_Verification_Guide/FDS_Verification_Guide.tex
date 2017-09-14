@@ -3691,7 +3691,7 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 $kw/m^3$ is studied. The initial temperature at the boundary is set to 20~$^\circ$C. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as : 
 \begin{equation}
 \label{eq:sphere}
-\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) \right] + \frac{\dot{q}^{\prime\prime\prime}}{k} 
+\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]  
 \end{equation}
 With 
 \begin{equation}
