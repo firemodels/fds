@@ -123,6 +123,9 @@ $QFDS -d Heat_Transfer ht3d_nz_80.fds
 $QFDS -d Heat_Transfer ht3d_nz_160.fds
 $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_ibeam.fds
+$QFDS -d Heat_Transfer ht3d_sphere_25.fds
+$QFDS -d Heat_Transfer ht3d_sphere_51.fds
+$QFDS -d Heat_Transfer ht3d_sphere_75.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
