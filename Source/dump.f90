@@ -2624,12 +2624,6 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)
-   IF (ABS(G_F_Z(ITMP,N))>TWO_EPSILON_EB) THEN
-      WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '  Gibbs Energy (J/kmol) Ambient, ',ITMP,' K: ', 1.E6_EB*G_F_Z(ITMP,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', 1.E6_EB*G_F_Z( 500,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', 1.E6_EB*G_F_Z(1000,N)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', 1.E6_EB*G_F_Z(1500,N)
-   ENDIF
    IF (SM%EVAPORATING) THEN
       WRITE(LU_OUTPUT,'(A)') ' '
       SS => SPECIES(SM%SINGLE_SPEC_INDEX)
@@ -3397,41 +3391,35 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
-CHARACTER(40) :: STEP_STRING,SIM_TIME_STRING,TIME_STEP_STRING !,CPU_TIME_STRING
 CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
-REAL(EB) :: TNOW !,CTIME
+REAL(EB) :: TNOW
 
 TNOW = SECOND()
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
 
-WRITE(STEP_STRING,'(1X,A,G0.9)')  'Time Step: ',ICYC
-WRITE(TIME_STEP_STRING,'(A,G0.7,A)') ', Time Step: ',DT,' s'
-
-IF (T<60._EB) THEN
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T,' s'
-ELSEIF (T>=60._EB .AND. T<3600._EB) THEN
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T/60._EB,' min'
-ELSEIF (T>=3600._EB .AND. T<86400._EB) THEN
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T/3600._EB,' h'
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSE
-   WRITE(SIM_TIME_STRING,'(A,G0.4,A)')  ', Simulation Time: ',T/86400._EB,' d'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ENDIF
 
-! CTIME = SECOND()-WALL_CLOCK_START
-! IF (CTIME<60._EB) THEN
-! WRITE(CPU_TIME_STRING,'(A,G0.4,A)')  ', CPU Time: ',CTIME,' s'
-! ELSEIF (CTIME>=60._EB .AND. T<3600._EB) THEN
-! WRITE(CPU_TIME_STRING,'(A,G0.4,A)')  ', CPU Time: ',CTIME/60._EB,' min'
-! ELSEIF (CTIME>=3600._EB .AND. T<86400._EB) THEN
-! WRITE(CPU_TIME_STRING,'(A,G0.4,A)')  ', CPU Time: ',CTIME/3600._EB,' h'
-! ELSE
-! WRITE(CPU_TIME_STRING,'(A,G0.4,A)')  ', CPU Time: ',CTIME/86400._EB,' d'
-! ENDIF
+! Simple output without DT for .err file
 
-SIMPLE_OUTPUT = TRIM(STEP_STRING)//TRIM(SIM_TIME_STRING)//TRIM(TIME_STEP_STRING)
-SIMPLE_OUTPUT_ERR = TRIM(STEP_STRING)//TRIM(SIM_TIME_STRING) !//TRIM(CPU_TIME_STRING)
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSE
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ENDIF
 
 ! Write simple output string to .err file
 
@@ -7685,13 +7673,13 @@ IF (N_PDPA_HISTOGRAM>0) THEN
          DO NN =1,MAX_PDPA_HISTOGRAM_NBINS
             IF(NN>PY%PDPA_HISTOGRAM_NBINS) EXIT
             VALUE = DV%PDPA_HISTOGRAM_COUNTS(NN)
-            CUMSUM = CUMSUM + VALUE            
+            CUMSUM = CUMSUM + VALUE
             DI=PY%PDPA_HISTOGRAM_LIMITS(1)+(REAL(NN,EB)-0.5_EB)*DD
             IF(PY%PDPA_HISTOGRAM_CUMULATIVE) VALUE = CUMSUM
             IF(PY%PDPA_NORMALIZE .AND. CONST>TWO_EPSILON_EB) VALUE = VALUE / CONST
             WRITE(TCFORM,'(5A)') "(1(",FMT_R,",A),",FMT_R,")"
             WRITE(PDPA_HISTOGRAM_VALUE(N,NN),TCFORM) DI*COORD_FACTOR,',',VALUE
-         ENDDO           
+         ENDDO
       ENDIF
    ENDDO
 
