@@ -154,6 +154,7 @@ The following individuals contributed to the verification process of FDS.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
 \item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
+\item Salah Benkorichi of Ulster University, Belfast, developed the HT3D sphere test case.
 \end{itemize}
 
 
@@ -3687,6 +3688,8 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{ht3d_sphere_75}
 \label{ht3d_sphere_51}
 \label{ht3d_sphere_25}
+
+\textbf{Salah Benkorichi, Ulster University}\\
 
 In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
