@@ -347,10 +347,11 @@ module-whatis   "Loads fds paths and libraries."
 set     version      "1.0"
 
 prepend-path    PATH    \$FDS_root/bin
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
-prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/openmpi_64
 
 setenv  MPIDIST \$FDS_root/bin/openmpi_64
+setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
 setenv  OMP_NUM_THREAD 4
 
 conflict fds
@@ -372,7 +373,7 @@ source \$FDS_root/bin/FDSVARS.sh
 </pre>
 or the following if you are using modules
 <pre>
-export MODULEPATH \$FDS_root/bin/modules:\\\$MODULEPATH
+export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH
 module load $FDSMODULE
 </pre>
 
@@ -430,7 +431,7 @@ echo "source \$FDS_root/bin/FDSVARS.sh"
 echo ""
 echo "   or the following if you are using modules"
 echo ""
-echo "export MODULEPATH \$FDS_root/bin/modules:\\\$MODULEPATH"
+echo "export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH"
 echo "module load $FDSMODULE"
 echo ""
 echo "2. Log out and log back in so changes will take effect."
