@@ -81,6 +81,9 @@ IB=
 DB=
 JOBPREFIX=
 OUT2ERROR=
+if [ "$FDSNETWORK" == "infiniband" ]; then		
+  IB=ib		
+fi
 EMAIL=
 
 # --------------------------- parse options --------------------
