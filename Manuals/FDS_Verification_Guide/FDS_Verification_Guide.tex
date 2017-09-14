@@ -154,6 +154,7 @@ The following individuals contributed to the verification process of FDS.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
 \item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
+\item Salah Benkorichi of Ulster University, Belfast, developed the HT3D sphere test case.
 \end{itemize}
 
 
@@ -3688,26 +3689,25 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{ht3d_sphere_51}
 \label{ht3d_sphere_25}
 
-In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 $kw/m^3$ is studied. The initial temperature at the boundary is set to 20~$^\circ$C. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as : 
+\textbf{Salah Benkorichi, Ulster University}\\
+
+In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
 \label{eq:sphere}
 \frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]  
 \end{equation}
-With 
+where $k$ is the thermal conductivity and $\alpha$ is the thermal diffusivity.  The initial and boundary conditions are
 \begin{equation}
 \label{eq:sphere_int}
-T \bigm|_{t=0} =T_0 \qquad; \qquad T\bigm|_{r=a} = T_0 \qquad; \qquad \frac{\partial T}{\partial r} \bigm|_{r=0}=0
+\left. T  \right|_{t=0} =T_0 \qquad; \qquad \left. T \right|_{r=a} = T_0 \qquad; \qquad \left. \frac{\partial T}{\partial r} \right|_{r=0}=0
 \end{equation}
-The solution is from \cite{ Carslaw:1} whereas the notation is adopted from \cite{lautenberger2014gpyro3d}, the exact solution to Eq.~(\ref{eq:sphere}) \& Eq.~(\ref{eq:sphere_int}) is  
+where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):  
 \begin{equation}
 \label{eq:sphere_sol}
-T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
+T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
 \end{equation} 
 
-Where: 
-$T_0$ is the initial temperature ($^\circ$C), $\alpha $ is the thermal diffusivity ($m^2/s$), and r is the radius of the sphere in ~(cm). The heat generation is in ($W/m^3$) and  thermal conductivity (k) is in ~\si{W/(m.K)}.
-
-The solution is run for 180s from an initial condition of \SI{20}{\degreeCelsius}. in Fig.~\ref{fig:ht3d_sphere_time} we show the time history of the temperature evolution in the sphere's radius (left) temperature contours($^{\circ}$C) and (right) a comparison between the analytical and numerical solution($^{\circ}$C). 
+The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsius}. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s (left) and a comparison between the analytical and numerical solutions at several points in time (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
 
 \begin{figure}[ht]
 \centering
@@ -3716,11 +3716,10 @@ The solution is run for 180s from an initial condition of \SI{20}{\degreeCelsius
 \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}  \\
 \end{tabular*}
 
-\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) temperature contours($^{\circ}$C). (Right) a comparison between the analytical and numerical solution($^{\circ}$C).}
+\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s. (Right) A comparison between the analytical and numerical solution.}
 \label{fig:ht3d_sphere_time} 
 \end{figure}
 
-Fig.~\ref{fig:ht3d_sphere_conv}  shows the L1 and L2 norm errors decay at O($\Delta x$).
 \begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -3728,7 +3727,7 @@ Fig.~\ref{fig:ht3d_sphere_conv}  shows the L1 and L2 norm errors decay at O($\De
 \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2}  \\
 \end{tabular*} 
  
-\caption[The \textct{ht3d\_sphere} test cases]{L1(left) and L2(right) norm errors in temperature ($^{\circ}$C) for the convergence study with different cell numbers (75, 51, 25) from left to right). The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay at O($\Delta x$).}
+\caption[The \textct{ht3d\_sphere} test cases]{L1 (left) and L2 (right) norm errors in temperature for the convergence study with different cell numbers [75, 51, 25] from left to right. The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.}
 \label{fig:ht3d_sphere_conv}
 \end{figure}
 
