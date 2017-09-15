@@ -560,9 +560,11 @@ LOGICAL, INTENT(INOUT):: EXTINCT
 REAL(EB):: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,H,H_CRIT,Q,Q_CRIT
 INTEGER:: NS
 
-! First pass check for fuel oxidation (step 1) extinction. Cycle if step 1 is extinct (and step 2 was not by AIT)
-! Second pass check for CO oxidiation (step 2) extinction.
-! If all steps extinct, zero out heat release and reset ZZ to ZZ_0
+! R1: Fuel + O2 => CO + Products
+! R2: CO + (1/2)O2 => CO2
+! extinction model:
+!  1. (first pass) Evaluate EXTINCT based on R1 + R2
+!  2. (second pass, EXTINCT=T on first pass) Evaluate EXTINCT based on R2
 
 DO NS = 1,N_TRACKED_SPECIES
    IF (NS==REACTION(1)%FUEL_SMIX_INDEX .OR. NS==REACTION(2)%FUEL_SMIX_INDEX) THEN
@@ -585,7 +587,7 @@ ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 
 CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction
 CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN) ! H of products participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(CO_PASS)%CRIT_FLAME_TMP) !H of products at the critical flame temperature
+CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(CO_PASS)%CRIT_FLAME_TMP) ! H of products at the critical flame temperature
 Q = H_0 - H ! Combustion heat release rate
 Q_CRIT = H_CRIT - H ! Heat release rate required to avoid extinction
 IF (Q < Q_CRIT) EXTINCT = .TRUE.
