@@ -8310,13 +8310,24 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%BULK_DENSITY = BULK_DENSITY
                IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
 
+               ! Error traps and warnings for HT3D
+
+               IF (.NOT.HT3D .AND. ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
                OB%HT3D = HT3D
-               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%HT3D=.FALSE.
+               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+               ENDIF
+
                IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', HT3D requires MATL_ID.'
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
 
@@ -8333,15 +8344,10 @@ MESH_LOOP: DO NM=1,NMESHES
                      ENDIF
                   ENDDO
                   IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', MATL_ID not found.'
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-               ELSE
-                  IF (ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
-                     WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
                ENDIF
 
                ! Make obstruction invisible if it's within a finer mesh
