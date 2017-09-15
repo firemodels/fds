@@ -3,9 +3,8 @@ platform=intel64
 dir=`pwd`
 target=${dir##*/}
 
-source $IFORT_COMPILER/bin/compilervars.sh $platform
-source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
-if [ "$MPIDIST" == "" ]; then
+source ../Scripts/set_env.sh eth
+if [ $? -eq 0 ]; then
   exit
 fi
 
