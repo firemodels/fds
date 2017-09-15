@@ -8314,7 +8314,9 @@ MESH_LOOP: DO NM=1,NMESHES
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
                OB%HT3D = HT3D
-               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%HT3D=.FALSE.
+
+               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+
                IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', HT3D requires MATL_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
