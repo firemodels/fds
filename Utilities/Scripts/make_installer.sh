@@ -379,8 +379,9 @@ module load $FDSMODULE
 
 <li>Log out and log back in so changes will take effect.
 
-<li>To uninstall fds simply erase the directory \$FDS_root 
-and remove changes you made to your startup files.
+<li>To uninstall fds, erase the directory:<br>
+\$FDS_root 
+<p>and remove changes you made to your startup files.
 
 <li>See <a href="README_repo.html">README_repo.html</a> 
 for more details on setting up the environment to use fds in a git repo.
