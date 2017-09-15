@@ -77,13 +77,10 @@ if [ "`uname`" != "Darwin" ]; then
 fi
 MPIRUN=
 ABORTRUN=n
-IB=
+IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
-if [ "$FDSNETWORK" == "infiniband" ]; then		
-  IB=ib		
-fi
 EMAIL=
 
 # --------------------------- parse options --------------------
