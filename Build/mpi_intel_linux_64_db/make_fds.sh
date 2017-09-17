@@ -4,7 +4,7 @@ dir=`pwd`
 target=${dir##*/}
 
 source ../Scripts/set_env.sh eth
-if [ $? -eq 0 ]; then
+if [ $? -eq 1 ]; then
   exit
 fi
 
