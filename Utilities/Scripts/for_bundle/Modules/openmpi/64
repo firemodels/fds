@@ -29,17 +29,19 @@ conflict FDS6
 if [ file isdirectory $mpihome/bin ] {
     module-whatis "Sets up your openmpi environment to use $mpihome"
     set helpmsg "Sets up your openmpi environment to use $mpihome"
-    # bring in new version
+
     setenv MPIHOME $mpihome
-    setenv MPIDIST /shared/openmpi_64
-    setenv OPENMPI_MODULE $mpitype
+    setenv MPIDIST $mpihome
+    setenv OPAL_PREFIX $mpihome
+
     setenv MPIFORT mpifort
+    setenv MPITYPE $mpitype
+
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77
     setenv F90 $mpihome/bin/mpif90
     setenv F77 $mpihome/bin/mpif77
-    #setenv CPP $mpihome/bin/
-    #setenv CXX $mpihome/bin/pgcpp
+
     prepend-path PATH $mpihome/bin
     prepend-path MANPATH $mpihome/man
     prepend-path C_INCLUDE_PATH $mpihome/include 
