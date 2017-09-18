@@ -1,0 +1,36 @@
+
+<h3>Environment Variables - Using fds in a Git repo</h3>
+<p> The following variables are needed if you plan to build or run fds from a git repo.
+Change the definitions to match your environment.  
+For example, define MPIDIST_ETH or MPIDIST_IB to match
+where your ethernet or infiniband openmpi libraries are located.  
+Note, you only need to define MPIDIST_ETH or MPIDIST_IB if you have the 
+corresponding library.
+
+<pre>
+# set stack size
+
+ulimit -s ulimited
+
+# OpenMPI library locations
+export MPIDIST_ETH=/shared/openmpi_64
+export MPIDIST_IB=/shared/openmpi_64ib
+export MPIDIST=$MPIDIST_IB
+
+# variables needed by qfds.sh when running fds
+export FDSNETWORK=infiniband
+export PATH=$PATH:$MPIDIST/bin
+
+# compiler location
+export IFORT_COMPILER=/opt/intel17
+export IFORT_COMPILER_LIB=$IFORT_COMPILER/lib
+
+# Intel shared compiler libraries needed when running repo built fds
+# (comment if using intalled FDS)
+INTEL_SHARED_LIB=$IFORT_COMPILER_LIB/intel64
+
+export LD_LIBRARY_PATH=/usr/lib64:$INTEL_SHARED_LIB:$LD_LIBRARY_PATH
+</pre>
+
+<p>See <a href="README_startup.html">README_startup.html</a> for notes on setting up environment
+variables when using the installation fds

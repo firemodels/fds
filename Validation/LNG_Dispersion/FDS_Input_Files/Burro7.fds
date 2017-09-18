@@ -7,43 +7,9 @@
 
 &TIME T_BEGIN=-200., T_END=300. /
 
-&MISC U0=1.0, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', RAMP_TMP0_Z='T profile', DT_MEAN_FORCING=1., TMPA=33.81, P_INF=94000, HUMIDITY=7.4, PROCESS_ALL_MESHES=.TRUE.  /
+&MISC P_INF=94000, HUMIDITY=7.4, PROCESS_ALL_MESHES=.TRUE.  /
 
-&RAMP ID='u profile', Z= 0.001 , F= 1.4602  /
-&RAMP ID='u profile', Z= 0.100 , F= 5.6354  /
-&RAMP ID='u profile', Z= 0.500 , F= 7.0829  /
-&RAMP ID='u profile', Z= 1.000 , F= 7.6964  /
-&RAMP ID='u profile', Z= 1.900 , F= 8.2526  /
-&RAMP ID='u profile', Z= 3.000 , F= 8.6373  /
-&RAMP ID='u profile', Z= 4.000 , F= 8.8731  /
-&RAMP ID='u profile', Z= 5.000 , F= 9.0519  /
-&RAMP ID='u profile', Z= 6.000 , F= 9.1949  /
-&RAMP ID='u profile', Z= 7.000 , F= 9.3134  /
-&RAMP ID='u profile', Z= 8.000 , F= 9.4143  /
-&RAMP ID='u profile', Z= 9.000 , F= 9.5018  /
-&RAMP ID='u profile', Z= 10.000 , F= 9.5788  /
-&RAMP ID='u profile', Z= 15.000 , F= 9.8640  /
-&RAMP ID='u profile', Z= 20.000 , F= 10.0548  /
-&RAMP ID='u profile', Z= 25.000 , F= 10.1960  /
-&RAMP ID='u profile', Z= 30.000 , F= 10.3068  /
-
-&RAMP ID='T profile', Z= 0.001 , F= 1.0052  /
-&RAMP ID='T profile', Z= 0.100 , F= 1.0017  /
-&RAMP ID='T profile', Z= 0.500 , F= 1.0005  /
-&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
-&RAMP ID='T profile', Z= 1.900 , F= 0.9995  /
-&RAMP ID='T profile', Z= 3.000 , F= 0.9992  /
-&RAMP ID='T profile', Z= 4.000 , F= 0.9990  /
-&RAMP ID='T profile', Z= 5.000 , F= 0.9988  /
-&RAMP ID='T profile', Z= 6.000 , F= 0.9987  /
-&RAMP ID='T profile', Z= 7.000 , F= 0.9986  /
-&RAMP ID='T profile', Z= 8.000 , F= 0.9985  /
-&RAMP ID='T profile', Z= 9.000 , F= 0.9984  /
-&RAMP ID='T profile', Z= 10.000 , F= 0.9983  /
-&RAMP ID='T profile', Z= 15.000 , F= 0.9980  /
-&RAMP ID='T profile', Z= 20.000 , F= 0.9977  /
-&RAMP ID='T profile', Z= 25.000 , F= 0.9974  /
-&RAMP ID='T profile', Z= 30.000 , F= 0.9972  /
+&WIND L=-111., U_STAR=0.372, Z_0=0.0002, THETA_STAR=-0.097, TMP_REF=33.81, Z_REF=1. /
 
 &RADI RADIATION=.FALSE. /
 

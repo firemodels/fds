@@ -20,6 +20,7 @@
 close all
 clear all
 
+restoredefaultpath
 addpath 'scripts'
 
 % Scripts to run prior to dataplot
@@ -48,7 +49,7 @@ Scatterplot_Inputs_File = 'FDS_verification_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Verification';
-Output_File = [pwd, '/FDS_verification_scatterplot_output.csv'];
+Output_File = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/FDS_verification_scatterplot_output.csv'];
 Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
 
 % Override the plot style options with NRC 1824 plot options
@@ -96,6 +97,8 @@ disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
 disp('ht3d_cond...');                     ht3d_cond
+disp('ht3d_sphere...');                   ht3d_sphere
 disp('vegetation...');                    vegetation
+disp('radiation_gas_panel...');           radiation_gas_panel
 
 display('verification scripts completed successfully!')

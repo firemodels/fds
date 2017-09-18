@@ -181,7 +181,7 @@ for i=2:n_plots
            display(['Error: File ', d1_Filename ', does not exist. Skipping case.'])
            continue
         end
-        [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
+        [H M] = dvcread(d1_Filename,d1_Col_Name_Row,d1_Data_Row);
         R1 = parsepipe(d1_Ind_Col_Name);
         S1 = parsepipe(d1_Dep_Col_Name);
         style = parsepipe(d1_Style);
@@ -189,8 +189,8 @@ for i=2:n_plots
         % Skips case upon any Matlab error
         try
             for j=1:length(S1)
-                d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
-                d1_Dep_Col = find(strcmp(H,S1(j)));
+                d1_Ind_Col = find(strcmp(strtrim(H),strtrim(R1(min(j,length(R1))))));
+                d1_Dep_Col = find(strcmp(strtrim(H),strtrim(S1(j))));
                 Save_Measured_Quantity(i,j) = S1(j);
                 clear indices
                 % Clear flag for stat_x_y metric
@@ -268,6 +268,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(j) = semilogy(X,Y,char(style(j))); hold on
                     end
+                    set(K(j),'linewidth',Line_Width)
                 end
             end
         catch
@@ -281,7 +282,7 @@ for i=2:n_plots
            display(['Error: File ', d2_Filename, ' does not exist. Skipping case.'])
            continue
         end
-        [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
+        [H M] = dvcread(d2_Filename,d2_Col_Name_Row,d2_Data_Row);
         R2 = parsepipe(d2_Ind_Col_Name);
         S2 = parsepipe(d2_Dep_Col_Name);
         style = parsepipe(d2_Style);
@@ -297,9 +298,9 @@ for i=2:n_plots
                 % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
                 Save_Predicted_Quantity(i,j) = S2(j);
-                d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
+                d2_Ind_Col = find(strcmp(strtrim(H),strtrim(R2(min(j,length(R2))))));
                 for jj=1:length(SP)
-                    d2_Dep_Col(jj) = find(strcmp(H,SP(jj)));
+                    d2_Dep_Col(jj) = find(strcmp(strtrim(H),strtrim(SP(jj))));
                 end
                 clear indices
 
@@ -387,6 +388,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(length(S1)+j) = semilogy(X,Y,char(style(j)));
                     end
+                    set(K(length(S1)+j),'linewidth',Line_Width)
                 else
                     if strcmp(Plot_Type,'linear')
                         K(length(K_save)+j) = plot(X,Y,char(style(j)));
@@ -397,6 +399,7 @@ for i=2:n_plots
                     elseif strcmp(Plot_Type,'semilogy')
                         K(length(K_save)+j) = semilogy(X,Y,char(style(j)));
                     end
+                    set(K(length(K_save)+j),'linewidth',Line_Width)
                 end
 
             end
@@ -504,7 +507,7 @@ for i=2:n_plots
             set(gcf,'Units',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
             set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
-            display(['Printing plot ',num2str(i),'...'])
+            display(['dataplot ',num2str(i),'...'])
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...

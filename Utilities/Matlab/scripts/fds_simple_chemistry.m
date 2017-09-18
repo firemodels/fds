@@ -22,7 +22,7 @@ X_H = 0.1;
 % define CO and soot yields
 
 y_CO = 0;
-y_s  = .01;
+y_s  = 0.05;
 
 % define the element matrix (number of atoms [rows] for each primitive species [columns])
 
@@ -42,12 +42,12 @@ E = [m 0 0 0 1 1 (1-X_H); ... % C
      n 0 0 2 0 0 X_H;     ... % H
      a 2 0 1 2 1 0;       ... % O
      b 0 2 0 0 0 0]       ... % N
-     
+
 W = E'*[12.0107 1.0794 15.9994 14.0067]' % primitive species molecular weights
 
 % define the volume fractions of the background and fuel
 
-v_0 = [0 2.077972E-01 7.834714E-01 8.344567E-03 3.868556E-04 0 0];
+v_0 = [0 2.078229E-01 7.835682E-01 8.222023E-03 3.869034E-04 0 0];
 v_0 = v_0/sum(v_0) % normalize
 
 v_1 = [1 0 0 0 0 0 0];
@@ -94,6 +94,12 @@ NU = nu_0*v_0 + nu_1*v_1 + nu_2*v_2;
 % display fuel properties
 
 Z2Y = [v_0',v_1',v_2']
+
+% mass stoichiometric coefficients
+
+S_0 = nu_0*sum(v_0*W)/sum(v_1*W)
+S_1 = nu_1*sum(v_1*W)/sum(v_1*W)
+S_2 = nu_2*sum(v_2*W)/sum(v_1*W)
 
 
 

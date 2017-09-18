@@ -2,6 +2,17 @@ MODULE PRECISION_PARAMETERS
 
 ! Set important parameters having to do with variable precision and array allocations
 
+! A partial list of the parameters defined here:
+! ONTH ... Self evident ratios
+! SR3      square root of 3
+! EIONTH   cubic root of 18
+! PI       the number pi = 3.14159265359
+! TWOPI    the number 2pi = 6.28318530718
+! PIO2     pi over 2, approx. 1.57079632679
+! SQRTPI   square root of pi, approx. 1.77245385091
+! RPI      reciprocal pi, approx. 0.31830988618
+
+
 IMPLICIT NONE
 
 ! Precision of "Four Byte" and "Eight Byte" reals
@@ -32,13 +43,14 @@ INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20
 INTEGER, PARAMETER :: LABEL_LENGTH=60, MESSAGE_LENGTH=200
 
 ! Special numbers
+! Numbers such as the largest number that is < 1 in 8-byte accuracy (ALMOST_ONE) are defined here
 
 REAL(EB), PARAMETER :: ALMOST_ONE=1._EB-EPSILON(1._EB),MICRON=1.E-6_EB,NANOMETER=1.E-9_EB,&
                        TWO_EPSILON_EB=2._EB*EPSILON(1._EB),TINY_EB=TINY(1._EB),HUGE_EB=HUGE(1._EB)
 
 ! Often used numbers
 
-REAL(EB), PARAMETER :: ONTH=1._EB/3._EB,THFO=3._EB/4._EB,FOTH=4._EB/3._EB,TWTH=2._EB/3._EB,ONSI=1._EB/6._EB,&
+REAL(EB), PARAMETER :: ONTH=1._EB/3._EB,FOTH=4._EB/3._EB,TWTH=2._EB/3._EB,ONSI=1._EB/6._EB,&
                        SR3=SQRT(3._EB),FTTOT=4._EB*(2._EB/3._EB)**(1._EB/3._EB),EIONTH=18._EB**(1._EB/3._EB)
 REAL(EB), PARAMETER :: PI=4._EB*ATAN(1.0_EB), SQRTPI=SQRT(PI), RPI=1._EB/PI, TWOPI=2._EB*PI, PIO2=PI/2._EB, &
                        RFPI=1._EB/(4._EB*PI), FOTHPI = FOTH*PI

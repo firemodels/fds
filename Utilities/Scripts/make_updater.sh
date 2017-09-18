@@ -189,5 +189,4 @@ __TARFILE_FOLLOWS__
 EOF
 chmod +x $INSTALLER
 cat $SMV_TAR >> $INSTALLER
-../Utilities/Scripts/md5hash.sh $INSTALLER
 echo "Updater created."

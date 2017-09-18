@@ -7,45 +7,9 @@
 
 &TIME T_BEGIN=-200., T_END=400. /
 
-&MISC U0=0.998, MEAN_FORCING(1)=.TRUE., RAMP_U0_Z='u profile', DT_MEAN_FORCING=1., 
-      V0=0.058, MEAN_FORCING(2)=.TRUE., RAMP_V0_Z='u profile', RAMP_TMP0_Z='T profile',
-      TMPA=35.0, P_INF=90080, HUMIDITY=4.0, PROCESS_ALL_MESHES=.TRUE.  /
+&MISC P_INF=90080, HUMIDITY=4.0, PROCESS_ALL_MESHES=.TRUE.  /
 
-&RAMP ID='u profile', Z= 0.001 , F= -1.5484  /
-&RAMP ID='u profile', Z= 0.100 , F= 1.8800  /
-&RAMP ID='u profile', Z= 0.500 , F= 3.0757  /
-&RAMP ID='u profile', Z= 1.000 , F= 3.5884  /
-&RAMP ID='u profile', Z= 1.900 , F= 4.0602  /
-&RAMP ID='u profile', Z= 3.000 , F= 4.3929  /
-&RAMP ID='u profile', Z= 4.000 , F= 4.6006  /
-&RAMP ID='u profile', Z= 5.000 , F= 4.7604  /
-&RAMP ID='u profile', Z= 6.000 , F= 4.8899  /
-&RAMP ID='u profile', Z= 7.000 , F= 4.9986  /
-&RAMP ID='u profile', Z= 8.000 , F= 5.0920  /
-&RAMP ID='u profile', Z= 9.000 , F= 5.1738  /
-&RAMP ID='u profile', Z= 10.000 , F= 5.2464  /
-&RAMP ID='u profile', Z= 15.000 , F= 5.5208  /
-&RAMP ID='u profile', Z= 20.000 , F= 5.7096  /
-&RAMP ID='u profile', Z= 25.000 , F= 5.8521  /
-&RAMP ID='u profile', Z= 30.000 , F= 5.9657  /
-
-&RAMP ID='T profile', Z= 0.001 , F= 1.0010  /
-&RAMP ID='T profile', Z= 0.100 , F= 1.0003  /
-&RAMP ID='T profile', Z= 0.500 , F= 1.0001  /
-&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
-&RAMP ID='T profile', Z= 1.900 , F= 0.9999  /
-&RAMP ID='T profile', Z= 3.000 , F= 0.9998  /
-&RAMP ID='T profile', Z= 4.000 , F= 0.9997  /
-&RAMP ID='T profile', Z= 5.000 , F= 0.9997  /
-&RAMP ID='T profile', Z= 6.000 , F= 0.9996  /
-&RAMP ID='T profile', Z= 7.000 , F= 0.9996  /
-&RAMP ID='T profile', Z= 8.000 , F= 0.9995  /
-&RAMP ID='T profile', Z= 9.000 , F= 0.9995  /
-&RAMP ID='T profile', Z= 10.000 , F= 0.9994  /
-&RAMP ID='T profile', Z= 15.000 , F= 0.9992  /
-&RAMP ID='T profile', Z= 20.000 , F= 0.9990  /
-&RAMP ID='T profile', Z= 25.000 , F= 0.9989  /
-&RAMP ID='T profile', Z= 30.000 , F= 0.9987  /
+&WIND L=-422., U_STAR=0.305, Z_0=0.008, THETA_STAR=-0.018, DIRECTION=266.7, TMP_REF=35.0, Z_REF=1. /
 
 &RADI RADIATION=.FALSE. /
 

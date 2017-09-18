@@ -1218,17 +1218,7 @@ CALL POINT_TO_MESH(NM)
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
 IF (CORRECTOR) CALL MOVE_PARTICLES(T,DT,NM)
-IF (CORRECTOR .AND. EVAPORATION) THEN
-   IF (.NOT.EQUILIBRIUM_MODEL) THEN
-      IF (EVAP_2) THEN
-         CALL PARTICLE_MASS_ENERGY_TRANSFER_2(T,DT,NM)
-      ELSE
-         CALL PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
-      ENDIF
-   ELSE
-      CALL PARTICLE_MASS_ENERGY_TRANSFER_EQ(T,DT,NM)
-   ENDIF
-ENDIF
+IF (CORRECTOR .AND. EVAPORATION) CALL PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
 T_USED(8)=T_USED(8)+SECOND()-TNOW
 
@@ -1351,7 +1341,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          IC = CELL_INDEX(IIG,JJG,1)
          IW = WALL_INDEX(IC,-3)
          IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. ACCUMULATE_WATER .AND. .NOT.LP%SPLAT) THEN
-            WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3*WALL(IW)%RAW
+            WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3/WALL(IW)%AW
             LP%SPLAT = .TRUE.
          ENDIF
          CYCLE PARTICLE_LOOP
@@ -1545,7 +1535,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
             IF (ACCUMULATE_WATER .AND. HIT_SOLID .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
                WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX)+&
-                  LP%PWT*LPC%FTPR*R_D**3*WALL(LP%WALL_INDEX)%RAW
+                  LP%PWT*LPC%FTPR*R_D**3/WALL(LP%WALL_INDEX)%AW
                LP%SPLAT = .TRUE.
             ENDIF
 
@@ -1684,7 +1674,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY
 USE MATH_FUNCTIONS, ONLY : AFILL2, RANDOM_CHOICE, BOX_MULLER
 REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
-            U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_DEN,DROP_VOL_FRAC,RE_WAKE,&
+            U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT,&
             GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)
@@ -1775,8 +1765,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
 
       WAKE_VEL=1.0_EB
       IF (LPC%LIQUID_DROPLET) THEN
-         DROP_DEN      = AVG_DROP_DEN_ALL(IIG,JJG,KKG)
-         DROP_VOL_FRAC = MIN(1._EB,DROP_DEN/LPC%DENSITY)
+         DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG,JJG,KKG,LPC%ARRAY_INDEX)/LPC%DENSITY)
          IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
       ENDIF
 
@@ -1816,8 +1805,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
             ! Drag reduction, except for particles associated with a SURF line
             WAKE_VEL = 1.0_EB
             IF (LPC%LIQUID_DROPLET) THEN
-               DROP_DEN      = AVG_DROP_DEN(IIG,JJG,KKG,LPC%ARRAY_INDEX)
-               DROP_VOL_FRAC = MIN(1._EB,DROP_DEN/LPC%DENSITY)
+               DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG,JJG,KKG,LPC%ARRAY_INDEX)/LPC%DENSITY)
                IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
             ENDIF
             ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
@@ -2031,683 +2019,7 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
 USE TRAN, ONLY: GET_IJK
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL(),&
-                                       DROP_DEN_ALL=>NULL(),RHO_INTERIM=>NULL(),TMP_INTERIM=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
-REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),WALL_QCONF=>NULL()
-REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
-            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
-            PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD, &
-            Y_DROP,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,DENOM,DZ_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
-            SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES), &
-            M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_D_OLD,H_G, &
-            H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD,TMP_FILM
-
-INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
-REAL(EB), INTENT(IN) :: T,DT
-INTEGER, INTENT(IN) :: NM
-LOGICAL :: TEMPITER
-CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
-TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
-TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
-
-CALL POINT_TO_MESH(NM)
-
-! Initializations
-
-OMRAF  = 1._EB - RUN_AVG_FAC
-M_DOT(2,NM) = 0._EB ! Fuel mass loss rate of droplets
-M_DOT(4,NM) = 0._EB ! Total mass loss rate of droplets
-
-! Rough estimates
-
-MINIMUM_FILM_THICKNESS = 1.E-5_EB   ! Minimum thickness of liquid film on the surface (m)
-H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surface to drop (W/m2/K)
-
-! Empirical coefficients
-
-D_AIR                  = 2.6E-5_EB  ! Water Vapor - Air binary diffusion (m2/s at 25 C, Incropera & DeWitt, Table A.8)
-SC_AIR                 = SC         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
-PR_AIR                 = PR         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
-SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
-NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
-SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
-NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
-
-! Liquid properties (temporary place)
-MU_LIQUID              = 1040E-6_EB  ! Ns/m2
-BETA_LIQUID            = 0.18E-3_EB  ! Volumetric thermal expansion 1/K
-K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
-CP_LIQUID              = 4.19E3_EB   ! J/(kg.K)
-PR_LIQUID              = MU_LIQUID*CP_LIQUID/K_LIQUID
-
-WALL_QCONF=>WALL_WORK1
-WALL_QCONF=0._EB
-
-! Working arrays
-
-IF (N_LP_ARRAY_INDICES>0) THEN
-   MVAP_TOT => WORK7
-   MVAP_TOT = 0._EB
-   DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WALL(IW)%LP_CPUA  = RUN_AVG_FAC*WALL(IW)%LP_CPUA
-      WALL(IW)%LP_MPUA  = RUN_AVG_FAC*WALL(IW)%LP_MPUA
-   ENDDO
-ENDIF
-
-IF (ANY(LAGRANGIAN_PARTICLE_CLASS(:)%LIQUID_DROPLET)) THEN
-   RHO_INTERIM => WORK1 ; RHO_INTERIM = RHO
-   TMP_INTERIM => WORK2 ; TMP_INTERIM = TMP
-   ZZ_INTERIM  => SCALAR_WORK1 ; ZZ_INTERIM = ZZ
-ENDIF
-
-! Loop over all types of evaporative species
-
-SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
-
-   ! Initialize quantities common to the evaporation index
-
-   IF (.NOT. SPECIES_MIXTURE(Z_INDEX)%EVAPORATING) CYCLE SPECIES_LOOP
-   Y_INDEX = MAXVAL(MAXLOC(SPECIES_MIXTURE(Z_INDEX)%VOLUME_FRACTION))
-   SS => SPECIES(Y_INDEX)
-   TMP_MELT = SS%TMP_MELT
-   TMP_BOIL = SS%TMP_V
-   MW_DROP  = SS%MW
-   CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,SS%H_V_REFERENCE_TEMPERATURE,H_V_REF)
-   !CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,SS%TMP_MELT,H_L_REF)
-   !H_L_REF= H_L_REF*TMP_MELT
-   H_L_REF=0._EB
-   I_MELT   = INT(TMP_MELT)
-   FILM_THICKNESS => WALL_WORK2
-   FILM_THICKNESS =  0._EB
-
-   ! Loop through all PARTICLEs in the class and determine the depth of the liquid film on each surface cell
-
-   FILM_SUMMING_LOOP: DO IP=1,NLP
-      LP  => LAGRANGIAN_PARTICLE(IP)
-      IF (LP%WALL_INDEX==0) CYCLE FILM_SUMMING_LOOP
-      IF (LP%ONE_D%IOR==0)  CYCLE FILM_SUMMING_LOOP
-      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (.NOT.LPC%LIQUID_DROPLET) CYCLE FILM_SUMMING_LOOP
-      IF (LPC%Z_INDEX/=Z_INDEX) CYCLE FILM_SUMMING_LOOP
-      IF (LP%ONE_D%X(1)<=LPC%KILL_RADIUS) CYCLE FILM_SUMMING_LOOP
-      IW = LP%WALL_INDEX
-      FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + LP%PWT*LP%ONE_D%X(1)**3/WALL(IW)%AW
-   ENDDO FILM_SUMMING_LOOP
-
-   FILM_THICKNESS = MAX(MINIMUM_FILM_THICKNESS,FOTHPI*FILM_THICKNESS)
-
-   ! Loop through all PARTICLEs within the class and determine mass/energy transfer
-
-   PARTICLE_LOOP: DO IP=1,NLP
-
-      LP  => LAGRANGIAN_PARTICLE(IP)
-      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE PARTICLE_LOOP
-      IF (.NOT.LPC%LIQUID_DROPLET)  CYCLE PARTICLE_LOOP
-
-      ! Determine the current coordinates of the particle
-
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-      RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      DHOR = H_V_REF*MW_DROP/R0
-      P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
-      ! Boiling temperature at current background pressure
-      T_BOIL_EFF = MAX(0._EB,DHOR*TMP_BOIL/(DHOR-TMP_BOIL*LOG(1._EB/P_RATIO)+TWO_EPSILON_EB))
-      I_BOIL   = INT(T_BOIL_EFF)
-      ! Determine how many sub-time step iterations are needed and then iterate over the time step.
-      ! This is not fully functional. Keep as a placeholder for now.
-
-      N_SUBSTEPS = 1
-      DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB)
-      DT_SUM = 0._EB
-
-      TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
-
-         KILL_RADIUS_CHECK: IF (LP%ONE_D%X(1)>LPC%KILL_RADIUS) THEN
-
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-            CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
-            MW_GAS = 0._EB
-            IF (ABS(Y_ALL(Y_INDEX)-1._EB) > TWO_EPSILON_EB) THEN
-               DO NS=1,N_SPECIES
-                  IF (NS==Y_INDEX) CYCLE
-                  MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
-               ENDDO
-               IF (MW_GAS<=TWO_EPSILON_EB) THEN
-                  MW_GAS=SPECIES_MIXTURE(1)%MW
-               ELSE
-                  MW_GAS = (1._EB-Y_ALL(Y_INDEX))/MW_GAS
-               ENDIF
-            ELSE
-               MW_GAS=SPECIES_MIXTURE(1)%MW
-            ENDIF
-
-            MW_RATIO = MW_GAS/MW_DROP
-
-            ! Initialize PARTICLE thermophysical data
-
-            R_DROP   = LP%ONE_D%X(1)
-            FTPR     = FOTHPI * LP%ONE_D%RHO(1,1)
-            M_DROP   = FTPR*R_DROP**3
-            TMP_DROP = LP%ONE_D%TMP(1)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
-            H_L = H_L*TMP_DROP+H_L_REF
-            H_D_OLD  = H_L*M_DROP
-            WGT      = LP%PWT
-            DHOR     = H_V*MW_DROP/R0
-
-            IF (H_V < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
-               CALL SHUTDOWN(MESSAGE)
-               RETURN
-            ENDIF
-
-            ! Gas conditions
-
-            TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
-            RHO_G  = RHO_INTERIM(II,JJ,KK)
-            M_GAS  = RHO_G/RVC
-            IF (DT_SUM <= TWO_EPSILON_EB) THEN
-               TMP_G_OLD = TMP_G
-               M_GAS_OLD = M_GAS
-               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
-               H_G_OLD = CP * TMP_G * M_GAS
-            ENDIF
-            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
-
-            ! Fluid properties evaluated at film temperature
-
-            TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_FILM)
-            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_FILM)
-
-
-            IF (Y_INDEX>=0) THEN
-               CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_GAS)
-            ELSE
-               Y_GAS = 0._EB
-            ENDIF
-            U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
-            V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
-            W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
-
-            ! Set variables for heat transfer on solid
-
-            SOLID_OR_GAS_PHASE: IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) THEN
-
-               IW   = LP%WALL_INDEX
-               A_DROP = M_DROP/(FILM_THICKNESS(IW)*LPC%DENSITY)
-               TMP_WALL = WALL(IW)%ONE_D%TMP_F
-
-               ! Compute mcbap = rho_w a_w cp_w dx_w for first wall cell for limiting convective heat transfer
-
-               SF => SURFACE(WALL(IW)%SURF_INDEX)
-               IF (SF%THERMALLY_THICK) THEN
-                  RHOCBAR = 0._EB
-                  DO NMAT=1,SF%N_MATL
-                     IF (WALL(IW)%ONE_D%RHO(1,NMAT)<=TWO_EPSILON_EB) CYCLE
-                     IF (MATERIAL(SF%MATL_INDEX(NMAT))%C_S>0._EB) THEN
-                        RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S
-                     ELSE
-                        RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*&
-                                  EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))
-                     ENDIF
-                  ENDDO
-                  MCBAR = RHOCBAR*WALL(IW)%AW*(WALL(IW)%ONE_D%X(1)-WALL(IW)%ONE_D%X(0))
-               ELSE
-                  MCBAR = 1.E30_EB
-               ENDIF
-
-               SELECT CASE(ABS(LP%ONE_D%IOR))
-                  CASE(1)
-                     VEL = SQRT(V2**2+W2**2)
-                  CASE(2)
-                     VEL = SQRT(U2**2+W2**2)
-                  CASE(3)
-                     VEL = SQRT(U2**2+V2**2)
-               END SELECT
-
-               IF (.NOT.CONSTANT_H_SOLID) THEN
-                  LENGTH = 2._EB*R_DROP
-
-                  NU_LIQUID = MU_LIQUID / LPC%DENSITY
-                  !Grashoff number
-                  GR = MAXVAL(ABS(GVEC))*LENGTH**3*BETA_LIQUID*ABS(TMP_WALL-TMP_DROP)/(NU_LIQUID**2)
-                  RAYLEIGH = GR*PR_LIQUID
-                  DIRECTION2: SELECT CASE(LP%ONE_D%IOR)
-                  CASE (-2:-1,1:2) DIRECTION2
-                  ! Vertical boundary layers (Churchill, S.W.)
-                  NUSSELT = 0.68_EB+0.67_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
-                  CASE (-3,3) DIRECTION2
-                  ! Horizontal, unstable boundary layers (top of hot plate)
-                  ! Raithby, G.D., Hollands, K.G.T. Natural convection. In Rohsenoh, W.M.,
-                  ! Hartnett, J.P., and Cho, Y.I. (eds.), Handbook of Heat Transfer, chapter
-                  ! 4. McGraw-Hill, New York, 3rd edition, 1998.
-                  NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
-                  END SELECT DIRECTION2
-                  H_WALL   = NUSSELT*K_LIQUID/LENGTH
-                  RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-   !               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
-                  SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-               ELSE
-                  LENGTH   = 1._EB
-                  RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-                  NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
-                  SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-                  H_WALL    = H_SOLID
-               ENDIF
-               H_HEAT   = NUSSELT*K_AIR/LENGTH
-               H_MASS   = SHERWOOD*D_AIR/LENGTH
-               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
-
-            ELSE SOLID_OR_GAS_PHASE
-
-               IW = -1
-               A_DROP   = 4._EB*PI*R_DROP**2
-               NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(LP%RE)
-               SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE)
-               H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
-               H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
-               H_WALL   = 0._EB
-               TMP_WALL = TMPA
-               IF (SUM(AVG_DROP_AREA(II,JJ,KK,:))>0._EB) THEN
-                  Q_DOT_RAD = (QR_W(II,JJ,KK)/SUM(AVG_DROP_AREA(II,JJ,KK,:)))*(A_DROP/4._EB)
-               ELSE
-                  Q_DOT_RAD = 0._EB
-               ENDIF
-
-            ENDIF SOLID_OR_GAS_PHASE
-
-            ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
-
-            X_DROP  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
-            Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-            IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
-
-            !IF (TMP_DROP < T_BOIL_EFF) THEN
-               DZ_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
-            !ELSE
-            !   DZ_DTMP_DROP = 0._EB
-            !ENDIF
-
-            ! Update the PARTICLE temperature semi_implicitly
-
-            DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DZ_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP)
-            TMP_DROP_NEW = (TMP_DROP + DT_SUBSTEP*( Q_DOT_RAD + &
-                           A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
-                           H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DZ_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
-
-            ! Compute the total amount of heat extracted from the gas, wall and radiative fields
-
-            Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
-            Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
-            Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
-            IF (ABS(Q_CON_WALL)>TWO_EPSILON_EB) THEN
-               IF (Q_CON_WALL < 0._EB) THEN
-                     IF (WALL_QCONF(IW)+Q_CON_WALL*WGT < MCBAR*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))) &
-                        Q_CON_WALL = MAX(0._EB,MCBAR*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))-WALL_QCONF(IW))/WGT
-               ENDIF
-               IF (Q_CON_WALL > 0._EB) THEN
-                     IF (WALL_QCONF(IW)+Q_CON_WALL*WGT > MCBAR*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))) &
-                        Q_CON_WALL = MIN(0._EB,MCBAR*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))-WALL_QCONF(IW))/WGT
-               ENDIF
-            ENDIF
-
-            Q_TOT = Q_RAD+Q_CON_GAS+Q_CON_WALL
-
-            ! Compute the total amount of liquid evaporated
-
-            M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DZ_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS)
-            M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
-
-            IF (M_VAP < M_DROP) THEN
-               TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
-               ITMP = NINT(TMP_DROP)
-               ITMP2 = MIN(I_BOIL,MAX(I_MELT,NINT(TMP_DROP_NEW)))
-               C_DROP2 = SS%C_P_L(ITMP2)
-               IF (ITMP/=ITMP2) THEN
-                  C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
-                  TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP2 * (M_DROP - M_VAP))
-               ENDIF
-            ELSE
-               Q_FRAC = M_VAP*H_V/Q_TOT
-               Q_RAD = Q_RAD*Q_FRAC
-               Q_CON_GAS = Q_CON_GAS*Q_FRAC
-               Q_CON_WALL = Q_CON_WALL*Q_FRAC
-               TMP_DROP_NEW = T_BOIL_EFF
-            ENDIF
-
-            ! If the PARTICLE temperature drops below its freezing point, just reset it
-
-            IF (TMP_DROP_NEW<TMP_MELT) TMP_DROP_NEW = TMP_MELT
-
-            ! If the PARTICLE temperature reaches boiling, use only enough energy from gas to vaporize liquid
-
-            IF (TMP_DROP_NEW>T_BOIL_EFF .AND. M_VAP < M_DROP) THEN
-               ITMP = NINT(TMP_DROP)
-               ITMP2 = NINT(T_BOIL_EFF)
-               C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
-               M_VAP  = MIN(M_DROP,(Q_TOT-M_DROP*C_DROP2*(T_BOIL_EFF-TMP_DROP))/(H_V-C_DROP2*(T_BOIL_EFF-TMP_DROP)))
-               IF (M_VAP == M_DROP) THEN
-                  Q_FRAC = M_VAP*H_V/Q_TOT
-                  Q_RAD = Q_RAD*Q_FRAC
-                  Q_CON_GAS = Q_CON_GAS*Q_FRAC
-                  Q_CON_WALL = Q_CON_WALL*Q_FRAC
-               ENDIF
-               TMP_DROP_NEW = T_BOIL_EFF
-            ENDIF
-            M_DROP = M_DROP - M_VAP
-
-            ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different
-            ! Heat of Combustion between fuel PARTICLE and gas
-
-            I_FUEL = 0
-            IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
-
-            IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
-
-            M_GAS_NEW = M_GAS + WGT*M_VAP
-            ZZ_GET2 = M_GAS/M_GAS_NEW*ZZ_GET
-            ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
-
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP_NEW,H_V2)
-            DHOR     = H_V2*MW_DROP/R0
-            X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
-            Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
-
-            CALL GET_MASS_FRACTION(ZZ_GET2,Y_INDEX,Y_GAS_NEW)
-
-            ! Limit temperature decrease
-
-            IF (TMP_DROP_NEW < TMP_DROP .AND. Y_GAS_NEW > 1.05_EB*Y_GAS) THEN
-               IF (1.1_EB*Y_EQUIL < Y_GAS_NEW .AND. M_VAP > 0._EB) THEN
-                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-                  IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                     CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
-                     RETURN
-                  ENDIF
-                  CYCLE TIME_ITERATION_LOOP
-               ENDIF
-            ENDIF
-
-            ! Limit supersaturation
-
-            IF (Y_GAS < Y_EQUIL) THEN
-               IF (Y_GAS_NEW/Y_EQUIL > 1.02_EB) THEN
-                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-                  IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                     CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
-                     RETURN
-                  ENDIF
-                  CYCLE TIME_ITERATION_LOOP
-               ENDIF
-            ENDIF
-
-            ! Update gas temperature
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
-
-            H_G = M_GAS*CP*TMP_G
-            TMP_G_NEW = TMP_G
-
-            H_NEW = H_G + WGT*(M_VAP*(H_V+H_L) - Q_CON_GAS)
-
-            !IF (H_NEW > 0._EB) THEN
-               TMP_G_I = TMP_G
-               TEMPITER = .TRUE.
-               ITCOUNT = 0
-               ITERATE_TEMP: DO WHILE (TEMPITER)
-                  TEMPITER=.FALSE.
-
-                  ! Compute approximation of d(cp)/dT
-
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)
-                  IF (TMP_G_I > 1._EB) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
-                     DCPDT = CP2-CP
-                  ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
-                     DCPDT = CP-CP2
-                  ENDIF
-
-                  TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
-
-                  IF (TMP_G_I < 0._EB) THEN
-                     DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-                     CYCLE TIME_ITERATION_LOOP
-                  ENDIF
-
-                  ITCOUNT = ITCOUNT + 1
-                  IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
-                  IF (ITCOUNT > 10) THEN
-                     TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
-                     EXIT ITERATE_TEMP
-                  ENDIF
-                  TMP_G_NEW = TMP_G_I
-               ENDDO ITERATE_TEMP
-               TMP_G_NEW = MAX(TMP_G_NEW,TMPMIN)
-            !ELSE
-            !   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-            !   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-            !   CYCLE TIME_ITERATION_LOOP
-            !ENDIF
-
-            ! Limit gas temperature change
-
-            IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
-               DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-               N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
-               IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                  CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
-                  RETURN
-               ENDIF
-               CYCLE TIME_ITERATION_LOOP
-            ENDIF
-
-            ! Update gas cell density, temperature, and mass fractions
-
-            RHO_INTERIM(II,JJ,KK) = M_GAS_NEW*RVC
-            ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES) = ZZ_GET2(1:N_TRACKED_SPECIES)
-            TMP_INTERIM(II,JJ,KK) = TMP_G_NEW
-
-            ! Compute contribution to the divergence
-
-            ZZ_GET = 0._EB
-            ZZ_GET(Z_INDEX) = 1._EB
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
-            DELTA_H_G = H_S_B - H_S
-            D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
-            M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
-            LP%M_DOT = M_VAP/DT
-
-            ! Add stability checks
-
-            IF (PARTICLE_CFL) PART_UVWMAX = MAX(PART_UVWMAX,H_MASS,H_HEAT/(RHO_G*CP))
-
-            ! Add energy losses and gains to overall energy budget array
-
-            Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
-            Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-            Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
-            Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
-
-            IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
-            M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT  ! Total mass loss rate
-
-            ! Keep track of total mass evaporated in cell
-
-            MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
-
-            ! Update PARTICLE quantities
-
-            LP%ONE_D%X(1)   = (M_DROP/FTPR)**ONTH
-            LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
-            LP%ONE_D%TMP(1) = TMP_DROP_NEW
-            LP%ONE_D%TMP_F  = TMP_DROP_NEW
-            LP%MASS = M_DROP
-
-            ! Compute surface cooling
-            IF (IW > 0) THEN
-               WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
-!                                                   OMRAF*WGT*(Q_RAD+Q_CON_WALL)*WALL(IW)%RAW/DT
-                                                   OMRAF*WGT*Q_CON_WALL*WALL(IW)%RAW/DT
-               WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT*Q_DOT_RAD)/(WALL(IW)%AW*DT)
-               WALL_QCONF(IW) = WALL_QCONF(IW) + Q_CON_WALL*WGT
-            ENDIF
-
-         ENDIF KILL_RADIUS_CHECK
-
-         ! Get out of the loop if the PARTICLE has evaporated completely
-         IF (LP%ONE_D%X(1)<=LPC%KILL_RADIUS) CYCLE PARTICLE_LOOP
-
-         DT_SUM = DT_SUM + DT_SUBSTEP
-         DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
-
-      ENDDO TIME_ITERATION_LOOP
-
-   ENDDO PARTICLE_LOOP
-
-ENDDO SPECIES_LOOP
-
-! Second loop is for summing the part quantities
-
-SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
-
-   DROP_AREA => WORK1
-   DROP_DEN => WORK4
-   DROP_RAD => WORK5
-   DROP_TMP => WORK6
-   DROP_DEN_ALL => WORK8
-
-   PART_CLASS_SUM_LOOP: DO N_LPC = 1,N_LAGRANGIAN_CLASSES
-
-      LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE PART_CLASS_SUM_LOOP
-
-      DROP_DEN = 0._EB
-      DROP_TMP = 0._EB
-      DROP_RAD = 0._EB
-      DROP_AREA = 0._EB
-      DROP_DEN_ALL = 0._EB
-
-      PARTICLE_LOOP_2: DO IP=1,NLP
-
-         LP => LAGRANGIAN_PARTICLE(IP)
-         IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_2
-         II = LP%ONE_D%IIG
-         JJ = LP%ONE_D%JJG
-         KK = LP%ONE_D%KKG
-         RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-
-         ! Determine the mass of the PARTICLE/particle, depending on whether the particle has a distinct SURFace type.
-
-         IF (LPC%LIQUID_DROPLET) THEN
-            R_DROP = LP%ONE_D%X(1)
-            A_DROP = PI*R_DROP**2
-         ELSE
-            SF => SURFACE(LPC%SURF_INDEX)
-            R_DROP = MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))
-            SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CARTESIAN)
-                  A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
-               CASE(SURF_CYLINDRICAL)
-                  A_DROP = 2._EB*SF%LENGTH*R_DROP
-               CASE(SURF_SPHERICAL)
-                  A_DROP = PI*R_DROP**2
-            END SELECT
-         ENDIF
-
-         ! Assign particle or PARTICLE mass to the grid cell if the particle/PARTICLE not on a surface
-
-         IF (LP%ONE_D%IOR==0) THEN
-            DEN_ADD  =    LP%PWT*LP%MASS * RVC
-            AREA_ADD =    LP%PWT*A_DROP * RVC
-            DROP_DEN(II,JJ,KK)  = DROP_DEN(II,JJ,KK)  + DEN_ADD
-            DROP_TMP(II,JJ,KK)  = DROP_TMP(II,JJ,KK)  + DEN_ADD*LP%ONE_D%TMP_F
-            DROP_RAD(II,JJ,KK)  = DROP_RAD(II,JJ,KK)  + AREA_ADD*R_DROP
-            DROP_AREA(II,JJ,KK) = DROP_AREA(II,JJ,KK) + AREA_ADD
-         ENDIF
-
-         ! Compute surface density
-
-         IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) THEN
-            IW     = LP%WALL_INDEX
-            R_DROP = LP%ONE_D%X(1)
-            FTPR   = FOTHPI * LP%ONE_D%RHO(1,1)
-            M_DROP = FTPR*R_DROP**3
-            WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) + OMRAF*LP%PWT*M_DROP*WALL(IW)%RAW
-         ENDIF
-
-      ENDDO PARTICLE_LOOP_2
-
-     ! Compute cumulative quantities for PARTICLE "clouds"
-
-      DROP_RAD = DROP_RAD/(DROP_AREA+TWO_EPSILON_EB)
-      DROP_TMP = DROP_TMP/(DROP_DEN +TWO_EPSILON_EB)
-      AVG_DROP_RAD(:,:,:,LPC%ARRAY_INDEX ) = DROP_RAD
-      AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_TMP
-      IF (LPC%Y_INDEX>0) THEN
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ELSE
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ENDIF
-      AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_DEN
-      AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) + OMRAF*DROP_AREA
-      WHERE (AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX )<0.0001_EB .AND. ABS(DROP_DEN)<TWO_EPSILON_EB) &
-         AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = 0.0_EB
-
-   ENDDO PART_CLASS_SUM_LOOP
-
-   ! Get total particle density
-
-   DO IP=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(IP)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-      RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      DROP_DEN_ALL(II,JJ,KK) = DROP_DEN(II,JJ,KK) + LP%PWT*LP%MASS*RVC
-   ENDDO
-
-   AVG_DROP_DEN_ALL(:,:,:) = RUN_AVG_FAC*AVG_DROP_DEN_ALL(:,:,:) + OMRAF*DROP_DEN_ALL
-
-ENDIF SUM_PART_QUANTITIES
-
-! Remove PARTICLEs that have completely evaporated
-
-CALL REMOVE_PARTICLES(T,NM)
-
-END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER
-
-
-SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER_2(T,DT,NM)
-
-! Mass and energy transfer between gas and PARTICLEs
-
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
-                               GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,GET_VISCOSITY,GET_CONDUCTIVITY
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP
-USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
-USE TRAN, ONLY: GET_IJK
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL(),&
-                                       DROP_DEN_ALL=>NULL(),RHO_INTERIM=>NULL(),TMP_INTERIM=>NULL()
+                                       RHO_INTERIM=>NULL(),TMP_INTERIM=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),TMP_WALL_INTERIM=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
@@ -2721,7 +2033,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
             T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,&
             M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2
-
+REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
@@ -2898,7 +2210,28 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ENDIF
             ENDIF SOLID_OR_GAS_PHASE_1
 
-            BOIL_ALL: IF (Q_DOT_RAD*DT_SUBSTEP > M_DROP*H_V) THEN
+            ! Determine the ratio of molecular weights between the gas and droplet vapor
+
+            MW_GAS = 0._EB
+            IF (ABS(Y_GAS-1._EB) > TWO_EPSILON_EB) THEN
+               DO NS=1,N_SPECIES
+                  IF (NS==Y_INDEX) CYCLE
+                  MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
+               ENDDO
+               IF (MW_GAS<=TWO_EPSILON_EB) THEN
+                  MW_GAS=SPECIES_MIXTURE(1)%MW
+               ELSE
+                  MW_GAS = (1._EB-Y_GAS)/MW_GAS
+               ENDIF
+            ELSE
+               MW_GAS=SPECIES_MIXTURE(1)%MW
+            ENDIF
+            MW_RATIO = MW_GAS/MW_DROP
+
+            ! Decide whether to evporate the entire droplet or only part of it
+
+            BOIL_ALL: IF (Q_DOT_RAD*DT_SUBSTEP > M_DROP*H_V) THEN  ! boil it all
+
                M_VAP = M_DROP
                Q_RAD = M_VAP*H_V
                I_FUEL = 0
@@ -2928,31 +2261,15 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ! Keep track of total mass evaporated in cell
 
                MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
-            ELSE BOIL_ALL
+
+            ELSE BOIL_ALL  ! boil only some of the liquid
 
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
                H_L = H_L*TMP_DROP
                H_D_OLD  = H_L*M_DROP
                DHOR     = H_V*MW_DROP/R0
-
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-               MW_GAS = 0._EB
-               IF (ABS(Y_GAS-1._EB) > TWO_EPSILON_EB) THEN
-                  DO NS=1,N_SPECIES
-                     IF (NS==Y_INDEX) CYCLE
-                     MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
-                  ENDDO
-                  IF (MW_GAS<=TWO_EPSILON_EB) THEN
-                     MW_GAS=SPECIES_MIXTURE(1)%MW
-                  ELSE
-                     MW_GAS = (1._EB-Y_GAS)/MW_GAS
-                  ENDIF
-               ELSE
-                  MW_GAS=SPECIES_MIXTURE(1)%MW
-               ENDIF
-
-               MW_RATIO = MW_GAS/MW_DROP
 
                ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
 
@@ -3043,6 +2360,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
 
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
+
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
@@ -3302,16 +2620,18 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                LP%MASS = M_DROP
 
                ! Compute surface cooling
+
                IF (IW > 0) THEN
-                  WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
-   !                                                   OMRAF*WGT*(Q_RAD+Q_CON_WALL)*WALL(IW)%RAW/DT
-                                                      OMRAF*WGT*Q_CON_WALL*WALL(IW)%RAW/DT
+                  WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + OMRAF*WGT*Q_CON_WALL/(WALL(IW)%AW*DT)
                   WALL(IW)%ONE_D%QRADIN = (WALL(IW)%AW*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT*Q_DOT_RAD)/(WALL(IW)%AW*DT)
                ENDIF
+
             ENDIF BOIL_ALL
+
          ENDIF KILL_RADIUS_CHECK
 
          ! Get out of the loop if the PARTICLE has evaporated completely
+
          IF (LP%ONE_D%X(1)<=LPC%KILL_RADIUS) CYCLE PARTICLE_LOOP
 
          DT_SUM = DT_SUM + DT_SUBSTEP
@@ -3331,7 +2651,6 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
    DROP_DEN => WORK4
    DROP_RAD => WORK5
    DROP_TMP => WORK6
-   DROP_DEN_ALL => WORK8
 
    PART_CLASS_SUM_LOOP: DO N_LPC = 1,N_LAGRANGIAN_CLASSES
 
@@ -3342,7 +2661,6 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
       DROP_TMP = 0._EB
       DROP_RAD = 0._EB
       DROP_AREA = 0._EB
-      DROP_DEN_ALL = 0._EB
 
       PARTICLE_LOOP_2: DO IP=1,NLP
 
@@ -3389,7 +2707,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
             R_DROP = LP%ONE_D%X(1)
             FTPR   = FOTHPI * LP%ONE_D%RHO(1,1)
             M_DROP = FTPR*R_DROP**3
-            WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) + OMRAF*LP%PWT*M_DROP*WALL(IW)%RAW
+            WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) + OMRAF*LP%PWT*M_DROP/WALL(IW)%AW
          ENDIF
 
       ENDDO PARTICLE_LOOP_2
@@ -3399,33 +2717,21 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
       DROP_RAD = DROP_RAD/(DROP_AREA+TWO_EPSILON_EB)
       DROP_TMP = DROP_TMP/(DROP_DEN +TWO_EPSILON_EB)
       AVG_DROP_RAD(:,:,:,LPC%ARRAY_INDEX ) = DROP_RAD
-      AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_TMP
+      AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + &
+                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_TMP
       IF (LPC%Y_INDEX>0) THEN
          AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
       ELSE
          AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
       ENDIF
-      AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_DEN
-      AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) + OMRAF*DROP_AREA
+      AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) + &
+                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_DEN
+      AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) = LPC%RUNNING_AVERAGE_FACTOR*AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) + &
+                                      (1._EB-LPC%RUNNING_AVERAGE_FACTOR)*DROP_AREA
       WHERE (AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX )<0.0001_EB .AND. ABS(DROP_DEN)<TWO_EPSILON_EB) &
          AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = 0.0_EB
 
    ENDDO PART_CLASS_SUM_LOOP
-
-   ! Get total particle density
-
-   DO IP=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(IP)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-      RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      DROP_DEN_ALL(II,JJ,KK) = DROP_DEN(II,JJ,KK) + LP%PWT*LP%MASS*RVC
-   ENDDO
-
-   AVG_DROP_DEN_ALL(:,:,:) = RUN_AVG_FAC*AVG_DROP_DEN_ALL(:,:,:) + OMRAF*DROP_DEN_ALL
 
 ENDIF SUM_PART_QUANTITIES
 
@@ -3433,466 +2739,7 @@ ENDIF SUM_PART_QUANTITIES
 
 CALL REMOVE_PARTICLES(T,NM)
 
-END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER_2
-
-
-SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER_EQ(T,DT,NM)
-
-! Mass and energy transfer between gas and PARTICLEs
-
-USE PHYSICAL_FUNCTIONS, ONLY : GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT,GET_MASS_FRACTION,&
-                               GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,GET_EQUILIBRIUM
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP
-USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
-USE TRAN, ONLY: GET_IJK
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_AREA=>NULL(),DROP_DEN=>NULL(),DROP_DEN_ALL=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),&
-                                       H_LIQUID=>NULL(),M_LIQUID=>NULL(),M_VAPOR=>NULL(),OMEGA=>NULL(),&
-                                       QR_LIQUID=>NULL(),T_EQ=>NULL(),Y_EQ=>NULL()
-INTEGER, POINTER, DIMENSION(:,:,:) :: FULL_EVAP=>NULL()
-REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),WALL_QCONF=>NULL()
-REAL(EB) :: A_DROP,AREA_ADD,BETA,C_DROP,CHI,CP,D_AIR,DEN_ADD,DHOR,EXP_OMEGAT,F,FG_TERM,G,H_G,H_L,H_L_OLD,H_V,H_L_NEW,&
-            H_HEAT,H_MASS,&
-            H_S,H_S_B,H_SOLID,K_GAS,K_LIQUID,MINIMUM_FILM_THICKNESS,&
-            M_DROP,M_DROP_NEW,M_GAS,M_VAP,MU_LIQUID,MW_DROP,MW_GAS,MW_RATIO,NU_FAC_GAS,NU_FAC_WALL,NUSSELT,OMRAF,P_RATIO,&
-            Q_CON_GAS,Q_D_1,&
-            R_DROP,RDT,RDT_HAT,RVC,SH_FAC_GAS,SH_FAC_WALL,SHERWOOD,TMP_DROP,TMP_DROP_NEW,TMP_FILM,X_DROP,Y_ALL(1:N_SPECIES),&
-            Y_DROP,Y_GAS,ZZ_GET(1:N_TRACKED_SPECIES),OMEGA_L,OMEGA_P,OMEGA_H,TMP_V_EFF,D_M_VAP,CP_BAR,CP_BAR_2
-INTEGER :: IP,I_FUEL,II,JJ,KK,ITMP,IW,N_LPC,NS,Y_INDEX,Z_INDEX
-REAL(EB), INTENT(IN) :: T,DT
-INTEGER, INTENT(IN) :: NM
-TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
-TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
-TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
-
-IF (.NOT. ANY(LAGRANGIAN_PARTICLE_CLASS(:)%LIQUID_DROPLET)) RETURN
-
-CALL POINT_TO_MESH(NM)
-
-! Initializations
-
-RDT = 1._EB/DT
-RDT_HAT = 1000._EB*RDT
-OMRAF  = 1._EB - RUN_AVG_FAC
-M_DOT(2,NM) = 0._EB ! Fuel mass loss rate of droplets
-M_DOT(4,NM) = 0._EB ! Total mass loss rate of droplets
-
-! Rough estimates
-
-MINIMUM_FILM_THICKNESS = 1.E-5_EB   ! Minimum thickness of liquid film on the surface (m)
-H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surface to drop (W/m2/K)
-
-! Empirical coefficients
-
-SH_FAC_GAS             = 0.6_EB*SC**ONTH !SC defined on MISC
-NU_FAC_GAS             = 0.6_EB*PR**ONTH !PR defined on MISC
-SH_FAC_WALL            = 0.037_EB*SC**ONTH
-NU_FAC_WALL            = 0.037_EB*PR**ONTH
-
-! Liquid properties (temporary place)
-
-MU_LIQUID              = 1040E-6_EB  ! N.s/m2
-K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
-
-! Working arrays
-
-WALL_QCONF=>WALL_WORK1
-WALL_QCONF=0._EB
-
-IF (N_LP_ARRAY_INDICES>0) THEN
-   DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WALL(IW)%LP_CPUA  = RUN_AVG_FAC*WALL(IW)%LP_CPUA
-      WALL(IW)%LP_MPUA  = RUN_AVG_FAC*WALL(IW)%LP_MPUA
-   ENDDO
-ENDIF
-
-I_FUEL = 0
-IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
-
-! Loop over all types of evaporative species
-
-SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
-
-   ! Initialize quantities common to the evaporation index
-
-   IF (.NOT. SPECIES_MIXTURE(Z_INDEX)%EVAPORATING) CYCLE SPECIES_LOOP
-   Y_INDEX = SPECIES_MIXTURE(Z_INDEX)%SINGLE_SPEC_INDEX
-   SS => SPECIES(Y_INDEX)
-   MW_DROP  = SS%MW
-   FILM_THICKNESS => WALL_WORK2
-   FILM_THICKNESS =  0._EB
-   CHI = 4._EB*PI*(SS%DENSITY_LIQUID*FOTHPI)**(-TWTH)
-
-   ! Loop through all PARTICLEs in the class and determine the depth of the liquid film on each surface cell
-
-   FILM_SUMMING_LOOP: DO IP=1,NLP
-      LP  => LAGRANGIAN_PARTICLE(IP)
-      IF (LP%WALL_INDEX==0) CYCLE FILM_SUMMING_LOOP
-      IF (LP%ONE_D%IOR==0)  CYCLE FILM_SUMMING_LOOP
-      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (.NOT.LPC%LIQUID_DROPLET) CYCLE FILM_SUMMING_LOOP
-      IF (LPC%Z_INDEX/=Z_INDEX) CYCLE FILM_SUMMING_LOOP
-      IF (LP%ONE_D%X(1)<=LPC%KILL_RADIUS) CYCLE FILM_SUMMING_LOOP
-      IW = LP%WALL_INDEX
-      FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + LP%PWT*LP%ONE_D%X(1)**3/WALL(IW)%AW
-   ENDDO FILM_SUMMING_LOOP
-
-   FILM_THICKNESS = MAX(MINIMUM_FILM_THICKNESS,FOTHPI*FILM_THICKNESS)
-
-   ! Get equilibrium conditions
-   M_LIQUID  => WORK1;  M_LIQUID  = 0._EB
-   H_LIQUID  => WORK2;  H_LIQUID  = 0._EB
-   QR_LIQUID => WORK3;  QR_LIQUID = 0._EB
-   T_EQ      => WORK4;  T_EQ      = 0._EB
-   Y_EQ      => WORK5;  Y_EQ      = 0._EB
-   OMEGA     => WORK6;  OMEGA     = 0._EB
-   FULL_EVAP => IWORK1; FULL_EVAP = 0
-   ! Sum drop masses and enthalpies
-   EQ_LOOP_1: DO IP=1,NLP
-
-      LP  => LAGRANGIAN_PARTICLE(IP)
-      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE EQ_LOOP_1
-      IF (.NOT.LPC%LIQUID_DROPLET)  CYCLE EQ_LOOP_1
-
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-
-      ZZ_GET = ZZ(II,JJ,KK,:)
-      CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
-      Y_GAS = Y_ALL(Y_INDEX)
-      MW_GAS = 0._EB
-      IF (ABS(Y_ALL(Y_INDEX)-1._EB) > TWO_EPSILON_EB) THEN
-         DO NS=1,N_SPECIES
-            IF (NS==Y_INDEX) CYCLE
-            MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
-         ENDDO
-         IF (MW_GAS<=TWO_EPSILON_EB) THEN
-            MW_GAS=SPECIES_MIXTURE(1)%MW
-         ELSE
-            MW_GAS = (1._EB-Y_ALL(Y_INDEX))/MW_GAS
-         ENDIF
-      ELSE
-         MW_GAS=SPECIES_MIXTURE(1)%MW
-      ENDIF
-      MW_RATIO = MW_GAS/MW_DROP
-
-      R_DROP = LP%ONE_D%X(1)
-      M_DROP = LPC%FTPR * R_DROP**3 * LP%PWT
-      A_DROP = 4._EB*PI * R_DROP**2 * LP%PWT
-
-      M_LIQUID(II,JJ,KK) = M_LIQUID(II,JJ,KK) + M_DROP
-
-      TMP_DROP = LP%ONE_D%TMP(1)
-      TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP(II,JJ,KK) - TMP_DROP)
-
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,C_DROP)
-
-      P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
-      DHOR = H_V*MW_DROP/R0
-      X_DROP = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/SS%TMP_V-1._EB/TMP_DROP)))
-      Y_DROP = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-
-      IF (Y_DROP>Y_GAS) THEN
-         SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE)
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
-         H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
-         OMEGA(II,JJ,KK) = OMEGA(II,JJ,KK)+A_DROP*H_MASS*(Y_GAS-Y_DROP)
-      ENDIF
-
-      H_LIQUID(II,JJ,KK) = H_LIQUID(II,JJ,KK) + M_DROP * TMP_DROP * C_DROP
-      IF (SUM(AVG_DROP_AREA(II,JJ,KK,:))>0._EB) Q_D_1 = (QR_W(II,JJ,KK)/SUM(AVG_DROP_AREA(II,JJ,KK,:)))* 0.25_EB*A_DROP * DT
-      ! Limit radiative absorption to energy needed to vaporize entire drop.
-      QR_LIQUID = QR_LIQUID + MIN(Q_D_1,H_V*M_DROP)
-
-   ENDDO EQ_LOOP_1
-
-   ! Get equilibrium condition
-   DO KK=1,KBAR
-      DO JJ=1,JBAR
-         EQ_LOOP_2: DO II=1,IBAR
-            IF (M_LIQUID(II,JJ,KK)<= 0._EB) CYCLE EQ_LOOP_2
-            P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
-            RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-            M_GAS = RHO(II,JJ,KK)/RVC
-            ITMP = INT(TMP(II,JJ,KK))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_BAR,REAL(ITMP,EB))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_BAR_2,REAL(ITMP+1,EB))
-            CP_BAR = CP_BAR + (TMP(II,JJ,KK)-REAL(ITMP,EB))*(CP_BAR_2-CP_BAR)
-            H_G = M_GAS * CP_BAR * TMP(II,JJ,KK)
-            CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_GAS)
-            T_EQ(II,JJ,KK) = TMP(II,JJ,KK)
-            CALL GET_EQUILIBRIUM(Y_EQ(II,JJ,KK),T_EQ(II,JJ,KK),H_G,H_LIQUID(II,JJ,KK),ZZ_GET,M_GAS, &
-                                 M_LIQUID(II,JJ,KK),Y_INDEX,Z_INDEX,QR_LIQUID(II,JJ,KK),P_RATIO,FULL_EVAP(II,JJ,KK))
-            IF (Y_GAS >= Y_EQ(II,JJ,KK)) THEN
-               OMEGA(II,JJ,KK) = 0._EB
-            ELSE
-               OMEGA(II,JJ,KK) = MAX(TWO_EPSILON_EB,1._EB-OMEGA(II,JJ,KK)*RVC/RDT_HAT/(Y_GAS-Y_EQ(II,JJ,KK)))
-               OMEGA(II,JJ,KK) = -RDT_HAT*LOG(OMEGA(II,JJ,KK))
-            ENDIF
-         ENDDO EQ_LOOP_2
-      ENDDO
-   ENDDO
-
-   M_VAPOR      => WORK1; M_VAPOR      = 0._EB
-
-   PARTICLE_LOOP:DO IP=1,NLP
-
-      LP  => LAGRANGIAN_PARTICLE(IP)
-      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE PARTICLE_LOOP
-      IF (.NOT.LPC%LIQUID_DROPLET)  CYCLE PARTICLE_LOOP
-
-      ! Determine the current coordinates of the particle
-
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-      RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      M_GAS = RHO(II,JJ,KK)/RVC
-      ZZ_GET = ZZ(II,JJ,KK,:)
-      CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(II,JJ,KK))
-      H_G = CP * TMP(II,JJ,KK) * M_GAS
-      TMP_DROP = LP%ONE_D%TMP(1)
-      TMP_DROP_NEW = TMP_DROP
-      R_DROP = LP%ONE_D%X(1)
-      M_DROP = LPC%FTPR * R_DROP**3
-      A_DROP = 4._EB*PI * R_DROP**2
-      IF (SUM(AVG_DROP_AREA(II,JJ,KK,:))>0._EB) THEN
-         Q_D_1 = MIN(H_V*M_DROP/DT,(QR_W(II,JJ,KK)/SUM(AVG_DROP_AREA(II,JJ,KK,:)))*0.25_EB*A_DROP)
-      ELSE
-         Q_D_1 = 0._EB
-      ENDIF
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,C_DROP)
-      H_L_OLD = TMP_DROP * C_DROP
-      H_L = M_DROP * LP%PWT * H_L_OLD
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
-      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
-      P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
-      DHOR = H_V*MW_DROP/R0
-      TMP_V_EFF = 1._EB/(1._EB/SS%TMP_V + LOG(P_RATIO)/DHOR)
-      X_DROP = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/SS%TMP_V-1._EB/TMP_DROP)))
-      Y_DROP = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-      TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP(II,JJ,KK) - TMP_DROP)
-      CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_GAS)
-      CALL GET_CONDUCTIVITY(ZZ_GET,K_GAS,TMP_FILM)
-      CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_FILM)
-      OMEGA_L = 0._EB ; OMEGA_P=OMEGA(II,JJ,KK); OMEGA_H=OMEGA(II,JJ,KK)
-      PREVENT_FREEZE: DO
-         OMEGA_H = MIN(OMEGA_H,OMEGA_P)
-         IF (Y_DROP > Y_GAS .AND. OMEGA_P > 0._EB) THEN
-            SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(LP%RE)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
-            H_MASS = SHERWOOD*D_AIR/(2._EB*R_DROP)
-            BETA = RHO(II,JJ,KK)*CHI*H_MASS*(Y_GAS - Y_DROP)
-            FG_TERM = MAX(0._EB,M_DROP**ONTH+BETA/(3*OMEGA_P)*(1._EB-EXP(-OMEGA_P*0.5_EB*DT)))
-            M_DROP_NEW = MAX(0._EB,M_DROP**ONTH+BETA/(3*OMEGA_P)*(1._EB-EXP(-OMEGA_P*DT)))**3
-            IF (M_DROP_NEW < LPC%KILL_MASS) M_DROP_NEW = 0._EB
-            M_VAP = (M_DROP - M_DROP_NEW)
-         ELSE
-            M_DROP_NEW = M_DROP
-            M_VAP = 0._EB
-            BETA = 0._EB
-            FG_TERM = M_DROP**ONTH
-         ENDIF
-         IF (M_DROP_NEW > 0._EB) THEN
-            EXP_OMEGAT = EXP(-OMEGA_P*0.5_EB*DT)
-            CALL GET_CONDUCTIVITY(ZZ_GET,K_GAS,TMP_FILM)
-            NUSSELT =2._EB + NU_FAC_GAS*SQRT(LP%RE)
-            H_HEAT = NUSSELT*K_GAS/(2._EB*R_DROP)
-            F = -CHI*H_HEAT/(C_DROP*FG_TERM)
-            G = ((CHI*H_HEAT*(TMP(II,JJ,KK)-T_EQ(II,JJ,KK))+BETA*H_V)*EXP_OMEGAT+CHI*H_HEAT*T_EQ(II,JJ,KK))/&
-                (C_DROP*FG_TERM)+Q_D_1/(C_DROP*FG_TERM**3)
-            TMP_DROP_NEW = (TMP_DROP*(1._EB+0.5_EB*DT*F)+DT*G)/(1._EB-0.5_EB*DT*F)
-            IF (TMP_DROP > T_EQ(II,JJ,KK)) THEN
-               TMP_DROP_NEW=MAX(T_EQ(II,JJ,KK),TMP_DROP_NEW)
-            ELSE
-               TMP_DROP_NEW=MIN(T_EQ(II,JJ,KK),TMP_DROP_NEW)
-            ENDIF
-            ! If the drop freezes decrease the amount of evaporation (increase the value of omega)
-            IF (TMP_DROP_NEW < SPECIES(LPC%Y_INDEX)%TMP_MELT) THEN
-               IF (M_VAP > 0._EB) THEN
-               OMEGA_P = OMEGA_P * 1.05_EB * (TMP_DROP-TMP_DROP_NEW)/(TMP_DROP-SPECIES(LPC%Y_INDEX)%TMP_MELT)
-               CYCLE PREVENT_FREEZE
-               ELSE
-                  TMP_DROP_NEW = SPECIES(LPC%Y_INDEX)%TMP_MELT
-               ENDIF
-            ENDIF
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,C_DROP)
-            H_L_NEW = M_DROP_NEW*TMP_DROP_NEW*C_DROP
-         ELSE
-            H_L_NEW = 0._EB
-         ENDIF
-         EXIT PREVENT_FREEZE
-      ENDDO PREVENT_FREEZE
-
-      !Check for exceeding the vaporization temperature when the equilbrium is to evaporate all the mass
-
-      IF (FULL_EVAP(II,JJ,KK) > 0 .AND. TMP_DROP_NEW > TMP_V_EFF) THEN
-         TMP_DROP_NEW = TMP_V_EFF
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,C_DROP)
-         D_M_VAP = MIN(M_DROP_NEW,(H_L_NEW - M_DROP_NEW*TMP_DROP_NEW*C_DROP)/H_V)
-         M_VAP = M_VAP + D_M_VAP
-         M_DROP_NEW = M_DROP_NEW - D_M_VAP
-         IF (M_DROP_NEW <= TWO_EPSILON_EB) THEN
-            H_L_NEW = 0._EB
-         ELSE
-            H_L_NEW = M_DROP_NEW*TMP_DROP_NEW*C_DROP
-         ENDIF
-      ENDIF
-
-      LP%M_DOT = M_VAP/DT
-      H_L_NEW = H_L_NEW*LP%PWT
-      M_VAP = M_VAP * LP%PWT
-      M_VAPOR(II,JJ,KK) = M_VAPOR(II,JJ,KK) + M_VAP
-
-      ! Compute contribution to the divergenceq
-
-      ZZ_GET = 0._EB
-      ZZ_GET(Z_INDEX) = 1._EB
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(II,JJ,KK))
-      Q_D_1 = Q_D_1*DT*LP%PWT
-      Q_CON_GAS = H_L_NEW - H_L - Q_D_1 + M_VAP * (H_V + H_L_OLD)
-      D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*(H_S_B - H_S) - Q_CON_GAS)/H_G) / DT
-      M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC/DT
-
-      ! Add stability checks
-
-      IF (PARTICLE_CFL) PART_UVWMAX = MAX(PART_UVWMAX,H_MASS,H_HEAT/(RHO(II,JJ,KK)*CP))
-
-      ! Add energy losses and gains to overall energy budget array
-
-      Q_DOT(7,NM) = Q_DOT(7,NM) - (Q_CON_GAS + Q_D_1)/DT ! Q_PART  !!!!Q_CON_WALL
-      Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B/DT      ! Q_CONV
-      Q_DOT(2,NM) = Q_DOT(2,NM) + Q_D_1/DT            ! Q_RADI
-!      Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT  ! Q_COND
-
-      IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_DOT(2,NM) = M_DOT(2,NM) + M_VAP/DT/LPC%ADJUST_EVAPORATION
-      M_DOT(4,NM) = M_DOT(4,NM) + M_VAP/DT  ! Total mass loss rate
-
-      LP%ONE_D%X(1)   = (M_DROP_NEW/LPC%FTPR)**ONTH
-      LP%ONE_D%LAYER_THICKNESS(1) = LP%ONE_D%X(1)
-      LP%ONE_D%TMP(1) = TMP_DROP_NEW
-      LP%ONE_D%TMP_F  = TMP_DROP_NEW
-      LP%MASS = M_DROP_NEW
-  END DO PARTICLE_LOOP
-
-ENDDO SPECIES_LOOP
-
-! Second loop is for summing the part quantities
-
-SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
-
-   DROP_AREA    => WORK1
-   DROP_DEN     => WORK2
-   DROP_DEN_ALL => WORK3
-   DROP_RAD     => WORK4
-   DROP_TMP     => WORK5
-
-   PART_CLASS_SUM_LOOP: DO N_LPC = 1,N_LAGRANGIAN_CLASSES
-
-      LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE PART_CLASS_SUM_LOOP
-
-      DROP_AREA    = 0._EB
-      DROP_DEN     = 0._EB
-      DROP_DEN_ALL = 0._EB
-      DROP_RAD     = 0._EB
-      DROP_TMP     = 0._EB
-
-      PARTICLE_LOOP_2: DO IP=1,NLP
-
-         LP => LAGRANGIAN_PARTICLE(IP)
-         IF (LP%CLASS_INDEX /= N_LPC) CYCLE PARTICLE_LOOP_2
-         II = LP%ONE_D%IIG
-         JJ = LP%ONE_D%JJG
-         KK = LP%ONE_D%KKG
-         RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-
-         ! Determine the mass of the PARTICLE/particle, depending on whether the particle has a distinct SURFace type.
-
-         IF (LPC%LIQUID_DROPLET) THEN
-            R_DROP = LP%ONE_D%X(1)
-            A_DROP = PI*R_DROP**2
-         ELSE
-            SF => SURFACE(LPC%SURF_INDEX)
-            R_DROP = MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))
-            SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CARTESIAN)
-                  A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
-               CASE(SURF_CYLINDRICAL)
-                  A_DROP = 2._EB*SF%LENGTH*R_DROP
-               CASE(SURF_SPHERICAL)
-                  A_DROP = PI*R_DROP**2
-            END SELECT
-         ENDIF
-
-         ! Assign particle or PARTICLE mass to the grid cell if the particle/PARTICLE not on a surface
-
-         IF (LP%ONE_D%IOR==0) THEN
-            DEN_ADD  =    LP%PWT*LP%MASS * RVC
-            AREA_ADD =    LP%PWT*A_DROP * RVC
-            DROP_DEN(II,JJ,KK)  = DROP_DEN(II,JJ,KK)  + DEN_ADD
-            DROP_TMP(II,JJ,KK)  = DROP_TMP(II,JJ,KK)  + DEN_ADD*LP%ONE_D%TMP_F
-            DROP_RAD(II,JJ,KK)  = DROP_RAD(II,JJ,KK)  + AREA_ADD*R_DROP
-            DROP_AREA(II,JJ,KK) = DROP_AREA(II,JJ,KK) + AREA_ADD
-         ENDIF
-
-         ! Compute surface density
-
-         IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) THEN
-            IW     = LP%WALL_INDEX
-            R_DROP = LP%ONE_D%X(1)
-            M_DROP = LPC%FTPR*R_DROP**3
-            WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_MPUA(LPC%ARRAY_INDEX) + OMRAF*LP%PWT*M_DROP*WALL(IW)%RAW
-         ENDIF
-
-      ENDDO PARTICLE_LOOP_2
-
-     ! Compute cumulative quantities for PARTICLE "clouds"
-
-      DROP_RAD = DROP_RAD/(DROP_AREA+TWO_EPSILON_EB)
-      DROP_TMP = DROP_TMP/(DROP_DEN +TWO_EPSILON_EB)
-      AVG_DROP_RAD(:,:,:,LPC%ARRAY_INDEX ) = DROP_RAD
-      AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_TMP
-      IF (LPC%Y_INDEX>0) THEN
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ELSE
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
-      ENDIF
-      AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_DEN
-      AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,LPC%ARRAY_INDEX) + OMRAF*DROP_AREA
-      WHERE (AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX )<0.0001_EB .AND. ABS(DROP_DEN)<TWO_EPSILON_EB) &
-         AVG_DROP_DEN(:,:,:,LPC%ARRAY_INDEX ) = 0.0_EB
-
-   ENDDO PART_CLASS_SUM_LOOP
-
-   ! Get total particle density
-
-   DO IP=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(IP)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE
-      II = LP%ONE_D%IIG
-      JJ = LP%ONE_D%JJG
-      KK = LP%ONE_D%KKG
-      RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      DROP_DEN_ALL(II,JJ,KK) = DROP_DEN(II,JJ,KK) + LP%PWT*LP%MASS*RVC
-   ENDDO
-
-   AVG_DROP_DEN_ALL(:,:,:) = RUN_AVG_FAC*AVG_DROP_DEN_ALL(:,:,:) + OMRAF*DROP_DEN_ALL
-
-ENDIF SUM_PART_QUANTITIES
-
-! Remove PARTICLEs that have completely evaporated
-
-CALL REMOVE_PARTICLES(T,NM)
-
-END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER_EQ
+END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER
 
 
 SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(NM)

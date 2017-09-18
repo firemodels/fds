@@ -50,7 +50,7 @@ CFD model for the Fluid Metrology Group Wind Tunnel
 &SLCF PBx=3.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
 
 /Y+ to determine the mesh quality 
-&BNDF QUANTITY='YPLUS' /
+&BNDF QUANTITY='VISCOUS WALL UNITS' /
 
 /Device to output velocity line statistics
 &DEVC XB=13.5,13.5,0.75,0.75,0.1,2.0, QUANTITY='VELOCITY', ID='RMSInletMid', STATISTICS='RMS', POINTS=5 /right inside the inlet, profile mid

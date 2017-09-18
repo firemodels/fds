@@ -1,6 +1,6 @@
 % McDermott
 % 7-7-14
-% mccaffrey_plumes.m
+% mccaffrey_plume.m
 
 close all
 clear all
@@ -14,14 +14,16 @@ rho = 1.18;
 cp = 1;
 T0 = 273.15 + 20;
 
-DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5); % m
+DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5) % m
+
+repo = '/Volumes/rmcdermo/GitHub/FireModels_rmcdermo/fds/';
 
 %datadir = '../../Validation/McCaffrey_Plume/FDS_Output_Files/';
-datadir = '../../Validation/McCaffrey_Plume/Test2/';
-plotdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/';
+datadir = [repo,'Validation/McCaffrey_Plume/Current_Results/'];
+plotdir = [repo,'Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
 
-chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
-%chid = {'McCaffrey_14_kW_21','McCaffrey_22_kW_21','McCaffrey_33_kW_21','McCaffrey_45_kW_21','McCaffrey_57_kW_21'};
+%chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
+chid = {'McCaffrey_14_kW_21','McCaffrey_22_kW_21','McCaffrey_33_kW_21','McCaffrey_45_kW_21','McCaffrey_57_kW_21'};
 %chid = {'McCaffrey_14_kW_45','McCaffrey_22_kW_45','McCaffrey_33_kW_45','McCaffrey_45_kW_45','McCaffrey_57_kW_45'};
 mark = {'ko','k+','k^','ksq','kd'};
 n_chid = length(chid);
@@ -67,17 +69,23 @@ figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-hh(n_chid+1)=loglog(zs,us,'b--','linewidth',2); hold on
-xmin = 0.2;
-xmax = 20;
-ymin = 1;
-ymax = 3.5;
+hh(n_chid+1)=loglog(zq,vq,'b--','linewidth',2); hold on
+% % for Baum scaling use:
+% xmin = 0.2;
+% xmax = 20;
+% ymin = 1;
+% ymax = 3.5;
+% for McCaffrey 1979 scaling use:
+xmin = 0.008;
+xmax = 0.6;
+ymin = 0.2;
+ymax = 2.5;
 axis([xmin xmax ymin ymax])
 %grid on
-%xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-%ylabel('$V/Q^{1/5}$ (m $\cdot$ s$^{-1}$ $\cdot$ kW$^{-1/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('$v^* = v/\sqrt{g D^*} $','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('$V/Q^{1/5}$ (m $\cdot$ s$^{-1}$ $\cdot$ kW$^{-1/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+% xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+% ylabel('$v^* = v/\sqrt{g D^*} $','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
 % FDS results velocity
 
@@ -88,21 +96,22 @@ for i=1:n_chid
     z = z + dz/2; % use with "wvel" for staggered storage location
     v = M.data(:,find(strcmp('wvel',M.colheaders)));
 
-    %zq_fds = z./Q(i)^(2/5);
-    %vq_fds = v./Q(i)^(1/5);
+    % McCaffrey 1979 scaling
+    zq_fds = z./Q(i)^(2/5);
+    vq_fds = v./Q(i)^(1/5);
 
-    zs_fds = z./DS(i);
-    vs_fds = v./sqrt(g*DS(i));
+    % Baum and McCaffrey 2nd IAFSS scaling
+    % zs_fds = z./DS(i);
+    % vs_fds = v./sqrt(g*DS(i));
 
-    hh(i)=loglog(zs_fds,vs_fds,mark{i});
+    hh(i)=loglog(zq_fds,vq_fds,mark{i});
 end
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
 leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$A(z^*\,)^n$'};
-%leg_key = {'57.5 kW','$A(z^*\,)^n$'};
-lh = legend(hh,leg_key,'location','northwest');
+lh = legend(hh,leg_key,'location','southeast');
 set(lh,'Interpreter',Font_Interpreter)
 set(lh,'FontSize',Key_Font_Size)
 
@@ -126,36 +135,41 @@ figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-hh(n_chid+1)=loglog(zs,Ts,'r--','linewidth',2); hold on
+hh(n_chid+1)=loglog(zq,Tq,'r--','linewidth',2); hold on
 
-xmin = 0.1;
-xmax = 20;
-ymin = 0.1;
-ymax = 5;
+% % Baum scaling:
+% xmin = 0.1;
+% xmax = 20;
+% ymin = 0.1;
+% ymax = 5;
+% McCaffrey scaling
+xmin = 0.008;
+xmax = 0.6;
+ymin = 100;
+ymax = 1600;
 axis([xmin xmax ymin ymax])
 %grid on
-%xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-%ylabel('$\Delta T$ ($^\circ$C)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('$\Theta^* = (T-T_0)/T_0$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('$\Delta T$ ($^\circ$C)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+% xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+% ylabel('$\Theta^* = (T-T_0)/T_0$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
 for i=1:n_chid
     M = importdata([datadir,chid{i},'_line.csv'],',',2);
     z = M.data(:,find(strcmp('Height',M.colheaders)));
     T = M.data(:,find(strcmp('tmp',M.colheaders))) + 273.15;
-    %zq_fds = z./Q(i)^(2/5);
-    %hh(i)=loglog(zq_fds,T,mark{i});
-    hh(i)=loglog(z./DS(i),(T-T0)/T0,mark{i});
+    zq_fds = z./Q(i)^(2/5);
+    hh(i)=loglog(zq_fds,T-T0,mark{i});
+    % hh(i)=loglog(z./DS(i),(T-T0)/T0,mark{i});
 end
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
 leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$B(z^*\,)^{2n-1}$'};
-%leg_key = {'57.5 kW','$B(z^*\,)^{2n-1}$'};
 lh = legend(hh,leg_key,'location','southwest');
 set(lh,'Interpreter',Font_Interpreter)
-set(lg,'FontSize',Key_Font_Size)
+set(lh,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
