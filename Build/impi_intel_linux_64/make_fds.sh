@@ -5,7 +5,7 @@ dir=`pwd`
 target=${dir##*/}
 
 if [ "$IFORT_COMPILER" != "" ]; then
-source $IFORT_COMPILER/bin/compilervars.sh $platform
+  source $IFORT_COMPILER/bin/compilervars.sh $platform
 fi
 
 echo Building $target with Intel MPI

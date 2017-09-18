@@ -1,11 +1,16 @@
 #!/bin/bash
-platform=intel64
+arg=$1
 dir=`pwd`
 target=${dir##*/}
 
-source ../Scripts/set_env.sh eth
-if [ $? -eq 1 ]; then
-  exit
+if [ "$arg" != "-f" ]; then
+  source ../Scripts/set_mpidist.sh eth
+  if [ $mpi_error -eq 1 ]; then
+    exit
+  fi
+  if [ $setup_fortran -eq 1 ]; then
+    source $IFORT_COMPILER/bin/compilervars.sh intel64
+  fi
 fi
 
 echo Building $target

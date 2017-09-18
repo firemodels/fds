@@ -1,12 +1,16 @@
 #!/bin/bash
-platform=intel64
+arg=$1
 dir=`pwd`
 target=${dir##*/}
 
-source ../Scripts/set_env.sh ib
-if [ $? -eq 1 ]; then
-# if MPIDIST was not defined above, abort
-  exit
+if [ "$arg" != "-f" ]; then
+  source ../Scripts/set_mpidist.sh ib
+  if [ $mpi_error -eq 1 ]; then
+    exit
+  fi
+  if [ $setup_fortran -eq 1 ]; then
+    source $IFORT_COMPILER/bin/compilervars.sh intel64
+  fi
 fi
 
 echo Building $target with $MPIDIST
