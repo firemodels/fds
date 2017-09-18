@@ -2582,7 +2582,8 @@ Below is an example input file section:
 &OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
 \end{lstlisting}
 
-Notice that we can account for volumetric heat sources, below is an example from ({\ct ht3d\_source\_term} file:
+{\ct HT3D} can also be used in multiple meshes to transfer heat across mesh boundaries. An example that demonstrate its usage is provided in ({\ct ht3d\_2mesh}). 
+Notice that we can account for volumetric heat sources, below is an example from ({\ct ht3d\_source\_term}) input file:
 
 \begin{lstlisting}
  &INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
