@@ -521,19 +521,19 @@ LOGICAL, INTENT(INOUT):: EXTINCT
 REAL(EB):: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,H,H_CRIT,Q,Q_CRIT
 INTEGER:: NS
 
-IF (N_REACTIONS /= 1 .OR. .NOT. REACTION(1)%FAST_CHEMISTRY) RETURN
+IF (N_REACTIONS /= 1 .OR. .NOT.REACTION(1)%FAST_CHEMISTRY) RETURN
 
 DO NS = 1,N_TRACKED_SPECIES
    IF (NS==REACTION(1)%FUEL_SMIX_INDEX) THEN
       ZZ_HAT_0(NS) = ZZ_0_IN(NS)
       ZZ_HAT(NS) = ZZ_IN(NS)
-   ELSEIF(NS==REACTION(1)%AIR_SMIX_INDEX) THEN
+   ELSEIF (NS==REACTION(1)%AIR_SMIX_INDEX) THEN
       ZZ_HAT_0(NS) = ZZ_0_IN(NS) - ZZ_IN(NS)
       ZZ_HAT(NS) = 0._EB
    ELSE
       ZZ_HAT_0(NS) = (ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX) - ZZ_IN(REACTION(1)%AIR_SMIX_INDEX))/ &
                       ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX)*ZZ_0_IN(NS)
-      ZZ_HAT(NS) = ZZ_IN(NS)-ZZ_0_IN(NS)+ ZZ_HAT_0(NS)
+      ZZ_HAT(NS) = ZZ_IN(NS) - ZZ_0_IN(NS) + ZZ_HAT_0(NS)
    ENDIF
 END DO
 
@@ -542,10 +542,10 @@ ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 
 ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
 
-CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN)  ! H of products participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(1)%CRIT_FLAME_TMP) !H of products at the critical flame temperature
-Q = H_0 - H ! Combustion heat release rate
+CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN)                      ! H of reactants participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN)                          ! H of products participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(1)%CRIT_FLAME_TMP) ! H of products at the critical flame temperature
+Q = H_0 - H         ! Combustion heat release rate
 Q_CRIT = H_CRIT - H ! Heat release rate required to avoid extinction
 IF (Q < Q_CRIT) EXTINCT = .TRUE.
 
@@ -576,7 +576,7 @@ DO NS = 1,N_TRACKED_SPECIES
    ELSE
       ZZ_HAT_0(NS) = (ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX) - ZZ_IN(REACTION(1)%AIR_SMIX_INDEX))/ &
                       ZZ_0_IN(REACTION(1)%AIR_SMIX_INDEX)*ZZ_0_IN(NS)
-      ZZ_HAT(NS) = ZZ_IN(NS)-ZZ_0_IN(NS)+ ZZ_HAT_0(NS)
+      ZZ_HAT(NS) = ZZ_IN(NS) - ZZ_0_IN(NS) + ZZ_HAT_0(NS)
    ENDIF
 END DO
 
@@ -585,10 +585,10 @@ ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 
 ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
 
-CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction
-CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN) ! H of products participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN)                            ! H of reactants participating in reaction
+CALL GET_ENTHALPY(ZZ_HAT,H,TMP_IN)                                ! H of products participating in reaction
 CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,REACTION(CO_PASS)%CRIT_FLAME_TMP) ! H of products at the critical flame temperature
-Q = H_0 - H ! Combustion heat release rate
+Q = H_0 - H         ! Combustion heat release rate
 Q_CRIT = H_CRIT - H ! Heat release rate required to avoid extinction
 IF (Q < Q_CRIT) EXTINCT = .TRUE.
 
