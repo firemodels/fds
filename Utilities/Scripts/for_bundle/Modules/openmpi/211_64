@@ -29,8 +29,11 @@ if [ file isdirectory $mpihome/bin ] {
 
     setenv MPIHOME $mpihome
     setenv MPIDIST $mpihome
+    setenv OPAL_PREFIX $mpihome
+
     setenv MPIFORT mpifort
     setenv MPITYPE $mpitype
+
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77
     setenv F90 $mpihome/bin/mpif90
