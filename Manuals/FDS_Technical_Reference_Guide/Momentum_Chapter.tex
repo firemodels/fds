@@ -32,7 +32,7 @@ In our two-phase formulation, $f_{d,i}$ represents the drag force due to unresol
 \end{equation}
 Here, $\nu$ is the kinematic viscosity and $\epsilon$ is the rate of viscous dissipation (the conversion of kinetic energy to heat by viscosity),
 \begin{equation}
-\epsilon \equiv \tau_{ij} \frac{\partial u_i}{\partial x_j} = 2 \mu \left( S_{ij} S_{ij} - \frac{1}{3} (\nabla\!\cdot \bu)^2 \right) \quad ; \quad S_{ij} \equiv \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+\epsilon \equiv \tau_{ij} \frac{\partial u_i}{\partial x_j} = 2 \mu \left( S_{ij} S_{ij} - \frac{1}{3} (\nabla\!\cdot \bu)^2 \right) \quad ; \quad S_{ij} \equiv \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right) \label{eq:strain_tensor}
 \end{equation}
 
 In fire scenarios, $\eta$ is usually on the order of one millimeter.  DNS is therefore impractical for all but special research flame calculations.
@@ -116,7 +116,7 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}}) \delta_{ij} \right) \widetilde{S}_{ij} && \notag \\
 &= - 2 (\mu + \mu_{\rm t}) \left(\widetilde{S}_{ij}\widetilde{S}_{ij} - \frac{1}{3}(\Div \widetilde{\mathbf{u}})^2 \right) = -2\mu \left(S_{ij}S_{ij} - \frac{1}{3}(\Div \mathbf{u})^2 \right) \equiv \varepsilon
 \end{align}
-Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.
+Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.  See Appendix \ref{app:lilly_analysis}.
 
 \subsection{Wind Fields via Mean Forcing or Nudging}
 
@@ -138,7 +138,7 @@ Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity c
 \be
 \mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
-where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.  The value of $C_{\rm s}=0.2$ is nominally the value obtained from Lilly's analysis \cite{Lilly:1967} (production equals dissipation) for a spectral cutoff filter (implicit filters for energy conserving schemes more closely resemble a spectral cutoff than a box filter \cite{McDermott:2005b}).  The constant value is derived theoretically in Appendix \ref{app:lilly_analysis} and also confirmed in tests of decaying isotropic turbulence in the FDS Verification Guide \cite{FDS_Verification_Guide}.
 
 \subsection{Dynamic Smagorinsky Model}
 
@@ -156,7 +156,7 @@ where $\bar{u}$ is the average value of $u$ at the grid cell center (representin
 \be
    \bar{u}_{ijk} = \frac{u_{ijk}+u_{i-1,jk}}{2} \quad ; \quad \hat{\bar{u}}_{ijk} = \frac{\bar{u}_{ijk}}{2} + \frac{\bar{u}_{i-1,jk} + \bar{u}_{i+1,jk} }{4}
 \ee
-The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
+The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The constant value is also derived theoretically in Appendix \ref{app:lilly_analysis}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
 \subsection{Vreman's Model}
 \label{sec:vreman}
@@ -187,6 +187,28 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
 
 For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the constant coefficient Smagorinsky model.  Unlike constant coefficient Smagorinsky, however, the RNG turns itself off in regions of low turbulence.  The cutoff constant, $C=10$, has been tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case (see FDS Verification Guide \cite{FDS_Verification_Guide}).
 
+\subsection{Wall-Adapting Local Eddy-viscosity (WALE) Model}
+\label{sec:wale}
+
+The Wall-Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
+\begin{equation}
+\label{eq:wale}
+\mu_{\si{t}} = \rho (C_{\si{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
+\end{equation}
+where
+\begin{equation}
+S^d_{ij} S^d_{ij} = \frac{1}{6} \left(S^2 S^2 + \Omega^2 \Omega^2\right) + \frac{2}{3} S^2 \Omega^2 + 2 {IV}_{S\Omega}
+\end{equation}
+\begin{equation*}
+S^2 = S_{ij} S_{ij} \quad ; \quad \Omega^2 = \Omega_{ij} \Omega_{ij} \quad ; \quad {IV}_{S\Omega} = S_{ik}S_{kj}\Omega_{jl}\Omega_{li}
+\end{equation*}
+The strain and rotation tensors are given by
+\begin{equation}
+S_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \quad ; \quad \Omega_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} - \frac{\partial u_j}{\partial x_i} \right)
+\end{equation}
+
+Nicoud and Ducros \cite{Nicoud:1999} suggest the model constant should be in the range $0.55 \le C_{\rm w} \le 0.60$.  FDS uses $C_{\rm w} = 0.60$ based on results for decaying isotropic turbulence \cite{FDS_Verification_Guide}.  It is apparent that WALE may also be used as a bulk flow eddy-viscosity model.  However, this has not been tested in fire applications.
+
 \subsection{Thermal Conduction and Gas Species Diffusion}
 
 The other diffusive parameters,
@@ -194,7 +216,7 @@ the thermal conductivity and mass diffusivity, are related to the turbulent visc
 \be k_{\rm t} = \frac{\mu_{\rm t} \, c_p}{\PR_{\rm t}}
 \quad ; \quad
  (\rho D)_{\rm t} =\frac{\mu_{\rm t}}{\SC_{\rm t}} \ee
-The turbulent Prandtl number $\PR_{\rm t}$ and the turbulent Schmidt number $\SC_{\rm t}$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.
+The turbulent Prandtl number $\PR_{\rm t}$ and the turbulent Schmidt number $\SC_{\rm t}$ are assumed to be constant for a given scenario.  The default value is 0.5 for both.  Justification for these values is given in~\cite{Zhang:1} based on smoke plume simulations.
 
 \subsection{Numerical Implementation}
 
@@ -219,7 +241,8 @@ The thermal conductivity and material diffusivity of the fluid are related to th
 \be k_{ijk} = \frac{c_{p,0} \, \mu_{ijk}}{\PR_{\rm t}}  \quad ; \quad
    (\rho D)_{ijk} = \frac{\mu_{ijk}}{\SC_{\rm t}}
 \ee
-where $\PR_{\rm t}$ is the turbulent Prandtl number and $\SC_{\rm t}$ is the turbulent Schmidt number, both assumed constant. Note that the specific heat $c_{p,0}$ is that of the dominant species of the mixture. Based on simulations of smoke plumes, $C_{\rm s}$ is 0.20, $\PR_{\rm t}$ and $\SC_{\rm t}$ are 0.5. There are no rigorous justifications for these choices other than through comparison with experimental data~\cite{Zhang:1}.
+where $\PR_{\rm t}$ is the turbulent Prandtl number and $\SC_{\rm t}$ is the turbulent Schmidt number, both assumed constant. Note that the specific heat $c_{p,0}$ is that of the dominant species of the mixture.
+
 
 
 \subsection{Transport Coefficients for Direct Numerical Simulation (DNS)}
@@ -262,28 +285,30 @@ where species 0 is nitrogen.
 
 \section{Coupling the Velocity and Pressure}
 
+This section explains how the momentum equation is written in finite difference form, and how the solution of the momentum equation requires the solution of an elliptic PDE for the pressure.
+
 \subsection{Simplifications of the Momentum Equation}
 
-First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
+The momentum equation in conservative form is written:
 \be
-    \left( \rho \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
+   \dod{(\rho \bu)}{t} + \nabla \cdot \rho \bu \bu + \nabla p = \rho \bg + \bof_b' + \nabla\!\cdot \btau_{ij}  \label{con_momentum}
 \ee
-Next, we make the following substitutions:
-\begin{enumerate}
-\item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
-$\nabla p=\rho_n \bg + \nabla \tp$.
+First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
 \be
    \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
 \ee
-\item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $
-\item Divide all terms by the density, $\rho$
+Note that all momentum exchange with Lagrangian particles is represented by the force term, $\bof_b$. Next, we make the following substitutions:
+\begin{enumerate}
+\item Subtract the hydrostatic pressure gradient, $\rho_0(z) \bg$, from both sides. Note that $\nabla p=\rho_0 \bg + \nabla \tp$, and $\rho_0(z)$ is the density profile of the ambient atmosphere.
+\item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo$.
+\item Divide all terms by the density, $\rho$.
 \item Decompose the pressure term:
    \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \label{p_decomp} \ee
-\item Define $\cH \equiv |\bu|^2/2 + \tp/\rho $
+\item Define $\cH \equiv |\bu|^2/2 + \tp/\rho$.
 \end{enumerate}
 Now the momentum equation can be written
 \be
-   \dod{\bu}{t} \underbrace{- \bu\times\bo - \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]}_{\bF_{\rm A}}  \underbrace{- \tp \, \nabla \left( \frac{1}{\rho}\right)}_{\bF_{\rm B}} + \nabla \cH =  0 \label{momeq}
+   \dod{\bu}{t} \underbrace{- \bu\times\bo - \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]}_{\bF_{\rm A}}  \underbrace{- \tp \, \nabla \left( \frac{1}{\rho}\right)}_{\bF_{\rm B}} + \nabla \cH =  0 \label{momeq}
 \ee
 Note that the subscripts A and B for the vector $\bF$ denote Advective and Baroclinic. As will be seen in the following sections, it is convenient to group the various terms of the momentum equation into these two terms.
 
@@ -571,13 +596,18 @@ where $A$ is a dimensionless empirical constant equal to 26.  The term in bracke
 \end{equation}
 where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
 
+\subsection{Alternate Near-Wall Eddy Viscosity Model}
+\label{sec:wall_wale_model}
+
+The WALE model (see Sec.~\ref{sec:wale}) is also available as a near-wall eddy viscosity model.  In fact, this is WALE's main purpose.  With the WALE model the eddy viscosity goes to zero at the correct rate, $\nu_t = O(y^3)$, without the need for an explicit damping function.
+
 \subsection{Open Boundaries}
 
-An open boundary is where the fluid is allowed to enter or exit the computational domain based on local pressure gradients, like at an open window or door of a building. Typically, the gradients of the tangential components of velocity are set to zero at an open boundary. That is, the ``ghost cell'' values of the tangential velocity components are set equal to their values in the first grid cell. However, if the user specifies a wind field $(u_\infty,v_\infty)$, then the tangential components of velocity are set to their respective far-field values at all inflow boundaries. At outflow boundaries, the standard zero-gradient condition is applied. 
+An open boundary is where the fluid is allowed to enter or exit the computational domain based on local pressure gradients, like at an open window or door of a building. Typically, the gradients of the tangential components of velocity are set to zero at an open boundary. That is, the ``ghost cell'' values of the tangential velocity components are set equal to their values in the first grid cell. However, if the user specifies a wind field $(u_\infty,v_\infty)$, then the tangential components of velocity are set to their respective far-field values at all inflow boundaries. At outflow boundaries, the standard zero-gradient condition is applied.
 
 \subsection{Mesh Boundaries}
 
-At the interface between two meshes, the tangential components of velocity are taken directly from the neighboring mesh via an MPI exchange. 
+At the interface between two meshes, the tangential components of velocity are taken directly from the neighboring mesh via an MPI exchange.
 
 
 

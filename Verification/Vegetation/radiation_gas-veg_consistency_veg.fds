@@ -27,7 +27,6 @@ cMESH IJK=20,48,48, XB=0,1,0,2.4,0,2.4 /
 &SURF ID         = 'ball'
       MATL_ID    = 'stuff'
       RADIUS     = 0.0007614
-      TMP_FRONT  = 20.
       HEAT_TRANSFER_COEFFICIENT = 0.0
       GEOMETRY   = 'SPHERICAL' /
 &MATL ID = 'stuff'

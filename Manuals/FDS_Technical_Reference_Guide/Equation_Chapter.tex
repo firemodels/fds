@@ -33,18 +33,44 @@ In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x
 \section{Numerical Grid}
 \label{govequations}
 
-FDS is designed to be used by practicing engineers for a variety of fire protection and other thermal flow applications.
-Therefore, it must be relatively fast and robust, and it must be easy to describe the scenario. This means that the user
-should only have to specify a small number of numerical parameters, focusing instead on the physical description of the
-problem. Because the
-computational domain usually encompasses a volume within a building, or the entire building itself, the
-most obvious and simplest numerical grid is rectilinear.
-In fact, because FDS is a large eddy simulation (LES) model, uniform meshing is
-preferred, and the only numerical parameters chosen by the end user are the three dimensions of the grid. Once established, it
-is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the
-grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM).
+Because FDS was designed to simulate thermally-driven flows within buildings, the most obvious and simplest numerical grid is rectilinear. In fact, because FDS is a large eddy simulation (LES) model, uniform meshing is preferred, and the only numerical parameters chosen by the end user are the three dimensions of the grid. Once established, it is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM).
 
-The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1,Morinishi}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
+The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; the velocity components at the appropriate cell faces; and vorticity components at cell edges. This is what is commonly referred to as a staggered grid \cite{Harlow:1,Morinishi}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model. Figure~\ref{variable_positions} displays where in a given grid cell the various flow variables are located.
+
+\begin{figure}[!h]
+\centering
+\begin{tikzpicture}[x=1in,y=1in]
+\draw [->] (-1,0) -- (-0.5,0); \node[text width=1, anchor=west] at (-0.5,0) {$x$};
+\draw [->] (-1,0) -- (-0.84,0.16); \node[text width=1, anchor=west] at (-0.84,0.16) {$y$};
+\draw [->] (-1,0) -- (-1,0.5); \node[text width=1, anchor=west] at (-1,0.5) {$z$};
+\draw (0,0) rectangle (3,3);
+\draw (2,2) circle (0.02); \node[text width=1, anchor=west] at (2.05,2.0) {$\rho_{ijk}$ \\ $T_{ijk}$ \\ $p_{ijk}$ };
+\draw (0,0) (3,0) -- (4,1) -- (4,4) -- (1,4) -- (0,3);
+\draw (0,0) (3,3) -- (4,4);
+\draw [dashed] (0,0) (0,0) -- (1,1) -- (4,1);
+\draw [dashed] (0,0) (1,1) -- (1,4);
+\draw [->] (0.5,2) -- (0.75,2); \node[text width=1, anchor=west] at (0.4,1.8) {$u_{i-1,jk}$};
+\draw [->] (3.5,2) -- (3.75,2); \node[text width=1, anchor=west] at (3.4,1.8) {$u_{ijk}$};
+\draw [->] (1.5,1.5) -- (1.7,1.7); \node[text width=1, anchor=west] at (1.25,1.35) {$v_{i,j-1,k}$};
+\draw [->] (2.5,2.5) -- (2.7,2.7); \node[text width=1, anchor=west] at (2.65,2.55) {$v_{ijk}$};
+\draw [->] (2.0,0.5) -- (2.0,0.7); \node[text width=1, anchor=west] at (1.75,0.35) {$w_{ij,k-1}$};
+\draw [->] (2.0,3.5) -- (2.0,3.7); \node[text width=1, anchor=west] at (1.80,3.35) {$w_{ijk}$};
+\draw [->] (0.4,3.5) arc (180:-90:.1); \node[text width=1, anchor=west] at (0.35,3.25) {$\omega_{y,i-1,jk}$};
+\draw [->] (3.4,3.5) arc (180:-90:.1); \node[text width=1, anchor=west] at (3.35,3.25) {$\omega_{y,ijk}$};
+\draw [->] (0.4,0.5) arc (180:-90:.1); \node[text width=1, anchor=west] at (0.35,0.25) {$\omega_{y,i-1,j,k-1}$};
+\draw [->] (3.4,0.5) arc (180:-90:.1); \node[text width=1, anchor=west] at (3.35,0.25) {$\omega_{y,ij,k-1}$};
+\draw [->] (1.5,-0.075) arc (-90:180:0.05 and 0.1); \node[text width=1, anchor=west] at (1.2,-0.2) {$\omega_{x,i,j-1,k-1}$};
+\draw [->] (1.5, 2.925) arc (-90:180:0.05 and 0.1); \node[text width=1, anchor=west] at (1.2, 2.8) {$\omega_{x,i,j-1,k}$};
+\draw [->] (2.5, 0.925) arc (-90:180:0.05 and 0.1); \node[text width=1, anchor=west] at (2.2, 0.8) {$\omega_{x,ij,k-1}$};
+\draw [->] (2.5, 3.925) arc (-90:180:0.05 and 0.1); \node[text width=1, anchor=west] at (2.2, 3.8) {$\omega_{x,ijk}$};
+\draw [->] (0.1, 1.5) arc (0:270:0.1 and 0.05); \node[text width=1, anchor=west] at (0.05, 1.35) {$\omega_{z,i-1,j-1,k}$};
+\draw [->] (3.1, 1.5) arc (0:270:0.1 and 0.05); \node[text width=1, anchor=west] at (3.05, 1.35) {$\omega_{z,i,j-1,k}$};
+\draw [->] (1.1, 2.5) arc (0:270:0.1 and 0.05); \node[text width=1, anchor=west] at (1.05, 2.35) {$\omega_{z,i-1,jk}$};
+\draw [->] (4.1, 2.5) arc (0:270:0.1 and 0.05); \node[text width=1, anchor=west] at (4.05, 2.35) {$\omega_{z,ijk}$};
+\end{tikzpicture}
+\caption[Position of flow variables in a grid cell]{Position of flow variables in grid cell $ijk$. The arrows indicate the positive direction of the given variable. Scalar variables, such as the density, $\rho$, temperature, $T$, and pressure, $p$, are defined at the cell center. Velocity components, $\mathbf{u}=(u,v,w)$, are defined at their respective cell faces, and vorticity components, $\vec{\omega}=(\omega_x,\omega_y,\omega_z)$, are located at cell edges.}
+\label{variable_positions}
+\end{figure}
 
 \section{Mass and Species Transport}
 \label{sec_lumped_species}
@@ -84,9 +110,9 @@ because $\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alp
 
 
 
-\paragraph{Enforcing Realizability}
+\paragraph{Enforcing Realizability} ~\\
 
-Realizability of species mass fractions requires $Y_\alpha \ge 0$ for all $\alpha$ and $\sum Y_\alpha = 1$.  Note that this is more restrictive than the boundedness constraint, which simply requires $0 \le Y_\alpha \le 1$.
+\noindent Realizability of species mass fractions requires $Y_\alpha \ge 0$ for all $\alpha$ and $\sum Y_\alpha = 1$.  Note that this is more restrictive than the boundedness constraint, which simply requires $0 \le Y_\alpha \le 1$.
 
 If $(\rho Y)_\alpha$ obeys boundedness, $(\rho Y)_\alpha \ge 0$, and we solve $N_s$ species equations obtaining the density via $\rho = \sum_{\alpha=1}^{N_s} (\rho Y)_\alpha$, then mass fractions obtained by $Y_\alpha = (\rho Y)_\alpha/\rho$ are \emph{guaranteed to be realizable} (for $\rho>0$).  Thus, we have reduced the realizability problem to the ``easier'' problem of boundedness for $(\rho Y)_\alpha$. Details of the scalar boundedness correction are discussed in Appendix \ref{app_boundedness}.
 
@@ -176,7 +202,7 @@ where $\kappa(\bx)$ is the absorption coefficient, $I_b(\bx)$ is the source term
 \be
    \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \label{bandRTE1}
 \ee
-In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved accurately, nor do we have reliable data for non-ideal fuels typical of real fires. While FDS does have an option to divide the radiation spectrum into a relatively small number of bands and solve a separate RTE for each band, it is usually not necessary because in real fires, soot is the dominant source and sink of thermal radiation and is not particulary sensitive to wavelength. The mean absorption coefficient, $\kappa$, is a function of species composition and temperature. Its values are obtained from a narrow-band model called RadCal~\cite{RadCal}.
+In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved accurately, nor do we have reliable data for non-ideal fuels typical of real fires. While FDS does have an option to divide the radiation spectrum into a relatively small number of bands and solve a separate RTE for each band, it is usually not necessary because in real fires, soot is the dominant source and sink of thermal radiation and is not particularly sensitive to wavelength. The mean absorption coefficient, $\kappa$, is a function of species composition and temperature. Its values are obtained from a narrow-band model called RadCal~\cite{RadCal}.
 
 The source term, $I_{\rm b}$, requires special treatment because of the limited resolution of the underlying numerical grid in the vicinity of flames. In large scale fire simulations, grid cells are typically on the order of
 tens of centimeters. Flame sheets cannot be resolved, meaning that the computed cell-average temperature can be significantly lower than temperatures one would expect to find in the reacting flame. Consequently, the
@@ -254,7 +280,7 @@ The background pressure is corrected similarly. Note that the mass source terms 
 \item Compute the pressure using the estimated quantities.
 \be
 \label{eqn_corrector_poisson2}
-\nabla^2\cH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right] - \nabla\!\cdot \mathbf{F}^* 
+\nabla^2\cH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right] - \nabla\!\cdot \mathbf{F}^*
 \ee
 
 \item Correct the velocity at the next time step.

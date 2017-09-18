@@ -166,11 +166,11 @@ INIT XB = 0,2,0,2,0,2 SPEC_ID = 'O2_CO2_CO' MASS_FRACTION(1) = 1. /
 						
 
 !Devices						
-&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FED', ID='FED (O2, CO2, CO)' /
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FED', ID='FED (O2 CO2 CO)' /
 &DEVC XYZ= 3.0,1.0,1.0, QUANTITY='FED', ID='FED (Asphyxiants)' /
 &DEVC XYZ= 5.0,1.0,1.0, QUANTITY='FED', ID='FED (Irritants)' /
 &DEVC XYZ= 7.0,1.0,1.0, QUANTITY='FED', ID='FED (All)' /
-&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FIC', ID='FIC (O2, CO2, CO)' /
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FIC', ID='FIC (O2 CO2 CO)' /
 &DEVC XYZ= 3.0,1.0,1.0, QUANTITY='FIC', ID='FIC (Asphyxiants)' /
 &DEVC XYZ= 5.0,1.0,1.0, QUANTITY='FIC', ID='FIC (Irritants)' /
 &DEVC XYZ= 7.0,1.0,1.0, QUANTITY='FIC', ID='FIC (All)' /

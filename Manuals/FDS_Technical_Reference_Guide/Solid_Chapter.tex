@@ -191,7 +191,7 @@ The governing equation solved in {\ct HT3D} is
   \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
   \label{eq:3dheat}
 \end{equation}
-Notice that we do not presently account for volumetric heat sources. Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
+Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
 
 Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
 
@@ -214,7 +214,7 @@ T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + h^n \, T_{\rm g}^n + 2 \,
 \section{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,  are modeled. This is commonly referred to as the ``pyrolysis model,'' but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
 
 
 \subsection{Specified Heat Release Rate}

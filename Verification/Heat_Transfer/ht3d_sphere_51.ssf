@@ -1,0 +1,14 @@
+RENDERDIR
+ ..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+ LOADINIFILE
+ht3d_sphere_51.ini
+SETVIEWPOINT
+view 1
+LOADFILE
+ht3d_sphere_51_03.sf
+LOADFILE
+ht3d_sphere_51_05.sf
+SETTIMEVAL
+165
+RENDERONCE
+ht3d_sphere_51_165

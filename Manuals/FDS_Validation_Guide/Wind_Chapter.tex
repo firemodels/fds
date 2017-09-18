@@ -107,49 +107,11 @@ This chapter presents results of simulations of wind over structures and atmosph
 \section{LNG Dispersion Experiments}
 \label{Atmospheric Dispersion}
 
-The simulations of liquified natural gas (LNG) dispersion experiments that are described in this section were originally designed by Jeffrey Engerer and Anay Luketa of Sandia National Laboratories on behalf of the Pipeline and Hazardous Materials Safety Administration of the U.S. Department of Transportation.
+The simulations of liquefied natural gas (LNG) dispersion experiments that are described in this section were originally designed by Jeffrey Engerer and Anay Luketa of Sandia National Laboratories on behalf of the Pipeline and Hazardous Materials Safety Administration of the U.S. Department of Transportation.
 
-\subsubsection{Atmospheric Boundary Layer}
-
-The input parameters to FDS allow one to specify an initial velocity and temperature profile for the atmospheric boundary layer. Periodic boundaries at the four sides of the computational domain then allow the flow field to develop naturally. The initial velocity and temperature profiles are modeled using Monin-Obukhov similarity theory. The wind speed, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
-\begin{eqnarray}
-   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.1in]
-   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
-\end{eqnarray}
-where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}:
-\begin{eqnarray}
-   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
-   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
-\end{eqnarray}
-The Monin-Obukhov length indicates the thermal stratification of the atmosphere.  When the Monin-Obukhov length is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as the Monin-Obukhov length nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Monin-Obukhov length. Generally, low stability corresponds to decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Cases with low stability are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
-
-Field experiments like those discussed in this section typically characterize the atmospheric conditions via the Monin-Obukhov length, $L$, friction velocity, $u_*$, and ground level temperature, $T_0=\theta_0$. From these, the scaling potential temperature can be obtained from the relation:
-\be
-   L = \frac{u_*^2 \, \theta_0}{g \, \kappa \, \theta_*}
-\ee
-Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. In some cases, values of the Monin-Obukhov parameters are taken directly from the test reports. However, for some of the experiments, these parameters were not derived using the same similarity functions as those presented above, in which case the parameters have been recomputed to best fit the measured velocity and temperature profiles.
+Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. In some cases, values of the Monin-Obukhov parameters are taken directly from the test reports. However, for some of the experiments, these parameters were not derived using the same similarity functions as those presented above, in which case the parameters have been recomputed to best fit the measured velocity and temperature profiles. In the table, $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}.
 
 Figure~\ref{LNG_Dispersion_Burro_profiles} through Fig.~\ref{LNG_Dispersion_MaplinSands_profiles} display the measured velocity and temperature profiles, the corresponding Monin-Obukhov profiles that serve as initial and boundary conditions for FDS, and the resulting time-averaged profiles from the FDS simulations.
-
-\subsubsection{Surface Roughness}
-
-The default rough wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
-\be
-   \frac{u(z)}{u_*} = \frac{1}{\kappa} \ln \left( \frac{z}{s} \right) + 8.5  \label{u_FDS}
-\ee
-The \emph{sandgrain} roughness length used here, $s$, is not the same as the \emph{aerodynamic} roughness length, $z_0$, used in Eq.~(\ref{u_om}). However, for the purpose of implementing the Monin-Obukhov model within FDS, the velocity profiles given by Eq.~(\ref{u_om}) and (\ref{u_FDS}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
-\be
-   s = z_0 \, {\rm e}^{8.5 \, \kappa} = 30 \, z_0
-\ee
-The values of $z_0$ are given in Table~\ref{tab:LNG_Dispersion}.
-
-\subsubsection{Sensible Heat Flux}
-
-The ground temperature relative to the air temperature is an important consideration in these experiments because the natural gas that readily evaporates from the pool of spilled LNG is cold and remains near the ground as it is swept downwind. In the simulation, one can either specify a ground temperature or equivalent heat flux based on the computed sensible heat flux from the field experiments. According to Monin-Obukhov theory, the sensible heat flux is given by
-\be
-   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
-\ee
-where a negative value indicates that the ground is warmer than the air above. The values of $\dot{q}''$ are given in Table~\ref{tab:LNG_Dispersion}.
 
 \subsubsection{Source Model}
 

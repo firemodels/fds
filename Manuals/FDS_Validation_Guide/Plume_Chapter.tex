@@ -87,6 +87,28 @@ The following plots show the results of simulations of McCaffrey's five fires at
 \label{McCaffrey_Plume_Temperature}
 \end{figure}
 
+
+\clearpage
+
+\subsection{NIST/NRC Corner Effects Experiments}
+
+This set of experiments involved a 60~cm by 60~cm natural gas burner with heat release rates of 200~kW, 300~kW, and 400~kW. The burner was either set in a corner or against a wall. The plots below show the thermocouple temperature just below the ceiling and just in the corner or against the wall above the fire.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_200_kW_Corner_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_200_kW_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_300_kW_Corner_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_300_kW_Wall_Temp} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_400_kW_Corner_Temp} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_400_kW_Wall_Temp}
+\end{tabular*}
+\caption[NIST/NRC Corner Effects experiments, plume temperature]
+{NIST/NRC Corner Effects experiments, plume temperature.}
+\label{NIST_NRC_Corner_Plume_Temp}
+\end{figure}
+
+
 \clearpage
 
 
@@ -543,7 +565,7 @@ By examining movies of the simulation results we can see a qualitative differenc
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Sandia_Plumes/Sandia_H2_1m_Test35_U_zp3}
 \end{tabular*}
 \caption[Sandia 1~m hydrogen pool fire (Test 35) mean velocity profiles]
-{FDS predictions of mean velocity profiles for the Sandia 1~m hydrgoen pool fire experiment (Test 35). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
+{FDS predictions of mean velocity profiles for the Sandia 1~m hydrogen pool fire experiment (Test 35). Results are shown for 6 cm, 3 cm, and 1.5 cm grid resolutions. The $z$ coordinate represents height above the pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_H2_1m_Test35_velocity}
 \end{figure}
 
@@ -655,6 +677,10 @@ Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} shows measured and computational re
 
 \section{FM Vertical Wall Flame Experiments}
 
+Figure~\ref{FM_Vertical_Wall_Flame_temperature} displays the measured and predicted thermocouple (i.e. uncorrected) temperatures as a function of the normal distance, $y$, from the surface of a vertical, water-cooled burner. The measurements were made 771~mm from the base of the burner for propylene mass flow rates of 8.75, 11.85, 12.68, 17.05, 22.37, and 22.49 g/m$^2$/s.
+
+Figure~\ref{FM_Vertical_Wall_Flame_soot_depth} displays the measured and predicted soot depth at heights of 365, 527, 771, 1022, and 1317~mm above the base of the burner for various fuel burning rates. The soot depth was measured by inserting glass rods through the flame, normal to the burner surface, for 2~s. The soot depth is the length of the blackened portion of the rod, taken to represent the average flame depth over the 2~s interval. For the FDS simulations, the soot depth was taken to be the distance from the burner surface where the soot mass fraction drops below 0.0025.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Propylene_Temp_8p75} &
@@ -675,7 +701,7 @@ Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} shows measured and computational re
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Soot_Depth_527} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Soot_Depth_771} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Soot_Depth_1022} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Soot_Depth_1317}} 
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Soot_Depth_1317}}
 \end{tabular*}
 \caption[FM Vertical Wall Flame soot depth measurements]
 {Soot depth at heights of 365, 527, 771, 1022, and 1317 mm.}

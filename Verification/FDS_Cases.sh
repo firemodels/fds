@@ -52,7 +52,8 @@ $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
 $QFDS -d Fires fire_const_gamma.fds
 
-$QFDS -d Flowfields divergence_test.fds
+$QFDS -d Flowfields divergence_test_1.fds
+$QFDS -d Flowfields divergence_test_2.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
@@ -125,6 +126,9 @@ $QFDS -d Heat_Transfer ht3d_ibeam.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
+$QFDS -d Heat_Transfer ht3d_sphere_25.fds
+$QFDS -d Heat_Transfer ht3d_sphere_51.fds
+$QFDS -p 27 -d Heat_Transfer ht3d_sphere_75.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -272,6 +276,20 @@ $QFDS -d Radiation radiation_box__20__100.fds
 $QFDS -d Radiation radiation_box__20_2000.fds
 $QFDS -d Radiation radiation_box__20__300.fds
 $QFDS -d Radiation radiation_box__20___50.fds
+$QFDS -d Radiation radiation_gas_panel_10cm.fds
+$QFDS -d Radiation radiation_gas_panel_10cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_15cm.fds
+$QFDS -d Radiation radiation_gas_panel_15cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_25cm.fds
+$QFDS -d Radiation radiation_gas_panel_25cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_38cm.fds
+$QFDS -d Radiation radiation_gas_panel_38cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_46cm.fds
+$QFDS -d Radiation radiation_gas_panel_46cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_61cm.fds
+$QFDS -d Radiation radiation_gas_panel_61cm_offset.fds
+$QFDS -d Radiation radiation_gas_panel_76cm.fds
+$QFDS -d Radiation radiation_gas_panel_76cm_offset.fds
 $QFDS -d Radiation radiation_plane_layer_1_1.fds
 $QFDS -d Radiation radiation_plane_layer_1_2.fds
 $QFDS -d Radiation radiation_plane_layer_1_3.fds
@@ -451,6 +469,9 @@ $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
 
+$QFDS -o 1 -d Thread_Check race_test_1.fds
+$QFDS -o 4 -d Thread_Check race_test_4.fds
+
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds
 $QFDS -d Turbulence csmag_64.fds
@@ -463,6 +484,8 @@ $QFDS -d Turbulence vreman_32.fds
 $QFDS -d Turbulence vreman_64.fds
 $QFDS -d Turbulence rng_32.fds
 $QFDS -d Turbulence rng_64.fds
+$QFDS -d Turbulence wale_32.fds
+$QFDS -d Turbulence wale_64.fds
 $QFDS -d Turbulence yplus_8.fds
 $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
@@ -482,47 +505,51 @@ $QFDS -d Turbulence ramp_prof_u_z.fds
 $QFDS -d Vegetation radiation_gas-veg_consistency_gas.fds
 $QFDS -d Vegetation radiation_gas-veg_consistency_veg.fds
 $QFDS -d Vegetation vege_mass_conservation.fds
+$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV2pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV30pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV2pt0.fds
+$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV30pt0.fds
 
 $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 
-$QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+$QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
-$QFDS -t -p 8 -d Atmospheric_Effects wind_example.fds
+$QFDS -p 8 -d Atmospheric_Effects wind_example.fds
 
-#$QFDS -t -p 3 -d Evacuation evac_smv_testcase1.fds
+#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
 
-$QFDS -t -p 8 -d Fires circular_burner.fds
+$QFDS -p 8 -d Fires circular_burner.fds
 
-$QFDS -t -p 4 -d Flowfields parabolic_profile.fds
-$QFDS -t -p 5 -d Flowfields simple_duct.fds
-$QFDS -t -p 8 -d Flowfields symmetry_test_mpi.fds
-$QFDS -t -p 8 -d Flowfields volume_flow_1.fds
-$QFDS -t -p 8 -d Flowfields volume_flow_2.fds
+$QFDS -p 4 -d Flowfields parabolic_profile.fds
+$QFDS -p 5 -d Flowfields simple_duct.fds
+$QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
+$QFDS -p 8 -d Flowfields volume_flow_1.fds
+$QFDS -p 8 -d Flowfields volume_flow_2.fds
 
-$QFDS -t -p 4 -d Heat_Transfer back_wall_test.fds
+$QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 
-$QFDS -t -p 2 -d Pressure_Effects zone_shape.fds
+$QFDS -p 2 -d Pressure_Effects zone_shape.fds
 
-$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight.fds
-$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
-$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_default.fds
-$QFDS -t -p 8 -d Pressure_Solver duct_flow.fds
-$QFDS -t -p 5 -d Pressure_Solver hallways.fds
-$QFDS -t -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
-$QFDS -t -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
-$QFDS -t -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
-$QFDS -t -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
-$QFDS -t -p 8 -d Pressure_Solver tunnel_demo.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow.fds
+$QFDS -p 5 -d Pressure_Solver hallways.fds
+$QFDS -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
+$QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
+$QFDS -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
+$QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
+$QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 
-$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
-$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
-$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
-$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
-$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
 
-$QFDS -t -p 4 -d WRF wrf_time_ramp.fds
-$QFDS -t -p 4 -d WRF wrf_prof_ramp.fds
-$QFDS -t -p 4 -d WRF wrf_time_prof_ramp.fds
+$QFDS -p 4 -d WRF wrf_time_ramp.fds
+$QFDS -p 4 -d WRF wrf_prof_ramp.fds
+$QFDS -p 4 -d WRF wrf_time_prof_ramp.fds
