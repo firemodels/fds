@@ -335,14 +335,10 @@ cat << MODULE > \$FDSMODULEtmp
 ###
 
 proc ModulesHelp { } {
-        global version
-
         puts stderr "\tAdds FDS bin location to your PATH environment variable"
 }
 
 module-whatis   "Loads fds paths and libraries."
-
-set     version      "1.0"
 
 conflict FDS6
 
