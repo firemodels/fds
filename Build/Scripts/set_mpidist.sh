@@ -34,7 +34,9 @@ if [ "$MPITYPE" == "" ]; then
     MPINETWORK=$MPIDIST_IB
   fi
  
-  export not_installed=`ifort -v |& head -1 | grep "not found" | wc -l`
+  ifort -v >& fort.out
+  export not_installed=`cat fort.out | head -1 | grep "not found" | wc -l`
+  rm fort.out
 
   if [ $not_installed -eq 1 ]; then
     if [ "$IFORT_COMPILER" != "" ]; then
@@ -66,8 +68,11 @@ if [ "$MPITYPE" == "" ]; then
 fi
 
 # CASE 2 - USING MODULES
+
   
-export not_installed=`ifort -v |& head -1 | grep "not found" | wc -l`
+ifort -v >& fort.out
+export not_installed=`cat fort.out | head -1 | grep "not found" | wc -l`
+rm fort.out
 if [ $not_installed -eq 1 ]; then
   echo "***error: An Intel compiler could not be found."
   echo "   Load a module defining the compiler enviornment or"
