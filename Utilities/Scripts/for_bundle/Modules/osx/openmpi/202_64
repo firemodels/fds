@@ -25,8 +25,6 @@ if [ file isdirectory $mpihome/bin ] {
     module-whatis "Sets up your openmpi environment to use $mpihome"
     set helpmsg "Sets up your openmpi environment to use $mpihome"
 
-    setenv MPIHOME $mpihome
-    setenv MPIDIST $mpihome
     setenv OPAL_PREFIX $mpihome
 
     setenv MPIFORT mpifort
