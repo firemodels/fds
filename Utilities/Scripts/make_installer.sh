@@ -389,15 +389,15 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
-export FDSBINDIR=\$FDS_root/bin
-export MPIDIST=\\\$FDSBINDIR/openmpi_64
+FDSBINDIR=\$FDS_root/bin
+MPIDIST=\\\$FDSBINDIR/openmpi_64
 export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
 
-export $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
