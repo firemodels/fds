@@ -3,34 +3,6 @@
 # this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
 
 errlog=/tmp/errlog.$$
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-OPENMPI_VERSION=2.0.2
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
-
-# ---------------- MDHASH -----------------
-
-MD5HASH ()
-{
-local DIR=$1
-local FILE=$2
-
-local curdir=`pwd`
-cd $DIR
-
-if [ "`uname`" == "Darwin" ] ; then
-  hash=`cat $FILE | md5`
-  echo "$hash   $FILE"
-else
-  md5sum $FILE
-fi
-
-cd $curdir
-}
-
-=======
->>>>>>> cbc84ab0150a844a157a99ea0328c28921690a8d
 
 # -------------------- SCP -------------------
 
@@ -245,31 +217,10 @@ hashfile fds2ascii > hash/fds2ascii.sha1
 cd $CURDIR
 
 if [ "$PLATFORM" == "LINUX64" ]; then
-<<<<<<< HEAD
-   ostype=LINUX
-   ossize=intel64
-<<<<<<< HEAD
-   openmpifile=openmpi_1.8.4_linux_64.tar.gz
-=======
-   openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
-   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_linux_bundle.md5s
-fi
-if [ "$PLATFORM" == "OSX64" ]; then
-   ostype=OSX
-   ossize=intel64
-<<<<<<< HEAD
-   openmpifile=openmpi_1.8.4_osx_64.tar.gz
-=======
-   openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
->>>>>>> 900e38896dccc585db7f3099c98411e6fafb3e85
-   MD5SUMMARY=$bundledir/bin/MD5/fds_${FDSVERSION}_osx_bundle.md5s
-=======
    openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
 fi
 if [ "$PLATFORM" == "OSX64" ]; then
    openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
->>>>>>> cbc84ab0150a844a157a99ea0328c28921690a8d
 fi
 
 echo ""
