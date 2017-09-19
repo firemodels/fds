@@ -389,21 +389,18 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
+export OMP_NUM_THREADS=4
 FDSBINDIR=\$FDS_root/bin
-MPIDIST=\\\$FDSBINDIR/openmpi_64
 export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-
 export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
-
-export OMP_NUM_THREADS=4
+export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
 BASH
 
 #--- create startup and readme files
