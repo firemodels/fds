@@ -59,11 +59,12 @@ set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Relative Wall Clock Time','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 Min_Ind = 1.0;
-Max_Ind = 1200;
+Max_Ind = 1000;
 Min_Dep = 0.00001;
 Max_Dep = 1.;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
+yticks([0.000001 0.00001 0.0001 0.001 0.01 0.1 1]);
 Title_Position(1) = 0.40;
 Title_Position(2) = 0.95;
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
@@ -118,12 +119,13 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Efficiency','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-Min_Ind = 0.9;
-Max_Ind = 1200;
+Min_Ind = 1.0;
+Max_Ind = 1000;
 Min_Dep = 0.0;
 Max_Dep = 1.2;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
+set(gca,'YTickLabel',num2str(get(gca,'YTick')'))
 Title_Position(1) = 0.60;
 Title_Position(2) = 0.90;
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
