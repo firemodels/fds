@@ -365,9 +365,33 @@ In 2006, the Fire Protection Research Foundation (FPRF) undertook a research pro
 
 \section{McCaffrey Plume Experiments}
 
-In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner.
-There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas. The burner was square, 0.3~m on each side.
-The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}.
+In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas (35 kJ/L [45 MJ/kg assuming 19 kg/kgmol as mole weight for natural gas]). The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}. Along the centerline of the burner, velocity and temperature were measured using bi-directional probes and thermocouples, respectively.  The centerline data collapses when scaled by the Froude number as shown in Fig.~\ref{fig:McCaffrey_Correlations}. Radiant fraction measurements for natural gas were made in \cite{McCaffrey:1981}.  For convenience, we have extracted the data from that report for the heat release rates reported in \cite{McCaffrey:NBSIR_79-1910}.  See Table \ref{tab:McCaffrey_Plume_Exp}.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Temperature_Correlation} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation} \\
+\end{tabular*}
+\caption[McCaffrey Plume Centerline Temperature and Velocity Correlations]
+{McCaffrey Plume Centerline Temperature and Velocity Correlations.}
+\label{fig:McCaffrey_Correlations}
+\end{figure}
+
+\begin{table}[p]
+\caption{Summary of McCaffrey Plume Experiments, 1979.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+$Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$  \\ \hline\hline
+14.4     & 0.270    & 0.178       & 160                & 0.17      \\ \hline
+21.7     & 0.407    & 0.209       & 241                & 0.21      \\ \hline
+33.0     & 0.618    & 0.248       & 367                & 0.25      \\ \hline
+44.9     & 0.841    & 0.280       & 499                & 0.27      \\ \hline
+57.5     & 1.07     & 0.309       & 639                & 0.27      \\ \hline
+\end{tabular}
+\end{center}
+\label{tab:McCaffrey_Plume_Exp}
+\end{table}
 
 
 \section{NBS Multi-Room Experiments}
