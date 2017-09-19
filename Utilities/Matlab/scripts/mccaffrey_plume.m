@@ -1,188 +1,176 @@
 % McDermott
-% 7-7-14
+% 9-19-2017
 % mccaffrey_plume.m
 
 close all
 clear all
 
 plot_style
-Font_Interpreter='latex';
 
 Q = [14.4 21.7 33.0 44.9 57.5]; % kW [14.4 21.7 33.0 44.9 57.5]
-g = 9.8;
-rho = 1.18;
-cp = 1;
-T0 = 273.15 + 20;
+g = 9.8; % m/s2
+rho = 1.18; % kg/m3
+cp = 1; % kJ/(kg*K)
+T0 = 273.15 + 20; % K
+D = 0.3; % m
 
-DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5) % m
+QS = (Q/(rho*cp*T0*sqrt(g)*D^(5/2)));
+DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5); % m
 
-repo = '/Volumes/rmcdermo/GitHub/FireModels_rmcdermo/fds/';
+EXP_Dir = '../../../exp/';
+OUT_Dir = '../../../out/';
+Manuals_Dir = '../../Manuals/';
 
-%datadir = '../../Validation/McCaffrey_Plume/FDS_Output_Files/';
-datadir = [repo,'Validation/McCaffrey_Plume/Current_Results/'];
-plotdir = [repo,'Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
+datadir = [OUT_Dir,'McCaffrey_Plume/FDS_Output_Files/'];
+plotdir = [Manuals_Dir,'FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
 
-%chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
-chid = {'McCaffrey_14_kW_21','McCaffrey_22_kW_21','McCaffrey_33_kW_21','McCaffrey_45_kW_21','McCaffrey_57_kW_21'};
-%chid = {'McCaffrey_14_kW_45','McCaffrey_22_kW_45','McCaffrey_33_kW_45','McCaffrey_45_kW_45','McCaffrey_57_kW_45'};
-mark = {'ko','k+','k^','ksq','kd'};
-n_chid = length(chid);
+resolution = {'Coarse','Medium','Fine'};
 
-% McCaffrey plume correlations
+for k=1:length(resolution)
 
-zq = logspace(-2,0,100);
-
-for i=1:length(zq)
-    if zq(i)<0.08
-        vq(i) = 6.84*zq(i)^0.5;
-        Tq(i) = 800*zq(i)^0;
-    elseif zq(i)>=0.08 & zq(i)<=0.2
-        vq(i) = 1.93*zq(i)^0;
-        Tq(i) = 63*zq(i)^(-1);
-    elseif zq(i)>0.2
-        vq(i) = 1.12*zq(i)^(-1/3);
-        Tq(i) = 21.6*zq(i)^(-5/3);
+    switch resolution{k}
+        case 'Coarse'
+            chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
+        case 'Medium'
+            chid = {'McCaffrey_14_kW_21','McCaffrey_22_kW_21','McCaffrey_33_kW_21','McCaffrey_45_kW_21','McCaffrey_57_kW_21'};
+        case 'Fine'
+            chid = {'McCaffrey_14_kW_45','McCaffrey_22_kW_45','McCaffrey_33_kW_45','McCaffrey_45_kW_45','McCaffrey_57_kW_45'};
     end
-end
+    mark = {'ko','k+','k^','ksq','kd'};
+    n_chid = length(chid);
 
-% Baum and McCaffrey plume correlations (in terms of D*)
-% 2nd IAFSS, pp. 129-148
+    % McCaffrey plume correlations
 
-zs = logspace(-2,1,100);
-n = [1/2 0 -1/3];
-A = [2.18 2.45 3.64];
-B = [2.91 3.81 8.41];
+    zq = logspace(-2,0,100);
 
-for i=1:length(zs)
-    if zs(i)<1.32
-        j=1;
-    elseif zs(i)>=1.32 & zs(i)<=3.3
-        j=2;
-    elseif zs(i)>3.3
-        j=3;
+    for i=1:length(zq)
+        if zq(i)<0.08
+            vq(i) = 6.84*zq(i)^0.5;
+            Tq(i) = 800*zq(i)^0;
+        elseif zq(i)>=0.08 & zq(i)<=0.2
+            vq(i) = 1.93*zq(i)^0;
+            Tq(i) = 63*zq(i)^(-1);
+        elseif zq(i)>0.2
+            vq(i) = 1.12*zq(i)^(-1/3);
+            Tq(i) = 21.6*zq(i)^(-5/3);
+        end
     end
-    us(i) = A(j)*zs(i)^n(j);
-    Ts(i) = B(j)*zs(i)^(2*n(j)-1);
+
+    figure
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+    hh(n_chid+1)=loglog(zq,vq,'b--','linewidth',2); hold on
+
+    % for McCaffrey 1979 scaling use:
+    xmin = 0.01;
+    xmax = 1.0;
+    ymin = 0.5;
+    ymax = 3.0;
+    axis([xmin xmax ymin ymax])
+    %grid on
+    xlabel('{\itz/Q}^{2/5} (m kW^{-2/5})','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+    ylabel('{\itV/Q}^{1/5} (m s^{-1} kW^{-1/5})','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+
+    % FDS results velocity
+
+    for i=1:n_chid
+        M = importdata([datadir,chid{i},'_line.csv'],',',2);
+        z = M.data(:,find(strcmp('Height',M.colheaders)));
+        v = M.data(:,find(strcmp('vel',M.colheaders)));
+
+        % McCaffrey 1979 scaling
+        zq_fds = z./Q(i)^(2/5);
+        vq_fds = v./Q(i)^(1/5);
+
+        hh(i)=loglog(zq_fds,vq_fds,mark{i});
+    end
+
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
+
+    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','(z/Q^{2/5})^\eta'};
+    lh = legend(hh,leg_key,'location','south');
+    set(lh,'Interpreter',Font_Interpreter)
+    set(lh,'FontSize',Key_Font_Size)
+
+    text(.0125,2.6,['McCaffrey Centerline Velocity, ',resolution{k}],'FontSize',Title_Font_Size,'FontName',Font_Name)
+
+    text(.04,1.2,'\eta=1/2','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.10,1.7,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.295,1.25,'\eta=-1/3','FontSize',Label_Font_Size,'FontName',Font_Name)
+
+    % add version string if file is available
+
+    Git_Filename = [datadir,'McCaffrey_14_kW_11_git.txt'];
+    addverstr(gca,Git_Filename,'loglog')
+
+    % print to pdf
+
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+    print(gcf,'-dpdf',[plotdir,['McCaffrey_Velocity_Correlation_',resolution{k}]])
+
+
+    % FDS results temperature rise
+
+    figure
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+    hh(n_chid+1)=loglog(zq,Tq,'r--','linewidth',2); hold on
+
+    % McCaffrey scaling
+    xmin = 0.008;
+    xmax = 1.0;
+    ymin = 100;
+    ymax = 1200;
+    axis([xmin xmax ymin ymax])
+    %grid on
+    xlabel('{\itz/Q}^{2/5} (m kW^{-2/5})','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+    ylabel('\Delta{\itT} (\circC)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+
+    for i=1:n_chid
+        M = importdata([datadir,chid{i},'_line.csv'],',',2);
+        z = M.data(:,find(strcmp('Height',M.colheaders)));
+        T = M.data(:,find(strcmp('tmp',M.colheaders))) + 273.15;
+        zq_fds = z./Q(i)^(2/5);
+        hh(i)=loglog(zq_fds,T-T0,mark{i});
+    end
+
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
+
+    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','(z/Q^{2/5})^\eta'};
+    lh = legend(hh,leg_key,'location','southwest');
+    set(lh,'Interpreter',Font_Interpreter)
+    set(lh,'FontSize',Key_Font_Size)
+
+    text(.01,1000,['McCaffrey Centerline Temperature, ',resolution{k}],'FontSize',Title_Font_Size,'FontName',Font_Name)
+
+    text(.01,675,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.08,425,'\eta=-1','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.18,125,'\eta=-5/3','FontSize',Label_Font_Size,'FontName',Font_Name)
+
+    % add version string if file is available
+
+    Git_Filename = [datadir,'McCaffrey_14_kW_11_git.txt'];
+    addverstr(gca,Git_Filename,'loglog')
+
+    % print to pdf
+
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+    print(gcf,'-dpdf',[plotdir,['McCaffrey_Temperature_Correlation_',resolution{k}]])
+
 end
 
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
-hh(n_chid+1)=loglog(zq,vq,'b--','linewidth',2); hold on
-% % for Baum scaling use:
-% xmin = 0.2;
-% xmax = 20;
-% ymin = 1;
-% ymax = 3.5;
-% for McCaffrey 1979 scaling use:
-xmin = 0.008;
-xmax = 0.6;
-ymin = 0.2;
-ymax = 2.5;
-axis([xmin xmax ymin ymax])
-%grid on
-xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('$V/Q^{1/5}$ (m $\cdot$ s$^{-1}$ $\cdot$ kW$^{-1/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-% xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-% ylabel('$v^* = v/\sqrt{g D^*} $','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-
-% FDS results velocity
-
-for i=1:n_chid
-    M = importdata([datadir,chid{i},'_line.csv'],',',2);
-    z = M.data(:,find(strcmp('Height',M.colheaders)));
-    dz = z(2)-z(1);
-    z = z + dz/2; % use with "wvel" for staggered storage location
-    v = M.data(:,find(strcmp('wvel',M.colheaders)));
-
-    % McCaffrey 1979 scaling
-    zq_fds = z./Q(i)^(2/5);
-    vq_fds = v./Q(i)^(1/5);
-
-    % Baum and McCaffrey 2nd IAFSS scaling
-    % zs_fds = z./DS(i);
-    % vs_fds = v./sqrt(g*DS(i));
-
-    hh(i)=loglog(zq_fds,vq_fds,mark{i});
-end
-
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-
-leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$A(z^*\,)^n$'};
-lh = legend(hh,leg_key,'location','southeast');
-set(lh,'Interpreter',Font_Interpreter)
-set(lh,'FontSize',Key_Font_Size)
-
-% add version string if file is available
-
-Git_Filename = [datadir,'McCaffrey_14_kW_11_git.txt'];
-addverstr(gca,Git_Filename,'loglog')
-
-% print to pdf
-
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'McCaffrey_Velocity_Correlation'])
-
-
-% FDS results temperature rise
-
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
-hh(n_chid+1)=loglog(zq,Tq,'r--','linewidth',2); hold on
-
-% % Baum scaling:
-% xmin = 0.1;
-% xmax = 20;
-% ymin = 0.1;
-% ymax = 5;
-% McCaffrey scaling
-xmin = 0.008;
-xmax = 0.6;
-ymin = 100;
-ymax = 1600;
-axis([xmin xmax ymin ymax])
-%grid on
-xlabel('$z/Q^{2/5}$ (m $\cdot$ kW$^{-2/5}$ )','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('$\Delta T$ ($^\circ$C)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-% xlabel('$z^* = z/D^*$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-% ylabel('$\Theta^* = (T-T_0)/T_0$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-
-for i=1:n_chid
-    M = importdata([datadir,chid{i},'_line.csv'],',',2);
-    z = M.data(:,find(strcmp('Height',M.colheaders)));
-    T = M.data(:,find(strcmp('tmp',M.colheaders))) + 273.15;
-    zq_fds = z./Q(i)^(2/5);
-    hh(i)=loglog(zq_fds,T-T0,mark{i});
-    % hh(i)=loglog(z./DS(i),(T-T0)/T0,mark{i});
-end
-
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-
-leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$B(z^*\,)^{2n-1}$'};
-lh = legend(hh,leg_key,'location','southwest');
-set(lh,'Interpreter',Font_Interpreter)
-set(lh,'FontSize',Key_Font_Size)
-
-% add version string if file is available
-
-Git_Filename = [datadir,'McCaffrey_14_kW_11_git.txt'];
-addverstr(gca,Git_Filename,'loglog')
-
-% print to pdf
-
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[plotdir,'McCaffrey_Temperature_Correlation'])
+%%% CURRENT INPUT FILES DO NOT HAVE DEVC FOR PROFILES %%%
+return
 
 
 % Velocity profile in the plume
