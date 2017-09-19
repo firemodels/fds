@@ -345,10 +345,10 @@ conflict FDS6
 
 prepend-path    PATH    \$FDS_root/bin
 prepend-path    PATH    \$FDS_root/bin/openmpi_64/bin
+prepend-path    LD_LIBRARY_PATH /usr/lib64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
-setenv  MPIDIST \$FDS_root/bin/openmpi_64
 setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
 setenv  OMP_NUM_THREAD 4
 
