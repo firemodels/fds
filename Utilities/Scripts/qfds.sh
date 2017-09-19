@@ -353,7 +353,12 @@ fi
       MPILABEL="IMPI"
     fi
   else
-    MPIRUNEXE=$MPIDIST/bin/mpirun
+    notfound=`$MPIRUNEXE -h |& head -1 | wc -l`
+    if [ $notfound -eq 1 ]; then
+      echo "*** error: mpirun not in PATH"
+      exit
+    fi
+    MPIRUNEXE=mpirun
     if [ "$IB" == "" ]; then
       MPILABEL="MPI"
     else
