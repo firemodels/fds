@@ -2,6 +2,10 @@
 % 9-19-2017
 % mccaffrey_plume.m
 
+% first call McCaffrey_Correlation.m to make data plots
+
+McCaffrey_Correlation
+
 close all
 clear all
 
@@ -89,7 +93,7 @@ for k=1:length(resolution)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
 
-    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','(z/Q^{2/5})^\eta'};
+    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','({\itz/Q}^{2/5})^\eta'};
     lh = legend(hh,leg_key,'location','south');
     set(lh,'Interpreter',Font_Interpreter)
     set(lh,'FontSize',Key_Font_Size)
@@ -143,7 +147,7 @@ for k=1:length(resolution)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
 
-    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','(z/Q^{2/5})^\eta'};
+    leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','({\itz/Q}^{2/5})^\eta'};
     lh = legend(hh,leg_key,'location','southwest');
     set(lh,'Interpreter',Font_Interpreter)
     set(lh,'FontSize',Key_Font_Size)
