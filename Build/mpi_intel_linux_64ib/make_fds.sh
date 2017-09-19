@@ -3,5 +3,5 @@ arg=$1
 dir=`pwd`
 target=${dir##*/}
 
-echo Building $target with $MPIDIST
+echo Building $target
 make -j4 MPIFORT="$MPIFORT" VPATH="../../Source" -f ../makefile $target
