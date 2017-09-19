@@ -8,7 +8,7 @@ then
   echo ""
   echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  -d installdir - default install directory"
-  echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
+  echo "   INSTALLER.sh - bash shell script containing self-extracting Installer"
   echo
   exit
 fi
@@ -294,7 +294,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to proceed? (yes/no) " yn
+     read -p "Proceed? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
