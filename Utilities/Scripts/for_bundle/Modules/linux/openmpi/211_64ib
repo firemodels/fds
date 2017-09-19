@@ -12,7 +12,6 @@ proc ModulesHelp { } {
 # and all variables below will be set correctly
 
 set mpihome /shared/openmpi211_64ib
-set mpitype ib
 
 # This MPI is built with version of the Intel compiler
 
@@ -30,7 +29,6 @@ if [ file isdirectory $mpihome/bin ] {
     setenv OPAL_PREFIX $mpihome
 
     setenv MPIFORT mpifort
-    setenv MPITYPE $mpitype
 
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77

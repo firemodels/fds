@@ -12,7 +12,8 @@ proc ModulesHelp { } {
 # and all variables below will be set correctly
 
 set mpihome /shared/openmpi211_i17u4_64
-set mpitype eth
+
+module load intel/17
 
 # make sure that another openmpi or FDS6 modules are not loaded
 #
@@ -26,7 +27,6 @@ if [ file isdirectory $mpihome/bin ] {
     setenv OPAL_PREFIX $mpihome
 
     setenv MPIFORT mpifort
-    setenv MPITYPE $mpitype
 
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77
