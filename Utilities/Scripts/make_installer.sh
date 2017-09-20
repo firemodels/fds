@@ -356,6 +356,7 @@ prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
 setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
+setenv  MPIFORT mpifort
 setenv  OMP_NUM_THREAD 4
 
 MODULE
