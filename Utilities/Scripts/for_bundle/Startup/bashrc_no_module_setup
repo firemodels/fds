@@ -1,4 +1,11 @@
-# modify the following lines to match your environment
+# ----------------------------------------------
+# non-module setup for FDS
+
+# Modify the lines below to match your enviornment
+
+# You only need the lines below if you ARE NOT using modules
+# if you are using the lines below comment the above
+# two module commands
 
 # If using the installed fds set INSTALLED_FDS to 1
 # If using an fds built from an openmpi library set

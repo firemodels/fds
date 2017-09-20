@@ -1,9 +1,12 @@
-# modify the following lines to match your environment
+# ----------------------------------------------
+# # module setup for FDS
+# # modify the following lines to match your environment
 
-# If you are using modules choose one module command depending
-# on whether you are using the installed fds or an fds you
-# build with an openmpi library
-
+# # If you are using modules choose one module command depending
+# # on whether you are using the installed fds or an fds you
+# # build with an openmpi library
+#
 export MODULEPATH=$HOME/FDS/FDS6/bin/modules:$MODULEPATH
 module load FDS6
-#module load openmpi/211_64ib
+# #module load openmpi/211_64ib
+
