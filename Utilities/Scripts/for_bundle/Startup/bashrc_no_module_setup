@@ -2,16 +2,17 @@
 
 # If using the installed fds set INSTALLED_FDS to 1
 # If using an fds built from an openmpi library set
-# INSTALLED_FDS to 0
+# INSTALLED_FDS to 2
 
 # set IFORT_COMPILER to Intel compiler location
 # set MPIDIST to OpenMPI library location
 
-INSTALLED_FDS=0
+INSTALLED_FDS=1
 
 if [ "$INSTALLED_FDS" == "1" ]; then
    source $HOME/FDS/FDS6/bin/FDSVARS.sh
-else
+fi
+if [ "$INSTALLED_FDS" == "2" ]; then
    MPIDIST=/shared/openmpi211_64
    export IFORT_COMPILER=/opt/intel17
 
