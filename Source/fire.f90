@@ -477,11 +477,11 @@ SELECT CASE (EXTINCT_MOD)
       ENDDO REACTION_LOOP
 
    CASE(EXTINCTION_3)
-      ! special case with 2 reactions
+      ! special case: CO production with 2 fast reactions
       ! CO_PASS==1 --> check hydrocarbon AIT
-      ! CO_PASS==2 --> check CO AIT
+      ! CO_PASS==2 --> check CO AIT (not subject to pilot zone ignition [AIT_IN < 1.E10_EB])
       RN => REACTION(CO_PASS)
-      IF (AIT_IN < 1.E10_EB) THEN
+      IF (CO_PASS==1 .AND. AIT_IN < 1.E10_EB) THEN
          AIT_LOC = AIT_IN
       ELSE
          AIT_LOC = RN%AUTO_IGNITION_TEMPERATURE
