@@ -582,9 +582,11 @@ and \SI{0.195 \pm 0.052}{kg/kg} for heptane and toluene, respectively.
 
 \section{NIST/NRC Corner and Wall Effects Experiments}
 
-Six large compartment experiments were conducted at NIST in July, 2017, where a natural gas burner was positioned (1) in a corner and (2) against a wall, and then moved outward in stages until the corner or wall effect became negligible.
+In the summer of 2017, large compartment experiments were conducted at NIST on behalf of the U.S. Nuclear Regulatory Commission in which a natural gas burner was positioned in a corner, against a wall, or inside steel cabinets of various geometries. The compartment was 11~m long, 7~m wide, and 3.8~m high. The long dimension of the compartment ran east-west. A 1.8~m wide, 2.4~m high door was centered on the east (short) wall. All of the fires were fueled by natural gas.
 
-The compartment was 11~m long, 7~m wide, and 3.8~m high. The burner was 60~cm by 60~cm and the burner surface was 54~cm above the floor. The long dimension of the compartment ran east-west. A 1.8~m wide, 2.4~m high door was centered on the east (short) wall. The corner fire was located in the southwest corner. The wall fire was centered on the south (long) wall.
+\subsection{Wall and Corner Effects}
+
+Six large compartment experiments were conducted in July, 2017, where a natural gas burner was positioned (1) in a corner and (2) against a wall, and then moved outward in stages until the corner or wall effect became negligible. The burner was 60~cm by 60~cm and the burner surface was 54~cm above the floor. The corner fire was located in the southwest corner of the large compartment. The wall fire was centered on the south (long) wall.
 
 The experiments began with the burner in the corner or against the wall for the first 30~min. At 30~min, the burner was moved so that its edge(s) was 10~cm away from the wall(s). It remained for 15~min, after which it was moved to 20~cm, 30~cm, 50~cm, 100~cm, and 160~cm, each time remaining 15~min for a total experiment time of 2~h.
 
@@ -653,6 +655,54 @@ The experimental data consists primarily of thermocouple measurements. The key t
 \end{figure}
 
 The East and West Tree thermocouples were used to estimate the height of the hot gas layer (HGL), and the average temperatures of the upper and lower layers. Also, the three horizontal arrays of thermocouples above the burner were processed by first taking a 2~min running average of each TC, and then choosing the maximum value for each of the three elevations above the fire. These were taken as approximate centerline plume temperatures at each height. These experimental files are labelled with ``HGL'' and ``Plume'', respectively.
+
+\subsection{Cabinet Effects}
+
+In this second series of experiments, conducted in September, 2017, two different mock steel cabinets were used. Each cabinet was constructed of 12 gauge (2.8~mm or 7/64~in) steel plate with openings as shown in Figs.~\ref{Large_Cabinet} and \ref{Medium_Cabinet}. The large cabinet was nominally 0.9~m by 0.9~m by 2.1~m and the medium size cabinet was 0.6~m by 0.6~m by 2.1~m. The openings near the top of each cabinet were sometimes covered with a steel grill, shown in Fig.~\ref{cabinet_grill}.
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NIST_NRC_Corner_Effects/Cabinet_3x3x7}
+\caption[Large cabinet drawing, NIST/NRC Corner Effects Experiments]{Large cabinet drawing, NIST/NRC Corner Effects Experiments.}
+\label{Large_Cabinet}
+\end{figure}
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NIST_NRC_Corner_Effects/Cabinet_2x2x7}
+\caption[Medium-sized cabinet drawing, NIST/NRC Corner Effects Experiments]{Medium-sized cabinet drawing, NIST/NRC Corner Effects Experiments.}
+\label{Medium_Cabinet}
+\end{figure}
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/NIST_NRC_Corner_Effects/grill_drawing}
+\caption[Cabinet grill, NIST/NRC Corner Effects Experiments]{Cabinet grill, NIST/NRC Corner Effects Experiments.}
+\label{cabinet_grill}
+\end{figure}
+
+
+For Tests~1-4, the large cabinet was positioned with its front opening facing eastward towards the opening of the test compartment. Its left side was 1.8~m from the south wall and its front side was 5.8~m from the east wall. Two 0.3~m by 0.3~m natural gas burners were placed side by side in the cabinet from the perspective of the cabinet front opening. In these four experiments with its front door closed, the heat release rate was initially 50~kW for 30~min, then it was increased to 100~kW for 15~min, 200~kW for 15~min, and 400~kW for 15~min. For Tests~5-6, the front door was opened, and the heat release rate was set to 200~kW, 400~kW, and 700~kW for 15~min each, and then 1000~kW for 5~min, a total of 50~min.
+
+The data files for these experiments are labelled, {\ct NIST\_NRC\_Cabinet\_Test\_n.csv}. These files contain the same measurement positions as the corner and wall experiments, with the following additional measurements:
+\begin{itemize}
+\item PT-1 through PT-8 are plate thermometers positioned 0.6 m (2 ft) from each side of the cabinet at heights of 0.8 m (2.5 ft) and 1.4 m (4.5 ft). PT-1 is the upper plate on the left side. PT-2 is lower left. PT-3 is upper back. PT-4 is lower back. PT-5 is upper front. PT-6 is lower front. PT-7 is upper right. PT-8 is lower right.
+\item STC-1 through STC-6 are sheathed thermocouples within the cabinet, 15 cm (6 in) from the left side, centered. STC-1 is 6 cm (2.5 in) from the top. STC-2 through STC-6 are 30 cm, 60 cm, 90 cm, 120 cm, and 150 cm from the top, respectively.
+\item TC-Cab is a single 24 gauge Type K thermocouple welded to the center of the back side on the outside of the cabinet.
+\end{itemize}
+The three dimensional array of thermocouples used in the wall and corner experiments was positioned over the front of the cabinet, such that TC positions 1, 7, 13, 19, and 25 in the diagram shown above were just above the upper front edge of the cabinet.
+
+The test matrix is as follows:
+\begin{table}[!ht]
+\caption{Summary of NIST/NRC Cabinet Experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|l|l|}
+\hline
+Test   & Cabinet    & Front Door & Top Vents        & Upper Side Vents                   & HRR (kW)               \\ \hline \hline
+1      & Large      & Closed     & Closed           & Grill                              & 50, 100, 200, 400      \\ \hline 2      & Large      & Closed     & All open         & Grill                              & 50, 100, 200, 400      \\ \hline 3      & Large      & Closed     & Closed           & Front open, all others closed      & 50, 100, 200, 400      \\ \hline 4      & Large      & Closed     & Closed           & Front and back open, others closed & 50, 100, 200, 400      \\ \hline 5      & Large      & Open       & Closed           & Front and back open, others closed & 200, 400, 700, 1000    \\ \hline 6      & Large      & Open       & Open             & All open                           & 200, 400, 700, 1000    \\ \hline \end{tabular}
+\end{center}
+\label{tab:NIST_Cabinet_Experiments}
+\end{table}
+
+
+
 
 
 \clearpage
