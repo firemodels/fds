@@ -154,7 +154,7 @@ for k=1:length(resolution)
 
     text(.01,1000,['McCaffrey Centerline Temperature, ',resolution{k}],'FontSize',Title_Font_Size,'FontName',Font_Name)
 
-    text(.01,675,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.02,650,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
     text(.08,425,'\eta=-1','FontSize',Label_Font_Size,'FontName',Font_Name)
     text(.18,125,'\eta=-5/3','FontSize',Label_Font_Size,'FontName',Font_Name)
 
