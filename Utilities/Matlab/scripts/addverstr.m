@@ -4,7 +4,7 @@
 
 function []=addverstr(ha,fn,pt,varargin)
 
-VerStr_Scale_X   = 0.65;
+VerStr_Scale_X   = 0.60;
 VerStr_Scale_Y   = 1.05;
 Font_Name        = 'Times';
 Font_Interpreter = 'TeX';
