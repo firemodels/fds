@@ -13,16 +13,7 @@ proc ModulesHelp { } {
 #
 set mpihome /shared/openmpi_64
 
-module load intel/17
-
-#
-# 2. If this MPI is built w/ a commercial compiler, or a different
-#    version of GNU compilers, load that module here so that it will
-#    load when the module is loaded. Comment this line out if it 
-#    isn't needed.
-#
 conflict openmpi
-
 conflict FDS6
 
 if [ file isdirectory $mpihome/bin ] {
@@ -30,8 +21,6 @@ if [ file isdirectory $mpihome/bin ] {
     set helpmsg "Sets up your openmpi environment to use $mpihome"
 
     setenv OPAL_PREFIX $mpihome
-
-    setenv MPIFORT mpifort
 
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77

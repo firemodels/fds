@@ -13,12 +13,8 @@ proc ModulesHelp { } {
 
 set mpihome /shared/openmpi202_i17_64
 
-# This MPI is built with version of the Intel compiler
-
-module load intel/17
-
 # make sure that another openmpi or FDS6 modules are not loaded
-#
+
 conflict openmpi
 conflict FDS6
 
@@ -27,8 +23,6 @@ if [ file isdirectory $mpihome/bin ] {
     set helpmsg "Sets up your openmpi environment to use $mpihome"
 
     setenv OPAL_PREFIX $mpihome
-
-    setenv MPIFORT mpifort
 
     setenv CC $mpihome/bin/mpicc
     setenv FC $mpihome/bin/mpif77
