@@ -1,0 +1,22 @@
+# modify the following lines to match your environment
+
+# If using the installed fds set INSTALLED_FDS to 1
+# If using an fds built from an openmpi library set
+# INSTALLED_FDS to 0
+
+# set IFORT_COMPILER to Intel compiler location
+# set MPIDIST to OpenMPI library location
+
+INSTALLED_FDS=0
+
+if [ "$INSTALLED_FDS" == "1" ]; then
+   source $HOME/FDS/FDS6/bin/FDSVARS.sh
+else
+   MPIDIST=/shared/openmpi211_64
+   export IFORT_COMPILER=/opt/intel17
+
+   export IFORT_COMPILER_LIB=$IFORT_COMPILER/lib
+   source $IFORT_COMPILER/bin/compilervars.sh intel64
+   export LD_LIBRARY_PATH=/usr/lib64:$IFORT_COMPILER_LIB/intel64:$LD_LIBRARY_PATH
+   export PATH=$MPIDIST/bin:$PATH
+fi
