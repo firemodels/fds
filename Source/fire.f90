@@ -574,7 +574,6 @@ DO NS = 1,N_TRACKED_SPECIES
       ZZ_HAT_0(NS) = ZZ_0_IN(NS) - ZZ_IN(NS)
       ZZ_HAT(NS)   = 0._EB
    ELSE
-      ! FDS Tech Guide (5.17)
       ZZ_HAT_0(NS) = ( (ZZ_0_IN(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0_IN(R1%AIR_SMIX_INDEX) ) * ZZ_0_IN(NS)
       ZZ_HAT(NS)   = ZZ_IN(NS) - ZZ_0_IN(NS) + ZZ_HAT_0(NS)
    ENDIF
