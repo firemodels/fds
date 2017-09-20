@@ -47,6 +47,9 @@ if [ file isdirectory $mpihome/bin ] {
     } else {
 	prepend-path LD_LIBRARY_PATH $mpihome/lib
     }
+    if [ file isdirectory /usr/lib64 ] {
+       prepend-path LD_LIBRARY_PATH /usr/lib64
+    }
 } else {
     module-whatis "MPI $mpihome is NOT installed"
     set helpmsg "MPI $mpihome is NOT installed"
