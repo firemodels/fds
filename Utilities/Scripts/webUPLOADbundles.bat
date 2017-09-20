@@ -19,5 +19,5 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\fds\Utilities\uploads
 explorer .
-start chrome https://drive.google.com/drive/my-drive
+start chrome https://drive.google.com/drive/folders/0B-W-dkXwdHWNaG9keHVkQk9xNU0
 start chrome https://github.com/firemodels/fds/releases

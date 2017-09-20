@@ -8,7 +8,7 @@ then
   echo ""
   echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  -d installdir - default install directory"
-  echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
+  echo "   INSTALLER.sh - bash shell script containing self-extracting Installer"
   echo
   exit
 fi
@@ -71,11 +71,12 @@ cat << EOF > $INSTALLER
 
 OVERRIDE=\$1
 echo ""
-echo "Installing 64 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
+echo "Installing FDS $FDSVERSION and Smokeview $SMVVERSION for $ostype2"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation [default]"
-echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
+echo "  2) Type \"extract\" to copy the installation files to:"
+echo "     $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
 
@@ -293,7 +294,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to proceed? (yes/no) " yn
+     read -p "Proceed? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
@@ -331,30 +332,33 @@ MKDIR \$FDS_root/bin/modules
 cat << MODULE > \$FDSMODULEtmp
 #%Module1.0#####################################################################
 ###
-### fds modulefile
-###
-### modulefiles/fds
+### FDS6 modulefile
 ###
 
 proc ModulesHelp { } {
-        global version
-
         puts stderr "\tAdds FDS bin location to your PATH environment variable"
 }
 
 module-whatis   "Loads fds paths and libraries."
 
-set     version      "1.0"
+conflict FDS6
 
 prepend-path    PATH    \$FDS_root/bin
+prepend-path    PATH    \$FDS_root/bin/openmpi_64/bin
+MODULE
+if [ "$ostype" == "LINUX" ] ; then
+cat << MODULE >> \$FDSMODULEtmp
+prepend-path    LD_LIBRARY_PATH /usr/lib64
+MODULE
+fi
+cat << MODULE >> \$FDSMODULEtmp
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
-setenv  MPIDIST \$FDS_root/bin/openmpi_64
 setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
+setenv  MPIFORT mpifort
 setenv  OMP_NUM_THREAD 4
 
-conflict fds
 MODULE
 
 cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
@@ -379,8 +383,9 @@ module load $FDSMODULE
 
 <li>Log out and log back in so changes will take effect.
 
-<li>To uninstall fds simply erase the directory \$FDS_root 
-and remove changes you made to your startup files.
+<li>To uninstall fds, erase the directory:<br>
+\$FDS_root 
+<p>and remove changes you made to your startup files.
 
 <li>See <a href="README_repo.html">README_repo.html</a> 
 for more details on setting up the environment to use fds in a git repo.
@@ -391,21 +396,18 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
-export FDSBINDIR=\$FDS_root/bin
-export MPIDIST=\\\$FDSBINDIR/openmpi_64
+export OMP_NUM_THREADS=4
+FDSBINDIR=\$FDS_root/bin
 export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-
-export $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
-
-export OMP_NUM_THREADS=4
+export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
 BASH
 
 #--- create startup and readme files
@@ -424,21 +426,21 @@ echo ""
 echo "-----------------------------------------------"
 echo "Wrap up"
 echo ""
-echo "1. Add following line to one of your startup files"
-echo "   to complete the installation."
+echo "1. Add the following line to one of your startup files"
+echo "   to complete the installation:"
 echo ""
 echo "source \$FDS_root/bin/FDSVARS.sh"
 echo ""
-echo "   or the following if you are using modules"
+echo "or the following lines if you are using modules:"
 echo ""
 echo "export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH"
 echo "module load $FDSMODULE"
 echo ""
-echo "2. Log out and log back in so changes will take effect."
+echo "2. Log out and log back in so the changes will take effect."
 echo ""
-echo "To uninstall fds simply erase the directory "
-echo "\$FDS_root and remove changes you made"
-echo "to your startup files."
+echo "To uninstall fds, erase the directory: "
+echo "\$FDS_root"
+echo "and remove any changes made to your startup file."
 echo ""
 echo "Installation complete."
 exit 0

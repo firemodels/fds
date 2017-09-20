@@ -1,0 +1,75 @@
+#%Module
+
+proc ModulesHelp { } {
+    global helpmsg
+    puts stderr "\t$helpmsg\n"
+}
+
+# Only allow one instance of compilers to load
+#
+conflict pgi
+conflict intel
+
+set version 2017
+set inteldir /opt/intel17/compilers_and_libraries
+
+if [ file isdirectory $inteldir ] {
+    module-whatis "Changes the Intel compiler to  $version"
+    set helpmsg "
+Purpose
+-------
+This module file defines the system paths and environment variables
+needed to use the Intel Parallel Studio XE $version Composer Edition.
+Includes C++ and/or Fortran compilers, performance libraries, and
+parallel models.
+
+Math library: Intel® Math Kernel Library (Intel® MKL)
+Threading library: Intel® Threading Building Blocks (Intel® TBB)
+Media/data library: Intel® Integrated Performance Primitives (Intel® IPP)
+Numerical analysis functions for Fortran applications: IMSL* numeric library
+Threading and vectorization parallel model: Intel Cilk Plus
+
+Dependencies
+------------
+None.
+
+Documentation
+-------------
+  Documentation for Intel Parallel Studio XE $version is available at:
+
+  https://software.intel.com/en-us/intel-software-technical-documentation
+"
+
+    setenv I_MPI_ROOT $inteldir/linux/mpi
+	setenv GDB_CROSS /opt/intel17/debugger_2017/gdb/intel64_mic/bin/gdb-mic
+	setenv INTEL_PYTHONHOME /opt/intel17/debugger_2017/python/intel64/
+	setenv IPPROOT $inteldir/linux/ipp
+	setenv MIC_LD_LIBRARY_PATH $inteldir/linux/mpi/mic/lib:$inteldir/linux/lib/mic:$inteldir/linux/ipp/lib/mic:$inteldir/linux/lib/intel64_lin_mic:$inteldir/linux/mkl/lib/intel64_lin_mic:$inteldir/linux/tbb/lib/mic
+	setenv DAALROOT $inteldir/linux/daal
+	prepend-path PATH /opt/intel17/debugger_2017/gdb/intel64_mic/bin
+	prepend-path PATH $inteldir/linux/mpi/intel64/bin
+	prepend-path PATH $inteldir/linux/bin/intel64
+	append-path PATH /opt/intel17/bin
+	setenv INTEL_LICENSE_FILE /opt/intel17/licenses:$inteldir/linux/licenses:/opt/intel/licenses:/root/intel/licenses
+	setenv CPATH $inteldir/linux/ipp/include:$inteldir/linux/mkl/include:$inteldir/linux/tbb/include:$inteldir/linux/daal/include
+	setenv LD_LIBRARY_PATH $inteldir/linux/lib/intel64:$inteldir/linux/lib/intel64_lin:$inteldir/linux/mpi/intel64/lib:$inteldir/linux/mpi/mic/lib:$inteldir/linux/ipp/lib/intel64:$inteldir/linux/lib/intel64_lin:$inteldir/linux/mkl/lib/intel64_lin:$inteldir/linux/tbb/lib/intel64/gcc4.7:/opt/intel17/debugger_2017/iga/lib:/opt/intel17/debugger_2017/libipt/intel64/lib:$inteldir/linux/daal/lib/intel64_lin:$inteldir/linux/daal/../tbb/lib/intel64_lin/gcc4.4
+	setenv MPM_LAUNCHER /opt/intel17/debugger_2017/mpm/mic/bin/start_mpm.sh
+	setenv MANPATH /opt/intel17/man/common:$inteldir/linux/mpi/man:/opt/intel17/documentation_2017/en/debugger//gdb-ia/man/:/opt/intel17/documentation_2017/en/debugger//gdb-mic/man/:/opt/intel17/documentation_2017/en/debugger//gdb-igfx/man/:/usr/share/man:/opt/stack/man:/usr/local/share/man:
+	setenv LIBRARY_PATH $inteldir/linux/ipp/lib/intel64:$inteldir/linux/lib/intel64_lin:$inteldir/linux/mkl/lib/intel64_lin:$inteldir/linux/tbb/lib/intel64/gcc4.7:$inteldir/linux/daal/lib/intel64_lin:$inteldir/linux/daal/../tbb/lib/intel64_lin/gcc4.4
+	setenv TBBROOT $inteldir/linux/tbb
+	setenv INFOPATH /opt/intel17/documentation_2017/en/debugger//gdb-ia/info/:/opt/intel17/documentation_2017/en/debugger//gdb-mic/info/:/opt/intel17/documentation_2017/en/debugger//gdb-igfx/info/
+	setenv MIC_LIBRARY_PATH $inteldir/linux/mpi/mic/lib:$inteldir/linux/lib/mic:$inteldir/linux/lib/intel64_lin_mic:$inteldir/linux/mkl/lib/intel64_lin_mic:$inteldir/linux/tbb/lib/mic
+	setenv GDBSERVER_MIC /opt/intel17/debugger_2017/gdb/targets/mic/bin/gdbserver
+	setenv MKLROOT $inteldir/linux/mkl
+	setenv NLSPATH $inteldir/linux/lib/intel64/locale/%l_%t/%N:$inteldir/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel17/debugger_2017/gdb/intel64_mic/share/locale/%l_%t/%N:/opt/intel17/debugger_2017/gdb/intel64/share/locale/%l_%t/%N
+	setenv CLASSPATH $inteldir/linux/mpi/intel64/lib/mpi.jar:$inteldir/linux/daal/lib/daal.jar
+} else {
+    module-whatis " Intel Parallel Studio XE $version not installed"
+    set helpmsg "Intel Parallel Studio XE $version not installed"
+    if [ expr [ module-info mode load ] || [ module-info mode display ] ] {
+	     # bring in new version
+	    puts stderr "Intel Parallel Studio XE $version not installed on [uname nodename]"
+    }
+}
+
+# Only allow one instance of compilers to load

@@ -1,0 +1,719 @@
+#!/usr/bin/env perl
+#
+#$Info: env2 - Converts environment variables to various script languages. $
+
+############################################################################}}}
+## BEGIN DOCUMENTATION #####################################################{{{
+###############################################################################
+=pod
+
+=head1 NAME
+
+B<env2> - Converts environment variables to various script languages.
+
+=head1 SYNOPSIS
+
+B<env2> -from I<SHELL> -to I<SHELL> [-o I<DESTINATION_FILE>] I<SOURCE_FILE>
+
+B<env2> --save [FILE]
+
+B<env2> # displays help
+
+=head1 DESCRIPTION
+
+Do you prefer running bash while the rest of the team runs tcsh? Or perhaps
+you learned csh and the system administrators only know ksh. What happens when
+they (or you) supply an initialization script to source? If any of these
+situations sounds familiar, then this may be the script for you.
+
+B<env2> takes shell scripts of one flavor in and spits out scripts effectively
+equivalent in another dialect. We say "effectively equivalent" because it does
+not translate syntax such as B<if>/B<else> statements. Instead, the original
+(source) script is evaluated to determine what environment variables it
+modifies, and the effective values of those variables are simply expressed in
+the syntax of the destination script's dialect. Typically, this is all you
+really need for scripts that modify the environment.
+
+NOTE: If you need to the conditionals and for-loops to be used for different
+situations (e.g. different host architectures), then simply use this script
+repeatedly as needed.
+
+Future extensions may include B<aliases> or <functions>. Supported languages
+currently include: B<bash>, B<csh>, B<ksh>, B<modulecmd>, B<perl>, B<plist>,
+B<sh>, B<tclsh>, B<tcsh>, B<vim>, B<yaml>, and B<zsh>.
+
+NOTE: The file version is identified by an internally computed SHA1 hash similar
+to the way B<git> does versioning. If you get a warning message about inconsistent
+hash, it means that somebody modified the file without updating the $SHA variable.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-all>
+
+Include all variables rather than just those that changed. See B<-diff>.
+
+=item B<-clear>
+
+Resets the ignore list to almost completely empty except for the
+generally dangerous environment list.
+
+See B<-ignore>, B<-reset>, and B<-unsafe_clear>.
+
+=item B<-diff>
+
+Only include those variables whose values are different as a result of
+sourcing the specified input script. This is the default action.
+
+=item B<-from> DIALECT
+
+The dialect to translate from. If not present, then the input file is
+examined for a #! line. If that fails, the B<SHELL> environment variable
+is examined. If that fails, we default to B<bash> (Hey, I had to
+choose something, and B<bash> is the default Linux shell of choice).
+
+=item B<-help>
+
+This built-in documentation. Written in POD so that you can also have it
+in HTML, PDF, RTF, plain text or as a man page.
+
+=item B<-ignore> VARLIST
+
+Comma separated list of variables to ignore. By default, B<env2> starts
+with the list set to 
+
+ _,ENV,ENV2,OLDPWD,SHLVL
+
+See also B<-clear>, B<-reset> and B<-unsafe_clear>.
+
+=item B<-ignored>
+
+Lists variables that will be ignored. Useful if you are uncertain and
+want to clarify things before proceeding.
+
+=item B<-o> [I<FILE>]
+
+Specifies a I<FILE> to save the results in. By default results are sent to STDOUT.
+If you leave off the I<FILE>, the filename will be C<env2.>B<$SHELL>.
+
+=item B<-profile> [I<FILE>]
+
+Specifies a file that contains the starting environment. Defaults to C<.env2profile>.
+Searches for the file in the current directory or $HOME if path not specified.
+
+=item B<-reset>
+
+Resets the ignore list to a minimum set. 
+
+See also B<-clear>, B<-ignore> and B<-unsafe_clear>.
+
+=item B<-save> [FILE]
+
+Saves the environment in a perl format. By default saves to env2.pl.
+Internally, this option is invoked as part of the conversion process and
+saves an intermediate file to /tmp/env2.$$.pl.
+
+=item B<-sha1>
+
+Displays the SHA1 version identifier. Use this to see if script has been
+modified since last updated.
+
+=item B<-to> DIALECT
+
+The dialect to translate to. If not supplied, the B<SHELL> environment
+variable is examined. If that fails, we default to B<bash> (Hey, I had
+to choose something, and B<bash> is the default Linux shell of choice).
+
+=item B<-uniq> I<[PATHLIST]>
+
+Ensure that each path variable specified in I<PATHLIST> contains a unique
+colon separated list. Default is to apply this to common path variables:
+
+ MANPATH
+ PATH
+ LD_LIBRARY_PATH
+ DYLD_LIBRARY_PATH
+ PERL5LIB
+
+=item B<-unsafe_clear>
+
+Resets the ignore list to completely empty. This is potentially
+dangerous because allows inclusion of dangerous environment variables
+that the user should not touch. These dangerous variables can have an
+adverse affect on operation of UNIX. 
+
+See also B<-clear>, B<-ignore> and B<-reset>.
+
+=item B<--version>
+
+Display version of script.
+
+=back
+
+=head1 ENVIRONMENT
+
+ENV2 environment variable contains default command-line arguments if defined.
+
+=head1 DEPENDENCIES
+
+To support YAML, this script uses the CPAN YAML module.
+
+=head1 EXAMPLES
+
+ # Simple conversion
+ env2 -from ksh -to csh -o setup.csh setup.ksh
+
+ # Create a modules cmd for a new xyz tool version 1.0
+ TOOL_SETUP=$TOOLS/vendor_dir/xyz_tool/xyz-1.0/setup.script
+ MDLDIR=$TOOLS/modules/tools/xyz
+ env2 -from sh -to modulecmd -o $MDLDIR/1.0 $TOOL_SETUP
+
+ # Dynamically use a script for another shell to set environment
+ eval `env2 -from ksh -to $SHELL -o setup.csh setup.ksh`
+
+=head1 COPYRIGHT/LICENSE
+
+env2 is copyright (C) 2003-2008 David C Black. All rights reserved. 
+This code may is hereby made available under Apache 2.0 licensing.
+
+=head1 AUTHOR
+
+David C. Black <dcblack@hldwizard.com>
+
+=cut
+
+###############################################################################
+## END DOCUMENTATION ##########################################################
+############################################################################}}}
+
+require v5.6;
+use strict;
+use warnings;
+use English;
+use FindBin qw($RealBin $RealScript);
+use Data::Dumper;
+use FileHandle;
+use Cwd qw(getcwd abs_path);
+BEGIN { eval 'use Digest::SHA qw(sha1)'; }
+our $use_sha1=defined &sha1;
+BEGIN { eval 'use YAML'; }
+our $use_yaml=defined &YAML::LoadFile;
+STDOUT->autoflush(1);
+STDERR->autoflush(1);
+our $start_dir = &getcwd();
+our $LINE = '?';
+use vars qw{$SHA1};
+our $verbose = 0;
+our (@DANGER_LIST,@USER_PREFS,@DEFAULT_IGNORE,@IGNORE,@ONLY);
+our $VERSION = '1.1.0'; ########################## <<< UPDATE THIS LINE WHEN FIXING BUGS OR ADDING FEATURES >>> ###
+
+# Compute SHA for the script
+if ($use_sha1) {
+  our $SHA1 = '18017c6e340372ef014013675b6bb799e60cc971'; #### <<< UPDATE THIS LINE WHEN COMMITTING CHANGES >>> ###
+  my $sha = Digest::SHA->new(1);
+  open SCRIPT,"<$RealBin/$RealScript";
+  while (<SCRIPT>) {
+    next if m{^\s*our .SHA1 = '};
+    $sha->add($_);
+  }#endwhile
+  close SCRIPT;
+  my $hex = $sha->hexdigest;
+  warn "Inconsistent SHA1 digest $hex!\n" if $SHA1 ne $hex;
+}
+
+if (@ARGV == 0 or scalar(@ARGV) and $ARGV[0] =~ m/^-{1,2}h(elp)?/) {
+  exec "perldoc $RealBin/$RealScript";
+} elsif (scalar(@ARGV) and $ARGV[0] eq '+TEST') { 
+  # +TEST is a hidden option for testing the script itself
+  &TestIndexPath( 1, 'a',       'a',    0,  0);
+  &TestIndexPath( 2, 'a',       'e',   -1, -1);
+  &TestIndexPath( 3, 'a:b:c:d', 'a',    0,  0);
+  &TestIndexPath( 4, 'a:b:c:d', 'b',    1,  2);
+  &TestIndexPath( 5, 'a:b:c:d', 'd',    3,  6);
+  &TestIndexPath( 6, 'a:b:c:d', 'e',   -1, -1);
+  &TestIndexPath( 7, 'a:b:c:d', 'b:c',  1,  2);
+  &TestIndexPath( 8, 'a:b:c:d', 'a:b',  0,  0);
+  &TestIndexPath( 9, 'a:b:c:d', 'c:d',  2,  4);
+  &TestIndexPath(10, 'a:x:c:d', 'b:c', -1, -1);
+  &TestIndexPath(11, '',        '',     0,  0);
+  &TestIndexPath(12, '',        'a:b', -1, -1);
+  &TestIndexPath(13, 'a',       '',    -1, -1);
+  &TestIndexPath(14, ':a',      '',     0,  0);
+  &TestIndexPath(15, 'a:',      '',     1,  2);
+  &TestIndexPath(16, 'a:b',     '',    -1, -1);
+  &TestIndexPath(17, 'a::c',    '',     1,  2);
+  exit 1;
+} elsif (scalar(@ARGV) and $ARGV[0] =~ m{^-{1,2}save$}) {
+  ############################################################################
+  # Dump %ENV to specified file (which could be - (STDOUT))
+  ############################################################################
+  my $efile = 'env2.pl';
+  $efile = $ARGV[1] if defined $ARGV[1];
+  open EFILE,">$efile";
+  EFILE->autoflush(1);
+  my $newenv = Data::Dumper->new([ \%ENV ] ,[qw{NEWENV}]);
+  print EFILE "#!/usr/bin/perl\n";
+  printf EFILE "%s\n",$newenv->Dump;
+  print EFILE "1;\n";
+  close EFILE;
+} else {
+  ############################################################################
+  # Parse command-line
+  ############################################################################
+  our $debug = 0;
+  our $diff = 1; # default
+  # The following environment variable names can cause scripts to fail
+  # if incorrectly set, and are generally only set explicitly to the
+  # operating system or shell at login.
+  @DANGER_LIST = qw(
+    BASH_ENV COLUMNS DISPLAY ENV HOME LINES LOGNAME PWD SHELL SHLVL LANG
+    LC_ALL LSB_ACCT_FILE LSB_CHKFILENAME LSB_JOBFILENAME LSB_JOBID
+    LS_JOBPID SSH_ASKPASS SSH_CLIENT SSH_CONNECTION SSH_TTY TERM USER
+  );
+  # The following environment variable names relate to user preferences
+  # that are generally not automatically set.
+  @USER_PREFS = qw(
+    EDITOR HISTFILE HISTSIZE MAILER PAGER REPLYTO VISUAL
+  );
+  push @USER_PREFS,@DANGER_LIST;
+  # The following environment variable names are commonly not set
+  # automatically by scripts, and are generally uninteresting.
+  @DEFAULT_IGNORE = qw(
+    _ ENV2 OLDPWD PS1 PS2 PRINTER TTY TZ
+  ); # Variables to completely ignore
+  push @DEFAULT_IGNORE,@USER_PREFS;
+  @IGNORE = @DEFAULT_IGNORE; # what is actually ignored
+  @ONLY = (); # only used if non-empty
+  our @PATHVARS;
+  our $ishell = 'UNKNOWN';
+  our $oshell = 'UNKNOWN';
+  our $profile = undef;
+  our $ifile = '';
+  our $ofile = '-';
+  our @ORIG = @ARGV;
+  our $USER = getlogin || $ENV{HOME} || 'kilroy';
+  our $HOME = $ENV{HOME} || $start_dir;
+  for my $rcfile ('/etc/env2rc',"$HOME/.env2rc",'./env2rc') {
+    next unless -r $rcfile;
+    unshift @ARGV,&read_args($rcfile);
+  }#endfor
+  unshift @ARGV,split(':',$ENV{'ENV2'}) if exists $ENV{'ENV2'};
+  our @LIST = ();
+  while (@ARGV) {
+    my $arg = shift(@ARGV);
+    if ($arg =~ m{^(\w[-A-Za-z0-9_:]*)=}) { # assignment
+      $ENV{$1} = $';
+    } elsif ($arg =~ m{^-{1,2}undef$}) {
+      die "FATAL(env2): $arg requires a variable name!\n" unless @ARGV and $ARGV[0] =~ m{^\w[-A-Za-z0-9_:]*};
+      my $arg = shift(@ARGV);
+      delete $ENV{$arg} if exists $ENV{$arg};
+    } elsif ($arg =~ m{^-{1,2}all$}) {
+      $diff = 0;
+    } elsif ($arg =~ m{^-{1,2}diff$}) {
+      $diff = 1;
+    } elsif ($arg eq '-f') {
+      if (@ARGV and $ARGV[0] !~ m{^[/A-Za-z0-9.]}) {
+        unshift @ARGV,&read_args(shift(@ARGV));
+      } else {
+        die "FATAL(env2): -f requires a valid filename!\n";
+      }#endif
+    } elsif ($arg eq '-v') {
+      $verbose++;
+      print "Using YAML\n" if $use_yaml;
+      print "Using SHA1\n" if $use_sha1;
+    } elsif ($arg =~ m{^-{1,2}from$}) {
+      $ishell = shift(@ARGV);
+    } elsif ($arg =~ m{^-{1,2}debug$}) {
+      $debug = 1; # suppress deletion of temporary files
+    } elsif ($arg =~ m{^-{1,2}version$}) {
+      printf STDERR "%s Version #%s\n",$RealBin,$VERSION;
+    } elsif ($arg =~ m{^-{1,2}sha(?:1?)$}) {
+      printf STDERR "%s %s/%s\n",$SHA1,$RealBin,$RealScript;
+    } elsif ($arg =~ m{^-{1,2}only$}) { 
+      push @ONLY,split('[ :,]',shift(@ARGV));
+    } elsif ($arg =~ m{^-{1,2}ignored$}) {
+      printf STDERR "Ignoring: %s\n",join(' ',@IGNORE);
+    } elsif ($arg =~ m{^-{1,2}ignore$}) { 
+      push @IGNORE,split('[ :,]',shift(@ARGV));
+    } elsif ($arg eq '-o') {
+      if (@ARGV and $ARGV[0] !~ m{^[/A-Za-z0-9.]}) {
+        $ofile = shift(@ARGV);
+      } else {
+        $ofile = undef;
+      }#endif
+    } elsif ($arg =~ m{^-{1,2}clear$}) {
+      @IGNORE = @DANGER_LIST;
+      @ONLY = ();
+    } elsif ($arg =~ m{^-{1,2}profile$}) {
+      $profile = '.env2profile';
+      $profile = shift(@ARGV) if @ARGV and not $ARGV[0] =~ m{^-};
+    } elsif ($arg =~ m{^-{1,2}reset$}) {
+      @IGNORE = @DEFAULT_IGNORE;
+      @ONLY = ();
+    } elsif ($arg =~ m{^-{1,2}uniq$}) {
+      @PATHVARS = qw(
+        MANPATH
+        PATH
+        DYLD_LIBRARY_PATH
+        LD_LIBRARY_PATH
+        PERL5LIB
+      );
+      @PATHVARS = split(':',shift(@ARGV)) if @ARGV and $ARGV[0] =~ m{^[A-Za-z_]\w+(?::\w+)*$};
+    } elsif ($arg =~ m{^-{1,2}unsafe_clear}) {
+      @IGNORE = ();
+    } elsif ($arg =~ m{^-{1,2}to$}) {
+      $oshell = shift(@ARGV);
+    } else {
+      push @LIST,$arg;
+    }#endif
+  }#endwhile @ARGV
+  $ofile = "env2.$oshell" unless defined $ofile;
+
+  ############################################################################
+  # Determine input
+  ############################################################################
+  if (scalar(@LIST) and $LIST[0] !~ m{^-?$}) { # File input
+    $ifile = abs_path shift(@LIST);
+    if ($ishell eq 'UNKNOWN') { # Determine type from file
+      open IFILE,"<$ifile" or die "FATAL(env2): Unable to read '$ifile'!?\n";
+      my $line;
+      while ($line = <IFILE>) {
+        chomp $line; chomp $line;
+        $ishell = $1    if $line =~ m{^#!(\S+)};
+        $ishell = $1    if $ishell eq 'UNKNOWN' and $line =~ m{^eval\s+`exec (\S+)};
+        $ishell =~ s{.*/}{};
+      }#endwhile
+      close IFILE;
+      $ishell = 'csh' if $ishell eq 'UNKNOWN'; # Default for a file
+    }#endif
+  } elsif (scalar(@LIST) == 0) { # No file
+    ; # nothing to do
+  } else { # Standard input -- save in a temporary file
+    $ishell = $ENV{'SHELL'} if $ishell eq 'UNKNOWN' and exists $ENV{'SHELL'};
+    $ishell =~ s{.*/}{};
+    $ifile = "/tmp/env2.$$.$ishell";
+    $LINE = __LINE__ + 1;
+    open TFILE,">$ifile" or die "FATAL(env2:$LINE): Unable to write $ifile!?\n";
+    TFILE->autoflush(1);
+    print TFILE "#!$ishell\n";
+    $LINE = __LINE__ + 1;
+    open IFILE,"<-" or die "FATAL(env2:$LINE): Unable to read from STDIN!?\n";
+
+    my $nshell = undef;
+    while (<IFILE>) {
+      chomp; chomp;
+      $nshell = $1    if m{^#!(\S+)};
+      $nshell = $1    if $ishell eq 'UNKNOWN' and m{^eval\s+`exec (\S+)};
+      $nshell =~ s{.*/}{} if defined $nshell;
+      printf TFILE "%s\n",$_;
+    }#endwhile <IFILE>
+    close IFILE;
+    close TFILE;
+    if (defined $nshell and $nshell ne $ishell) {
+      my $nfile = "/tmp/env2.$$.$nshell";
+      rename $ifile,$nfile;
+      $ifile = $nfile;
+      $ishell = $nshell;
+    }
+  }#endif
+  $oshell = $ENV{'SHELL'} if $oshell eq 'UNKNOWN' and defined $ENV{'SHELL'};
+
+  ############################################################################
+  # PROCESS RC IF AVAILABLE
+  ############################################################################
+  if (defined $profile) {
+    $profile = "$HOME/$profile" unless -r $profile or $profile =~ m{^/};
+    require $profile;
+  }#endif
+
+  ############################################################################
+  # COMPUTE
+  ############################################################################
+  my $exe = "$RealBin/$RealScript";
+  #{:TODO - possible pipe output instead of write to temp file:}
+  my $efile = "/tmp/env2.$$.pl";
+  our $logfile = "/tmp/env2.$$.log";
+  our $NEWENV;
+  our %OLDENV = %ENV;
+  our %DEL_YAML;
+  our %NEW_YAML;
+  %OLDENV = () unless $diff;
+  delete $ENV{'ENV'};
+  delete $ENV{'BASH_ENV'};
+  our $status = 0;
+  if ($ishell eq 'UNKNOWN' or not defined $ifile) {
+    $status = system 'bash','--noprofile','--norc','-c',"$exe --save $efile";
+  } elsif ($ishell =~ m/\b(?:yml|yaml|YAML)\b/) {
+    $NEWENV = YAML::LoadFile $ifile;
+  } elsif ($ishell =~ m/\bcsh/) {
+    $status = system $ishell,'-f','-c',"source $ifile >&$logfile;$exe --save $efile";
+  } elsif ($ishell =~ m/ksh/) {
+    $status = system $ishell,'-c',". $ifile >$logfile 2>&1;$exe --save $efile";
+  } elsif ($ishell =~ m/bash/) {
+    $status = system $ishell,'--noprofile','--norc','-c',". $ifile >$logfile 2>&1;$exe --save $efile";
+  } elsif ($ishell =~ m/\bperl/) {
+    system("cp $ifile $efile");
+  } elsif ($ishell =~ m/vim\b/) {
+    die "FATAL(env2:$LINE): vim not yet supported for input!";
+  } elsif ($ishell !~ m/perl/) {
+    $status = system $ishell,'-f','-c',". $ifile >$logfile;$exe --save $efile";
+  }#endif
+  die "FATAL(env2:$LINE): $?\n" if $status != 0;
+  if ($ishell !~ m/\b(?:yml|yaml|YAML)\b/) {
+    require $efile;
+  }#endif
+  if (not $debug) {
+    unlink $efile;
+    unlink $logfile;
+    unlink $ifile if $ifile =~ m{^/tmp/env2\.$$\.};
+  }
+  ############################################################################
+  # PROCESS
+  ############################################################################
+  for my $pvar (@PATHVARS) {
+    $NEWENV->{$pvar} = &reduce($NEWENV->{$pvar});
+  }#endfor
+  ############################################################################
+  # OUTPUT
+  ############################################################################
+  $LINE = __LINE__ + 1;
+  open OFILE,">$ofile" or die "FATAL(env2:$LINE): Unable to open '$ofile' for writing!?\n";
+  OFILE->autoflush(1);
+  ############################################################################
+  # File header
+  ############################################################################
+  if ($ofile ne '-') {
+    if ($oshell =~ m/\bmodule(cmd|file|s)?/) {
+      printf OFILE "%-78.78s\n",'#%Module1.0#'.('#' x 80);
+    } elsif ($oshell =~ m/plist/) {
+      printf OFILE <<'EOT';
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+EOT
+    } elsif ($oshell =~ m/vim/) {
+      printf OFILE <<'EOT';
+"vim script to set environment
+"Automatigically created with env2
+
+EOT
+    } elsif ($oshell =~ m/\b(yml|yaml|YAML)\b/) {
+      print OFILE <<'EOT';
+# Yaml of environment
+EOT
+    } else {
+      printf OFILE "#!%s;\n",$oshell;
+    }#endif
+  }#endif
+  my $var;
+  for my $var (keys %OLDENV) {
+    next if not @ONLY and grep($_ eq $var,@IGNORE);
+    next if @ONLY and not grep($_ eq $var,@ONLY);
+    next if exists $NEWENV->{$var};
+    ##########################################################################
+    # Delete environment variable
+    ##########################################################################
+    if ($oshell =~ m/\bmodule(cmd|file|s)?\b/) {
+      printf OFILE "unsetenv %s;\n",$var;
+    } elsif ($oshell =~ m/plist/) {
+      # Nothing
+    } elsif ($oshell =~ m/csh/) {
+      printf OFILE "unsetenv %s;\n",$var;
+    } elsif ($oshell =~ m/perl/) {
+      printf OFILE "delete \$ENV{'%s'};\n",$var;
+    } elsif ($oshell =~ m/\b(yml|yaml|YAML)\b/) {
+      $DEL_YAML{$var} = 'DELETE';
+    } else {
+      printf OFILE "unset %s;\n",$var;
+    }#endif
+  }#endfor
+  for my $var (keys %$NEWENV) {
+    next if not @ONLY and grep($_ eq $var,@IGNORE);
+    next if @ONLY and not grep($_ eq $var,@ONLY);
+    warn "WARNING(env2): setting $var\n" 
+      if $verbose and @ONLY and grep($_ eq $var,@DEFAULT_IGNORE);
+    next if (exists $OLDENV{$var} and $OLDENV{$var} eq $NEWENV->{$var}); # Skip duplicates
+    ##########################################################################
+    # Define environment variable
+    ##########################################################################
+    my ($rawval,$escval,$tclval,$xmlval);
+    $rawval = $NEWENV->{$var};
+    ($escval=$rawval) =~ s/'/'"'"'/g;
+    ($tclval=$rawval) =~ s/[{}]/\\$&/g;
+    ($xmlval = $rawval) =~ s/&/&amp;/g;
+    $xmlval =~ s/</&lt;/g;
+    $xmlval =~ s/>/&gt;/g;
+    if ($oshell =~ m/\bmodule(cmd|file|s)?\b/) {
+      # Shorten/diff
+      if (exists $OLDENV{$var} and ($OLDENV{$var} =~ m/:/ or $rawval =~ m/:/)) {
+        my $oldval = $OLDENV{$var};
+        my ($pos) = &IndexPath($rawval,$oldval);
+        my @oldlist = &List($oldval);
+        my @newlist = &List($rawval);
+        if ($pos < 0) {
+          printf OFILE "setenv %s {%s};\n",$var,$tclval;
+        } else {
+          splice @newlist,$pos,scalar(@oldlist);
+          if ($pos > 0) {
+            for $rawval (reverse @newlist[0..($pos-1)]) {
+              ($tclval=$rawval) =~ s/[{}]/\\$1/g;
+              printf OFILE "prepend-path %s {%s};\n",$var,$tclval;
+            }#endfor
+          }#endif
+          if ($pos <= scalar(@newlist)) {
+            for $rawval (@newlist[$pos..$#newlist]) {
+              ($tclval=$rawval) =~ s/[{}]/\\$1/g;
+              printf OFILE "append-path %s {%s};\n",$var,$tclval;
+            }#endfor
+          }#endif
+        }#end
+      } else {
+        printf OFILE "setenv %s {%s};\n",$var,$tclval;
+      }#endif
+    } elsif ($oshell =~ m/plist/) {
+      printf OFILE <<"EOT";
+  <key>$var</key>
+  <string>$xmlval</string>
+EOT
+    } elsif ($oshell =~ m/tcl/) {
+      printf OFILE "set env(%s) {%s};\n",$var,$tclval;
+    } elsif ($oshell =~ m/vim/) {
+      printf OFILE ":let \$%s='%s'\n",$var,$escval;
+    } elsif ($oshell =~ m/csh/) {
+      printf OFILE "setenv %s '%s';\n",$var,$escval;
+    } elsif ($oshell =~ m/perl/) {
+      printf OFILE "\$ENV{'%s'}=q{%s};\n",$var,$escval;
+    } elsif ($oshell =~ m/\b(yml|yaml|YAML)\b/) {
+      $NEW_YAML{$var} = $rawval;
+    } else {
+      printf OFILE "%s='%s'; export %s;\n",$var,$escval,$var;
+    }#endif
+  }#endfor
+  if ($oshell =~ m/\b(yml|yaml|YAML)\b/) {
+    print OFILE YAML::Dump(\%NEW_YAML) if scalar keys %NEW_YAML;
+    print OFILE "---\n",YAML::Dump(\%DEL_YAML) if scalar keys %DEL_YAML;
+    print OFILE "...\n";
+  }#endif
+  ############################################################################
+  # File trailer
+  ############################################################################
+  if ($ofile ne '-') {
+    if ($oshell =~ m/\bmodule(cmd|file|s)?\b/) {
+      printf OFILE "#eof %s\n",$ofile;
+    } elsif ($oshell =~ m/plist/) {
+      printf OFILE <<'EOT';
+</dict>
+</plist>
+EOT
+    } elsif ($oshell =~ m/vim/) {
+      printf OFILE qq{\n"eof %s\n},$ofile;
+    } elsif ($oshell =~ m/perl/) {
+      printf OFILE "1;\n#eof %s\n",$ofile;
+    } else {
+      printf OFILE "#eof %s\n",$ofile;
+    }#endif
+  }#endif
+  close OFILE;
+}#endif
+
+exit 0;
+
+sub reduce {
+    # Reduces a list to its unique entries without reordering by dropping duplicates.
+    my (@old) = @_;
+    my (%old,@new,$old);
+    @old = split(':',join(':',@old)) unless wantarray;
+    # Create a list of unique entries
+    foreach $old (@old) {
+        $old =~ s://+:/:; # remove // from paths
+        $old{$old} = 1; # note the entry
+    }#endforeach
+    @new = ();
+    foreach $old (@old) {
+        next unless defined $old{$old} and $old ne '';
+        push(@new,$old);
+        delete $old{$old}; # only use the first one
+    }#endforeach
+    return wantarray ? @new : join(':',@new);
+}#endsub reduce
+
+our %file_seen;
+sub read_args {
+  my @results = ();
+  for my $file (@_) {
+    my $path = &abs_path($file);
+    return () if exists $file_seen{$path}; # only include once per path
+    $file_seen{$path} = 1;
+    open ARGS,"<$path" or die "FATAL(env2:$LINE): Unable to read $path!?\n";
+    while (<ARGS>) {
+      chomp; chomp;
+      s{^\s+}{}; # remove leading whitespace
+      s{\s+$}{}; # remove trailing whitespace
+      next if m{^$} or m{^#}; # Skip blank lines and comments
+      s{\s+}{ }g; # compress whitespace
+      push @results,split $_;
+    }#endwhile
+    close ARGS;
+  }#endfor
+  return @results;
+}#endsub read_args
+
+sub List($) {
+  my ($str) = @_;
+  my @list = split(':',"A:$str:Z");
+  shift @list;
+  pop @list;
+  return @list;
+}#endsub List
+
+sub IndexPath($$) {
+  my ($str,$sub) = @_;
+  my @str = &List($str);
+  my @sub = &List($sub);
+  my $subcnt = scalar(@sub);
+  my $strcnt = scalar(@str);
+  my $strmax = $strcnt - $subcnt + 1;
+  my $subidx = 0;
+  my $stridx = 0;
+  my $subelt = $sub[$subidx];
+  my $strelt = $str[$stridx];
+  my $pos = -1;
+  # Degenerate cases
+  if ($subcnt >= $strcnt or $strcnt == 1) {
+    return (wantarray ? ( 0, 0) :  0) if $str eq $sub;
+    return (wantarray ? (-1,-1) : -1);
+  }#endif
+  while (1) {
+    $subelt = $sub[$subidx];
+    $strelt = $str[$stridx];
+    if ($subelt eq $strelt) { # partial match
+      ++$subidx;
+      ++$stridx;
+      last if ($subidx >= $subcnt);
+    } else { # doesn't match
+      $stridx = $stridx + 1 - $subidx;
+      $subidx = 0;
+      return (wantarray ? (-1,-1) : -1) if $stridx >= $strmax;
+    }#endif
+  }#endwhile
+  $stridx -= $subidx;
+  $pos = length(join(':',@str[0..($stridx-1)])) + 1;
+  $pos = 0 if $stridx == 0;
+  return wantarray ? ($stridx,$pos) : $pos;
+}#endsub IndexPath
+
+sub TestIndexPath($$$$$) {
+  my ($tno,$arg1,$arg2,$exp1,$exp2) = @_;
+  my ($got1,$got2);
+  printf "Test#%d '%s','%s' expecting %d %d ", $tno, $arg1, $arg2, $exp1, $exp2;
+  ($got1,$got2) = &IndexPath($arg1,$arg2);
+  if ($got1==$exp1 and $got2==$exp2) {
+    printf "got %d %d %s\n", $got1, $got2, 'PASS';
+  } else {
+    printf "got %d %d %s\n", $got1, $got2, 'FAIL';
+  }#endif
+}#end TestIndexPath
+
+# The end
