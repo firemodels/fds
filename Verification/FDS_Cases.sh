@@ -533,10 +533,12 @@ $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
