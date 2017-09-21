@@ -5,6 +5,7 @@
 % first call McCaffrey_Correlation.m to make data plots
 
 McCaffrey_Correlation
+McCaffrey_Surface_Temp
 
 close all
 clear all
