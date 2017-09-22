@@ -13,13 +13,20 @@ VPATH = ../Source
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-  BUILD_DATE := $(shell date /t) $(shell time /t)
   GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
+  GIT_STAT :=
   GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
   GIT_BRANCH := $(shell ..\..\Utilities\Scripts\gitbranch)
+  BUILD_DATE := $(shell date /t) $(shell time /t)
 else
 # linux/osx
-  GIT_HASH := $(shell git describe --long --dirty)
+  SHELL:=/bin/bash
+  GIT_HASH := $(shell git describe --long)
+  ifeq ("$(shell git diff --shortstat $(VPATH)/*.f90)","")
+    GIT_STAT :=
+  else
+    GIT_STAT := -dirty
+  endif
   GIT_DATE := $(shell git log -1 --format=%cd)
   GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
   BUILD_DATE := $(shell date "+%b %d, %Y  %T")
@@ -28,7 +35,7 @@ else
   BUILD_DATE_XLF := $(shell date "+%b %d\, %Y  %T")
 endif
 
-GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)-$(GIT_BRANCH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)$(GIT_STAT)-$(GIT_BRANCH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
