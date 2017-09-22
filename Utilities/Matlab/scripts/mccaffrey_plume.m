@@ -95,7 +95,7 @@ for k=1:length(resolution)
     set(gca,'FontSize',Label_Font_Size)
 
     leg_key = {'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','({\itz/Q}^{2/5})^\eta'};
-    lh = legend(hh,leg_key,'location','south');
+    lh = legend(hh,leg_key,'location','southeast');
     set(lh,'Interpreter',Font_Interpreter)
     set(lh,'FontSize',Key_Font_Size)
 
