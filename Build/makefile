@@ -14,7 +14,7 @@ VPATH = ../Source
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
-  GIT_STAT :=
+  GIT_STAT := $(shell ..\..\Utilities\Scripts\gitstat)
   GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
   GIT_BRANCH := $(shell ..\..\Utilities\Scripts\gitbranch)
   BUILD_DATE := $(shell date /t) $(shell time /t)
