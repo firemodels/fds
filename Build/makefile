@@ -63,10 +63,10 @@ LFLAGSMKL_CUSTOM =
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-ifneq ("$(wildcard $(MKLROOT)\lib\intel64\mkl_blacs_intelmpi_lp64.lib)","")
+ifeq ($(shell ..\..\Utilities\Scripts\havemkl),1)
 # Use cluster_sparse_solver with intelmpi blacs
-  FFLAGSMKL_INTEL = -DWITH_CLUSTER_SPARSE_SOLVER /I$(MKLROOT)\include
-  LFLAGSMKL_INTEL = $(MKLROOT)\lib\intel64\mkl_intel_lp64.lib $(MKLROOT)\lib\intel64\mkl_intel_thread.lib $(MKLROOT)\lib\intel64\mkl_core.lib $(MKLROOT)\lib\intel64\mkl_blacs_intelmpi_lp64.lib
+  FFLAGSMKL_INTEL = -DWITH_CLUSTER_SPARSE_SOLVER /I"$(MKLROOT)"\include
+  LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
 endif
 else 
 # linux/osx
