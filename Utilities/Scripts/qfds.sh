@@ -77,13 +77,10 @@ if [ "`uname`" != "Darwin" ]; then
 fi
 MPIRUN=
 ABORTRUN=n
-IB=
+IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
-if [ "$FDSNETWORK" == "infiniband" ]; then		
-  IB=ib		
-fi
 EMAIL=
 
 # --------------------------- parse options --------------------
@@ -356,7 +353,12 @@ fi
       MPILABEL="IMPI"
     fi
   else
-    MPIRUNEXE=$MPIDIST/bin/mpirun
+    MPIRUNEXE=mpirun
+    notfound=`$MPIRUNEXE -h |& head -1 | grep "not found" | wc -l`
+    if [ $notfound -eq 1 ]; then
+      echo "*** error: $MPIRUNEXE not in PATH"
+      exit
+    fi
     if [ "$IB" == "" ]; then
       MPILABEL="MPI"
     else

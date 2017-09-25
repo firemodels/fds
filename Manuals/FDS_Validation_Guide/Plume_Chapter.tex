@@ -72,7 +72,7 @@ The FM/SNL tests consisted of propylene gas burners, heptane pools, methanol poo
 
 \subsection{McCaffrey's Plume Correlation}
 
-The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, nominally $D^*/\dx=[5,10,20]$ (respectively, coarse, medium, and fine resolution).  Temperature measurements and reported simulation results are for thermocouple temperature.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -87,6 +87,20 @@ The following plots show the results of simulations of McCaffrey's five fires at
 \label{McCaffrey_Plume_Temperature}
 \end{figure}
 
+\clearpage
+
+Below we plot the same results but arranged in a different way.  The height dimension is scaled by the fire Froude number and each plot represents nominally the same resolution level.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Temperature_Correlation_Coarse} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Temperature_Correlation_Medium} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Temperature_Correlation_Fine}
+\end{tabular*}
+\caption[McCaffrey experiments, plume temperature, Froude scaling]
+{McCaffrey experiments, plume temperature, Froude scaling.}
+\label{McCaffrey_Plume_Temperature_Froude}
+\end{figure}
 
 \clearpage
 

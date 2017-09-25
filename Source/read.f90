@@ -7975,6 +7975,12 @@ MESH_LOOP: DO NM=1,NMESHES
 
       CALL CHECK_XB(XB)
 
+      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
+
+      IF (HT3D) SOLID_HT3D = .TRUE.
+
+      ! No device and controls for evacuation obstructions
+
       IF (EVACUATION_ONLY(NM)) THEN
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'

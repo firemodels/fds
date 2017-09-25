@@ -1,0 +1,26 @@
+#%Module
+prepend-path CPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/daal/include};
+prepend-path CPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/tbb/include};
+prepend-path CPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/mkl/include};
+prepend-path CPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/ipp/include};
+prepend-path PATH {/opt/intel//documentation_2017/en/debugger//gdb-ia/man/};
+prepend-path PATH {/opt/intel//debugger_2017/gdb/intel64/bin};
+prepend-path PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/bin/intel64};
+setenv MKLROOT {/opt/intel/compilers_and_libraries_2017.4.181/mac/mkl};
+setenv TBBROOT {/opt/intel/compilers_and_libraries_2017.4.181/mac/tbb};
+append-path INTEL_LICENSE_FILE {/opt/intel/compilers_and_libraries_2017.4.181/mac/licenses};
+append-path INTEL_LICENSE_FILE {/opt/intel/licenses};
+append-path INTEL_LICENSE_FILE {/Users/gforney/intel/licenses};
+append-path INTEL_LICENSE_FILE {/Users/Shared/Library/Application Support/Intel/Licenses};
+prepend-path NLSPATH {/opt/intel//debugger_2017/gdb/intel64/share/locale/%l_%t/%N};
+prepend-path NLSPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/mkl/lib/locale/%l_%t/%N};
+prepend-path NLSPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/compiler/lib/locale/en_US/%N};
+setenv DAALROOT {/opt/intel/compilers_and_libraries_2017.4.181/mac/daal};
+setenv INTEL_PYTHONHOME {/opt/intel//debugger_2017/python/intel64/};
+prepend-path CLASSPATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/daal/lib/daal.jar};
+prepend-path LIBRARY_PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/daal/lib};
+prepend-path LIBRARY_PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/tbb/lib};
+prepend-path LIBRARY_PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/mkl/lib};
+prepend-path LIBRARY_PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/compiler/lib};
+prepend-path LIBRARY_PATH {/opt/intel/compilers_and_libraries_2017.4.181/mac/ipp/lib};
+setenv IPPROOT {/opt/intel/compilers_and_libraries_2017.4.181/mac/ipp};
