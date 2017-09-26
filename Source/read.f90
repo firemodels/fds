@@ -9267,7 +9267,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
    COUNT_VENT_LOOP: DO
       CALL CHECKREAD('VENT',LU_INPUT,IOS)
       IF (IOS==1) EXIT COUNT_VENT_LOOP
+      ID      = 'null'
       MULT_ID = 'null'
+      SURF_ID = 'null'
       READ(LU_INPUT,NML=VENT,END=3,ERR=4,IOSTAT=IOS)
       N_VENT_NEW = 0
       IF (MULT_ID=='null') THEN
