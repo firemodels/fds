@@ -12,6 +12,7 @@ fi
 OMPPLACES=
 OMPPROCBIND=
 HELP=
+MODULE=
 
 function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
@@ -46,6 +47,7 @@ function usage {
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
+  echo " -M module -  load an openmpi module"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
@@ -120,7 +122,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:iIhHj:l:M:m:NO:P:n:o:p:q:rstTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -171,6 +173,9 @@ case $OPTION  in
    ;;
   m)
    max_processes_per_node="$OPTARG"
+   ;;
+  M)
+   MODULE="$OPTARG"
    ;;
   N)
    nosocket="1"
@@ -506,6 +511,15 @@ EOF
 fi
 fi
 fi
+if [ "$MODULE" != "" ]; then
+cat << EOF >> $scriptfile
+# unload any openmpi module then load module specified with -M option
+
+module unload openmpi
+module load $MODULE
+
+EOF
+fi
 
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
@@ -541,6 +555,11 @@ echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+if [ "$MODULE" != "" ]; then
+cat << EOF >> $scriptfile
+echo "    Module: $MODULE"
+EOF
+fi
 
 # if requested, output script file to screen
 
@@ -558,6 +577,9 @@ if [ "$queue" != "none" ] ; then
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
   echo " Processes per node:$nmpi_processes_per_node"
+if [ "$MODULE" != "" ]; then
+  echo "             Module:$MODULE"
+fi
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
