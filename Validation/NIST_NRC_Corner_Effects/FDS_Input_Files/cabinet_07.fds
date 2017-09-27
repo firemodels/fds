@@ -113,7 +113,7 @@
 
 &HOLE XB= 5.05, 5.15, 2.00, 2.40,0.1,0.2 / lower front vent
  HOLE XB= 5.05, 5.15, 2.00, 2.40,0.3,1.8 / front door
- HOLE XB= 5.05, 5.15, 2.00, 2.40,1.9,2.0 / upper front vent
+&OBST XB= 5.00, 5.10, 2.00, 2.40,1.9,2.0 / upper front vent
 
 &SURF ID='GRILL', MATL_ID='STEEL', THICKNESS=0.0028, COLOR='GRAY 70' /
 
