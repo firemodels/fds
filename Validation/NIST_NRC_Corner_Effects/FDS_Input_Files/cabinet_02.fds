@@ -113,10 +113,10 @@
 
 &HOLE XB= 5.05, 5.15, 1.90, 2.60,0.1,0.2 / lower front vent
  HOLE XB= 5.05, 5.15, 1.90, 2.60,0.3,1.8 / front door
- HOLE XB= 5.05, 5.15, 1.90, 2.60,1.9,2.0 / upper front vent
- HOLE XB= 4.15, 4.25, 1.90, 2.60,1.9,2.0 / upper back vent
- HOLE XB= 4.30, 5.00, 1.75, 1.85,1.9,2.0 / upper left vent
- HOLE XB= 4.30, 5.00, 2.65, 2.75,1.9,2.0 / upper right vent
+&OBST XB= 5.00, 5.10, 1.90, 2.60,1.9,2.0 / upper front vent
+&OBST XB= 4.20, 4.30, 1.90, 2.60,1.9,2.0 / upper back vent
+&OBST XB= 4.30, 5.00, 1.80, 1.90,1.9,2.0 / upper left vent
+&OBST XB= 4.30, 5.00, 2.60, 2.70,1.9,2.0 / upper right vent
 &HOLE XB= 4.40, 4.50, 2.00, 2.10,2.0,2.2 / top vent
 &HOLE XB= 4.60, 4.70, 2.00, 2.10,2.0,2.2 / top vent
 &HOLE XB= 4.80, 4.90, 2.00, 2.10,2.0,2.2 / top vent
