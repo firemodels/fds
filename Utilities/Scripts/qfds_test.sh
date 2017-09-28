@@ -12,19 +12,21 @@ fi
 OMPPLACES=
 OMPPROCBIND=
 HELP=
-MODULE=
-CURRENT=1
+CURRENT_MODULE_OPTION=
+FDS_MODULE_OPTION=1
 
 function usage {
-  echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
-  echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
+  echo "Usage: qfds.sh [-p nmpi_processes] [-e fds_command] [-q queue]  casename.fds"
   echo ""
-  echo "qfds.sh runs FDS using an executable specified with the -e option or from the repository"
-  echo "if -e is not specified.  A parallel version of FDS is invoked by using -p to specify the"
-  echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
+  echo "qfds.sh runs FDS using an executable from the repository or one specified with the -e option."
+  echo "A parallel version of FDS is invoked by using -p to specify the number of MPI processes and/or"
+  echo "-o to specify the number of OpenMP threads.  Modules loaded when fds was built are loaded when"
+  echo "fds is run, unless the -C option is specified then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
   echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
+  echo " -F     - use modules loaded when fds was built. If this information is not available, the"
+  echo "          currently loaded modules will be used (-C option). This option is the default."
   echo " -h     - show most used options"
   echo " -H     - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -39,10 +41,13 @@ function usage {
   echo " -b     - use debug version of FDS"
   echo " -B     - location of background program"
   echo " -c     - strip extension"
+  echo " -C     - use modules currently loaded."
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E email address - send an email when the job ends or if it aborts"
+  echo " -F     - use modules loaded when fds was built. If this information is not"
+  echo "          available, the currently loaded modules will be used (-C option)."
   echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: $FDSROOT]"
+  echo "    [default: $FDSROOT]" 
   echo " -i use installed fds"
   echo " -I use Intel mpi version of fds"
   echo " -j job - job prefix"
@@ -56,7 +61,7 @@ function usage {
   echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
   echo "        options: false, true, master, close, spread"
   echo " -q q - name of queue. [default: batch]"
-  echo "        If queue is terminal then casename.fds is run in the foreground on the local computer"
+  echo "        If q is terminal then casename.fds is run in the foreground on the local computer"
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -u   - use development version of FDS"
@@ -123,7 +128,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:iIhHj:l:M:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:Ff:iIhHj:l:m:NO:P:n:o:p:q:rstTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -138,6 +143,10 @@ case $OPTION  in
   c)
    strip_extension=1
    ;;
+  C)
+   CURRENT_MODULE_OPTION=1
+   FDS_MODULE_OPTION=
+   ;;
   d)
    dir="$OPTARG"
    ;;
@@ -146,6 +155,10 @@ case $OPTION  in
    ;;
   E)
    EMAIL="$OPTARG"
+   ;;
+  F)
+   FDS_MODULE_OPTION=1
+   CURRENT_MODULE_OPTION=
    ;;
   f)
    FDSROOT="$OPTARG"
@@ -174,10 +187,6 @@ case $OPTION  in
    ;;
   m)
    max_processes_per_node="$OPTARG"
-   ;;
-  M)
-   MODULE="$OPTARG"
-   CURRENT=
    ;;
   N)
    nosocket="1"
@@ -245,12 +254,6 @@ if [ "$OMPPROCBIND" != "" ]; then
   OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
-# obtain currently loaded modules
-
-if [ "$CURRENT" != "" ]; then
-MODULES=`echo $LOADEDMODULES | tr ':' ' '`
-fi
-
 # define executable
 
 if [ "$use_installed" == "1" ]; then
@@ -265,6 +268,11 @@ if [ "$use_installed" == "1" ]; then
     curdir=`pwd`
     cd $fdsdir
     exe=`pwd`/fds
+    FDSDIR=$(dirname "$exe")
+    if [ -e $FDSDIR/.fdsinfo]; then
+      FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+      OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
+    fi
     cd $curdir
   fi
 else
@@ -280,6 +288,19 @@ else
   if [ "$exe" == "" ]; then
     exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
   fi
+  FDSDIR=$(dirname "$exe")
+  if [ -e $FDSDIR/.fdsinfo ]; then
+    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
+  fi
+fi
+
+# obtain module list - use currently loaded modules unless 
+# the -F option is used (modules loaded when FDS was built)
+
+MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
+  MODULES=$FDS_LOADED_MODULES
 fi
 
 #define input file
@@ -363,12 +384,10 @@ if [ "$use_intel_mpi" == "1" ]; then # using Intel MPI
     MPILABEL="IMPI"
   fi
 else                                 # using OpenMPI
-  fdsmpi=$(dirname "${exe}")/.fdsmpi
-  if [ -e $fdsmpi ]; then
-     fdsmpidir=`head -1 $fdsmpi`
-     if [ -e $fdsmpidir/bin ]; then
-        mpibindir=$fdsmpidir/bin/
-     fi
+  if [ "$OPENMPI_PATH" != "" ]; then
+    if [ -e $OPENMPI_PATH/bin ]; then
+      mpibindir=$OPENMPI_PATH/bin/
+    fi
   fi
   MPIRUNEXE=${mpibindir}mpirun
   if [ "$mpibindir" == "" ]; then  # mpirun needs to be in path
@@ -497,6 +516,7 @@ cat << EOF > $scriptfile
 EOF
 
 if [ "$queue" != "none" ] ; then
+
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
@@ -515,27 +535,22 @@ cat << EOF >> $scriptfile
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
+
 if [ "$EMAIL" != "" ]; then
 cat << EOF >> $scriptfile
 #PBS -M $EMAIL
 #PBS -m ae
 EOF
 fi
+
 if [ "$walltimestring_pbs" != "" ] ; then
 cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
 EOF
 fi
-fi
-fi
-if [ "$MODULE" != "" ]; then
-cat << EOF >> $scriptfile
-# unload any openmpi module then load module(s) specified with -M option
 
-module unload openmpi
-module load $MODULE
+fi
 
-EOF
 fi
 if [ "$MODULES" != "" ]; then
 cat << EOF >> $scriptfile
@@ -578,11 +593,6 @@ echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
-if [ "$MODULE" != "" ]; then
-cat << EOF >> $scriptfile
-echo "    Module: $MODULE"
-EOF
-fi
 
 # if requested, output script file to screen
 
@@ -596,11 +606,8 @@ fi
 if [ "$queue" != "none" ] ; then
   echo "         Input file:$in"
   echo "         Executable:$exe"
-if [ "$fdsmpidir" != "" ]; then
-  echo "       OpenMPI(fds):$fdsmpidir"
-fi
-if [ "$MODULE" != "" ]; then
-  echo "             Module:$MODULE"
+if [ "$OPENMPI_PATH" != "" ]; then
+  echo "            OpenMPI:$OPENMPI_PATH"
 fi
 if [ "$MODULES" != "" ]; then
   echo "            Modules:$MODULES"
@@ -622,4 +629,3 @@ $QSUB $scriptfile
 if [ "$queue" != "none" ] ; then
   rm $scriptfile
 fi
-
