@@ -13,6 +13,7 @@ OMPPLACES=
 OMPPROCBIND=
 HELP=
 MODULE=
+CURRENT=1
 
 function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
@@ -47,7 +48,7 @@ function usage {
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
-  echo " -M module -  load an openmpi module"
+  echo " -M module -  load an openmpi module. Enclose modules in quotes if more than one"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
@@ -176,6 +177,7 @@ case $OPTION  in
    ;;
   M)
    MODULE="$OPTARG"
+   CURRENT=
    ;;
   N)
    nosocket="1"
@@ -243,6 +245,12 @@ if [ "$OMPPROCBIND" != "" ]; then
   OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
 fi
 
+# obtain currently loaded modules
+
+if [ "$CURRENT" != "" ]; then
+MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+fi
+
 # define executable
 
 if [ "$use_installed" == "1" ]; then
@@ -278,8 +286,6 @@ fi
 
 in=$1
 infile=${in%.*}
-
-# if there is more than 1 process then use the mpirun command
 
 TITLE="$infile"
 
@@ -342,37 +348,49 @@ if [ "$nosocket" == "1" ]; then
  REPORT_BINDINGS=
 fi
 
-# use mpirun if there is more than 1 process
+# define MPIRUNEXE and do some error checking
 
-#if [ $nmpi_processes -gt 1 ] ; then
-  if [ "$use_intel_mpi" == "1" ]; then
-    if [ "$I_MPI_ROOT" == "" ]; then
-      echo "Intel MPI environment not setup. Run aborted."
-      ABORTRUN=y
-    else
-      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
-      if [ ! -e $MPIRUNEXE ]; then
-        echo "Intel mpiexec does not exist. Run aborted."
-        ABORTRUN=y
-      fi
-      MPILABEL="IMPI"
-    fi
+if [ "$use_intel_mpi" == "1" ]; then # using Intel MPI
+  if [ "$I_MPI_ROOT" == "" ]; then
+    echo "Intel MPI environment not setup. Run aborted."
+    ABORTRUN=y
   else
-    MPIRUNEXE=mpirun
+    MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+    if [ ! -e $MPIRUNEXE ]; then
+      echo "Intel mpiexec, $MPIRUNEXE, does not exist. Run aborted."
+      ABORTRUN=y
+    fi
+    MPILABEL="IMPI"
+  fi
+else                                 # using OpenMPI
+  fdsmpi=$(dirname "${exe}")/.fdsmpi
+  if [ -e $fdsmpi ]; then
+     fdsmpidir=`head -1 $fdsmpi`
+     if [ -e $fdsmpidir/bin ]; then
+        mpibindir=$fdsmpidir/bin/
+     fi
+  fi
+  MPIRUNEXE=${mpibindir}mpirun
+  if [ "$mpibindir" == "" ]; then  # mpirun needs to be in path
     notfound=`$MPIRUNEXE -h |& head -1 | grep "not found" | wc -l`
     if [ $notfound -eq 1 ]; then
       echo "*** error: $MPIRUNEXE not in PATH"
-      exit
+      ABORTRUN=y
     fi
-    if [ "$IB" == "" ]; then
-      MPILABEL="MPI"
-    else
-      MPILABEL="MPI_IB"
+  else                             # use full path to mpirun
+    if [ ! -e $MPIRUNEXE ]; then
+      echo "*** error: $MPIRUNEXE does not exist"
+      ABORTRUN=y
     fi
   fi
-  TITLE="$infile($MPILABEL)"
-  MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
-#fi
+  if [ "$IB" == "" ]; then
+    MPILABEL="MPI"
+  else
+    MPILABEL="MPI_IB"
+  fi
+fi
+TITLE="$infile($MPILABEL)"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
 
 cd $dir
 fulldir=`pwd`
@@ -460,7 +478,6 @@ fi
 # setup for systems using the queuing system SLURM
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  MPIRUN="mpirun"
   QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
@@ -513,11 +530,17 @@ fi
 fi
 if [ "$MODULE" != "" ]; then
 cat << EOF >> $scriptfile
-# unload any openmpi module then load module specified with -M option
+# unload any openmpi module then load module(s) specified with -M option
 
 module unload openmpi
 module load $MODULE
 
+EOF
+fi
+if [ "$MODULES" != "" ]; then
+cat << EOF >> $scriptfile
+module purge
+module load $MODULES
 EOF
 fi
 
@@ -573,16 +596,23 @@ fi
 if [ "$queue" != "none" ] ; then
   echo "         Input file:$in"
   echo "         Executable:$exe"
+if [ "$fdsmpidir" != "" ]; then
+  echo "       OpenMPI(fds):$fdsmpidir"
+fi
+if [ "$MODULE" != "" ]; then
+  echo "             Module:$MODULE"
+fi
+if [ "$MODULES" != "" ]; then
+  echo "            Modules:$MODULES"
+fi
   echo "              Queue:$queue"
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
   echo " Processes per node:$nmpi_processes_per_node"
-if [ "$MODULE" != "" ]; then
-  echo "             Module:$MODULE"
-fi
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
+  echo "            Command: $MPIRUN $exe $in $OUT2ERROR"
 fi
 
 # run script
