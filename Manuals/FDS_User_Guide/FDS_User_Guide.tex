@@ -1646,20 +1646,20 @@ To demonstrate how to improve the accuracy of the pressure solver, consider the 
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to a relatively small value, and one in which it is set to the default value. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct GLMAT\_SOLVER} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct GLMAT\_SOLVER} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_glmat}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for two different settings
-of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolerance on the right. (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the {\ct GLMAT\_SOLVER} with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies}
 \end{figure}
 
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the overall reduction in CPU time (right).
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the {\ct GLMAT\_SOLVER} reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
@@ -2593,17 +2593,15 @@ Below is an example input file section:
 
 \begin{lstlisting}
  &INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
- \end{lstlisting}
+\end{lstlisting}
  
 {\ct HT3D} can use internal heat source as shown in the example below:
-
 \begin{lstlisting}
  &MATL ID='orange', .../
  &SURF ID='SPHERE', HT3D=.TRUE./
  &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
-\end{lstlisting}
- 
-Note that you should not specify the internal heat source at the SURF line.
+\end{lstlisting} 
+Note that you should not specify the internal heat source at the {\ct SURF} line.
 
 \clearpage
 
