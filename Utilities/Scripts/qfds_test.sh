@@ -13,6 +13,7 @@ OMPPLACES=
 OMPPROCBIND=
 HELP=
 MODULE=
+CURRENT=1
 
 function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
@@ -22,7 +23,6 @@ function usage {
   echo "if -e is not specified.  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
-  echo " -C     - use currently loaded modules"
   echo " -e exe - full path of FDS used to run case "
   echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
   echo " -h     - show most used options"
@@ -123,7 +123,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:M:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:iIhHj:l:M:m:NO:P:n:o:p:q:rstTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -137,10 +137,6 @@ case $OPTION  in
    ;;
   c)
    strip_extension=1
-   ;;
-  C)
-   CURRENT=1
-   MODULE=
    ;;
   d)
    dir="$OPTARG"
