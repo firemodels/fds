@@ -304,17 +304,9 @@ fi
 
 # define processes per node
 
-let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
+let "ppn=($nmpi_processes_per_node)"
 if test $ppn -le $max_processes_per_node ; then
   ppn=$max_processes_per_node
-fi
-
-# in benchmark mode run a case "alone" on one node
-
-if [ "$benchmark" == "yes" ]; then
-  let "nodes=($nmpi_processes-1)/$ncores+1"
-  ppn=$ncores
-  nmpi_processes_per_node=$ncores
 fi
 
 # default: Use mpirun option to bind processes to socket (for MPI).
@@ -325,10 +317,6 @@ if test $nopenmp_threads -gt 1 ; then
  SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
 else
  SOCKET_OPTION="--bind-to socket --map-by socket"
-fi
-
-if [ "$benchmark" == "yes" ]; then
- SOCKET_OPTION="--bind-to core --map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
@@ -507,6 +495,11 @@ fi
 if [ "$walltimestring_pbs" != "" ] ; then
 cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
+EOF
+fi
+if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#PBS -l naccesspolicy=singlejob
 EOF
 fi
 fi
