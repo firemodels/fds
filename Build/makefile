@@ -61,6 +61,15 @@ LFLAGSMKL_OPENMPI =
 FFLAGSMKL_CUSTOM =
 LFLAGSMKL_CUSTOM =
 ifdef MKLROOT # This assumes the MKL library is available.
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+# windows
+ifeq ($(shell ..\..\Utilities\Scripts\havemkl),1)
+# Use cluster_sparse_solver with intelmpi blacs
+  FFLAGSMKL_INTEL = -DWITH_CLUSTER_SPARSE_SOLVER /I"$(MKLROOT)"\include
+  LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
+endif
+else 
+# linux/osx
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
 # Use cluster_sparse_solver with intelmpi blacs
   FFLAGSMKL_INTEL = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
@@ -76,7 +85,8 @@ ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
   FFLAGSMKL_CUSTOM = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
   LFLAGSMKL_CUSTOM = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
 endif
-endif
+endif # OS test
+endif # MKLROOT test
 
 obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
           ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
@@ -132,30 +142,30 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 
 impi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 impi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO) $(INTEL_COMPINFO)
+impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback /wrap-margin- $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64 : FCOMPL = ifort
 impi_intel_win_64 : obj = fds_mpi_win_64
 impi_intel_win_64 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 impi_intel_win_64_dv : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 impi_intel_win_64_dv : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback $(GITINFO) $(INTEL_COMPINFO)
+impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback /wrap-margin- $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64_dv : FCOMPL = ifort
 impi_intel_win_64_dv : obj = fds_mpi_win_64_dv
 impi_intel_win_64_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 impi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 impi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO) $(INTEL_COMPINFO)
+impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 /wrap-margin- $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64_db : FCOMPL = ifort
 impi_intel_win_64_db : obj = fds_mpi_win_64_db
 impi_intel_win_64_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 # Intel Compiler for Linux
 impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -mt_mpi -traceback -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_INTEL)
