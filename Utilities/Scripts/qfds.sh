@@ -43,7 +43,6 @@ showinput=0
 strip_extension=0
 REPORT_BINDINGS="--report-bindings"
 nodelist=
-erroptionfile=
 nosocket=
 exe=
 
@@ -173,23 +172,23 @@ case $OPTION  in
   m)
    max_processes_per_node="$OPTARG"
    ;;
-  N)
-   nosocket="1"
-   ;;
-  O)
-   OMPPLACES="$OPTARG"
-   ;;
-  P)
-   OMPPROCBIND="$OPTARG"
-   ;;
   n)
    nmpi_processes_per_node="$OPTARG"
+   ;;
+  N)
+   nosocket="1"
    ;;
   o)
    nopenmp_threads="$OPTARG"
    ;;
+  O)
+   OMPPLACES="$OPTARG"
+   ;;
   p)
    nmpi_processes="$OPTARG"
+   ;;
+  P)
+   OMPPROCBIND="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
@@ -225,7 +224,7 @@ if [ "$nodelist" != "" ]; then
   nodelist="-l nodes=$nodelist"
 fi
 
-if [[ "$OMPPLACES" != "" ]]  ; then
+if [[ "$OMPPLACES" != "" ]]; then
   if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
     echo "*** error: can only be specify cores, sockets or threads with -O option"
     exit
@@ -435,9 +434,9 @@ if [ "$STOPFDSMAXITER" != "" ]; then
 fi
 
 if [ "$stopjob" == "1" ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
+  echo "stopping case: $in"
+  touch $stopfile
+  exit
 fi
 
 if [ "$STOPFDSMAXITER" == "" ]; then
