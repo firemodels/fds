@@ -1637,7 +1637,7 @@ To demonstrate how to improve the accuracy of the pressure solver, consider the 
 &PRES GLMAT_SOLVER=.TRUE., PRES_ON_WHOLE_DOMAIN=.FALSE. /
 \end{lstlisting}
 
-As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the GLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
 
 \begin{figure}[ht]
 \begin{center}
