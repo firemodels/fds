@@ -323,10 +323,10 @@ fi
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-if test $nopenmp_threads -gt 1 ; then
- SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+if test $nmpi_processes -gt 1 ; then
+ SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
 else
- SOCKET_OPTION="--bind-to socket --map-by socket"
+ SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
