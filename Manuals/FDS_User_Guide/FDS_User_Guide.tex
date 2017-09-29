@@ -4853,34 +4853,38 @@ Modeling suppression of a fire due to the introduction of a suppression agent li
 the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works.
 
-The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1327~\si{\degree C}. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
+The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
 If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
-You may also specify {\ct AUTO\_IGNITION\_TEMPERATURE} on an {\ct INIT} region.  This feature is intended to be used as a pilot zone.  For example, you might use something like this for a piloted methane flame:
+\paragraph{Finding Extinction Parameters}
+
+For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT for several common fuels (listed as {\it T}(OI), for temperature at the oxygen index for diffusion flames).
+
+%If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
+%\begin{align}
+%T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
+%\end{align}
+%where
+%\begin{itemize}
+%{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
+%{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
+%{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
+%{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
+%{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
+%{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
+%\end{itemize}
+
+\subsection{Special Topic: Piloted Ignition Zone}
+
+\label{info:ignition}
+
+Since by default the AIT is 0 K, it is possible to get spurious reignition of unburned fuel when fresh air is encountered after extinction.  To prevent this from happening you need to set an AIT for the fuel on the {\ct REAC} line, as discussed above.  However, this then leads to the problem of ignition at a burner surface.  It is usually too difficult to model the ignition process from first principles.  Instead, you can use an {\ct INIT} line to mimic a piloted ignition zone. For example, you might use something like this for a piloted methane flame:
 \begin{lstlisting}
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
 &INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
-where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.
-
-\paragraph{Finding or Calculating Extinction Parameters}
-
-For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT (listed as T(LFL), for temperature at lower flammability limit) for several common fuels.
-
-If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
-\begin{align}
-T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
-\end{align}
-where
-\begin{itemize}
-{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
-{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
-{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
-{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
-{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
-{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
-\end{itemize}
+where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.  On the {\ct REAC} line you are telling FDS to use AIT = 627 \si{\degreeCelsius} throughout the domain.  Then the {\ct INIT} line takes precedence over the {\ct REAC} line within the specified region.
 
 
 
