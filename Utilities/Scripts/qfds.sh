@@ -266,7 +266,11 @@ else
   fi
 fi
 
-# obtain module list
+# modules loaded currrently
+
+CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+
+# modules loaded when fds was built
 
 if [ "$exe" != "" ]; then  # first look for file that contains the list
   FDSDIR=$(dirname "$exe")
@@ -276,9 +280,10 @@ if [ "$exe" != "" ]; then  # first look for file that contains the list
   fi
 fi
 
-MODULES=`echo $LOADEDMODULES | tr ':' ' '`  # currently loaded  modules
 if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
   MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+else
+  MODULES=$CURRENT_LOADED_MODULES
 fi
 
 #define input file
@@ -577,7 +582,21 @@ if [ "$queue" != "none" ]; then
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH"
   fi
-  if [ "$MODULES" != "" ]; then
+
+# output currently loaded modules and modules when fds was built if the
+# 1) -C option was selected and 2) currently loaded modules and fds loaded modules are diffent
+  if [ "$FDS_MODULE_OPTION" == "" ]; then
+    if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
+      if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
+        echo "  Modules(when run):$CURRENT_LOADED_MODULES"
+        echo "Modules(when built):$FDS_LOADED_MODULES"
+        MODULES_OUT=1
+      fi
+    fi
+  fi
+  
+# otherwise output modules used when fds is run  
+  if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
     echo "            Modules:$MODULES"
   fi
   echo "              Queue:$queue"
