@@ -12,7 +12,6 @@ fi
 
 QUEUE=batch
 DEBUG=
-IB=
 nthreads=1
 resource_manager=
 walltime=
@@ -26,10 +25,6 @@ REGULAR=1
 BENCHMARK=1
 OOPT=
 POPT=
-
-if [ "$FDSNETWORK" == "infiniband" ] ; then
-  IB=ib
-fi
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -137,13 +132,8 @@ if [ "$POPT" != "" ]; then
   POPT="-O $POPT"
 fi
 
-IB=
-if [ "$FDSNETWORK" == "infiniband" ]; then
-  IB=ib
-fi
-
 export FDS=$SVNROOT/fds/Build/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export FDSMPI=$SVNROOT/fds/Build/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
+export FDSMPI=$SVNROOT/fds/Build/mpi_intel_$PLATFORM$DEBUG/fds_mpi_intel_$PLATFORM$DEBUG
 export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then
