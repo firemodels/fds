@@ -21,7 +21,6 @@ if [ "`uname`" != "Darwin" ]; then
 fi
 MPIRUN=
 ABORTRUN=n
-IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
@@ -57,7 +56,7 @@ function usage {
   echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
+  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB]"
   echo " -h     - show commony used options"
   echo " -H     - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -95,7 +94,6 @@ function usage {
   echo " -s   - stop job"
   echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -T   - use the ethernet version  of FDS"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -202,9 +200,6 @@ case $OPTION  in
   t)
    benchmark="yes"
    ;;
-  T)
-   IB=
-   ;;
   u)
    use_devel=1
    ;;
@@ -267,7 +262,7 @@ else
     exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
   fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
+    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB
   fi
 fi
 
@@ -323,10 +318,10 @@ fi
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-if test $nopenmp_threads -gt 1 ; then
- SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+if test $nmpi_processes -gt 1 ; then
+ SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
 else
- SOCKET_OPTION="--bind-to socket --map-by socket"
+ SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
@@ -369,11 +364,7 @@ else                                 # using OpenMPI
       ABORTRUN=y
     fi
   fi
-  if [ "$IB" == "" ]; then
-    MPILABEL="MPI"
-  else
-    MPILABEL="MPI_IB"
-  fi
+  MPILABEL="MPI"
 fi
 
 TITLE="$infile($MPILABEL)"

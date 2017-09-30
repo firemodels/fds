@@ -205,15 +205,6 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib : LFLAGS = -static-intel
-mpi_intel_linux_64ib : FCOMPL = mpifort
-mpi_intel_linux_64ib : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
-mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
-mpi_intel_linux_64ib : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
-
 mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO) $(INTEL_COMPINFO)
 mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel
 mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi mpifort
@@ -246,24 +237,6 @@ mpi_intel_linux_64_inspect : FCOMPL = mpifort
 mpi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 mpi_intel_linux_64_inspect : obj = fds_mpi_intel_linux_64_inspect
 mpi_intel_linux_64_inspect : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
-
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib_db : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib_db : LFLAGS = -static-intel
-mpi_intel_linux_64ib_db : FCOMPL = mpifort
-mpi_intel_linux_64ib_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
-mpi_intel_linux_64ib_db : obj = fds_mpi_intel_linux_64ib_db
-mpi_intel_linux_64ib_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
-
-mpi_intel_linux_64ib_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib_dv : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
-mpi_intel_linux_64ib_dv : LFLAGS = -static-intel
-mpi_intel_linux_64ib_dv : FCOMPL = mpifort
-mpi_intel_linux_64ib_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
-mpi_intel_linux_64ib_dv : obj = fds_mpi_intel_linux_64ib_dv
-mpi_intel_linux_64ib_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # OSX
