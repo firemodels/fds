@@ -6,10 +6,8 @@ FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  walltime=99-99:99:99
-else
-  walltime=999:0:0
+if [ "$RESOURCE_MANAGER" != "SLURM" ]; then
+  RESOURCE_MANAGER="TORQUE"
 fi
 OMPPLACES=
 OMPPROCBIND=
@@ -91,6 +89,7 @@ function usage {
   echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
   echo "        options: false, true, master, close, spread"
   echo " -r   - report bindings"
+  echo " -R manager - specify resource manager (SLURM or TORQUE) default: $RESOURCE_MANAGER"
   echo " -s   - stop job"
   echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
@@ -115,7 +114,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rR:stTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -194,6 +193,12 @@ case $OPTION  in
   r)
    REPORT_BINDINGS="--report-bindings"
    ;;
+  R)
+   RESOURCE_MANAGER=`echo "$OPTARG" | tr /a-z/ /A-Z/`
+   if [  "$RESOURCE_MANAGER" != "SLURM" ]; then
+     RESOURCE_MANAGER="torque"
+   fi
+   ;;
   s)
    stopjob=1
    ;;
@@ -215,6 +220,11 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  walltime=99-99:99:99
+else
+  walltime=999:0:0
+fi
 if [ "$nodelist" != "" ]; then
   nodelist="-l nodes=$nodelist"
 fi
