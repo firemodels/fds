@@ -537,6 +537,7 @@ fi
 
 if [ "$MODULES" != "" ]; then
   cat << EOF >> $scriptfile
+export MODULEPATH=$MODULEPATH
 module purge
 module load $MODULES
 EOF
