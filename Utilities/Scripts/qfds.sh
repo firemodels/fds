@@ -6,10 +6,8 @@ FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  walltime=99-99:99:99
-else
-  walltime=999:0:0
+if [ "$RESOURCE_MANAGER" != "SLURM" ]; then
+  RESOURCE_MANAGER="TORQUE"
 fi
 OMPPLACES=
 OMPPROCBIND=
@@ -21,7 +19,6 @@ if [ "`uname`" != "Darwin" ]; then
 fi
 MPIRUN=
 ABORTRUN=n
-IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
@@ -57,7 +54,7 @@ function usage {
   echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
+  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB]"
   echo " -h     - show commony used options"
   echo " -H     - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -92,10 +89,10 @@ function usage {
   echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
   echo "        options: false, true, master, close, spread"
   echo " -r   - report bindings"
+  echo " -R manager - specify resource manager (SLURM or TORQUE) default: $RESOURCE_MANAGER"
   echo " -s   - stop job"
   echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -T   - use the ethernet version  of FDS"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -117,7 +114,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rR:stTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -196,14 +193,17 @@ case $OPTION  in
   r)
    REPORT_BINDINGS="--report-bindings"
    ;;
+  R)
+   RESOURCE_MANAGER=`echo "$OPTARG" | tr /a-z/ /A-Z/`
+   if [  "$RESOURCE_MANAGER" != "SLURM" ]; then
+     RESOURCE_MANAGER="torque"
+   fi
+   ;;
   s)
    stopjob=1
    ;;
   t)
    benchmark="yes"
-   ;;
-  T)
-   IB=
    ;;
   u)
    use_devel=1
@@ -220,6 +220,11 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  walltime=99-99:99:99
+else
+  walltime=999:0:0
+fi
 if [ "$nodelist" != "" ]; then
   nodelist="-l nodes=$nodelist"
 fi
@@ -267,11 +272,15 @@ else
     exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
   fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
+    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB
   fi
 fi
 
-# obtain module list
+# modules loaded currrently
+
+CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+
+# modules loaded when fds was built
 
 if [ "$exe" != "" ]; then  # first look for file that contains the list
   FDSDIR=$(dirname "$exe")
@@ -281,9 +290,10 @@ if [ "$exe" != "" ]; then  # first look for file that contains the list
   fi
 fi
 
-MODULES=`echo $LOADEDMODULES | tr ':' ' '`  # currently loaded  modules
 if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
   MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+else
+  MODULES=$CURRENT_LOADED_MODULES
 fi
 
 #define input file
@@ -323,10 +333,10 @@ fi
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-if test $nopenmp_threads -gt 1 ; then
- SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+if test $nmpi_processes -gt 1 ; then
+ SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
 else
- SOCKET_OPTION="--bind-to socket --map-by socket"
+ SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
@@ -369,11 +379,7 @@ else                                 # using OpenMPI
       ABORTRUN=y
     fi
   fi
-  if [ "$IB" == "" ]; then
-    MPILABEL="MPI"
-  else
-    MPILABEL="MPI_IB"
-  fi
+  MPILABEL="MPI"
 fi
 
 TITLE="$infile($MPILABEL)"
@@ -531,6 +537,7 @@ fi
 
 if [ "$MODULES" != "" ]; then
   cat << EOF >> $scriptfile
+export MODULEPATH=$MODULEPATH
 module purge
 module load $MODULES
 EOF
@@ -586,7 +593,21 @@ if [ "$queue" != "none" ]; then
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH"
   fi
-  if [ "$MODULES" != "" ]; then
+
+# output currently loaded modules and modules when fds was built if the
+# 1) -C option was selected and 2) currently loaded modules and fds loaded modules are diffent
+  if [ "$FDS_MODULE_OPTION" == "" ]; then
+    if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
+      if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
+        echo "  Modules(when run):$CURRENT_LOADED_MODULES"
+        echo "Modules(when built):$FDS_LOADED_MODULES"
+        MODULES_OUT=1
+      fi
+    fi
+  fi
+  
+# otherwise output modules used when fds is run  
+  if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
     echo "            Modules:$MODULES"
   fi
   echo "              Queue:$queue"
