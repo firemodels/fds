@@ -7352,11 +7352,16 @@ SELECT CASE(TRIM(SOLVER))
       ITERATE_PRESSURE = .FALSE.
       IF (SCARC_METHOD == 'null') SCARC_METHOD = 'KRYLOV' ! Taken as default for SCARC when SOLVER is SCARC and
                                                           ! SCARC_METHOD is not defined.
+      ! Default for 'SCARC' is solve pressure on whole domain, that is in gas cells and inside OBSTS.
+      PRES_ON_WHOLE_DOMAIN=.TRUE.
    CASE('GLMAT')
       PRES_METHOD = 'GLMAT'
       GLMAT_SOLVER= .TRUE.
    CASE DEFAULT
       ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+      ! Default for 'FFT' is solve pressure on whole domain, that is in gas cells and inside OBSTS.
+      ! This flag is used in NO_FLUX, velo.f90.
+      PRES_ON_WHOLE_DOMAIN=.TRUE.
 END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
