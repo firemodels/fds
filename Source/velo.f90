@@ -1559,9 +1559,6 @@ ENDDO OBST_LOOP
 
 ! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (UW or UWS)
 
-DHFCT=1._EB
-IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. PRES_METHOD=='GLMAT') DHFCT=0._EB
-
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    WC => WALL(IW)
@@ -1582,6 +1579,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IOR = WC%ONE_D%IOR
 
    IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
+      DHFCT=1._EB
+      IF (.NOT. PRES_ON_WHOLE_DOMAIN) DHFCT=0._EB
       IF (PREDICTOR) THEN
          UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
       ELSE
@@ -3379,7 +3378,7 @@ SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 ! This routine recomputes velocities on wall cells, such that the correct
 ! normal derivative of H is used on the projection. It is only used when the Poisson equation
-! for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN with the GLMAT solver.
+! for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN

@@ -2145,12 +2145,11 @@ END SUBROUTINE INIT_CUTCELL_DATA
 SUBROUTINE CCIBM_VELOCITY_NO_GRADH(DT)
 
 REAL(EB), INTENT(IN) :: DT
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Assume by default that pressure is solved in whole domain.
+
 ! Local Variables:
 INTEGER :: I,J,K
 
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN = PRES_ON_WHOLE_DOMAIN
-IF (.NOT.PRES_ON_CARTESIAN .OR. GLMAT_WHOLE_DOMAIN) RETURN
+IF (.NOT.PRES_ON_CARTESIAN .OR. PRES_ON_WHOLE_DOMAIN) RETURN
 
 PREDICTOR_COND : IF (PREDICTOR) THEN
 
@@ -6821,8 +6820,6 @@ END SUBROUTINE GET_EXIMVECTOR_DENSITY_3D
 
 SUBROUTINE GET_ADVVECTOR_DENSITY_3D
 
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Set by default to have a pressure solution on whole domain.
-
 ! Local Variables:
 
 ! This routine computes RHS due to boundary conditions prescribed in immersed solids
@@ -6832,8 +6829,7 @@ LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Set by default to have a pressure solutio
 
 ! Source due to nonzero velocities in SOLID-CUT CELL interface faces:
 ! This is only nonzero when the Poisson solve is done s.t. PRES_ON_WHOLE_DOMAIN = .TRUE.
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
-IF (GLMAT_WHOLE_DOMAIN) CALL GET_ADV_TRANSPIRATIONVECTOR_DENSITY_3D ! add to F_RHO
+IF (PRES_ON_WHOLE_DOMAIN) CALL GET_ADV_TRANSPIRATIONVECTOR_DENSITY_3D ! add to F_RHO
 
 RETURN
 END SUBROUTINE GET_ADVVECTOR_DENSITY_3D
@@ -8083,7 +8079,6 @@ END SUBROUTINE GET_ADV_TRANSPIRATIONVECTOR_SCALAR_3D
 SUBROUTINE GET_ADVDIFFVECTOR_SCALAR_3D(N)
 
 INTEGER, INTENT(IN) :: N
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Set by default to have a pressure solution on whole domain.
 
 ! Local Variables:
 
@@ -8096,8 +8091,7 @@ LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Set by default to have a pressure solutio
 
 ! Source due to nonzero velocities in SOLID-CUT CELL interface faces:
 ! This is only nonzero when the Poisson solve is done s.t. PRES_ON_WHOLE_DOMAIN = .TRUE.
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
-IF (GLMAT_WHOLE_DOMAIN) CALL GET_ADV_TRANSPIRATIONVECTOR_SCALAR_3D(N) ! add to F_Z
+IF (PRES_ON_WHOLE_DOMAIN) CALL GET_ADV_TRANSPIRATIONVECTOR_SCALAR_3D(N) ! add to F_Z
 
 RETURN
 END SUBROUTINE GET_ADVDIFFVECTOR_SCALAR_3D
@@ -8112,7 +8106,6 @@ SUBROUTINE CCIBM_VELOCITY_CUTFACES
 INTEGER  :: NM,ICC,ICF,I,J,K,X1AXIS,NFACE,INDADD,INDF,JCC,IFC,IFACE,IFACE2
 REAL(EB) :: AREATOT, VEL_CART, FLX_FCT, FSCU
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE. ! Set by default to have a pressure solution on whole domain.
 
 IF (.NOT. PRES_ON_CARTESIAN) RETURN
 
@@ -8181,8 +8174,7 @@ MESH_LOOP : DO NM=1,NMESHES
    ! Procedure, for each cut-cell marked Cartesian cell find cell faces tagged as solid, and compute
    ! velocity flux on these. Also compute total area of cut-faces of type INBOUNDARY.
    ! Define average velocity (either in or out) and assign to each INBOUNDARY cut-face.
-   IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
-   PRES_ON_WHOLE_DOMAIN_IF : IF ( GLMAT_WHOLE_DOMAIN ) THEN
+   PRES_ON_WHOLE_DOMAIN_IF : IF ( PRES_ON_WHOLE_DOMAIN ) THEN
 
        ! First Cycle over cut-cell underlying Cartesian cells:
        ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -8370,7 +8362,6 @@ INTEGER :: NM, ICC, NCELL, ICELL
 INTEGER :: I, II, J ,K, PTS(IAXIS:KAXIS,NOD1:NOD4), IRCELL
 REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),INTCOEF(1:5),VAL(1:5),VAL_CC
 REAL(EB):: U_IBM, V_IBM, W_IBM
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 INTEGER :: IPT
 
@@ -8526,8 +8517,7 @@ MESH_LOOP : DO NM=1,NMESHES
    ENDDO ICC_LOOP
 
    ! Finally set HP to zero inside immersed solids:
-   IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
-   IF (GLMAT_NOT_WHOLE_DOMAIN) THEN
+   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
       DO K=0,KBP1
         DO J=0,JBP1
            DO I=0,IBP1
@@ -8539,7 +8529,7 @@ MESH_LOOP : DO NM=1,NMESHES
    ENDIF
 
    ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
-   IF (GLMAT_NOT_WHOLE_DOMAIN) THEN
+   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
    ! Force U velocities in IBM_SOLID faces to zero
    U_IBM = 0._EB ! Body doesn't move.
    DO K=1,KBAR
@@ -8595,7 +8585,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
 REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,VAL(1:5),DUMEB,XYZ_PP(IAXIS:KAXIS)
 INTEGER :: I,J,K,ICF,IFACE,X1AXIS,NFACE,IPT,INBFC_CFCEN(1:3),INBFC_CARTCEN(1:3)
 REAL(EB):: U_INT,V_INT,W_INT
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 ! This is the CCIBM forcing routine for momentum eqns.
 
@@ -9036,8 +9025,6 @@ ENDIF ! FORCE_GAS_FACE
 ! For Mesh NM, force solid faces:
 IF (FORCE_SOLID_FACE) THEN
 
-   IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
-
    ! Force U velocities in IBM_SOLID faces to zero
    U_IBM = 0._EB ! Body doesn't move.
    DO K=1,KBAR
@@ -9048,7 +9035,7 @@ IF (FORCE_SOLID_FACE) THEN
                IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
                IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
                FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-               IF (GLMAT_NOT_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
+               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
                                                                     ! and solid Cartesian faces.
             ENDIF
 
@@ -9066,7 +9053,7 @@ IF (FORCE_SOLID_FACE) THEN
                IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
                IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
                FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-               IF (GLMAT_NOT_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
+               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
                                                                     ! and solid Cartesian faces.
             ENDIF
 
@@ -9084,7 +9071,7 @@ IF (FORCE_SOLID_FACE) THEN
                IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
                IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
                FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-               IF (GLMAT_NOT_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
+               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
                                                                     ! and solid Cartesian faces.
             ENDIF
 
@@ -9146,7 +9133,6 @@ INTEGER,  ALLOCATABLE, DIMENSION(:,:):: IJKRM, IJKRM_AUX
 INTEGER,  ALLOCATABLE, DIMENSION(:,:,:):: IJKMNX    , DIVVOLIJKMNX    , DIVVOLICJCMNX     ,DIVICJCMNX    ,&
                                           IJKMNX_AUX, DIVVOLIJKMNX_AUX, DIVVOLICJCMNX_AUX ,DIVICJCMNX_AUX
 LOGICAL, PARAMETER :: DO_CARTESIAN = .FALSE.
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 ! Allocate div Containers
 ALLOCATE( RESMAXV(NMESHES), DIVMNX(LOW_IND:HIGH_IND,NMESHES), DIVVOLMNX(LOW_IND:HIGH_IND,NMESHES) )
@@ -9164,8 +9150,6 @@ DIVVOLIJKMNX(IAXIS:KAXIS,LOW_IND:HIGH_IND,1:NMESHES) = 0
 DIVVOLICJCMNX(1:2,LOW_IND:HIGH_IND,1:NMESHES)        = 0
 DIVICJCMNX(1:2,LOW_IND:HIGH_IND,1:NMESHES)           = 0
 VOLMNX(LOW_IND:HIGH_IND,1:NMESHES)                   = 0._EB
-
-IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
 
 ! Meshes Loop:
 MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -9200,7 +9184,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          DO J=1,JBAR
             LOOP1C: DO I=1,IBAR
 
-               IF (GLMAT_NOT_WHOLE_DOMAIN .AND. (CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID)) CYCLE
+               IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. (CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID)) CYCLE
 
                ! 3D Cartesian divergence:
                DIV = (UP(I,J,K)-UP(I-1,J,K))*RDX(I) + &
@@ -15604,12 +15588,9 @@ SUBROUTINE GET_CUTCELL_HP(NM,HP)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(INOUT), POINTER, DIMENSION(:,:,:) :: HP
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 ! Local Variables:
 INTEGER :: I,J,K,IROW,ICC
-
-IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
 
 ! Second if PRES_ON_CARTESIAN = .FALSE. populate HP for cut-cells:
 IF (.NOT.PRES_ON_CARTESIAN) THEN
@@ -15618,7 +15599,7 @@ IF (.NOT.PRES_ON_CARTESIAN) THEN
    ! pressure unknown, as is the case with scalars advection.
    ! To do.
 
-ELSEIF (PRES_ON_CARTESIAN .AND. GLMAT_NOT_WHOLE_DOMAIN ) THEN
+ELSEIF (PRES_ON_CARTESIAN .AND. .NOT.PRES_ON_WHOLE_DOMAIN ) THEN
 
    CUTCELL_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
 
@@ -15644,12 +15625,9 @@ END SUBROUTINE GET_CUTCELL_HP
 SUBROUTINE GET_CUTCELL_FH(NM)
 
 INTEGER, INTENT(IN) :: NM
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 ! Local Variables:
 INTEGER :: I,J,K,IROW,ICC
-
-IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
 
 ! Second if PRES_ON_CARTESIAN = .FALSE. populate source for cut-cells:
 IF (.NOT.PRES_ON_CARTESIAN) THEN
@@ -15657,7 +15635,7 @@ IF (.NOT.PRES_ON_CARTESIAN) THEN
    ! WORK HERE !!!! EITHER USE IBM FN on cut-faces or FVX, FVY, FVZ on regular faces
    ! of cut-cells. Compute integral on boundary cut faces (Div Theorem).
 
-ELSEIF (PRES_ON_CARTESIAN .AND. GLMAT_NOT_WHOLE_DOMAIN ) THEN
+ELSEIF (PRES_ON_CARTESIAN .AND. .NOT.PRES_ON_WHOLE_DOMAIN ) THEN
 
    ! FVX(I,J,K), FVY(I,J,K), FVZ(I,J,K) have been populated for Cartesian faces which
    ! underlay gasphase cut-faces. They have also been populated on IBM_SOLID type , and regular faces.
@@ -15692,7 +15670,6 @@ SUBROUTINE GET_H_MATRIX_CC(NM,NM1,D_MAT_HP)
 
 INTEGER, INTENT(IN) :: NM,NM1
 REAL(EB), POINTER, DIMENSION(:,:) :: D_MAT_HP
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE.
 
 ! Local Variables:
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
@@ -15704,8 +15681,7 @@ IF (.NOT. ASSOCIATED(D_MAT_HP)) THEN
    RETURN
 ENDIF
 
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
-IF ( GLMAT_WHOLE_DOMAIN ) RETURN ! No cut-cell related info needed.
+IF ( PRES_ON_WHOLE_DOMAIN ) RETURN ! No cut-cell related info needed.
 
 ! X direction bounds:
 ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -15908,15 +15884,13 @@ SUBROUTINE GET_CC_MATRIXGRAPH_H(NM,NM1,GLSETUP_FLAG,LOOP_FLAG)
 
 INTEGER, INTENT(IN) :: NM,NM1,GLSETUP_FLAG
 LOGICAL, INTENT(IN) :: LOOP_FLAG
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE.
 
 ! Local Variables:
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW_1,LOCROW_2,LOCROW,IIND,NII,ILOC
 
 
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
-IF ( GLMAT_WHOLE_DOMAIN ) RETURN ! No need to deal with cut-faces.
+IF ( PRES_ON_WHOLE_DOMAIN ) RETURN ! No need to deal with cut-faces.
 
 ! X direction bounds:
 ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -18508,9 +18482,6 @@ INTEGER :: NM
 INTEGER :: NCELL,ICC,JCC,IFC,IFACE,LOWHIGH,ICF1,ICF2
 INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,X1AXIS
 TYPE (WALL_TYPE), POINTER :: WC
-LOGICAL :: GLMAT_WHOLE_DOMAIN=.TRUE.
-
-IF (PRES_METHOD=='GLMAT') GLMAT_WHOLE_DOMAIN=PRES_ON_WHOLE_DOMAIN
 
 ! Mesh loop:
 MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -18518,8 +18489,8 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
 
    ! Now Pressure:
-   if ( GLMAT_WHOLE_DOMAIN ) CYCLE ! No need to build matrix this way, i.e. fft solver/structured solve
-                                   ! will be used for pressure.
+   if ( PRES_ON_WHOLE_DOMAIN ) CYCLE ! No need to build matrix this way, i.e. fft solver/structured solve
+                                     ! will be used for pressure.
 
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
       NCELL = CUT_CELL(ICC)%NCELL
@@ -20016,10 +19987,9 @@ INTEGER :: NOM,ICC,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
-   IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
+
    ! Loop over external wall cells:
    EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
@@ -20041,7 +20011,7 @@ IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
 
       ICC=CCVAR(II,JJ,KK,IBM_IDCC)
 
-      IF(GLMAT_NOT_WHOLE_DOMAIN) THEN
+      IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
          IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
             MESHES(NM)%CUT_CELL(ICC)%UNKH(1) = INT(OM%HS(IIO,JJO,KKO))
          ELSE
@@ -20072,14 +20042,13 @@ END SUBROUTINE COPY_CC_HS_TO_UNKH
 SUBROUTINE COPY_CC_UNKH_TO_HS(NM)
 
 INTEGER, INTENT(IN) :: NM
-LOGICAL :: GLMAT_NOT_WHOLE_DOMAIN=.FALSE.
 
 ! Local Variables:
 INTEGER :: I,J,K,ICC
 
 IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
-   IF (PRES_METHOD=='GLMAT') GLMAT_NOT_WHOLE_DOMAIN = (.NOT.PRES_ON_WHOLE_DOMAIN)
-   IF(GLMAT_NOT_WHOLE_DOMAIN) THEN
+
+   IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
          I = MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
          J = MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
