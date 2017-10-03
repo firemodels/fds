@@ -46,6 +46,10 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 nosocket=
 exe=
+STARTUP=
+if [ "$QFDS_STARTUP" != "" ]; then
+  STARTUP=$QFDS_STARTUP
+fi
 
 function usage {
   echo "Usage: qfds.sh [-p nmpi_processes] [-o nthreads] [-e fds_command] [-q queue]  casename.fds"
@@ -95,6 +99,7 @@ function usage {
   echo " -r   - report bindings"
   echo " -R manager - specify resource manager (SLURM or TORQUE) default: $RESOURCE_MANAGER"
   echo " -s   - stop job"
+  echo " -S   - use startup files to set the environment, do not load modules"
   echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
@@ -118,7 +123,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:MNO:P:n:o:p:q:rR:stTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:MNO:P:n:o:p:q:rR:sStTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -209,6 +214,9 @@ case $OPTION  in
   s)
    stopjob=1
    ;;
+  S)
+   STARTUP=1
+   ;;
   t)
    benchmark="yes"
    ;;
@@ -285,22 +293,25 @@ fi
 
 # modules loaded currrently
 
-CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+if [ "$STARTUP" == "" ]; then
+
+  CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
 
 # modules loaded when fds was built
 
-if [ "$exe" != "" ]; then  # first look for file that contains the list
-  FDSDIR=$(dirname "$exe")
-  if [ -e $FDSDIR/.fdsinfo ]; then
-    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
-    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
+  if [ "$exe" != "" ]; then  # first look for file that contains the list
+    FDSDIR=$(dirname "$exe")
+    if [ -e $FDSDIR/.fdsinfo ]; then
+      FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+      OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
+    fi
   fi
-fi
 
-if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
-  MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
-else
-  MODULES=$CURRENT_LOADED_MODULES
+  if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
+    MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+  else
+    MODULES=$CURRENT_LOADED_MODULES
+  fi
 fi
 
 #define input file
@@ -543,7 +554,7 @@ EOF
   fi
 fi
 
-if [ "$MODULES" != "" ]; then
+if [[ "$MODULES" != "" ]]; then
   cat << EOF >> $scriptfile
 export MODULEPATH=$MODULEPATH
 module purge
