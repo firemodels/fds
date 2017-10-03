@@ -7359,6 +7359,10 @@ SELECT CASE(TRIM(SOLVER))
       PRES_ON_WHOLE_DOMAIN=.NOT.EXACT_VELOCITY_BC
    CASE DEFAULT
       ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+      IF (EXACT_VELOCITY_BC) THEN
+         CALL SHUTDOWN('ERROR: Problem with PRES line, cannot use EXACT_VELOCITY_BC with FFT Solver')
+         RETURN
+      ENDIF
 END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
