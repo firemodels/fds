@@ -7352,7 +7352,7 @@ SELECT CASE(TRIM(SOLVER))
       ITERATE_PRESSURE = .FALSE.
       IF (SCARC_METHOD == 'null') SCARC_METHOD = 'KRYLOV' ! Taken as default for SCARC when SOLVER is SCARC and
                                                           ! SCARC_METHOD is not defined.
-   CASE('GLMAT EXACT')
+   CASE('GLMAT')
       PRES_METHOD = 'GLMAT'
       GLMAT_SOLVER = .TRUE.
       PRES_ON_WHOLE_DOMAIN = .FALSE.
