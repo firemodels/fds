@@ -583,6 +583,7 @@ echo \`date\`
 echo "Input file: $in"
 echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
+echo "   Command: $MPIRUN $exe $in $OUT2ERROR"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
