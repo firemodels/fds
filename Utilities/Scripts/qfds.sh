@@ -356,7 +356,6 @@ if test $nmpi_processes -gt 1 ; then
 else
  SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
-SOCKET_OPTION=$MCA $SOCKET_OPTION
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
 
@@ -402,7 +401,7 @@ else                                 # using OpenMPI
 fi
 
 TITLE="$infile($MPILABEL)"
-MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $nmpi_processes"
 
 cd $dir
 fulldir=`pwd`
