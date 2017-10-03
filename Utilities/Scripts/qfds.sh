@@ -338,6 +338,7 @@ if test $nmpi_processes -gt 1 ; then
 else
  SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
+SOCKET_OPTION="--mca plm_rsh_agent /usr/bin/ssh "$SOCKET_OPTION
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
 
