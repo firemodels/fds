@@ -25,6 +25,10 @@ OUT2ERROR=
 EMAIL=
 queue=batch
 stopjob=0
+MCA=
+if [ "$MPIRUN_MCA" != "" ]; then
+  MCA=$MPIRUN_MCA
+fi
 
 nmpi_processes=1
 nmpi_processes_per_node=-1
@@ -81,7 +85,7 @@ function usage {
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
-  echo " -M module -  load an openmpi module. Enclose modules in quotes if more than one"
+  echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
@@ -114,7 +118,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rR:stTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:MNO:P:n:o:p:q:rR:stTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -165,6 +169,9 @@ case $OPTION  in
    ;;
   l)
    nodelist="$OPTARG"
+   ;;
+  M)
+   MCA="--mca plm_rsh_agent /usr/bin/ssh "
    ;;
   m)
    max_processes_per_node="$OPTARG"
@@ -338,7 +345,7 @@ if test $nmpi_processes -gt 1 ; then
 else
  SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
-SOCKET_OPTION="--mca plm_rsh_agent /usr/bin/ssh "$SOCKET_OPTION
+SOCKET_OPTION=$MCA $SOCKET_OPTION
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
 
