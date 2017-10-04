@@ -590,10 +590,11 @@ cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
-echo "Input file: $in"
-echo " Directory: \`pwd\`"
-echo "      Host: \`hostname\`"
-echo "   Command: $MPIRUN $exe $in $OUT2ERROR"
+echo "    Input file: $in"
+echo "     Directory: \`pwd\`"
+echo "          Host: \`hostname\`"
+echo "   MPI Command: $MPIRUN $exe $in $OUT2ERROR"
+echo "Script command:  $QSUB $scriptfile"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
@@ -636,7 +637,8 @@ if [ "$queue" != "none" ]; then
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
-  echo "            Command: $MPIRUN $exe $in $OUT2ERROR"
+  echo "        MPI command: $MPIRUN $exe $in $OUT2ERROR"
+  echo "     Script command:  $QSUB $scriptfile"
 fi
 
 # run script
