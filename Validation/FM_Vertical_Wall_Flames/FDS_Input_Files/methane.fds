@@ -1,7 +1,7 @@
 &HEAD CHID='methane', TITLE='FM Vertical Wall Flame Experiments' /
 
-&MESH XB=0.000,0.075,-0.190,-0.095,0.000,0.100, IJK=25,32,32, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.075, DY=0.095, DZ=0.100, I_UPPER=1, J_UPPER=3, K_UPPER=19 /
+&MESH XB=0.000,0.150,-0.190,-0.06333,0.000,0.200, IJK=30,25,40, MULT_ID='mesh' /
+&MULT ID='mesh', DY=0.12667, DZ=0.200, J_UPPER=2, K_UPPER=9 /
 
 &TIME T_END=20. /
 

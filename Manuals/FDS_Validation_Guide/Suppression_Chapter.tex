@@ -164,4 +164,30 @@ Figure~\ref{LN02} presents profiles of mean droplet diameter, mean velocity, and
 \label{LN02}
 \end{figure}
 
+\clearpage
 
+\section{UMD Line Burner}
+
+In the UMD line burner experiments the oxygen coflow is slowly diluted with nitrogen until the flame weakens and eventually blows out.  In this series of FDS calculations, the nitrogen coflow is setup with a ramp in time to achieve a linear decrease in the coflow oxygen volume fraction over one minute of real time.  In Fig.~\ref{fig_umd_n2_ramp_check} we plot the oxygen volume fraction in time to verify the input ramp.
+
+In Fig.~\ref{fig_umd_comb_eta}, we plot the combustion efficiency as a function of oxygen volume fraction for both methane and propane and compare with the measurements of White et al.~\cite{White:2015}.  Note that the FDS results are presented for three different grid resolutions corresponding to $W/\delta x$ = 4, 8, and 16 ($\delta x$ = 1.25 cm, 0.625 cm, and 0.3125 cm, respectively), where $W=5$ cm is the width of the burner.  Also, two different reaction schemes are tested, one step and two step.  The two step scheme first converts fuel to CO and then oxidizes the CO to CO2.  The extinction model for the two step scheme is intended to provide similar results to the one step model for well-ventilated flames.  A simple reignition model with an ignition temperature threshold set to the SFPE Handbook \cite{SFPE} value of the Auto-Ignition Temperature (AIT) for methane and propane is used.  A piloted ignition region (AIT = 0 K) is set just within the near field of the line burner.  Details of the reignition model and pilot region as well as parameter sensitivity studies are provided in White et al.~\cite{White:2017}.
+
+\begin{figure}[h!]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_N2_ramp_check} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_N2_ramp_check}
+\end{tabular*}
+\caption[UMD Line Burner N2 ramp check]{UMD Line Burner N2 ramp check.}
+\label{fig_umd_n2_ramp_check}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_eta} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_eta}
+\end{tabular*}
+\caption[UMD Line Burner combustion efficiency]{UMD Line Burner combustion efficiency.}
+\label{fig_umd_comb_eta}
+\end{figure}

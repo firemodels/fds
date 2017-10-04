@@ -34,8 +34,8 @@ do i = 1, nverts
   if(iv1<1)iv1 = iv1 + nverts
   if(iv2>nverts)iv2 = iv2 - nverts
   if(iv3>nverts)iv3 = iv3 - nverts
-  tritest = valid_triangle(dir,verts, nverts, iv1, iv2, iv3)
-  write(0,*)iv1,iv2,iv3,tritest
+!  tritest = valid_triangle(dir,verts, nverts, iv1, iv2, iv3)
+!  write(0,*)iv1,iv2,iv3,tritest
 end do
 
 write(0,*)""

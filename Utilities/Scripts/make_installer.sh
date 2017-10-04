@@ -8,7 +8,7 @@ then
   echo ""
   echo "  -i FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  -d installdir - default install directory"
-  echo "   INSTALLER.sh - bash shell script containing self-extracting FDS installer"
+  echo "   INSTALLER.sh - bash shell script containing self-extracting Installer"
   echo
   exit
 fi
@@ -71,11 +71,12 @@ cat << EOF > $INSTALLER
 
 OVERRIDE=\$1
 echo ""
-echo "Installing 64 bit $ostype2 FDS $FDSVERSION and Smokeview $SMVVERSION"
+echo "Installing FDS $FDSVERSION and Smokeview $SMVVERSION for $ostype2"
 echo ""
 echo "Options:"
 echo "  1) Press <Enter> to begin installation [default]"
-echo "  2) Type \"extract\" to copy the installation files to $FDS_TAR"
+echo "  2) Type \"extract\" to copy the installation files to:"
+echo "     $FDS_TAR"
 
 BAK=_\`date +%Y%m%d_%H%M%S\`
 
@@ -171,7 +172,8 @@ THISDIR=\`pwd\`
 #--- record temporary startup file names
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
-FDSMODULE=/tmp/fds_module.\$\$
+FDSMODULEtmp=/tmp/fds_module.\$\$
+STARTUPtmp=/tmp/readme.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
 #    can be subsequently un-tar'd
@@ -292,7 +294,7 @@ while true; do
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
-     read -p "Do you wish to proceed? (yes/no) " yn
+     read -p "Proceed? (yes/no) " yn
    fi
    case \$yn in
       [Yy]* ) break;;
@@ -327,63 +329,95 @@ echo "Copy complete."
 
 MKDIR \$FDS_root/bin/modules
 
-cat << MODULE > \$FDSMODULE
+cat << MODULE > \$FDSMODULEtmp
 #%Module1.0#####################################################################
 ###
-### fds modulefile
-###
-### modulefiles/fds
+### FDS6 modulefile
 ###
 
 proc ModulesHelp { } {
-        global version
-
         puts stderr "\tAdds FDS bin location to your PATH environment variable"
 }
 
 module-whatis   "Loads fds paths and libraries."
 
-set     version      "1.0"
+conflict FDS6
 
 prepend-path    PATH    \$FDS_root/bin
+prepend-path    PATH    \$FDS_root/bin/openmpi_64/bin
+MODULE
+if [ "$ostype" == "LINUX" ] ; then
+cat << MODULE >> \$FDSMODULEtmp
+prepend-path    LD_LIBRARY_PATH /usr/lib64
+MODULE
+fi
+cat << MODULE >> \$FDSMODULEtmp
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
-prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/openmpi_64
 
-setenv  MPIDIST \$FDS_root/bin/openmpi_64
-setenv  OMP_NUM_THREAD 4
+setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
+setenv  MPIFORT mpifort
+setenv  OMP_NUM_THREADS 4
 
-conflict fds
 MODULE
 
-cp \$FDSMODULE \$FDS_root/bin/modules/fds
-rm \$FDSMODULE
+cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
+rm \$FDSMODULEtmp
+
+#--- create startup readme file
+
+
+cat << STARTUP > \$STARTUPtmp
+<h3>Environment Variables - Using the installation fds</h3>
+<ul>
+<li>Add following line to one of your startup files
+to complete the installation.<br>
+<pre>
+source \$FDS_root/bin/FDSVARS.sh
+</pre>
+or the following if you are using modules
+<pre>
+export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH
+module load $FDSMODULE
+</pre>
+
+<li>Log out and log back in so changes will take effect.
+
+<li>To uninstall fds, erase the directory:<br>
+\$FDS_root 
+<p>and remove changes you made to your startup files.
+
+<li>See <a href="README_repo.html">README_repo.html</a> 
+for more details on setting up the environment to use fds in a git repo.
+STARTUP
 
 #--- create BASH startup file
 
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
-export FDSBINDIR=\$FDS_root/bin
-export MPIDIST=\\\$FDSBINDIR/openmpi_64
+export OMP_NUM_THREADS=4
+FDSBINDIR=\$FDS_root/bin
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-
-export $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
 BASH
 fi
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
-
-export OMP_NUM_THREADS=4
+export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
 BASH
 
-#--- create startup file for FDS
+#--- create startup and readme files
 
 cp \$BASHRCFDS \$FDS_root/bin/FDSVARS.sh
 chmod +x \$FDS_root/bin/FDSVARS.sh
 rm \$BASHRCFDS
+
+cp \$STARTUPtmp \$FDS_root/Documentation/README_startup.html
+#rm \$STARTUPtmp
 
 EOF
 
@@ -397,11 +431,16 @@ echo "   to complete the installation:"
 echo ""
 echo "source \$FDS_root/bin/FDSVARS.sh"
 echo ""
-echo "2. See the readme file at \$FDS_root/bin/README.html for"
-echo "   notes on setting up your environment if you plan to use"
-echo "   a fds git repo."
+echo "or the following lines if you are using modules:"
 echo ""
-echo "3. Log out and log back in so changes will take effect."
+echo "export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH"
+echo "module load $FDSMODULE"
+echo ""
+echo "2. Log out and log back in so the changes will take effect."
+echo ""
+echo "To uninstall fds, erase the directory: "
+echo "\$FDS_root"
+echo "and remove any changes made to your startup file."
 echo ""
 echo "Installation complete."
 exit 0

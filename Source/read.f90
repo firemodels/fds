@@ -7321,16 +7321,19 @@ USE SCRC, ONLY: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , S
                 SCARC_PRECON_ITERATIONS, SCARC_PRECON_ACCURACY, SCARC_PRECON_OMEGA, &
                 SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY
 
-NAMELIST /PRES/ CHECK_POISSON,FISHPAK_BC,GLMAT_SOLVER,ITERATION_SUSPEND_FACTOR,LAPLACE_PRESSURE_CORRECTION, &
-                MAX_PRESSURE_ITERATIONS,PRES_ON_WHOLE_DOMAIN,PRESSURE_RELAX_TIME,PRESSURE_TOLERANCE,RELAXATION_FACTOR, &
+CHARACTER(60) :: SOLVER='FFT'
+
+NAMELIST /PRES/ CHECK_POISSON,FISHPAK_BC,ITERATION_SUSPEND_FACTOR,LAPLACE_PRESSURE_CORRECTION, &
+                MAX_PRESSURE_ITERATIONS,PRESSURE_RELAX_TIME,PRESSURE_TOLERANCE,RELAXATION_FACTOR, &
                 SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON, &
-                SCARC_COARSE , SCARC_INITIAL, SCARC_ACCURACY, SCARC_DEBUG , &
-                SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL , SCARC_MULTIGRID_COARSENING  , &
+                SCARC_COARSE , SCARC_INITIAL, SCARC_ACCURACY,  SCARC_DEBUG , &
+                SCARC_MULTIGRID_CYCLE,      SCARC_MULTIGRID_LEVEL,    SCARC_MULTIGRID_COARSENING  , &
                 SCARC_MULTIGRID_ITERATIONS, SCARC_MULTIGRID_ACCURACY, SCARC_MULTIGRID_INTERPOL, &
                 SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, &
                 SCARC_SMOOTH_ITERATIONS, SCARC_SMOOTH_ACCURACY, SCARC_SMOOTH_OMEGA, &
                 SCARC_PRECON_ITERATIONS, SCARC_PRECON_ACCURACY, SCARC_PRECON_OMEGA, &
-                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, SUSPEND_PRESSURE_ITERATIONS,VELOCITY_TOLERANCE
+                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, &
+                SOLVER,SUSPEND_PRESSURE_ITERATIONS,VELOCITY_TOLERANCE
 
 ! Read the single PRES line
 
@@ -7345,14 +7348,27 @@ READ_LOOP: DO
 ENDDO READ_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-IF (SCARC_METHOD /= 'null') THEN
-   PRES_METHOD = 'SCARC'
-   ITERATE_PRESSURE = .FALSE.
-ENDIF
+! Given the chosen SOLVER, define internal variable PRES_METHOD:
 
-IF (GLMAT_SOLVER) THEN
-   PRES_METHOD='GLMAT'
-ENDIF
+SELECT CASE(TRIM(SOLVER))
+   CASE('SCARC')
+      PRES_METHOD = 'SCARC'
+      ITERATE_PRESSURE = .FALSE.
+      IF (SCARC_METHOD == 'null') SCARC_METHOD = 'KRYLOV' ! Taken as default for SCARC when SOLVER is SCARC and
+                                                          ! SCARC_METHOD is not defined.
+   CASE('GLMAT')
+      PRES_METHOD = 'GLMAT'
+      GLMAT_SOLVER = .TRUE.
+      PRES_ON_WHOLE_DOMAIN = .FALSE.
+
+   CASE('GLMAT IBM')
+      PRES_METHOD = 'GLMAT'
+      GLMAT_SOLVER = .TRUE.
+      PRES_ON_WHOLE_DOMAIN = .TRUE.
+
+   CASE DEFAULT
+      ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
 
@@ -7979,6 +7995,12 @@ MESH_LOOP: DO NM=1,NMESHES
 
       CALL CHECK_XB(XB)
 
+      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
+
+      IF (HT3D) SOLID_HT3D = .TRUE.
+
+      ! No device and controls for evacuation obstructions
+
       IF (EVACUATION_ONLY(NM)) THEN
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'
@@ -8314,13 +8336,24 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%BULK_DENSITY = BULK_DENSITY
                IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
 
+               ! Error traps and warnings for HT3D
+
+               IF (.NOT.HT3D .AND. ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
                OB%HT3D = HT3D
-               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%HT3D=.FALSE.
+               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+               ENDIF
+
                IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', HT3D requires MATL_ID.'
+                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
 
@@ -8337,15 +8370,10 @@ MESH_LOOP: DO NM=1,NMESHES
                      ENDIF
                   ENDDO
                   IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', MATL_ID not found.'
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-               ELSE
-                  IF (ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
-                     WRITE(MESSAGE,'(A,I0,A)')  'ERROR: Problem with OBST number',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
                ENDIF
 
                ! Make obstruction invisible if it's within a finer mesh
@@ -9259,7 +9287,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
    COUNT_VENT_LOOP: DO
       CALL CHECKREAD('VENT',LU_INPUT,IOS)
       IF (IOS==1) EXIT COUNT_VENT_LOOP
+      ID      = 'null'
       MULT_ID = 'null'
+      SURF_ID = 'null'
       READ(LU_INPUT,NML=VENT,END=3,ERR=4,IOSTAT=IOS)
       N_VENT_NEW = 0
       IF (MULT_ID=='null') THEN

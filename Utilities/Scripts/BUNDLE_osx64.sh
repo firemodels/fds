@@ -17,8 +17,10 @@ export OPENMPI_VERSION=$7
 export MAJOR=$8
 export COMPLIBFROM=
 export MISCLIBFROM=
+export IB=
 
 export FDSOS=_osx_64
 export INSTALLDIR=FDS/$FDSEDITION
+export FDSMODULE=$FDSEDITION
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh

@@ -161,7 +161,7 @@ On the following page there are eight plots comparing the predicted and measured
 
 \section{McCaffrey's Plume Correlation}
 
-The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, nominally $D^*/\dx=[5,10,20]$ (respectively, coarse, medium, and fine resolution).
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -176,6 +176,21 @@ The following plots show the results of simulations of McCaffrey's five fires at
 \end{figure}
 
 \clearpage
+
+Below we plot the same results but arranged in a different way.  The height dimension is scaled by the fire Froude number and each plot represents nominally the same resolution level.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Coarse} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Medium} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Fine}
+\end{tabular*}
+\caption{McCafrrey experiments, centerline plume velocity, Froude scaling.}
+\label{McCaffrey_Plume_Velocity_Froude}
+\end{figure}
+
+\clearpage
+
 
 \section{PRISME DOOR Experiments}
 

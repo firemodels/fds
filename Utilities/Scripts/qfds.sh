@@ -12,6 +12,7 @@ fi
 OMPPLACES=
 OMPPROCBIND=
 HELP=
+MODULE=
 
 function usage {
   echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
@@ -46,6 +47,7 @@ function usage {
   echo " -j job - job prefix"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
+  echo " -M module -  load an openmpi module"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
@@ -58,6 +60,7 @@ function usage {
   echo " -s   - stop job"
   echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -T   - use the ethernet version  of FDS"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -76,13 +79,10 @@ if [ "`uname`" != "Darwin" ]; then
 fi
 MPIRUN=
 ABORTRUN=n
-IB=
+IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
-if [ "$FDSNETWORK" == "infiniband" ] ; then
-  IB=ib
-fi
 EMAIL=
 
 # --------------------------- parse options --------------------
@@ -122,7 +122,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstuw:v' OPTION
+while getopts 'AbB:cd:e:E:f:iIhHj:l:M:m:NO:P:n:o:p:q:rstTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -174,6 +174,9 @@ case $OPTION  in
   m)
    max_processes_per_node="$OPTARG"
    ;;
+  M)
+   MODULE="$OPTARG"
+   ;;
   N)
    nosocket="1"
    ;;
@@ -203,6 +206,9 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
+   ;;
+  T)
+   IB=
    ;;
   u)
    use_devel=1
@@ -298,31 +304,19 @@ fi
 
 # define processes per node
 
-let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
+let "ppn=($nmpi_processes_per_node)"
 if test $ppn -le $max_processes_per_node ; then
   ppn=$max_processes_per_node
-fi
-
-# in benchmark mode run a case "alone" on one node
-
-if [ "$benchmark" == "yes" ]; then
-  let "nodes=($nmpi_processes-1)/$ncores+1"
-  ppn=$ncores
-  nmpi_processes_per_node=$ncores
 fi
 
 # default: Use mpirun option to bind processes to socket (for MPI).
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-if test $nopenmp_threads -gt 1 ; then
- SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+if test $nmpi_processes -gt 1 ; then
+ SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
 else
- SOCKET_OPTION="--bind-to socket --map-by socket"
-fi
-
-if [ "$benchmark" == "yes" ]; then
- SOCKET_OPTION="--bind-to core --map-by node:PE=$nopenmp_threads"
+ SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
@@ -352,11 +346,16 @@ fi
       MPILABEL="IMPI"
     fi
   else
-    MPIRUNEXE=$MPIDIST/bin/mpirun
-    if [ "$FDSNETWORK" == "infiniband" ]; then
-      MPILABEL="MPI_IB"
-    else
+    MPIRUNEXE=mpirun
+    notfound=`$MPIRUNEXE -h |& head -1 | grep "not found" | wc -l`
+    if [ $notfound -eq 1 ]; then
+      echo "*** error: $MPIRUNEXE not in PATH"
+      exit
+    fi
+    if [ "$IB" == "" ]; then
       MPILABEL="MPI"
+    else
+      MPILABEL="MPI_IB"
     fi
   fi
   TITLE="$infile($MPILABEL)"
@@ -449,7 +448,7 @@ fi
 # setup for systems using the queuing system SLURM
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  MPIRUN="srun"
+  MPIRUN="mpirun"
   QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
@@ -498,7 +497,21 @@ cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
 EOF
 fi
+if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#PBS -l naccesspolicy=singlejob
+EOF
 fi
+fi
+fi
+if [ "$MODULE" != "" ]; then
+cat << EOF >> $scriptfile
+# unload any openmpi module then load module specified with -M option
+
+module unload openmpi
+module load $MODULE
+
+EOF
 fi
 
 cat << EOF >> $scriptfile
@@ -535,6 +548,11 @@ echo " Directory: \`pwd\`"
 echo "      Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+if [ "$MODULE" != "" ]; then
+cat << EOF >> $scriptfile
+echo "    Module: $MODULE"
+EOF
+fi
 
 # if requested, output script file to screen
 
@@ -552,6 +570,9 @@ if [ "$queue" != "none" ] ; then
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
   echo " Processes per node:$nmpi_processes_per_node"
+if [ "$MODULE" != "" ]; then
+  echo "             Module:$MODULE"
+fi
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi

@@ -148,8 +148,8 @@
 &RAMP ID='east cycle', T= 498., F= 1 /
 &RAMP ID='east cycle', T= 885., F= 1 /
 &RAMP ID='east cycle', T= 886., F=-1 /
-&RAMP ID='east cycle', T= 986., F=-1 /
-&RAMP ID='east cycle', T= 987., F= 1 /
+&RAMP ID='east cycle', T= 985., F=-1 /
+&RAMP ID='east cycle', T= 986., F= 1 /
 &RAMP ID='east cycle', T=1420., F= 1 /
 &RAMP ID='east cycle', T=1421., F=-1 /
 
