@@ -132,8 +132,8 @@ background=background
 
 openmpidir=~/FDS_Guides
 
-fdsmpidir=mpi_intel$FDSOS$IB
-fdsmpi=fds_mpi_intel$FDSOS$IB
+fdsmpidir=mpi_intel$FDSOS
+fdsmpi=fds_mpi_intel$FDSOS
 
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS

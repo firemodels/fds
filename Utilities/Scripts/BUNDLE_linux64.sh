@@ -18,7 +18,6 @@ export MAJOR=$8
 export COMPFROM=$9
 
 export MISCFROM=fire-notes/INSTALL/LIBS/LINUX/LIB64
-export IB=ib
 export FDSMODULE=$FDSEDITION
 
 export FDSOS=_linux_64
