@@ -470,7 +470,8 @@ if [ "$STOPFDSMAXITER" == "" ]; then
   fi
 fi
 
-QSUB="qsub -k eo -q $queue $nodelist"
+#QSUB="qsub -k eo -q $queue $nodelist"
+QSUB="qsub -q $queue $nodelist"
 
 if [ "$queue" == "terminal" ]; then
   QSUB=
