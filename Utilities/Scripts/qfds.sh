@@ -352,7 +352,11 @@ fi
 # OpenMP is being used (number of OpenMP threads > 1).
 
 if test $nmpi_processes -gt 1 ; then
- SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ if test $nopenmp_threads -gt 1 ; then
+  SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ else
+  SOCKET_OPTION=" "
+ fi
 else
  SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
