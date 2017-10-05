@@ -411,6 +411,7 @@ fulldir=`pwd`
 outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
+scriptlog=$fulldir/$infile.slog
 in_full_file=$fulldir/$in
 
 # make sure various files exist before running case
@@ -593,8 +594,6 @@ echo \`date\`
 echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
-echo "   MPI Command: $MPIRUN $exe $in $OUT2ERROR"
-echo "Script command:  $QSUB $scriptfile"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
@@ -637,8 +636,6 @@ if [ "$queue" != "none" ]; then
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
-  echo "        MPI command: $MPIRUN $exe $in $OUT2ERROR"
-  echo "     Script command:  $QSUB $scriptfile"
 fi
 
 # run script
@@ -646,5 +643,7 @@ fi
 chmod +x $scriptfile
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
+  cat $scriptfile > $scriptlog
+  echo "#$QSUB $scriptfile" >> $scriptlog
   rm $scriptfile
 fi
