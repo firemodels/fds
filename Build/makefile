@@ -205,13 +205,14 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO) $(INTEL_COMPINFO)
-mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel
-mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi mpifort
-mpi_intel_linux_64ib_scorep : FOPENMPFLAGS =
-mpi_intel_linux_64ib_scorep : obj = fds_mpi_intel_linux_64ib_scorep
-mpi_intel_linux_64ib_scorep : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+mpi_intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_OPENMPI)
+mpi_intel_linux_64_dv : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
+mpi_intel_linux_64_dv : LFLAGS = -static-intel
+mpi_intel_linux_64_dv : FCOMPL = mpifort
+mpi_intel_linux_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+mpi_intel_linux_64_dv : obj = fds_mpi_intel_linux_64_dv
+mpi_intel_linux_64_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -no-wrap-margin $(GITINFO) $(INTEL_COMPINFO) $(FFLAGSMKL_OPENMPI)
 mpi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)

@@ -63,8 +63,8 @@ function usage {
   echo ""
   echo " -e exe - full path of FDS used to run case "
   echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB]"
-  echo " -h     - show commony used options"
-  echo " -H     - show all options"
+  echo " -h   - show commony used options"
+  echo " -H   - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
@@ -75,11 +75,11 @@ function usage {
     exit
   fi
   echo "Other options:"
-  echo " -A     - used by timing scripts"
-  echo " -b     - use debug version of FDS"
-  echo " -B     - location of background program"
-  echo " -c     - strip extension"
-  echo " -C     - use modules currently loaded."
+  echo " -A   - used by timing scripts"
+  echo " -b   - use debug version of FDS"
+  echo " -B   - location of background program"
+  echo " -c   - strip extension"
+  echo " -C   - use modules currently loaded."
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
@@ -352,7 +352,11 @@ fi
 # OpenMP is being used (number of OpenMP threads > 1).
 
 if test $nmpi_processes -gt 1 ; then
- SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ if test $nopenmp_threads -gt 1 ; then
+  SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ else
+  SOCKET_OPTION=" "
+ fi
 else
  SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
@@ -411,6 +415,7 @@ fulldir=`pwd`
 outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
+scriptlog=$fulldir/$infile.slog
 in_full_file=$fulldir/$in
 
 # make sure various files exist before running case
@@ -469,6 +474,7 @@ if [ "$STOPFDSMAXITER" == "" ]; then
   fi
 fi
 
+#QSUB="qsub -k eo -q $queue $nodelist"
 QSUB="qsub -q $queue $nodelist"
 
 if [ "$queue" == "terminal" ]; then
@@ -593,8 +599,6 @@ echo \`date\`
 echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
-echo "   MPI Command: $MPIRUN $exe $in $OUT2ERROR"
-echo "Script command:  $QSUB $scriptfile"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
@@ -637,8 +641,6 @@ if [ "$queue" != "none" ]; then
   if test $nopenmp_threads -gt 1 ; then
     echo "Threads per process:$nopenmp_threads"
   fi
-  echo "        MPI command: $MPIRUN $exe $in $OUT2ERROR"
-  echo "     Script command:  $QSUB $scriptfile"
 fi
 
 # run script
@@ -646,5 +648,7 @@ fi
 chmod +x $scriptfile
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
+  cat $scriptfile > $scriptlog
+  echo "#$QSUB $scriptfile" >> $scriptlog
   rm $scriptfile
 fi
