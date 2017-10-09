@@ -21,4 +21,6 @@ $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_07.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_08.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_09.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_10.fds
+$QFDS $DEBUG $QUEUE -p 13 -d $INDIR cabinet_11.fds
+$QFDS $DEBUG $QUEUE -p 13 -d $INDIR cabinet_12.fds
 

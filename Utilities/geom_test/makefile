@@ -23,7 +23,7 @@ GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
 GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
-obj = prec.o mpis.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
+obj = prec.o cons.o devc.o type.o mesh.o func.o geom.o gsmv.o geom_main.o
 
 objwin = $(obj:.o=.obj)
 
@@ -69,7 +69,7 @@ gnu_linux_32 : $(obj)
 
 intel_linux_64 : FFLAGS = -m64 -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency $(GITINFO)
 intel_linux_64 : LFLAGS = -static-intel
-intel_linux_64 : FCOMPL = ifort
+intel_linux_64 : FCOMPL = mpifort
 intel_linux_64 : exe = geomtest
 intel_linux_64 : setup $(obj)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(bindir)/$(exe) $(obj)
@@ -87,7 +87,6 @@ intel_osx_64 : $(obj)
 # *** Object Dependencies ***
 
 cons.o : prec.o
-mpis.o : prec.o
 type.o : prec.o cons.o
 devc.o : prec.o
 mesh.o : prec.o type.o
@@ -97,7 +96,6 @@ geom.o : gsmv.o func.o prec.o cons.o mesh.o
 geom_main.o : func.o prec.o cons.o type.o mesh.o devc.o geom.o
 
 cons.obj : prec.obj
-mpis.obj : prec.obj
 type.obj : prec.obj cons.obj
 devc.obj : prec.obj
 mesh.obj : prec.obj type.obj

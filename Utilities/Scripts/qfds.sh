@@ -1,94 +1,34 @@
 #!/bin/bash
 
+# default parameter settings
+
 FDSROOT=~/FDS-SMV
-if [ "$FIREMODELS" != "" ] ; then
+if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  walltime=99-99:99:99
-else
-  walltime=999:0:0
+if [ "$RESOURCE_MANAGER" != "SLURM" ]; then
+  RESOURCE_MANAGER="TORQUE"
 fi
 OMPPLACES=
 OMPPROCBIND=
 HELP=
-
-function usage {
-  echo "Usage: qfds.sh [-d directory] [-f repository root] [-n mpi processes per node] [-o nopenmp_threads]"
-  echo "                 [-q queue] [-p nmpi_processes] [-e fds_command] casename.fds"
-  echo ""
-  echo "qfds.sh runs FDS using an executable specified with the -e option or from the repository"
-  echo "if -e is not specified.  A parallel version of FDS is invoked by using -p to specify the"
-  echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
-  echo ""
-  echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB]"
-  echo " -h     - show most used options"
-  echo " -H     - show all options"
-  echo " -o o - number of OpenMP threads per process [default: 1]"
-  echo " -p p - number of MPI processes [default: 1] "
-  echo " -v   - output generated script to standard output"
-  echo "input_file - input file"
-  if [ "$HELP" == "" ]; then
-    exit
-  fi
-  echo "Other options:"
-  echo " -A     - used by timing scripts"
-  echo " -b     - use debug version of FDS"
-  echo " -B     - location of background program"
-  echo " -c     - strip extension"
-  echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -E email address - send an email when the job ends or if it aborts"
-  echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: $FDSROOT]"
-  echo " -i use installed fds"
-  echo " -I use Intel mpi version of fds"
-  echo " -j job - job prefix"
-  echo " -l node1+node2+...+noden - specify which nodes to run job on"
-  echo " -m m - reserve m processes per node [default: 1]"
-  echo " -n n - number of MPI processes per node [default: 1]"
-  echo " -N   - do not use socket or report binding options"
-  echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
-  echo "        options: cores, sockets, threads"
-  echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
-  echo "        options: false, true, master, close, spread"
-  echo " -q q - name of queue. [default: batch]"
-  echo "        If queue is terminal then casename.fds is run in the foreground on the local computer"
-  echo " -r   - report bindings"
-  echo " -s   - stop job"
-  echo " -u   - use development version of FDS"
-  echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -T   - use the ethernet version  of FDS"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
-  echo ""
-  exit
-}
-
-if [ $# -lt 1 ]
-then
-  usage
-fi
-
-# default parameter settings
-
+FDS_MODULE_OPTION=1
 ncores=8
 if [ "`uname`" != "Darwin" ]; then
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
 MPIRUN=
 ABORTRUN=n
-IB=ib
 DB=
 JOBPREFIX=
 OUT2ERROR=
 EMAIL=
-
-# --------------------------- parse options --------------------
-
-# default parameter settings
-
 queue=batch
 stopjob=0
+MCA=
+if [ "$MPIRUN_MCA" != "" ]; then
+  MCA=$MPIRUN_MCA
+fi
 
 nmpi_processes=1
 nmpi_processes_per_node=-1
@@ -104,9 +44,72 @@ showinput=0
 strip_extension=0
 REPORT_BINDINGS="--report-bindings"
 nodelist=
-erroptionfile=
 nosocket=
 exe=
+STARTUP=
+if [ "$QFDS_STARTUP" != "" ]; then
+  STARTUP=$QFDS_STARTUP
+fi
+
+function usage {
+  echo "Usage: qfds.sh [-p nmpi_processes] [-o nthreads] [-e fds_command] [-q queue]  casename.fds"
+  echo ""
+  echo "qfds.sh runs FDS using an executable from the repository or one specified with the -e option."
+  echo "A parallel version of FDS is invoked by using -p to specify the number of MPI processes and/or"
+  echo "-o to specify the number of OpenMP threads."
+  echo ""
+  echo "qfds.sh loads the modules that were loaded when fds was built unless the -C option is specified"
+  echo "then the currently loaded modules are used."
+  echo ""
+  echo " -e exe - full path of FDS used to run case "
+  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB]"
+  echo " -h   - show commony used options"
+  echo " -H   - show all options"
+  echo " -o o - number of OpenMP threads per process [default: 1]"
+  echo " -p p - number of MPI processes [default: 1] "
+  echo " -q q - name of queue. [default: batch]"
+  echo "        If q is terminal then casename.fds is run in the foreground on the local computer"
+  echo " -v   - output generated script to standard output"
+  echo "input_file - input file"
+  if [ "$HELP" == "" ]; then
+    exit
+  fi
+  echo "Other options:"
+  echo " -A   - used by timing scripts"
+  echo " -b   - use debug version of FDS"
+  echo " -B   - location of background program"
+  echo " -c   - strip extension"
+  echo " -C   - use modules currently loaded."
+  echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -E email address - send an email when the job ends or if it aborts"
+  echo " -f repository root - name and location of repository where FDS is located"
+  echo "    [default: $FDSROOT]" 
+  echo " -i use installed fds"
+  echo " -I use Intel mpi version of fds"
+  echo " -j job - job prefix"
+  echo " -l node1+node2+...+noden - specify which nodes to run job on"
+  echo " -m m - reserve m processes per node [default: 1]"
+  echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
+  echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -N   - do not use socket or report binding options"
+  echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
+  echo "        options: cores, sockets, threads"
+  echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
+  echo "        options: false, true, master, close, spread"
+  echo " -r   - report bindings"
+  echo " -R manager - specify resource manager (SLURM or TORQUE) default: $RESOURCE_MANAGER"
+  echo " -s   - stop job"
+  echo " -S   - use startup files to set the environment, do not load modules"
+  echo " -u   - use development version of FDS"
+  echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
+  echo ""
+  exit
+}
+
+if [ $# -lt 1 ]; then
+  usage
+fi
 
 if [ "$BACKGROUND" == "" ]; then
    BACKGROUND=background
@@ -120,7 +123,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:E:f:iIhHj:l:m:NO:P:n:o:p:q:rstTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:MNO:P:n:o:p:q:rR:sStTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -134,6 +137,9 @@ case $OPTION  in
    ;;
   c)
    strip_extension=1
+   ;;
+  C)
+   FDS_MODULE_OPTION=
    ;;
   d)
    dir="$OPTARG"
@@ -169,26 +175,29 @@ case $OPTION  in
   l)
    nodelist="$OPTARG"
    ;;
+  M)
+   MCA="--mca plm_rsh_agent /usr/bin/ssh "
+   ;;
   m)
    max_processes_per_node="$OPTARG"
-   ;;
-  N)
-   nosocket="1"
-   ;;
-  O)
-   OMPPLACES="$OPTARG"
-   ;;
-  P)
-   OMPPROCBIND="$OPTARG"
    ;;
   n)
    nmpi_processes_per_node="$OPTARG"
    ;;
+  N)
+   nosocket="1"
+   ;;
   o)
    nopenmp_threads="$OPTARG"
    ;;
+  O)
+   OMPPLACES="$OPTARG"
+   ;;
   p)
    nmpi_processes="$OPTARG"
+   ;;
+  P)
+   OMPPROCBIND="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
@@ -196,14 +205,20 @@ case $OPTION  in
   r)
    REPORT_BINDINGS="--report-bindings"
    ;;
+  R)
+   RESOURCE_MANAGER=`echo "$OPTARG" | tr /a-z/ /A-Z/`
+   if [  "$RESOURCE_MANAGER" != "SLURM" ]; then
+     RESOURCE_MANAGER="torque"
+   fi
+   ;;
   s)
    stopjob=1
    ;;
+  S)
+   STARTUP=1
+   ;;
   t)
    benchmark="yes"
-   ;;
-  T)
-   IB=
    ;;
   u)
    use_devel=1
@@ -220,16 +235,23 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
-if [ "$nodelist" != "" ] ; then
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  walltime=99-99:99:99
+else
+  walltime=999:0:0
+fi
+if [ "$nodelist" != "" ]; then
   nodelist="-l nodes=$nodelist"
 fi
-if [[ "$OMPPLACES" != "" ]]  ; then
+
+if [[ "$OMPPLACES" != "" ]]; then
   if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
     echo "*** error: can only be specify cores, sockets or threads with -O option"
     exit
   fi
   OMPPLACES="OMP_PLACES=$OMPPLACES"
 fi
+
 if [ "$OMPPROCBIND" != "" ]; then
   if [[ "$OMPPROCBIND" != "false" ]] &&  [[ "$OMPPROCBIND" != "true" ]] &&  [[ "$OMPPROCBIND" != "master" ]] &&  [[ "$OMPPROCBIND" == "close" ]] &&  [[ "$OMPPROCBIND" == "spread" ]]; then
     echo "*** error: can only specify false, true, master, close or spread with -P option"
@@ -255,17 +277,40 @@ if [ "$use_installed" == "1" ]; then
     cd $curdir
   fi
 else
-  if [ "$use_debug" == "1" ] ; then
+  if [ "$use_debug" == "1" ]; then
     DB=_db
   fi
-  if [ "$use_devel" == "1" ] ; then
+  if [ "$use_devel" == "1" ]; then
     DB=_dv
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
   fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
+    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB
+  fi
+fi
+
+# modules loaded currrently
+
+if [ "$STARTUP" == "" ]; then
+
+  CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+
+# modules loaded when fds was built
+
+  if [ "$exe" != "" ]; then  # first look for file that contains the list
+    FDSDIR=$(dirname "$exe")
+    if [ -e $FDSDIR/.fdsinfo ]; then
+      FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+      OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
+    fi
+  fi
+
+  if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
+    MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+  else
+    MODULES=$CURRENT_LOADED_MODULES
   fi
 fi
 
@@ -273,8 +318,6 @@ fi
 
 in=$1
 infile=${in%.*}
-
-# if there is more than 1 process then use the mpirun command
 
 TITLE="$infile"
 
@@ -299,75 +342,70 @@ fi
 
 # define processes per node
 
-let "ppn=($nopenmp_threads)*($nmpi_processes_per_node)"
+let "ppn=($nmpi_processes_per_node)"
 if test $ppn -le $max_processes_per_node ; then
   ppn=$max_processes_per_node
-fi
-
-# in benchmark mode run a case "alone" on one node
-
-if [ "$benchmark" == "yes" ]; then
-  let "nodes=($nmpi_processes-1)/$ncores+1"
-  ppn=$ncores
-  nmpi_processes_per_node=$ncores
 fi
 
 # default: Use mpirun option to bind processes to socket (for MPI).
 # Or, bind processs to and map processes by socket if
 # OpenMP is being used (number of OpenMP threads > 1).
 
-if test $nopenmp_threads -gt 1 ; then
- SOCKET_OPTION="--bind-to core --map-by socket:PE=$nopenmp_threads"
+if test $nmpi_processes -gt 1 ; then
+ if test $nopenmp_threads -gt 1 ; then
+  SOCKET_OPTION="--map-by socket:PE=$nopenmp_threads"
+ else
+  SOCKET_OPTION=" "
+ fi
 else
- SOCKET_OPTION="--bind-to socket --map-by socket"
-fi
-
-if [ "$benchmark" == "yes" ]; then
- SOCKET_OPTION="--bind-to core --map-by node:PE=$nopenmp_threads"
+ SOCKET_OPTION="--map-by node:PE=$nopenmp_threads"
 fi
 
 # the "none" queue does not use the queing system, so blank out SOCKET_OPTIONS and REPORT_BINDINGS
 
-if [ "$queue" == "none" ]; then
- SOCKET_OPTION=
- REPORT_BINDINGS=
-fi
-if [ "$nosocket" == "1" ]; then
+if [[ "$queue" == "none" ]] || [[ "$nosocket" == "1" ]]; then
  SOCKET_OPTION=
  REPORT_BINDINGS=
 fi
 
-# use mpirun if there is more than 1 process
+# define MPIRUNEXE and do some error checking
 
-#if [ $nmpi_processes -gt 1 ] ; then
-  if [ "$use_intel_mpi" == "1" ]; then
-    if [ "$I_MPI_ROOT" == "" ]; then
-      echo "Intel MPI environment not setup. Run aborted."
-      ABORTRUN=y
-    else
-      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
-      if [ ! -e $MPIRUNEXE ]; then
-        echo "Intel mpiexec does not exist. Run aborted."
-        ABORTRUN=y
-      fi
-      MPILABEL="IMPI"
-    fi
+if [ "$use_intel_mpi" == "1" ]; then # using Intel MPI
+  if [ "$I_MPI_ROOT" == "" ]; then
+    echo "Intel MPI environment not setup. Run aborted."
+    ABORTRUN=y
   else
-    MPIRUNEXE=mpirun
+    MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+    if [ ! -e $MPIRUNEXE ]; then
+      echo "Intel mpiexec, $MPIRUNEXE, does not exist. Run aborted."
+      ABORTRUN=y
+    fi
+    MPILABEL="IMPI"
+  fi
+else                                 # using OpenMPI
+  if [ "$OPENMPI_PATH" != "" ]; then
+    if [ -e $OPENMPI_PATH/bin ]; then
+      mpibindir=$OPENMPI_PATH/bin/
+    fi
+  fi
+  MPIRUNEXE=${mpibindir}mpirun
+  if [ "$mpibindir" == "" ]; then  # OPENMPI_PATH blank so mpirun needs to be in path
     notfound=`$MPIRUNEXE -h |& head -1 | grep "not found" | wc -l`
     if [ $notfound -eq 1 ]; then
       echo "*** error: $MPIRUNEXE not in PATH"
-      exit
+      ABORTRUN=y
     fi
-    if [ "$IB" == "" ]; then
-      MPILABEL="MPI"
-    else
-      MPILABEL="MPI_IB"
+  else                             # use full path to mpirun
+    if [ ! -e $MPIRUNEXE ]; then
+      echo "*** error: $MPIRUNEXE does not exist"
+      ABORTRUN=y
     fi
   fi
-  TITLE="$infile($MPILABEL)"
-  MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $nmpi_processes"
-#fi
+  MPILABEL="MPI"
+fi
+
+TITLE="$infile($MPILABEL)"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $nmpi_processes"
 
 cd $dir
 fulldir=`pwd`
@@ -377,59 +415,69 @@ fulldir=`pwd`
 outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
+scriptlog=$fulldir/$infile.slog
 in_full_file=$fulldir/$in
 
 # make sure various files exist before running case
 
 if ! [ -e $in_full_file ]; then
-  if [ "$showinput" == "0" ] ; then
+  if [ "$showinput" == "0" ]; then
     echo "The input file, $in_full_file, does not exist. Run aborted."
     ABORTRUN=y
   fi
 fi
-if [ "$strip_extension" == "1" ] ; then
+
+if [ "$strip_extension" == "1" ]; then
   in=$infile
 fi
+
 if [ $STOPFDS ]; then
  echo "stopping case: $in"
  touch $stopfile
  exit
 fi
+
 if [ "$exe" != "" ]; then
   if ! [ -e "$exe" ]; then
-    if [ "$showinput" == "0" ] ; then
+    if [ "$showinput" == "0" ]; then
       echo "The program, $exe, does not exist. Run aborted."
       ABORTRUN=y
     fi
   fi
 fi
+
 if [ -e $outlog ]; then
   echo "Removing log file: $outlog"
   rm $outlog
 fi
-if [ "$ABORTRUN" == "y" ] ; then
-  if [ "$showinput" == "0" ] ; then
+
+if [ "$ABORTRUN" == "y" ]; then
+  if [ "$showinput" == "0" ]; then
     exit
   fi
 fi
+
 if [ "$STOPFDSMAXITER" != "" ]; then
   echo "creating delayed stop file: $infile"
   echo $STOPFDSMAXITER > $stopfile
 fi
+
 if [ "$stopjob" == "1" ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
+  echo "stopping case: $in"
+  touch $stopfile
+  exit
 fi
+
 if [ "$STOPFDSMAXITER" == "" ]; then
   if [ -e $stopfile ]; then
     rm $stopfile
   fi
 fi
 
+#QSUB="qsub -k eo -q $queue $nodelist"
 QSUB="qsub -q $queue $nodelist"
 
-if [ "$queue" == "terminal" ] ; then
+if [ "$queue" == "terminal" ]; then
   QSUB=
   MPIRUN=
 fi
@@ -452,17 +500,16 @@ if [ "$queue" == "none" ]; then
   QSUB="$BACKGROUND -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
 fi
 
-# setup for systems using the queuing system SLURM
+# setup for SLURM (alternative to torque)
 
-if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  MPIRUN="mpirun"
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue --ignore-pbs"
 fi
 
 # Set walltime parameter only if walltime is specified as input argument
 walltimestring_pbs=
 walltimestring_slurm=
-if [ "$walltime" != "" ] ; then
+if [ "$walltime" != "" ]; then
   walltimestring_pbs="-l walltime=$walltime"
   walltimestring_slurm="-t $walltime"
 fi
@@ -474,9 +521,9 @@ cat << EOF > $scriptfile
 #!/bin/bash
 EOF
 
-if [ "$queue" != "none" ] ; then
-if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-cat << EOF >> $scriptfile
+if [ "$queue" != "none" ]; then
+  if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+    cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH -e $outerr
 #SBATCH -o $outlog
@@ -485,75 +532,108 @@ cat << EOF >> $scriptfile
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
 EOF
-else
-cat << EOF >> $scriptfile
+  else
+    cat << EOF >> $scriptfile
 #PBS -N $JOBPREFIX$TITLE
 #PBS -W umask=0022
 #PBS -e $outerr
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
-if [ "$EMAIL" != "" ]; then
-cat << EOF >> $scriptfile
+    if [ "$EMAIL" != "" ]; then
+      cat << EOF >> $scriptfile
 #PBS -M $EMAIL
 #PBS -m ae
 EOF
-fi
-if [ "$walltimestring_pbs" != "" ] ; then
-cat << EOF >> $scriptfile
+    fi
+    if [ "$walltimestring_pbs" != "" ]; then
+      cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
 EOF
+    fi
+    if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#PBS -l naccesspolicy=singlejob
+EOF
+    fi
+  fi
 fi
-fi
+
+if [[ "$MODULES" != "" ]]; then
+  cat << EOF >> $scriptfile
+export MODULEPATH=$MODULEPATH
+module purge
+module load $MODULES
+EOF
 fi
 
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 EOF
 
-if [ "$use_intel_mpi" == "1" ] ; then
-cat << EOF >> $scriptfile
+if [ "$use_intel_mpi" == "1" ]; then
+  cat << EOF >> $scriptfile
 export I_MPI_FABRICS=shm:dapl
 export I_MPI_DEBUG=5
 EOF
 fi
 
 if test $nopenmp_threads -gt 1 ; then
-if [ "$OMPPLACES" != "" ]; then
-cat << EOF >> $scriptfile
+  if [ "$OMPPLACES" != "" ]; then
+    cat << EOF >> $scriptfile
 export $OMPPLACES
 EOF
-fi
+  fi
 
-if [ "$OMPPROCBIND" != "" ]; then
-cat << EOF >> $scriptfile
+  if [ "$OMPPROCBIND" != "" ]; then
+    cat << EOF >> $scriptfile
 export $OMPPROCBIND
 EOF
-fi
+  fi
 fi
 
 cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
-echo "Input file: $in"
-echo " Directory: \`pwd\`"
-echo "      Host: \`hostname\`"
+echo "    Input file: $in"
+echo "     Directory: \`pwd\`"
+echo "          Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
-# if requested, output script file to screen
+# output script file to screen if -v option was selected
 
-if [ "$showinput" == "1" ] ; then
+if [ "$showinput" == "1" ]; then
   cat $scriptfile
   exit
 fi
 
 # output info to screen
 
-if [ "$queue" != "none" ] ; then
+if [ "$queue" != "none" ]; then
   echo "         Input file:$in"
   echo "         Executable:$exe"
+  if [ "$OPENMPI_PATH" != "" ]; then
+    echo "            OpenMPI:$OPENMPI_PATH"
+  fi
+
+# output currently loaded modules and modules when fds was built if the
+# 1) -C option was selected and 2) currently loaded modules and fds loaded modules are diffent
+  if [ "$FDS_MODULE_OPTION" == "" ]; then
+    if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
+      if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
+        echo "  Modules(when run):$CURRENT_LOADED_MODULES"
+        echo "Modules(when built):$FDS_LOADED_MODULES"
+        MODULES_OUT=1
+      fi
+    fi
+  fi
+  
+# otherwise output modules used when fds is run  
+  if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
+    echo "            Modules:$MODULES"
+  fi
   echo "              Queue:$queue"
   echo "              Nodes:$nodes"
   echo "          Processes:$nmpi_processes"
@@ -567,7 +647,8 @@ fi
 
 chmod +x $scriptfile
 $QSUB $scriptfile
-if [ "$queue" != "none" ] ; then
+if [ "$queue" != "none" ]; then
+  cat $scriptfile > $scriptlog
+  echo "#$QSUB $scriptfile" >> $scriptlog
   rm $scriptfile
 fi
-
