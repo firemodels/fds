@@ -7830,10 +7830,9 @@ To include the irritant effect of a gas not listed in the table, you should spec
 property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
-use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point
-measurement.
+use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point measurement.
 
-In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as the example below:
+In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as in the example below:
  
 \begin{lstlisting}
 &SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE' /
