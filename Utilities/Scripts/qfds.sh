@@ -6,7 +6,14 @@ FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
-if [ "$RESOURCE_MANAGER" != "SLURM" ]; then
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+  if [ "$SLURM_MEM" != "" ]; then
+    SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
+  fi
+  if [ "$SLURM_MEMPERCPU" != "" ]; then
+    SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
+  fi
+else
   RESOURCE_MANAGER="TORQUE"
 fi
 OMPPLACES=
@@ -531,6 +538,7 @@ if [ "$queue" != "none" ]; then
 #SBATCH -n $nmpi_processes
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
+$SLURM_MEM
 EOF
   else
     cat << EOF >> $scriptfile
