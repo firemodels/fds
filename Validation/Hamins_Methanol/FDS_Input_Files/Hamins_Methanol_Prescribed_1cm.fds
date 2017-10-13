@@ -1,4 +1,4 @@
-&HEAD CHID='Hamins_Methanol_Prescribed_1cm', TITLE='NIST 30 cm Methanol Pool Fire'
+&HEAD CHID='Hamins_Methanol_Prescribed_1cm', TITLE='NIST 30 cm Methanol Pool Fire'/
 
 &MESH XB=-0.32,0,-0.32,0,0,0.32,IJK=32,32,32, MULT_ID='ARRAY'/
 &MULT ID='ARRAY', DX=0.32,DY=0.32,DZ=0.32,I_UPPER=1,J_UPPER=1,K_UPPER=3/ 16 meshes
