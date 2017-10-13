@@ -4503,7 +4503,7 @@ CONTAINS
          TIME_DELAY    = 0.0_EB
          GLOBAL        = .TRUE.
          PROB          = 0.0_EB
-         PRE_EVAC_DIST = -1
+         PRE_EVAC_DIST = -1 ! If pre dist given on EDEV, override evac/pers values
          PRE_MEAN      = 0.0_EB
          PRE_PARA      = 0.0_EB
          PRE_PARA2     = 0.0_EB
@@ -4523,6 +4523,7 @@ CONTAINS
          EDV%GLOBAL     = GLOBAL
          EDV%TIME_DELAY = TIME_DELAY
          EDV%PROB       = MIN(1.0_EB,MAX(0.0_EB,PROB))
+         EDV%I_pre_dist = PRE_EVAC_DIST
          EDV%Tpre_mean  = PRE_MEAN
          EDV%Tpre_para  = PRE_PARA
          EDV%Tpre_para2 = PRE_PARA2
@@ -8206,9 +8207,14 @@ CONTAINS
                       KK = EDV%INPUT_DEVC_INDEX(N)
                       IF (EVAC_DEVICES(KK)%T_Change <= T .AND. EVAC_DEVICES(KK)%CURRENT .AND. &
                            EVAC_DEVICES(KK)%USE_NOW) THEN
-                         CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
-                              EDV%Tpre_para2,TPRE)
-                         IF (STOP_STATUS>NO_STOP) RETURN
+
+                         IF (EDV%i_pre_dist > -1) THEN
+                            CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
+                                 EDV%Tpre_para2,TPRE)
+                            IF (STOP_STATUS>NO_STOP) RETURN
+                         ELSE
+                            TPRE = HR%TPRE ! Use evac/pers namelist reaction times
+                         END IF
                          HR%DETECT1 = IBSET(HR%DETECT1,2)  ! Detected by some device, bit 2
                          IF (T+TPRE < HR%TDET+HR%TPRE) THEN
                             WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A,F6.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
