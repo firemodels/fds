@@ -20,10 +20,15 @@ OMPPLACES=
 OMPPROCBIND=
 HELP=
 FDS_MODULE_OPTION=1
+
 ncores=8
 if [ "`uname`" != "Darwin" ]; then
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
+if [ "$NCORES_COMPUTENODE" != "" ]; then
+  ncores=$NCORES_COMPUTENODE
+fi
+
 MPIRUN=
 ABORTRUN=n
 DB=
