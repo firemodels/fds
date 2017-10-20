@@ -2492,7 +2492,7 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 
 
 
-\section{Radiation Attenuation by Particles (\texorpdfstring{\textct{part\_attenuation}}{part\_attenuation}) }
+\section{Radiation Attenuation by Scattering Particles (\texorpdfstring{\textct{part\_attenuation}}{part\_attenuation}) }
 \label{part_attenuation}
 
 This case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles. In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall that is opposite the hot wall. In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with a density of 1,000~\si{kg/m^3} are placed inside the cube. Five different cases are computed. The reference case contains no particles. The four other cases contain transparent particles, water droplets, fuel droplets, and opaque particles. Different methods to specify the refractive index are tested. For water and fuel droplets, the FDS internal tables are used. For transparent particles, the refractive index is $\hbox{m} = 1.0+0\,i$. For opaque particles, the refractive index is $\hbox{m} = 1.5+0.5 \,i$. The resulting heat fluxes are plotted in Fig.~\ref{part_attenuation_figure}. The transparent particles do not attenuate the radiation, and the relatively opaque particles give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
@@ -2504,6 +2504,32 @@ This case also demonstrates the finite convergence rate of the radiation calcula
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/part_attenuation}
 \caption[Radiation attenuation by Lagrangian particles]{Attenuation of thermal radiation by four different classes of Lagrangian particles.}
 \label{part_attenuation_figure}
+\end{figure}
+
+
+\subsection{Radiation Attenuation by Non-Scattering Particles (\texorpdfstring{\textct{radiation\_gas-veg\_consistency}}{radiation\_gas-veg\_consistency})}
+\label{radiation_gas-veg_consistency}
+
+Relatively large solid particles, like idealized vegetation, act as opaque, non-scattering absorbers of thermal radiation. For a cloud of particles contained within a region $\Omega$ with volume $V$, the absorption coefficient is taken to be
+\be 
+   \kappa_{\rm p} = \sum_{m \in \Omega} \frac{A_{{\rm p},m}}{4 \, V} 
+\ee
+where $A_{{\rm p},m}$ is the surface area of particle $m$. For this test case, the space between two infinitely wide parallel plates, 1~m apart, is filled with either a gas with constant absorption coefficient, $\kappa=5.04$~m$^{-1}$, or a uniform distribution of mondisperse solid spheres of radius 0.7614~mm and density 514~kg/m$^3$ such that the total mass of spheres per unit volume is $m'''=2.63$~kg/m$^3$. In the simulation, only one particle per grid cell is used to represent all the particles in that cell. The effective absorption coefficient can be calculated:
+\be
+   N_{\rm p} = \frac{ m''' \, V }{m_{\rm p}} \quad ; \quad \kappa_{\rm p} = N_{\rm p} \frac{A_{{\rm p},m}}{4 \, V} = 5.04 \; \hbox{m}^{-1}
+\ee
+Here, $N_{\rm p}$ is the actual number of spheres represented by the single particle within a grid cell that is 10~cm on each side. 
+
+Figure~\ref{fig_radiation_gas-veg_consistency} displays the radiative heat flux at various distances from the hot plate, demonstrating that the cloud of particles act the same way as a gas with constant absorption coefficient.
+
+\begin{figure}[!ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_veg}
+\end{tabular*}
+\caption[The {\ct radiation\_gas-veg\_consistency} test cases]{Heat flux at various distances from an infinitely wide hot plate where the radiation is attenuated by either a gas with constant absorption coefficient (left) or a cloud of mondisperse, non-scattering spheres (right).}
+\label{fig_radiation_gas-veg_consistency}
 \end{figure}
 
 
@@ -3694,18 +3720,18 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
 \label{eq:sphere}
-\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]  
+\frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]
 \end{equation}
 where $k$ is the thermal conductivity and $\alpha$ is the thermal diffusivity.  The initial and boundary conditions are
 \begin{equation}
 \label{eq:sphere_int}
 \left. T  \right|_{t=0} =T_0 \qquad; \qquad \left. T \right|_{r=a} = T_0 \qquad; \qquad \left. \frac{\partial T}{\partial r} \right|_{r=0}=0
 \end{equation}
-where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):  
+where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):
 \begin{equation}
 \label{eq:sphere_sol}
 T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
-\end{equation} 
+\end{equation}
 
 The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsius}. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case\footnote{The reason for displaying the medium resolution image is that the high resolution case is run with multiple meshes and the overlap of the slice files shows mesh artifacts.} (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
 
@@ -3717,7 +3743,7 @@ The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsiu
 \end{tabular*}
 
 \caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s for $n=51$ cells across diameter. (Right) A comparison between the analytical and numerical solution for $n=75$ cells across diameter.}
-\label{fig:ht3d_sphere_time} 
+\label{fig:ht3d_sphere_time}
 \end{figure}
 
 \begin{figure}[ht]
@@ -3725,8 +3751,8 @@ The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsiu
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
  & \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
 \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2}  \\
-\end{tabular*} 
- 
+\end{tabular*}
+
 \caption[The \textct{ht3d\_sphere} test cases]{L1 (left) and L2 (right) norm errors in temperature for the convergence study with different cell numbers [75, 51, 25] from left to right. The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.}
 \label{fig:ht3d_sphere_conv}
 \end{figure}
@@ -4404,13 +4430,27 @@ Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particl
 \be
    C_{\rm d} = 10 \, \frac{0.6 + 0.4 \, \RE^{0.8}}{\RE} \approx 1.55 \quad ; \quad \RE = \frac{\rho \, u_0 \, D}{\mu_{\rm air}} \approx 132.9
 \ee
-The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s). The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
+The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s).
+
+\subsubsection{Conventional Notation} 
+
+The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
 \be
-   \Delta p=-\frac{1}{2} \rho \frac{n_{\rm p} \, C_{\rm d} \, A_{\rm c} \, u_0^2} {A} = -18.88 \; {\rm Pa}  \quad ; \quad n_{\rm p}=\frac{m''' \, V}{\pi \, r^2 \, L \, \rho_{\rm p}} \approx 254648
+   \Delta p=-\frac{1}{2} \rho \frac{n_{\rm p} \, C_{\rm d} \, A_{\rm c} \, u_0^2} {A} \approx -18.9 \; {\rm Pa}  \quad ; \quad n_{\rm p}=\frac{m''' \, V}{\pi \, r^2 \, L \, \rho_{\rm p}} \approx 254648  \label{pressure_drop_1}
 \ee
 where $A$ is the 1~m$^2$ cross-sectional area of the duct, $A_{\rm c}=LD$ is the cross sectional area of the cylindrical particle, and $\rho=1.196$~kg/m$^3$ is the density of air. The number of actual pine needles within the volume, $n_{\rm p}$, is the mass per unit volume, $m'''=2$~kg/m$^3$, times the volume, $V=1$~m$^3$, divided by the mass of an individual pine needle. The density of the needle is $\rho_{\rm p}=500$~kg/m$^3$. Comparisons of computed and analytical pressure drops are shown in the left plot of Fig.~\ref{vegetation_drag_fig}. Differences between the ideal and computed results are due to the fact that the air velocity is not exactly 2~m/s within the volume filled with the particles. In particular, the duct filled randomly with particles exhibits the greatest deviation from the ideal because the velocity does not remain uniform within the volume.
 
-Using this same basic configuration, a second test is performed where the cylindrical particles now exert no drag force on the air flow, but instead generate additional air at a rate of 0.1~kg/(m$^2 \cdot$s). The surface area of each of the 254648 particles is $6.28 \times 10^{-5}$~m$^2$, resulting in a total air injection rate of $\dot{m}=1.6$~kg/s. The momentum equation becomes one-dimensional and time-independent:
+\subsubsection{Notation used by the Wildland Fire Community}
+
+The notation used in the previous section is inconvenient when characterizing the drag force exerted by actual vegetation that cannot be assumed to be perfect spheres or cylinders. Instead, Eq.~(\ref{pressure_drop_1}) can be rewritten as follows:
+\be
+   \Delta p=-\frac{L}{2} \rho \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, u_0^2 \approx -18.9 \; {\rm Pa}  \label{pressure_drop_2}
+\ee
+Here, $C_{\rm s}$ is the ratio of the particle's cross sectional area to surface area, which is approximately $1/\pi$ for objects that are cylindrical in shape. $\beta$ is the packing ratio, which is the ratio of the volume occupied by the solid particles to the overall volume of particle-laden region; 0.004 in this case. $\sigma$ is the surface to volume ratio of an individual particle; $2/r$ for a cylinder. 
+
+\subsubsection{Pressure Drop due to Mass-Generating Particles}
+
+Using this same basic configuration, another test is performed where the cylindrical particles now exert no drag force on the air flow, but instead generate additional air at a rate of 0.1~kg/(m$^2 \cdot$s). The surface area of each of the 254648 particles is $6.28 \times 10^{-5}$~m$^2$, resulting in a total air injection rate of $\dot{m}=1.6$~kg/s. The momentum equation becomes one-dimensional and time-independent:
 \be
    \frac{\d}{\d x} \left( \frac{p}{\rho} + \frac{u^2}{2} \right) = - \frac{1}{\rho} \frac{\dot{m}}{V} \, u  \label{simmom}
 \ee
@@ -4426,6 +4466,7 @@ The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} f
 \caption[The {\ct vegetation\_drag} test cases]{Pressure drop in duct filled with pine needles for three different particle insertion methods.}
 \label{vegetation_drag_fig}
 \end{figure}
+
 
 
 \subsection{Mesh Screen in a Duct (\texorpdfstring{\textct{screen\_drag}}{screen\_drag})}
@@ -5140,228 +5181,11 @@ h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\
 %
 %\newpage
 
-\clearpage
 
-\chapter{Vegetation}
 
-\section{Introduction}
 
-\section{Tests}
-\subsection{Mass conservation (\texorpdfstring{\textct{vege\_mass\_conservation}}{vege\_mass\_conservation})}
-\label{vege_mass_conservation}
-The total mass, which is the sum of fuel gas mass, water vapor mass
-and solid mass, should remain constant over time.
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/vege_mass_conservation}
-\caption[\textct{Vegetation\_vege\_mass\_conservation} test
-case.]{Total mass should remain constant over time.}
-\label{fig_vege_mass_conservation}
-\end{figure}
 
-\subsection{Radiation}
-\label{radiation_gas-veg_consistency}
-Vegetation is assumed to participate radiatively as a medium that is
-\begin{itemize}
- \item Nonscattering
- \item Optically black (no reflection)
- \item Opaque (no transmission)
-\end{itemize}
 
-With these assumptions, the thermal radiation transfer equation for a
-gray medium (no wavelength dependence) reduces to
-\be
- s \cdot \nabla I(x,s) = \kappa_{\mathrm{gas}} \left[ I_{\mathrm{b}} \left(
-   T_{\mathrm{gas}} \right) - I(x, s) \right] + \kappa_{\mathrm{veg}}
- \left[ \epsilon_{\mathrm{veg}} I_{\mathrm{b}}\left( T_{\mathrm{veg}}
-   \right) - I(x, s) \right].
-\label{eq:thermal transfer equation}
-\ee
-Equation~\ref{eq:thermal transfer equation} is used to model
-vegetation composed of one type, e.g., a fuel bed composed only of
-pine needles, by a number of researchers; see Morvan (2000)
-\cite{Morvan:2000} and Porterie (2006) \cite{Porterie:2006}.
-
-Integrating Equation~\ref{eq:thermal transfer equation} over all solid
-angles gives the equation for conservation of radiant energy.
-\be
-\nabla \cdot q_{\mathrm{r}}(x) = \kappa_{\mathrm{gas}} \left[ 4 \pi
-  I_{\mathrm{b}} \left(T_{\mathrm{gas}} \right) - U(s) \right] +
-\kappa_{\mathrm{veg}} \left[ 4 \pi I_{\mathrm{b}}
-  \left(T_{\mathrm{veg}}\right) - U(s) \right].
-\label{eq:conservation of radiant energy}
-\ee
-Here
-\begin{itemize}
- \item $s$ is a unit vector in the direction of the radiation intensity
- \item $I$ is the radiation intensity, W m$^{-2}$ sr$^{-2}$
- \item $I_{\mathrm{b}}$= $\sigma_{\mathrm{B}} T^4/\pi$ is the blackbody radiation intensity, W m$^{-2}$ sr$^{-2}$
- \item $\sigma_{\mathrm{B}} = 5.670367 \times 10^{−8}$  is the
-   Stefan-Boltzmann constant, W m$^{−2}$ K$^{−4}$
- \item $U$ is the integrated radiation intensity, W m$^{-2}$
- \item $\kappa_{\mathrm{gas}}$ is the gray gas absorption coefficient
- \item $\epsilon_{\mathrm{veg}}$ is the emissivity of vegetation, usually
-   assumed equal to 1
- \item $\kappa_{\mathrm{veg}}$ is the gray absorption coefficient of bulk vegetation
-\end{itemize}
-The structure of Equation~\ref{eq:conservation of radiant energy}
-suggests a pair of reciprocal consistency tests.  The integrated radiant energy
-computed by FDS for the case $\kappa_{\mathrm{gas}} = 1, \kappa_{\mathrm{veg}} = 0$ should equal that computed for
-$\kappa_{\mathrm{gas}} = 0, \kappa_{\mathrm{veg}} = 1$.
-
-\subsubsection{The radiant energy computed with $\kappa_{\mathrm{gas}}
-  = 1$, $\kappa_{\mathrm{veg}} = 0$ is consistent with
- the radiant energy pre-computed with $\kappa_{\mathrm{gas}} = 0$,
-$\kappa_{\mathrm{veg}} = 1$ (\texorpdfstring{\textct{radiation\_gas-veg\_consistency\_gas}}{radiation\_gas-veg\_consistency\_gas})}
-\label{radiation_gas-veg_consistency_gas}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_gas}
-\caption[\textct{Vegetation\_radiation\_veg-gas\_consistency\_gas}
-test case.]{Radiant energy computed with $\kappa_{\mathrm{gas}}
-  = 1$, $\kappa_{\mathrm{veg}} = 0$ is plotted along with end-time values
-  for the radiant energy pre-computed with  $\kappa_{\mathrm{gas}} = 0$,
-$\kappa_{\mathrm{veg}} = 1$.}
-\label{fig_radiation_gas-veg_consistency_gas}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{The radiant energy computed with $\kappa_{\mathrm{gas}}
-  = 0$, $\kappa_{\mathrm{veg}} = 1$ is consistent with
- the radiant energy pre-computed with $\kappa_{\mathrm{gas}} = 1$,
-$\kappa_{\mathrm{veg}} = 0$ (\texorpdfstring{\textct{radiation\_gas-veg\_consistency\_veg}}{radiation\_gas-veg\_consistency\_veg})}
-\label{radiation_gas-veg_consistency_veg}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas-veg_consistency_veg}
-\caption[\textct{Vegetation\_radiation\_veg-gas\_consistency\_veg} test case.]{Radiant energy computed with $\kappa_{\mathrm{gas}}
-  = 0$, $\kappa_{\mathrm{veg}} = 1$ is plotted along with end-time values
-  for the radiant energy pre-computed with  $\kappa_{\mathrm{gas}} = 1$,
-$\kappa_{\mathrm{veg}} = 0$.}
-\label{fig_radiation_gas-veg_consistency_veg}
-\end{figure}
-
-\subsection{Pressure drop  across spherical and cylindrical vegetative
-  particles in a pipe or duct}
-\label{vege_pressure-drop}
-Vegetation is idealized as solid particles dispersed in a volume
-containing the vegetation in bulk, e.g., a tree crown or shrub.
-FDS models the particles as being distributed uniformly through this
-volume; the void space is therefore isotropic. For fuels such as
-branches, this assumption may lose validity as
-the computational grid size is reduced and the fuel thus resolved at
-smaller scale.
-
-Consider a pipe or duct with frictionless walls.  Let $\overline{u}$
-represent the fluid velocity. Upstream of the vegetation bed the
-velocity is unidirectional and parallel to the pipe walls,
-$\overline{u} = (U_0, 0, 0)$.  Within the
-vegetation bed, because there is less volume to accommodate the flow,
-mass conservation demands that the fluid velocity increase.   This
-interstitial velocity $U$ is given by (see Holdich (2002) \cite{Holdich:2002})
-\be
- U = U_0/\epsilon = U_0/(1 - \beta),
-\label{eq:interstitial velocity}
-\ee
-where $\epsilon$ is the porosity of the fuel bed and $\beta$ is the
-packing ratio.  Note that if the porosity $\epsilon$ is isotropic, so
-is $U$. For the high-porosity cases we consider here, $U \approx U_0$.
-
-The expression for the drag force on a stationary, isolated solid with
-cross-sectional area $A_c$ is given by
-\be
- \overline{F_D} = \frac{1}{2} C_D A_c \rho|\overline{u}| \overline{u}.
- \label{eq:drag force}
-\ee
-In Equation~\ref{eq:drag force}, $\overline{u}$ and $\rho$ are the
-local fluid velocity and density, respectively, and $C_D$ is the
-dimensionless drag coefficient obtained from empirical correlations
-based on the particle shape and local Reynolds number.
-
-For steady flow through a pipe or duct with cross-sectional area
-$A$ in which vegetation particles are uniformly dispersed over length
-$L$ having porosity $\epsilon$, the force balance of pressure and
-drag gives
-\be
- \Delta P A \epsilon = \sum_V \overline{F_D},
- \label{eq:force balance}
-\ee
-where the sum is over all vegetation
-particles in the volume $V = A L$, and $\Delta P$ is the pressure
-drop over the distance $L$.
-
-Let $S_p$ and $V_p$ represent the surface area and volume,
-respectively, of a vegetation particle, and let $C_S = A_c/S_p$ be
-a particle shape factor constant. Expanding the RHS of
-Equation~\eqref{eq:force balance}, we find
-\be
- \Delta P A \epsilon = N_p F_D = N_p \dfrac{1}{2} \rho u^2 C_D A_c =
- N_p \dfrac{1}{2} \rho U^2 C_D C_S S_p.
- \label{eq:force balance expand}
-\ee
-By definition, $\beta = N_p V_p / A L$, and from
-Equation~\eqref{eq:interstitial velocity}, $\epsilon = 1 - \beta$.
-Dividing both sides of Equation~\eqref{eq:force balance expand} by $A L$,
-we obtain
-\be
- \Delta P / L = \dfrac{1}{2} \rho U^2 C_D C_S \sigma \beta / (1 -
- \beta),
- \label{eq:pressure drop}
-\ee
-where $\sigma = S_p/V_p$ is the surface to volume ratio of a single
-vegetation particle.
-
-\subsubsection{Pressure drop across spherical particles in steady
-  state flow through a pipe}
-\label{vege_pressure-drop_sphere_MPUV2pt0}
-\label{vege_pressure-drop_sphere_MPUV30pt0}
-We take the temperature to be 20~$^\circ$C, the density of air $\rho = 1.205$~kg/m$^3$, and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For spherical particles with radius $r_p = 0.0005$~m and density 500~kg/m$^3$, packed with a bulk density of 2~kg/m$^3$ (30~kg/m$^3$), we have
-\begin{itemize}
- \item $\sigma = 3/r_p$ = 6000 $\mathrm{m}^{-1}$
- \item $\beta = 2/500$ (or $\beta = 30/500$)
- \item $\mathrm{Re} = 6 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta)) = 132.9$
- \item $C_D = 24 (0.85 + 0.15 \mathrm{Re}^{0.687})/\mathrm{Re} = 0.933$, $1 \le \mathrm{Re} \le 1000$
- \item $C_S = 1/4$
-\end{itemize}
-and therefore $\Delta P = 13.65$ Pa (or $\Delta P = 237.66$ Pa).
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV2pt0} } &
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_sphere_MPUV30pt0} }
-   \end{tabular*}
-\caption[The \textct{vege\_pressure-drop\_sphere} test cases]
-{The pressure drop in steady state flow through a duct across 2 kg (or 30 kg) of spherical particles with radius 0.0005 m and density 500~kg/m$^3$, distributed in a volume of 1 m$^3$.}
-\label{fig_vegetation_pressure-drop_sphere}
-\end{figure}
-
-\subsubsection{Pressure drop across cylindrical particles in steady
-  state flow through a pipe}
-\label{vege_pressure-drop_cylinder_MPUV2pt0}
-\label{vege_pressure-drop_cylinder_MPUV30pt0}
-We take the temperature to be 20~$^\circ$C, the density of air $\rho = 1.205$ kg/m$^3$, and the kinematic viscosity $\nu = 15.11 \times 10^{-6}$ m$^2$/s. For cylindrical particles with radius $r_p = 0.0005$~m, length
-$L_p = 0.02$~m and density 500~kg/m$^3$, packed with a bulk density of 2~kg/m$^3$ (or 30~kg/m$^3$), we have
-\begin{itemize}
- \item $\sigma = 2/r_p$ = 4000 $\mathrm{m}^{-1}$
- \item $\beta = 2/500$ (or $\beta = 30/500$)
- \item $\mathrm{Re} = 4 U/(\nu \sigma) = 6 U_0/(\nu \sigma (1 - \beta))  = 199.3$
- \item $C_D = 10 (0.6 + 0.4 \mathrm{Re}^{0.8})/\mathrm{Re} = 0.789$,  $1 \le \mathrm{Re} \le 1000$
- \item $C_S = 1/\pi$
-\end{itemize}
-and therefore $\Delta P = 19.25$ Pa (or $\Delta P = 339.076$ Pa).
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV2pt0} } &
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/vege_pressure-drop_cylinder_MPUV30pt0} }
-   \end{tabular*}
-\caption[The \textct{vege\_pressure-drop\_cylinder} test cases]
-{The pressure drop in steady state flow through a duct across 2 kg (or 30 kg) of cylindrical particles with radius 0.0005 m, length 0.02 m and density 500 kg/m$^3$, distributed in a volume of 1 m$^3$.}
-\label{fig_vegetation_pressure-drop_cylinder}
-\end{figure}
 
 \chapter{Outputs}
 

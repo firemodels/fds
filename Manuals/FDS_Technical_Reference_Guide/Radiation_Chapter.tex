@@ -341,7 +341,7 @@ In calculations of limited spatial resolution, the source term, $I_{\rm b}$, def
 \be I_{\rm b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
     C = \min \left( 100 \; , \; \max \left[ 1 \; , \; \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \right] \right) \label{corrected_emission_source_term}
 \ee
-When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate. Note that this correction factor is bounded below by 1 and above by 100. The upper bound is arbitrary, meant to prevent spurious behavior at the start of a simulation. 
+When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate. Note that this correction factor is bounded below by 1 and above by 100. The upper bound is arbitrary, meant to prevent spurious behavior at the start of a simulation.
 
 The radiative fraction, $\chi_{\rm r}$, is a useful quantity in fire science. It is the nominal fraction of the combustion energy that is emitted as thermal radiation. For most combustibles, $\chi_{\rm r}$ is between 0.3 and 0.4~\cite{Beyler2:SFPE}. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_{\rm r}$ is interpreted as the fraction of energy radiated from the flaming region.  For a small fire with a base diameter less than approximately 1~m, the local $\chi_{\rm r}$ is approximately equal to its global counterpart. However, as the fire increases in size, the global value will typically decrease due to a net re-absorption of the thermal radiation by the increasing smoke mantle~\cite{Takahashi:1}.
 
@@ -569,10 +569,12 @@ is avoided by keeping the solid angle discretization symmetric on the $x$, $y$ a
 The connection matrix associates one incoming direction $l'$ to each mirrored direction on each wall cell.
 
 
-\section{Absorption and Scattering of Thermal Radiation by Droplets/Particles}
+\clearpage
+
+\section{Absorption and Scattering by Small Droplets and Particles}
 \label{droplet-radiation}
 
-The attenuation of thermal radiation by liquid droplets and particles is an important consideration, especially for water mist systems~\cite{Ravigururajan:1}.  Droplets and particles attenuate thermal radiation through a combination of scattering and absorption~\cite{Tuntomo:1}.  The radiation-spray interaction must therefore be solved for both the accurate prediction of the radiation field and for the particle energy balance. If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport equation becomes
+The attenuation of thermal radiation by liquid droplets and small particles is an important consideration, especially for water mist systems~\cite{Ravigururajan:1}.  Droplets and particles attenuate thermal radiation through a combination of scattering and absorption~\cite{Tuntomo:1}.  The radiation-spray interaction must therefore be solved for both the accurate prediction of the radiation field and for the particle energy balance. If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport equation becomes
 \be
 \bs \cdot \nabla I_{\la}(\bx,\bs) = -\Big[\kappa_{\rm p}(\bx,\la) + \sigma_{\rm p}(\bx,\la)\Big]
 I_{\la}(\bx,\bs) +\kappa_{\rm p}(\bx,\la) \; I_{{\rm b,p}}(\bx,\la) +
@@ -660,7 +662,7 @@ The absorption and scattering efficiencies, $Q_{\rm a}$ and $Q_{\rm s}$, and the
 
 
 
-\subsection{Heat absorbed by droplets}
+\subsection{Heat Absorbed by Droplets and Small Particles}
 
 The droplet contribution to the radiative loss term is
 \be \dot{q}'''_{\rm r} \equiv -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{droplets}) =
@@ -672,6 +674,15 @@ For each individual droplet, the radiative heating/cooling power is computed as
     \kappa_{\rm p}(\bx) \, \left[ U(\bx) - 4\pi \, I_{{\rm b,p}}(\bx) \right]
 \ee
 where $m_{\rm p}$ is the mass of the droplet and $\rho_{\rm p}(\bx)$ is the total density of droplets in the cell.
+
+
+
+\section{Absorption by Large, Non-Scattering Particles}
+
+FDS uses Lagrangian particles to represent objects that are not resolvable on the numerical grid, but are still relatively large compared to liquid droplets. For example, vegetation is modeled as a collection of large, opaque, non-scattering particles. For more discussion of the radiation absorption by large particles, see Section~\ref{rad_part_absorb}.
+
+
+
 
 
 
