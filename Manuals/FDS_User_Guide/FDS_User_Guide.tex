@@ -1602,15 +1602,12 @@ indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This
 
 
 
-
-
-
 \section{The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
 \label{info:PRES}
 
 \subsection{Parameters Related to the Solution of Poisson Equation for Pressure}
 
-FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
+FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
 
 Another limitation of the pressure solver is that at solid surfaces that are not part of the boundary of the computational domain, the pressure solver enforces a no-flux boundary condition. However, it is not perfect, and it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution.
 
@@ -1618,14 +1615,23 @@ If either the error in the normal component of the velocity at a mesh interface 
 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
+
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
-For Linux and Mac OS targets, and non overlapping meshes at same refinement level, the parameter {\ct GLMAT\_SOLVER} set to {\ct .TRUE.} allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is Intel\textsuperscript{\textregistered} MKL Pardiso for serial targets, and Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver for MPI targets. Two solution modes are defined by the logical parameter {\ct PRES\_ON\_WHOLE\_DOMAIN}: if {\ct .TRUE.} (default) the $H$ equation is solved in cells covered by obstacles as well as gas phase cells in the spirit of FDS default solver. If {\ct .FALSE.} the pressure is solved only on gas cells, employing solid boundary conditions for pressure in immersed obstacles. This method is more computationally and memory intensive than the default solver with default options, but eliminates velocity penetration errors in obstacles as well as inter-mesh boundaries.
+
+\subsection*{Optional Pressure Solver}
+
+The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping meshes at the same refinement level, the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}, which allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory.
+
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the GLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+\begin{lstlisting}
+&PRES SOLVER='GLMAT' /
+\end{lstlisting}
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the GLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1639,20 +1645,20 @@ To demonstrate how to improve the accuracy of the pressure solver, consider the 
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to a relatively small value, and one in which it is set to the default value. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_glmat}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for two different settings
-of {\ct VELOCITY\_TOLERANCE}, the default value on the left and a tighter tolerance on the right. (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the GLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies}
 \end{figure}
 
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the overall reduction in CPU time (right).
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the GLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
@@ -2586,17 +2592,15 @@ Below is an example input file section:
 
 \begin{lstlisting}
  &INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
- \end{lstlisting}
- 
-HT3d can also use internal heat source as shown in the example below:
+\end{lstlisting}
 
+{\ct HT3D} can use internal heat source as shown in the example below:
 \begin{lstlisting}
  &MATL ID='orange', .../
  &SURF ID='SPHERE', HT3D=.TRUE./
  &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
- 
-Note that you should not specify the internal heat source at the SURF line.
+Note that you should not specify the internal heat source at the {\ct SURF} line.
 
 \clearpage
 
@@ -3104,33 +3108,33 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 
 
 
-
+\clearpage
 
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
 
-Modeling the burning of real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
+The {\ct SURF} and {\ct MATL} lines describing the pyrolysis of real materials consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, you can perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
 
 This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need 4 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to whatever value appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=0} on the {\ct SURF} line. This turns off the convective heat flux from gas to surface and vice versa. The heat flux to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the {\ct SURF} line that is assigned to the solid surface.
-\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
-\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit.
-\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces.
-\item Finally, add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid is to burn away). Use these to track the condition of the solid as a function of time. In particular, make sure that the {\ct 'BURNING RATE'} is appropriate for the particular external heat flux applied. Make sure that the {\ct 'WALL TEMPERATURE'} is appropriate. Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena.
+\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need three cells in each direction ({\ct IJK=3,3,3}) for the pressure solver to function properly.
+\item On the {\ct MISC} line, set {\ct SOLID\_PHASE\_ONLY=.TRUE.} to turn off all gas phase computation and speed up the simulation.
+\item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
+\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
+\item Set an {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C, default {\ct TMPA}) and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
+\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
-Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
-
+Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
-&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2' /
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
-&TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
-&MISC Y_O2_INFTY=0.01, SOLID_PHASE_ONLY=.TRUE. /
-&REAC FUEL='METHANE' /
+&HEAD CHID='pmma_example', TITLE='Black PMMA at 50 kW/m2' /
+&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
+&TIME T_END=600., WALL_INCREMENT=1, DT=0.05 /
+&MISC SOLID_PHASE_ONLY=.TRUE. /
+&SPEC ID='METHANE' /
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
       N_REACTIONS=1
@@ -3141,7 +3145,6 @@ Below is an FDS input file that demonstrates how you can test a candidate pyroly
       SPEC_ID='METHANE'
       NU_SPEC=1.
       HEAT_OF_REACTION=870.
-      HEAT_OF_COMBUSTION=25200.
       CONDUCTIVITY = 0.20
       SPECIFIC_HEAT = 2.2
 &SURF ID='PMMA SLAB'
@@ -3149,12 +3152,11 @@ Below is an FDS input file that demonstrates how you can test a candidate pyroly
       BACKING='INSULATED'
       MATL_ID='BLACKPMMA'
       THICKNESS=0.0085
-      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
 &DUMP DT_DEVC=5. /
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='MLR' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='MASS FLUX', SPEC_ID='METHANE', ID='MF' /
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='thick' /
 &TAIL /
 \end{lstlisting}
@@ -4843,34 +4845,38 @@ Modeling suppression of a fire due to the introduction of a suppression agent li
 the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works.
 
-The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1327~\si{\degree C}. This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
+The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
 If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
-You may also specify {\ct AUTO\_IGNITION\_TEMPERATURE} on an {\ct INIT} region.  This feature is intended to be used as a pilot zone.  For example, you might use something like this for a piloted methane flame:
+\paragraph{Finding Extinction Parameters}
+
+For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT for several common fuels (listed as {\it T}(OI), for temperature at the oxygen index for diffusion flames).
+
+%If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
+%\begin{align}
+%T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
+%\end{align}
+%where
+%\begin{itemize}
+%{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
+%{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
+%{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
+%{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
+%{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
+%{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
+%\end{itemize}
+
+\subsection{Special Topic: Piloted Ignition Zone}
+
+\label{info:ignition}
+
+Since by default the AIT is 0 K, it is possible to get spurious reignition of unburned fuel when fresh air is encountered after extinction.  To prevent this from happening you need to set an AIT for the fuel on the {\ct REAC} line, as discussed above.  However, this then leads to the problem of ignition at a burner surface.  It is usually too difficult to model the ignition process from first principles.  Instead, you can use an {\ct INIT} line to mimic a piloted ignition zone. For example, you might use something like this for a piloted methane flame:
 \begin{lstlisting}
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
 &INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
-where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.
-
-\paragraph{Finding or Calculating Extinction Parameters}
-
-For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT (listed as T(LFL), for temperature at lower flammability limit) for several common fuels.
-
-If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
-\begin{align}
-T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
-\end{align}
-where
-\begin{itemize}
-{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
-{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
-{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
-{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
-{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
-{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
-\end{itemize}
+where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.  On the {\ct REAC} line you are telling FDS to use AIT = 627 \si{\degreeCelsius} throughout the domain.  Then the {\ct INIT} line takes precedence over the {\ct REAC} line within the specified region.
 
 
 
@@ -5371,7 +5377,7 @@ The total radiative loss from the computational domain is reported as a function
 \be
    \chi_{\rm r} \, \dot{q}''' > 10 \; \hbox{kW/m}^3 \label{clip}
 \ee
-Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, FDS applies a correction factor to increase the value of the source term in the radiative transport equation to compensate for the fact that flame temperatures are not resolved on relatively coarse meshes. This correction factor, by default, will only increase, not decrease, the value of the source term. You can change these two default behavior as follows. First, you can force the source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. Second, you can allow the source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
+Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, FDS applies a correction factor to increase the value of the source term in the radiative transport equation to compensate for the fact that flame temperatures are not resolved on relatively coarse meshes. This correction factor, by default, will only increase, not decrease, the value of the source term. You can change these two default behavior as follows. First, you can force the source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. Second, you can allow the source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
 
 \paragraph{Multi-fuel radiative fraction}
 
@@ -6323,14 +6329,17 @@ Many devices are fairly easy to describe, like a point measurement, with only a 
 \subsection{Sprinklers}
 \label{info:sprinklers}
 
-Here is a very simple example of a sprinkler:
+To specify one or more sprinklers, you need to specify several different groups of parameters that fall into a variety of namelist groups. For example, here is a basic sprinkler description:
 \begin{lstlisting}
+&SPEC ID='WATER VAPOR' /
+&PART ID='my droplets', DIAMETER=1000., SPEC_ID='WATER VAPOR' /
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
+      ACTIVATION_TEMPERATURE=74., OFFSET=0.10, PART_ID='my droplets', FLOW_RATE=189.3,
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'   /
+&DEVC ID='Spr-1', XYZ=22.8,19.7,7.4, PROP_ID='K-11' /
+&DEVC ID='Spr-2', XYZ=22.8,22.7,7.4, PROP_ID='K-11' /
 \end{lstlisting}
-A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
+A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
 \item[{\ct RTI}] Response Time Index in units of (m$\cdot$s)$^{1/2}$. (Default 100.)
 \item[{\ct C\_FACTOR}] Conduction Factor in units of (m/s)$^{1/2}$. (Default 0.)
@@ -6340,14 +6349,13 @@ A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {
 \item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. (Default 0.05~m)
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
-\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
+\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the {\ct ORIENTATION} of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
+\item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
 Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets.
-
-For more information about sprinklers, their activation and spray dynamics, read the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
@@ -6357,18 +6365,12 @@ For more information about sprinklers, their activation and spray dynamics, read
 
 As an example of the more advanced sprinkler options, a sprinkler with an elliptical spray pattern and uniform mass flux distribution within the spray angle is given by:
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,2) = 0.,30.,
+&PROP ... SPRAY_ANGLE(1:2,1)=0.,60., SPRAY_ANGLE(1:2,2)=0.,30.,
       SPRAY_PATTERN_SHAPE='UNIFORM' /
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
-For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in $x$ direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
+For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in the $x$ direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between a full-cone and a hollow-cone spray:
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE=0.,30. ,SPRAY_PATTERN_MU=15./
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
+&PROP ... SPRAY_ANGLE=0.,30., SPRAY_PATTERN_MU=15. /
 \end{lstlisting}
 If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} namelist group. Specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the form:
 \begin{lstlisting}
@@ -6376,13 +6378,11 @@ If a more complex spray pattern is desired than one characterized by a {\ct SPRA
 \end{lstlisting}
 where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downwards, which is why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters {\ct LON1} and {\ct LON2} are the bounds of the solid angle (also in degrees), where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  {\ct VELO} is the velocity (m/s) of the droplets at their point of insertion. {\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
-In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
+In the test case called {\ct bucket\_test\_2}, the spray consists of two jets, each with a velocity of 5~m/s and a combined flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 60$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
-      PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
-      SMOKEVIEW_ID='sprinkler_upright', PARTICLE_VELOCITY=5. /
-&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
-&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
+&PROP ... FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1' /
+&TABL ID='TABLE1', TABLE_DATA=30,31,  0,  1,5,0.2 /
+&TABL ID='TABLE1', TABLE_DATA=30,31,179,180,5,0.8 /
 \end{lstlisting}
 Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that the {\ct TABL} lines can be specified in any order. Figure~\ref{bucket_test_2_fig} verifies that the sprinkler releases 5~kg of water (1~kg/s for 5~s).
 
@@ -7493,8 +7493,7 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC}) = 0
    \label{TC}
 \ee
-where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and
-$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
 \subsection{Heat Flux}
@@ -7776,7 +7775,7 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
     \right) \, \d t
 \ee
 where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
-the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
+the denominators are the exposure doses of respective irritants predicted to be lethal to half the population.
 The lethal exposure doses~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table,
 you should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
 \begin{table}[ht]
@@ -7814,14 +7813,22 @@ depends upon the immediate concentrations of irritants. The overall irritant con
     \frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} +
     \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
 \ee
-where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants
+where the nominators are the instantaneous concentrations of each irritant and the denominators are the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in Table~\ref{tbl:FIC}.
 To include the irritant effect of a gas not listed in the table, you should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
-use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point
-measurement.
+use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point measurement.
+
+In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as in the example below:
+
+\begin{lstlisting}
+&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE' /
+&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE' /
+&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'OXYGEN' /
+\end{lstlisting}
+
 
 \subsection{Spatially-Integrated Outputs}
 \label{info:statistics}
@@ -8142,7 +8149,7 @@ TKE must be output via {\ct DEVC} for each velocity component and its mean:
 &DEVC ..., QUANTITY='V-VELOCITY' /
 &DEVC ..., QUANTITY='V-VELOCITY', STATISTICS='MEAN' /
 &DEVC ..., QUANTITY='W-VELOCITY' /
-&DEVC ..., QUANTITY='V-VELOCITY', STATISTICS='MEAN' /
+&DEVC ..., QUANTITY='W-VELOCITY', STATISTICS='MEAN' /
 \end{lstlisting}
 You must post-process these outputs to obtain TKE.
 
@@ -9191,7 +9198,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
-%{\ct NORTHANGLE}                                & Real          &                                                       &\si{\degree}   & {\ct -190.0}      \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
@@ -9223,7 +9229,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-%{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
@@ -9408,13 +9413,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{info:PRES}           &               &                           \\ \hline
 {\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
+{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
 {\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       &                           \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
+{\ct SOLVER}                        & Character     & Section~\ref{info:PRES}           &               & {\ct 'FFT'}               \\ \hline
 {\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
-{\ct GLMAT\_SOLVER}                 & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,

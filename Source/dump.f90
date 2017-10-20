@@ -1482,14 +1482,6 @@ ELSE
    WRITE(LU_SMV,'(1X,I1)') 0
 ENDIF
 
-! Write out direction angle of true north North with respect to the y axis
-! this is intended for outdoor cases derived from map data
-
-IF (NORTHANGLE>-185.0_EB) THEN
-   WRITE(LU_SMV,'(/A)') 'NORTHANGLE'
-   WRITE(LU_SMV,'(F13.5)') NORTHANGLE
-ENDIF
-
 ! Write out GVEC
 
 WRITE(LU_SMV,'(/A)') 'GVEC'
@@ -6358,8 +6350,8 @@ IND_SELECT: SELECT CASE(IND)
             ENDIF
           ENDDO
        ENDDO
-       IF (ZZ_FUEL == 0._EB .OR. ZZ_OX == 0._EB .OR. Q(II,JJ,KK) == 0._EB) GAS_PHASE_OUTPUT_RES = -1._EB
-       IF (ZZ_FUEL > ZZ_MIN_GLOBAL .AND. ZZ_OX > ZZ_MIN_GLOBAL .AND. Q(II,JJ,KK) == 0._EB) GAS_PHASE_OUTPUT_RES = 1._EB
+       IF (ZZ_FUEL < TWO_EPSILON_EB .OR. ZZ_OX < TWO_EPSILON_EB .OR. Q(II,JJ,KK) < TWO_EPSILON_EB) GAS_PHASE_OUTPUT_RES = -1._EB
+       IF (ZZ_FUEL > ZZ_MIN_GLOBAL .AND. ZZ_OX > ZZ_MIN_GLOBAL .AND. Q(II,JJ,KK) < TWO_EPSILON_EB) GAS_PHASE_OUTPUT_RES = 1._EB
 
    CASE(131) ! CHEMISTRY SUBITERATIONS
       GAS_PHASE_OUTPUT_RES = CHEM_SUBIT(II,JJ,KK)

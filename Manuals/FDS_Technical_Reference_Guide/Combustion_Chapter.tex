@@ -158,26 +158,31 @@ FDS uses simple empirical rules---which ignore strain---to predict local extinct
 \paragraph{Basic Extinction Model}
 \begin{enumerate}
 \item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
-\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture are defined as follows (take 1 kg as a basis; the hat $\hat{\;}$ indicates a reactant mixture value):
+\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture (denote with a hat) are defined as follows (take 1 kg as a basis):
 \begin{align}
-\label{eq:dzf} \hat{Z}_{\rm F} &= \min(Z_{\rm F},Z_{\rm A}/s) \\
-\label{eq:dza} \hat{Z}_{\rm A} &= s \, \hat{Z}_{\rm F}
+\label{eq:dzf} \hat{Z}_{\rm F}^0 &= Z_{\rm F}^0  && \mbox{(stoichiometric Fuel + excess Fuel)} \\
+\label{eq:dza} \hat{Z}_{\rm A}^0 &= s \, \min(Z_{\rm F}^0,Z_{\rm A}^0/s) && \mbox{(stoichiometric Air)}
 \end{align}
-The stoichiometric mixture value for the product diluents is defined such that the following ratio holds:
+The reactant mixture value for the product diluents (denoted as ``P'' but may include extra inert agents such as argon or water vapor from droplet evaporation) is defined such that the following ratio holds:
 \begin{align}
-\label{eq:dzp} \frac{\hat{Z}_{\rm P}}{\hat{Z}_{\rm A}} &= \frac{\overbrace{Z_{\rm F} - \hat{Z}_{\rm F}}^{\mbox{\small unburned fuel}} + \;\; Z_{\rm P}}{Z_{\rm A}}
+\label{eq:dzp} \frac{\hat{Z}_{\rm P}^0}{Z_{\rm P}^0} &= \frac{\hat{Z}_{\rm A}^0}{Z_{\rm A}^0}
 \end{align}
-In other words, within the reactant mixture we lump unburned fuel in with any products or diluents and keep the ratio of diluent to air constant.
+The effect of Eq.~(\ref{eq:dzp}) is that excess fuel acts as a diluent, but excess air does \emph{not}.  Hence, a large computational cell which is mostly air with a small amount of fuel (and no additional diluents) is likely to burn, whereas a cell which is mostly fuel with very little air will not burn.
 
-Another way to say this is that excess fuel acts as a diluent, but excess air does \emph{not}.  Hence, a large computational cell which is mostly air with a small amount of fuel (and no additional diluents) is likely to burn, whereas a cell which is mostly fuel with very little air will not burn.
+Let $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ denote the species mass fractions \emph{after} reaction. The post-reaction mixture does not contain Air but does contain the excess Fuel and diluents from the pre-reaction mixture as well as stoichiometric products of combustion:
+\begin{align}
+\label{eq:dzfbar} \hat{Z}_{\rm F} &= Z_{\rm F} \\
+\label{eq:dzabar} \hat{Z}_{\rm A} &= 0 \\
+\label{eq:dzpbar} \hat{Z}_{\rm P} &= \hat{Z}_{\rm P}^0 + (Z_{\rm P} - Z_{\rm P}^0)
+\end{align}
 
-Once the local reactant mixture has been determined, the extinction criterion is given by
+Once the local pre- and post-reaction mixtures have been determined, the extinction criterion is given by
 \begin{align}
 \label{eq:extinction}
-\hat{Z}_{\rm F} \, (h_{\rm F}(T) + \Delta h_{\rm c,F}) + \hat{Z}_{\rm A} \, h_{\rm A}(T) + \hat{Z}_{\rm P} \, h_{\rm P}(T) <
-\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm A} \, h_{\rm A}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
+\hat{Z}_{\rm F}^0 \, h_{\rm F}(T) + \hat{Z}_{\rm A}^0 \, h_{\rm A}(T) + \hat{Z}_{\rm P}^0 \, h_{\rm P}(T) <
+\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
 \end{align}
-where $T$ is the initial mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the heat of combustion is not sufficient to raise the product mixture above its critical flame temperature.
+where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy.  Therefore, the left-hand-side includes the combustion heat release.  If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature.
 
 \end{enumerate}
 
