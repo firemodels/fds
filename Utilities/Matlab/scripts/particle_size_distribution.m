@@ -15,8 +15,8 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 D_v50 = 1;
 
-gamma = 2.4
-sigma = 1.15/gamma
+gamma = 2.4;
+sigma = 1.15/gamma;
 
 N = 100;
 D = linspace(0,3,N);
