@@ -5462,7 +5462,7 @@ Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, F
 
 \paragraph{Multi-fuel radiative fraction}
 
-If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
+If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as  a reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
 
 \paragraph{Time variation of radiative fraction}
 
@@ -6518,7 +6518,7 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 
 \subsubsection{Example Case: A Beam Detector}
 
-A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{1/m} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
 
 \begin{figure}[ht]
 \begin{center}
@@ -8875,7 +8875,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
-{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)                 \\ \hline
+{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)  \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
@@ -9175,6 +9175,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
+\newpage
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9364,7 +9365,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-
+\newpage
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9611,7 +9612,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
+\newpage
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
 
@@ -9845,7 +9846,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
+\newpage
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
