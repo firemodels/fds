@@ -2507,18 +2507,18 @@ This case also demonstrates the finite convergence rate of the radiation calcula
 \end{figure}
 
 
-\subsection{Radiation Attenuation by Non-Scattering Particles (\texorpdfstring{\textct{radiation\_gas-veg\_consistency}}{radiation\_gas-veg\_consistency})}
+\section{Radiation Attenuation by Non-Scattering Particles \\ (\texorpdfstring{\textct{radiation\_gas-veg\_consistency}}{radiation\_gas-veg\_consistency})}
 \label{radiation_gas-veg_consistency}
 
 Relatively large solid particles, like idealized vegetation, act as opaque, non-scattering absorbers of thermal radiation. For a cloud of particles contained within a region $\Omega$ with volume $V$, the absorption coefficient is taken to be
-\be 
-   \kappa_{\rm p} = \sum_{m \in \Omega} \frac{A_{{\rm p},m}}{4 \, V} 
-\ee
-where $A_{{\rm p},m}$ is the surface area of particle $m$. For this test case, the space between two infinitely wide parallel plates, 1~m apart, is filled with either a gas with constant absorption coefficient, $\kappa=5.04$~m$^{-1}$, or a uniform distribution of mondisperse solid spheres of radius 0.7614~mm and density 514~kg/m$^3$ such that the total mass of spheres per unit volume is $m'''=2.63$~kg/m$^3$. In the simulation, only one particle per grid cell is used to represent all the particles in that cell. The effective absorption coefficient can be calculated:
 \be
-   N_{\rm p} = \frac{ m''' \, V }{m_{\rm p}} \quad ; \quad \kappa_{\rm p} = N_{\rm p} \frac{A_{{\rm p},m}}{4 \, V} = 5.04 \; \hbox{m}^{-1}
+   \kappa_{\rm p} = \sum_{m \in \Omega} \frac{A_{{\rm s},m}}{4 \, V}
 \ee
-Here, $N_{\rm p}$ is the actual number of spheres represented by the single particle within a grid cell that is 10~cm on each side. 
+where $A_{{\rm s},m}$ is the surface area of particle $m$. For this test case, the space between two infinitely wide parallel plates, 1~m apart, is filled with either a gas with constant absorption coefficient, $\kappa=5.04$~m$^{-1}$, or a uniform distribution of mondisperse solid spheres of radius 0.7614~mm and density 514~kg/m$^3$ such that the total mass of spheres per unit volume is $m'''=2.63$~kg/m$^3$. In the simulation, only one particle per grid cell is used to represent all the particles in that cell. The effective absorption coefficient can be calculated:
+\be
+   N_{\rm p} = \frac{ m''' \, V }{m_{\rm p}} \quad ; \quad \kappa_{\rm p} = N_{\rm p} \frac{A_{{\rm s},m}}{4 \, V} = 5.04 \; \hbox{m}^{-1}
+\ee
+Here, $N_{\rm p}$ is the actual number of spheres represented by the single particle within a grid cell that is 10~cm on each side.
 
 Figure~\ref{fig_radiation_gas-veg_consistency} displays the radiative heat flux at various distances from the hot plate, demonstrating that the cloud of particles act the same way as a gas with constant absorption coefficient.
 
@@ -4432,7 +4432,7 @@ Vegetation (leaves, grasses, etc.) is sometimes modeled using Lagrangian particl
 \ee
 The viscosity of air at 20~$^\circ$C is $\mu_{\rm air}=1.8\times 10^{-5}$~kg/(m$\cdot$s).
 
-\subsubsection{Conventional Notation} 
+\subsubsection{Conventional Notation}
 
 The pressure drop in each duct is expected to the be same, regardless of how the particles are inserted:
 \be
@@ -4446,7 +4446,7 @@ The notation used in the previous section is inconvenient when characterizing th
 \be
    \Delta p=-\frac{L}{2} \rho \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, u_0^2 \approx -18.9 \; {\rm Pa}  \label{pressure_drop_2}
 \ee
-Here, $C_{\rm s}$ is the ratio of the particle's cross sectional area to surface area, which is approximately $1/\pi$ for objects that are cylindrical in shape. $\beta$ is the packing ratio, which is the ratio of the volume occupied by the solid particles to the overall volume of particle-laden region; 0.004 in this case. $\sigma$ is the surface to volume ratio of an individual particle; $2/r$ for a cylinder. 
+Here, $C_{\rm s}$ is the ratio of the particle's cross sectional area to surface area, which is approximately $1/\pi$ for objects that are cylindrical in shape. $\beta$ is the packing ratio, which is the ratio of the volume occupied by the solid particles to the overall volume of particle-laden region; 0.004 in this case. $\sigma$ is the surface to volume ratio of an individual particle; $2/r$ for a cylinder.
 
 \subsubsection{Pressure Drop due to Mass-Generating Particles}
 
