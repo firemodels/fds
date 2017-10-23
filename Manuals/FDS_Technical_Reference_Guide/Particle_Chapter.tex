@@ -93,13 +93,13 @@ An alternative approach to drag reduction was provided by Prahl et al.~\cite{Pra
 \newpage
 \section{Liquid Droplet Size Distribution}
 
-The cumulative volume distribution for a liquid spray is represented by a combination of lognormal and Rosin-Rammler distributions~\cite{Chan:1}:
+The cumulative volume distribution for a liquid spray is represented by a combination of log-normal and Rosin-Rammler distributions~\cite{Chan:1}:
 \be F_{\rm v}(D) = \left\{ \begin{array}{ll}
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^D} \, \frac{1}{\sigma\, D'} \,
    \exp \left( -\frac{[\ln(D'/D_{\rm v,0.5})]^2}{2\sigma^2} \right) \; \d D'            & (D \le D_{\rm v,0.5}) \\ [0.2in]
-   1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D_{\rm v,0.5} < D)
+   1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)           & (D > D_{\rm v,0.5})
    \end{array} \right.  \ee
-where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.6, respectively.\footnote{The Rosin-Rammler and lognormal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
+where $D_{\rm v,0.5}$ is the median volumetric droplet diameter (i.e., half the mass is carried by droplets with diameters of $D_{\rm v,0.5}$ or less), and $\gamma$ and $\sigma$ are empirical constants equal to approximately 2.4 and 0.48, respectively.\footnote{The Rosin-Rammler and log-normal distributions are smoothly joined if $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ .} Alternatively, the user may specify any form of size distribution using the tabulated input data.
 
 The median droplet diameter is a function of the sprinkler orifice diameter, operating pressure, and geometry. Research at Factory Mutual has yielded a correlation for the median droplet diameter~\cite{Yu:2}
 \be
@@ -122,14 +122,14 @@ The droplet diameters are randomly chosen from the given size distribution. The 
    F_{\rm n}(D) = \int_0^D \frac{F'_{\rm v}(D')}{D'^3} \, \d D'  \left/ \int_0^\infty \, \frac{F'_{\rm v}(D')}{D'^3}
      \, \d D' \right. \quad ; \quad F_{\rm v}' \equiv \frac{\d F_{\rm v}}{\d D}
 \ee
-Figure~\ref{rosin} displays the Rosin-Rammler/lognormal function and the resulting cumulative number fraction.
+Figure~\ref{rosin} displays the Rosin-Rammler/log-normal function and the resulting cumulative number fraction.
 \begin{figure}[t]
 \begin{center}
-\includegraphics[width=4.5in]{FIGURES/rosin}
+\includegraphics[width=4.5in]{SCRIPT_FIGURES/particle_size_distribution}
 \caption[Liquid droplet size distribution]{Cumulative Volume Fraction and Cumulative Number
 Fraction functions of the droplet size distribution from
 a typical industrial-scale sprinkler. The median volumetric diameter, $D_{\rm v,0.5}$, is
-1~mm, $\sigma=0.6$ and $\gamma=2.4$.}
+1~mm, $\sigma=0.48$ and $\gamma=2.4$.}
 \label{rosin}
 \end{center}
 \end{figure}
