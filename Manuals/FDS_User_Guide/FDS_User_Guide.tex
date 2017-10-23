@@ -194,7 +194,7 @@ Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusett
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow with an emphasis on smoke and heat transport from fires. The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
 
-Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate User's Guide~\cite{Smokeview_Users_Guide}.
+Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate user's guide~\cite{Smokeview_Users_Guide}.
 
 
 \section{Features of FDS}
@@ -440,12 +440,11 @@ The MPI version of FDS requires shared disk access to each computer where cases 
 
 \section{Computer Operating System (OS) and Software Requirements}
 
-The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and various implementations of Unix/Linux.
+The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and Linux.
 \begin{description}
 \item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
 \item[{\bf Mac OS X}] Pre-compiled executables are installed into a user selected directory using an installation script.  Mac OS~X 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
-\item[{\bf Unix}] There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies equally as well to Unix.
 \end{description}
 
 \section{Installation Testing}
@@ -695,7 +694,7 @@ Along with the FDS User's Guide, there are resources available on the Internet. 
 
 \section{The Version Number}
 
-If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like \fdsversion, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
 
 Get in the habit of checking the version number of your executable, periodically checking for new releases which might already have addressed your problem, and telling us what version you are using if you report a problem.
 
@@ -795,7 +794,7 @@ To enter more than one mass fraction, use this notation:
 \begin{lstlisting}
 MATL_MASS_FRACTION(1,1:3)=0.5,0.4,0.1
 \end{lstlisting}
-which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array element 1 through 3, inclusive.
+which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array elements 1 through 3, inclusive.
 
 Note that character strings can be enclosed either by single or double quotation marks. Be careful not to create the input file by pasting text from something other than a simple text editor, in which case the punctuation marks may not transfer properly into the text file.
 
@@ -816,7 +815,7 @@ To ensure that FDS reads the entire input file, add
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
-Another general rule of thumb when writing input files is to only add parameters that make change from the
+Another general rule of thumb when writing input files is to only add parameters that make a change from the
 default value. That way, you can more easily distinguish between what you want and what FDS wants.
 Add comments liberally to the file, so long as
 these comments do not fall within the namelist records.
@@ -3406,7 +3405,7 @@ where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is
 
 The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
 In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
-In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.}\footnote{This parameter sets the wall stress to zero (removes viscous friction).  It is \emph{not} equivalent to the {\ct SAWTOOTH=.FALSE.} functionality from versions of FDS prior to Version 6.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The ``sand grain'' surface roughness\footnote{Note the \emph{sand grain} roughness, $s$, is different than the \emph{aerodynamic} roughness, $z_0$, used in atmospheric flows (see Sec.~\ref{info:WIND}).} (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.}\footnote{This parameter sets the wall stress to zero (removes viscous friction).  It is \emph{not} equivalent to the {\ct SAWTOOTH=.FALSE.} functionality from versions of FDS prior to Version 6.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
 
 
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
@@ -4067,9 +4066,9 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 \chapter{Atmospheric Effects and Wind}
 
-This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
+This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
 
-There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
 
 
 \section{Wind Method 1: Monin-Obukhov Similarity}
@@ -4093,7 +4092,7 @@ In the event that these various parameters are not reported or known, they can b
 \be
    u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
 \ee
-The Obukhov length, $L$, can be chosen from Table~\ref{OL}.
+The Obukhov length, $L$, can be chosen from Table~\ref{OL}. Suggested values of the aerodynamic roughness length\footnote{Note that \emph{aerodynamic} roughness, $z_0$, is not the same as \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}.}, $z_0$, are given in Table~\ref{z0}.
 \begin{table}[!ht]
 \centering
 \caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
@@ -4107,7 +4106,7 @@ Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
 \end{tabular}
 \label{OL}
 \end{table}
-Suggested values of the aerodynamic roughness length, $z_0$, are given in Table~\ref{z0}.
+
 \begin{table}[!ht]
 \centering
 \caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
@@ -4125,7 +4124,7 @@ $z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
 \label{z0}
 \end{table}
 
-\noindent The scaling potential temperature, $\theta_*$, can be obtained from the relation:
+The scaling potential temperature, $\theta_*$, can be obtained from the relation:
 \be
    \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
 \ee
