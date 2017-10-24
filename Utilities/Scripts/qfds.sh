@@ -296,7 +296,9 @@ else
     DB=_dv
   fi
   if [ "$use_intel_mpi" == "1" ]; then
-    exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
+    if [ "$exe" != "" ]; then
+      exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
+    fi
   fi
   if [ "$exe" == "" ]; then
     exe=$FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB
