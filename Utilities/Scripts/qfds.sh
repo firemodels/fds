@@ -296,7 +296,7 @@ else
     DB=_dv
   fi
   if [ "$use_intel_mpi" == "1" ]; then
-    if [ "$exe" != "" ]; then
+    if [ "$exe" == "" ]; then
       exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
     fi
   fi
@@ -588,7 +588,6 @@ EOF
 
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
-export I_MPI_FABRICS=shm
 export I_MPI_DEBUG=5
 EOF
 fi
