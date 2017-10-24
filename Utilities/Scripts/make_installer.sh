@@ -365,7 +365,6 @@ prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
 setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
 setenv  MPIFORT mpifort
-setenv  OMP_NUM_THREADS 4
 
 MODULE
 
@@ -404,7 +403,6 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
-export OMP_NUM_THREADS=4
 FDSBINDIR=\$FDS_root/bin
 export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
