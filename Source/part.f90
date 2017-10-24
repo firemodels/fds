@@ -1641,7 +1641,13 @@ PARTICLE_LOOP: DO IP=1,NLP
          LP%WALL_INDEX = WALL_INDEX(ICN,-LP%ONE_D%IOR)
       ENDIF
 
+      ! Get current cell indices of the particle and if out of range, exit the time stepping loop.
+
       CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+
+      IF (LP%ONE_D%IIG<1 .OR. LP%ONE_D%IIG>IBAR .OR. &
+          LP%ONE_D%JJG<1 .OR. LP%ONE_D%JJG>JBAR .OR. &
+          LP%ONE_D%KKG<1 .OR. LP%ONE_D%KKG>KBAR ) EXIT TIME_STEP_LOOP
 
    ENDDO TIME_STEP_LOOP
 
