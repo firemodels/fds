@@ -587,12 +587,8 @@ export OMP_NUM_THREADS=$nopenmp_threads
 EOF
 
 if [ "$use_intel_mpi" == "1" ]; then
-FABRIC=tmi
-if [ "$INTEL_NETWORK_FABRIC" != "" ]; then
-FABRIC=$INTEL_NETWORK_FABRIC
-fi
 cat << EOF >> $scriptfile
-export I_MPI_FABRICS=shm:$FABRIC
+export I_MPI_FABRICS=shm
 export I_MPI_DEBUG=5
 EOF
 fi
