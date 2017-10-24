@@ -26,6 +26,7 @@ BENCHMARK=1
 OOPT=
 POPT=
 INTEL=
+INTEL2=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -91,6 +92,7 @@ case $OPTION in
    ;;
   J)
    INTEL=i
+   INTEL2="-I"
    ;;
   L)
    BACKGROUND_LOAD="$OPTARG"
@@ -161,7 +163,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE $OOPT $POPT" 
+export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $INTEL2 $JOBPREFIX -e $FDSMPI $QUEUE $OOPT $POPT" 
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
