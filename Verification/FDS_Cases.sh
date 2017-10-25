@@ -415,8 +415,6 @@ $QFDS -d Sprinklers_and_Sprays water_fuel_sprays.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays porous_media.fds
-$QFDS -d Sprinklers_and_Sprays vegetation_drag_1.fds
-$QFDS -d Sprinklers_and_Sprays vegetation_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays water_evap_1_const_gamma.fds
 
 $QFDS -d Scalar_Analytical_Solution pulsating_FL0_16.fds
@@ -515,6 +513,8 @@ $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
+$QFDS -d WUI vegetation_drag_1.fds
+$QFDS -d WUI vegetation_drag_2.fds
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 

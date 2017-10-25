@@ -150,16 +150,24 @@ MKDIR()
     echo "\`whoami\` does not have permission to create \$DIR."
     echo "FDS installation aborted."
     exit 0
-  else
-    echo The installation directory, "\$DIR, has been created."
   fi
   touch \$DIR/temp.\$\$>&/dev/null
   if ! [ -e \$DIR/temp.\$\$ ]
   then
-    echo "\`whoami\` does not have permission to write to \$DIR"
+    echo ""
+    echo "***error: \`whoami\` does not have permission to overwrite \$DIR"
+    echo ""
+    ls -ld \$DIR
+    echo ""
+    echo "Either: "
+    echo "  1. change to a user that has permission, "
+    echo "  2. remove \$DIR or,"
+    echo "  3. change the owner/permissions of \$DIR" 
+    echo "     to allow acceess to \`whoami\`"
     echo "FDS installation aborted."
     exit 0
   fi
+  echo The installation directory, "\$DIR, has been created."
   rm \$DIR/temp.\$\$
 }
 
@@ -357,7 +365,6 @@ prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
 setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
 setenv  MPIFORT mpifort
-setenv  OMP_NUM_THREADS 4
 
 MODULE
 
@@ -396,7 +403,6 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
-export OMP_NUM_THREADS=4
 FDSBINDIR=\$FDS_root/bin
 export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
@@ -424,6 +430,8 @@ EOF
 cat << EOF >> $INSTALLER
 echo ""
 echo "-----------------------------------------------"
+echo "-----------------------------------------------"
+echo "-----------------------------------------------"
 echo "Wrap up"
 echo ""
 echo "1. Add the following line to one of your startup files"
@@ -431,7 +439,9 @@ echo "   to complete the installation:"
 echo ""
 echo "source \$FDS_root/bin/FDSVARS.sh"
 echo ""
-echo "or the following lines if you are using modules:"
+echo "Note: you may also add the contents of FDSVARS.sh to your startup file."
+echo ""
+echo "If you are using modules, add the following lines:"
 echo ""
 echo "export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH"
 echo "module load $FDSMODULE"

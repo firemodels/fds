@@ -4459,7 +4459,8 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF ( BREAKUP_SIGMA_D > 0._EB ) THEN
       LPC%BREAKUP_SIGMA                 = BREAKUP_SIGMA_D
    ELSE
-      LPC%BREAKUP_SIGMA                 = 1.15_EB/BREAKUP_GAMMA_D ! 1.15 ???
+      ! per tech guide, sigma*gamma=1.15 smoothly joins Rosin-Rammler and lognormal distribustions
+      LPC%BREAKUP_SIGMA                 = 1.15_EB/BREAKUP_GAMMA_D
    ENDIF
    LPC%CTRL_ID                          = CTRL_ID
    LPC%DENSE_VOLUME_FRACTION            = DENSE_VOLUME_FRACTION

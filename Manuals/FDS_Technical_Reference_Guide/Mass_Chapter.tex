@@ -129,11 +129,7 @@ The Central Difference, Godunov, and MINMOD limiters are included for completene
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
 
-Following the corrector step of the transport scheme, source terms are applied to the scalars.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. For particle evaporation, mass is simply added to the cell, particle by particle, and the species mass fractions are adjusted accordingly:
-\be \label{eq:mass_source_terms}
-   (\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{**} + \dt \left( \dm_{\alpha}''' + \dm_{\rm b,\alpha}''' \right)_{ijk}
-\ee
-The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
+Following the corrector step of the transport scheme, source terms are computed for the next time step.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
 
 
 \subsection{Boundary Conditions for Temperature, Species Mass Fraction, and Density}
