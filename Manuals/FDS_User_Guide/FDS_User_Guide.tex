@@ -917,7 +917,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \end{table}
 
 
-\clearpage
+
 
 \chapter{Setting the Bounds of Time and Space}
 
@@ -1243,7 +1243,6 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\clearpage
 \section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
 \label{info:MISC}
 
@@ -2229,30 +2228,16 @@ model to ensure that the phenomena of interest are being captured.
 \section{Basics}
 \label{info:SURF_MATL_Basics}
 
-By default, the outer boundary of the computational domain is assumed
-to be a solid boundary that is maintained at ambient temperature. The
-same is true for any obstructions that are added to the scene. To
-specify the properties of solids, use the namelist group {\ct SURF}
-(Section~\ref{info:SURF}). Solids are assumed to
-consist of layers that can be made of different materials.  The
-properties of each material required are designated via the {\ct MATL}
-namelist group (Section~\ref{info:MATL}).  These properties indicate how
-rapidly the materials heat up, and how they burn.  Each {\ct MATL}
-entry in the input file must have an {\ct ID}, or name, so that they
-may be associated with a particular {\ct SURF} via the parameter {\ct
-MATL\_ID}.  For example, the input file entries:
-
+By default, the outer boundary of the computational domain is assumed to be a solid boundary that is maintained at ambient temperature. The same is true for any obstructions that are added to the scene. To specify the properties of solids, use the namelist group {\ct SURF} (Section~\ref{info:SURF}). Solids are assumed to consist of layers that can be made of different materials.  The properties of each material required are designated via the {\ct MATL} namelist group (Section~\ref{info:MATL}).  These properties indicate how rapidly the materials heat up, and how they burn.  Each {\ct MATL} entry in the input file must have an {\ct ID}, or name, so that they may be associated with a particular {\ct SURF} via the parameter {\ct MATL\_ID}.  For example, the input file entries:
 \begin{lstlisting}
 &MATL ID='BRICK', CONDUCTIVITY=0.69, SPECIFIC_HEAT=0.84, DENSITY=1600. /
 &SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED',
       THICKNESS=0.20 /
 &OBST XB=0.1,5.0,1.0,1.2,0.0,1.0, SURF_ID='BRICK WALL' /
 \end{lstlisting}
-
-\noindent
 define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
 
-\clearpage
+
 
 \section{Surface Temperature and Heat Flux}
 
@@ -2328,7 +2313,7 @@ For some special applications, it is often desired that a solid surface be adiab
 
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
 
-\clearpage
+
 
 
 \section{Heat Conduction in Solids}
@@ -2601,7 +2586,7 @@ Below is an example input file section:
 \end{lstlisting}
 Note that you should not specify the internal heat source at the {\ct SURF} line.
 
-\clearpage
+
 
 
 \section{Simple Pyrolysis Models}
@@ -3104,7 +3089,7 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 \end{figure}
 
 
-\clearpage
+
 
 \section{Thermal Degradation Model for Vegetation}
 
@@ -3188,8 +3173,6 @@ Gaseous products created during the thermal degradation process are water vapor 
 
 
 
-
-\clearpage
 
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
@@ -4009,7 +3992,6 @@ the right portal.}
 \end{figure}
 
 
-\clearpage
 
 \section{Special Flow Profiles}
 \label{info:profiles}
@@ -4980,8 +4962,6 @@ where the {\ct XB} specifies a region at the base of the burner where AIT is set
 
 
 
-\clearpage
-
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
 
@@ -5775,8 +5755,6 @@ In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liq
 
 
 
-
-\clearpage
 
 \section{Solid Particles}
 \label{info:PART_SURF}
@@ -7020,7 +6998,6 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
-\clearpage
 
 \input{smv_objects.tex}
 
@@ -8261,7 +8238,6 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 \end{description}
 
 
-\clearpage
 
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
@@ -8407,7 +8383,7 @@ $^4$                  \> Quantify allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
 
-\clearpage
+
 \section{Summary of Infrequently-Used Output Quantities}
 \label{info:oddoutputquantities}
 
@@ -8506,7 +8482,7 @@ $^3$                 \> Quantity requires specification of an additional scalar 
 $^4$                 \> Quantity allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
-\clearpage
+
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
@@ -8552,9 +8528,7 @@ This appendix lists all of the input parameters for FDS in separate tables group
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice. Only prescribe those parameters which are necessary to describe the desired scenario. Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
 
 
-\clearpage
 
-%Undocumented NAMELIST /BNDE/
 
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
@@ -8666,7 +8640,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
-
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Device parameters ({\ct DEVC} namelist group)]{For more information see Section~\ref{info:DEVC}.}
@@ -9194,7 +9167,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
+
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9384,7 +9357,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\newpage
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9546,7 +9518,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
-
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Reaction parameters ({\ct REAC} namelist group)]{For more information see Chapter~\ref{chap:combustion}.}
 \label{tbl:REAC} \\
@@ -9631,7 +9602,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
 
@@ -9865,7 +9835,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
