@@ -15,10 +15,9 @@ PRIVATE
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, LOGLAW_HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
+          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
-          FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, YUAN_HEAT_FLUX_MODEL, &
-          WALE_VISCOSITY
+          FILL_EDGES
 
 CONTAINS
 
@@ -1090,65 +1089,6 @@ ENDIF
 END SUBROUTINE RNG_EDDY_VISCOSITY
 
 
-SUBROUTINE WALE_VISCOSITY(NU_T,G_IJ,DELTA)
-
-! Wall Adapting Local Eddy-viscosity (WALE)
-
-! F. Nicoud, F. Ducros. Subgrid-scale stress modelling based on the square of the velocity gradient tensor.
-! Flow, Turbulence, and Combustion, Vol. 62, pp. 183-200, 1999.
-
-REAL(EB), INTENT(OUT) :: NU_T
-REAL(EB), INTENT(IN) :: G_IJ(3,3),DELTA
-REAL(EB) :: S_IJ(3,3),O_IJ(3,3),S2,O2,IV_SO,SD2,DENOM
-INTEGER :: I,J,K,L
-
-! compute strain and rotation tensors
-
-DO J=1,3
-   DO I=1,3
-      S_IJ(I,J) = 0.5_EB * ( G_IJ(I,J) + G_IJ(J,I) )
-      O_IJ(I,J) = 0.5_EB * ( G_IJ(I,J) - G_IJ(J,I) )
-   ENDDO
-ENDDO
-
-! contraction of strain and rotation tensors
-
-S2 = 0._EB
-O2 = 0._EB
-DO J=1,3
-   DO I=1,3
-      S2 = S2 + S_IJ(I,J)*S_IJ(I,J)
-      O2 = O2 + O_IJ(I,J)*O_IJ(I,J)
-   ENDDO
-ENDDO
-
-! fourth order contraction
-
-IV_SO = 0._EB
-DO L=1,3
-   DO K=1,3
-      DO J=1,3
-         DO I=1,3
-            IV_SO = IV_SO + S_IJ(I,K)*S_IJ(K,J)*O_IJ(J,L)*O_IJ(L,I)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-! using Caley-Hamilton theorem
-
-SD2 = ONSI*(S2*S2 + O2*O2) + TWTH*S2*O2 + 2._EB*IV_SO
-
-DENOM = S2**2.5_EB + SD2**1.25_EB
-IF (DENOM>TWO_EPSILON_EB) THEN
-   NU_T = (C_WALE*DELTA)**2 * SD2**1.5_EB / DENOM
-ELSE
-   NU_T = 0._EB
-ENDIF
-
-END SUBROUTINE WALE_VISCOSITY
-
-
 SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S)
 
 REAL(EB), INTENT(OUT) :: SLIP_FACTOR,U_TAU,Y_PLUS
@@ -1280,197 +1220,42 @@ END FUNCTION U_PLUS_BUFFER_POLY4
 END SUBROUTINE WALL_MODEL
 
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,C_VERTICAL,C_HORIZONTAL,SURF_GEOMETRY_INDEX,IOR,K_G,DN)
-
-REAL(EB), INTENT(OUT) :: H_NATURAL
-REAL(EB), INTENT(IN) :: DELTA_TMP,C_VERTICAL,C_HORIZONTAL,K_G,DN
-INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX,IOR
-
-! Calculate the HTC for natural/free convection (Holman, 1990, Table 7-2)
-
-SELECT CASE(SURF_GEOMETRY_INDEX)
-   CASE (SURF_CARTESIAN)
-      SELECT CASE(ABS(IOR))
-         CASE(0:2)
-            H_NATURAL = C_VERTICAL*ABS(DELTA_TMP)**ONTH
-         CASE(3)
-            H_NATURAL = C_HORIZONTAL*ABS(DELTA_TMP)**ONTH
-      END SELECT
-      H_NATURAL = MAX(H_NATURAL,2._EB*K_G/DN)
-
-   CASE (SURF_CYLINDRICAL)
-      H_NATURAL = C_VERTICAL*ABS(DELTA_TMP)**ONTH
-
-   CASE (SURF_SPHERICAL) ! It is assumed that the forced HTC represents natural convection as well
-      H_NATURAL = 0._EB
-END SELECT
-
-END SUBROUTINE NATURAL_CONVECTION_MODEL
-
-
-SUBROUTINE FORCED_CONVECTION_MODEL(H_FORCED,RE,K_G,CONV_LENGTH,SURF_GEOMETRY_INDEX)
-
-REAL(EB), INTENT(OUT) :: H_FORCED
-REAL(EB), INTENT(IN) :: RE,K_G,CONV_LENGTH
-INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX
-REAL(EB) :: NUSSELT
-
-SELECT CASE(SURF_GEOMETRY_INDEX)
-   CASE (SURF_CARTESIAN)
-      ! Incropera and DeWitt, 3rd, 1990, Eq. 7.44
-      NUSSELT = 0.037_EB*RE**0.8_EB*PR_ONTH
-   CASE (SURF_CYLINDRICAL)
-      ! Incropera and DeWitt, 3rd, 1990, Eq. 7.55, 40 < Re < 4000
-      NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
-   CASE (SURF_SPHERICAL)
-      ! Incropera and DeWitt, 3rd, 1990, Eq. 7.59
-      NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH
-END SELECT
-H_FORCED = MAX(1._EB,NUSSELT)*K_G/CONV_LENGTH
-
-END SUBROUTINE FORCED_CONVECTION_MODEL
-
-
-SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
-
-!!!!! EXPERIMENTAL !!!!!
-
-! Rayleigh number scaling in nondimensional thermal wall units
-!
-! The formulation is based on the discussion of natural convection systems in
-! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
-
-REAL(EB), INTENT(OUT) :: H,Z_STAR
-REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G
-REAL(EB) :: NUSSELT,Q,ZC,NU_G,DS,ALPHA,THETA,Q_OLD,ERROR
-INTEGER :: ITER
-INTEGER, PARAMETER :: MAX_ITER=10
-! C_L = Z_L**(-0.8_EB)
-! C_T = C_L*Z_T**(-0.2_EB)
-REAL(EB), PARAMETER :: Z_L = 3.2_EB, Z_T=17._EB
-REAL(EB), PARAMETER :: C_L = 3.2_EB**(-0.8_EB), C_T = 0.394_EB*17._EB**(-0.2_EB)
-
-ZC = 0.5_EB*DZ
-NU_G = MU_G/RHO_G
-ALPHA = K_G/(RHO_G*CP_G)
-THETA = TMP_W*K_G*ALPHA*NU_G/GRAV
-
-! Step 1: assume a heat transfer coefficient
-
-H = K_G/ZC ! initial guess
-Q = H*ABS(TMP_W-TMP_G)
-
-RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
-
-   ! Step 2: compute new thermal diffusive length scale, delta*, from modified Grashof number * Pr
-
-   DS = (THETA/Q)**0.25_EB
-
-   ! Step 3: compute new z* (thermal)
-
-   Z_STAR = ZC/DS ! Ra* = (z*)**4
-
-   ! Step 4: based on z*, choose Ra scaling law
-
-   IF (Z_STAR<=Z_L) THEN
-      NUSSELT = 1._EB
-   ELSEIF (Z_STAR>Z_L .AND. Z_STAR<=Z_T) THEN
-      NUSSELT = C_L * Z_STAR**0.8_EB
-   ELSE
-      NUSSELT = C_T * Z_STAR
-   ENDIF
-
-   ! Step 5: update heat transfer coefficient
-
-   H = NUSSELT*K_G/ZC
-   Q_OLD = Q
-   Q = H*ABS(TMP_W-TMP_G)
-
-   ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
-
-   IF (ERROR<0.001_EB) EXIT RAYLEIGH_LOOP
-
-ENDDO RAYLEIGH_LOOP
-
-END SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL
-
-
-SUBROUTINE YUAN_HEAT_FLUX_MODEL(H,Y_STAR,DY,TMP_W,TMP_G,K_G,RHO_G,CP_G)
-
-!!!!! EXPERIMENTAL !!!!!
-
-! This model is very similar to RAYLEIGH_HEAT_FLUX_MODEL
-!
-! X. Yuan, A. Moser, P. Suter. Wall functions for numerical simulation of turbulent
-! natural convection along vertical plates. Int. J. Heat Mass Transfer, Vol. 36,
-! No. 18 pp. 4477-4485, 1993.
-
-REAL(EB), INTENT(OUT) :: H,Y_STAR
-REAL(EB), INTENT(IN) :: DY,TMP_W,TMP_G,K_G,RHO_G,CP_G
-REAL(EB) :: T_STAR,Q,YC,TQ,UQ,ALPHA,THETA,GAMMA,Q_OLD,ERROR
-INTEGER :: ITER
-INTEGER, PARAMETER :: MAX_ITER=10
-
-YC = 0.5_EB*DY
-ALPHA = K_G/(RHO_G*CP_G)
-THETA = GRAV/TMP_W*ALPHA*(RHO_G*CP_G)**3
-GAMMA = GRAV/TMP_W*ALPHA/(RHO_G*CP_G)
-
-H = K_G/YC ! initial guess
-Q = H*ABS(TMP_W-TMP_G)
-
-YUAN_LOOP: DO ITER=1,MAX_ITER
-
-   UQ = ( Q / GAMMA )**0.25_EB
-
-   Y_STAR = YC*UQ/ALPHA ! Yuan et al. Eq. (15)
-
-   ! Yuan et al. Eqs. (22)-(24)
-   IF (Y_STAR<=1._EB) THEN
-      T_STAR = Y_STAR
-   ELSEIF (Y_STAR>1._EB .AND. Y_STAR<=100._EB) THEN
-      T_STAR = 1._EB + 1.36_EB*LOG(Y_STAR) - 0.135_EB*LOG(Y_STAR)**2
-   ELSE
-      T_STAR = 4.4_EB
-   ENDIF
-
-   TQ = ABS(TMP_W-TMP_G)/T_STAR
-   Q_OLD = Q
-   Q = (THETA*TQ**4)**ONTH
-
-   ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
-
-   IF (ERROR<0.001_EB) EXIT YUAN_LOOP
-
-ENDDO YUAN_LOOP
-
-H = MAX( K_G/YC, Q/ABS(TMP_W-TMP_G) )
-
-END SUBROUTINE YUAN_HEAT_FLUX_MODEL
-
-
-SUBROUTINE LOGLAW_HEAT_FLUX_MODEL(H,YPLUS,U_TAU,K_G,RHO_G,CP_G,MU_G)
+SUBROUTINE HEAT_FLUX_MODEL(H,YPLUS,U_TAU,K,RHO,CP,MU)
 
 ! Kiyoung Moon, Yonsei University
 ! Ezgi Oztekin, Technology and Manangement International
 
 REAL(EB), INTENT(OUT) :: H
-REAL(EB), INTENT(IN) :: YPLUS,U_TAU,K_G,RHO_G,CP_G,MU_G
-REAL(EB) :: PR_M,TPLUS,B_T
+REAL(EB), INTENT(IN) :: YPLUS,U_TAU,K,RHO,CP,MU
+REAL(EB) :: PR_M,TPLUS,B_T !,T1,T2,CA,CB
 REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB
+REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
+REAL(EB), PARAMETER :: LOG_Y1=LOG(Y1),LOG_Y2=LOG(Y2),DLOGY=LOG(Y2/Y1)
 
-PR_M = CP_G*MU_G/K_G
+PR_M = CP*MU/K
 
 IF (YPLUS < Y_WERNER_WENGLE) THEN
+   ! viscous sublayer
    TPLUS = PR_M*YPLUS
 ELSE
    B_T = (3.85_EB*PR_M**ONTH-1.3_EB)**2 + 2.12_EB*LOG(PR_M) ! Kader, 1981
-   TPLUS = PR*RKAPPA*LOG(YPLUS)+B_T
+   !IF (YPLUS < Y2) THEN
+   !   ! buffer layer
+   !   T2 = PR*RKAPPA*LOG_Y2 + B_T
+   !   T1 = PR_M*Y1
+   !   T2 = MAX(T1,T2)
+   !   CA = (T2-T1)/DLOGY
+   !   CB = T1-CA*LOG_Y1
+   !   TPLUS = CA*LOG(YPLUS)+CB
+   !ELSE
+      ! log layer
+      TPLUS = PR*RKAPPA*LOG(YPLUS)+B_T
+   !ENDIF
 ENDIF
 
-H = RHO_G*U_TAU*CP_G/TPLUS
+H = RHO*U_TAU*CP/TPLUS
 
-END SUBROUTINE LOGLAW_HEAT_FLUX_MODEL
+END SUBROUTINE HEAT_FLUX_MODEL
 
 
 SUBROUTINE ABL_HEAT_FLUX_MODEL(H,U_TAU,DZ,Z0,TMP_G,TMP_S,RHO,CP)
@@ -1518,7 +1303,7 @@ REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,M
 
 REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY(3),&
+REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY, &
             U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN,RDN
 INTEGER :: SUBIT
 
@@ -1575,7 +1360,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1593,11 +1378,11 @@ END FUNCTION VELTAN2D
 
 
 REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS,U_INT)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
 
 REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS,U_INT
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,U_RELA(3),DUMMY(3),&
+REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY,U_RELA(3), &
             U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN,RDN
 INTEGER :: SUBIT,I,J
 
@@ -1687,7 +1472,7 @@ IF (DNS) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM,MU*RRHO,DN,ROUGHNESS)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
       !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -2129,7 +1914,7 @@ IMPLICIT NONE
 ! This exe generates a random velocity field with a spectrum that matches the
 ! Comte-Bellot/Corrsin 1971 experimental data.
 
-REAL(EB) :: MEANU,MEANV,MEANW,DUMMY(3)
+REAL(EB) :: DUMMY,MEANU,MEANV,MEANW
 INTEGER :: I,J,K,II,JJ,KK,FILE_NUM,IM,IW,IOR,IIO,JJO,KKO,NX,NX_BLOCK,I_MESH,J_MESH,K_MESH,MX
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_ISO
@@ -2168,8 +1953,8 @@ IF (II/=NX) CALL SHUTDOWN('ERROR: wrong iso_ini.dat file')
 
 ! read physical dimensions
 
-READ (FILE_NUM,*) DUMMY(1), DUMMY(2), DUMMY(3)
-READ (FILE_NUM,*) DUMMY(1), DUMMY(2), DUMMY(3)
+READ (FILE_NUM,*) DUMMY, DUMMY, DUMMY
+READ (FILE_NUM,*) DUMMY, DUMMY, DUMMY
 
 DO KK=1,NX
    K_MESH = CEILING(REAL(KK,EB)/REAL(NX_BLOCK,EB)) ! "k" position of mesh block in global domain
@@ -2748,7 +2533,7 @@ IMPLICIT NONE
       enddo
 
       if(ndim-1.lt.0) goto 920
-      ntot=2
+1     ntot=2
       do idim=1,ndim
       if(nn(idim).le.0) goto 920
       ntot=ntot*nn(idim)
@@ -2768,15 +2553,15 @@ IMPLICIT NONE
 !
 !     is n a power of two and if not, what are its factors
 !
-      m=n
+5     m=n
       ntwo=np1
       iif=1
       idiv=2
 10    iquot=m/idiv
       irem=m-idiv*iquot
       if(iquot-idiv.lt.0) goto 50
-      if(irem.ne.0) goto 20
-      ntwo=ntwo+ntwo
+11    if(irem.ne.0) goto 20
+12    ntwo=ntwo+ntwo
       ifact(iif)=idiv
       iif=iif+1
       m=iquot
@@ -2786,8 +2571,8 @@ IMPLICIT NONE
 30    iquot=m/idiv
       irem=m-idiv*iquot
       if(iquot-idiv.lt.0) goto 60
-      if(irem.ne.0) goto 40
-      ifact(iif)=idiv
+31    if(irem.ne.0) goto 40
+32    ifact(iif)=idiv
       iif=iif+1
       m=iquot
       go to 30
@@ -2795,7 +2580,7 @@ IMPLICIT NONE
       go to 30
 50    inon2=iif
       if(irem.ne.0) goto 60
-      ntwo=ntwo+ntwo
+51    ntwo=ntwo+ntwo
       go to 70
 60    ifact(iif)=m
 !
@@ -2817,14 +2602,14 @@ IMPLICIT NONE
       ifmin=1
       i1rng=np1
       if(idim-4.ge.0) goto 100
-      if(iform.gt.0) goto 100
-      icase=2
+71    if(iform.gt.0) goto 100
+72    icase=2
       i1rng=np0*(1+nprev/2)
       if(idim-1.gt.0) goto 100
-      icase=3
+73    icase=3
       i1rng=np1
       if(ntwo-np1.le.0) goto 100
-      icase=4
+74    icase=4
       ifmin=2
       ntwo=ntwo/2
       n=n/2
@@ -2840,11 +2625,11 @@ IMPLICIT NONE
 !     can be done by simple interchange, no working array is needed
 !
 100   if(ntwo-np2.lt.0) goto 200
-      np2hf=np2/2
+110   np2hf=np2/2
       j=1
       do i2=1,np2,np1
       if(j-i2.ge.0) goto 130
-      i1max=i2+np1-2
+120   i1max=i2+np1-2
       do i1=i2,i1max,2
          do i3=i1,ntot,np2
             j3=j+i3-i2
@@ -2858,7 +2643,7 @@ IMPLICIT NONE
       enddo
 130   m=np2hf
 140   if(j-m.le.0) goto 150
-      j=j-m
+145   j=j-m
       m=m/2
       if(m-np1.ge.0) goto 140
 150   j=j+m
@@ -2873,7 +2658,7 @@ IMPLICIT NONE
       j=i3
       do 260 i=1,nwork,2
       if(icase-3.ne.0) goto 220
-      work(i)=data(j)
+210   work(i)=data(j)
       work(i+1)=data(j+1)
       go to 230
 220   work(i)=data(j)
@@ -2883,7 +2668,7 @@ IMPLICIT NONE
 240   ifp1=ifp2/ifact(iif)
       j=j+ifp1
       if(j-i3-ifp2.lt.0) goto 260
-      j=j-ifp2
+250   j=j-ifp2
       ifp2=ifp1
       iif=iif+1
       if(ifp2-np1.gt.0) goto 240
@@ -2893,7 +2678,7 @@ IMPLICIT NONE
       do i2=i3,i2max,np1
       data(i2)=work(i)
       data(i2+1)=work(i+1)
-      i=i+2
+270   i=i+2
       enddo
       enddo
       enddo
@@ -2904,14 +2689,14 @@ IMPLICIT NONE
 !     and repeat for w=w*(1+isign*sqrt(-1))/sqrt(2).
 !
 300   if(ntwo-np1.le.0) goto 600
-      np1tw=np1+np1
+305   np1tw=np1+np1
       ipar=ntwo/np1
 310   if(ipar-2.lt.0) then
          goto 350
       elseif(ipar-2.eq.0) then
          goto 330
       endif
-      ipar=ipar/4
+320   ipar=ipar/4
       go to 310
 330   do i1=1,i1rng,2
       do k1=i1,ntot,np1tw
@@ -2921,18 +2706,18 @@ IMPLICIT NONE
       data(k2)=data(k1)-tempr
       data(k2+1)=data(k1+1)-tempi
       data(k1)=data(k1)+tempr
-      data(k1+1)=data(k1+1)+tempi
+340   data(k1+1)=data(k1+1)+tempi
       enddo
       enddo
 350   mmax=np1
 360   if(mmax-ntwo/2.ge.0) goto 600
-      lmax=max0(np1tw,mmax/2)
+370   lmax=max0(np1tw,mmax/2)
       do 570 l=np1,lmax,np1tw
       m=l
       if(mmax-np1.le.0) goto 420
-      theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
+380   theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
       if(isign.lt.0) goto 400
-      theta=-theta
+390   theta=-theta
 400   wr=cos(theta)
       wi=sin(theta)
 410   w2r=wr*wr-wi*wi
@@ -2942,23 +2727,23 @@ IMPLICIT NONE
 420   do 530 i1=1,i1rng,2
       kmin=i1+ipar*m
       if(mmax-np1.gt.0) goto 440
-      kmin=i1
+430   kmin=i1
 440   kdif=ipar*mmax
 450   kstep=4*kdif
       if(kstep-ntwo.gt.0) goto 530
-      do k1=kmin,ntot,kstep
+460   do k1=kmin,ntot,kstep
       k2=k1+kdif
       k3=k2+kdif
       k4=k3+kdif
       if(mmax-np1.gt.0) goto 480
-      u1r=data(k1)+data(k2)
+470   u1r=data(k1)+data(k2)
       u1i=data(k1+1)+data(k2+1)
       u2r=data(k3)+data(k4)
       u2i=data(k3+1)+data(k4+1)
       u3r=data(k1)-data(k2)
       u3i=data(k1+1)-data(k2+1)
       if(isign.ge.0) goto 472
-      u4r=data(k3+1)-data(k4+1)
+471   u4r=data(k3+1)-data(k4+1)
       u4i=data(k4)-data(k3)
       go to 510
 472   u4r=data(k4+1)-data(k3+1)
@@ -2977,7 +2762,7 @@ IMPLICIT NONE
       u3r=data(k1)-t2r
       u3i=data(k1+1)-t2i
       if(isign.ge.0) goto 500
-      u4r=t3i-t4i
+490   u4r=t3i-t4i
       u4i=t4r-t3r
       go to 510
 500   u4r=t4i-t3i
@@ -2989,7 +2774,7 @@ IMPLICIT NONE
       data(k3)=u1r-u2r
       data(k3+1)=u1i-u2i
       data(k4)=u3r-u4r
-      data(k4+1)=u3i-u4i
+520   data(k4+1)=u3i-u4i
       enddo
       kdif=kstep
       kmin=4*(kmin-i1)+i1
@@ -2997,8 +2782,8 @@ IMPLICIT NONE
 530   continue
       m=m+lmax
       if(m-mmax.gt.0) goto 570
-      if(isign.ge.0) goto 560
-      tempr=wr
+540   if(isign.ge.0) goto 560
+550   tempr=wr
       wr=(wr+wi)*rthlf
       wi=(wi-tempr)*rthlf
       go to 410
@@ -3017,16 +2802,16 @@ IMPLICIT NONE
 !     conjugate symmetries.
 !
 600   if(ntwo-np2.ge.0) goto 700
-      ifp1=ntwo
+605   ifp1=ntwo
       iif=inon2
       np1hf=np1/2
 610   ifp2=ifact(iif)*ifp1
       j1min=np1+1
       if(j1min-ifp1.gt.0) goto 640
-      do j1=j1min,ifp1,np1
+615   do j1=j1min,ifp1,np1
       theta=-twopi*REAL(j1-1,EB)/REAL(ifp2,EB)
       if(isign.lt.0) goto 625
-      theta=-theta
+620   theta=-theta
 625   wstpr=cos(theta)
       wstpi=sin(theta)
       wr=wstpr
@@ -3039,17 +2824,17 @@ IMPLICIT NONE
       do j3=i1,ntot,ifp2
       tempr=data(j3)
       data(j3)=data(j3)*wr-data(j3+1)*wi
-      data(j3+1)=tempr*wi+data(j3+1)*wr
+630   data(j3+1)=tempr*wi+data(j3+1)*wr
       enddo
       enddo
       tempr=wr
       wr=wr*wstpr-wi*wstpi
-      wi=tempr*wstpi+wi*wstpr
+635   wi=tempr*wstpi+wi*wstpr
       enddo
       enddo
 640   theta=-twopi/REAL(ifact(iif),EB)
       if(isign.lt.0) goto 650
-      theta=-theta
+645   theta=-theta
 650   wstpr=cos(theta)
       wstpi=sin(theta)
       j2rng=ifp1*(1+ifact(iif)/2)
@@ -3065,11 +2850,11 @@ IMPLICIT NONE
       jmax=jmin+ifp2-ifp1
       i=1+(j3-i3)/np1hf
       if(j2-i3.gt.0) goto 665
-      sumr=0._EB
+655   sumr=0._EB
       sumi=0._EB
       do j=jmin,jmax,ifp1
-      sumr=sumr+data(j)
-      sumi=sumi+data(j+1)
+659   sumr=sumr+data(j)
+660   sumi=sumi+data(j+1)
       enddo
       work(i)=sumr
       work(i+1)=sumi
@@ -3089,7 +2874,7 @@ IMPLICIT NONE
       oldsi=tempi
       j=j-ifp1
       if(j-jmin.gt.0) goto 670
-      tempr=wr*sumr-oldsr+data(j)
+675   tempr=wr*sumr-oldsr+data(j)
       tempi=wi*sumi
       work(i)=tempr-tempi
       work(iconj)=tempr+tempi
@@ -3101,7 +2886,7 @@ IMPLICIT NONE
       enddo
       enddo
       if(j2-i3.gt.0) goto 686
-      wr=wstpr
+685   wr=wstpr
       wi=wstpi
       go to 690
 686   tempr=wr
@@ -3114,7 +2899,7 @@ IMPLICIT NONE
       do i2=i3,i2max,np1
       data(i2)=work(i)
       data(i2+1)=work(i+1)
-      i=i+2
+695   i=i+2
       enddo
       enddo
       enddo
@@ -3137,7 +2922,7 @@ IMPLICIT NONE
       n=n+n
       theta=-twopi/REAL(n,EB)
       if(isign.lt.0) goto 703
-      theta=-theta
+702   theta=-theta
 703   wstpr=cos(theta)
       wstpi=sin(theta)
       wr=wstpr
@@ -3157,7 +2942,7 @@ IMPLICIT NONE
       data(i+1)=difi+tempi
       data(j)=sumr-tempr
       data(j+1)=-difi+tempi
-      j=j+np2
+720   j=j+np2
       enddo
       imin=imin+2
       jmin=jmin-2
@@ -3169,9 +2954,9 @@ IMPLICIT NONE
       elseif(imin-jmin.gt.0) then
          goto 740
       endif
-      if(isign.ge.0) goto 740
-      do i=imin,ntot,np2
-      data(i+1)=-data(i+1)
+730   if(isign.ge.0) goto 740
+731   do i=imin,ntot,np2
+735   data(i+1)=-data(i+1)
       enddo
 740   np2=np2+np2
       ntot=ntot+ntot
@@ -3185,7 +2970,7 @@ IMPLICIT NONE
 755   i=i+2
       j=j-2
       if(i-imax.lt.0) goto 750
-      data(j)=data(imin)-data(imin+1)
+760   data(j)=data(imin)-data(imin+1)
       data(j+1)=0._EB
       if(i-j.lt.0) then
          goto 770
@@ -3197,7 +2982,7 @@ IMPLICIT NONE
 770   i=i-2
       j=j-2
       if(i-imin.gt.0) goto 765
-      data(j)=data(imin)+data(imin+1)
+775   data(j)=data(imin)+data(imin+1)
       data(j+1)=0._EB
       imax=imin
       go to 745
@@ -3209,26 +2994,26 @@ IMPLICIT NONE
 !     conjugate symmetries.
 !
 800   if(i1rng-np1.ge.0) goto 900
-      do i3=1,ntot,np2
+805   do i3=1,ntot,np2
       i2max=i3+np2-np1
       do i2=i3,i2max,np1
       imin=i2+i1rng
       imax=i2+np1-2
       jmax=2*i3+np1-imin
       if(i2-i3.le.0) goto 820
-      jmax=jmax+np2
+810   jmax=jmax+np2
 820   if(idim-2.le.0) goto 850
-      j=jmax+np0
+830   j=jmax+np0
       do i=imin,imax,2
       data(i)=data(j)
       data(i+1)=-data(j+1)
-      j=j-2
+840   j=j-2
       enddo
 850   j=jmax
       do i=imin,imax,np0
       data(i)=data(j)
       data(i+1)=-data(j+1)
-      j=j-np0
+860   j=j-np0
       enddo
       enddo
       enddo
@@ -3237,7 +3022,7 @@ IMPLICIT NONE
 !
 900   np0=np1
       np1=np2
-      nprev=n
+910   nprev=n
       enddo
 
       ! reshape data back to 3D complex array
