@@ -256,13 +256,11 @@ TYPE(BODINT_CELL_TYPE), SAVE :: BODINT_CELL
 ! Allocatable real arrays
 ! Grid position containers:
 REAL(EB), SAVE, TARGET, ALLOCATABLE, DIMENSION(:) :: XFACE,YFACE,ZFACE,XCELL,YCELL,ZCELL, &
-          DXFACE,DYFACE,DZFACE,DXCELL,DYCELL,DZCELL,X1FACE,X2FACE,X3FACE,X1CELL,  &
-          X2CELL,X3CELL,DX1FACE,DX2FACE,DX3FACE,DX1CELL,DX2CELL,DX3CELL
+          DXFACE,DYFACE,DZFACE,DXCELL,DYCELL,DZCELL,X1FACE,X2FACE,X3FACE,  &
+          X2CELL,X3CELL,DX1FACE,DX2FACE,DX3FACE,DX2CELL,DX3CELL ! X1CELL,DX1CELL not used.
 
-REAL(EB), POINTER, DIMENSION(:) :: X1FACEP,X2FACEP,X3FACEP,X1CELLP,  &
-                   X2CELLP,X3CELLP,DX1FACEP,DX2FACEP,DX3FACEP,DX1CELLP,DX2CELLP,DX3CELLP
-
-REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:) :: GEOM_XYZ
+REAL(EB), POINTER, DIMENSION(:) :: X1FACEP,X2FACEP,X3FACEP,  &
+                   X2CELLP,X3CELLP ! X1CELLP,DX1FACEP,DX2FACEP,DX3FACEP,DX1CELLP,DX2CELLP,DX3CELLP not used.
 
 ! x2 Intersection data containers:
 INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 512
@@ -314,8 +312,9 @@ REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_Z
  INTEGER, ALLOCATABLE :: PT_Z(:)
 #endif /* WITH_PARDISO */
 INTEGER, ALLOCATABLE :: IPARMZ( : ) ! SOLVER Control Parameters array.
+#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
 INTEGER :: MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NRHSZ, ERRORZ, MSGLVLZ, PERMZ(1)
-
+#endif
 
 ! Here H variables, case of solver from geom:
 ! Everything related to GLMAT_FROM_GEOM will be erased when GLMAT from pres.f90 is
@@ -401,8 +400,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLINT_SPEC_MASS_0,FLXTINT_SPEC_MASS,VOLI
 LOGICAL, PARAMETER :: DO_SYMM_SCALAR_DIFFLUXES   =.FALSE. ! Experimental: Use symmetric form of diffusive fluxes
                                                           ! Ja=-rho^n Da d(rho^n+1 Ya/rho^n) in Implicit CC integration.
 LOGICAL, PARAMETER :: IMP_REGION_FROM_MATRIX_DIFF=.FALSE. ! IF .FALSE. use scalars diffusion from divg computation.
-
-INTEGER :: VAL_TESTX,VAL_TESTY,VAL_TESTZ
 
 REAL(EB):: VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_LOW,VAL_TESTZ_HIGH
 
@@ -7471,6 +7468,7 @@ RETURN
 END SUBROUTINE GET_RHOZZ_CCIMPREG_3D
 
 ! -------------------------------- SYMBLU_ZZ -----------------------------
+#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
 
 SUBROUTINE SYMBLU_ZZ
 
@@ -7554,6 +7552,7 @@ RETURN
 RETURN
 END SUBROUTINE SYMBLU_ZZ
 
+#endif /* #if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER) */
 
 ! --------------------------- PUT_RHOZZVECTOR_SCALAR_3D --------------------------
 
@@ -21610,8 +21609,6 @@ TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 LOGICAL :: TWINMATCH
 INTEGER, PARAMETER :: INDADD(1:3,1:6) = RESHAPE((/-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0,0/),(/3,6/))
 INTEGER, PARAMETER :: MYAXIS(1:6) = (/ IAXIS,IAXIS,JAXIS,JAXIS,KAXIS,KAXIS /)
-INTEGER :: IADD, JADD, KADD, NMICF, CFNUM(6), CFTYP(6), CCNUM
-INTEGER :: NVERT, NFACE, NBODTRI, SIZE1, SIZE2, ISIDE, FCSIDE, NVERTFACE
 
 IF (CCGUARD == 0) RETURN
 
@@ -26291,10 +26288,10 @@ INTEGER, INTENT(OUT):: NV,V(MAXVERTS)
 
 ! Local Variables:
 INTEGER :: IV, IIV, JJV
-REAL(EB):: V2(MAXVERTS)
+INTEGER :: V2(MAXVERTS)
 LOGICAL :: FOUND
 
-V(:) = 0._EB
+V(:) = 0
 NV   = 0
 DO IV=1,NVERTS
    IF (ABS(VERTS1(IV)-XV) < GEOMEPS) THEN
@@ -28656,7 +28653,7 @@ COUNT_GEOM_LOOP: DO
    IF (IOS==1) EXIT COUNT_GEOM_LOOP
    READ(LU_INPUT,'(A)')BUFFER
    N_GEOMETRY=N_GEOMETRY+1
-   CALL GET_GEOM_INFO(LU_INPUT,MAX_ZVALS,MAX_VERTS,MAX_FACES,MAX_VOLUS,MAX_IDS)
+   CALL GET_GEOM_INFO(MAX_ZVALS,MAX_VERTS,MAX_FACES,MAX_VOLUS,MAX_IDS) ! LU_INPUT not currently used.
 ENDDO COUNT_GEOM_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_GEOMETRY==0) RETURN
@@ -29471,7 +29468,6 @@ REAL(EB):: LEDGE, DXYZE(MAX_DIM), LX1, DELBIN, X1V_LO, X1V_HI
 REAL(EB), PARAMETER :: GAMMA_MULT = 1._EB
 INTEGER,  PARAMETER :: DELTA_TBIN = 1000
 INTEGER, ALLOCATABLE, DIMENSION(:) :: TRI_LIST
-REAL(EB),ALLOCATABLE, DIMENSION(:,:,:) :: XYZV
 
 ! Loop geometries:
 LOOP_GEOM : DO IG = 1, N_GEOMETRY
@@ -29628,12 +29624,12 @@ END SUBROUTINE GET_GEOM_TRIBIN
 
 ! ---------------------------- GET_GEOM_INFO ----------------------------------------
 
-SUBROUTINE GET_GEOM_INFO(LU_INPUT,MAX_ZVALS,MAX_VERTS,MAX_FACES,MAX_VOLUS,MAX_IDS)
+SUBROUTINE GET_GEOM_INFO(MAX_ZVALS,MAX_VERTS,MAX_FACES,MAX_VOLUS,MAX_IDS) ! LU_INPUT not used for now.
 
-! count numnber of various geometry types on the current &GEOM line
+! count number of various geometry types on the current &GEOM line
 ! for now assume a maximum value
+! INTEGER, INTENT(IN) :: LU_INPUT
 
-INTEGER, INTENT(IN) :: LU_INPUT
 INTEGER, INTENT(INOUT) :: MAX_ZVALS,MAX_VERTS,MAX_FACES,MAX_VOLUS,MAX_IDS
 
 MAX_ZVALS=MAX(MAX_ZVALS,100000)
@@ -29768,40 +29764,40 @@ NVOLS=NFACES
 
 END SUBROUTINE EXTRUDE_SPHERE
 
-! ---------------------------- EXTRUDE_SURFACE ----------------------------------------
-
-SUBROUTINE EXTRUDE_SURFACE(ZMIN,VERTS,MAXVERTS,NVERTS,FACES,NFACES,VOLS,MAXVOLS, NVOLS)
-
-! extend a 2D surface defined by VERTS and FACES to a plane defined by ZMIN
-
-INTEGER, INTENT(IN) :: NFACES, MAXVERTS,MAXVOLS
-INTEGER, INTENT(INOUT) :: NVERTS
-REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
-INTEGER, INTENT(IN) :: FACES(3*NFACES)
-INTEGER, INTENT(OUT) :: NVOLS
-INTEGER, INTENT(OUT) :: VOLS(4*MAXVOLS)
-REAL(EB), INTENT(IN) :: ZMIN
-INTEGER :: PRISM(6)
-
-INTEGER :: I
-REAL(EB), POINTER, DIMENSION(:) :: VNEW, VOLD
-
-! define a new vertex on the plane z=ZMIN for each vertex in original list
-DO I = 1, NVERTS
-   VNEW=>VERTS(3*NVERTS+3*I-2:3*NVERTS+3*I)
-   VOLD=>VERTS(3*I-2:3*I)
-   VNEW(1:3)=(/VOLD(1:2),ZMIN/)
-ENDDO
-! construct 3 tetrahedrons for each prism (solid between original face and face on plane z=zplane)
-DO I = 1, NFACES
-   PRISM(1:3)=FACES(3*I-2:3*I)
-   PRISM(4:6)=FACES(3*I-2:3*I)+NVERTS
-   CALL PRISM2TETRA(PRISM,VOLS(12*I-11:12*I))
-ENDDO
-NVOLS=3*NFACES
-NVERTS=2*NVERTS
-
-END SUBROUTINE EXTRUDE_SURFACE
+! ! ---------------------------- EXTRUDE_SURFACE ----------------------------------------
+!
+! SUBROUTINE EXTRUDE_SURFACE(ZMIN,VERTS,MAXVERTS,NVERTS,FACES,NFACES,VOLS,MAXVOLS, NVOLS)
+!
+! ! extend a 2D surface defined by VERTS and FACES to a plane defined by ZMIN
+!
+! INTEGER, INTENT(IN) :: NFACES, MAXVERTS,MAXVOLS
+! INTEGER, INTENT(INOUT) :: NVERTS
+! REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+! INTEGER, INTENT(IN) :: FACES(3*NFACES)
+! INTEGER, INTENT(OUT) :: NVOLS
+! INTEGER, INTENT(OUT) :: VOLS(4*MAXVOLS)
+! REAL(EB), INTENT(IN) :: ZMIN
+! INTEGER :: PRISM(6)
+!
+! INTEGER :: I
+! REAL(EB), POINTER, DIMENSION(:) :: VNEW, VOLD
+!
+! ! define a new vertex on the plane z=ZMIN for each vertex in original list
+! DO I = 1, NVERTS
+!    VNEW=>VERTS(3*NVERTS+3*I-2:3*NVERTS+3*I)
+!    VOLD=>VERTS(3*I-2:3*I)
+!    VNEW(1:3)=(/VOLD(1:2),ZMIN/)
+! ENDDO
+! ! construct 3 tetrahedrons for each prism (solid between original face and face on plane z=zplane)
+! DO I = 1, NFACES
+!    PRISM(1:3)=FACES(3*I-2:3*I)
+!    PRISM(4:6)=FACES(3*I-2:3*I)+NVERTS
+!    CALL PRISM2TETRA(PRISM,VOLS(12*I-11:12*I))
+! ENDDO
+! NVOLS=3*NFACES
+! NVERTS=2*NVERTS
+!
+! END SUBROUTINE EXTRUDE_SURFACE
 
 ! ---------------------------- BOX2TETRA ----------------------------------------
 
@@ -29830,84 +29826,84 @@ TETRAS(17:20) = (/BOX(4),BOX(5),BOX(2),BOX(7)/)
 
 END SUBROUTINE BOX2TETRA
 
-! ---------------------------- PRISM2TETRA ----------------------------------------
+! ! ---------------------------- PRISM2TETRA ----------------------------------------
+!
+! SUBROUTINE PRISM2TETRA(PRISM,TETRAS)
+!
+! ! split a prism defined by a list of 6 vertices into 3 tetrahedrons
+!
+! !       6
+! !      /.\                      .
+! !    /  .  \                    .
+! !  /    .    \                  .
+! ! 4-----------5
+! ! |     .     |
+! ! |     .     |
+! ! |     3     |
+! ! |    / \    |
+! ! |  /     \  |
+! ! |/         \|
+! ! 1-----------2
+! INTEGER, INTENT(IN) :: PRISM(6)
+! INTEGER, INTENT(OUT) :: TETRAS(1:12)
+!
+! TETRAS(1:4)   = (/PRISM(1),PRISM(6),PRISM(4),PRISM(5)/)
+! TETRAS(5:8)   = (/PRISM(1),PRISM(3),PRISM(6),PRISM(5)/)
+! TETRAS(9:12)  = (/PRISM(1),PRISM(2),PRISM(3),PRISM(5)/)
+!
+! END SUBROUTINE PRISM2TETRA
 
-SUBROUTINE PRISM2TETRA(PRISM,TETRAS)
-
-! split a prism defined by a list of 6 vertices into 3 tetrahedrons
-
-!       6
-!      /.\                      .
-!    /  .  \                    .
-!  /    .    \                  .
-! 4-----------5
-! |     .     |
-! |     .     |
-! |     3     |
-! |    / \    |
-! |  /     \  |
-! |/         \|
-! 1-----------2
-INTEGER, INTENT(IN) :: PRISM(6)
-INTEGER, INTENT(OUT) :: TETRAS(1:12)
-
-TETRAS(1:4)   = (/PRISM(1),PRISM(6),PRISM(4),PRISM(5)/)
-TETRAS(5:8)   = (/PRISM(1),PRISM(3),PRISM(6),PRISM(5)/)
-TETRAS(9:12)  = (/PRISM(1),PRISM(2),PRISM(3),PRISM(5)/)
-
-END SUBROUTINE PRISM2TETRA
-
-! ---------------------------- SPLIT_TETRA ----------------------------------------
-
-SUBROUTINE SPLIT_TETRA(VERTS,MAXVERTS,NVERTS,TETRAS)
-! split a tetrahedron defined by a list of 4 vertices into 4 tetrahedrons
-
-!        1
-!        |
-!       .|.
-!       .|.
-!      . | .
-!     .  7 .
-!     .  |  .
-!    .   4  .
-!    5  / \  6
-!   .  /   \ .
-!   . /     \ .
-!  . /       \ .
-!  ./         \.
-!  /           \.
-! 2-------------3
-
-INTEGER, INTENT(IN) :: MAXVERTS
-INTEGER, INTENT(INOUT) :: NVERTS
-REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
-INTEGER, INTENT(INOUT) :: TETRAS(16)
-
-REAL(EB), POINTER, DIMENSION(:) :: VERT1, VERT2, VERT3, VERT4, VERT5, VERT6, VERT7
-INTEGER :: TETRANEW(16)
-
-VERT1=>VERTS(3*TETRAS(1)-2:3*TETRAS(1))
-VERT2=>VERTS(3*TETRAS(2)-2:3*TETRAS(2))
-VERT3=>VERTS(3*TETRAS(3)-2:3*TETRAS(3))
-VERT4=>VERTS(3*TETRAS(4)-2:3*TETRAS(4))
-VERT5=>VERTS(3*NVERTS+1:3*NVERTS+3)
-VERT6=>VERTS(3*NVERTS+4:3*NVERTS+6)
-VERT7=>VERTS(3*NVERTS+7:3*NVERTS+9)
-
-! add 3 vertices
-VERT5(1:3) = ( VERT1(1:3)+VERT2(1:3) )/2.0_EB
-VERT6(1:3) = ( VERT1(1:3)+VERT3(1:3) )/2.0_EB
-VERT7(1:3) = ( VERT1(1:3)+VERT4(1:3) )/2.0_EB
-TETRAS(5)=NVERTS+1
-TETRAS(6)=NVERTS+2
-TETRAS(7)=NVERTS+3
-NVERTS=NVERTS+3
-
-TETRANEW(1:4)=(/TETRAS(1),TETRAS(5),TETRAS(6),TETRAS(7)/)
-CALL PRISM2TETRA(TETRAS(2:7),TETRANEW(5:16))
-TETRAS(1:16)=TETRANEW(1:16)
-
-END SUBROUTINE SPLIT_TETRA
+! ! ---------------------------- SPLIT_TETRA ----------------------------------------
+!
+! SUBROUTINE SPLIT_TETRA(VERTS,MAXVERTS,NVERTS,TETRAS)
+! ! split a tetrahedron defined by a list of 4 vertices into 4 tetrahedrons
+!
+! !        1
+! !        |
+! !       .|.
+! !       .|.
+! !      . | .
+! !     .  7 .
+! !     .  |  .
+! !    .   4  .
+! !    5  / \  6
+! !   .  /   \ .
+! !   . /     \ .
+! !  . /       \ .
+! !  ./         \.
+! !  /           \.
+! ! 2-------------3
+!
+! INTEGER, INTENT(IN) :: MAXVERTS
+! INTEGER, INTENT(INOUT) :: NVERTS
+! REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+! INTEGER, INTENT(INOUT) :: TETRAS(16)
+!
+! REAL(EB), POINTER, DIMENSION(:) :: VERT1, VERT2, VERT3, VERT4, VERT5, VERT6, VERT7
+! INTEGER :: TETRANEW(16)
+!
+! VERT1=>VERTS(3*TETRAS(1)-2:3*TETRAS(1))
+! VERT2=>VERTS(3*TETRAS(2)-2:3*TETRAS(2))
+! VERT3=>VERTS(3*TETRAS(3)-2:3*TETRAS(3))
+! VERT4=>VERTS(3*TETRAS(4)-2:3*TETRAS(4))
+! VERT5=>VERTS(3*NVERTS+1:3*NVERTS+3)
+! VERT6=>VERTS(3*NVERTS+4:3*NVERTS+6)
+! VERT7=>VERTS(3*NVERTS+7:3*NVERTS+9)
+!
+! ! add 3 vertices
+! VERT5(1:3) = ( VERT1(1:3)+VERT2(1:3) )/2.0_EB
+! VERT6(1:3) = ( VERT1(1:3)+VERT3(1:3) )/2.0_EB
+! VERT7(1:3) = ( VERT1(1:3)+VERT4(1:3) )/2.0_EB
+! TETRAS(5)=NVERTS+1
+! TETRAS(6)=NVERTS+2
+! TETRAS(7)=NVERTS+3
+! NVERTS=NVERTS+3
+!
+! TETRANEW(1:4)=(/TETRAS(1),TETRAS(5),TETRAS(6),TETRAS(7)/)
+! CALL PRISM2TETRA(TETRAS(2:7),TETRANEW(5:16))
+! TETRAS(1:16)=TETRANEW(1:16)
+!
+! END SUBROUTINE SPLIT_TETRA
 
 ! ---------------------------- ORDER_FACES ----------------------------------------
 
@@ -30426,25 +30422,45 @@ M = UUT + COS(ALPHA*DEG2RAD)*(IDENTITY - UUT) + SIN(ALPHA*DEG2RAD)*S
 
 END SUBROUTINE SETUP_ROTATE
 
-! ---------------------------- TRANSLATE_VEC ----------------------------------------
+! ! ---------------------------- `TRANSLATE_VEC` ----------------------------------------
+!
+! SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
+!
+! ! translate a geometry by the vector XYZ
+!
+! INTEGER, INTENT(IN) :: N
+! REAL(EB), INTENT(IN) :: XYZ(3), XIN(3*N)
+! REAL(EB), INTENT(OUT) :: XOUT(3*N)
+!
+! REAL(EB) :: VEC(3)
+! INTEGER :: I
+!
+! DO I = 1, N
+!    VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
+!    XOUT(3*I-2:3*I) = VEC(1:3)
+! ENDDO
+!
+! END SUBROUTINE TRANSLATE_VEC
 
-SUBROUTINE TRANSLATE_VEC(XYZ,N,XIN,XOUT)
+! ---------------------------- `TRANSLATE_VEC_INPLACE` ----------------------------------------
+
+SUBROUTINE TRANSLATE_VEC_INPLACE(XYZ,N,XINOUT)
 
 ! translate a geometry by the vector XYZ
 
 INTEGER, INTENT(IN) :: N
-REAL(EB), INTENT(IN) :: XYZ(3), XIN(3*N)
-REAL(EB), INTENT(OUT) :: XOUT(3*N)
+REAL(EB), INTENT(IN) :: XYZ(3)
+REAL(EB), INTENT(INOUT) :: XINOUT(3*N)
 
 REAL(EB) :: VEC(3)
 INTEGER :: I
 
 DO I = 1, N
-   VEC(1:3) = XYZ(1:3) + XIN(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
-   XOUT(3*I-2:3*I) = VEC(1:3)
+   VEC(1:3) = XYZ(1:3) + XINOUT(3*I-2:3*I) ! copy into a temp array so XIN and XOUT can point to same space
+   XINOUT(3*I-2:3*I) = VEC(1:3)
 ENDDO
 
-END SUBROUTINE TRANSLATE_VEC
+END SUBROUTINE TRANSLATE_VEC_INPLACE
 
 ! ---------------------------- ROTATE_VEC ----------------------------------------
 
@@ -30510,7 +30526,7 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME, N_VERTS, N_FACES, N_VOLUS)
       IF (TRIM(G%GEOC_FILENAME)=='null' .OR. ABS(TIME-T_BEGIN)<TWO_EPSILON_EB) THEN
          CALL SETUP_TRANSFORM(G%SCALE,G%AZIM,G%ELEV,G%GAXIS,G%GROTATE,M)
          CALL ROTATE_VEC(M,G%N_VERTS,G%XYZ0,G%VERTS_BASE,G%VERTS)
-         CALL TRANSLATE_VEC(G%XYZ,G%N_VERTS,G%VERTS,G%VERTS)
+         CALL TRANSLATE_VEC_INPLACE(G%XYZ,G%N_VERTS,G%VERTS)
       ENDIF
    ENDDO
    CALL GEOM2TEXTURE
@@ -30670,7 +30686,7 @@ DO J = 1, G%NSUB_GEOMS
    DXYZ0PTR(1:3) => G%DXYZ0(1:3,J)
    DXYZPTR(1:3) => G%DXYZ(1:3,J)
    CALL ROTATE_VEC(M,NSUB_VERTS,DXYZ0PTR,XIN,XOUT)
-   CALL TRANSLATE_VEC(DXYZPTR,NSUB_VERTS,XOUT,XOUT)
+   CALL TRANSLATE_VEC_INPLACE(DXYZPTR,NSUB_VERTS,XOUT)
 
    ! copy and offset face indices
 
@@ -30928,106 +30944,106 @@ SUBROUTINE WRITE_GEOM_DATA(VERTS, NVERTS, TRIANGLES, NTRIANGLES, VERTDATA, NVERT
 
 END SUBROUTINE WRITE_GEOM_DATA
 
-! ---------------------------- TRIANGLE_BOX_INTERSECT ----------------------------------------
-
-SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-IMPLICIT NONE
-
-INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
-REAL(EB) :: PLANE(4),P0(3),P1(3)
-
-IERR=0
-
-!! Filter small triangles
+! ! ---------------------------- TRIANGLE_BOX_INTERSECT ----------------------------------------
 !
-!A_TRI = TRIANGLE_AREA(V1,V2,V3)
-!A_BB  = MIN( (BB(2)-BB(1))*(BB(4)-BB(3)), (BB(2)-BB(1))*(BB(6)-BB(5)), (BB(4)-BB(3))*(BB(6)-BB(5)) )
-!IF (A_TRI < 0.01*A_BB) RETURN
-
-! Are vertices outside of bounding planes?
-
-IF (MAX(V1(1),V2(1),V3(1))<BB(1)) RETURN
-IF (MIN(V1(1),V2(1),V3(1))>BB(2)) RETURN
-IF (MAX(V1(2),V2(2),V3(2))<BB(3)) RETURN
-IF (MIN(V1(2),V2(2),V3(2))>BB(4)) RETURN
-IF (MAX(V1(3),V2(3),V3(3))<BB(5)) RETURN
-IF (MIN(V1(3),V2(3),V3(3))>BB(6)) RETURN
-
-! Any vertices inside bounding box?
-
-IF ( V1(1)>=BB(1) .AND. V1(1)<=BB(2) .AND. &
-     V1(2)>=BB(3) .AND. V1(2)<=BB(4) .AND. &
-     V1(3)>=BB(5) .AND. V1(3)<=BB(6) ) THEN
-   IERR=1
-   RETURN
-ENDIF
-IF ( V2(1)>=BB(1) .AND. V2(1)<=BB(2) .AND. &
-     V2(2)>=BB(3) .AND. V2(2)<=BB(4) .AND. &
-     V2(3)>=BB(5) .AND. V2(3)<=BB(6) ) THEN
-   IERR=1
-   RETURN
-ENDIF
-IF ( V3(1)>=BB(1) .AND. V3(1)<=BB(2) .AND. &
-     V3(2)>=BB(3) .AND. V3(2)<=BB(4) .AND. &
-     V3(3)>=BB(5) .AND. V3(3)<=BB(6) ) THEN
-   IERR=1
-   RETURN
-ENDIF
-
-! There are a couple other trivial rejection tests we could employ.
-! But for now we jump straight to line segment--plane intersection.
-
-! Test edge V1,V2 for intersection with each face of box
-PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-1); IF (IERR==1) RETURN
-PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 1); IF (IERR==1) RETURN
-PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-2); IF (IERR==1) RETURN
-PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 2); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-3); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 3); IF (IERR==1) RETURN
-
-! Test edge V2,V3 for intersection with each face of box
-PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-1); IF (IERR==1) RETURN
-PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 1); IF (IERR==1) RETURN
-PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-2); IF (IERR==1) RETURN
-PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 2); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-3); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 3); IF (IERR==1) RETURN
-
-! Test edge V3,V1 for intersection with each face of box
-PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-1); IF (IERR==1) RETURN
-PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 1); IF (IERR==1) RETURN
-PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-2); IF (IERR==1) RETURN
-PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 2); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-3); IF (IERR==1) RETURN
-PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 3); IF (IERR==1) RETURN
-
-! The remaining possibility for tri-box intersection is that the corner of the box pokes through
-! the triangle such that neither the vertices nor the edges of tri intersect any of the box faces.
-! In this case the diagonal of the box corner intersects the plane formed by the tri.  The diagonal
-! is defined as the line segment from point P0 to P1, formed from the corners of the bounding box.
-
-! Test the four box diagonals:
-
-P0 = (/BB(1),BB(3),BB(5)/)
-P1 = (/BB(2),BB(4),BB(6)/)
-CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
-
-P0 = (/BB(2),BB(3),BB(5)/)
-P1 = (/BB(1),BB(4),BB(6)/)
-CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
-
-P0 = (/BB(1),BB(3),BB(6)/)
-P1 = (/BB(2),BB(4),BB(5)/)
-CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
-
-P0 = (/BB(1),BB(4),BB(5)/)
-P1 = (/BB(2),BB(3),BB(6)/)
-CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
-
-! test commit from Charles Luo
-
-END SUBROUTINE TRIANGLE_BOX_INTERSECT
+! SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(OUT) :: IERR
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
+! REAL(EB) :: PLANE(4),P0(3),P1(3)
+!
+! IERR=0
+!
+! !! Filter small triangles
+! !
+! !A_TRI = TRIANGLE_AREA(V1,V2,V3)
+! !A_BB  = MIN( (BB(2)-BB(1))*(BB(4)-BB(3)), (BB(2)-BB(1))*(BB(6)-BB(5)), (BB(4)-BB(3))*(BB(6)-BB(5)) )
+! !IF (A_TRI < 0.01*A_BB) RETURN
+!
+! ! Are vertices outside of bounding planes?
+!
+! IF (MAX(V1(1),V2(1),V3(1))<BB(1)) RETURN
+! IF (MIN(V1(1),V2(1),V3(1))>BB(2)) RETURN
+! IF (MAX(V1(2),V2(2),V3(2))<BB(3)) RETURN
+! IF (MIN(V1(2),V2(2),V3(2))>BB(4)) RETURN
+! IF (MAX(V1(3),V2(3),V3(3))<BB(5)) RETURN
+! IF (MIN(V1(3),V2(3),V3(3))>BB(6)) RETURN
+!
+! ! Any vertices inside bounding box?
+!
+! IF ( V1(1)>=BB(1) .AND. V1(1)<=BB(2) .AND. &
+!      V1(2)>=BB(3) .AND. V1(2)<=BB(4) .AND. &
+!      V1(3)>=BB(5) .AND. V1(3)<=BB(6) ) THEN
+!    IERR=1
+!    RETURN
+! ENDIF
+! IF ( V2(1)>=BB(1) .AND. V2(1)<=BB(2) .AND. &
+!      V2(2)>=BB(3) .AND. V2(2)<=BB(4) .AND. &
+!      V2(3)>=BB(5) .AND. V2(3)<=BB(6) ) THEN
+!    IERR=1
+!    RETURN
+! ENDIF
+! IF ( V3(1)>=BB(1) .AND. V3(1)<=BB(2) .AND. &
+!      V3(2)>=BB(3) .AND. V3(2)<=BB(4) .AND. &
+!      V3(3)>=BB(5) .AND. V3(3)<=BB(6) ) THEN
+!    IERR=1
+!    RETURN
+! ENDIF
+!
+! ! There are a couple other trivial rejection tests we could employ.
+! ! But for now we jump straight to line segment--plane intersection.
+!
+! ! Test edge V1,V2 for intersection with each face of box
+! PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-1); IF (IERR==1) RETURN
+! PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 1); IF (IERR==1) RETURN
+! PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-2); IF (IERR==1) RETURN
+! PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 2); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-3); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 3); IF (IERR==1) RETURN
+!
+! ! Test edge V2,V3 for intersection with each face of box
+! PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-1); IF (IERR==1) RETURN
+! PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 1); IF (IERR==1) RETURN
+! PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-2); IF (IERR==1) RETURN
+! PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 2); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-3); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 3); IF (IERR==1) RETURN
+!
+! ! Test edge V3,V1 for intersection with each face of box
+! PLANE = (/-1._EB,0._EB,0._EB, BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-1); IF (IERR==1) RETURN
+! PLANE = (/ 1._EB,0._EB,0._EB,-BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 1); IF (IERR==1) RETURN
+! PLANE = (/0._EB,-1._EB,0._EB, BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-2); IF (IERR==1) RETURN
+! PLANE = (/0._EB, 1._EB,0._EB,-BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 2); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB,-1._EB, BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-3); IF (IERR==1) RETURN
+! PLANE = (/0._EB,0._EB, 1._EB,-BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 3); IF (IERR==1) RETURN
+!
+! ! The remaining possibility for tri-box intersection is that the corner of the box pokes through
+! ! the triangle such that neither the vertices nor the edges of tri intersect any of the box faces.
+! ! In this case the diagonal of the box corner intersects the plane formed by the tri.  The diagonal
+! ! is defined as the line segment from point P0 to P1, formed from the corners of the bounding box.
+!
+! ! Test the four box diagonals:
+!
+! P0 = (/BB(1),BB(3),BB(5)/)
+! P1 = (/BB(2),BB(4),BB(6)/)
+! CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
+!
+! P0 = (/BB(2),BB(3),BB(5)/)
+! P1 = (/BB(1),BB(4),BB(6)/)
+! CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
+!
+! P0 = (/BB(1),BB(3),BB(6)/)
+! P1 = (/BB(2),BB(4),BB(5)/)
+! CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
+!
+! P0 = (/BB(1),BB(4),BB(5)/)
+! P1 = (/BB(2),BB(3),BB(6)/)
+! CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
+!
+! ! test commit from Charles Luo
+!
+! END SUBROUTINE TRIANGLE_BOX_INTERSECT
 
 ! ---------------------------- TRIANGLE_AREA ----------------------------------------
 
@@ -31046,76 +31062,76 @@ TRIANGLE_AREA = 0.5_EB*NORM2(N)
 
 END FUNCTION TRIANGLE_AREA
 
-! ---------------------------- LINE_SEGMENT_TRIANGLE_INTERSECT ----------------------------------------
+! ! ---------------------------- LINE_SEGMENT_TRIANGLE_INTERSECT ----------------------------------------
+!
+! SUBROUTINE LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1)
+! USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(OUT) :: IERR
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
+! REAL(EB) :: E1(3),E2(3),S(3),Q(3),U,V,TMP,T,D(3),P(3)
+! REAL(EB), PARAMETER :: EPS=1.E-10_EB
+!
+! IERR=0
+!
+! ! Schneider and Eberly, Section 11.1
+!
+! D = P1-P0
+!
+! E1 = V2-V1
+! E2 = V3-V1
+!
+! CALL CROSS_PRODUCT(P,D,E2)
+!
+! TMP = DOT_PRODUCT(P,E1)
+!
+! IF ( ABS(TMP)<EPS ) RETURN
+!
+! TMP = 1._EB/TMP
+! S = P0-V1
+!
+! U = TMP*DOT_PRODUCT(S,P)
+! IF (U<0._EB .OR. U>1._EB) RETURN
+!
+! CALL CROSS_PRODUCT(Q,S,E1)
+! V = TMP*DOT_PRODUCT(D,Q)
+! IF (V<0._EB .OR. (U+V)>1._EB) RETURN
+!
+! T = TMP*DOT_PRODUCT(E2,Q)
+! !XI = P0 + T*D ! the intersection point
+!
+! IF (T>=0._EB .AND. T<=1._EB) IERR=1
+!
+! END SUBROUTINE LINE_SEGMENT_TRIANGLE_INTERSECT
 
-SUBROUTINE LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
-IMPLICIT NONE
-
-INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
-REAL(EB) :: E1(3),E2(3),S(3),Q(3),U,V,TMP,T,D(3),P(3)
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
-
-IERR=0
-
-! Schneider and Eberly, Section 11.1
-
-D = P1-P0
-
-E1 = V2-V1
-E2 = V3-V1
-
-CALL CROSS_PRODUCT(P,D,E2)
-
-TMP = DOT_PRODUCT(P,E1)
-
-IF ( ABS(TMP)<EPS ) RETURN
-
-TMP = 1._EB/TMP
-S = P0-V1
-
-U = TMP*DOT_PRODUCT(S,P)
-IF (U<0._EB .OR. U>1._EB) RETURN
-
-CALL CROSS_PRODUCT(Q,S,E1)
-V = TMP*DOT_PRODUCT(D,Q)
-IF (V<0._EB .OR. (U+V)>1._EB) RETURN
-
-T = TMP*DOT_PRODUCT(E2,Q)
-!XI = P0 + T*D ! the intersection point
-
-IF (T>=0._EB .AND. T<=1._EB) IERR=1
-
-END SUBROUTINE LINE_SEGMENT_TRIANGLE_INTERSECT
-
-! ---------------------------- LINE_PLANE_INTERSECT ----------------------------------------
-
-SUBROUTINE LINE_PLANE_INTERSECT(IERR,P0,P1,PP,BB,IOR)
-IMPLICIT NONE
-
-INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(IN) :: P0(3),P1(3),PP(4),BB(6)
-INTEGER, INTENT(IN) :: IOR
-REAL(EB) :: D(3),T,DENOM, Q0(3)
-REAL(EB), PARAMETER :: EPS=1.E-10_EB
-
-IERR=0
-Q0=-999._EB
-T=0._EB
-
-D = P1-P0
-DENOM = DOT_PRODUCT(PP(1:3),D)
-
-IF (ABS(DENOM)>EPS) THEN
-   T = -( DOT_PRODUCT(PP(1:3),P0)+PP(4) )/DENOM
-   IF (T>=0._EB .AND. T<=1._EB) THEN
-      Q0 = P0 + T*D ! instersection point
-      IF (POINT_IN_BOX_2D(Q0,BB,IOR)) IERR=1
-   ENDIF
-ENDIF
-
-END SUBROUTINE LINE_PLANE_INTERSECT
+! ! ---------------------------- LINE_PLANE_INTERSECT ----------------------------------------
+!
+! SUBROUTINE LINE_PLANE_INTERSECT(IERR,P0,P1,PP,BB,IOR)
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(OUT) :: IERR
+! REAL(EB), INTENT(IN) :: P0(3),P1(3),PP(4),BB(6)
+! INTEGER, INTENT(IN) :: IOR
+! REAL(EB) :: D(3),T,DENOM, Q0(3)
+! REAL(EB), PARAMETER :: EPS=1.E-10_EB
+!
+! IERR=0
+! Q0=-999._EB
+! T=0._EB
+!
+! D = P1-P0
+! DENOM = DOT_PRODUCT(PP(1:3),D)
+!
+! IF (ABS(DENOM)>EPS) THEN
+!    T = -( DOT_PRODUCT(PP(1:3),P0)+PP(4) )/DENOM
+!    IF (T>=0._EB .AND. T<=1._EB) THEN
+!       Q0 = P0 + T*D ! instersection point
+!       IF (POINT_IN_BOX_2D(Q0,BB,IOR)) IERR=1
+!    ENDIF
+! ENDIF
+!
+! END SUBROUTINE LINE_PLANE_INTERSECT
 
 ! ---------------------------- POINT_IN_BOX_2D ----------------------------------------
 
@@ -31328,11 +31344,11 @@ DO I = 1, NVERTS
   IF (I == IV1 .OR. I == IV2 .OR.I == IV3 ) CYCLE
   V(1:3)=>VERTS(3*I-2:3*I)
   ! These CYCLE tests are done to treat holes properly:
-  D123=SQRT( (V(1)-V1(1))**2._EB + (V(2)-V1(2))**2._EB + (V(3)-V1(3))**2._EB )
+  D123=SQRT( (V(1)-V1(1))**2._FB + (V(2)-V1(2))**2._FB + (V(3)-V1(3))**2._FB )
   IF (D123 < EPS_FB) CYCLE
-  D123=SQRT( (V(1)-V2(1))**2._EB + (V(2)-V2(2))**2._EB + (V(3)-V2(3))**2._EB )
+  D123=SQRT( (V(1)-V2(1))**2._FB + (V(2)-V2(2))**2._FB + (V(3)-V2(3))**2._FB )
   IF (D123 < EPS_FB) CYCLE
-  D123=SQRT( (V(1)-V3(1))**2._EB + (V(2)-V3(2))**2._EB + (V(3)-V3(3))**2._EB )
+  D123=SQRT( (V(1)-V3(1))**2._FB + (V(2)-V3(2))**2._FB + (V(3)-V3(3))**2._FB )
   IF (D123 < EPS_FB) CYCLE
   IF (POINT_IN_TRIANGLE_FB(V, V1, V2, V3)) RETURN
 ENDDO
@@ -31733,28 +31749,28 @@ ENDDO
 RETURN
 END SUBROUTINE TRIANGULATE
 
-! ---------------------------- TRIANGULATE2 ----------------------------------------
-
-SUBROUTINE TRIANGULATE2(DIR, VERTS,NVERTS,VERT_OFFSET,FACES)
-  INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
-  REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
-  INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
-  INTEGER :: IVERT
-
-
-  IF (VERTS(1)*VERTS(1)<0.0 .OR. DIR==4) THEN
-  ! a dummy checks to prevent compiler warnings for unused variables
-  ! (we need VERTS eventually  but don't need VERTS now)
-     RETURN
-  ENDIF
-  DO IVERT = 1, NVERTS - 2 ! for now assume face is convex
-  ! vertex indices 1, 2, ..., NVF
-  ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
-    FACES(3*IVERT-2) = VERT_OFFSET+1
-    FACES(3*IVERT-1) = VERT_OFFSET+1+IVERT
-    FACES(3*IVERT)   = VERT_OFFSET+2+IVERT
-  ENDDO
-END SUBROUTINE TRIANGULATE2
+! ! ---------------------------- TRIANGULATE2 ----------------------------------------
+!
+! SUBROUTINE TRIANGULATE2(DIR, VERTS,NVERTS,VERT_OFFSET,FACES)
+!   INTEGER, INTENT(IN) :: DIR, NVERTS, VERT_OFFSET
+!   REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+!   INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
+!   INTEGER :: IVERT
+!
+!
+!   IF (VERTS(1)*VERTS(1)<0.0 .OR. DIR==4) THEN
+!   ! a dummy checks to prevent compiler warnings for unused variables
+!   ! (we need VERTS eventually  but don't need VERTS now)
+!      RETURN
+!   ENDIF
+!   DO IVERT = 1, NVERTS - 2 ! for now assume face is convex
+!   ! vertex indices 1, 2, ..., NVF
+!   ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
+!     FACES(3*IVERT-2) = VERT_OFFSET+1
+!     FACES(3*IVERT-1) = VERT_OFFSET+1+IVERT
+!     FACES(3*IVERT)   = VERT_OFFSET+2+IVERT
+!   ENDDO
+! END SUBROUTINE TRIANGULATE2
 
 ! ! ---------------------------- RAY_TRIANGLE_INTERSECT ----------------------------------------
 !
@@ -32096,370 +32112,370 @@ G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 END SUBROUTINE GETGRAD
 
 
-! ---------------------------- TRI_PLANE_BOX_INTERSECT ----------------------------------------
+! ! ---------------------------- TRI_PLANE_BOX_INTERSECT ----------------------------------------
+!
+! SUBROUTINE TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
+! USE MATH_FUNCTIONS
+! IMPLICIT NONE
+! ! get the intersection points (cooridnates) of the BB's 12 edges and the plane of the trianlge
+! ! regular intersection polygons with 0, 3, 4, 5, or 6 corners
+! ! irregular intersection case (corner, edge, or face intersection) should also be ok.
+!
+! INTEGER, INTENT(OUT) :: NP
+! REAL(EB), INTENT(OUT) :: PC(18) ! max 6 points but maybe repeated at the vertices
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
+! REAL(EB) :: P0(3),P1(3),Q(3),PC_TMP(60)
+! INTEGER :: I,J,IERR,IERR2
+!
+! NP = 0
+! EDGE_LOOP: DO I=1,12
+!    SELECT CASE(I)
+!       CASE(1)
+!          P0(1)=BB(1)
+!          P0(2)=BB(3)
+!          P0(3)=BB(5)
+!          P1(1)=BB(2)
+!          P1(2)=BB(3)
+!          P1(3)=BB(5)
+!       CASE(2)
+!          P0(1)=BB(2)
+!          P0(2)=BB(3)
+!          P0(3)=BB(5)
+!          P1(1)=BB(2)
+!          P1(2)=BB(4)
+!          P1(3)=BB(5)
+!       CASE(3)
+!          P0(1)=BB(2)
+!          P0(2)=BB(4)
+!          P0(3)=BB(5)
+!          P1(1)=BB(1)
+!          P1(2)=BB(4)
+!          P1(3)=BB(5)
+!       CASE(4)
+!          P0(1)=BB(1)
+!          P0(2)=BB(4)
+!          P0(3)=BB(5)
+!          P1(1)=BB(1)
+!          P1(2)=BB(3)
+!          P1(3)=BB(5)
+!       CASE(5)
+!          P0(1)=BB(1)
+!          P0(2)=BB(3)
+!          P0(3)=BB(6)
+!          P1(1)=BB(2)
+!          P1(2)=BB(3)
+!          P1(3)=BB(6)
+!       CASE(6)
+!          P0(1)=BB(2)
+!          P0(2)=BB(3)
+!          P0(3)=BB(6)
+!          P1(1)=BB(2)
+!          P1(2)=BB(4)
+!          P1(3)=BB(6)
+!       CASE(7)
+!          P0(1)=BB(2)
+!          P0(2)=BB(4)
+!          P0(3)=BB(6)
+!          P1(1)=BB(1)
+!          P1(2)=BB(4)
+!          P1(3)=BB(6)
+!       CASE(8)
+!          P0(1)=BB(1)
+!          P0(2)=BB(4)
+!          P0(3)=BB(6)
+!          P1(1)=BB(1)
+!          P1(2)=BB(3)
+!          P1(3)=BB(6)
+!       CASE(9)
+!          P0(1)=BB(1)
+!          P0(2)=BB(3)
+!          P0(3)=BB(5)
+!          P1(1)=BB(1)
+!          P1(2)=BB(3)
+!          P1(3)=BB(6)
+!       CASE(10)
+!          P0(1)=BB(2)
+!          P0(2)=BB(3)
+!          P0(3)=BB(5)
+!          P1(1)=BB(2)
+!          P1(2)=BB(3)
+!          P1(3)=BB(6)
+!       CASE(11)
+!          P0(1)=BB(2)
+!          P0(2)=BB(4)
+!          P0(3)=BB(5)
+!          P1(1)=BB(2)
+!          P1(2)=BB(4)
+!          P1(3)=BB(6)
+!       CASE(12)
+!          P0(1)=BB(1)
+!          P0(2)=BB(4)
+!          P0(3)=BB(5)
+!          P1(1)=BB(1)
+!          P1(2)=BB(4)
+!          P1(3)=BB(6)
+!    END SELECT
+!    CALL LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
+!
+!    IF (IERR==1) THEN
+!       NP=NP+1
+!       DO J=1,3
+!          PC_TMP((NP-1)*3+J)=Q(J)
+!       ENDDO
+!    ENDIF
+! ENDDO EDGE_LOOP
+!
+! ! For more than 3 intersection points
+! ! they have to be sorted in order to create a convex polygon
+! CALL ELIMATE_REPEATED_POINTS(NP,PC_TMP)
+! IF ( NP > 6) THEN
+!    WRITE(LU_OUTPUT,*)"*** Triangle box intersections"
+!    DO I = 1, NP
+!       WRITE(LU_OUTPUT,*)I,PC_TMP(3*I-2),PC_TMP(3*I-1),PC_TMP(3*I)
+!    ENDDO
+!    CALL SHUTDOWN("ERROR: more than 6 triangle box intersections")
+! ENDIF
+! IF (NP > 3) THEN
+!    CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC_TMP)
+! ENDIF
+! DO I=1,NP*3
+!    PC(I) = PC_TMP(I)
+! ENDDO
+!
+! RETURN
+! END SUBROUTINE TRI_PLANE_BOX_INTERSECT
 
-SUBROUTINE TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
-USE MATH_FUNCTIONS
-IMPLICIT NONE
-! get the intersection points (cooridnates) of the BB's 12 edges and the plane of the trianlge
-! regular intersection polygons with 0, 3, 4, 5, or 6 corners
-! irregular intersection case (corner, edge, or face intersection) should also be ok.
+! ! ---------------------------- SORT_POLYGON_CORNERS ----------------------------------------
+!
+! SUBROUTINE SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC)
+! USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+! IMPLICIT NONE
+! ! Sort all the corners of a polygon
+! ! Ref: Gernot Hoffmann, Cube Plane Intersection.
+!
+! INTEGER, INTENT(IN) :: NP
+! REAL(EB), INTENT(INOUT) :: PC(60)
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3)
+! REAL(EB) :: MEAN_VALUE(3),POLY_NORM(3),R1,R2,TMP(3),U(3),W(3)
+! INTEGER :: I,J,K,IOR,NA,NB
+!
+! IF (NP <=3 ) RETURN
+!
+! U = V2-V1
+! W = V3-V1
+! CALL CROSS_PRODUCT(POLY_NORM,U,W)
+!
+! DO I=1,3
+!    MEAN_VALUE(I) = 0._EB
+!    DO J=1,NP
+!       MEAN_VALUE(I) = MEAN_VALUE(I) + PC((J-1)*3+I)/REAL(NP)
+!    ENDDO
+! ENDDO
+!
+! !get normal of ploygan
+! IF (ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) .AND. ABS(POLY_NORM(1)) >= ABS(POLY_NORM(3)) ) THEN
+!    IOR = 1
+!    NA = 2
+!    NB = 3
+! ELSE IF (ABS(POLY_NORM(2)) >= ABS(POLY_NORM(3)) ) THEN
+!    IOR = 2
+!    NA = 1
+!    NB = 3
+! ELSE
+!    IOR = 3
+!    NA = 1
+!    NB = 2
+! ENDIF
+!
+! DO I=1,NP-1
+!    R1 = ATAN2(PC((I-1)*3+NB)-MEAN_VALUE(NB), PC((I-1)*3+NA)-MEAN_VALUE(NA))
+!    DO J=I+1, NP
+!       R2 = ATAN2(PC((J-1)*3+NB)-MEAN_VALUE(NB), PC((J-1)*3+NA)-MEAN_VALUE(NA))
+!       IF (R2 < R1) THEN
+!          DO K=1,3
+!             TMP(K) = PC((J-1)*3+K)
+!             PC((J-1)*3+K) = PC((I-1)*3+K)
+!             PC((I-1)*3+K) = TMP(K)
+!             R1 = R2
+!          ENDDO
+!       ENDIF
+!    ENDDO
+! ENDDO
+!
+! RETURN
+! END SUBROUTINE SORT_POLYGON_CORNERS
 
-INTEGER, INTENT(OUT) :: NP
-REAL(EB), INTENT(OUT) :: PC(18) ! max 6 points but maybe repeated at the vertices
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
-REAL(EB) :: P0(3),P1(3),Q(3),PC_TMP(60)
-INTEGER :: I,J,IERR,IERR2
+! ! ---------------------------- TRIANGLE_POLYGON_POINTS ----------------------------------------
+!
+! SUBROUTINE TRIANGLE_POLYGON_POINTS(IERR,NXP,XPC,V1,V2,V3,NP,PC,BB)
+! IMPLICIT NONE
+! ! Calculate the intersection points of a triangle and a polygon, if intersected.
+! ! http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+!
+! INTEGER, INTENT(IN) :: NP
+! INTEGER, INTENT(OUT) :: NXP,IERR
+! REAL(EB), INTENT(OUT) :: XPC(60)
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),PC(18),BB(6)
+! INTEGER :: I,J,K
+! REAL(EB) :: U(3),V(3),W(3),S1P0(3),XC(3)
+! REAL(EB) :: A,B,C,D,E,DD,SC,TC
+! REAL(EB), PARAMETER :: EPS=1.E-20_EB,TOL=1.E-12_EB
+! !LOGICAL :: POINT_IN_BB, POINT_IN_TRIANGLE
+!
+! IERR = 0
+! SC = 0._EB
+! TC = 0._EB
+! NXP = 0
+! TRIANGLE_LOOP: DO I=1,3
+!    SELECT CASE(I)
+!       CASE(1)
+!          U = V2-V1
+!          S1P0 = V1
+!       CASE(2)
+!          U = V3-V2
+!          S1P0 = V2
+!       CASE(3)
+!          U = V1-V3
+!          S1P0 = V3
+!    END SELECT
+!
+!    POLYGON_LOOP: DO J=1,NP
+!       IF (J < NP) THEN
+!          DO K=1,3
+!             V(K) = PC(J*3+K)-PC((J-1)*3+K)
+!          ENDDO
+!       ELSE
+!          DO K=1,3
+!             V(K) = PC(K)-PC((J-1)*3+K)
+!          ENDDO
+!       ENDIF
+!
+!       DO K=1,3
+!          W(K) = S1P0(K)-PC((J-1)*3+K)
+!       ENDDO
+!
+!       A = DOT_PRODUCT(U,U)
+!       B = DOT_PRODUCT(U,V)
+!       C = DOT_PRODUCT(V,V)
+!       D = DOT_PRODUCT(U,W)
+!       E = DOT_PRODUCT(V,W)
+!       DD = A*C-B*B
+!
+!       IF (DD < EPS) THEN ! almost parallel
+!          IERR = 0
+!          CYCLE
+!       ELSE
+!          SC = (B*E-C*D)/DD
+!          TC = (A*E-B*D)/DD
+!          IF (SC>-TOL .AND. SC<1._EB+TOL .AND. TC>-TOL .AND. TC<1._EB+TOL ) THEN
+!             NXP = NXP+1
+!             XC = S1P0+SC*U
+!             DO K=1,3
+!                XPC((NXP-1)*3+K) = XC(K)
+!             ENDDO
+!          ENDIF
+!       ENDIF
+!
+!    ENDDO POLYGON_LOOP
+! ENDDO TRIANGLE_LOOP
+!
+! !WRITE(LU_ERR,*) 'A', NXP
+! ! add triangle vertices in polygon
+! DO I=1,3
+!    SELECT CASE(I)
+!       CASE(1)
+!          V = V1
+!       CASE(2)
+!          V = V2
+!       CASE(3)
+!          V = V3
+!    END SELECT
+!
+!    IF (POINT_IN_BB(V,BB)) THEN
+!       NXP = NXP+1
+!       DO K=1,3
+!          XPC((NXP-1)*3+K) = V(K)
+!       ENDDO
+!    ENDIF
+! ENDDO
+!
+! !WRITE(LU_ERR,*) 'B', NXP
+! ! add polygon vertices in triangle
+! DO I=1,NP
+!    DO J=1,3
+!       V(J) = PC((I-1)*3+J)
+!    ENDDO
+!    IF (POINT_IN_TRIANGLE(V,V1,V2,V3)) THEN
+!       NXP = NXP+1
+!       DO J=1,3
+!          XPC((NXP-1)*3+J) = V(J)
+!       ENDDO
+!    ENDIF
+! ENDDO
+!
+! !WRITE(LU_ERR,*) 'C', NXP
+!
+! CALL ELIMATE_REPEATED_POINTS(NXP,XPC)
+!
+! !WRITE(LU_ERR,*) 'D', NXP
+!
+! IF (NXP > 3) THEN
+!    CALL SORT_POLYGON_CORNERS(NXP,V1,V2,V3,XPC)
+! ENDIF
+!
+! !WRITE(LU_ERR,*) 'E', NXP
+!
+! IF (NXP >= 1) THEN
+!    IERR = 1 ! index for intersecting
+! ELSE
+!    IERR = 0
+! ENDIF
+!
+! RETURN
+! END SUBROUTINE TRIANGLE_POLYGON_POINTS
 
-NP = 0
-EDGE_LOOP: DO I=1,12
-   SELECT CASE(I)
-      CASE(1)
-         P0(1)=BB(1)
-         P0(2)=BB(3)
-         P0(3)=BB(5)
-         P1(1)=BB(2)
-         P1(2)=BB(3)
-         P1(3)=BB(5)
-      CASE(2)
-         P0(1)=BB(2)
-         P0(2)=BB(3)
-         P0(3)=BB(5)
-         P1(1)=BB(2)
-         P1(2)=BB(4)
-         P1(3)=BB(5)
-      CASE(3)
-         P0(1)=BB(2)
-         P0(2)=BB(4)
-         P0(3)=BB(5)
-         P1(1)=BB(1)
-         P1(2)=BB(4)
-         P1(3)=BB(5)
-      CASE(4)
-         P0(1)=BB(1)
-         P0(2)=BB(4)
-         P0(3)=BB(5)
-         P1(1)=BB(1)
-         P1(2)=BB(3)
-         P1(3)=BB(5)
-      CASE(5)
-         P0(1)=BB(1)
-         P0(2)=BB(3)
-         P0(3)=BB(6)
-         P1(1)=BB(2)
-         P1(2)=BB(3)
-         P1(3)=BB(6)
-      CASE(6)
-         P0(1)=BB(2)
-         P0(2)=BB(3)
-         P0(3)=BB(6)
-         P1(1)=BB(2)
-         P1(2)=BB(4)
-         P1(3)=BB(6)
-      CASE(7)
-         P0(1)=BB(2)
-         P0(2)=BB(4)
-         P0(3)=BB(6)
-         P1(1)=BB(1)
-         P1(2)=BB(4)
-         P1(3)=BB(6)
-      CASE(8)
-         P0(1)=BB(1)
-         P0(2)=BB(4)
-         P0(3)=BB(6)
-         P1(1)=BB(1)
-         P1(2)=BB(3)
-         P1(3)=BB(6)
-      CASE(9)
-         P0(1)=BB(1)
-         P0(2)=BB(3)
-         P0(3)=BB(5)
-         P1(1)=BB(1)
-         P1(2)=BB(3)
-         P1(3)=BB(6)
-      CASE(10)
-         P0(1)=BB(2)
-         P0(2)=BB(3)
-         P0(3)=BB(5)
-         P1(1)=BB(2)
-         P1(2)=BB(3)
-         P1(3)=BB(6)
-      CASE(11)
-         P0(1)=BB(2)
-         P0(2)=BB(4)
-         P0(3)=BB(5)
-         P1(1)=BB(2)
-         P1(2)=BB(4)
-         P1(3)=BB(6)
-      CASE(12)
-         P0(1)=BB(1)
-         P0(2)=BB(4)
-         P0(3)=BB(5)
-         P1(1)=BB(1)
-         P1(2)=BB(4)
-         P1(3)=BB(6)
-   END SELECT
-   CALL LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
-
-   IF (IERR==1) THEN
-      NP=NP+1
-      DO J=1,3
-         PC_TMP((NP-1)*3+J)=Q(J)
-      ENDDO
-   ENDIF
-ENDDO EDGE_LOOP
-
-! For more than 3 intersection points
-! they have to be sorted in order to create a convex polygon
-CALL ELIMATE_REPEATED_POINTS(NP,PC_TMP)
-IF ( NP > 6) THEN
-   WRITE(LU_OUTPUT,*)"*** Triangle box intersections"
-   DO I = 1, NP
-      WRITE(LU_OUTPUT,*)I,PC_TMP(3*I-2),PC_TMP(3*I-1),PC_TMP(3*I)
-   ENDDO
-   CALL SHUTDOWN("ERROR: more than 6 triangle box intersections")
-ENDIF
-IF (NP > 3) THEN
-   CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC_TMP)
-ENDIF
-DO I=1,NP*3
-   PC(I) = PC_TMP(I)
-ENDDO
-
-RETURN
-END SUBROUTINE TRI_PLANE_BOX_INTERSECT
-
-! ---------------------------- SORT_POLYGON_CORNERS ----------------------------------------
-
-SUBROUTINE SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC)
-USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
-IMPLICIT NONE
-! Sort all the corners of a polygon
-! Ref: Gernot Hoffmann, Cube Plane Intersection.
-
-INTEGER, INTENT(IN) :: NP
-REAL(EB), INTENT(INOUT) :: PC(60)
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3)
-REAL(EB) :: MEAN_VALUE(3),POLY_NORM(3),R1,R2,TMP(3),U(3),W(3)
-INTEGER :: I,J,K,IOR,NA,NB
-
-IF (NP <=3 ) RETURN
-
-U = V2-V1
-W = V3-V1
-CALL CROSS_PRODUCT(POLY_NORM,U,W)
-
-DO I=1,3
-   MEAN_VALUE(I) = 0._EB
-   DO J=1,NP
-      MEAN_VALUE(I) = MEAN_VALUE(I) + PC((J-1)*3+I)/REAL(NP)
-   ENDDO
-ENDDO
-
-!get normal of ploygan
-IF (ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) .AND. ABS(POLY_NORM(1)) >= ABS(POLY_NORM(3)) ) THEN
-   IOR = 1
-   NA = 2
-   NB = 3
-ELSE IF (ABS(POLY_NORM(2)) >= ABS(POLY_NORM(3)) ) THEN
-   IOR = 2
-   NA = 1
-   NB = 3
-ELSE
-   IOR = 3
-   NA = 1
-   NB = 2
-ENDIF
-
-DO I=1,NP-1
-   R1 = ATAN2(PC((I-1)*3+NB)-MEAN_VALUE(NB), PC((I-1)*3+NA)-MEAN_VALUE(NA))
-   DO J=I+1, NP
-      R2 = ATAN2(PC((J-1)*3+NB)-MEAN_VALUE(NB), PC((J-1)*3+NA)-MEAN_VALUE(NA))
-      IF (R2 < R1) THEN
-         DO K=1,3
-            TMP(K) = PC((J-1)*3+K)
-            PC((J-1)*3+K) = PC((I-1)*3+K)
-            PC((I-1)*3+K) = TMP(K)
-            R1 = R2
-         ENDDO
-      ENDIF
-   ENDDO
-ENDDO
-
-RETURN
-END SUBROUTINE SORT_POLYGON_CORNERS
-
-! ---------------------------- TRIANGLE_POLYGON_POINTS ----------------------------------------
-
-SUBROUTINE TRIANGLE_POLYGON_POINTS(IERR,NXP,XPC,V1,V2,V3,NP,PC,BB)
-IMPLICIT NONE
-! Calculate the intersection points of a triangle and a polygon, if intersected.
-! http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
-
-INTEGER, INTENT(IN) :: NP
-INTEGER, INTENT(OUT) :: NXP,IERR
-REAL(EB), INTENT(OUT) :: XPC(60)
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),PC(18),BB(6)
-INTEGER :: I,J,K
-REAL(EB) :: U(3),V(3),W(3),S1P0(3),XC(3)
-REAL(EB) :: A,B,C,D,E,DD,SC,TC
-REAL(EB), PARAMETER :: EPS=1.E-20_EB,TOL=1.E-12_EB
-!LOGICAL :: POINT_IN_BB, POINT_IN_TRIANGLE
-
-IERR = 0
-SC = 0._EB
-TC = 0._EB
-NXP = 0
-TRIANGLE_LOOP: DO I=1,3
-   SELECT CASE(I)
-      CASE(1)
-         U = V2-V1
-         S1P0 = V1
-      CASE(2)
-         U = V3-V2
-         S1P0 = V2
-      CASE(3)
-         U = V1-V3
-         S1P0 = V3
-   END SELECT
-
-   POLYGON_LOOP: DO J=1,NP
-      IF (J < NP) THEN
-         DO K=1,3
-            V(K) = PC(J*3+K)-PC((J-1)*3+K)
-         ENDDO
-      ELSE
-         DO K=1,3
-            V(K) = PC(K)-PC((J-1)*3+K)
-         ENDDO
-      ENDIF
-
-      DO K=1,3
-         W(K) = S1P0(K)-PC((J-1)*3+K)
-      ENDDO
-
-      A = DOT_PRODUCT(U,U)
-      B = DOT_PRODUCT(U,V)
-      C = DOT_PRODUCT(V,V)
-      D = DOT_PRODUCT(U,W)
-      E = DOT_PRODUCT(V,W)
-      DD = A*C-B*B
-
-      IF (DD < EPS) THEN ! almost parallel
-         IERR = 0
-         CYCLE
-      ELSE
-         SC = (B*E-C*D)/DD
-         TC = (A*E-B*D)/DD
-         IF (SC>-TOL .AND. SC<1._EB+TOL .AND. TC>-TOL .AND. TC<1._EB+TOL ) THEN
-            NXP = NXP+1
-            XC = S1P0+SC*U
-            DO K=1,3
-               XPC((NXP-1)*3+K) = XC(K)
-            ENDDO
-         ENDIF
-      ENDIF
-
-   ENDDO POLYGON_LOOP
-ENDDO TRIANGLE_LOOP
-
-!WRITE(LU_ERR,*) 'A', NXP
-! add triangle vertices in polygon
-DO I=1,3
-   SELECT CASE(I)
-      CASE(1)
-         V = V1
-      CASE(2)
-         V = V2
-      CASE(3)
-         V = V3
-   END SELECT
-
-   IF (POINT_IN_BB(V,BB)) THEN
-      NXP = NXP+1
-      DO K=1,3
-         XPC((NXP-1)*3+K) = V(K)
-      ENDDO
-   ENDIF
-ENDDO
-
-!WRITE(LU_ERR,*) 'B', NXP
-! add polygon vertices in triangle
-DO I=1,NP
-   DO J=1,3
-      V(J) = PC((I-1)*3+J)
-   ENDDO
-   IF (POINT_IN_TRIANGLE(V,V1,V2,V3)) THEN
-      NXP = NXP+1
-      DO J=1,3
-         XPC((NXP-1)*3+J) = V(J)
-      ENDDO
-   ENDIF
-ENDDO
-
-!WRITE(LU_ERR,*) 'C', NXP
-
-CALL ELIMATE_REPEATED_POINTS(NXP,XPC)
-
-!WRITE(LU_ERR,*) 'D', NXP
-
-IF (NXP > 3) THEN
-   CALL SORT_POLYGON_CORNERS(NXP,V1,V2,V3,XPC)
-ENDIF
-
-!WRITE(LU_ERR,*) 'E', NXP
-
-IF (NXP >= 1) THEN
-   IERR = 1 ! index for intersecting
-ELSE
-   IERR = 0
-ENDIF
-
-RETURN
-END SUBROUTINE TRIANGLE_POLYGON_POINTS
-
-! ---------------------------- ELIMATE_REPEATED_POINTS ----------------------------------------
-
-SUBROUTINE ELIMATE_REPEATED_POINTS(NP,PC)
-IMPLICIT NONE
-
-INTEGER, INTENT(INOUT):: NP
-REAL(EB), INTENT(INOUT) :: PC(60)
-INTEGER :: NP2,I,J,K
-REAL(EB) :: U(3),V(3),W(3)
-REAL(EB), PARAMETER :: EPS_DIFF=1.0E-8_EB
-
-I = 1
-DO WHILE (I <= NP-1)
-   DO K=1,3
-      U(K) = PC(3*(I-1)+K)
-   ENDDO
-
-   J = I+1
-   NP2 = NP
-   DO WHILE (J <= NP2)
-      DO K=1,3
-         V(K) = PC(3*(J-1)+K)
-      ENDDO
-      W = U-V
-      ! use hybrid comparison test
-      !    absolute for small values
-      !    relative for large values
-      IF (NORM2(W) <= MAX(1.0_EB,NORM2(U),NORM2(V))*EPS_DIFF) THEN
-         DO K=3*J+1,3*NP
-            PC(K-3) = PC(K)
-         ENDDO
-         NP = NP-1
-         J = J-1
-      ENDIF
-      J = J+1
-      IF (J > NP) EXIT
-   ENDDO
-   I = I+1
-ENDDO
-
-RETURN
-END SUBROUTINE ELIMATE_REPEATED_POINTS
+! ! ---------------------------- ELIMATE_REPEATED_POINTS ----------------------------------------
+!
+! SUBROUTINE ELIMATE_REPEATED_POINTS(NP,PC)
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(INOUT):: NP
+! REAL(EB), INTENT(INOUT) :: PC(60)
+! INTEGER :: NP2,I,J,K
+! REAL(EB) :: U(3),V(3),W(3)
+! REAL(EB), PARAMETER :: EPS_DIFF=1.0E-8_EB
+!
+! I = 1
+! DO WHILE (I <= NP-1)
+!    DO K=1,3
+!       U(K) = PC(3*(I-1)+K)
+!    ENDDO
+!
+!    J = I+1
+!    NP2 = NP
+!    DO WHILE (J <= NP2)
+!       DO K=1,3
+!          V(K) = PC(3*(J-1)+K)
+!       ENDDO
+!       W = U-V
+!       ! use hybrid comparison test
+!       !    absolute for small values
+!       !    relative for large values
+!       IF (NORM2(W) <= MAX(1.0_EB,NORM2(U),NORM2(V))*EPS_DIFF) THEN
+!          DO K=3*J+1,3*NP
+!             PC(K-3) = PC(K)
+!          ENDDO
+!          NP = NP-1
+!          J = J-1
+!       ENDIF
+!       J = J+1
+!       IF (J > NP) EXIT
+!    ENDDO
+!    I = I+1
+! ENDDO
+!
+! RETURN
+! END SUBROUTINE ELIMATE_REPEATED_POINTS
 
 ! ---------------------------- POINT_IN_BB ----------------------------------------
 
@@ -32479,53 +32495,53 @@ ENDIF
 RETURN
 END FUNCTION POINT_IN_BB
 
-! ---------------------------- LINE_SEG_TRI_PLANE_INTERSECT ----------------------------------------
-
-SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
-USE MATH_FUNCTIONS, ONLY:CROSS_PRODUCT
-IMPLICIT NONE
-
-INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(OUT) :: Q(3)
-REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
-REAL(EB) :: E1(3),E2(3),S(3),U,V,TMP,T,D(3),P(3)
-REAL(EB), PARAMETER :: EPS=1.E-10_EB,TOL=1.E-15
-INTEGER :: IERR2
-
-IERR  = 0
-IERR2 = 1
-! IERR=1:  line segment intersect with the plane
-! IERR2=1: the intersection point is in the triangle
-
-! Schneider and Eberly, Section 11.1
-
-D = P1-P0
-E1 = V2-V1
-E2 = V3-V1
-
-CALL CROSS_PRODUCT(P,D,E2)
-
-TMP = DOT_PRODUCT(P,E1)
-
-IF ( ABS(TMP)<EPS ) RETURN
-
-TMP = 1._EB/TMP
-S = P0-V1
-
-U = TMP*DOT_PRODUCT(S,P)
-IF (U<0._EB .OR. U>1._EB) IERR2=0
-
-CALL CROSS_PRODUCT(Q,S,E1)
-V = TMP*DOT_PRODUCT(D,Q)
-IF (V<0._EB .OR. (U+V)>1._EB) IERR2=0
-
-T = TMP*DOT_PRODUCT(E2,Q)
-Q = P0 + T*D ! the intersection point
-
-IF (T>=0._EB-TOL .AND. T<=1._EB+TOL) IERR=1
-
-RETURN
-END SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT
+! ! ---------------------------- LINE_SEG_TRI_PLANE_INTERSECT ----------------------------------------
+!
+! SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
+! USE MATH_FUNCTIONS, ONLY:CROSS_PRODUCT
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(OUT) :: IERR
+! REAL(EB), INTENT(OUT) :: Q(3)
+! REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
+! REAL(EB) :: E1(3),E2(3),S(3),U,V,TMP,T,D(3),P(3)
+! REAL(EB), PARAMETER :: EPS=1.E-10_EB,TOL=1.E-15
+! INTEGER :: IERR2
+!
+! IERR  = 0
+! IERR2 = 1
+! ! IERR=1:  line segment intersect with the plane
+! ! IERR2=1: the intersection point is in the triangle
+!
+! ! Schneider and Eberly, Section 11.1
+!
+! D = P1-P0
+! E1 = V2-V1
+! E2 = V3-V1
+!
+! CALL CROSS_PRODUCT(P,D,E2)
+!
+! TMP = DOT_PRODUCT(P,E1)
+!
+! IF ( ABS(TMP)<EPS ) RETURN
+!
+! TMP = 1._EB/TMP
+! S = P0-V1
+!
+! U = TMP*DOT_PRODUCT(S,P)
+! IF (U<0._EB .OR. U>1._EB) IERR2=0
+!
+! CALL CROSS_PRODUCT(Q,S,E1)
+! V = TMP*DOT_PRODUCT(D,Q)
+! IF (V<0._EB .OR. (U+V)>1._EB) IERR2=0
+!
+! T = TMP*DOT_PRODUCT(E2,Q)
+! Q = P0 + T*D ! the intersection point
+!
+! IF (T>=0._EB-TOL .AND. T<=1._EB+TOL) IERR=1
+!
+! RETURN
+! END SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT
 
 ! ---------------------------- POLYGON_AREA ----------------------------------------
 
@@ -32580,86 +32596,86 @@ ENDDO
 RETURN
 END FUNCTION POLYGON_CENTROID
 
-! ---------------------------- TRIANGLE_ON_CELL_SURF ----------------------------------------
+! ! ---------------------------- TRIANGLE_ON_CELL_SURF ----------------------------------------
+!
+! SUBROUTINE TRIANGLE_ON_CELL_SURF(IERR1,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
+! IMPLICIT NONE
+!
+! INTEGER, INTENT(OUT) :: IERR1
+! REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
+! REAL(EB) :: DIST(3),TOL=1.E-15_EB
+!
+! IERR1 = 1
+! DIST = 0._EB
+! !IF (NORM2(N_VEC)>1._EB) N_VEC = N_VEC/NORM2(N_VEC)
+!
+! IF (N_VEC(1)==1._EB .OR. N_VEC(1)==-1._EB) THEN
+!    DIST(1) = XC-V(1)
+!    IF ( ABS(ABS(DIST(1))-DX*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+!       IERR1 = -1
+!    ENDIF
+!    RETURN
+! ENDIF
+!
+! IF (N_VEC(2)==1._EB .OR. N_VEC(2)==-1._EB) THEN
+!    DIST(2) = YC-V(2)
+!    IF ( ABS(ABS(DIST(2))-DY*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+!       IERR1 = -1
+!    ENDIF
+!    RETURN
+! ENDIF
+!
+! IF (N_VEC(3)==1._EB .OR. N_VEC(3)==-1._EB) THEN
+!    DIST(3) = ZC-V(3)
+!    IF ( ABS(ABS(DIST(3))-DZ*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+!       IERR1 = -1
+!    ENDIF
+!    RETURN
+! ENDIF
+!
+! RETURN
+! END SUBROUTINE TRIANGLE_ON_CELL_SURF
 
-SUBROUTINE TRIANGLE_ON_CELL_SURF(IERR1,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
-IMPLICIT NONE
-
-INTEGER, INTENT(OUT) :: IERR1
-REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
-REAL(EB) :: DIST(3),TOL=1.E-15_EB
-
-IERR1 = 1
-DIST = 0._EB
-!IF (NORM2(N_VEC)>1._EB) N_VEC = N_VEC/NORM2(N_VEC)
-
-IF (N_VEC(1)==1._EB .OR. N_VEC(1)==-1._EB) THEN
-   DIST(1) = XC-V(1)
-   IF ( ABS(ABS(DIST(1))-DX*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
-      IERR1 = -1
-   ENDIF
-   RETURN
-ENDIF
-
-IF (N_VEC(2)==1._EB .OR. N_VEC(2)==-1._EB) THEN
-   DIST(2) = YC-V(2)
-   IF ( ABS(ABS(DIST(2))-DY*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
-      IERR1 = -1
-   ENDIF
-   RETURN
-ENDIF
-
-IF (N_VEC(3)==1._EB .OR. N_VEC(3)==-1._EB) THEN
-   DIST(3) = ZC-V(3)
-   IF ( ABS(ABS(DIST(3))-DZ*0.5_EB)<TOL .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
-      IERR1 = -1
-   ENDIF
-   RETURN
-ENDIF
-
-RETURN
-END SUBROUTINE TRIANGLE_ON_CELL_SURF
-
-! ---------------------------- POLYGON_CLOSE_TO_EDGE ----------------------------------------
-
-SUBROUTINE POLYGON_CLOSE_TO_EDGE(IOR,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
-IMPLICIT NONE
-INTEGER, INTENT(OUT) :: IOR
-REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
-REAL(EB) :: DIST(3),DMAX
-REAL(EB), PARAMETER :: TOLERANCE=0.01_EB
-
-IOR = 0
-DIST(1) = XC-V(1)
-DIST(2) = YC-V(2)
-DIST(3) = ZC-V(3)
-
-IF (ABS(DIST(1)/DX) >= ABS(DIST(2)/DY) .AND. ABS(DIST(1)/DX) >= ABS(DIST(3)/DZ)) THEN
-   DMAX = ABS(DIST(1)/DX*2._EB)
-   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
-   IF (DIST(1) < 0._EB) THEN
-      IOR = 1
-   ELSE
-      IOR = -1
-   ENDIF
-ELSEIF (ABS(DIST(2)/DY) >= ABS(DIST(3)/DZ)) THEN
-   DMAX = ABS(DIST(2)/DY*2._EB)
-   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
-   IF (DIST(2) < 0._EB) THEN
-      IOR = 2
-   ELSE
-      IOR = -2
-   ENDIF
-ELSE
-   DMAX = ABS(DIST(3)/DZ*2._EB)
-   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
-   IF (DIST(3) < 0._EB) THEN
-      IOR = 3
-   ELSE
-      IOR = -3
-   ENDIF
-ENDIF
-
-END SUBROUTINE POLYGON_CLOSE_TO_EDGE
+! ! ---------------------------- POLYGON_CLOSE_TO_EDGE ----------------------------------------
+!
+! SUBROUTINE POLYGON_CLOSE_TO_EDGE(IOR,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
+! IMPLICIT NONE
+! INTEGER, INTENT(OUT) :: IOR
+! REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
+! REAL(EB) :: DIST(3),DMAX
+! REAL(EB), PARAMETER :: TOLERANCE=0.01_EB
+!
+! IOR = 0
+! DIST(1) = XC-V(1)
+! DIST(2) = YC-V(2)
+! DIST(3) = ZC-V(3)
+!
+! IF (ABS(DIST(1)/DX) >= ABS(DIST(2)/DY) .AND. ABS(DIST(1)/DX) >= ABS(DIST(3)/DZ)) THEN
+!    DMAX = ABS(DIST(1)/DX*2._EB)
+!    IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+!    IF (DIST(1) < 0._EB) THEN
+!       IOR = 1
+!    ELSE
+!       IOR = -1
+!    ENDIF
+! ELSEIF (ABS(DIST(2)/DY) >= ABS(DIST(3)/DZ)) THEN
+!    DMAX = ABS(DIST(2)/DY*2._EB)
+!    IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+!    IF (DIST(2) < 0._EB) THEN
+!       IOR = 2
+!    ELSE
+!       IOR = -2
+!    ENDIF
+! ELSE
+!    DMAX = ABS(DIST(3)/DZ*2._EB)
+!    IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+!    IF (DIST(3) < 0._EB) THEN
+!       IOR = 3
+!    ELSE
+!       IOR = -3
+!    ENDIF
+! ENDIF
+!
+! END SUBROUTINE POLYGON_CLOSE_TO_EDGE
 
 END MODULE COMPLEX_GEOMETRY
