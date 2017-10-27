@@ -155,6 +155,7 @@ The following individuals contributed to the verification process of FDS.
 \item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
 \item Chao Zhang of Tongji University provided the finite-element analysis for the HT3D I-beam test case.
 \item Salah Benkorichi of Ulster University, Belfast, developed the HT3D sphere test case.
+\item Kiyoung Moon and Jung-il Choi of Yonsei University, Seoul, South Korea, provided the Heat Channel Flow case.
 \end{itemize}
 
 
@@ -638,8 +639,6 @@ the corresponding location in space and time.  The figure confirms that the adve
 \end{figure}
 
 
-\FloatBarrier
-
 \section{Analytical Solution to the Continuity Equation}
 
 Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for CFD.  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.
@@ -829,8 +828,6 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
 \end{figure}
 
 
-\FloatBarrier
-
 \section{Scalar Transport (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
 
 In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.
@@ -860,8 +857,6 @@ this test case confirms that relatively low levels of diffusion are incurred at 
    \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
    \label{fig_move_slug}
 \end{figure}
-
-\FloatBarrier
 
 \section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring{\textct{saad}}{saad})}
 \label{sec:saad_temporal_error}
@@ -920,8 +915,6 @@ The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the 
 \caption[The {\ct saad} temporal order test case]{Temporal order for a variable-density projection.  (Upper-left) Initial and final field for mixture fraction.  (Upper-right) Initial and final field for density.  (Lower-left) Plot of numerator and denominator in Eq.~(\ref{eq:temporal_order}) for density at final time. (Lower-right) Plot of $p$ computed pointwise from Eq.~(\ref{eq:temporal_order}).  Fluctuations are due to degenerate points in the formula for $p$.  The temporal order is $p$ = \input{SCRIPT_FIGURES/saad_l2_norm}\!.}
 \label{fig:saad_temporal_order}
 \end{figure}
-
-\FloatBarrier
 
 \section{Variable-Density Manufactured Solution (\texorpdfstring{\textct{shunn3}}{shunn3})}
 \label{sec:shunn_mms}
@@ -1140,7 +1133,6 @@ Norm & $\rho$ & $Z$ & $u$ & $H$ \\
 \end{table}
 
 
-\FloatBarrier
 
 \section{Collapse of a Hot Layer in a Micro-gravity Environment (\texorpdfstring{\textct{hot\_layer\_360}}{hot\_layer\_360})}
 \label{sec:baum_hot_layer}
@@ -1198,7 +1190,6 @@ Figure~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted t
 \end{figure}
 
 
-\FloatBarrier
 
 
 \section{2D Vortex Simulation (\texorpdfstring{\textct{vort2d}}{vort2d})}
@@ -1307,7 +1298,6 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Boundedness Tests}
 
@@ -1398,7 +1388,6 @@ A 2-D methane-air diffusion flame calculation is run three different ways to che
    \label{tmp_lower_limit_fig}
 \end{figure}
 
-\FloatBarrier
 
 \section{Constant Specific Heat Ratio}
 \label{const_gamma}
@@ -1517,7 +1506,6 @@ Overall, the agreement between the FDS simulations and the CBC data is satisfact
 
 
 
-\FloatBarrier
 
 \subsection{Dynamic Smagorinsky (\texorpdfstring{\textct{dsmag}}{dsmag})}
 \label{dynamic_smagorinsky_model}
@@ -1545,7 +1533,6 @@ Next, in Fig.~\ref{fig_dynsmag_cbc}, we show results for the dynamic model analo
    \caption[Integrated and spectral energy decay for CBC experiment using dynamic Smagorinsky]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Deardorff (\texorpdfstring{\textct{deardorff}}{deardorff})}
 \label{Deardorff_model}
@@ -1562,7 +1549,6 @@ In this section we present the results for the FDS implantation of the Deardorff
    \caption[Integrated and spectral energy decay for CBC experiment using Deardorff's model]{\label{fig_deardorff_cbc} Deardorff model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Vreman (\texorpdfstring{\textct{vreman}}{vreman})}
 \label{Vreman_model}
@@ -1579,7 +1565,6 @@ The Vreman eddy viscosity model \cite{Vreman:2004} is an efficient alternative t
    \caption[Integrated and spectral energy decay for CBC experiment using Vreman's model]{\label{fig_vreman_cbc} Vreman model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Renormalization Group (\texorpdfstring{\textct{rng}}{rng})}
 \label{RNG_model}
@@ -1601,7 +1586,6 @@ Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is t
    \caption[Integrated and spectral energy decay for CBC experiment using RNG model]{\label{fig_rng_cbc} RNG model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{WALE (\texorpdfstring{\textct{wale}}{wale})}
 \label{WALE_model}
@@ -1618,7 +1602,6 @@ The WALE (Wall Adapting Local Eddy-viscosity) model of Nicoud and Ducros \cite{N
    \caption[Integrated and spectral energy decay for CBC experiment using the WALE model]{\label{fig_wale_cbc} WALE model results (analogous to Fig.~\ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
-\FloatBarrier
 
 
 \section{Jet Centerline Velocity Decay (\texorpdfstring{\textct{jet}}{jet})}
@@ -1815,12 +1798,9 @@ In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wal
 \end{figure}
 
 
-\newpage
 \section{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
 
-\textbf{Kiyoung Moon and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
-
-\noindent The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
+The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
 
 The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
 \begin{center}
@@ -2508,6 +2488,8 @@ This case also demonstrates the finite convergence rate of the radiation calcula
 
 \section{Radiation Attenuation by Non-Scattering Particles \\ (\texorpdfstring{\textct{radiation\_gas-veg\_consistency}}{radiation\_gas-veg\_consistency})}
 \label{radiation_gas-veg_consistency}
+\label{radiation_gas-veg_consistency_gas}
+\label{radiation_gas-veg_consistency_veg}
 
 Relatively large solid particles, like idealized vegetation, act as opaque, non-scattering absorbers of thermal radiation. For a cloud of particles contained within a region $\Omega$ with volume $V$, the absorption coefficient is taken to be
 \be
@@ -2614,7 +2596,6 @@ Because the heat flux from the hot plate to the shield is equal to the heat flux
 \ee
 The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
-\pagebreak
 
 \section{Radiation from a gas-fired panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
 \label{radiation_gas_panel}
@@ -2686,7 +2667,6 @@ mass of the three combustion products. The figure compares the simple chemistry 
 \label{fig_methane_flame_yields}
 \end{figure}
 
-\FloatBarrier
 
 \section{Reaction Rates (\texorpdfstring{\textct{reactionrate}}{reactionrate})}
 
@@ -2846,7 +2826,6 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 \end{figure}
 
 
-\FloatBarrier
 
 \subsection{Finite Rate Reactions (\texorpdfstring{\textct{reactionrate\_arrhenius}}{reactionrate\_arrhenius})}
 \label{finite_rate_reactions}
@@ -2991,7 +2970,6 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
 
-\FloatBarrier
 
 \section{Heat Release Rates from Reaction Mechanisms (\textct{hrrpuv\_reac})}
 \label{hrrpuv_reac}
@@ -3053,7 +3031,6 @@ In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Mixture Fraction (\textct{burke\_schumann})}
 \label{Mix_Frac}
@@ -3098,7 +3075,6 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 
 
 
-\FloatBarrier
 
 \section{Extinction Model (\textct{extinction})}
 \label{Extinct}
@@ -3118,7 +3094,6 @@ Based on the combination of oxygen concentration, methane concentration, and tem
 \end{figure}
 For the same initial conditions, FDS predictions for burning or extinction (closed symbols) fall identically on the expected results (open symbols). This example also illustrates that for these initial conditions, the delineation between burning and extinction is not linear as the simple model suggests. More detailed information on the extinction model, which uses the critical flame temperature and local enthalpy change, can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
-\FloatBarrier
 
 \section{Ideal and Non-Ideal Heat of Combustion (\textct{extinction})}
 \label{HoC}
@@ -3135,7 +3110,6 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 \label{fig:HoC}
 \end{figure}
 
-\FloatBarrier
 
 
 \section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{\textct{FED\_FIC}}{FED\_FIC}) }
@@ -3269,7 +3243,6 @@ Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 \label{FED_FIC_SMIX_plot}
 \end{figure}
 
-\FloatBarrier
 
 \section{Smoke Detector Model (\texorpdfstring{\textct{smoke\_detector}}{smoke\_detector}) }
 \label{smoke_detector}
@@ -3307,7 +3280,6 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 \label{fig:smoke_detector}
 \end{figure}
 
-\FloatBarrier
 
 \section{Aerosol Deposition}
 
@@ -3329,7 +3301,6 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 \label{fig:deposition_mass}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Gravitational Settling of Aerosols (\texorpdfstring{\textct{soot\_gravitational\_settling}}{soot\_gravitational\_settling})}
 \label{soot_gravitational_settling}
@@ -3400,7 +3371,6 @@ devices.
 
 
 
-\FloatBarrier
 
 \section{Heat Conduction Through a Solid Slab (\texorpdfstring{\textct{heat\_conduction}}{heat\_conduction})}
 \label{heat_conduction_a}
@@ -3437,7 +3407,6 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Temperature-Dependent Thermal Properties (\texorpdfstring{\textct{heat\_conduction\_kc}}{heat\_conduction\_kc})}
 \label{heat_conduction_kc}
@@ -3483,7 +3452,6 @@ lines are FDS results and the circles are the HEATING results. An example input 
 \label{heat_conduction_kc_fig}
 \end{figure}
 
-\FloatBarrier
 
 \section{Convective Cooling (\texorpdfstring{\textct{convective\_cooling}}{convective\_cooling})}
 \label{convective_cooling}
@@ -3507,7 +3475,6 @@ To test the second-order accuracy of the solid phase conduction algorithm, this 
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Simple Thermocouple Model (\texorpdfstring{\textct{thermocouples}}{thermocouples})}
 \label{thermocouples}
@@ -3522,7 +3489,6 @@ This example tests the simple thermocouple model in FDS. It consists of a box wh
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Heat Conduction through Insulated Steel (\texorpdfstring{\textct{insulated\_steel\_x}}{insulated\_steel\_x})}
 \label{insulated_steel_pipe}
@@ -3553,7 +3519,6 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Heat Conduction across Mesh Boundaries (\texorpdfstring{\textct{back\_wall\_test}}{back\_wall\_test})}
 \label{back_wall_test}
@@ -3571,7 +3536,6 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Specified Heat Flux Boundary Conditions (\texorpdfstring{\textct{adiabatic\_xxx\_flux}}{adiabatic\_xxx\_flux})}
 \label{adiabatic_con_flux}
@@ -3691,7 +3655,6 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \label{fig:ht3d_ibeam_time_history}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{3D Heat Diffusion Across Mesh Boundaries (\texorpdfstring{\textct{ht3d\_2mesh}}{ht3d\_2mesh})}
 \label{sec:ht3d_2mesh}
@@ -3817,7 +3780,6 @@ The analytical mass losses are calculated by multiplying the mass per unit area 
 \label{surf_mass_vent_nonchar}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Pyrolysis of Discrete Particles}
 
@@ -3868,7 +3830,6 @@ The analytical and computed results for charring material are compared in Fig.~\
 \label{surf_mass_part_nonchar}
 \end{figure}
 
-\FloatBarrier
 
 
 \subsubsection{Multiple Particles}
@@ -3931,7 +3892,6 @@ The analytical and computed results are compared in Fig.~\ref{surf_mass_part_cha
 \label{surf_mass_part_fuel_energy_split}
 \end{figure}
 
-\FloatBarrier
 
 \subsubsection{Particles that Generate Multiple Gas Species}
 \label{surf_mass_two_species_cart}
@@ -3949,7 +3909,6 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 \label{surf_mass_two_species}
 \end{figure}
 
-\FloatBarrier
 
 
 
@@ -4154,7 +4113,6 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 \end{figure}
 
 
-\FloatBarrier
 
 
 \section{Interpreting Bench-Scale Measurements}
@@ -4397,7 +4355,6 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 \label{particle_drag_plots}
 \end{figure}
 
-\FloatBarrier
 
 
 
@@ -4606,7 +4563,6 @@ Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS so
 \label{flat_fire_plots}
 \end{figure}
 
-\FloatBarrier
 
 
 
@@ -4700,7 +4656,6 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_3_plots}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Case 4}
 \label{water_evaporation_4}
@@ -4772,7 +4727,6 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \label{water_evaporation_7_plot}
 \end{figure}
 
-\FloatBarrier
 
 \subsection{Case 8}
 \label{water_evaporation_8}
@@ -4789,7 +4743,6 @@ In this case, we compare FDS predictions against the evaporation model of Li and
 \label{water_evaporation_8_plots}
 \end{figure}
 
-\FloatBarrier
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textct{flow\_rate\_2}}}{flow\_rate\_2}) }
 \label{flow_rate_2}
@@ -4806,7 +4759,6 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 \end{figure}
 
 
-\FloatBarrier
 
 \section{Turbulent Dispersion (\texorpdfstring{{\textct{random\_walk}}}{random\_walk}) }
 \label{turbulent_dispersion}
@@ -4849,7 +4801,6 @@ where $K$ is the loss coefficient for the duct, $\rho$ is the gas density, and $
 \label{fig_HVAC_loss}
 \end{figure}
 
-\FloatBarrier
 
 \section{Node Flow Losses (\texorpdfstring{\textct{HVAC\_tee\_loss\_1}}{HVAC\_tee\_loss\_1}, \texorpdfstring{\textct{HVAC\_tee\_loss\_2}}{HVAC\_tee\_loss\_2})}
 \label{HVAC_tee_loss_1}
@@ -4867,7 +4818,6 @@ These two cases use the same geometry as in Section~\ref{HVAC_flow_loss}. Howeve
 \end{figure}
 
 
-\FloatBarrier
 
 \section{HVAC Mass Conservation (\texorpdfstring{\textct{HVAC\_mass\_conservation}}{HVAC\_mass\_conservation})}
 \label{HVAC_mass_conservation}
@@ -4884,7 +4834,6 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 \end{figure}
 
 
-\FloatBarrier
 
 \section{HVAC Energy Conservation and Pressure (\texorpdfstring{\textct{HVAC\_energy\_pressure}}{HVAC\_energy\_pressure})}
 \label{HVAC_energy_pressure}
@@ -4907,7 +4856,6 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \label{fig_HVAC_e_p}
 \end{figure}
 
-\FloatBarrier
 
 \section{HVAC Dampers (\texorpdfstring{\textct{HVAC\_damper}}{HVAC\_damper})}
 \label{HVAC_damper}
@@ -4922,7 +4870,6 @@ The \textct{HVAC\_damper} example case is a simple duct network of three ducts c
 \end{figure}
 
 
-\FloatBarrier
 
 \section{HVAC Filters (\texorpdfstring{\textct{HVAC\_filter}}{HVAC\_filter})}
 \label{HVAC_filter}
@@ -4940,7 +4887,6 @@ The sample case \textct{HVAC\_filter} demonstrates the use of the filter input. 
    \label{fig_filter}
 \end{figure}
 
-\FloatBarrier
 
 \section{HVAC Fans (\texorpdfstring{\textct{fan\_test}}{fan\_test})}
 \label{fan_test}
@@ -4968,7 +4914,6 @@ The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). No
 \label{fan_test_fig}
 \end{figure}
 
-\FloatBarrier
 
 \section{Leakage}
 
@@ -5014,7 +4959,6 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
 
 
 
-\FloatBarrier
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
@@ -5179,7 +5123,6 @@ h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\
 %
 % Twelve examples in which different triangles intersect with a bounding box are summarized in Table \ref{tab_cutcell_areas}.  NXP represents the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
 %
-%\newpage
 
 
 
@@ -5206,16 +5149,12 @@ Computation of the these quantities by their typical statistical definition woul
 \label{rms_cov_corr_plots}
 \end{figure}
 
-\FloatBarrier
 
 
 
-
-\newpage
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
-\newpage
 
 \appendix
 
