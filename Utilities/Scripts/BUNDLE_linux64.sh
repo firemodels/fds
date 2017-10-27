@@ -13,7 +13,7 @@ export PLATFORM=LINUX64
 export FDSEDITION=$4
 export FDSVERSION=$5
 export SMVVERSION=$6
-export OPENMPI_VERSION=$7
+export MPI_VERSION=$7
 export MAJOR=$8
 export COMPFROM=$9
 
