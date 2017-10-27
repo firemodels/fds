@@ -132,8 +132,13 @@ background=background
 
 openmpidir=~/FDS_Guides
 
-fdsmpidir=mpi_intel$FDSOS
-fdsmpi=fds_mpi_intel$FDSOS
+if [ "$MPI_VERSION" == "INTEL" ]; then
+  fdsmpidir=impi_intel$FDSOS
+  fdsmpi=fds_impi_intel$FDSOS
+else
+  fdsmpidir=mpi_intel$FDSOS
+  fdsmpi=fds_mpi_intel$FDSOS
+fi
 
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS
@@ -216,11 +221,13 @@ hashfile fds       > hash/fds.sha1
 hashfile fds2ascii > hash/fds2ascii.sha1
 cd $CURDIR
 
-if [ "$PLATFORM" == "LINUX64" ]; then
-   openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
-fi
-if [ "$PLATFORM" == "OSX64" ]; then
-   openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
+if [ "$MPI_VERSION" != "INTEL" ]; then
+  if [ "$PLATFORM" == "LINUX64" ]; then
+    openmpifile=openmpi_${MPI_VERSION}_linux_64.tar.gz
+  fi
+  if [ "$PLATFORM" == "OSX64" ]; then
+    openmpifile=openmpi_${MPI_VERSION}_osx_64.tar.gz
+  fi
 fi
 
 echo ""

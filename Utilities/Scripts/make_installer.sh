@@ -64,7 +64,9 @@ if [ "$ostype" == "OSX" ]; then
   BASHRC2=.bash_profile
   PLATFORM=osx
 fi
-OPENMPIFILE=openmpi_${OPENMPI_VERSION}_${PLATFORM}_64.tar.gz
+if [ "$MPI_VERSION" != "INTEL" ]; then
+OPENMPIFILE=openmpi_${MPI_VERSION}_${PLATFORM}_64.tar.gz
+fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
@@ -324,12 +326,19 @@ echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THISSCRIPT | tar -xz
+EOF
+
+if [ "$OPENMPIFILE" != "" ]; then
+cat << EOF >> $INSTALLER
 if [ "\$MPIDIST_FDSROOT" != "" ]; then
   echo unpacking OpenMPI distribution to \$MPIDIST_FDSROOT
   cd \$MPIDIST_FDSROOT
   tar xvf $OPENMPIFILE >& /dev/null
 fi
+EOF
+fi
 
+cat << EOF >> $INSTALLER
 
 echo "Copy complete."
 

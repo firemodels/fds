@@ -68,7 +68,7 @@ ifeq ($(shell ..\..\Utilities\Scripts\havemkl),1)
   FFLAGSMKL_INTEL = -DWITH_CLUSTER_SPARSE_SOLVER /I"$(MKLROOT)"\include
   LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
 endif
-else 
+else
 # linux/osx
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
 # Use cluster_sparse_solver with intelmpi blacs
@@ -79,11 +79,15 @@ ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a)","")
 # Use cluster_sparse_solver with openmpi blacs
   FFLAGSMKL_OPENMPI = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
   LFLAGSMKL_OPENMPI = -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lpthread -lm -ldl
+  FFLAGSMKL_GNU_OPENMPI = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
+  LFLAGSMKL_GNU_OPENMPI =  -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_gf_lp64.a ${MKLROOT}/lib/intel64/libmkl_gnu_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lgomp -lpthread -lm -ldl
 endif
 ifneq ("$(wildcard ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a)","")
 # Use cluster_sparse_solver with custom blacs
   FFLAGSMKL_CUSTOM = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
   LFLAGSMKL_CUSTOM = ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_intel_thread.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
+  FFLAGSMKL_GNU_CUSTOM = -DWITH_CLUSTER_SPARSE_SOLVER -I$(MKLROOT)/include
+  LFLAGSMKL_GNU_CUSTOM =  ${MKLROOT}/lib/libmkl_intel_lp64.a ${MKLROOT}/lib/libmkl_sequential.a ${MKLROOT}/lib/libmkl_core.a ${MKLROOT}/lib/libmkl_blacs_custom_lp64.a -lpthread -lm -ldl
 endif
 endif # OS test
 endif # MKLROOT test
@@ -311,33 +315,37 @@ mpi_xlf_aix : $(obj_mpi)
 
 #*** GNU Compilers ***
 
-mpi_gnu_linux_64 : FFLAGS = -O3 $(GITINFOGNU) $(GNU_COMPINFO)
+mpi_gnu_linux_64 : FFLAGS = -m64 -O2 $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
+mpi_gnu_linux_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64 : FCOMPL = mpifort
 mpi_gnu_linux_64 : FOPENMPFLAGS = -fopenmp
 mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_linux_64_db : FFLAGS = -O2 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU) $(GNU_COMPINFO)
+mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
+mpi_gnu_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
 mpi_gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
 mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
 mpi_gnu_linux_64_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64 : FFLAGS = -O2 $(GITINFOGNU) $(GNU_COMPINFO)
+mpi_gnu_osx_64 : FFLAGS = -m64 -O2 $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64 : FCOMPL = mpifort
 mpi_gnu_osx_64 : FOPENMPFLAGS =
 mpi_gnu_osx_64 : obj = fds_mpi_gnu_osx_64
 mpi_gnu_osx_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64_db : FFLAGS = -O2 $(GITINFOGNU) $(GNU_COMPINFO)
+mpi_gnu_osx_64_db : FFLAGS = -m64 -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64_db : FCOMPL = mpifort
 mpi_gnu_osx_64_db : FOPENMPFLAGS =
 mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
 mpi_gnu_osx_64_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 
 # *** Object Dependencies ***
