@@ -392,7 +392,7 @@ else
 cat << MODULE >> \$FDSMODULEtmp
 prepend-path    PATH            \$FDS_root/bin/openmpi_64/bin
 setenv          OPAL_PREFIX     \$FDS_root/bin/openmpi_64
-setenv          MPIFORT        mpifort
+setenv          MPIFORT         mpifort
 MODULE
 fi
 
