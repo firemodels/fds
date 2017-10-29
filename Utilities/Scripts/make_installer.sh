@@ -366,15 +366,7 @@ proc ModulesHelp { } {
 module-whatis   "Loads fds paths and libraries."
 
 conflict FDS6
-MODULE
-
-if [ "$MPI_VERSION" == "INTEL" ] ; then
-cat << MODULE >> \$FDSMODULEtmp
 conflict openmpi
-MODULE
-fi
-
-cat << MODULE >> \$FDSMODULEtmp
 
 prepend-path    PATH            \$FDS_root/bin
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
