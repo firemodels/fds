@@ -433,11 +433,11 @@ cat \$FDS_root/bin/$FDSVARS | grep -v bash >> \$STARTUPtmp
 
 cat << STARTUP >> \$STARTUPtmp
 </pre>
-<li>or add following line:
+<li>or add:
 <pre>
 source \$FDS_root/bin/$FDSVARS
 </pre>
-<li>or add the following lines if you are using modules:
+<li>or if you are using modules, add:
 <pre>
 export MODULEPATH=\$FDS_root/bin/modules:\\\$MODULEPATH
 module load $FDSMODULE
@@ -459,11 +459,11 @@ cat << EOF >> $INSTALLER
 echo ""
 echo "-----------------------------------------------"
 echo "*** To complete the installation add the following lines to your startup file"
-echo "   (usually \$HOME/.bashrc)"
+echo "   (usually \$HOME/.bashrc)."
 echo ""
 cat \$FDS_root/bin/$FDSVARS | grep -v bash
 echo ""
-echo "See README_startup.html file in the Documentation directory for other options"
+echo "See README_startup.html file in the Documentation directory for other options."
 echo ""
 echo "*** Log out and log back in so the changes will take effect."
 echo ""
