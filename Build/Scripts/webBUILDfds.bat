@@ -31,7 +31,7 @@ if "%platform%" == "windows" (
   goto eof
 )
 set INTEL=
-if "%mpi_version%" == "INTEL" (
+if "%linux_mpi_version%" == "INTEL" (
   set INTEL=i
 )
 if "%platform%" == "linux" (
@@ -41,8 +41,8 @@ if "%platform%" == "linux" (
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh %INTEL%mpi_intel_osx_64
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%INTEL%mpi_intel_osx_64 make_fds.sh
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh mpi_intel_osx_64
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64 make_fds.sh
   pause
   goto eof
 )
