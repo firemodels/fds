@@ -2392,32 +2392,6 @@ ENDDO JLOOP
 END SUBROUTINE DUMMY_VENTS
 
 
-SUBROUTINE TRIM_LABEL(T,LAB)
-
-CHARACTER(LABEL_LENGTH), INTENT(OUT) :: LAB
-REAL(EB), INTENT(IN) :: T
-
-IF (T<  .00_EB   .AND. T>=  -.001_EB) WRITE(LAB,'(F4.1)') T
-IF (T<   .001_EB .AND. T>=    -.1_EB) WRITE(LAB,'(F6.3)') T
-IF (T<    -.1_EB .AND. T>=    -1._EB) WRITE(LAB,'(F5.2)') T
-IF (T<    -1._EB .AND. T>=   -10._EB) WRITE(LAB,'(F5.1)') T
-IF (T<   -10._EB .AND. T>=  -100._EB) WRITE(LAB,'(F5.0)') T
-IF (T<  -100._EB .AND. T>= -1000._EB) WRITE(LAB,'(F6.0)') T
-IF (T< -1000._EB .AND. T>=-10000._EB) WRITE(LAB,'(F7.0)') T
-IF (T<-10000._EB                   ) WRITE(LAB,'(F8.0)') T
-
-IF (T>=  .00_EB  .AND. T<  .001_EB) WRITE(LAB,'(F4.1)') T
-IF (T>=  .001_EB .AND. T<    .1_EB) WRITE(LAB,'(F6.3)') T
-IF (T>=    .1_EB .AND. T<    1._EB) WRITE(LAB,'(F5.2)') T
-IF (T>=    1._EB .AND. T<   10._EB) WRITE(LAB,'(F4.1)') T
-IF (T>=   10._EB .AND. T<  100._EB) WRITE(LAB,'(F4.1)') T
-IF (T>=  100._EB .AND. T< 1000._EB) WRITE(LAB,'(F4.0)') T
-IF (T>= 1000._EB .AND. T<10000._EB) WRITE(LAB,'(F5.0)') T
-IF (T>=10000._EB                  ) WRITE(LAB,'(F6.0)') T
-
-END SUBROUTINE TRIM_LABEL
-
-
 SUBROUTINE RE_ALLOCATE_SEGMENTS
 USE MEMORY_FUNCTIONS, ONLY : ChkMemErr
 TYPE(SEGMENT_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY_SEGMENT
@@ -4569,7 +4543,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
@@ -4577,16 +4551,16 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
             ELSEIF(CELLTYPE == IBM_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,SLICE,J,K,IND,Y_INDEX,Z_INDEX,VAL_CF)
                IFACE = IFACE + 1  ! is a solid or gas cell
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
 
                IFACE = IFACE + 1
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                IFACE = IFACE + 1  ! is a gas cell
                VALS(IFACE) = QQ(SLICE,J,K,1)
@@ -4607,7 +4581,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
@@ -4615,16 +4589,16 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
             ELSEIF(CELLTYPE == IBM_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,I,SLICE,K,IND,Y_INDEX,Z_INDEX,VAL_CF)
                IFACE = IFACE + 1  ! is a solid or gas cell
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
 
                IFACE = IFACE + 1
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                IFACE = IFACE + 1
                VALS(IFACE) = QQ(I,SLICE,K,1)
@@ -4645,7 +4619,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
                CALL GET_SOLIDCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IND,Y_INDEX,Z_INDEX,VAL_CF)
@@ -4653,16 +4627,16 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                   NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2
                      IFACECUT = IFACECUT + 1
-                     VALS(IFACECUT) = VAL_CF
+                     VALS(IFACECUT) = REAL(VAL_CF,FB)
                   ENDDO
                ENDDO
             ELSEIF(CELLTYPE == IBM_SOLID) THEN
                CALL GET_SOLIDREGFACE_SCALAR_SLICE(X1AXIS,I,J,SLICE,IND,Y_INDEX,Z_INDEX,VAL_CF)
                IFACE = IFACE + 1  ! is a solid or gas cell
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
 
                IFACE = IFACE + 1
-               VALS(IFACE) = VAL_CF
+               VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
                IFACE = IFACE + 1
                VALS(IFACE) = QQ(I,J,SLICE,1)
@@ -4686,7 +4660,7 @@ ELSE IF (SLICETYPE_LOCAL=='INBOUND_FACES') THEN
                NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                DO IVCF = 1, NVF-2 ! face is convex
                   IFACECUT = IFACECUT + 1
-                  VALS(IFACECUT) = VAL_CF
+                  VALS(IFACECUT) = REAL(VAL_CF,FB)
                ENDDO
             ENDDO
          ENDIF
@@ -4699,12 +4673,12 @@ ELSE IF (SLICETYPE_LOCAL=='EXIMBND_FACES') THEN
       CALL GET_EXIMFACE_SCALAR_SLICE(IEXIM,IND,Y_INDEX,Z_INDEX,VAL_CF)
       DO IVCF = 1,2
          IFACECUT = IFACECUT + 1
-         VALS(IFACECUT) = VAL_CF
+         VALS(IFACECUT) = REAL(VAL_CF,FB)
       ENDDO
    ENDDO
 ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
    IFACECUT=NFACES-NFACES_CUTCELLS
-   VAL_CF=0.
+   VAL_CF=0._EB
    DO KK = 1, KBAR
       DO JJ = 1, JBAR
          DO II = 1, IBAR
@@ -4719,7 +4693,7 @@ ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
                   CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
                      DO IVCF = 1,2
                         IFACECUT = IFACECUT + 1
-                        VALS(IFACECUT) = VAL_CF
+                        VALS(IFACECUT) = REAL(VAL_CF,FB)
                      ENDDO
 
                   CASE(IBM_FTYPE_CFGAS)
@@ -4728,7 +4702,7 @@ ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
                      NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2)
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
-                        VALS(IFACECUT) = VAL_CF
+                        VALS(IFACECUT) = REAL(VAL_CF,FB)
                      ENDDO
 
                   CASE(IBM_FTYPE_CFINB)
@@ -4737,7 +4711,7 @@ ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
                      NVF     = CUT_FACE(ICF2)%CFELEM(1,IFACE2); DIR = 0
                      DO IVCF = 1, NVF-2 ! face is convex
                         IFACECUT = IFACECUT + 1
-                        VALS(IFACECUT) = VAL_CF
+                        VALS(IFACECUT) = REAL(VAL_CF,FB)
                      ENDDO
 
                   END SELECT

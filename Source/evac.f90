@@ -7278,9 +7278,9 @@ CONTAINS
     !
     ! Local variables
     INTEGER, PARAMETER :: N_SECTORS = 2
-    REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA, WSPB
-    INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
-    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
+    REAL(EB) :: DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA=0._EB, WSPB=0._EB
+    INTEGER :: ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
+    INTEGER  :: IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2, MAX_V0_FAC
     !Issue1547: MAX_V0_FAC is declared as a real variable.
     REAL(EB), DIMENSION(4) :: D_XY
@@ -8643,7 +8643,7 @@ CONTAINS
        ! ========================================================
        ! Remove out-of-bounds persons (outside the grid)
        ! ========================================================
-       IF (N_HUMANS > 0) CALL REMOVE_OUT_OF_GRIDS(T)
+       IF (N_HUMANS > 0) CALL REMOVE_OUT_OF_GRIDS
        IF (STOP_STATUS>NO_STOP) RETURN
 
        IF ( ICYC >= 0) THEN
@@ -11911,7 +11911,6 @@ CONTAINS
       REAL(EB) X_OLD, Y_OLD, XX, YY, ZZ, PDXX1, PDXX2, PDXY1, PDXY2, V, ANGLE
       INTEGER :: IE,I,N_TMP, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
-      CHARACTER(60) :: TO_NODE
       CHARACTER(LABEL_LENGTH) :: NEW_FFIELD_NAME
       LOGICAL :: KEEP_XY, UPSTREAM, NO_TO_NODE, L_INIT_IOR, CLOSED
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX =>NULL()
@@ -12399,7 +12398,7 @@ CONTAINS
       ! Local variables
       REAL :: RN_REAL
       REAL(EB) RN, X1, X2, Y1, Y2, Z1, Z2, D_MAX, DIST, WIDTH, &
-           XX1,YY1, AVE_K
+           XX1,YY1
       INTEGER  II, JJ, KK, IOR, IRNMAX, IRN, IE, IZERO, J1
       REAL(EB), DIMENSION(6) :: R_TMP, X_TMP, Y_TMP
       INTEGER :: I_TMP, III, JJJ, I_OBST
@@ -12828,15 +12827,11 @@ CONTAINS
       !
     END SUBROUTINE REMOVE_PERSON
     !
-    SUBROUTINE REMOVE_OUT_OF_GRIDS(T)
+    SUBROUTINE REMOVE_OUT_OF_GRIDS
       IMPLICIT NONE
       !
       ! Remove humans that do not lie in any mesh
       !
-      ! Passed variables
-      REAL(EB), INTENT(IN) :: T
-      !
-      ! Local variables
       INTEGER :: IKILL, I
       !
       IKILL = 0
