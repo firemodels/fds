@@ -177,6 +177,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
+mkdir $bundledir/bin/INTEL
 mkdir $bundledir/bin/hash
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
@@ -245,7 +246,9 @@ CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+if [ "$MPI_VERSION" != "INTEL" ]; then
+  CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+fi
 
 echo ""
 echo "--- copying documentation ---"
@@ -267,7 +270,10 @@ if [ ! "$COMPFROM" == "" ]; then
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CPDIR $COMPLIBFROM $bundledir/bin/$COMPTO
+    CPDIR $COMPLIBFROM/LIB $bundledir/bin/INTEL/LIB
+    if [ "$MPI_VERSION" == "INTEL" ]; then
+      CPDIR $COMPLIBFROM/bin64 $bundledir/bin/INTEL/bin64
+    fi
   fi
 fi
 if [ ! "$MISCFROM" == "" ]; then

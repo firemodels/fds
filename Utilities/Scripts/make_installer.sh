@@ -300,7 +300,13 @@ eval MPIDIST_FDS=\$FDS_root/bin/openmpi_64
 while true; do
    echo ""
    echo "Installation directory: \$FDS_root"
+EOF
+if [ "$OPENMPIFILE" != "" ]; then
+cat << EOF >> $INSTALLER
    echo "     OpenMPI directory: \$mpiused"
+EOF
+fi
+cat << EOF >> $INSTALLER
    if [ "\$OVERRIDE" == "y" ] ; then
      yn="y"
    else
@@ -360,22 +366,39 @@ module-whatis   "Loads fds paths and libraries."
 
 conflict FDS6
 
-prepend-path    PATH    \$FDS_root/bin
-prepend-path    PATH    \$FDS_root/bin/openmpi_64/bin
+# fds bin directory
+set fdsbindir \$FDS_root/bin
+
+# fds
+prepend-path    PATH    \\\$fdsbindir
+
+# shared libraries for fds
+prepend-path    LD_LIBRARY_PATH \\\$fdsbindir/LIB64
+prepend-path    LD_LIBRARY_PATH \\\$fdsbindir/INTEL/LIB
 MODULE
 if [ "$ostype" == "LINUX" ] ; then
 cat << MODULE >> \$FDSMODULEtmp
 prepend-path    LD_LIBRARY_PATH /usr/lib64
 MODULE
 fi
+if [ "$MPI_VERSION" == "INTEL" ] ; then
 cat << MODULE >> \$FDSMODULEtmp
-prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
-prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/INTELLIBS
 
-setenv  OPAL_PREFIX \$FDS_root/bin/openmpi_64
+# Intel  MPI
+prepend-path    PATH \\\$fdsbindir/INTEL/bin64
+setenv  MPIFORT mpiifort
+
+MODULE
+else
+cat << MODULE >> \$FDSMODULEtmp
+
+# OpenMPI
+prepend-path    PATH    \\\$fdsbindir/openmpi_64/bin
+setenv  OPAL_PREFIX \\\$fdsbindir/openmpi_64
 setenv  MPIFORT mpifort
 
 MODULE
+fi
 
 cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
 rm \$FDSMODULEtmp
@@ -412,18 +435,36 @@ STARTUP
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 
+# fds
 FDSBINDIR=\$FDS_root/bin
-export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
+export PATH=\\\$FDSBINDIR:\\\$PATH
 BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTELLIBS:\\\$$LDLIBPATH
+
+# shared libraries for fds
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$FDSBINDIR/INTEL/LIB:\\\$$LDLIBPATH
 BASH
 fi
+if [ "$MPI_VERSION" == "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\\\$FDSBINDIR:\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
+
+# Intel  MPI
+export PATH=\\\$FDSBINDIR/INTEL/bin64:\\\$PATH
+export MPIFORT=mpiifort
+
 BASH
+else
+cat << BASH >> \$BASHRCFDS
+
+# OpenMPI
+export PATH=\\\$FDSBINDIR/openmpi_64/bin
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
+export MPIFORT=mpifort
+
+BASH
+fi
 
 #--- create startup and readme files
 
@@ -443,12 +484,12 @@ echo "-----------------------------------------------"
 echo "-----------------------------------------------"
 echo "Wrap up"
 echo ""
-echo "1. Add the following line to one of your startup files"
-echo "   to complete the installation:"
+echo "1. To complete the installation"
+echo "   add the contents of \$FDS_root/bin/FDSVARS.sh to your startup file"
+echo "   (usually \$HOME/.bashrc)"
 echo ""
+echo "   or add the following line to your startup file"
 echo "source \$FDS_root/bin/FDSVARS.sh"
-echo ""
-echo "Note: you may also add the contents of FDSVARS.sh to your startup file."
 echo ""
 echo "If you are using modules, add the following lines:"
 echo ""

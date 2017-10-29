@@ -385,16 +385,29 @@ fi
 # define MPIRUNEXE and do some error checking
 
 if [ "$use_intel_mpi" == "1" ]; then # using Intel MPI
-  if [ "$I_MPI_ROOT" == "" ]; then
-    echo "Intel MPI environment not setup. Run aborted."
-    ABORTRUN=y
-  else
-    MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+  if [ "$use_installed" == "1" ]; then
+    MPIRUNEXE=$fdsdir/INTEL/bin64/mpiexec
     if [ ! -e $MPIRUNEXE ]; then
-      echo "Intel mpiexec, $MPIRUNEXE, does not exist. Run aborted."
-      ABORTRUN=y
+      echo "Intel MPI mpiexec program not found at:"
+      echo "$MPIRUNEXE"
+      echo "Run aborted"
+      ABORT=y
     fi
     MPILABEL="IMPI"
+  else
+    if [ "$I_MPI_ROOT" == "" ]; then
+      echo "Intel MPI environment not setup. Run aborted."
+      ABORTRUN=y
+    else
+      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+      if [ ! -e $MPIRUNEXE ]; then
+        echo "Intel mpiexec, $MPIRUNEXE, not found at:"
+        echo "$MPIRUNEXE"
+        ABORTRUN=y
+        echo "Run aborted"
+      fi
+      MPILABEL="IMPI"
+    fi
   fi
 else                                 # using OpenMPI
   if [ "$OPENMPI_PATH" != "" ]; then

@@ -23,6 +23,6 @@ export FDSMODULE=$FDSEDITION
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
 export MISCTO=LIB64
-export COMPTO=INTELLIBS
+export COMPTO=INTEL
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh
