@@ -19,13 +19,13 @@ is_file_installed()
   exit
 }
 
-ifort_installed=`is_file_installed ifort`
+ifort_installed=`is_file_installed mpiifort`
 if [ $ifort_installed -eq 0 ]; then
   echo unknown
   exit
 fi
 
-ifort -v > ifort_version 2>&1 
+mpiifort -v > ifort_version 2>&1 
 IFORTVERSION=`cat ifort_version | awk '{print $3}' `
 rm ifort_version
 echo "\"Intel ifort $IFORTVERSION\""
