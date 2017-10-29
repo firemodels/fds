@@ -1,4 +1,4 @@
-&HEAD CHID='rotate_wind', TITLE='Test rotation of grid on constant wind field'
+&HEAD CHID='rotate_wind', TITLE='Test rotation of grid on constant wind field' /
 
 &MESH IJK=40,40,4, XB=-20,20,-20,20,0,4 /
 
