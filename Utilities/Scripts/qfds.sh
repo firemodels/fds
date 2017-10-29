@@ -305,7 +305,19 @@ else
   fi
 fi
 
-# modules loaded currrently
+# check to see if fds was built using Intel MPI
+
+if [ -e $exe ]; then
+  if [ "$use_mpi_intel" == "" ]; then
+    is_intel_mpi=`echo "" | $exe |& grep MPI | grep library | grep Intel | wc -l`
+    if [ "$is_intel_mpi" == "1" ]; then
+         use_intel_mpi=1
+         nosocket="1"
+    fi
+  fi
+fi
+
+# modules loaded currently
 
 if [ "$STARTUP" == "" ]; then
 
@@ -386,10 +398,9 @@ fi
 
 if [ "$use_intel_mpi" == "1" ]; then # using Intel MPI
   if [ "$use_installed" == "1" ]; then
-    MPIRUNEXE=$fdsdir/INTEL/bin64/mpiexec
+    MPIRUNEXE=$fdsdir/mpiexec
     if [ ! -e $MPIRUNEXE ]; then
-      echo "Intel MPI mpiexec program not found at:"
-      echo "$MPIRUNEXE"
+      echo "$MPIRUNEXE not found"
       echo "Run aborted"
       ABORT=y
     fi
@@ -643,6 +654,9 @@ if [ "$queue" != "none" ]; then
   echo "         Executable:$exe"
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH"
+  fi
+  if [ "$use_intel_mpi" != "" ]; then
+    echo "           Intel MPI"
   fi
 
 # output currently loaded modules and modules when fds was built if the
