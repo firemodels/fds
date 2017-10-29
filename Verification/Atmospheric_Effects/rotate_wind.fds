@@ -7,9 +7,7 @@
 &MISC NOISE=.FALSE., GVEC(3)=0. /
 
 &WIND U0=10., V0=10., STRATIFICATION=.FALSE.
-      RAMP_U0_T='v-ramp', RAMP_V0_T='u-ramp'
-      NEW_MOMENTUM_NUDGING=T
-      SPONGE_LAYER_DISTANCE=2/
+      RAMP_U0_T='v-ramp', RAMP_V0_T='u-ramp' /
 
 &SPEC ID='AIR', BACKGROUND=T, VISCOSITY=1e-5/
 
