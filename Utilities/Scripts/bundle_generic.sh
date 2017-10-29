@@ -105,6 +105,27 @@ CPDIR ()
   fi
 }
 
+# -------------------- CPDIRFILES -------------------
+
+CPDIRFILES ()
+{
+  FROMDIR=$1
+  TODIR=$2
+  if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist"
+  else
+    echo "*******************************"
+    echo copying files from directory $FROMDIR to $TODIR
+    echo "*******************************"
+    cp $FROMDIR/* $TODIR/.
+  fi
+  if [ -e $TODIR ]; then
+    echo "$FROMDIR copied"
+  else
+    echo "***error: unable to copy $FROMDIR" >> $errlog
+  fi
+}
+
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 manifest=manifest$FDSOS.html
@@ -177,7 +198,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
-mkdir $bundledir/bin/INTEL
+mkdir $bundledir/bin/LIB64
 mkdir $bundledir/bin/hash
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
@@ -209,7 +230,7 @@ hashfile hashfile   > hash/hashfile.sha1
 cd $CURDIR
 
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
-CPDIR $texturedir $bundledir/bin/textures
+CPDIR $texturedir $bundledir/bin
 
 # FDS 
 
@@ -263,27 +284,33 @@ CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
-if [ ! "$COMPFROM" == "" ]; then
-  COMPLIBFROM=~/$COMPFROM
-  if [ -d $COMPLIBFROM ]; then
+if [ ! "$INTELBINDIR" == "" ]; then
+  if [ -d $HOME/$INTELBINDIR ]; then
+    if [ "$MPI_VERSION" == "INTEL" ]; then
+    echo ""
+    echo "--- copying Intel exe's ---"
+    echo ""
+      CP $HOME/$INTELBINDIR mpiexec   $bundledir/bin mpiexec
+      CP $HOME/$INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
+    fi
+  fi
+fi
+if [ ! "$INTELLIBDIR" == "" ]; then
+  if [ -d $HOME/$INTELLIBDIR ]; then
 
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CPDIR $COMPLIBFROM/LIB $bundledir/bin/INTEL/LIB
-    if [ "$MPI_VERSION" == "INTEL" ]; then
-      CPDIR $COMPLIBFROM/bin64 $bundledir/bin/INTEL/bin64
-    fi
+    CP $HOME/$INTELLIBDIR libiomp5.so $bundledir/bin/LIB64 libiomp5.so
   fi
 fi
-if [ ! "$MISCFROM" == "" ]; then
-  MISCLIBFROM=~/$MISCFROM
-  if [ -d $MISCLIBFROM ]; then
+if [ "$OSLIBDIR" != "" ]; then
+  if [ -d $HOME/$OSLIBDIR ]; then
 
     echo ""
     echo "--- copying miscellaneous run time libraries ---"
     echo ""
-    CPDIR $MISCLIBFROM $bundledir/bin/$MISCTO
+    CPDIRFILES $HOME/$OSLIBDIR $bundledir/bin/LIB64
   fi
 fi
 
