@@ -384,15 +384,10 @@ cat << MODULE >> \$FDSMODULEtmp
 prepend-path    LD_LIBRARY_PATH /usr/lib64
 MODULE
 fi
-if [ "$MPI_VERSION" == "INTEL" ] ; then
-cat << MODULE >> \$FDSMODULEtmp
-setenv          MPIFORT         mpiifort
-MODULE
-else
+if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << MODULE >> \$FDSMODULEtmp
 prepend-path    PATH            \$FDS_root/bin/openmpi_64/bin
 setenv          OPAL_PREFIX     \$FDS_root/bin/openmpi_64
-setenv          MPIFORT         mpifort
 MODULE
 fi
 
@@ -411,15 +406,10 @@ cat << BASH >> \$BASHRCFDS
 export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
 BASH
 fi
-if [ "$MPI_VERSION" == "INTEL" ] ; then
-cat << BASH >> \$BASHRCFDS
-export MPIFORT=mpiifort
-BASH
-else
+if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
 export PATH=\$FDS_root/bin/openmpi_64/bin
 export OPAL_PREFIX=\$FDS_root_bin/openmpi_64
-export MPIFORT=mpifort
 BASH
 fi
 
