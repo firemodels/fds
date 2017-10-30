@@ -317,7 +317,7 @@ mpi_xlf_aix : $(obj_mpi)
 
 #*** GNU Compilers ***
 
-mpi_gnu_linux_64 : FFLAGS = -m64 -O2 $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
+mpi_gnu_linux_64 : FFLAGS = -m64 -O2 -ffpe-summary=none $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64 : FCOMPL = mpifort
 mpi_gnu_linux_64 : FOPENMPFLAGS = -fopenmp
@@ -333,7 +333,7 @@ mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
 mpi_gnu_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64 : FFLAGS = -m64 -O2 $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64 : FFLAGS = -m64 -O2 -ffpe-summary=none $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64 : FCOMPL = mpifort
 mpi_gnu_osx_64 : FOPENMPFLAGS =
