@@ -25,7 +25,5 @@ if [ $ifort_installed -eq 0 ]; then
   exit
 fi
 
-mpiifort -v > ifort_version 2>&1 
-IFORTVERSION=`cat ifort_version | awk '{print $3}' `
-rm ifort_version
+IFORTVERSION=`mpiifort -v |&  grep version | awk '{print $3}' `
 echo "\"Intel ifort $IFORTVERSION\""
