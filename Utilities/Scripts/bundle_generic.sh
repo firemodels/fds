@@ -295,15 +295,15 @@ if [ ! "$INTELBINDIR" == "" ]; then
     fi
   fi
 fi
-if [ ! "$INTELLIBDIR" == "" ]; then
+if [ "$INTELLIBDIR" != "" ]; then
   if [ -d $HOME/$INTELLIBDIR ]; then
 
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CP $HOME/$INTELLIBDIR libiomp5.so $bundledir/bin/LIB64 libiomp5.so
+    CP $HOME/$INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
     CP $HOME/$INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
-    CP $HOME/$INTELLIBDIR libmpi.so.12 $bundledir/bin/LIB64 libmpi.so.12
+    CP $HOME/$INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
 if [ "$OSLIBDIR" != "" ]; then
