@@ -399,16 +399,17 @@ export PATH=\$FDS_root/bin:\$FDS_root/bin/openmpi_64/bin:\\\$PATH
 export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
 BASH
 fi
-cat << BASH >> \$BASHRCFDS
-# number of OpenMPI threads - set to no more than MIN(4,number of cores / 2)
-export OMP_NUM_THREADS=4
-BASH
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
 export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
 BASH
 fi
+
+cat << BASH >> \$BASHRCFDS
+# number of OpenMPI threads - set to no more than MIN(4,number of cores / 2)
+export OMP_NUM_THREADS=4
+BASH
 
 #--- create startup and readme files
 
