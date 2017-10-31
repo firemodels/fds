@@ -1,28 +1,43 @@
-<h3 id="fds-6.5.3">FDS 6.5.3</h3>
+<h2 id="fds-6.6.0-oct-31-2017">FDS 6.6.0 (Oct 31, 2017)</h2>
 <ul>
+<li><p>Implementation of new implicit droplet evaporation scheme. Fixes many stability issues with droplet cases.</p></li>
+<li><p>Add EXTINCTION_MODEL='EXTINCTION 3' for two-step fast CO chemistry. General cleanup of extinction routines. Change in critical flame temperature model to use post-combustion product specific heats. Change in default CFT to 1700 K. Users should take T(OI) (diffusion flame oxygen index) from SFPE Handbook Table 2-7.3 as CFT for specific fuels.</p></li>
+<li><p>Add WIND namelist group. In addition, it is now possible, and preferred, that the user specify a wind and temperature profile using Monin-Obukhov similarity parameters. At a minimum, the user can specify a wind speed and direction, both of which can change in time, plus a parameter to characterize the terrain roughness and a parameter to characterize the stability of the atmosphere.</p></li>
+<li><p>Add global linear matrix solver for pressure, SOLVER='GLMAT' on PRES (in beta). Uses Intel MKL sparse cluster solver and performs a direct solution of the pressure equation (no iteration). Resolves problems of velocity errors at mesh boundaries and velocity penetration errors at all solid boundaries (exterior domain and immersed). Efficiency relative to default FFT solver is problem dependent. Suggest using GLMAT when required velocity error tolerance is tight. See <a href="https://github.com/firemodels/fds/blob/master/Verification/Pressure_Solver/duct_flow_glmat.fds">duct_flow_glmat</a> and <a href="https://github.com/firemodels/fds/blob/master/Verification/Pressure_Solver/dancing_eddies_glmat.fds">dancing_eddies_glmat</a> for examples.</p></li>
+<li><p>Multi-mesh capability added to 3D heat transfer in solids (HT3D). Volumetric heat source added to HT3D.</p></li>
+<li><p>Add NEAR_WALL_TURBULENCE_MODEL parameter to MISC. Default is constant Smagorinsky. Newly available option is the Wall-Adapting Local Eddy-viscosity (WALE) model (in beta).</p></li>
+<li><p>Add 'THERMAL WALL UNITS' output. Change 'YPLUS' output to 'VISCOUS WALL UNITS'.</p></li>
+<li><p>Add RAMP_CP_L to SPEC for liquid specific heat ramp.</p></li>
+<li><p>Add VOLUME_FRACTION to INIT namelist.</p></li>
+<li><p>Fix bug when MESH has negative z-coordinates.</p></li>
+<li><p>Fix bug for localized leakage that resulted in the creation of spurious species when there was a large difference between the gas temperature and the wall temperature on the inflow side of a leak.</p></li>
+</ul>
+<h2 id="fds-6.5.3-jan-22-2017">FDS 6.5.3 (Jan 22, 2017)</h2>
+<ul>
+<li><p>Precompiled OpenMPI libraries are bundled with OSX and Linux release (to be extracted and installed by user, if desired).</p></li>
 <li><p>Fix undefined heat of formation for unlisted species.</p></li>
-<li><p>Fix bug in OPEN bc at mesh corners.</p></li>
+<li><p>Fix bug in OPEN boundary condition at mesh corners.</p></li>
+<li><p>The OPEN boundary condition is altered when MEAN_FORCING=T. The tangential component of velocity is taken from the specified U0, V0, or W0 for inflow (rather than FREE_SLIP). In the abscence of MEAN_FORCING, the user may invoke the new OPEN bc on a specific VENT with SURF_ID='OPEN', WIND=T.</p></li>
 <li><p>Fix bug in PARABOLIC profiles for VENTs that span multiple meshes.</p></li>
 <li><p>Fix bug in MIXTURE FRACTION output.</p></li>
 <li><p>Add PERIODIC_MESH_IDS as a parameter on the MESH line. The ability to use periodic boundaries for multi-mesh cases was broken by the changes made to improve scalability of the code (FDS 6.4.0). Now the user must specify which boundary meshes are connected.</p></li>
-<li><p>The OPEN boundary condition is altered when MEAN_FORCING=T. The tangential component of velocity is taken from the specified U0, V0, or W0 for inflow (rather than FREE_SLIP). In the abscence of MEAN_FORCING, the user may invoke the new OPEN bc on a specific VENT with SURF_ID='OPEN', WIND=T.</p></li>
 <li><p>Add new chapter to FDS User's Guide to address atmospheric boundary layer parameters.</p></li>
 <li><p>Solid Heat Transfer 3D (HT3D) is in beta testing.</p></li>
 <li><p>Add HVAC_MASS_TRANSPORT (T/[F]) to MISC line to enable transient species and energy transfer in the HVAC sub-model (in beta testing).</p></li>
 </ul>
-<h3 id="fds-6.5.2">FDS 6.5.2</h3>
+<h2 id="fds-6.5.2-aug-25-2016">FDS 6.5.2 (Aug 25, 2016)</h2>
 <ul>
 <li><p>Fix bug in particle transport algorithm sub-time step procedure.</p></li>
 <li><p>Add QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS' to get AST away from a solid wall.</p></li>
 <li><p>Simplify discussion and implementation of output related to heat flux.</p></li>
 </ul>
-<h3 id="fds-6.5.1">FDS 6.5.1</h3>
+<h2 id="fds-6.5.1-jul-6-2016">FDS 6.5.1 (Jul 6, 2016)</h2>
 <ul>
 <li><p>Fix bug in Windows installation which fails on non-English versions of Windows.</p></li>
 <li><p>Eliminate spurious motion at mesh boundary where grid resolution changes.</p></li>
 <li><p>Ensure VOLUME_FLOW consistent with PARABOLIC profile.</p></li>
 </ul>
-<h3 id="fds-6.5.0">FDS 6.5.0</h3>
+<h2 id="fds-6.5.0-jun-23-2016">FDS 6.5.0 (Jun 23, 2016)</h2>
 <h4 id="general-enhancementsbug-fixes">General Enhancements/Bug Fixes</h4>
 <ul>
 <li><p>Include computation of baroclinic torque term in the pressure iteration scheme. A number of users have reported numerical instabilities when simulating fires in long, sealed tunnels. The cause of the instabilities has been a mismatch in the pressure field that is solved for in the Poisson equation and the lagged pressure of the baroclinic term.</p></li>
@@ -32,7 +47,7 @@
 <li><p>Add HVAC quantities to the restart file</p></li>
 <li><p>Improve method of interpolating particle drag onto grid for use in momentum equation. In the past, the drag was applied at the nearest cell face, whereas now the drag is linearly interpolated onto two nearest cell faces.</p></li>
 </ul>
-<h3 id="fds-6.4.0">FDS 6.4.0</h3>
+<h2 id="fds-6.4.0-apr-5-2016">FDS 6.4.0 (Apr 5, 2016)</h2>
 <h4 id="general-enhancementsbug-fixes-1">General Enhancements/Bug Fixes</h4>
 <ul>
 <li><p>Fixed bug in reaction divergence causing below ambient temperatures</p></li>
@@ -61,11 +76,11 @@
 <li><p>Fixed bug in <code>RADIATIVE HEAT FLUX GAS</code> across multiple meshes</p></li>
 <li><p>Fixed bug in <code>HRRPUV REAC</code></p></li>
 </ul>
-<h3 id="fds-6.3.2">FDS 6.3.2</h3>
+<h2 id="fds-6.3.2-nov-18-2015">FDS 6.3.2 (Nov 18, 2015)</h2>
 <ul>
 <li>Fix an error related to evaporation of fuel droplets. This release is only a minor fix to 6.3.1.</li>
 </ul>
-<h3 id="fds-6.3.1">FDS 6.3.1</h3>
+<h2 id="fds-6.3.1-nov-10-2015">FDS 6.3.1 (Nov 10, 2015)</h2>
 <h4 id="general-enhancementsbug-fixes-2">General Enhancements/Bug Fixes</h4>
 <ul>
 <li><p>Fix error in mixing step of combustion model for multiple subtimesteps (does not affect simple chemistry)</p></li>
@@ -83,7 +98,7 @@
 <ul>
 <li>Add QUANTITY='HRRPUV REAC' with REAC_ID to parse heat release rate from multiple reactions</li>
 </ul>
-<h3 id="fds-6.3.0">FDS 6.3.0</h3>
+<h2 id="fds-6.3.0-oct-1-2015">FDS 6.3.0 (Oct 1, 2015)</h2>
 <h4 id="remove-heat-release-rate-limiter-in-combustion-model">Remove heat release rate limiter in combustion model</h4>
 <p>In past versions of FDS, a bound was set to limit the amount of heat that could be released in a given cell over a given time step. The bound was approximately 2000 kW/m<sup>3</sup>. Without this bound, numerical instabilities could occur if too much heat was added to a grid cell too quickly. Physically, it is impossible to for fuel and oxygen to react and produce such large amounts of energy in a given cell, but since we used a simple infinitely fast chemistry model, it could happen in the model. Now, we handle the combustion chemistry in such a way as to control the mixing time and prevent such large releases. Thus, the input parameters HRRPUV_AVERAGE and HRRPUA_SHEET, which allowed the user to set the upper bound on the heat release rate of a given cell, are not needed and have been removed.</p>
 <h4 id="set-default-radiant-fraction-for-various-fuels">Set default radiant fraction for various fuels</h4>
@@ -110,7 +125,7 @@
 <ul>
 <li>TURBULENCE RESOLUTION and SCALAR RESOLUTION have been removed from SLCF and DEVC output until proper handling of resolved TURBULENT KINETIC ENERGY is achieved &quot;on the fly&quot;. For the time being, TKE and K_SGS must be output independently as discussed in the FDS User Guide (see section on <em>A Posteriori Mesh Quality Metrics</em>).</li>
 </ul>
-<h3 id="fds-6.2.0">FDS 6.2.0</h3>
+<h2 id="fds-6.2.0-apr-14-2015">FDS 6.2.0 (Apr 14, 2015)</h2>
 <h4 id="species-mass-density-transport-overhaul">Species Mass Density Transport Overhaul</h4>
 <p>To address potential realizability violations in species mass fractions (realizability requires Y_i &gt;=0 and sum_i Y_i = 1, for all i), we now solve transport equations for all Ns species and obtain the mass density, rho, from sum_i rhoY_i. This guarantees realizability provided rhoY_i &gt;=0 (i.e., we enforce boundedness). An improved boundedness correction is employed that absorbs any errors in the most abundant species locally (the error absorbing species is not specified <em>a</em> <em>priori</em>).</p>
 <h4 id="general-enhancementsbug-fixes-4">General Enhancements/Bug Fixes</h4>
@@ -140,7 +155,7 @@
 <li><p>DIFFUSIVITY, MASS FLUX WALL CELL, and MACH NUMBER outputs added.</p></li>
 <li><p>MLR_TOTAL added to hrr file (replaces BURN_RATE).</p></li>
 </ul>
-<h3 id="fds-6.1.2">FDS 6.1.2</h3>
+<h2 id="fds-6.1.2-oct-1-2014">FDS 6.1.2 (Oct 1, 2014)</h2>
 <ul>
 <li><p>Set CHECK_VN=.TRUE. by default (Von Neumann stability check), helps improve stability.</p></li>
 <li><p>Use Intel MPI for Windows version of FDS.</p></li>
@@ -150,7 +165,7 @@
 <li><p>Remove hard coded limit on the number of SPEC inputs, note other inputs with SPEC_ID such as SURF and REAC are still limited to 20 species.</p></li>
 <li><p>Add RAMP_T_I to specify an initial, in-depth, surface temperature profile.</p></li>
 </ul>
-<h3 id="fds-6.1.1">FDS 6.1.1</h3>
+<h2 id="fds-6.1.1-jul-21-2014">FDS 6.1.1 (Jul 21, 2014)</h2>
 <ul>
 <li><p>Speed up processing of particles and droplets.</p></li>
 <li><p>Fix bug in <code>'RADIATIVE HEAT FLUX GAS'</code> output.</p></li>
@@ -159,7 +174,7 @@
 <li><p>Add relaxation to HVAC pressure boundary condition.</p></li>
 <li><p>Allow for creation of new primitive species based on a predefined species using the keyword PRIMITIVE.</p></li>
 </ul>
-<h3 id="fds-6.1.0">FDS 6.1.0</h3>
+<h2 id="fds-6.1.0-may-29-2014">FDS 6.1.0 (May 29, 2014)</h2>
 <h4 id="parallel-computing">Parallel Computing</h4>
 <ul>
 <li><p>Release OpenMP version as the default.</p></li>
@@ -193,7 +208,7 @@
 <li><p>Add QUANTITY_RANGE to DEVC for limiting integration when STATISTICS is set</p></li>
 <li><p>Add AMPUA_Z, CPUA_Z, MPUA_Z, and MPUV_Z output quantities.</p></li>
 </ul>
-<h3 id="fds-6.0.1">FDS 6.0.1</h3>
+<h2 id="fds-6.0.1-dec-10-2013">FDS 6.0.1 (Dec 10, 2013)</h2>
 <ul>
 <li><p>The MPI version of FDS is now compiled with Open MPI 1.6.5.</p></li>
 <li><p>Fixes related to lumped species definitions.</p></li>
@@ -204,7 +219,7 @@
 <li><p>Add inlet velocity profile functionality via RAMP_V_X, etc., on SURF line.</p></li>
 <li><p>Include FDS User, Technical, Verification, Validation, and Configuration guides in bundle.</p></li>
 </ul>
-<h3 id="fds-6.0.0">FDS 6.0.0</h3>
+<h2 id="fds-6.0.0-nov-19-2013">FDS 6.0.0 (Nov 19, 2013)</h2>
 <h4 id="hydrodynamics-and-turbulence">Hydrodynamics and Turbulence</h4>
 <ul>
 <li><p>Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.</p></li>
@@ -261,7 +276,7 @@
 <li><p>A line of devices can be specified using a number of POINTS on one DEVC line.</p></li>
 <li><p>Statistical outputs for RMS, covariance, and correlation coefficient are available.</p></li>
 </ul>
-<h3 id="fds-5.5">FDS 5.5</h3>
+<h2 id="fds-5.5">FDS 5.5</h2>
 <ul>
 <li><p>Restoration of the baroclinic torque term in the momentum equation, by default (removed in 5.5.3)</p></li>
 <li><p>Secondary breakup model for droplets (simplified version of WAVE model by Reitz 1987)</p></li>
@@ -273,7 +288,7 @@
 <li><p>RAMP_PART and TAU_PART on SURF to control PARTICLE_MASS_FLUX</p></li>
 <li><p>Use of a SURF line to describe Lagrangian particles</p></li>
 </ul>
-<h3 id="fds-5.4">FDS 5.4</h3>
+<h2 id="fds-5.4">FDS 5.4</h2>
 <ul>
 <li><p>Pyrolysis model for solid materials has changed. The most important change is the definition of REFERENCE_TEMPERATURE and the elimination of REFERENCE_RATE. See the FDS User's Guide for more details.</p></li>
 <li><p>Werner-Wengle wall model, a better description of the velocity boundary condition.</p></li>
