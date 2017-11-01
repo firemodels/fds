@@ -1090,7 +1090,7 @@ Some parallel computing environments do not have a centralized file system, in w
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
-\setlength{\unitlength}{0.02in}
+\setlength{\unitlength}{0.015in}
 
 \newsavebox{\mygraph}
 \savebox{\mygraph}{
@@ -1122,21 +1122,25 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 \put(0,0){\framebox(100,80){ }}
 \end{picture} }
 
-\put(  0,320){\usebox{\mygraph}}
-\put(100,320){\usebox{\mygraph}}
-\put(230,370){\parbox{1.9in}{This is the ideal kind of mesh to mesh alignment.}}
+\put(  0,420){\usebox{\mygraph}}
+\put(100,420){\usebox{\mygraph}}
+\put(230,470){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
 
-\put(  0,220){\usebox{\mygraph}}
-\put(100,220){\usebox{\myfinegraph}}
-\put(230,270){\parbox{1.9in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+\put(  0,320){\usebox{\mygraph}}
+\put(100,320){\usebox{\myfinegraph}}
+\put(230,370){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+
+\put(  0,200){\usebox{\mygraph}}
+\put( 80,220){\usebox{\myfinegraph}}
+\put(230,270){\parbox{2.5in}{This is allowed, but of questionable value.}}
 
 \put(  0,100){\usebox{\mygraph}}
-\put( 80,120){\usebox{\myfinegraph}}
-\put(230,170){\parbox{1.9in}{This is allowed, but of questionable value.}}
+\put( 80,110){\usebox{\myfinegraph}}
+\put(230,160){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
 
 \put(  0,  0){\usebox{\mygraph}}
 \put(100,  0){\usebox{\myotherfinegraph}}
-\put(230, 50){\parbox{1.9in}{This is not allowed.}}
+\put(230, 50){\parbox{2.5in}{This is not allowed.}}
 \end{picture}
 
 \caption[Rules governing the alignment of meshes]{Rules governing the alignment of meshes.}
@@ -4189,7 +4193,7 @@ For the purpose of implementing the Monin-Obukhov model within FDS, the velocity
 \be
    s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 30 \, z_0
 \ee
-To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$. 
+To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$.
 
 \subsection{Sensible Heat Flux}
 
