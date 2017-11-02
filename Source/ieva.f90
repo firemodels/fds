@@ -6370,40 +6370,40 @@ Contains
 !!$    Return
 !!$  End Subroutine cumbin
 
-  Subroutine cumchi ( x, df, cum, ccum )
+! Subroutine cumchi ( x, df, cum, ccum )
 
-    !*****************************************************************************80
-    !
-    !! CUMCHI evaluates the cumulative chi-square distribution.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) X, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DF, the egrees of freedom of the
-    !    chi-square distribution.
-    !
-    !    Output, real ( kind = 8 ) CUM, the cumulative chi-square distribution.
-    !
-    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
-    !    chi-square distribution.
-    !
-    Implicit None
+!   !*****************************************************************************80
+!   !
+!   !! CUMCHI evaluates the cumulative chi-square distribution.
+!   !
+!   !  Parameters:
+!   !
+!   !    Input, real ( kind = 8 ) X, the upper limit of integration.
+!   !
+!   !    Input, real ( kind = 8 ) DF, the egrees of freedom of the
+!   !    chi-square distribution.
+!   !
+!   !    Output, real ( kind = 8 ) CUM, the cumulative chi-square distribution.
+!   !
+!   !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
+!   !    chi-square distribution.
+!   !
+!   Implicit None
 
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ) xx
+!   Real ( kind = 8 ) a
+!   Real ( kind = 8 ) ccum
+!   Real ( kind = 8 ) cum
+!   Real ( kind = 8 ) df
+!   Real ( kind = 8 ) x
+!   Real ( kind = 8 ) xx
 
-    a = df * 0.5D+00
-    xx = x * 0.5D+00
+!   a = df * 0.5D+00
+!   xx = x * 0.5D+00
 
-    Call cumgam ( xx, a, cum, ccum )
+!   Call cumgam ( xx, a, cum, ccum )
 
-    Return
-  End Subroutine cumchi
+!   Return
+! End Subroutine cumchi
 
 !!$  Subroutine cumchn ( x, df, pnonc, cum, ccum )
 !!$
@@ -6629,75 +6629,75 @@ Contains
 !!$
 !!$  End Subroutine cumchn
 
-  Subroutine cumf ( f, dfn, dfd, cum, ccum )
+! Subroutine cumf ( f, dfn, dfd, cum, ccum )
 
-    !*****************************************************************************80
-    !
-    !! CUMF evaluates the cumulative F distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine computes the integral from 0 to F of the F density with DFN
-    !    numerator and DFD denominator degrees of freedom.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.28.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) F, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of
-    !    freedom for the numerator and denominator.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the value of the F CDF and
-    !    the complementary F CDF.
-    !
-    Implicit None
+!   !*****************************************************************************80
+!   !
+!   !! CUMF evaluates the cumulative F distribution.
+!   !
+!   !  Discussion:
+!   !
+!   !    This routine computes the integral from 0 to F of the F density with DFN
+!   !    numerator and DFD denominator degrees of freedom.
+!   !
+!   !  Reference:
+!   !
+!   !    Milton Abramowitz, Irene Stegun,
+!   !    Handbook of Mathematical Functions
+!   !    1966, Formula 26.5.28.
+!   !
+!   !  Parameters:
+!   !
+!   !    Input, real ( kind = 8 ) F, the upper limit of integration.
+!   !
+!   !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of
+!   !    freedom for the numerator and denominator.
+!   !
+!   !    Output, real ( kind = 8 ) CUM, CCUM, the value of the F CDF and
+!   !    the complementary F CDF.
+!   !
+!   Implicit None
 
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) dfd
-    Real ( kind = 8 ) dfn
-    Real ( kind = 8 ) dsum
-    Real ( kind = 8 ) f
-    Integer ierr
-    Real ( kind = 8 ) prod
-    Real ( kind = 8 ) xx
-    Real ( kind = 8 ) yy
+!   Real ( kind = 8 ) ccum
+!   Real ( kind = 8 ) cum
+!   Real ( kind = 8 ) dfd
+!   Real ( kind = 8 ) dfn
+!   Real ( kind = 8 ) dsum
+!   Real ( kind = 8 ) f
+!   Integer ierr
+!   Real ( kind = 8 ) prod
+!   Real ( kind = 8 ) xx
+!   Real ( kind = 8 ) yy
 
-    If ( f <= 0.0D+00 ) Then
-       cum = 0.0D+00
-       ccum = 1.0D+00
-       Return
-    End If
+!   If ( f <= 0.0D+00 ) Then
+!      cum = 0.0D+00
+!      ccum = 1.0D+00
+!      Return
+!   End If
 
-    prod = dfn * f
-    !
-    !  XX is such that the incomplete beta with parameters
-    !  DFD/2 and DFN/2 evaluated at XX is 1 - CUM or CCUM
-    !
-    !  YY is 1 - XX
-    !
-    !  Calculate the smaller of XX and YY accurately.
-    !
-    dsum = dfd + prod
-    xx = dfd / dsum
+!   prod = dfn * f
+!   !
+!   !  XX is such that the incomplete beta with parameters
+!   !  DFD/2 and DFN/2 evaluated at XX is 1 - CUM or CCUM
+!   !
+!   !  YY is 1 - XX
+!   !
+!   !  Calculate the smaller of XX and YY accurately.
+!   !
+!   dsum = dfd + prod
+!   xx = dfd / dsum
 
-    If ( 0.5D+00 < xx ) Then
-       yy = prod / dsum
-       xx = 1.0D+00 - yy
-    Else
-       yy = 1.0D+00 - xx
-    End If
+!   If ( 0.5D+00 < xx ) Then
+!      yy = prod / dsum
+!      xx = 1.0D+00 - yy
+!   Else
+!      yy = 1.0D+00 - xx
+!   End If
 
-    Call beta_inc ( 0.5D+00*dfd, 0.5D+00*dfn, xx, yy, ccum, cum, ierr )
+!   Call beta_inc ( 0.5D+00*dfd, 0.5D+00*dfn, xx, yy, ccum, cum, ierr )
 
-    Return
-  End Subroutine cumf
+!   Return
+! End Subroutine cumf
 
 !!$  Subroutine cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
 !!$
