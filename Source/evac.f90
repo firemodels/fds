@@ -5963,7 +5963,7 @@ CONTAINS
     ! Next means that only EVAC_PROCESS is doing something
     IF (MYID /= PROCESS(NM)) RETURN
 
-    TNOW = SECOND()
+    TNOW = CURRENT_TIME()
     !
     ! Gaussian random numbers, initialize (only once during
     ! the whole calculation is needed). We are now in the
@@ -6582,7 +6582,7 @@ CONTAINS
     END DO EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
     WRITE (LU_EVACOUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', 0.0_EB,' mesh ',nm,' number of humans ',n_humans
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
     !
   END SUBROUTINE INITIALIZE_EVACUATION
 
@@ -6606,7 +6606,7 @@ CONTAINS
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (STOP_STATUS > 0) RETURN
 
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
 
     !
     ilh_dim = ilh           ! lonely humans dimension
@@ -6829,7 +6829,7 @@ CONTAINS
     END DO
     WRITE (LU_EVACOUT,FMT='(/)')
 
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
   END SUBROUTINE INIT_EVAC_GROUPS
 !
   SUBROUTINE EVAC_MESH_EXCHANGE(T,T_SAVE,I_MODE, ICYC, EXCHANGE_EVACUATION, MODE)
@@ -6886,7 +6886,7 @@ CONTAINS
     !
     ! Update interval (seconds) fire ==> evac information
 
-    TNOW = SECOND()
+    TNOW = CURRENT_TIME()
     DT_SAVE = 2.0_EB
     IOS = 0
     L_USE_FED  = .FALSE.
@@ -7173,7 +7173,7 @@ CONTAINS
        T_SAVE = 1.0E15
     END IF
 
-    T_USED(12) = T_USED(12) + SECOND() - TNOW
+    T_USED(12) = T_USED(12) + CURRENT_TIME() - TNOW
   END SUBROUTINE EVAC_MESH_EXCHANGE
 !
   SUBROUTINE PREPARE_TO_EVACUATE(ICYC)
@@ -7349,7 +7349,7 @@ CONTAINS
     INTRINSIC :: BTEST
     !
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
     ! Check if FED is used
     USE_FED = .FALSE.
     IF (BTEST(I_EVAC,3) .OR. BTEST(I_EVAC,1)) USE_FED = .TRUE.
@@ -10206,7 +10206,7 @@ CONTAINS
     ! ========================================================
     ! Evacuation routine ends here
     ! ========================================================
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
 
   CONTAINS
 
@@ -14809,7 +14809,7 @@ CONTAINS
     !
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
     !
     CALL POINT_TO_MESH(NM)
 
@@ -14983,7 +14983,7 @@ CONTAINS
     END DO HUMAN_CLASS_LOOP
 
     !
-    T_USED(12) = T_USED(12) + SECOND() - TNOW
+    T_USED(12) = T_USED(12) + CURRENT_TIME() - TNOW
   END SUBROUTINE DUMP_EVAC
 !
   FUNCTION GaussRand( gmean, gtheta, gcutmult )
