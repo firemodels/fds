@@ -6315,609 +6315,609 @@ Contains
     Return
   End Subroutine cumbet
 
-  Subroutine cumbin ( s, xn, pr, ompr, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMBIN evaluates the cumulative binomial distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine returns the probability of 0 to S successes in XN binomial
-    !    trials, each of which has a probability of success, PR.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.24.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) S, the upper limit of summation.
-    !
-    !    Input, real ( kind = 8 ) XN, the number of trials.
-    !
-    !    Input, real ( kind = 8 ) PR, the probability of success in one trial.
-    !
-    !    Input, real ( kind = 8 ) OMPR, equals ( 1 - PR ).
-    !
-    !    Output, real ( kind = 8 ) CUM, the cumulative binomial distribution.
-    !
-    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
-    !    binomial distribution.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) ompr
-    Real ( kind = 8 ) pr
-    Real ( kind = 8 ) s
-    Real ( kind = 8 ) xn
-
-    If ( s < xn ) Then
-
-       Call cumbet ( pr, ompr, s + 1.0D+00, xn - s, ccum, cum )
-
-    Else
-
-       cum = 1.0D+00
-       ccum = 0.0D+00
-
-    End If
-
-    Return
-  End Subroutine cumbin
-
-  Subroutine cumchi ( x, df, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMCHI evaluates the cumulative chi-square distribution.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) X, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DF, the egrees of freedom of the
-    !    chi-square distribution.
-    !
-    !    Output, real ( kind = 8 ) CUM, the cumulative chi-square distribution.
-    !
-    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
-    !    chi-square distribution.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ) xx
-
-    a = df * 0.5D+00
-    xx = x * 0.5D+00
-
-    Call cumgam ( xx, a, cum, ccum )
-
-    Return
-  End Subroutine cumchi
-
-  Subroutine cumchn ( x, df, pnonc, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMCHN evaluates the cumulative noncentral chi-square distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine calculates the cumulative noncentral chi-square
-    !    distribution, i.e., the probability that a random variable
-    !    which follows the noncentral chi-square distribution, with
-    !    noncentrality parameter PNONC and continuous degrees of
-    !    freedom DF, is less than or equal to X.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.4.25.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) X, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom.
-    !
-    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter of
-    !    the noncentral chi-square distribution.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the CDF and complementary
-    !    CDF of the noncentral chi-square distribution.
-    !
-    !  Local Parameters:
-    !
-    !    Local, real ( kind = 8 ) EPS, the convergence criterion.  The sum
-    !    stops when a term is less than EPS*SUM.
-    !
-    !    Local, integer NTIRED, the maximum number of terms to be evaluated
-    !    in each sum.
-    !
-    !    Local, logical QCONV, is TRUE if convergence was achieved, that is,
-    !    the program did not stop on NTIRED criterion.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) adj
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) centaj
-    Real ( kind = 8 ) centwt
-    Real ( kind = 8 ) chid2
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) dfd2
-    !Timo: Real ( kind = 8 ) dg
-    Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
-    !    Real ( kind = 8 ) gamma_log
-    Integer i
-    Integer icent
-    Integer iterb
-    Integer iterf
-    Real ( kind = 8 ) lcntaj
-    Real ( kind = 8 ) lcntwt
-    Real ( kind = 8 ) lfact
-    Integer, Parameter :: ntired = 1000
-    Real ( kind = 8 ) pcent
-    Real ( kind = 8 ) pnonc
-    Real ( kind = 8 ) pterm
-    !Timo: Logical qsmall
-    Real ( kind = 8 ) sum1
-    Real ( kind = 8 ) sumadj
-    Real ( kind = 8 ) term
-    Real ( kind = 8 ) wt
-    Real ( kind = 8 ) x
-    Real ( kind = 8 ) xnonc
-    !Timo: Statement function qsmall converted to an internal function
-    !Timo: qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
-    !Timo: dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
-    !Timo: Statement function dg converted to an internal function
-    !Timo: dg(xi) = df +  2.0D+00  * xi
-
-    If ( x <= 0.0D+00 ) Then
-       cum = 0.0D+00
-       ccum = 1.0D+00
-       Return
-    End If
-    !
-    !  When the noncentrality parameter is (essentially) zero,
-    !  use cumulative chi-square distribution
-    !
-    If ( pnonc <= 1.0D-10 ) Then
-       Call cumchi ( x, df, cum, ccum )
-       Return
-    End If
-
-    xnonc = pnonc /  2.0D+00
-    !
-    !  The following code calculates the weight, chi-square, and
-    !  adjustment term for the central term in the infinite series.
-    !  The central term is the one in which the poisson weight is
-    !  greatest.  The adjustment term is the amount that must
-    !  be subtracted from the chi-square to move up two degrees
-    !  of freedom.
-    !
-    icent = Int ( xnonc )
-    If ( icent == 0 ) Then
-       icent = 1
-    End If
-
-    chid2 = x /  2.0D+00
-    !
-    !  Calculate central weight term.
-    !
-    lfact = gamma_log ( Real ( icent + 1, kind = 8 ) )
-    lcntwt = - xnonc + icent * Log ( xnonc ) - lfact
-    centwt = Exp ( lcntwt )
-    !
-    !  Calculate central chi-square.
-    !
-    Call cumchi ( x, dg(Real(icent,kind=8)), pcent, ccum )
-    !
-    !  Calculate central adjustment term.
-    !
-    dfd2 = dg(Real(icent,kind=8)) /  2.0D+00
-    lfact = gamma_log ( 1.0D+00 + dfd2 )
-    lcntaj = dfd2 * Log ( chid2 ) - chid2 - lfact
-    centaj = Exp ( lcntaj )
-    sum1 = centwt * pcent
-    !
-    !  Sum backwards from the central term towards zero.
-    !  Quit whenever either
-    !  (1) the zero term is reached, or
-    !  (2) the term gets small relative to the sum, or
-    !  (3) More than NTIRED terms are totaled.
-    !
-    iterb = 0
-    sumadj = 0.0D+00
-    adj = centaj
-    wt = centwt
-    i = icent
-    term = 0.0D+00
-
-    Do
-
-       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
-       !
-       !  Adjust chi-square for two fewer degrees of freedom.
-       !  The adjusted value ends up in PTERM.
-       !
-       adj = adj * dfd2 / chid2
-       sumadj = sumadj + adj
-       pterm = pcent + sumadj
-       !
-       !  Adjust Poisson weight for J decreased by one.
-       !
-       wt = wt * ( i / xnonc )
-       term = wt * pterm
-       sum1 = sum1 + term
-       i = i - 1
-       iterb = iterb + 1
-
-       If ( ntired < iterb .Or. qsmall ( term ) .Or. i == 0 ) Then
-          Exit
-       End If
-
-    End Do
-
-    iterf = 0
-    !
-    !  Now sum forward from the central term towards infinity.
-    !  Quit when either
-    !    (1) the term gets small relative to the sum, or
-    !    (2) More than NTIRED terms are totaled.
-    !
-    sumadj = centaj
-    adj = centaj
-    wt = centwt
-    i = icent
-    !
-    !  Update weights for next higher J.
-    !
-    Do
-
-       wt = wt * ( xnonc / ( i + 1 ) )
-       !
-       !  Calculate PTERM and add term to sum.
-       !
-       pterm = pcent - sumadj
-       term = wt * pterm
-       sum1 = sum1 + term
-       !
-       !  Update adjustment term for DF for next iteration.
-       !
-       i = i + 1
-       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
-       adj = adj * chid2 / dfd2
-       sumadj = sumadj + adj
-       iterf = iterf + 1
-
-       If ( ntired < iterf .Or. qsmall ( term ) ) Then
-          Exit
-       End If
-
-    End Do
-
-    cum = sum1
-    ccum = 0.5D+00 + ( 0.5D+00 - cum )
-
-    Return
-  Contains
-
-    Logical Function qsmall(xx)
-      Real ( kind = 8 ), Intent(In) :: xx
-      qsmall = sum1 < 1.0D-20 .Or. xx < eps * sum1
-      Return
-    End Function qsmall
-
-    Real ( kind = 8 ) Function dg(xi)
-      Real ( kind = 8 ), Intent(In) :: xi
-      dg = df +  2.0D+00  * xi
-      Return
-    End Function dg
-
-  End Subroutine cumchn
-
-  Subroutine cumf ( f, dfn, dfd, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMF evaluates the cumulative F distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine computes the integral from 0 to F of the F density with DFN
-    !    numerator and DFD denominator degrees of freedom.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.28.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) F, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of
-    !    freedom for the numerator and denominator.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the value of the F CDF and
-    !    the complementary F CDF.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) dfd
-    Real ( kind = 8 ) dfn
-    Real ( kind = 8 ) dsum
-    Real ( kind = 8 ) f
-    Integer ierr
-    Real ( kind = 8 ) prod
-    Real ( kind = 8 ) xx
-    Real ( kind = 8 ) yy
-
-    If ( f <= 0.0D+00 ) Then
-       cum = 0.0D+00
-       ccum = 1.0D+00
-       Return
-    End If
-
-    prod = dfn * f
-    !
-    !  XX is such that the incomplete beta with parameters
-    !  DFD/2 and DFN/2 evaluated at XX is 1 - CUM or CCUM
-    !
-    !  YY is 1 - XX
-    !
-    !  Calculate the smaller of XX and YY accurately.
-    !
-    dsum = dfd + prod
-    xx = dfd / dsum
-
-    If ( 0.5D+00 < xx ) Then
-       yy = prod / dsum
-       xx = 1.0D+00 - yy
-    Else
-       yy = 1.0D+00 - xx
-    End If
-
-    Call beta_inc ( 0.5D+00*dfd, 0.5D+00*dfn, xx, yy, ccum, cum, ierr )
-
-    Return
-  End Subroutine cumf
-
-  Subroutine cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMFNC evaluates the cumulative noncentral F distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine computes the noncentral F distribution with DFN and DFD
-    !    degrees of freedom and noncentrality parameter PNONC.
-    !
-    !    The series is calculated backward and forward from J = LAMBDA/2
-    !    (this is the term with the largest Poisson weight) until
-    !    the convergence criterion is met.
-    !
-    !    The sum continues until a succeeding term is less than EPS
-    !    times the sum (or the sum is less than 1.0D-20).  EPS is
-    !    set to 1.0D-4 in a data statement which can be changed.
-    !
-    !
-    !    The original version of this routine allowed the input values
-    !    of DFN and DFD to be negative (nonsensical) or zero (which
-    !    caused numerical overflow.)  I have forced both these values
-    !    to be at least 1.
-    !
-    !  Modified:
-    !
-    !    15 June 2004
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.16, 26.6.17, 26.6.18, 26.6.20.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) F, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of freedom
-    !    in the numerator and denominator.  Both DFN and DFD must be positive,
-    !    and normally would be integers.  This routine requires that they
-    !    be no less than 1.
-    !
-    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the noncentral F CDF and
-    !    complementary CDF.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) adn
-    Real ( kind = 8 ) arg1
-    Real ( kind = 8 ) aup
-    Real ( kind = 8 ) b
-    Real ( kind = 8 ) betdn
-    Real ( kind = 8 ) betup
-    Real ( kind = 8 ) centwt
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) dfd
-    Real ( kind = 8 ) dfn
-    Real ( kind = 8 ) dnterm
-    Real ( kind = 8 ) dsum
-    Real ( kind = 8 ) dummy
-    Real ( kind = 8 ), Parameter :: eps = 0.0001D+00
-    Real ( kind = 8 ) f
-    !    Real ( kind = 8 ) gamma_log
-    Integer i
-    Integer icent
-    Integer ierr
-    Real ( kind = 8 ) pnonc
-    Real ( kind = 8 ) prod
-    !Timo: Logical qsmall
-    Real ( kind = 8 ) sum1
-    Real ( kind = 8 ) upterm
-    Real ( kind = 8 ) xmult
-    Real ( kind = 8 ) xnonc
-    Real ( kind = 8 ) xx
-    Real ( kind = 8 ) yy
-
-    !Timo: Statement function qsmall converted to an internal function
-    !Timo: qsmall(x) = sum1 < 1.0D-20 .Or. x < eps * sum1
-
-    If ( f <= 0.0D+00 ) Then
-       cum = 0.0D+00
-       ccum = 1.0D+00
-       Return
-    End If
-
-    If ( dfn < 1.0D+00 ) Then
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CUMFNC - Fatal error!'
-       Write ( *, '(a)' ) '  DFN < 1.'
-       Stop
-    End If
-
-    If ( dfd < 1.0D+00 ) Then
-       Write ( *, '(a)' ) ' '
-       Write ( *, '(a)' ) 'CUMFNC - Fatal error!'
-       Write ( *, '(a)' ) '  DFD < 1.'
-       Stop
-    End If
-    !
-    !  Handle case in which the noncentrality parameter is essentially zero.
-    !
-    If ( pnonc < 1.0D-10 ) Then
-       Call cumf ( f, dfn, dfd, cum, ccum )
-       Return
-    End If
-
-    xnonc = pnonc /  2.0D+00
-    !
-    !  Calculate the central term of the Poisson weighting factor.
-    !
-    icent = Int ( xnonc )
-
-    If ( icent == 0 ) Then
-       icent = 1
-    End If
-    !
-    !  Compute central weight term.
-    !
-    centwt = Exp ( -xnonc + icent * Log ( xnonc ) &
-         - gamma_log ( Real ( icent + 1, kind = 8  ) ) )
-    !
-    !  Compute central incomplete beta term.
-    !  Ensure that minimum of arg to beta and 1 - arg is computed accurately.
-    !
-    prod = dfn * f
-    dsum = dfd + prod
-    yy = dfd / dsum
-
-    If ( 0.5D+00 < yy ) Then
-       xx = prod / dsum
-       yy = 1.0D+00 - xx
-    Else
-       xx = 1.0D+00 - yy
-    End If
-
-    arg1 = 0.5D+00 * dfn + Real ( icent, kind = 8 )
-    Call beta_inc ( arg1, 0.5D+00*dfd, xx, yy, betdn, &
-         dummy, ierr )
-
-    adn = dfn / 2.0D+00 + Real ( icent, kind = 8 )
-    aup = adn
-    b = dfd / 2.0D+00
-    betup = betdn
-    sum1 = centwt * betdn
-    !
-    !  Now sum terms backward from ICENT until convergence or all done.
-    !
-    xmult = centwt
-    i = icent
-    dnterm = Exp ( gamma_log ( adn + b ) &
-         - gamma_log ( adn + 1.0D+00 ) &
-         - gamma_log ( b ) + adn * Log ( xx ) + b * Log ( yy ) )
-
-    Do
-
-       If ( qsmall ( xmult * betdn ) .Or. i <= 0 ) Then
-          Exit
-       End If
-
-       xmult = xmult * ( Real ( i, kind = 8 ) / xnonc )
-       i = i - 1
-       adn = adn - 1.0D+00
-       dnterm = ( adn + 1.0D+00 ) / ( ( adn + b ) * xx ) * dnterm
-       betdn = betdn + dnterm
-       sum1 = sum1 + xmult * betdn
-
-    End Do
-
-    i = icent + 1
-    !
-    !  Now sum forward until convergence.
-    !
-    xmult = centwt
-
-    If ( ( aup - 1.0D+00 + b ) == 0 ) Then
-
-       upterm = Exp ( - gamma_log ( aup ) - gamma_log ( b ) &
-            + ( aup - 1.0D+00 ) * Log ( xx ) + b * Log ( yy ) )
-
-    Else
-
-       upterm = Exp ( gamma_log ( aup - 1.0D+00 + b ) - gamma_log ( aup ) &
-            - gamma_log ( b ) + ( aup - 1.0D+00 ) * Log ( xx ) + b * Log ( yy ) )
-
-    End If
-
-    Do
-
-       xmult = xmult * ( xnonc / i )
-       i = i + 1
-       aup = aup + 1.0D+00
-       upterm = ( aup + b -  2.0D+00  ) * xx / ( aup - 1.0D+00 ) * upterm
-       betup = betup - upterm
-       sum1 = sum1 + xmult * betup
-
-       If ( qsmall ( xmult * betup ) ) Then
-          Exit
-       End If
-
-    End Do
-
-    cum = sum1
-    ccum = 0.5D+00 + ( 0.5D+00 - cum )
-
-    Return
-  Contains
-
-    Logical Function qsmall(x)
-      Real ( kind = 8 ), Intent(In) :: x
-      qsmall = sum1 < 1.0D-20 .Or. x < eps * sum1
-      Return
-    End Function qsmall
-
-  End Subroutine cumfnc
+!!$  Subroutine cumbin ( s, xn, pr, ompr, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMBIN evaluates the cumulative binomial distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine returns the probability of 0 to S successes in XN binomial
+!!$    !    trials, each of which has a probability of success, PR.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.24.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) S, the upper limit of summation.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) XN, the number of trials.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) PR, the probability of success in one trial.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) OMPR, equals ( 1 - PR ).
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, the cumulative binomial distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
+!!$    !    binomial distribution.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) ompr
+!!$    Real ( kind = 8 ) pr
+!!$    Real ( kind = 8 ) s
+!!$    Real ( kind = 8 ) xn
+!!$
+!!$    If ( s < xn ) Then
+!!$
+!!$       Call cumbet ( pr, ompr, s + 1.0D+00, xn - s, ccum, cum )
+!!$
+!!$    Else
+!!$
+!!$       cum = 1.0D+00
+!!$       ccum = 0.0D+00
+!!$
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cumbin
+
+! Subroutine cumchi ( x, df, cum, ccum )
+
+!   !*****************************************************************************80
+!   !
+!   !! CUMCHI evaluates the cumulative chi-square distribution.
+!   !
+!   !  Parameters:
+!   !
+!   !    Input, real ( kind = 8 ) X, the upper limit of integration.
+!   !
+!   !    Input, real ( kind = 8 ) DF, the egrees of freedom of the
+!   !    chi-square distribution.
+!   !
+!   !    Output, real ( kind = 8 ) CUM, the cumulative chi-square distribution.
+!   !
+!   !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
+!   !    chi-square distribution.
+!   !
+!   Implicit None
+
+!   Real ( kind = 8 ) a
+!   Real ( kind = 8 ) ccum
+!   Real ( kind = 8 ) cum
+!   Real ( kind = 8 ) df
+!   Real ( kind = 8 ) x
+!   Real ( kind = 8 ) xx
+
+!   a = df * 0.5D+00
+!   xx = x * 0.5D+00
+
+!   Call cumgam ( xx, a, cum, ccum )
+
+!   Return
+! End Subroutine cumchi
+
+!!$  Subroutine cumchn ( x, df, pnonc, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMCHN evaluates the cumulative noncentral chi-square distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine calculates the cumulative noncentral chi-square
+!!$    !    distribution, i.e., the probability that a random variable
+!!$    !    which follows the noncentral chi-square distribution, with
+!!$    !    noncentrality parameter PNONC and continuous degrees of
+!!$    !    freedom DF, is less than or equal to X.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.4.25.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) X, the upper limit of integration.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter of
+!!$    !    the noncentral chi-square distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, CCUM, the CDF and complementary
+!!$    !    CDF of the noncentral chi-square distribution.
+!!$    !
+!!$    !  Local Parameters:
+!!$    !
+!!$    !    Local, real ( kind = 8 ) EPS, the convergence criterion.  The sum
+!!$    !    stops when a term is less than EPS*SUM.
+!!$    !
+!!$    !    Local, integer NTIRED, the maximum number of terms to be evaluated
+!!$    !    in each sum.
+!!$    !
+!!$    !    Local, logical QCONV, is TRUE if convergence was achieved, that is,
+!!$    !    the program did not stop on NTIRED criterion.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) adj
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) centaj
+!!$    Real ( kind = 8 ) centwt
+!!$    Real ( kind = 8 ) chid2
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    Real ( kind = 8 ) dfd2
+!!$    !Timo: Real ( kind = 8 ) dg
+!!$    Real ( kind = 8 ), Parameter :: eps = 0.00001D+00
+!!$    !    Real ( kind = 8 ) gamma_log
+!!$    Integer i
+!!$    Integer icent
+!!$    Integer iterb
+!!$    Integer iterf
+!!$    Real ( kind = 8 ) lcntaj
+!!$    Real ( kind = 8 ) lcntwt
+!!$    Real ( kind = 8 ) lfact
+!!$    Integer, Parameter :: ntired = 1000
+!!$    Real ( kind = 8 ) pcent
+!!$    Real ( kind = 8 ) pnonc
+!!$    Real ( kind = 8 ) pterm
+!!$    !Timo: Logical qsmall
+!!$    Real ( kind = 8 ) sum1
+!!$    Real ( kind = 8 ) sumadj
+!!$    Real ( kind = 8 ) term
+!!$    Real ( kind = 8 ) wt
+!!$    Real ( kind = 8 ) x
+!!$    Real ( kind = 8 ) xnonc
+!!$    !Timo: Statement function qsmall converted to an internal function
+!!$    !Timo: qsmall(xx) = sum1 < 1.0D-20 .Or. xx < eps * sum1
+!!$    !Timo: dg(ii) = df +  2.0D+00  * Real ( ii, kind = 8 )
+!!$    !Timo: Statement function dg converted to an internal function
+!!$    !Timo: dg(xi) = df +  2.0D+00  * xi
+!!$
+!!$    If ( x <= 0.0D+00 ) Then
+!!$       cum = 0.0D+00
+!!$       ccum = 1.0D+00
+!!$       Return
+!!$    End If
+!!$    !
+!!$    !  When the noncentrality parameter is (essentially) zero,
+!!$    !  use cumulative chi-square distribution
+!!$    !
+!!$    If ( pnonc <= 1.0D-10 ) Then
+!!$       Call cumchi ( x, df, cum, ccum )
+!!$       Return
+!!$    End If
+!!$
+!!$    xnonc = pnonc /  2.0D+00
+!!$    !
+!!$    !  The following code calculates the weight, chi-square, and
+!!$    !  adjustment term for the central term in the infinite series.
+!!$    !  The central term is the one in which the poisson weight is
+!!$    !  greatest.  The adjustment term is the amount that must
+!!$    !  be subtracted from the chi-square to move up two degrees
+!!$    !  of freedom.
+!!$    !
+!!$    icent = Int ( xnonc )
+!!$    If ( icent == 0 ) Then
+!!$       icent = 1
+!!$    End If
+!!$
+!!$    chid2 = x /  2.0D+00
+!!$    !
+!!$    !  Calculate central weight term.
+!!$    !
+!!$    lfact = gamma_log ( Real ( icent + 1, kind = 8 ) )
+!!$    lcntwt = - xnonc + icent * Log ( xnonc ) - lfact
+!!$    centwt = Exp ( lcntwt )
+!!$    !
+!!$    !  Calculate central chi-square.
+!!$    !
+!!$    Call cumchi ( x, dg(Real(icent,kind=8)), pcent, ccum )
+!!$    !
+!!$    !  Calculate central adjustment term.
+!!$    !
+!!$    dfd2 = dg(Real(icent,kind=8)) /  2.0D+00
+!!$    lfact = gamma_log ( 1.0D+00 + dfd2 )
+!!$    lcntaj = dfd2 * Log ( chid2 ) - chid2 - lfact
+!!$    centaj = Exp ( lcntaj )
+!!$    sum1 = centwt * pcent
+!!$    !
+!!$    !  Sum backwards from the central term towards zero.
+!!$    !  Quit whenever either
+!!$    !  (1) the zero term is reached, or
+!!$    !  (2) the term gets small relative to the sum, or
+!!$    !  (3) More than NTIRED terms are totaled.
+!!$    !
+!!$    iterb = 0
+!!$    sumadj = 0.0D+00
+!!$    adj = centaj
+!!$    wt = centwt
+!!$    i = icent
+!!$    term = 0.0D+00
+!!$
+!!$    Do
+!!$
+!!$       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
+!!$       !
+!!$       !  Adjust chi-square for two fewer degrees of freedom.
+!!$       !  The adjusted value ends up in PTERM.
+!!$       !
+!!$       adj = adj * dfd2 / chid2
+!!$       sumadj = sumadj + adj
+!!$       pterm = pcent + sumadj
+!!$       !
+!!$       !  Adjust Poisson weight for J decreased by one.
+!!$       !
+!!$       wt = wt * ( i / xnonc )
+!!$       term = wt * pterm
+!!$       sum1 = sum1 + term
+!!$       i = i - 1
+!!$       iterb = iterb + 1
+!!$
+!!$       If ( ntired < iterb .Or. qsmall ( term ) .Or. i == 0 ) Then
+!!$          Exit
+!!$       End If
+!!$
+!!$    End Do
+!!$
+!!$    iterf = 0
+!!$    !
+!!$    !  Now sum forward from the central term towards infinity.
+!!$    !  Quit when either
+!!$    !    (1) the term gets small relative to the sum, or
+!!$    !    (2) More than NTIRED terms are totaled.
+!!$    !
+!!$    sumadj = centaj
+!!$    adj = centaj
+!!$    wt = centwt
+!!$    i = icent
+!!$    !
+!!$    !  Update weights for next higher J.
+!!$    !
+!!$    Do
+!!$
+!!$       wt = wt * ( xnonc / ( i + 1 ) )
+!!$       !
+!!$       !  Calculate PTERM and add term to sum.
+!!$       !
+!!$       pterm = pcent - sumadj
+!!$       term = wt * pterm
+!!$       sum1 = sum1 + term
+!!$       !
+!!$       !  Update adjustment term for DF for next iteration.
+!!$       !
+!!$       i = i + 1
+!!$       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
+!!$       adj = adj * chid2 / dfd2
+!!$       sumadj = sumadj + adj
+!!$       iterf = iterf + 1
+!!$
+!!$       If ( ntired < iterf .Or. qsmall ( term ) ) Then
+!!$          Exit
+!!$       End If
+!!$
+!!$    End Do
+!!$
+!!$    cum = sum1
+!!$    ccum = 0.5D+00 + ( 0.5D+00 - cum )
+!!$
+!!$    Return
+!!$  Contains
+!!$
+!!$    Logical Function qsmall(xx)
+!!$      Real ( kind = 8 ), Intent(In) :: xx
+!!$      qsmall = sum1 < 1.0D-20 .Or. xx < eps * sum1
+!!$      Return
+!!$    End Function qsmall
+!!$
+!!$    Real ( kind = 8 ) Function dg(xi)
+!!$      Real ( kind = 8 ), Intent(In) :: xi
+!!$      dg = df +  2.0D+00  * xi
+!!$      Return
+!!$    End Function dg
+!!$
+!!$  End Subroutine cumchn
+
+! Subroutine cumf ( f, dfn, dfd, cum, ccum )
+
+!   !*****************************************************************************80
+!   !
+!   !! CUMF evaluates the cumulative F distribution.
+!   !
+!   !  Discussion:
+!   !
+!   !    This routine computes the integral from 0 to F of the F density with DFN
+!   !    numerator and DFD denominator degrees of freedom.
+!   !
+!   !  Reference:
+!   !
+!   !    Milton Abramowitz, Irene Stegun,
+!   !    Handbook of Mathematical Functions
+!   !    1966, Formula 26.5.28.
+!   !
+!   !  Parameters:
+!   !
+!   !    Input, real ( kind = 8 ) F, the upper limit of integration.
+!   !
+!   !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of
+!   !    freedom for the numerator and denominator.
+!   !
+!   !    Output, real ( kind = 8 ) CUM, CCUM, the value of the F CDF and
+!   !    the complementary F CDF.
+!   !
+!   Implicit None
+
+!   Real ( kind = 8 ) ccum
+!   Real ( kind = 8 ) cum
+!   Real ( kind = 8 ) dfd
+!   Real ( kind = 8 ) dfn
+!   Real ( kind = 8 ) dsum
+!   Real ( kind = 8 ) f
+!   Integer ierr
+!   Real ( kind = 8 ) prod
+!   Real ( kind = 8 ) xx
+!   Real ( kind = 8 ) yy
+
+!   If ( f <= 0.0D+00 ) Then
+!      cum = 0.0D+00
+!      ccum = 1.0D+00
+!      Return
+!   End If
+
+!   prod = dfn * f
+!   !
+!   !  XX is such that the incomplete beta with parameters
+!   !  DFD/2 and DFN/2 evaluated at XX is 1 - CUM or CCUM
+!   !
+!   !  YY is 1 - XX
+!   !
+!   !  Calculate the smaller of XX and YY accurately.
+!   !
+!   dsum = dfd + prod
+!   xx = dfd / dsum
+
+!   If ( 0.5D+00 < xx ) Then
+!      yy = prod / dsum
+!      xx = 1.0D+00 - yy
+!   Else
+!      yy = 1.0D+00 - xx
+!   End If
+
+!   Call beta_inc ( 0.5D+00*dfd, 0.5D+00*dfn, xx, yy, ccum, cum, ierr )
+
+!   Return
+! End Subroutine cumf
+
+!!$  Subroutine cumfnc ( f, dfn, dfd, pnonc, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMFNC evaluates the cumulative noncentral F distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine computes the noncentral F distribution with DFN and DFD
+!!$    !    degrees of freedom and noncentrality parameter PNONC.
+!!$    !
+!!$    !    The series is calculated backward and forward from J = LAMBDA/2
+!!$    !    (this is the term with the largest Poisson weight) until
+!!$    !    the convergence criterion is met.
+!!$    !
+!!$    !    The sum continues until a succeeding term is less than EPS
+!!$    !    times the sum (or the sum is less than 1.0D-20).  EPS is
+!!$    !    set to 1.0D-4 in a data statement which can be changed.
+!!$    !
+!!$    !
+!!$    !    The original version of this routine allowed the input values
+!!$    !    of DFN and DFD to be negative (nonsensical) or zero (which
+!!$    !    caused numerical overflow.)  I have forced both these values
+!!$    !    to be at least 1.
+!!$    !
+!!$    !  Modified:
+!!$    !
+!!$    !    15 June 2004
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.16, 26.6.17, 26.6.18, 26.6.20.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) F, the upper limit of integration.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) DFN, DFD, the number of degrees of freedom
+!!$    !    in the numerator and denominator.  Both DFN and DFD must be positive,
+!!$    !    and normally would be integers.  This routine requires that they
+!!$    !    be no less than 1.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, CCUM, the noncentral F CDF and
+!!$    !    complementary CDF.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) adn
+!!$    Real ( kind = 8 ) arg1
+!!$    Real ( kind = 8 ) aup
+!!$    Real ( kind = 8 ) b
+!!$    Real ( kind = 8 ) betdn
+!!$    Real ( kind = 8 ) betup
+!!$    Real ( kind = 8 ) centwt
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) dfd
+!!$    Real ( kind = 8 ) dfn
+!!$    Real ( kind = 8 ) dnterm
+!!$    Real ( kind = 8 ) dsum
+!!$    Real ( kind = 8 ) dummy
+!!$    Real ( kind = 8 ), Parameter :: eps = 0.0001D+00
+!!$    Real ( kind = 8 ) f
+!!$    !    Real ( kind = 8 ) gamma_log
+!!$    Integer i
+!!$    Integer icent
+!!$    Integer ierr
+!!$    Real ( kind = 8 ) pnonc
+!!$    Real ( kind = 8 ) prod
+!!$    !Timo: Logical qsmall
+!!$    Real ( kind = 8 ) sum1
+!!$    Real ( kind = 8 ) upterm
+!!$    Real ( kind = 8 ) xmult
+!!$    Real ( kind = 8 ) xnonc
+!!$    Real ( kind = 8 ) xx
+!!$    Real ( kind = 8 ) yy
+!!$
+!!$    !Timo: Statement function qsmall converted to an internal function
+!!$    !Timo: qsmall(x) = sum1 < 1.0D-20 .Or. x < eps * sum1
+!!$
+!!$    If ( f <= 0.0D+00 ) Then
+!!$       cum = 0.0D+00
+!!$       ccum = 1.0D+00
+!!$       Return
+!!$    End If
+!!$
+!!$    If ( dfn < 1.0D+00 ) Then
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CUMFNC - Fatal error!'
+!!$       Write ( *, '(a)' ) '  DFN < 1.'
+!!$       Stop
+!!$    End If
+!!$
+!!$    If ( dfd < 1.0D+00 ) Then
+!!$       Write ( *, '(a)' ) ' '
+!!$       Write ( *, '(a)' ) 'CUMFNC - Fatal error!'
+!!$       Write ( *, '(a)' ) '  DFD < 1.'
+!!$       Stop
+!!$    End If
+!!$    !
+!!$    !  Handle case in which the noncentrality parameter is essentially zero.
+!!$    !
+!!$    If ( pnonc < 1.0D-10 ) Then
+!!$       Call cumf ( f, dfn, dfd, cum, ccum )
+!!$       Return
+!!$    End If
+!!$
+!!$    xnonc = pnonc /  2.0D+00
+!!$    !
+!!$    !  Calculate the central term of the Poisson weighting factor.
+!!$    !
+!!$    icent = Int ( xnonc )
+!!$
+!!$    If ( icent == 0 ) Then
+!!$       icent = 1
+!!$    End If
+!!$    !
+!!$    !  Compute central weight term.
+!!$    !
+!!$    centwt = Exp ( -xnonc + icent * Log ( xnonc ) &
+!!$         - gamma_log ( Real ( icent + 1, kind = 8  ) ) )
+!!$    !
+!!$    !  Compute central incomplete beta term.
+!!$    !  Ensure that minimum of arg to beta and 1 - arg is computed accurately.
+!!$    !
+!!$    prod = dfn * f
+!!$    dsum = dfd + prod
+!!$    yy = dfd / dsum
+!!$
+!!$    If ( 0.5D+00 < yy ) Then
+!!$       xx = prod / dsum
+!!$       yy = 1.0D+00 - xx
+!!$    Else
+!!$       xx = 1.0D+00 - yy
+!!$    End If
+!!$
+!!$    arg1 = 0.5D+00 * dfn + Real ( icent, kind = 8 )
+!!$    Call beta_inc ( arg1, 0.5D+00*dfd, xx, yy, betdn, &
+!!$         dummy, ierr )
+!!$
+!!$    adn = dfn / 2.0D+00 + Real ( icent, kind = 8 )
+!!$    aup = adn
+!!$    b = dfd / 2.0D+00
+!!$    betup = betdn
+!!$    sum1 = centwt * betdn
+!!$    !
+!!$    !  Now sum terms backward from ICENT until convergence or all done.
+!!$    !
+!!$    xmult = centwt
+!!$    i = icent
+!!$    dnterm = Exp ( gamma_log ( adn + b ) &
+!!$         - gamma_log ( adn + 1.0D+00 ) &
+!!$         - gamma_log ( b ) + adn * Log ( xx ) + b * Log ( yy ) )
+!!$
+!!$    Do
+!!$
+!!$       If ( qsmall ( xmult * betdn ) .Or. i <= 0 ) Then
+!!$          Exit
+!!$       End If
+!!$
+!!$       xmult = xmult * ( Real ( i, kind = 8 ) / xnonc )
+!!$       i = i - 1
+!!$       adn = adn - 1.0D+00
+!!$       dnterm = ( adn + 1.0D+00 ) / ( ( adn + b ) * xx ) * dnterm
+!!$       betdn = betdn + dnterm
+!!$       sum1 = sum1 + xmult * betdn
+!!$
+!!$    End Do
+!!$
+!!$    i = icent + 1
+!!$    !
+!!$    !  Now sum forward until convergence.
+!!$    !
+!!$    xmult = centwt
+!!$
+!!$    If ( ( aup - 1.0D+00 + b ) == 0 ) Then
+!!$
+!!$       upterm = Exp ( - gamma_log ( aup ) - gamma_log ( b ) &
+!!$            + ( aup - 1.0D+00 ) * Log ( xx ) + b * Log ( yy ) )
+!!$
+!!$    Else
+!!$
+!!$       upterm = Exp ( gamma_log ( aup - 1.0D+00 + b ) - gamma_log ( aup ) &
+!!$            - gamma_log ( b ) + ( aup - 1.0D+00 ) * Log ( xx ) + b * Log ( yy ) )
+!!$
+!!$    End If
+!!$
+!!$    Do
+!!$
+!!$       xmult = xmult * ( xnonc / i )
+!!$       i = i + 1
+!!$       aup = aup + 1.0D+00
+!!$       upterm = ( aup + b -  2.0D+00  ) * xx / ( aup - 1.0D+00 ) * upterm
+!!$       betup = betup - upterm
+!!$       sum1 = sum1 + xmult * betup
+!!$
+!!$       If ( qsmall ( xmult * betup ) ) Then
+!!$          Exit
+!!$       End If
+!!$
+!!$    End Do
+!!$
+!!$    cum = sum1
+!!$    ccum = 0.5D+00 + ( 0.5D+00 - cum )
+!!$
+!!$    Return
+!!$  Contains
+!!$
+!!$    Logical Function qsmall(x)
+!!$      Real ( kind = 8 ), Intent(In) :: x
+!!$      qsmall = sum1 < 1.0D-20 .Or. x < eps * sum1
+!!$      Return
+!!$    End Function qsmall
+!!$
+!!$  End Subroutine cumfnc
 
   Subroutine cumgam ( x, a, cum, ccum )
 
@@ -6967,55 +6967,55 @@ Contains
     Return
   End Subroutine cumgam
 
-  Subroutine cumnbn ( f, s, pr, ompr, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMNBN evaluates the cumulative negative binomial distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine returns the probability that there will be F or
-    !    fewer failures before there are S successes, with each binomial
-    !    trial having a probability of success PR.
-    !
-    !    Prob(# failures = F | S successes, PR)  =
-    !                        ( S + F - 1 )
-    !                        (            ) * PR^S * (1-PR)^F
-    !                        (      F     )
-    !
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions
-    !    1966, Formula 26.5.26.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) F, the number of failures.
-    !
-    !    Input, real ( kind = 8 ) S, the number of successes.
-    !
-    !    Input, real ( kind = 8 ) PR, OMPR, the probability of success on
-    !    each binomial trial, and the value of (1-PR).
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the negative binomial CDF,
-    !    and the complementary CDF.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) f
-    Real ( kind = 8 ) ompr
-    Real ( kind = 8 ) pr
-    Real ( kind = 8 ) s
-
-    Call cumbet ( pr, ompr, s, f+1.D+00, cum, ccum )
-
-    Return
-  End Subroutine cumnbn
+!!$  Subroutine cumnbn ( f, s, pr, ompr, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMNBN evaluates the cumulative negative binomial distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine returns the probability that there will be F or
+!!$    !    fewer failures before there are S successes, with each binomial
+!!$    !    trial having a probability of success PR.
+!!$    !
+!!$    !    Prob(# failures = F | S successes, PR)  =
+!!$    !                        ( S + F - 1 )
+!!$    !                        (            ) * PR^S * (1-PR)^F
+!!$    !                        (      F     )
+!!$    !
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions
+!!$    !    1966, Formula 26.5.26.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) F, the number of failures.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) S, the number of successes.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) PR, OMPR, the probability of success on
+!!$    !    each binomial trial, and the value of (1-PR).
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, CCUM, the negative binomial CDF,
+!!$    !    and the complementary CDF.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) f
+!!$    Real ( kind = 8 ) ompr
+!!$    Real ( kind = 8 ) pr
+!!$    Real ( kind = 8 ) s
+!!$
+!!$    Call cumbet ( pr, ompr, s, f+1.D+00, cum, ccum )
+!!$
+!!$    Return
+!!$  End Subroutine cumnbn
 
   Subroutine cumnor ( arg, cum, ccum )
 
@@ -7223,98 +7223,98 @@ Contains
     Return
   End Subroutine cumnor
 
-  Subroutine cumpoi ( s, xlam, cum, ccum )
+!!$  Subroutine cumpoi ( s, xlam, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMPOI evaluates the cumulative Poisson distribution.
+!!$    !
+!!$    !  Discussion:
+!!$    !
+!!$    !    This routine returns the probability of S or fewer events in a Poisson
+!!$    !    distribution with mean XLAM.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    Formula 26.4.21.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) S, the upper limit of cumulation of the
+!!$    !    Poisson density function.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) XLAM, the mean of the Poisson distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, CCUM, the Poisson density CDF and
+!!$    !    complementary CDF.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) chi
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    Real ( kind = 8 ) s
+!!$    Real ( kind = 8 ) xlam
+!!$
+!!$    df =  2.0D+00  * ( s + 1.0D+00 )
+!!$    chi =  2.0D+00  * xlam
+!!$
+!!$    Call cumchi ( chi, df, ccum, cum )
+!!$
+!!$    Return
+!!$  End Subroutine cumpoi
 
-    !*****************************************************************************80
-    !
-    !! CUMPOI evaluates the cumulative Poisson distribution.
-    !
-    !  Discussion:
-    !
-    !    This routine returns the probability of S or fewer events in a Poisson
-    !    distribution with mean XLAM.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    Formula 26.4.21.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) S, the upper limit of cumulation of the
-    !    Poisson density function.
-    !
-    !    Input, real ( kind = 8 ) XLAM, the mean of the Poisson distribution.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the Poisson density CDF and
-    !    complementary CDF.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) chi
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) s
-    Real ( kind = 8 ) xlam
-
-    df =  2.0D+00  * ( s + 1.0D+00 )
-    chi =  2.0D+00  * xlam
-
-    Call cumchi ( chi, df, ccum, cum )
-
-    Return
-  End Subroutine cumpoi
-
-  Subroutine cumt ( t, df, cum, ccum )
-
-    !*****************************************************************************80
-    !
-    !! CUMT evaluates the cumulative T distribution.
-    !
-    !  Reference:
-    !
-    !    Milton Abramowitz, Irene Stegun,
-    !    Handbook of Mathematical Functions,
-    !    Formula 26.5.27.
-    !
-    !  Parameters:
-    !
-    !    Input, real ( kind = 8 ) T, the upper limit of integration.
-    !
-    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of
-    !    the T distribution.
-    !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the T distribution CDF and
-    !    complementary CDF.
-    !
-    Implicit None
-
-    Real ( kind = 8 ) a
-    Real ( kind = 8 ) ccum
-    Real ( kind = 8 ) cum
-    Real ( kind = 8 ) df
-    Real ( kind = 8 ) oma
-    Real ( kind = 8 ) t
-    Real ( kind = 8 ) xx
-    Real ( kind = 8 ) yy
-
-    xx = df / ( df + t**2 )
-    yy = t**2 / ( df + t**2 )
-
-    Call cumbet ( xx, yy, 0.5D+00*df, 0.5D+00, a, oma )
-
-    If ( t <= 0.0D+00 ) Then
-       cum = 0.5D+00 * a
-       ccum = oma + cum
-    Else
-       ccum = 0.5D+00 * a
-       cum = oma + ccum
-    End If
-
-    Return
-  End Subroutine cumt
+!!$  Subroutine cumt ( t, df, cum, ccum )
+!!$
+!!$    !*****************************************************************************80
+!!$    !
+!!$    !! CUMT evaluates the cumulative T distribution.
+!!$    !
+!!$    !  Reference:
+!!$    !
+!!$    !    Milton Abramowitz, Irene Stegun,
+!!$    !    Handbook of Mathematical Functions,
+!!$    !    Formula 26.5.27.
+!!$    !
+!!$    !  Parameters:
+!!$    !
+!!$    !    Input, real ( kind = 8 ) T, the upper limit of integration.
+!!$    !
+!!$    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of
+!!$    !    the T distribution.
+!!$    !
+!!$    !    Output, real ( kind = 8 ) CUM, CCUM, the T distribution CDF and
+!!$    !    complementary CDF.
+!!$    !
+!!$    Implicit None
+!!$
+!!$    Real ( kind = 8 ) a
+!!$    Real ( kind = 8 ) ccum
+!!$    Real ( kind = 8 ) cum
+!!$    Real ( kind = 8 ) df
+!!$    Real ( kind = 8 ) oma
+!!$    Real ( kind = 8 ) t
+!!$    Real ( kind = 8 ) xx
+!!$    Real ( kind = 8 ) yy
+!!$
+!!$    xx = df / ( df + t**2 )
+!!$    yy = t**2 / ( df + t**2 )
+!!$
+!!$    Call cumbet ( xx, yy, 0.5D+00*df, 0.5D+00, a, oma )
+!!$
+!!$    If ( t <= 0.0D+00 ) Then
+!!$       cum = 0.5D+00 * a
+!!$       ccum = oma + cum
+!!$    Else
+!!$       ccum = 0.5D+00 * a
+!!$       cum = oma + ccum
+!!$    End If
+!!$
+!!$    Return
+!!$  End Subroutine cumt
 
   Function dbetrm ( a, b )
 
@@ -11346,7 +11346,7 @@ Contains
 
     Else If ( a < 10.0D+00 ) Then
 
-       n = a - 1.25D+00
+       n = INT(a - 1.25D+00)
        t = a
        w = 1.0D+00
        Do i = 1, n
@@ -13446,7 +13446,7 @@ Module STAT
   Use DCDFLIB ! ieva.f90
   Use PRECISION_PARAMETERS ! prec.f90g
   Use GLOBAL_CONSTANTS, GC_Gamma => Gamma    ! cons.f90
-  Use COMP_FUNCTIONS, Only: SHUTDOWN, SECOND ! func.f90
+  Use COMP_FUNCTIONS, Only: SHUTDOWN         ! func.f90
   Use MATH_FUNCTIONS, Only: AFILL ! func.f90
   Use MEMORY_FUNCTIONS, Only: ChkMemErr ! func.f90
 

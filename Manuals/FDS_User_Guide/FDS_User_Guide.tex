@@ -194,7 +194,7 @@ Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusett
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow with an emphasis on smoke and heat transport from fires. The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
 
-Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate User's Guide~\cite{Smokeview_Users_Guide}.
+Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate user's guide~\cite{Smokeview_Users_Guide}.
 
 
 \section{Features of FDS}
@@ -440,12 +440,11 @@ The MPI version of FDS requires shared disk access to each computer where cases 
 
 \section{Computer Operating System (OS) and Software Requirements}
 
-The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and various implementations of Unix/Linux.
+The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and Linux.
 \begin{description}
 \item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
 \item[{\bf Mac OS X}] Pre-compiled executables are installed into a user selected directory using an installation script.  Mac OS~X 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
-\item[{\bf Unix}] There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies equally as well to Unix.
 \end{description}
 
 \section{Installation Testing}
@@ -695,7 +694,7 @@ Along with the FDS User's Guide, there are resources available on the Internet. 
 
 \section{The Version Number}
 
-If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like \fdsversion, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
 
 Get in the habit of checking the version number of your executable, periodically checking for new releases which might already have addressed your problem, and telling us what version you are using if you report a problem.
 
@@ -795,7 +794,7 @@ To enter more than one mass fraction, use this notation:
 \begin{lstlisting}
 MATL_MASS_FRACTION(1,1:3)=0.5,0.4,0.1
 \end{lstlisting}
-which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array element 1 through 3, inclusive.
+which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation {\ct 1:3} means array elements 1 through 3, inclusive.
 
 Note that character strings can be enclosed either by single or double quotation marks. Be careful not to create the input file by pasting text from something other than a simple text editor, in which case the punctuation marks may not transfer properly into the text file.
 
@@ -816,7 +815,7 @@ To ensure that FDS reads the entire input file, add
 as the last line at the end of the input file. This completes the file from {\ct \&HEAD} to {\ct \&TAIL}. FDS does not even look for
 this last line. It just forces the ``end of file'' character past relevant input.
 
-Another general rule of thumb when writing input files is to only add parameters that make change from the
+Another general rule of thumb when writing input files is to only add parameters that make a change from the
 default value. That way, you can more easily distinguish between what you want and what FDS wants.
 Add comments liberally to the file, so long as
 these comments do not fall within the namelist records.
@@ -918,7 +917,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \end{table}
 
 
-\clearpage
+
 
 \chapter{Setting the Bounds of Time and Space}
 
@@ -1091,7 +1090,7 @@ Some parallel computing environments do not have a centralized file system, in w
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
-\setlength{\unitlength}{0.02in}
+\setlength{\unitlength}{0.015in}
 
 \newsavebox{\mygraph}
 \savebox{\mygraph}{
@@ -1123,21 +1122,25 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 \put(0,0){\framebox(100,80){ }}
 \end{picture} }
 
-\put(  0,320){\usebox{\mygraph}}
-\put(100,320){\usebox{\mygraph}}
-\put(230,370){\parbox{1.9in}{This is the ideal kind of mesh to mesh alignment.}}
+\put(  0,420){\usebox{\mygraph}}
+\put(100,420){\usebox{\mygraph}}
+\put(230,470){\parbox{2.5in}{This is the ideal kind of mesh to mesh alignment.}}
 
-\put(  0,220){\usebox{\mygraph}}
-\put(100,220){\usebox{\myfinegraph}}
-\put(230,270){\parbox{1.9in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+\put(  0,320){\usebox{\mygraph}}
+\put(100,320){\usebox{\myfinegraph}}
+\put(230,370){\parbox{2.5in}{This is allowed so long as there are an integral number of fine cells abutting each coarse cell.}}
+
+\put(  0,200){\usebox{\mygraph}}
+\put( 80,220){\usebox{\myfinegraph}}
+\put(230,270){\parbox{2.5in}{This is allowed, but of questionable value.}}
 
 \put(  0,100){\usebox{\mygraph}}
-\put( 80,120){\usebox{\myfinegraph}}
-\put(230,170){\parbox{1.9in}{This is allowed, but of questionable value.}}
+\put( 80,110){\usebox{\myfinegraph}}
+\put(230,160){\parbox{2.5in}{This is not allowed because each large cell must be completely covered by small ones.}}
 
 \put(  0,  0){\usebox{\mygraph}}
 \put(100,  0){\usebox{\myotherfinegraph}}
-\put(230, 50){\parbox{1.9in}{This is not allowed.}}
+\put(230, 50){\parbox{2.5in}{This is not allowed.}}
 \end{picture}
 
 \caption[Rules governing the alignment of meshes]{Rules governing the alignment of meshes.}
@@ -1244,7 +1247,6 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\clearpage
 \section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
 \label{info:MISC}
 
@@ -1343,7 +1345,7 @@ There are a few special applications where you might want to vary the gravity ve
 &RAMP ID='z-ramp', X= 51., F=-9.80 /
 &RAMP ID='z-ramp', X=100., F=-9.80 /
 \end{lstlisting}
-Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly. The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$, respectively. To check your math, the sum of the squares of the gravity components ought to equal 9.81. Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
+Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly. The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$, respectively. To check your math, the square root of the sum of the squares of the gravity components ought to equal 9.81. Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
 
@@ -1621,18 +1623,16 @@ If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the 
 
 \subsection*{Optional Pressure Solver}
 
-The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping meshes at the same refinement level, the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}, which allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. Two solution modes are defined by the logical parameter {\ct PRES\_ON\_WHOLE\_DOMAIN}. If {\ct .FALSE.} (default), the unknown values of the psueudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If {\ct .TRUE.}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated.
-
+The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping meshes at the same refinement level, the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}, which allows for the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory.
 
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the {\ct GLMAT\_SOLVER} with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the GLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
 \begin{lstlisting}
-&PRES GLMAT_SOLVER=.TRUE., PRES_ON_WHOLE_DOMAIN=.FALSE. /
+&PRES SOLVER='GLMAT' /
 \end{lstlisting}
-
 As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the GLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
 
 \begin{figure}[ht]
@@ -1647,7 +1647,7 @@ As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the n
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct GLMAT\_SOLVER} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct GLMAT\_SOLVER} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that {\ct GLMAT\_SOLVER} is threaded, whereas the FFT solver (FDS default) is not.  
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1656,11 +1656,11 @@ In this example, air is pushed through a 30~cm long, two-dimensional channel at 
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_glmat}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the {\ct GLMAT\_SOLVER} with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the GLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies}
 \end{figure}
 
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the {\ct GLMAT\_SOLVER} reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the GLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
@@ -2232,30 +2232,16 @@ model to ensure that the phenomena of interest are being captured.
 \section{Basics}
 \label{info:SURF_MATL_Basics}
 
-By default, the outer boundary of the computational domain is assumed
-to be a solid boundary that is maintained at ambient temperature. The
-same is true for any obstructions that are added to the scene. To
-specify the properties of solids, use the namelist group {\ct SURF}
-(Section~\ref{info:SURF}). Solids are assumed to
-consist of layers that can be made of different materials.  The
-properties of each material required are designated via the {\ct MATL}
-namelist group (Section~\ref{info:MATL}).  These properties indicate how
-rapidly the materials heat up, and how they burn.  Each {\ct MATL}
-entry in the input file must have an {\ct ID}, or name, so that they
-may be associated with a particular {\ct SURF} via the parameter {\ct
-MATL\_ID}.  For example, the input file entries:
-
+By default, the outer boundary of the computational domain is assumed to be a solid boundary that is maintained at ambient temperature. The same is true for any obstructions that are added to the scene. To specify the properties of solids, use the namelist group {\ct SURF} (Section~\ref{info:SURF}). Solids are assumed to consist of layers that can be made of different materials.  The properties of each material required are designated via the {\ct MATL} namelist group (Section~\ref{info:MATL}).  These properties indicate how rapidly the materials heat up, and how they burn.  Each {\ct MATL} entry in the input file must have an {\ct ID}, or name, so that they may be associated with a particular {\ct SURF} via the parameter {\ct MATL\_ID}.  For example, the input file entries:
 \begin{lstlisting}
 &MATL ID='BRICK', CONDUCTIVITY=0.69, SPECIFIC_HEAT=0.84, DENSITY=1600. /
 &SURF ID='BRICK WALL', MATL_ID='BRICK', COLOR='RED', BACKING='EXPOSED',
       THICKNESS=0.20 /
 &OBST XB=0.1,5.0,1.0,1.2,0.0,1.0, SURF_ID='BRICK WALL' /
 \end{lstlisting}
-
-\noindent
 define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
 
-\clearpage
+
 
 \section{Surface Temperature and Heat Flux}
 
@@ -2331,7 +2317,7 @@ For some special applications, it is often desired that a solid surface be adiab
 
 No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
 
-\clearpage
+
 
 
 \section{Heat Conduction in Solids}
@@ -2595,16 +2581,16 @@ Below is an example input file section:
 \begin{lstlisting}
  &INIT XB=-.1,.1,-.1,.1,-.1,.1, HRRPUV=1/
 \end{lstlisting}
- 
+
 {\ct HT3D} can use internal heat source as shown in the example below:
 \begin{lstlisting}
  &MATL ID='orange', .../
  &SURF ID='SPHERE', HT3D=.TRUE./
  &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
-\end{lstlisting} 
+\end{lstlisting}
 Note that you should not specify the internal heat source at the {\ct SURF} line.
 
-\clearpage
+
 
 
 \section{Simple Pyrolysis Models}
@@ -3109,34 +3095,114 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 
 
 
+\section{Thermal Degradation Model for Vegetation}
+
+The working model for the thermal degradation of a vegetative fuel is similar to that employed by others~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process has three reactions:
+
+\noindent 1. Endothermic drying
+\be
+ {\rm Wet Vegetation} \rightarrow M_{\rm dw} \, {\rm H_2O} + (1-M_{\rm dw}) \, {\rm Dry\ Vegetation}
+\ee
+
+\noindent 2. Endothermic pyrolysis
+\be
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, ({\rm Fuel\ Gas + Soot})
+\ee
+
+\noindent 3. Exothermic char oxidation
+\be
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
+\ee
+$M_{\rm dw}$ is the fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ is the mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ = 1.65~\cite{Porterie:2006};  $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
+
+In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
+
+The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
+\begin{eqnarray}
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right)  \\[.1in]
+  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right)  \\[.1in]
+  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
+  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
+\end{eqnarray}
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+
+\begin{table}[!ht]
+\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
+\vspace{0.1in}
+\label{tab:veg_kinetics}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Constant                 &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
+$E_{\rm H_2O}/R$ (K)         & 5,800 \\ \hline
+$A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
+$E_{\rm pyr}/R$ (K)            & 7,250  \\ \hline
+$A_{\rm char}$ (m/s)          & 430 \\ \hline
+$E_{\rm char}/R$ (K)           & 9,000 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The equation governing the temperature of a thermally thin fuel element is
+\be
+\label{eq:Tv_thermally_thin}
+\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
+\ee
+The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32 \times 10^3$~kJ/kg~\cite{Dahale:2013}.
+
+In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
+\begin{eqnarray}
+\rho_{\rm b} &=& \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O} \\[.1in]
+{\rm c_{\rm p,v}} &=& \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}
+\end{eqnarray}
+where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
+\begin{eqnarray}
+c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
+c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
+c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm p,H_2O} &=& 4190
+\end{eqnarray}
+The rate of change of the total vegetative fuel mass is
+\be
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
+\ee
+The rate of change for the components of the vegetative mass during thermal degradation are:
+\begin{eqnarray}
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O} \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}  \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
+\end{eqnarray}
+Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
+
 
 
 
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
 
-Modeling the burning of real materials can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the input file will consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, it is easy to perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
+The {\ct SURF} and {\ct MATL} lines describing the pyrolysis of real materials consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, you can perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
 
 This section describes how to set up a simple model of the cone calorimeter or other similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. You can literally create a model of the cone heater and sample holder in FDS to simulate the coupling of gas and solid phase phenomena, but before even attempting this, it is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
-\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need 4 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to whatever value appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
-\item Set {\ct HEAT\_TRANSFER\_COEFFICIENT=0} on the {\ct SURF} line. This turns off the convective heat flux from gas to surface and vice versa. The heat flux to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.} (kW/m$^2$) on the {\ct SURF} line that is assigned to the solid surface.
-\item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.} on the {\ct MISC} line. This will also speed up the computations significantly. If a {\ct REAC} line is needed to define a fuel gas, you may turn off combustion by setting {\ct Y\_O2\_INFTY=0.01} on the {\ct MISC} line. This sets the background oxygen mass fraction to 0.01, too low to support any burning.
-\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit.
-\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces.
-\item Finally, add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid is to burn away). Use these to track the condition of the solid as a function of time. In particular, make sure that the {\ct 'BURNING RATE'} is appropriate for the particular external heat flux applied. Make sure that the {\ct 'WALL TEMPERATURE'} is appropriate. Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena.
+\item Create a trivially small mesh, just to let FDS run. Since the gas phase calculation is essentially being shut off, you just need three cells in each direction ({\ct IJK=3,3,3}) for the pressure solver to function properly.
+\item On the {\ct MISC} line, set {\ct SOLID\_PHASE\_ONLY=.TRUE.} to turn off all gas phase computation and speed up the simulation.
+\item Create {\ct SPEC} lines to list any gas species created in the pyrolysis process. Do not specify a reaction using a {\ct REAC} line, as there is no gas phase combustion allowed.
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set {\ct DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
+\item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
+\item Set an {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C, default {\ct TMPA}) and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
+\item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
+\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
-Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
-
+Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
-&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2' /
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
-&TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
-&MISC Y_O2_INFTY=0.01, SOLID_PHASE_ONLY=.TRUE. /
-&REAC FUEL='METHANE' /
+&HEAD CHID='pmma_example', TITLE='Black PMMA at 50 kW/m2' /
+&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
+&TIME T_END=600., WALL_INCREMENT=1, DT=0.05 /
+&MISC SOLID_PHASE_ONLY=.TRUE. /
+&SPEC ID='METHANE' /
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
       N_REACTIONS=1
@@ -3147,7 +3213,6 @@ Below is an FDS input file that demonstrates how you can test a candidate pyroly
       SPEC_ID='METHANE'
       NU_SPEC=1.
       HEAT_OF_REACTION=870.
-      HEAT_OF_COMBUSTION=25200.
       CONDUCTIVITY = 0.20
       SPECIFIC_HEAT = 2.2
 &SURF ID='PMMA SLAB'
@@ -3155,12 +3220,11 @@ Below is an FDS input file that demonstrates how you can test a candidate pyroly
       BACKING='INSULATED'
       MATL_ID='BLACKPMMA'
       THICKNESS=0.0085
-      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
 &DUMP DT_DEVC=5. /
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='MLR' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='MASS FLUX', SPEC_ID='METHANE', ID='MF' /
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='thick' /
 &TAIL /
 \end{lstlisting}
@@ -3326,9 +3390,7 @@ where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is
 \subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
-The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
-In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
-In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.}\footnote{This parameter sets the wall stress to zero (removes viscous friction).  It is \emph{not} equivalent to the {\ct SAWTOOTH=.FALSE.} functionality from versions of FDS prior to Version 6.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+The no-slip condition implies that the continuum tangential gas velocity at a surface is zero. In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The ``sand grain'' surface roughness\footnote{Note the \emph{sand grain} roughness, $s$, is different than the \emph{aerodynamic} roughness, $z_0$, used in atmospheric flows (see Sec.~\ref{aerodynamic_roughness}).} (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.}\footnote{This parameter sets the wall stress to zero (removes viscous friction).  It is \emph{not} equivalent to the {\ct SAWTOOTH=.FALSE.} functionality from versions of FDS prior to Version 6.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
 
 
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
@@ -3934,7 +3996,6 @@ the right portal.}
 \end{figure}
 
 
-\clearpage
 
 \section{Special Flow Profiles}
 \label{info:profiles}
@@ -3989,9 +4050,9 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 \chapter{Atmospheric Effects and Wind}
 
-This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
+This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
 
-There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
 
 
 \section{Wind Method 1: Monin-Obukhov Similarity}
@@ -4015,7 +4076,7 @@ In the event that these various parameters are not reported or known, they can b
 \be
    u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
 \ee
-The Obukhov length, $L$, can be chosen from Table~\ref{OL}.
+The Obukhov length, $L$, can be chosen from Table~\ref{OL}. Suggested values of the aerodynamic roughness length\footnote{Note that \emph{aerodynamic} roughness, $z_0$, is not the same as \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. For more information, see Section~\ref{aerodynamic_roughness}.}, $z_0$, are given in Table~\ref{z0}.
 \begin{table}[!ht]
 \centering
 \caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
@@ -4029,7 +4090,7 @@ Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
 \end{tabular}
 \label{OL}
 \end{table}
-Suggested values of the aerodynamic roughness length, $z_0$, are given in Table~\ref{z0}.
+
 \begin{table}[!ht]
 \centering
 \caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
@@ -4047,7 +4108,7 @@ $z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
 \label{z0}
 \end{table}
 
-\noindent The scaling potential temperature, $\theta_*$, can be obtained from the relation:
+The scaling potential temperature, $\theta_*$, can be obtained from the relation:
 \be
    \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
 \ee
@@ -4108,13 +4169,7 @@ An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} f
 \end{figure}
 
 
-\subsection{Additional Parameters Related to Wind}
-
-The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} or its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), on the {\ct WIND} line, FDS will drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
-\be
-   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
-\ee
-Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+\subsection{Temporal and Spatial Variation of the Wind}
 
 The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
 \begin{lstlisting}
@@ -4127,6 +4182,27 @@ The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnit
 \end{lstlisting}
 The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
 
+\subsection{Aerodynamic Roughness}
+\label{aerodynamic_roughness}
+
+The \emph{aerodynamic} roughness length, $z_0$, is not the same as the \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. The default wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
+\be
+   \frac{u(z)}{u_*} = \frac{1}{\kappa} \, \ln \left( \frac{z}{s} \right) + 8.5
+\ee
+For the purpose of implementing the Monin-Obukhov model within FDS, the velocity profile given by Eq.~(\ref{u_om}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
+\be
+   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 30 \, z_0
+\ee
+To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$.
+
+\subsection{Sensible Heat Flux}
+
+The ground temperature relative to the air temperature is an important consideration in ground level gas dispersion because it essentially defines the stability of the atmospheric boundary layer. Cold air blowing over a warm ground surface leads to greater dispersion than warm air blowing over cold ground. In FDS wind simulations, the ground temperature is assumed to be fixed at the specified ambient temperature {\ct TMPA}, and the choice of Monin-Obukhov parameters dictate the temperature profile of the atmosphere.  According to the model, the sensible heat flux is given by
+\be
+   \dot{q}_{\rm c}'' = \rho \, c_p \, u_* \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above. In the simulation, you can explicitly specify the {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$) on the {\ct SURF} line to be $-\dot{q}_{\rm c}''$. Note that $\rho$ (kg/m$^3$) is the density of air near the ground and $c_p$ is the specific heat of air near the ground, approximately 1~kJ/(kg$\cdot$K).
+
 \subsection{Shielding Indoor Volumes from the Wind}
 \label{info:BLOCK_WIND}
 
@@ -4135,8 +4211,14 @@ There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are o
 &HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
 \end{lstlisting}
 
-\subsection{Issues Related to Mean Forcing}
+\subsection{The Mean Forcing Concept}
 \label{info:SPONGE_CELLS}
+
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} or its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), on the {\ct WIND} line, FDS will drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+\be
+   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
+\ee
+Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
 
 When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
 
@@ -4884,8 +4966,6 @@ where the {\ct XB} specifies a region at the base of the burner where AIT is set
 
 
 
-\clearpage
-
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
 
@@ -5307,6 +5387,11 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 \end{figure}
 
 
+\subsection{Soot Surface Oxidation}
+
+If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of 4.7x10$^{12}$ and an activation energy of 211,000~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler ~\cite{Hartman_2012}.
+
+
 
 
 
@@ -5385,7 +5470,7 @@ Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, F
 
 \paragraph{Multi-fuel radiative fraction}
 
-If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
+If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as  a reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
 
 \paragraph{Time variation of radiative fraction}
 
@@ -5680,8 +5765,6 @@ In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liq
 
 
 
-\clearpage
-
 \section{Solid Particles}
 \label{info:PART_SURF}
 
@@ -5786,7 +5869,6 @@ In this case, there is no calculation of heat conduction in depth. Only the surf
 \label{pine_needles}
 
 Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example. Suppose we want to describe a collection of wet pine needles that occupy a certain volume. The following lines have been extracted from the sample file {\ct WUI/pine\_needles.fds}. Note that all of the values have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.
-
 \begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
@@ -5838,6 +5920,10 @@ In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles use
 \caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
 \label{pine_needles_fig}
 \end{figure}
+
+\subsubsection{Notation used in Forestry}
+
+Users of FDS that work in wildland fire or forestry may be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture content is reported on a dry weight basis, $M_{\rm dw}$. The {\ct MASS\_FRACTION} of moisture on the {\ct SURF} line is $M_{\rm dw} / (1 + M_{\rm dw})$. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then the radius of the cylinder (input as {\ct THICKNESS}) is $2/\sigma_{\rm v}$. The {\ct MASS\_PER\_VOLUME} is equivalent to $m_{\rm d}''' \, (1+M_{\rm dw})$ where $m_{\rm d}'''$ is the mass per unit volume of dry vegetation.
 
 
 \subsection{Firebrands}
@@ -5907,6 +5993,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
 
+The {\ct MISC} input parameter {\ct DRAG\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct DRAG\_CFL\_MAX} may resolve them.
 
 \subsection{Electrical Cable Failure}
 \label{info:THIEF}
@@ -5991,15 +6078,32 @@ Sometimes it is convenient to introduce Lagrangian particles within a particular
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
-The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
 \begin{lstlisting}
-&INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
-&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
-      N_PARTICLES=..., MASS_PER_VOLUME=... /
+&INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
 Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning.
 
 If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
+
+Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Here is an example of how one might make a tree:
+\begin{lstlisting}
+&PART ID='tree crown foliage',
+      DRAG_LAW='CYLINDER',
+      SURF_ID='needles',
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+      STATIC=.TRUE.,
+      COLOR='FOREST GREEN' /
+&INIT PART_ID='tree crown foliage',
+      XYZ=0.0,0.0,0.0,
+      RADIUS=1,
+      HEIGHT=2,
+      SHAPE='CONE',
+      N_PARTICLES_PER_CELL=1,
+      CELL_CENTERED=.TRUE.,
+      MASS_PER_VOLUME=2.0  /
+\end{lstlisting}
+Note that in this example, exactly one particle is specified per grid cell, positioned exactly in the center of the cell. The number of actual pine needles this single particle represents depends on the specified {\ct MASS\_PER\_VOLUME} and the mass of an individual cylindrical particle. That information would be provided by the {\ct SURF} line {\ct 'needles'}.
 
 \subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
 
@@ -6100,177 +6204,6 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 
 
-
-\chapter{Vegetation}
-
-Vegetation can be modeled using the particle functionality in FDS (for raised vegetation) or as a surface (for vegetation on the ground). In both cases, the vegetation is present as a source of momentum drag and, when undergoing thermal degradation, a source of mass (e.g., water and fuel vapor).
-
-\section{Using Particles to Represent Vegetation}
-
-Four namelist groups are needed to specify the properties and the location of vegetation using particles: {\ct SURF}, {\ct MATL}, {\ct PART}, and {\ct INIT}. A cone-shape tree crown comprised of needles (i.e., no roundwood) can be defined by the following namelist lines.
-
-The {\ct SURF} and {\ct MATL} namelists specify the properties of the needles. In this example, the {\ct  SURF} namelist specifies that the mass of a needle is 70\% solid and 30\% moisture. The {\ct MATL ID='solid fuel'} namelist contains the properties of the needle's solid fuel and the {\ct MATL ID='moisture'} contains the properties of the needle's moisture. As a given mass of solid fuel undergoes pyrolysis,  74\% ({\ct NU\_SPEC} = 0.74) is converted to fuel gas (pyrolyzate) and 26\% ({\ct NU\_MATL=0.26}) remains as a solid in the form of char. The exothermic process of char oxidation is not modeled. Instead, char remains present as a solid with material properties listed in {\ct MATL ID='char'}.
-\begin{lstlisting}
-&SURF ID = 'needles'
-      MATL_ID(1,1:2)   = 'solid fuel','moisture'
-      MATL_MASS_FRACTION(1,1:2) = 0.7,0.3
-      THICKNESS  = 0.00025
-      LENGTH  = 0.05
-      GEOMETRY  = 'CYLINDRICAL' /
-\end{lstlisting}
-\begin{lstlisting}
-&MATL ID = 'solid fuel'
-      DENSITY = 514.
-      CONDUCTIVITY = 2.0
-      SPECIFIC_HEAT= 1.2
-      SPEC_ID = 'pyrolyzate'
-      NU_SPEC = 0.74
-      NU_MATL = 0.26
-      N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 200.
-      REFERENCE_RATE = 0.0005
-      HEATING_RATE = 1.6
-      MATL_ID = 'char'
-      HEAT_OF_COMBUSTION = 17700.
-      HEAT_OF_REACTION = 418.
-      ALLOW_SHRINKING=.FALSE.
-      ALLOW_SWELLING=.FALSE. /
-\end{lstlisting}
-\begin{lstlisting}
-&MATL ID = 'char'
-      DENSITY = 300.
-      CONDUCTIVITY = 2.0
-      SPECIFIC_HEAT= 1.2 /
-\end{lstlisting}
-\begin{lstlisting}
-&MATL ID = 'moisture'
-      DENSITY = 1000.
-      CONDUCTIVITY = 2.0
-      SPECIFIC_HEAT= 4.184
-      N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 100.
-      REFERENCE_RATE = 0.002
-      HEATING_RATE = 1.6
-      NU_SPEC = 1.0
-      SPEC_ID = 'water vapor'
-      HEAT_OF_REACTION= 2500. /
-\end{lstlisting}
-The {\ct PART} namelist references {\ct SURF} for material properties and specifies the drag model. The {\ct INIT} namelist defines the geometry of the volume occupied by the vegetation (in this case a cone) and total mass (dry and moist) of the vegetation in that volume ({\ct MASS\_PER\_VOLUME}).
-\begin{lstlisting}
-&PART ID='tree crown foliage',
-      DRAG_LAW='CYLINDER',
-      SURF_ID='needles',
-      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
-      STATIC=.TRUE.,
-      COLOR='FOREST GREEN' /
-\end{lstlisting}
-\begin{lstlisting}
-&INIT PART_ID='tree crown foliage',
-      XYZ=0.0,0.0,0.0,
-      RADIUS=1,
-      HEIGHT=2,
-      SHAPE='CONE',
-      N_PARTICLES_PER_CELL=1,
-      CELL_CENTERED=.TRUE.,
-      MASS_PER_VOLUME=2.0  /
-\end{lstlisting}
-
-\section{Conversion of Vegetation Parameters Commonly Used in Forestry to those Required by FDS}
-
-Users of FDS that work in wildland fire or forestry will be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture is reported on a dry weight basis. Thus, pending the creation of new namelists or the addition of new namelist parameters,  commonly reported vegetation properties cannot be directly used in FDS input files. Instead, they must be converted to the parameters needed by FDS. These conversions affect parameters in the {\ct SURF} and {\ct INIT} namelists and are given below.
-
-The forestry literature provides vegetation moisture, $M_{\rm dw}$, on a dry weight basis. The {\ct SURF} namelist parameters for mass fractions of the solid fuel and moisture are then $1 / (1 + M_{\rm dw})$ and $M_{\rm dw} / (1 + M_{\rm dw}$), respectively. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then {\ct THICKNESS} = $2/\sigma_{\rm v}$ in the {\ct SURF} namelist (here {\ct THICKNESS} equal the radius of the cylindrical shaped vegetation element).
-
-The {\ct INIT} namelist parameter {\ct MASS\_PER\_VOLUME} = $\rho_{\rm d} (1+M_{\rm dw})$ where $\rho_{\rm d}$ is the bulk density of the dry vegetation.
-
-\section{Thermal Degradation Model for Vegetation}
-
-The working model for the thermal degradation of a vegetative fuel is similar to that employed by others (e.g. Porterie et al. 2005; Morvan and Dupuy 2004; Houssami et al. 2016). The solid-phase thermal degradation process has three reactions: \\
-
-\noindent 1. Endothermic drying
-\be
- {\rm Virgin\ Veg} \rightarrow M_{\rm dw} \, {\rm H_2O} + (1-M_{\rm dw}) \, {\rm Dry\ Veg} \nonumber
-\ee
-
-\noindent 2. Endothermic pyrolysis
-\be
- {\rm Dry\ Veg} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, ({\rm Fuel\ Gas + Soot}) \nonumber
-\ee
-
-\noindent 3. Exothermic char oxidation
-\be
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash} \nonumber
-\ee
-$M_{\rm dw}$ is the fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ is the mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ = 1.65 [Porterie 2005];  $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
-
-In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell et al. (2009), $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
-
-The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
-\begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right) \nonumber \\[.1in]
-  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right) \nonumber \\[.1in]
-  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
-  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}} \nonumber
-\end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie et al. 2005.
-
-\begin{table}[!ht]
-\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al., 2005)}
-\vspace{0.1in}
-\label{tab:veg_kinetics}
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Constant                 &   Default Value  \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
-$E_{\rm H_2O}/R$ (K)         & 5,800 \\ \hline
-$A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
-$E_{\rm pyr}/R$ (K)            & 7,250  \\ \hline
-$A_{\rm char}$ (m/s)          & 430 \\ \hline
-$E_{\rm char}/R$ (K)           & 9,000 \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-The equation governing the temperature of a thermally thin fuel element is
-\be
-\label{eq:Tv_thermally_thin}
-\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
-\ee
-The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie et al. 2005). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively (Mell et al. 2009). The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg [Movan and Dupuy, 2001]; $\Delta{\rm h_{char}} = -32 \times 10^3$~kJ/kg [Dahale et al. 2013].
-
-In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
-\be
-\rho_{\rm b} = \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O}, \nonumber
-\ee
-
-\be
-{\rm c_{\rm p,v}} = \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}, \nonumber
-\ee
-where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
-\begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~1997}) \nonumber \\[.1in]
-c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \nonumber \\[.1in]
-c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~2009}) \nonumber \\[.1in]
-c_{\rm p,H_2O} &=& 4190 \nonumber
-\end{eqnarray}
-The rate of change of the total vegetative fuel mass is
-\be
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char} \nonumber
-\ee
-The rate of change for the components of the vegetative mass during thermal degradation are:
-
-\begin{eqnarray}
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O}, \nonumber \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}, \nonumber \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char} \nonumber
-\end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
-
-
-
-
-
 \chapter{Devices and Control Logic}
 
 Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be completely unrelated, but from the point of view of FDS, they are simply devices that operate in specific ways depending on the properties assigned to them. They can be used to record some quantity of the simulated environment, like a thermocouple, or they can represent a mathematical model of a complex sensor, like a smoke detector, and in some cases they can trigger events to happen, like a timer.
@@ -6333,14 +6266,17 @@ Many devices are fairly easy to describe, like a point measurement, with only a 
 \subsection{Sprinklers}
 \label{info:sprinklers}
 
-Here is a very simple example of a sprinkler:
+To specify one or more sprinklers, you need to specify several different groups of parameters that fall into a variety of namelist groups. For example, here is a basic sprinkler description:
 \begin{lstlisting}
+&SPEC ID='WATER VAPOR' /
+&PART ID='my droplets', DIAMETER=1000., SPEC_ID='WATER VAPOR' /
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
+      ACTIVATION_TEMPERATURE=74., OFFSET=0.10, PART_ID='my droplets', FLOW_RATE=189.3,
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'   /
+&DEVC ID='Spr-1', XYZ=22.8,19.7,7.4, PROP_ID='K-11' /
+&DEVC ID='Spr-2', XYZ=22.8,22.7,7.4, PROP_ID='K-11' /
 \end{lstlisting}
-A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
+A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
 \item[{\ct RTI}] Response Time Index in units of (m$\cdot$s)$^{1/2}$. (Default 100.)
 \item[{\ct C\_FACTOR}] Conduction Factor in units of (m/s)$^{1/2}$. (Default 0.)
@@ -6350,14 +6286,13 @@ A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {
 \item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. (Default 0.05~m)
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
-\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of $x$ axis and a 30 degree angle in the direction of $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
+\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the {\ct ORIENTATION} of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1,1:2)=0.,60.}  and {\ct SPRAY\_ANGLE(2,1:2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
+\item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
 Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets.
-
-For more information about sprinklers, their activation and spray dynamics, read the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
@@ -6367,18 +6302,12 @@ For more information about sprinklers, their activation and spray dynamics, read
 
 As an example of the more advanced sprinkler options, a sprinkler with an elliptical spray pattern and uniform mass flux distribution within the spray angle is given by:
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE(1:2,1)=0.,60.,SPRAY_ANGLE(1:2,2) = 0.,30.,
+&PROP ... SPRAY_ANGLE(1:2,1)=0.,60., SPRAY_ANGLE(1:2,2)=0.,30.,
       SPRAY_PATTERN_SHAPE='UNIFORM' /
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 \end{lstlisting}
-For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in $x$ direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between full-cone and hollow-cone spray:
+For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by default. For hollow-cone sprays it is set to the average of {\ct SPRAY\_ANGLE(1:2,1)}, the spray angle in the $x$ direction. The following example uses  {\ct SPRAY\_PATTERN\_MU} to define a spray that is somewhere between a full-cone and a hollow-cone spray:
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE=0.,30. ,SPRAY_PATTERN_MU=15./
-&DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
+&PROP ... SPRAY_ANGLE=0.,30., SPRAY_PATTERN_MU=15. /
 \end{lstlisting}
 If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} namelist group. Specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the form:
 \begin{lstlisting}
@@ -6386,13 +6315,11 @@ If a more complex spray pattern is desired than one characterized by a {\ct SPRA
 \end{lstlisting}
 where each {\ct TABL} line for a given {\ct 'table\_id'} provides information about the spherical distribution of the spray pattern for a specified solid angle. {\ct LAT1} and {\ct LAT2} are the bounds of the solid angle measured in degrees from the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downwards, which is why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters {\ct LON1} and {\ct LON2} are the bounds of the solid angle (also in degrees), where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  {\ct VELO} is the velocity (m/s) of the droplets at their point of insertion. {\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
-In the test case called {\ct bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 5~m/s and a total flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
+In the test case called {\ct bucket\_test\_2}, the spray consists of two jets, each with a velocity of 5~m/s and a combined flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 60$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 \begin{lstlisting}
-&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10,
-      PART_ID='water_drops', FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1',
-      SMOKEVIEW_ID='sprinkler_upright', PARTICLE_VELOCITY=5. /
-&TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
-&TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
+&PROP ... FLOW_RATE=60., SPRAY_PATTERN_TABLE='TABLE1' /
+&TABL ID='TABLE1', TABLE_DATA=30,31,  0,  1,5,0.2 /
+&TABL ID='TABLE1', TABLE_DATA=30,31,179,180,5,0.8 /
 \end{lstlisting}
 Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that the {\ct TABL} lines can be specified in any order. Figure~\ref{bucket_test_2_fig} verifies that the sprinkler releases 5~kg of water (1~kg/s for 5~s).
 
@@ -6598,7 +6525,7 @@ where $O_i$ is the FDS output for the beam detector of the $i$th path (note that
 
 \subsubsection{Example Case: A Beam Detector}
 
-A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{1/m}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{1/m} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7081,7 +7008,6 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
-\clearpage
 
 \input{smv_objects.tex}
 
@@ -7503,8 +7429,7 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC}) = 0
    \label{TC}
 \ee
-where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and
-$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
 \subsection{Heat Flux}
@@ -7833,7 +7758,7 @@ Note that the spatial integration features (Section~\ref{info:statistics}) canno
 use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point measurement.
 
 In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as in the example below:
- 
+
 \begin{lstlisting}
 &SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE' /
 &SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE' /
@@ -8323,7 +8248,6 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 \end{description}
 
 
-\clearpage
 
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
@@ -8469,7 +8393,7 @@ $^4$                  \> Quantify allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
 
-\clearpage
+
 \section{Summary of Infrequently-Used Output Quantities}
 \label{info:oddoutputquantities}
 
@@ -8568,7 +8492,7 @@ $^3$                 \> Quantity requires specification of an additional scalar 
 $^4$                 \> Quantity allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
-\clearpage
+
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
@@ -8614,9 +8538,7 @@ This appendix lists all of the input parameters for FDS in separate tables group
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice. Only prescribe those parameters which are necessary to describe the desired scenario. Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
 
 
-\clearpage
 
-%Undocumented NAMELIST /BNDE/
 
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
@@ -8728,7 +8650,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
-
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Device parameters ({\ct DEVC} namelist group)]{For more information see Section~\ref{info:DEVC}.}
@@ -8956,7 +8877,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
-{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)                 \\ \hline
+{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)  \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
@@ -9180,6 +9101,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                               &              &   1.0               \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
@@ -9209,7 +9131,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
-%{\ct NORTHANGLE}                                & Real          &                                                       &\si{\degree}   & {\ct -190.0}      \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
@@ -9229,6 +9150,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
+{\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                          &               & {\ct .FALSE.}      \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline
@@ -9241,7 +9163,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-%{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
@@ -9257,6 +9178,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 \vspace{\baselineskip}
+
 
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
@@ -9388,6 +9310,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 6             \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array      & Section~\ref{info:porous_media}         &           &               \\ \hline
+{\ct POROUS\_VOLUME\_FRACTION}           & Real            & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct PROP\_ID}                           & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct QUANTITIES(10)}                     & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
 {\ct QUANTITIES\_SPEC\_ID(10)}           & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
@@ -9445,7 +9368,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %               SCARC_COARSE_ITERATIONS     , SCARC_COARSE_ACCURACY
 
 \vspace{\baselineskip}
-
 
 
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
@@ -9609,7 +9531,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
-
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Reaction parameters ({\ct REAC} namelist group)]{For more information see Chapter~\ref{chap:combustion}.}
 \label{tbl:REAC} \\
@@ -9693,7 +9614,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %Undocumented: AGL_SLICE,FIRE_LINE, ID, LEVEL_SET_FIRE_LINE
 
 \vspace{\baselineskip}
-
 
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
@@ -9928,7 +9848,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -10080,12 +9999,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \part{FDS and Smokeview Development Tools}
 
-\chapter{The FDS/Smokeview Repository}
+\chapter{The FDS and Smokeview Repositories}
 
-For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.'' All project documents are maintained using the online utility \href{https://github.com/}{{GitHub}}, a free service that supports software development for open source applications.  GitHub uses Git version control software. Under this system, a centralized repository containing all project files resides on a GitHub server.  Anyone can obtain a copy of the repository or retrieve a specific revision of the repository.  However, only the FDS and Smokeview developers can commit changes directly to the repository. Others must submit a ``pull request.'' Detailed instructions for checking out the FDS repository can be found at
+For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the FDS and Smokeview repositories. All project documents are maintained using the online utility \href{https://github.com/}{{GitHub}}, a free service that supports software development for open source applications.  GitHub uses Git version control software. Under this system, a centralized repository containing all project files resides on a GitHub server.  Anyone can obtain a copy of the repository or retrieve a specific revision of the repository.  However, only the FDS and Smokeview developers can commit changes directly to the repository. Others must submit a ``pull request.'' Detailed instructions for checking out the FDS repository can be found at
 \href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 
-Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``firemodels''.  The current location of the organization is \href{https://github.com/firemodels}{{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
 
 \vskip\baselineskip
 \begin{tabular}{ll}
@@ -10098,7 +10017,7 @@ fds-smv & Web page html source
 \end{tabular}
 \vskip\baselineskip
 
-\noindent The Wiki Pages are particularly useful in describing the details of how you go about working with the repository assets.
+\noindent The wiki pages in the fds repository are particularly useful in describing the details of how you go about working with the repository assets.
 
 
 
@@ -10113,9 +10032,9 @@ If a compiled version of FDS exists for the machine on which the calculation is 
 
 Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2008 edition). A {\ct makefile} is available in the FDS-SMV Repository that contains platform specific options for compilation. Note the following:
 \begin{itemize}
-\item The source code consists entirely of Fortran statements organized into about 35 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item For the non-MPI version of FDS, compile with {\ct mpis.f90}.
-\item The MPI version of FDS uses {\ct mpip.f90} instead of {\ct mpis.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the FDS-SMV website, along with links to the necessary organizations who have developed free MPI libraries.
+\item The source code consists entirely of Fortran statements organized into 33 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
+\item To compile FDS, you need a Fortran compiler (2008 or greater) and MPI libraries. More details on MPI can be found at the FDS repository
+\href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 \end{itemize}
 
 \begin{table}[ht]
@@ -10144,8 +10063,6 @@ File Name  & Description  \\ \hline \hline
 {\ct main.f90}   & Main program \\ \hline
 {\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
 {\ct mesh.f90}   & Arrays and constants associated with each mesh \\ \hline
-{\ct mpip.f90}   & MPI ``include'' statement for MPI compilation \\ \hline
-{\ct mpis.f90}   & ``Dummy'' Fortran/MPI bindings for non-MPI compilation \\ \hline
 {\ct part.f90}   & Lagrangian particle transport and sprinkler activation \\ \hline
 {\ct pois.f90}   & Poisson (pressure) solver \\ \hline
 {\ct prec.f90}   & Specification of numerical precision \\ \hline

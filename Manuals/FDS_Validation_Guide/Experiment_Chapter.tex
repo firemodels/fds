@@ -174,7 +174,7 @@ The following information was provided by the test director, Steve Nowlen of San
 
 
 
-\begin{table}[h!]
+\begin{table}[!ht]
 \caption[Summary of FM/SNL Experiments]{Summary of FM/SNL Experiments. ACH stands for Air Changes per Hour.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
@@ -213,7 +213,7 @@ No.     &  Type             & HRR (kW)      & Position      & Rate (ACH)        
 \label{FM_SNL_Drawing}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 
 %\section{FPRF/HAI Corridor Test Series}
@@ -255,7 +255,7 @@ No.     &  Type             & HRR (kW)      & Position      & Rate (ACH)        
 %\end{table}
 %
 %
-%\clearpage
+%\FloatBarrier
 
 \section{FM Vertical Wall Flame Experiments}
 
@@ -367,17 +367,17 @@ In 2006, the Fire Protection Research Foundation (FPRF) undertook a research pro
 
 In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas (35 kJ/L [45 MJ/kg assuming 19 kg/kgmol as mole weight for natural gas]). The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}. Along the centerline of the burner, velocity and temperature were measured using bi-directional probes and thermocouples, respectively.  The centerline data collapses when scaled by the Froude number as shown in Fig.~\ref{fig:McCaffrey_Correlations}. Radiant fraction measurements for natural gas were made in \cite{McCaffrey:1981}.  For convenience, we have extracted the data from that report for the heat release rates reported in \cite{McCaffrey:NBSIR_79-1910}.  See Table \ref{tab:McCaffrey_Plume_Exp}.  The burner surface temperatures are extrapolated to the surface location from a least squares fit of of the temperature data below $z/Q^{2/5} = 0.05$ \si{m.kW^{-2/5}}.  The extrapolations for each power are shown in Fig.~\ref{fig:McCaffrey_Surf_Temp}.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Temperature_Correlation} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation} \\
 \end{tabular*}
 \caption[McCaffrey Plume Centerline Temperature and Velocity Correlations]
-{McCaffrey Plume Centerline Temperature and Velocity Correlations.}
+{McCaffrey Plume Centerline Temperature and Velocity Correlations (dashed lines) and raw data (symbols).}
 \label{fig:McCaffrey_Correlations}
 \end{figure}
 
-\begin{table}[p]
+\begin{table}[!ht]
 \caption{Summary of McCaffrey Plume Experiments, 1979.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
@@ -393,7 +393,7 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \label{tab:McCaffrey_Plume_Exp}
 \end{table}
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_14kW_Surface_Temp} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_22kW_Surface_Temp} \\
@@ -407,7 +407,7 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \end{figure}
 
 
-\clearpage
+\FloatBarrier
 
 \section{NBS Multi-Room Experiments}
 
@@ -490,13 +490,13 @@ Number &  Type         &  HRR (kW)    &  Size (m$^2$) &  Opening (cm)     \\ \hl
 
 The NIST FSE (2008) Experiments were conducted in an ISO~9705 compartment~\cite{Lock:1}. The compartment was 2.4~m wide by 3.6~m long by 2.4~m high with a 2~m high door at one end (Fig.~\ref{NIST_FSE_2008_Drawing}). The door width varied between 0.1~m and 0.8~m. The experiments were designed to study the effects of fuel type, fuel distribution, and vent size on under-ventilated compartment fires. Thirty experiments were conducted, which included 7 different fuels, 3 fuel sources, and 4 ventilation openings. Table~\ref{tab:NIST_FSE_Exp} provides a summary of the experiments. Species concentrations and temperature measurements were made at the front and rear of the compartment.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/NIST_FSE_2008/NIST_FSE_2008_Drawing}
 \caption[Geometry of the compartment used in the NIST Full-Scale Enclosure experiments]{Geometry of the compartment used in the NIST Full-Scale Enclosure (FSE) experiments.}
 \label{NIST_FSE_2008_Drawing}
 \end{figure}
 
-\begin{table}[p]
+\begin{table}[!ht]
 \caption{Summary of NIST FSE Experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|}
@@ -536,7 +536,7 @@ ISONG32       &  Natural Gas  &            &  1        &  0.28         &  20    
 \end{table}
 
 
-
+\FloatBarrier
 
 
 \section{NIST Helium Experiments}
@@ -593,7 +593,7 @@ and \SI{0.195 \pm 0.052}{kg/kg} for heptane and toluene, respectively.
 \end{description}
 
 
-\clearpage
+\FloatBarrier
 
 \section{NIST/NRC Corner and Wall Effects Experiments}
 
@@ -738,7 +738,7 @@ Test   & Cabinet    & Front Door & Top Vents        & Upper Side Vents          
 
 
 
-\clearpage
+\FloatBarrier
 
 \section{NIST Smoke Alarm Experiments}
 
@@ -778,7 +778,7 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 \label{NIST_Smoke_Alarms_Drawing}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 
 \section{NIST Vent Study}
@@ -865,7 +865,7 @@ No.  & Window   & Window  & Window    & Vent     & Vent    & Vent Area    & Vent
 \end{table}
 
 
-\clearpage
+\FloatBarrier
 
 \section{NRCC Facade Heat Flux Measurements}
 
@@ -931,7 +931,7 @@ Thermocouples and gas analyzers were placed at various locations to measure temp
 %and velocity probes in a small number of doors, vents, and HVAC ducts.  Test variables included the number of opened doors and hatches, the number of vent openings to the ambient,
 %the fire location, the fire size, and the operation of the HVAC systems.  All the fires were marine diesel pool fires.
 %
-%\clearpage
+%\FloatBarrier
 
 
 \section{NRL/HAI Wall Heat Flux Measurements}
@@ -983,7 +983,7 @@ In 2008, three compartment experiments were performed at SP Technical Research I
 
 The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705). The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m (Fig.~\ref{Room_Drawing}). The room was constructed of 20~cm thick light weight concrete blocks with a density of 600~kg/m$^3$~$\pm$~100~kg/m$^3$. The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls. A single steel beam was suspended 20~cm below the ceiling along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and 2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam. A diagram of the room used in Test~2 is displayed in Figure~\ref{Room_Drawing}.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/SP_AST/SP_AST_Compartment_Drawing}
 \caption{Geometry of the  SP/AST compartment for Test 2.}
 \label{Room_Drawing}
@@ -992,6 +992,8 @@ The experiments were performed inside a standard compartment designed for corner
 A second series of experiments involving plate thermometers was carried out in 2011~\cite{Sjostrom:AST}. A 6~m long, 20~cm diameter vertical steel column was positioned in the center of 1.1~m and 1.9~m diesel fuel and 1.1~m heptane pool fires. Gas, plate thermometer, and surface temperatures were measured at heights of 1~m, 2~m, 3~m, 4~m, and 5~m above the pool surface. These experiments are notable because the column is partially engulfed in flames.
 
 A third series of experiments involving plate thermometers was conducted in 2015~\cite{Sjostrom:SP2016}. A simple compartment with a single door was constructed and instrumented primarily with plate thermometers. The compartment was 2.7~m long, 1.8~m wide, and 1.8~m tall, with a 0.6~m by 1.5~m door centered on one of the short walls. The PTs were affixed to the walls. The 12 experiments were conducted with four different wall linings. In Series~A, the compartment was lined with a 10~cm thick light concrete block. In Series~B, the compartment was lined with a 5~cm thick layer of insulation backed by a 3~mm thick plate of steel. In Series~C, the compartment was lined with an uninsulated 3~mm thick steel plate. In Series~D, the compartment was lined with a 3~mm thick steel plate backed by a 5~cm thick layer of insulation (the opposite of Series~B). The fires were fueled by a 0.3~m by 0.3~m propane burner located in the center of the room except for Test~A3, where it was centered on the back wall. For most of the experiments, the heat release rate was 1000~kW, except for A2 and C1, which were 500~kW, and A4 and C3, which employed linear ramp-ups to 1250~kW.
+
+\FloatBarrier
 
 
 \section{Steckler Compartment Experiments}
@@ -1040,13 +1042,14 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 \end{table}
 
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/Steckler_Compartment/Steckler_Room_Drawing}
 \caption{Geometry of the Steckler Compartment Experiments.}
 \label{Steckler_ Drawing}
 \end{figure}
 
 
+\FloatBarrier
 
 
 \section{UL/NIST Vent Experiments}
@@ -1094,7 +1097,7 @@ No.     & (s)       & (kW)          & Vents     & No.     & (s)       & (kW)    
 \end{table}
 
 
-
+\FloatBarrier
 
 \section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Study}
 \label{UL_NFPRF_Description}
@@ -1372,6 +1375,9 @@ II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 \end{description}
 
 
+\FloatBarrier
+
+
 \section{UL/NIJ Houses}
 
 The Firefighter Safety Research Institute (FSRI) of Underwriters Laboratory (UL), with support from the National Institute of Justice (NIJ), conducted fire experiments in a one-story ranch-style house and a two-story colonial-style house in the large fire facility at Northbrook, Illinois, in 2016 and 2017. The goal of the experiments was to determine the effect of ventilation on fire patterns in fully-furnished homes. As part of the project, a natural gas burner was positioned within the unfurnished structures to evaluate changes in flow patterns as various doors and windows were opened and closed. The analysis of this data is still underway, but some results for the one-story house are included.
@@ -1550,7 +1556,7 @@ Two fuels were used in the tests. The properties of the fuels were obtained from
 \label{WTC_Drawing}
 \end{figure}
 
-\clearpage
+\FloatBarrier
 
 
 
@@ -1648,7 +1654,7 @@ WTC                 & 1970 -- 3240  & 1.6           & 3.8   & 0.6 -- 0.9        
 \end{sidewaystable}
 
 
-\clearpage
+\FloatBarrier
 
 Table~\ref{Numerical_Parameters} lists a few important parameters related to the numerical resolution of the calculation.
 \begin{description}

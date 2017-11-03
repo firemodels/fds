@@ -1,4 +1,4 @@
-&HEAD CHID='rotate_wind', TITLE='Test rotation of grid on constant wind field'
+&HEAD CHID='rotate_wind', TITLE='Test rotation of grid on constant wind field' /
 
 &MESH IJK=40,40,4, XB=-20,20,-20,20,0,4 /
 
@@ -7,9 +7,7 @@
 &MISC NOISE=.FALSE., GVEC(3)=0. /
 
 &WIND U0=10., V0=10., STRATIFICATION=.FALSE.
-      RAMP_U0_T='v-ramp', RAMP_V0_T='u-ramp'
-      NEW_MOMENTUM_NUDGING=T
-      SPONGE_LAYER_DISTANCE=2/
+      RAMP_U0_T='v-ramp', RAMP_V0_T='u-ramp' /
 
 &SPEC ID='AIR', BACKGROUND=T, VISCOSITY=1e-5/
 
