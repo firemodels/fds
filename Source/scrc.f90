@@ -120,14 +120,13 @@ CHARACTER(20) :: SCARC_COARSE_PRECON     = 'SSOR'           !< Preconditioner fo
 
 !! Debugging parameters
 CHARACTER(20) :: SCARC_DEBUG = 'NONE'                       !< Debugging level (NONE/LESS/MEDIUM/MUCH)
-CHARACTER(40) :: SCARC_FN, SCARC_FN_DUMP                    !< File name for ScaRC debug messages
-INTEGER       :: LU_SCARC, LU_SCARC_DUMP                    !< Unit number for ScaRC debug file
+CHARACTER(40) :: SCARC_FN                                   !< File name for ScaRC debug messages
+INTEGER       :: LU_SCARC                                   !< Unit number for ScaRC debug file
 
 CHARACTER(20) :: SCARC_CASE = 'NONE'                        !< Debugging level (NONE/LESS/MEDIUM/MUCH)
 INTEGER       :: SCARC_LAYER = 1                            !< Unit number for ScaRC debug file
 
 REAL (EB)     :: SCARC_WALL_TIME = -1.0_EB                  !< Time measurement parameter
-REAL (EB)     :: SCARC_WALL_TIME_START = -1.0_EB            !< Initial time for time measurment
 
 CHARACTER(100):: SCARC_MESSAGE                              !< ScaRC messages
 CHARACTER(40) :: SCARC_ROUTINE                              !< name of active SCARC-routine
@@ -136,7 +135,6 @@ CHARACTER(40) :: SCARC_ROUTINE                              !< name of active SC
 !LOGICAL       :: SCARC_MKL = .FALSE.
 
 !! order for the treatment of the single mesh faces
-INTEGER :: FACE_ORDER_STD(6) = (/-3,-1,-1,1,2,3/)           !< Standard order of mesh faces
 INTEGER :: FACE_ORDER_XYZ(6) = (/1,-1,2,-2,3,-3/)           !< Coordinate direction related order of mesh faces
 
 
@@ -337,13 +335,6 @@ INTEGER, PARAMETER :: NSCARC_INTERPOL_NONE          =  0, &
                       NSCARC_INTERPOL_GMG           =  7, &    !< GMG-like interpolation
                       NSCARC_INTERPOL_GMG3          =  8       !< GMG3-like interpolation
 
-INTEGER, PARAMETER :: NSCARC_LATEX_NONE             = -1, &    !< no latex information requested
-                      NSCARC_LATEX_STAGGERED        =  1, &    !< show staggered latex information
-                      NSCARC_LATEX_EQUAL            =  2, &    !< show equal latex information
-                      NSCARC_LATEX_NUMBER           =  3, &    !< show number latex information
-                      NSCARC_LATEX_ALL              =  4, &    !< show all latex information
-                      NSCARC_LATEX_TABLE            =  5       !< show latex table
-
 INTEGER, PARAMETER :: NSCARC_TIME_NONE              = -1, &
                       NSCARC_TIME_TOTAL             =  1, &    !< time for complete ScaRC part of FDS
                       NSCARC_TIME_SETUP             =  2, &    !< time for setup phase
@@ -421,7 +412,7 @@ INTEGER :: TYPE_METHOD     = NSCARC_METHOD_NONE           !< Type of global ScaR
 INTEGER :: TYPE_METHOD0    = NSCARC_METHOD_NONE           !< Type of local ScaRC method
 INTEGER :: TYPE_KRYLOV     = NSCARC_KRYLOV_NONE           !< Type of Krylov method
 INTEGER :: TYPE_MULTIGRID  = NSCARC_MULTIGRID_NONE        !< Type of multigrid method
-INTEGER :: TYPE_MATRIX     = NSCARC_MATRIX_NONE           !< Type of matrix for data exchange
+!INTEGER :: TYPE_MATRIX     = NSCARC_MATRIX_NONE           !< Type of matrix for data exchange
 INTEGER :: TYPE_ACCURACY   = NSCARC_ACCURACY_NONE         !< Type of requested accuracy
 INTEGER :: TYPE_SMOOTH     = NSCARC_SMOOTH_SSOR           !< Type of smoother for multigrid method
 INTEGER :: TYPE_PRECON     = NSCARC_PRECON_SSOR           !< Type of preconditioner for global iterative solver
@@ -436,14 +427,12 @@ INTEGER :: TYPE_INITIAL    = NSCARC_INITIAL_NONE          !< Type of initial sol
 INTEGER :: TYPE_EXCHANGE   = NSCARC_EXCHANGE_NONE         !< Type of data exchange
 INTEGER :: TYPE_VECTOR     = NSCARC_VECTOR_NONE           !< Type of vector
 INTEGER :: TYPE_DIRECT     = NSCARC_DIRECT_NONE           !< Type of direct solver for multigrid method
-INTEGER :: TYPE_LATEX      = NSCARC_LATEX_ALL             !< Type of Latex output level
-INTEGER :: TYPE_DUMP       = NSCARC_DUMP_RHS              !< Type of Dump level
 INTEGER :: TYPE_LAYER      = NSCARC_LAYER_ONE             !< Type of layers (for overlap)
 
 INTEGER, PARAMETER :: N_TIMERS_SCARC=18                   !< Number of timers for ScaRC
 !>
 INTEGER :: NLEVEL, NLEVEL_MAX, NLEVEL_MIN                 !< Total, minimum and maximum number of multigrid levels
-INTEGER :: NMASTER, NC_COARSE0                            !< Settings for global coarse solver
+INTEGER :: NMASTER                                        !< Settings for global coarse solver
 INTEGER :: NREQ_SCARC, N_EXCHANGES, TAG_SCARC             !< Variables for data exchange
 INTEGER :: SNODE, RNODE                                   !< Process identifier for data exchange
 INTEGER :: STATUS2_SCARC(MPI_STATUS_SIZE)                 !< Status array for data excange
@@ -456,7 +445,6 @@ INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NC_COARSE        !< Global number of ce
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: REQ_SCARC        !< Request array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: COUNTS_SCARC     !< Counter array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: DISPLS_SCARC     !< Displacement array for data exchange
-INTEGER,  ALLOCATABLE, DIMENSION (:)  :: GROUP_ID         !< Displacement array for data exchange
 REAL(EB), ALLOCATABLE, DIMENSION (:)  :: SP_LOCAL         !< Local scalar procucts
 REAL(EB), ALLOCATABLE, DIMENSION (:)  :: SP_GROUP         !< Scalar procuct of process group
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TUSED_SCARC      !< Time measurement array
@@ -727,7 +715,7 @@ END TYPE SCARC_PRECON_TYPE
 !> Globally used types
 !> --------------------------------------------------------------------------------------------
 TYPE ( SCARC_TYPE), SAVE, DIMENSION(:), ALLOCATABLE, TARGET ::  SCARC
-TYPE (OSCARC_TYPE), SAVE, DIMENSION(:), ALLOCATABLE, TARGET :: OSCARC
+!TYPE (OSCARC_TYPE), SAVE, DIMENSION(:), ALLOCATABLE, TARGET :: OSCARC
 
 
 CONTAINS
@@ -1816,16 +1804,14 @@ INTEGER :: IWG, IWL
 INTEGER :: NOM_LAST , NOM
 INTEGER :: NCPL_LAST, NCPL
 INTEGER :: IOR0_LAST, IOR0
-INTEGER :: MLATEX
 INTEGER :: FACE_NEIGHBORS(NSCARC_MAX_FACE_NEIGHBORS, -3:3)
 INTEGER :: MESH_NEIGHBORS(NSCARC_MAX_MESH_NEIGHBORS)
 INTEGER :: NUM_FACE_NEIGHBORS(-3:3)
 INTEGER :: NUM_MESH_NEIGHBORS
-CHARACTER (40) :: CLATEX
 LOGICAL :: BFOUND_NOM
 TYPE (MESH_TYPE)        , POINTER :: M
 TYPE (SCARC_TYPE)       , POINTER :: S
-TYPE (OSCARC_TYPE)      , POINTER :: OS
+!TYPE (OSCARC_TYPE)      , POINTER :: OS
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SLF , SLC
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: OSLF, OSLC
 
@@ -2204,30 +2190,6 @@ IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .AND. TYPE_MULTIGRID == NSCARC_MULTIG
 ELSE
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NLEVEL_MIN, 'SETUP_WALL', 'WALL')
    !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_FACEINFO , NLEVEL_MIN, 'SETUP_WALL', 'FACE')
-ENDIF
-
-
-!< ---- ONLY TEMPORARILY FOR DEBUGGING PURPOSES !!!
-IF (TYPE_DEBUG>NSCARC_DEBUG_NONE      .AND. &
-    TYPE_LATEX  > NSCARC_LATEX_ALL)   THEN
-!>   TYPE_LATEX  == NSCARC_LATEX_ALL)   THEN
-   MLATEX = 98
-   DO NM = 1, NMESHES
-      IF (PROCESS(NM) /= MYID) CYCLE
-      CLATEX = "tables/wall  .tex"
-      WRITE(CLATEX(12:13),'(i2.2)') NM
-      OPEN (MLATEX, FILE=CLATEX)
-      SLF => SCARC(NM)%LEVEL(NLEVEL_MIN)
-      CALL SCARC_LATEX_WALL(MLATEX, NM, NLEVEL_MIN)
-      LATEX_OMESH_LOOP: DO NOM = 1, NMESHES
-         IF (NOM == NM) CYCLE LATEX_OMESH_LOOP
-         OS => SCARC(NM)%OSCARC(NOM)
-         IF (OS%NICMAX_S==0 .AND. OS%NICMAX_R==0)  CYCLE LATEX_OMESH_LOOP
-         OSLF => SCARC(NM)%OSCARC(NOM)%LEVEL(NLEVEL_MIN)
-         CALL SCARC_LATEX_NOM(MLATEX,NM, NOM, NLEVEL_MIN)
-      ENDDO LATEX_OMESH_LOOP
-      CLOSE (MLATEX)
-   ENDDO
 ENDIF
 
 END SUBROUTINE SCARC_SETUP_WALLINFO
@@ -5026,23 +4988,6 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
                                   SLF%NCE, SLF%NCCE )
    ENDIF
 
-   !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 'FINAL PROL 002')
-   !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_RESTRICTION', 'FINAL REST 002')
-   !CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_SYSTEM', 'WALLINFO 002')
-   !CALL SCARC_LATEX_GRID(NSCARC_LATEX_STAGGERED,NL)
-   !CALL SCARC_LATEX_GRID(NSCARC_LATEX_EQUAL,NL)
-   !CALL SCARC_LATEX_GRID(NSCARC_LATEX_NUMBER,NL)
-   !DO NM = 1, NMESHES
-   !   IF (PROCESS(NM) /= MYID) CYCLE
-   !   SLF => SCARC(NM)%LEVEL(NL)
-   !   CALL SCARC_LATEX_MATRIX2(SLF%A, SLF%A_ROW, SLF%A_COL, SLF%NC  , SLF%NC  , NM, NL, 'A')
-   !   CALL SCARC_LATEX_MATRIX2(SLF%R, SLF%R_ROW, SLF%R_COL, SLF%NCCE, SLF%NCE , NM, NL, 'R')
-   !   CALL SCARC_LATEX_MATRIX2(SLF%P, SLF%P_ROW, SLF%P_COL, SLF%NCE , SLF%NCCE, NM, NL, 'P')
-   !   CALL SCARC_MATLAB_MATRIX(SLF%A, SLF%A_ROW, SLF%A_COL, SLF%NC  , SLF%NC  , NM, NL, 'A')
-   !   CALL SCARC_MATLAB_MATRIX(SLF%R, SLF%R_ROW, SLF%R_COL, SLF%NCCE, SLF%NCE , NM, NL, 'R')
-   !   CALL SCARC_MATLAB_MATRIX(SLF%P, SLF%P_ROW, SLF%P_COL, SLF%NCE , SLF%NCCE, NM, NL, 'P')
-   !ENDDO
-
 
    !! -----------------------------------------------------------------------------------------
    !! Allocate coarse grid matrix including pointer arrays
@@ -5151,78 +5096,6 @@ END SUBROUTINE SCARC_SETUP_AMG_COARSENING
 !A(LBOUND(B):UBOUND(B)) = B
 !DEALLOCATE(B)
 !END SUBROUTINE RESIZE_ARRAY
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE PRINT_MATRIX(A, A_ROW, A_COL, NC1, NC2, NM, NL, CNAME)
-REAL(EB), DIMENSION(:), INTENT(IN) :: A
-INTEGER , DIMENSION(:), INTENT(IN) :: A_ROW
-INTEGER , DIMENSION(:), INTENT(IN) :: A_COL
-INTEGER , INTENT(IN) :: NM, NL, NC1, NC2
-CHARACTER(1), INTENT(IN):: CNAME
-INTEGER :: IC, JC, ICOL, MMATRIX
-CHARACTER(60):: MATRIX
-REAL(EB):: MATRIX_LINE(1000)
-
-WRITE (MATRIX, '(A,A1,A,i2.2,A,i2.2,A)') 'matrix/',CNAME,'_mesh',NM,'_level',NL,'.txt'
-MMATRIX=GET_FILE_NUMBER()
-OPEN(MMATRIX,FILE=MATRIX)
-
-DO IC = 1, NC1
-   MATRIX_LINE=0.0_EB
-   DO JC = 1, NC2
-      DO  ICOL= A_ROW(IC), A_ROW(IC+1)-1
-         IF (A_COL(ICOL)==JC) MATRIX_LINE(JC)=A(ICOL)
-      ENDDO
-   ENDDO
-   WRITE(MMATRIX,1000) (MATRIX_LINE(JC),JC=1,NC2)
-ENDDO
-
-CLOSE(MMATRIX)
-
-1000 FORMAT(F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',&
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,';')
-END SUBROUTINE PRINT_MATRIX
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE PRINT_MATRIX2(A, A_ROW, A_COL, NC1, NC2, NM, NL, CNAME)
-REAL(EB), DIMENSION(:), INTENT(IN) :: A
-INTEGER , DIMENSION(:), INTENT(IN) :: A_ROW
-INTEGER , DIMENSION(:), INTENT(IN) :: A_COL
-INTEGER , INTENT(IN) :: NM, NL, NC1, NC2
-CHARACTER(1), INTENT(IN):: CNAME
-INTEGER :: IC, JC, ICOL, MMATRIX
-CHARACTER(60):: MATRIX
-REAL(EB):: MATRIX_LINE(1000)
-
-WRITE (MATRIX, '(A,A1,A,i2.2,A,i2.2,A)') 'matrix2/',CNAME,'_mesh',NM,'_level',NL,'.txt'
-MMATRIX=GET_FILE_NUMBER()
-OPEN(MMATRIX,FILE=MATRIX)
-
-DO IC = 1, NC1
-   MATRIX_LINE=0.0_EB
-   DO JC = 1, NC2
-      DO  ICOL= A_ROW(IC), A_ROW(IC+1)-1
-         IF (A_COL(ICOL)==JC) MATRIX_LINE(JC)=A(ICOL)
-      ENDDO
-   ENDDO
-   WRITE(MMATRIX,1000) (MATRIX_LINE(JC),JC=1,NC2)
-ENDDO
-
-CLOSE(MMATRIX)
-
-1000 FORMAT(40f8.2)
-END SUBROUTINE PRINT_MATRIX2
 
 
 !> ----------------------------------------------------------------------------------------------------
@@ -5419,301 +5292,6 @@ CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_WALLINFO, NL+1)
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_WALLINFO , NL+1, 'SETUP_WALLINFO_AMG', 'WALL pos 2')
 
 END SUBROUTINE SCARC_SETUP_WALLINFO_AMG
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_LATEX_MATRIX(A, A_ROW, A_COL, NC1, NC2, NM, NL, CNAME)
-REAL(EB), DIMENSION(:), INTENT(IN) :: A
-INTEGER , DIMENSION(:), INTENT(IN) :: A_ROW
-INTEGER , DIMENSION(:), INTENT(IN) :: A_COL
-INTEGER , INTENT(IN) :: NM, NL, NC1, NC2
-CHARACTER(1), INTENT(IN):: CNAME
-INTEGER :: IC, JC, ICOL, MMATRIX
-CHARACTER(60):: MATRIX
-REAL(EB):: MATRIX_LINE(1000)
-
-WRITE (MATRIX, '(A,A1,A,i2.2,A,i2.2,A)') 'matrix/',CNAME,'_mesh',NM,'_level',NL,'.txt'
-MMATRIX=GET_FILE_NUMBER()
-OPEN(MMATRIX,FILE=MATRIX)
-
-DO IC = 1, NC1
-   MATRIX_LINE=0.0_EB
-   DO JC = 1, NC2
-      DO  ICOL= A_ROW(IC), A_ROW(IC+1)-1
-         IF (A_COL(ICOL)==JC) MATRIX_LINE(JC)=A(ICOL)
-      ENDDO
-   ENDDO
-   WRITE(MMATRIX,1000) (MATRIX_LINE(JC),JC=1,NC2)
-ENDDO
-
-CLOSE(MMATRIX)
-
-1000 FORMAT(F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',&
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',', &
-            F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,',',F11.6,';')
-END SUBROUTINE SCARC_LATEX_MATRIX
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_LATEX_MATRIX2(A, A_ROW, A_COL, NC1, NC2, NM, NL, CNAME)
-REAL(EB), DIMENSION(:), INTENT(IN) :: A
-INTEGER , DIMENSION(:), INTENT(IN) :: A_ROW
-INTEGER , DIMENSION(:), INTENT(IN) :: A_COL
-INTEGER , INTENT(IN) :: NM, NL, NC1, NC2
-CHARACTER(1), INTENT(IN):: CNAME
-INTEGER :: IC, JC, ICOL, MMATRIX
-CHARACTER(60):: MATRIX
-REAL(EB):: MATRIX_LINE(1000)
-
-WRITE (MATRIX, '(A,A1,A,i2.2,A,i2.2,A)') 'matrix2/',CNAME,'_mesh',NM,'_level',NL,'.txt'
-MMATRIX=GET_FILE_NUMBER()
-OPEN(MMATRIX,FILE=MATRIX)
-
-DO IC = 1, NC1
-   MATRIX_LINE=0.0_EB
-   DO JC = 1, NC2
-      DO  ICOL= A_ROW(IC), A_ROW(IC+1)-1
-         IF (A_COL(ICOL)==JC) MATRIX_LINE(JC)=A(ICOL)
-      ENDDO
-   ENDDO
-   WRITE(MMATRIX,1000) (MATRIX_LINE(JC),JC=1,NC2)
-ENDDO
-
-CLOSE(MMATRIX)
-
-1000 FORMAT(40f8.2)
-END SUBROUTINE SCARC_LATEX_MATRIX2
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MATLAB_MATRIX(A, A_ROW, A_COL, NC1, NC2, NM, NL, CNAME)
-REAL(EB), DIMENSION(:), INTENT(IN) :: A
-INTEGER , DIMENSION(:), INTENT(IN) :: A_ROW
-INTEGER , DIMENSION(:), INTENT(IN) :: A_COL
-INTEGER , INTENT(IN) :: NM, NL, NC1, NC2
-CHARACTER(1), INTENT(IN):: CNAME
-INTEGER :: IC, JC, ICOL, MMATRIX
-CHARACTER(60):: MATRIX
-REAL(EB):: MATRIX_LINE(1000)
-
-SCARC_ROUTINE = 'SCARC_MATLAB_MATRIX'
-
-WRITE (MATRIX, '(A,A1,A,i2.2,A,i2.2,A)') 'matlab/',CNAME,'_mesh',NM,'_level',NL,'.txt'
-MMATRIX=GET_FILE_NUMBER()
-OPEN(MMATRIX,FILE=MATRIX)
-
-!WRITE(LU_SCARC,*) 'PRINTING MATLAB INFORMATION FOR LEVEL ', NL
-!WRITE(LU_SCARC,*) 'NC1  =',NC1
-!WRITE(LU_SCARC,*) 'NC2  =',NC2
-!WRITE(LU_SCARC,*) 'CNAME=',CNAME
-
-WRITE(MMATRIX, 1000) CNAME
-DO IC = 1, NC1
-   MATRIX_LINE=0.0_EB
-   DO JC = 1, NC2
-      DO  ICOL= A_ROW(IC), A_ROW(IC+1)-1
-         IF (A_COL(ICOL)==JC) MATRIX_LINE(JC)=A(ICOL)
-      ENDDO
-   ENDDO
-   SELECT CASE (NC2)
-      CASE (4)
-         WRITE(MMATRIX,1004) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (8)
-         WRITE(MMATRIX,1008) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (12)
-         WRITE(MMATRIX,1012) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (16)
-         WRITE(MMATRIX,1016) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (24)
-         WRITE(MMATRIX,1024) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (32)
-         WRITE(MMATRIX,1032) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE (64)
-         WRITE(MMATRIX,1064) (MATRIX_LINE(JC),JC=1,NC2)
-      CASE DEFAULT
-         WRITE(SCARC_MESSAGE,'(2A,I8)') TRIM(SCARC_ROUTINE),': Wrong value for ', NC2
-         CALL SHUTDOWN(SCARC_MESSAGE); RETURN
-   END SELECT
-ENDDO
-WRITE(MMATRIX, 1100)
-
-CLOSE(MMATRIX)
-
-1000 FORMAT(a,' = [ ')
-1004 FORMAT( 3(f24.16,','),f24.16,';')
-1008 FORMAT( 7(f24.16,','),f24.16,';')
-1012 FORMAT(11(f24.16,','),f24.16,';')
-1016 FORMAT(15(f24.16,','),f24.16,';')
-1024 FORMAT(23(f24.16,','),f24.16,';')
-1032 FORMAT(31(f24.16,','),f24.16,';')
-1064 FORMAT(63(f24.16,','),f24.16,';')
-1104 FORMAT(i4,' :', 4(f8.2))
-1108 FORMAT(i4,' :', 8(f8.2))
-1112 FORMAT(i4,' :',12(f8.2))
-1116 FORMAT(i4,' :',16(f8.2))
-1124 FORMAT(i4,' :',24(f8.2))
-1132 FORMAT(i4,' :',32(f8.2))
-1164 FORMAT(i4,' :',64(f8.2))
-1100 FORMAT(' ] ')
-END SUBROUTINE SCARC_MATLAB_MATRIX
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_LATEX_WALL(MTABLE, NM, NL)
-INTEGER, INTENT(IN):: NM, NL, MTABLE
-INTEGER :: NOM, NOM0, NCPL
-INTEGER :: IW, ICPL, ICE
-TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
-
-SL => SCARC(NM)%LEVEL(NL)
-
-!WRITE (CTABLE, '(A,A,A,i2.2,A,i2.2,A)') 'tables/',CNAME,'_mesh',NM,'_level',NL,'.tex'
-!MTABLE=GET_FILE_NUMBER()
-!OPEN(MTABLE,FILE=CTABLE)
-
-WRITE(MTABLE,100) NM
-WRITE(MTABLE,500) NM
-WRITE(MTABLE,1000)
-WRITE(MTABLE,1001) NM
-WRITE(MTABLE,2000)
-!WRITE(MTABLE,2001) 'IW','IC\_WALL','IC\_EXT','IC\_GHOST','IC\_GHOST'
-WRITE(MTABLE,2001) 'IW','ICW','ICE','ICG','ICN'
-NOM0 = 0
-DO IW = 1, SL%NW
-   NOM = SL%WALL(IW)%NOM
-   NCPL = SCARC(NM)%OSCARC(NOM)%LEVEL(NLEVEL_MIN)%NCPL
-   IF (NOM == 0) CYCLE
-   IF (NOM /= NOM0) WRITE(MTABLE,2000)
-   SELECT CASE(NCPL)
-   CASE (1)
-       WRITE(MTABLE,3001) IW, SL%WALL(IW)%ICW,&
-                          (SL%WALL(IW)%ICE(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICG(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICN(ICPL), ICPL=1,NCPL)
-    CASE (2)
-       WRITE(MTABLE,3002) IW, SL%WALL(IW)%ICW,&
-                          (SL%WALL(IW)%ICE(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICG(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICN(ICPL), ICPL=1,NCPL)
-    CASE (3)
-       WRITE(MTABLE,3003) IW, SL%WALL(IW)%ICW,&
-                          (SL%WALL(IW)%ICE(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICG(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICN(ICPL), ICPL=1,NCPL)
-    CASE (4)
-       WRITE(MTABLE,3004) IW, SL%WALL(IW)%ICW,&
-                          (SL%WALL(IW)%ICE(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICG(ICPL), ICPL=1,NCPL), &
-                          (SL%WALL(IW)%ICN(ICPL), ICPL=1,NCPL)
-   END SELECT
-   !WRITE(MTABLE,2000)
-   NOM0 = NOM
-ENDDO
-WRITE(MTABLE,2000)
-WRITE(MTABLE,4000)
-WRITE(MTABLE,5000)
-
-
-!> ICE_TO_IWG
-WRITE(MTABLE,500) NM
-WRITE(MTABLE,1004)
-WRITE(MTABLE,1002) NM
-WRITE(MTABLE,2000)
-WRITE(MTABLE,2002) 'ICE', 'IW'
-WRITE(MTABLE,2000)
-DO ICE = SL%NC+1, SL%NCE
-   WRITE(MTABLE,3000) ICE, SL%ICE_TO_IWG(ICE)
-   !WRITE(MTABLE,2000)
-ENDDO
-WRITE(MTABLE,2000)
-WRITE(MTABLE,4000)
-WRITE(MTABLE,5000)
-
-100  FORMAT( /,'\vspace{1cm}',/,'{\bf MESH ',i3,'} \\',/)
-500  FORMAT( '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%',/, &
-             '%%%    Mesh(',i2,')',/,&
-             '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-1000 FORMAT( '\begin{minipage}{8cm}')
-1004 FORMAT( '\begin{minipage}{5cm}')
-1001 FORMAT( '\flushleft{\bf {\footnotesize Mesh(',i3,'):WALL:}}\\[2ex]',/,&
-             '\begin{tabular}{|c|c|c|c|c|}')
-1002 FORMAT( '\flushleft{\bf {\footnotesize Mesh(',i3,'):WALL\_PTR:}}\\[2ex]',/,&
-             '\begin{tabular}{|c|c|}')
-2000 FORMAT( '\hline')
-2001 FORMAT ('{\footnotesize ',a,'} & {\footnotesize ',a,'} & {\footnotesize ',a,'} & {\footnotesize ',a,&
-             '} & {\footnotesize ',a,'} \\')
-2002 FORMAT ('{\footnotesize ',a,'} & {\footnotesize ',a,'} \\')
-3000 FORMAT (i4,' &',i4, '\\')
-3001 FORMAT (i4,' &',i4, ' &',i4,' &',i4,' &',i4,'\\')
-3002 FORMAT (i4,' &',i4, ' &',i4,',',i4,' &',i4,',',i4,' &',i4,',',i4,'\\')
-3003 FORMAT (i4,' &',i4, ' &',i4,',',i4,',',i4,' &',i4,',',i4,',',i4,' &',i4,',',i4,',',i4,'\\')
-3004 FORMAT (i4,' &',i4, ' &',i4,',',i4,',',i4,',',i4,' &',i4,',',i4,',',i4,',',i4,' &',i4,',',i4,',',i4,',',i4,'\\')
-4000 FORMAT( '\end{tabular}')
-5000 FORMAT( '\end{minipage}',/,'\vspace{0.5cm}')
-END SUBROUTINE SCARC_LATEX_WALL
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if a cell IC is strongly coupled to another cell JC
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_LATEX_NOM(MTABLE, NM, NOM, NL)
-INTEGER, INTENT(IN):: NM, NOM, NL, MTABLE
-INTEGER :: IG
-TYPE (SCARC_LEVEL_TYPE), POINTER :: OSL
-
-OSL => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)
-
-!WRITE (CTABLE, '(A,A,A,i2.2,A,I2.2,A,i2.2,A)') 'tables/',CNAME,'_mesh',NM,'_nom',nom,'_level',NL,'.tex'
-!MTABLE=GET_FILE_NUMBER()
-!OPEN(MTABLE,FILE=CTABLE)
-
-!WRITE(MTABLE,100) NM, NOM
-
-!> NOM: ICE_TO_IWG
-WRITE(MTABLE, 500) NM,':WALL\_PTR(',NOM,'), GHOST\_PTR(',NOM,'), NOM\_PTR(',NOM,')'
-WRITE(LU_SCARC, 500) NM,':WALL\_PTR(',NOM,'), GHOST\_PTR(',NOM,'), NOM\_PTR(',NOM,')'
-WRITE(MTABLE,1000)
-WRITE(MTABLE,1500) NM,NOM
-WRITE(MTABLE,2000)
-WRITE(MTABLE,3000) 'IG', 'IW','ICE','IW'
-WRITE(LU_SCARC,3000) 'IG', 'IW','ICE','IW'
-WRITE(MTABLE,2000)
-DO IG = 1, OSL%NCG
-   WRITE(MTABLE,3001) IG, OSL%ICG_TO_IWG(IG), OSL%ICG_TO_ICE(IG), OSL%ICN_TO_ICE(IG)
-   WRITE(LU_SCARC,3001) IG, OSL%ICG_TO_IWG(IG), OSL%ICG_TO_ICE(IG), OSL%ICN_TO_ICE(IG)
-   !WRITE(MTABLE,2000)
-ENDDO
-WRITE(MTABLE,2000)
-WRITE(MTABLE,4000)
-WRITE(MTABLE,5000)
-
-
-
-100  FORMAT( /,'\vspace{5mm}',/,'{\bf MESH',i3,': NOM ',i3,' }\\', /)
-500  FORMAT( '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%',/, &
-             '%%%    ', i3, a,i3,a,i3,a,i3,a/,&
-             '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-1000 FORMAT( '\begin{minipage}{4cm}')
-1500 FORMAT( '\flushleft{\bf {\footnotesize Mesh ',i3,' : NOM',i3,':}}\\[2ex]',/,&
-             '\begin{tabular}{|c|c|c|c|}')
-2000 FORMAT( '\hline')
-3000 FORMAT ('{\footnotesize ',a,'} & {\footnotesize ',a, '} & {\footnotesize ',a, '} & {\footnotesize ',a,'} \\')
-3001 FORMAT (i4,' &',i4, ' &',i4,' &',i4,'\\')
-4000 FORMAT( '\end{tabular}')
-5000 FORMAT( '\end{minipage}')
-END SUBROUTINE SCARC_LATEX_NOM
-
 
 
 !> ------------------------------------------------------------------------------------------------
@@ -9023,10 +8601,10 @@ END SUBROUTINE SCARC_SETUP_RESTRICTION2
 !> ------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_TRANSFER_MATRIX(NL)
 INTEGER , INTENT(IN) :: NL
-INTEGER :: NM, IC, ICO2, IERR, ICP1, ICP2, IP, ICOL, IDIAG, IOR0, IW
+INTEGER :: NM, IC, IERR, ICP1, ICP2, IP, IDIAG, IOR0, IW !,ICO2, ICOL
 REAL (EB), ALLOCATABLE, DIMENSION(:) :: VAL
 !REAL(EB):: MAUX1(50,50)=0.0_EB!, MAUX2(30,30)=0.0_EB
-REAL:: AUX1, AUX2, PW!, MATRIX(16,16)
+REAL:: AUX2 !AUX1,PW, MATRIX(16,16)
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SLF, SLC
 
 IERR = 0
@@ -9055,38 +8633,23 @@ SELECT CASE (TYPE_COARSENING)
          IP = 1
          ICP1_GMG_LOOP: DO ICP1 = 1, SLF%NCC
 
-!yyWRITE(*,*) 'ICP1=',ICP1, SLF%NCC
-
-            ICP2_GMG_LOOP1: DO ICP2 = 1, SLF%NCC
-!WRITE(*,*) 'ICP2=',ICP2
-
-               AUX2 = 0.0_EB
-
-               DO IC = 1, SLF%NC
-!WRITE(*,*) 'IC=',IC, SLF%NC
-
-                  IDIAG = SLF%A_ROW(IC)
-                  !PW    = 0.5_EB* P_WEIGHT(IC, ICP2, NM, NL)
-                  PW    = P_WEIGHT(IC, ICP2, NM, NL)
-                  AUX1  = SLF%A(IDIAG) * PW
-
-                  COUPLINGS_GMG_LOOP: DO ICOL = SLF%A_ROW(IC)+1, SLF%A_ROW(IC+1)-1
-                     ICO2  = SLF%A_COL(ICOL)
-                     !PW = 0.5_EB* P_WEIGHT(ICO2, ICP2, NM, NL)
-                     PW =  P_WEIGHT(ICO2, ICP2, NM, NL)
-                     AUX1 = AUX1 + SLF%A(ICOL) * PW
-                  ENDDO COUPLINGS_GMG_LOOP
-!MATRIX(IC, ICP2 ) = AUX1
-!WRITE(LU_SCARC,*) 'MATRIX(',IC,',',ICP2,')=',MATRIX(IC,ICP2)
-
-                  AUX2 = AUX2 + R_WEIGHT(IC, ICP1, NM, NL) * AUX1
-
-               ENDDO
-               VAL(ICP2) = AUX2
-
-            ENDDO ICP2_GMG_LOOP1
-
-!WRITE(LU_SCARC,'(4f12.6)') ((MATRIX(IC0,ICP0),ICP0=1,4),IC0=1,16)
+          !?!  ICP2_GMG_LOOP1: DO ICP2 = 1, SLF%NCC
+          !?!    AUX2 = 0.0_EB
+          !?!     DO IC = 1, SLF%NC
+          !?!        IDIAG = SLF%A_ROW(IC)
+          !?!        !!!!!!PW    = 0.5_EB* P_WEIGHT(IC, ICP2, NM, NL)
+          !?!        PW    = P_WEIGHT(IC, ICP2, NM, NL)
+          !?!        AUX1  = SLF%A(IDIAG) * PW
+          !?!     COUPLINGS_GMG_LOOP: DO ICOL = SLF%A_ROW(IC)+1, SLF%A_ROW(IC+1)-1
+          !?!        ICO2  = SLF%A_COL(ICOL)
+          !?!        !PW = 0.5_EB* P_WEIGHT(ICO2, ICP2, NM, NL)
+          !?!        PW =  P_WEIGHT(ICO2, ICP2, NM, NL)
+          !?!        AUX1 = AUX1 + SLF%A(ICOL) * PW
+          !?!     ENDDO COUPLINGS_GMG_LOOP
+          !?!     AUX2 = AUX2 + R_WEIGHT(IC, ICP1, NM, NL) * AUX1
+          !?!  ENDDO
+          !?!     VAL(ICP2) = AUX2
+          !?!  ENDDO ICP2_GMG_LOOP1
 
             !< analyze new matrix line and store it corresponding to compact storage technique:
             !< (diagonal entry first)
@@ -9121,8 +8684,6 @@ SELECT CASE (TYPE_COARSENING)
 
       ENDDO MESHES_GMG
 
-!WRITE(LU_SCARC,*) 'ENDING MATRIX'
-
  !! ---------------------------------------------------------------------------------
  !! Default case
  !! ---------------------------------------------------------------------------------
@@ -9156,16 +8717,16 @@ SELECT CASE (TYPE_COARSENING)
                DO IC = 1, SLF%NC
 
                   IDIAG = SLF%A_ROW(IC)
-                  PW    = P_WEIGHT(IC, ICP2, NM, NL)
-                  AUX1  = SLF%A(IDIAG) * PW
+                  !?!   PW    = P_WEIGHT(IC, ICP2, NM, NL)
+                  !?!   AUX1  = SLF%A(IDIAG) * PW
 
-                  COUPLINGS_LOOP: DO ICOL = SLF%A_ROW(IC)+1, SLF%A_ROW(IC+1)-1
-                     ICO2  = SLF%A_COL(ICOL)
-                     PW = P_WEIGHT(ICO2, ICP2, NM, NL)
-                     AUX1 = AUX1 + SLF%A(ICOL) * PW
-                  ENDDO COUPLINGS_LOOP
+                  !?!  COUPLINGS_LOOP: DO ICOL = SLF%A_ROW(IC)+1, SLF%A_ROW(IC+1)-1
+                  !?!     ICO2  = SLF%A_COL(ICOL)
+                  !?!     PW = P_WEIGHT(ICO2, ICP2, NM, NL)
+                  !?!     AUX1 = AUX1 + SLF%A(ICOL) * PW
+                  !?!  ENDDO COUPLINGS_LOOP
 
-                  AUX2 = AUX2 + P_WEIGHT(IC, ICP1, NM, NL) * AUX1
+                  !?!  AUX2 = AUX2 + P_WEIGHT(IC, ICP1, NM, NL) * AUX1
 
                ENDDO
                VAL(ICP2) = AUX2
@@ -9205,63 +8766,60 @@ IF (NMESHES > 1) CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_MATRIX_SUBDIAG, NL)
 
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NL+1, 'TRANSFER_MATRIX', 'Next coarser matrix2')
 
-
 END SUBROUTINE SCARC_TRANSFER_MATRIX
 
 
-!> ------------------------------------------------------------------------------------------------
-!> Determine if corresponding coarse point contributes a non-zero interpolation weight or not
-!> ------------------------------------------------------------------------------------------------
-REAL(EB) FUNCTION P_WEIGHT(IC, ICP, NM, NL)
-INTEGER, INTENT(IN):: IC, ICP, NM, NL
-INTEGER :: ICOL
-REAL(EB) :: VAL
-TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
-
-SL => SCARC(NM)%LEVEL(NL)
-
-VAL = 0.0_EB
-!IF (IC <= SL%NC) THEN
-   P_WEIGHT_LOOP: DO ICOL = SL%P_ROW(IC), SL%P_ROW(IC+1)-1
-      IF (ICOL > 0) THEN
-        IF (SL%P_COL(ICOL) /= ICP) CYCLE P_WEIGHT_LOOP
-      ENDIF
-      VAL = SL%P(ICOL)
-   ENDDO P_WEIGHT_LOOP
-!ENDIF
-
-P_WEIGHT = VAL
-RETURN
-END FUNCTION P_WEIGHT
-
-!> ------------------------------------------------------------------------------------------------
-!> Determine if corresponding coarse point contributes a non-zero interpolation weight or not
-!> ------------------------------------------------------------------------------------------------
-REAL(EB) FUNCTION R_WEIGHT(IC, ICP, NM, NL)
-INTEGER, INTENT(IN):: IC, ICP, NM, NL
-INTEGER :: ICOL
-REAL(EB) :: VAL
-TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
-
-SL => SCARC(NM)%LEVEL(NL)
-
-VAL = 0.0_EB
-IF (ICP <= SL%NCC) THEN
-   R_WEIGHT_LOOP: DO ICOL = SL%R_ROW(ICP), SL%R_ROW(ICP+1)-1
-      IF (ICOL > 0) THEN
-        IF (SL%R_COL(ICOL) /= IC) CYCLE R_WEIGHT_LOOP
-      ENDIF
-      VAL = SL%R(ICOL)
-   ENDDO R_WEIGHT_LOOP
-ELSE
-  WRITE(*,*)
-ENDIF
-
-R_WEIGHT = VAL
-RETURN
-END FUNCTION R_WEIGHT
-
-
+!?!!> ------------------------------------------------------------------------------------------------
+!?!!> Determine if corresponding coarse point contributes a non-zero interpolation weight or not
+!?!!> ------------------------------------------------------------------------------------------------
+!?!REAL(EB) FUNCTION P_WEIGHT(IC, ICP, NM, NL)
+!?!INTEGER, INTENT(IN):: IC, ICP, NM, NL
+!?!INTEGER :: ICOL
+!?!REAL(EB) :: VAL
+!?!TYPE (SCARC_LEVEL_TYPE), POINTER :: SL
+!?!
+!?!SL => SCARC(NM)%LEVEL(NL)
+!?!
+!?!VAL = 0.0_EB
+!?!!IF (IC <= SL%NC) THEN
+!?!   P_WEIGHT_LOOP: DO ICOL = SL%P_ROW(IC), SL%P_ROW(IC+1)-1
+!?!      IF (ICOL > 0) THEN
+!?!        IF (SL%P_COL(ICOL) /= ICP) CYCLE P_WEIGHT_LOOP
+!?!      ENDIF
+!?!      VAL = SL%P(ICOL)
+!?!   ENDDO P_WEIGHT_LOOP
+!?!!ENDIF
+!?!
+!?!P_WEIGHT = REAL(VAL,EB)
+!?!RETURN
+!?!END FUNCTION P_WEIGHT
+!?!
+!?!!> ------------------------------------------------------------------------------------------------
+!?!!> Determine if corresponding coarse point contributes a non-zero interpolation weight or not
+!?!!> ------------------------------------------------------------------------------------------------
+!?!REAL(EB) FUNCTION R_WEIGHT(IC, ICP, NM, NL)
+!?!INTEGER, INTENT(IN):: IC, ICP, NM, NL
+!?!INTEGER :: ICOL
+!?!REAL(EB) :: VAL
+!?!TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
+!?!
+!?!SL => SCARC(NM)%LEVEL(NL)
+!?!
+!?!VAL = 0.0_EB
+!?!IF (ICP <= SL%NCC) THEN
+!?!   R_WEIGHT_LOOP: DO ICOL = SL%R_ROW(ICP), SL%R_ROW(ICP+1)-1
+!?!      IF (ICOL > 0) THEN
+!?!        IF (SL%R_COL(ICOL) /= IC) CYCLE R_WEIGHT_LOOP
+!?!      ENDIF
+!?!      VAL = SL%R(ICOL)
+!?!   ENDDO R_WEIGHT_LOOP
+!?!ELSE
+!?!  WRITE(*,*)
+!?!ENDIF
+!?!
+!?!R_WEIGHT = REAL(VAL,EB)
+!?!RETURN
+!?!END FUNCTION R_WEIGHT
 
 !> -----------------------------------------------------------------------------------------------
 !> Interface for the CALL of ScaRC-solver with requested storage technique
@@ -13357,7 +12915,6 @@ DO NM = 1, NMESHES
 
 ENDDO
 
-2000 FORMAT('=== ',A,' : ',A,' on mesh ',I8,' on level ',I8, ': NX, NY, NZ=',3I8,': NVECTOR=',I8)
 2001 FORMAT('=== ',A,' : ',A,' on mesh ',I8,' on level ',I8, ': NC, NCE=',2I8, ': NX, NY, NZ=',3I8,': NVECTOR=',I8)
 END SUBROUTINE SCARC_DEBUG_LEVEL
 
@@ -13547,284 +13104,6 @@ ENDDO
 102 FORMAT (4f25.16)
 
 END SUBROUTINE SCARC_DUMP
-
-!> ------------------------------------------------------------------------------------------------
-!> Produce latex information about coarsening of grid
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_LATEX_GRID(NTYPE, NL)
-INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER :: NM, NL0, MLATEX, I, K, IC, IC1, IC2, IC3, IC4, IC5, IC6
-CHARACTER (60) :: CLATEX
-
-
-SELECT CASE(NTYPE)
-
- !! ---------------------------------------------------------------------------------------------
- !! Produce Latex information about grid coarsening with different node sizes for different levels
- !! ---------------------------------------------------------------------------------------------
-   CASE(NSCARC_LATEX_STAGGERED)
-
-      DO NM = 1, NMESHES
-         IF (PROCESS(NM) /= MYID) CYCLE
-
-         WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL+1,'_s.tex'
-         MLATEX=GET_FILE_NUMBER()
-         OPEN(MLATEX,FILE=CLATEX)
-         WRITE(MLATEX,1001)
-         WRITE(MLATEX,2001)
-
-         NL0 = NLEVEL_MIN
-         DO K = SCARC(NM)%LEVEL(NL0)%NZ,1,-1
-            DO I = 1,SCARC(NM)%LEVEL(NL0)%NX
-               IC = (K-1)*SCARC(NM)%LEVEL(NL0)%NX + I
-               WRITE(MLATEX,3002) 'L1','L1',I,K,I,K
-               IC1=SCARC(NM)%LEVEL(NL0)%CELLTYPE(IC)
-               IF (IC1>0) THEN
-                   WRITE(MLATEX,3002) 'L2','L2',I,K,I,K
-!WRITE(LU_SCARC,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%LEVEL(NL0)%NCC
-                   IF (SCARC(NM)%LEVEL(NL0)%NCC>=1) THEN
-                   IF (NL==1) CYCLE
-                   IC2=SCARC(NM)%LEVEL(NL0+1)%CELLTYPE(IC1)
-                   IF (IC2>0) THEN
-                      WRITE(MLATEX,3002) 'L3','L3',I,K,I,K
-!WRITE(LU_SCARC,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%LEVEL(NL0+1)%NCC
-                      IF (SCARC(NM)%LEVEL(NL0+1)%NCC>=1) THEN
-                      IF (NL==2) CYCLE
-                      IC3=SCARC(NM)%LEVEL(NL0+2)%CELLTYPE(IC2)
-                      IF (IC3>0) THEN
-                         WRITE(MLATEX,3002) 'L4','L4',I,K,I,K
-!WRITE(LU_SCARC,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%LEVEL(NL0+2)%NCC
-                         IF (SCARC(NM)%LEVEL(NL0+2)%NCC>=1) THEN
-                         IF (NL==3) CYCLE
-                         IC4=SCARC(NM)%LEVEL(NL0+3)%CELLTYPE(IC3)
-                         IF (IC4>0) THEN
-                            WRITE(MLATEX,3002) 'L5','L5',I,K,I,K
-!WRITE(LU_SCARC,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%LEVEL(NL0+3)%NCC
-                            IF (SCARC(NM)%LEVEL(NL0+3)%NCC>=1) THEN
-                            IF (NL==4) CYCLE
-                            IC5=SCARC(NM)%LEVEL(NL0+4)%CELLTYPE(IC4)
-                            IF (IC5>0) THEN
-                               WRITE(MLATEX,3002) 'L6','L6',I,K,I,K
-!WRITE(LU_SCARC,*) 'IN LATEX_MATRIX for LEVEL ', NL,': NCC=',SCARC(NM)%LEVEL(NL+4)%NCC
-                               IF (SCARC(NM)%LEVEL(NL0+4)%NCC>=1) THEN
-                               IF (NL==5) CYCLE
-                               IC6=SCARC(NM)%LEVEL(NL0+5)%CELLTYPE(IC4)
-                               IF (IC6>0) THEN
-                                  WRITE(MLATEX,3002) 'L7','L7',I,K,I,K
-                               ENDIF
-                               ENDIF
-                            ENDIF
-                            ENDIF
-                         ENDIF
-                         ENDIF
-                      ENDIF
-                      ENDIF
-                   ENDIF
-                   ENDIF
-               ENDIF
-            ENDDO
-         ENDDO
-
-         WRITE(MLATEX,1002)
-         CLOSE(MLATEX)
-
-      ENDDO
-
-
- !! ---------------------------------------------------------------------------------------------
- !! Produce Latex information about grid coarsening with same node sizes for different levels
- !! ---------------------------------------------------------------------------------------------
-   CASE(NSCARC_LATEX_EQUAL)
-
-      DO NM = 1, NMESHES
-         IF (PROCESS(NM) /= MYID) CYCLE
-
-         WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL+1,'_e.tex'
-         MLATEX=GET_FILE_NUMBER()
-         OPEN(MLATEX,FILE=CLATEX)
-         WRITE(MLATEX,1001)
-         WRITE(MLATEX,3001)
-
-         NL0 = NLEVEL_MIN
-         DO K = SCARC(NM)%LEVEL(NL0)%NZ,1,-1
-            DO I = 1,SCARC(NM)%LEVEL(NL0)%NX
-               IC = (K-1)*SCARC(NM)%LEVEL(NL0)%NX + I
-               WRITE(MLATEX,3002) 'L1','L1',I,K,I,K
-               IC1=SCARC(NM)%LEVEL(NL0)%CELLTYPE(IC)
-               IF (IC1>0) THEN
-                   WRITE(MLATEX,4002) 'L2','L2',I,K,I,K, IC1
-                   IF (SCARC(NM)%LEVEL(NL0)%NCC>=1) THEN
-                   IF (NL==1) CYCLE
-                   IC2=SCARC(NM)%LEVEL(NL0+1)%CELLTYPE(IC1)
-                   IF (IC2>0) THEN
-                      WRITE(MLATEX,3002) 'L3','L3',I,K,I,K
-                      IF (SCARC(NM)%LEVEL(NL0+1)%NCC>=1) THEN
-                      IF (NL==2) CYCLE
-                      IC3=SCARC(NM)%LEVEL(NL0+2)%CELLTYPE(IC2)
-                      IF (IC3>0) THEN
-                         WRITE(MLATEX,3002) 'L4','L4',I,K,I,K
-                         IF (SCARC(NM)%LEVEL(NL0+2)%NCC>=1) THEN
-                         IF (NL==3) CYCLE
-                         IC4=SCARC(NM)%LEVEL(NL0+3)%CELLTYPE(IC3)
-                         IF (IC4>0) THEN
-                            WRITE(MLATEX,3002) 'L5','L5',I,K,I,K
-                            IF (SCARC(NM)%LEVEL(NL0+3)%NCC>=1) THEN
-                            IF (NL==4) CYCLE
-                            IC5=SCARC(NM)%LEVEL(NL0+4)%CELLTYPE(IC4)
-                            IF (IC5>0) THEN
-                               WRITE(MLATEX,3002) 'L6','L6',I,K,I,K
-                               IF (SCARC(NM)%LEVEL(NL0+3)%NCC>=1) THEN
-                               IF (NL==5) CYCLE
-                               IC6=SCARC(NM)%LEVEL(NL0+4)%CELLTYPE(IC4)
-                               IF (IC6>0) THEN
-                                  WRITE(MLATEX,3002) 'L7','L7',I,K,I,K
-                               ENDIF
-                               ENDIF
-                            ENDIF
-                            ENDIF
-                         ENDIF
-                         ENDIF
-                      ENDIF
-                      ENDIF
-                   ENDIF
-                   ENDIF
-               ENDIF
-            ENDDO
-         ENDDO
-
-         WRITE(MLATEX,1002)
-         CLOSE(MLATEX)
-
-      ENDDO
-
- !! ---------------------------------------------------------------------------------------------
- !! Produce Latex information about grid coarsening with different node sizes for different levels
- !! ---------------------------------------------------------------------------------------------
-   CASE(NSCARC_LATEX_NUMBER)
-
-      DO NM = 1, NMESHES
-         IF (PROCESS(NM) /= MYID) CYCLE
-
-         IF (NL == NLEVEL_MIN) THEN
-            WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL,'_n.tex'
-            MLATEX=GET_FILE_NUMBER()
-            OPEN(MLATEX,FILE=CLATEX)
-            WRITE(MLATEX,1001)
-            WRITE(MLATEX,4001)
-            NL0 = NLEVEL_MIN
-            DO K = SCARC(NM)%LEVEL(NL0)%NZ,1,-1
-               DO I = 1,SCARC(NM)%LEVEL(NL0)%NX
-                  IC = (K-1)*SCARC(NM)%LEVEL(NL0)%NX + I
-!WRITE(LU_SCARC,*) 'IC=',IC,I,K
-                  WRITE(MLATEX,4002) 'L1','L1',I,K,I,K, IC
-               ENDDO
-            ENDDO
-            WRITE(MLATEX,1002)
-            CLOSE(MLATEX)
-         ENDIF
-
-         WRITE (CLATEX, '(A,A,A,i2.2,A,i2.2,A)') 'latex/',TRIM(CHID),'_mesh',NM,'_level',NL+1,'_n.tex'
-         MLATEX=GET_FILE_NUMBER()
-         OPEN(MLATEX,FILE=CLATEX)
-         WRITE(MLATEX,1001)
-         WRITE(MLATEX,4001)
-
-         NL0 = NLEVEL_MIN
-         DO K = SCARC(NM)%LEVEL(NL0)%NZ,1,-1
-            DO I = 1,SCARC(NM)%LEVEL(NL0)%NX
-               IC = (K-1)*SCARC(NM)%LEVEL(NL0)%NX + I
-               IC1=SCARC(NM)%LEVEL(NL0)%CELLTYPE(IC)
-               IF (IC1> 0) THEN
-                  WRITE(MLATEX,4002) 'L2','L2',I,K,I,K, IC1
-                  IF (SCARC(NM)%LEVEL(NL0)%NCC>=1) THEN
-                  IF (NL==1) CYCLE
-                  IC2=SCARC(NM)%LEVEL(NL0+1)%CELLTYPE(IC1)
-                  IF (IC2>0) THEN
-                     WRITE(MLATEX,4002) 'L2','L2',I,K,I,K, IC2
-                     IF (SCARC(NM)%LEVEL(NL0+1)%NCC>=1) THEN
-                     IF (NL==2) CYCLE
-                     IC3=SCARC(NM)%LEVEL(NL0+2)%CELLTYPE(IC2)
-                     IF (IC3>0) THEN
-                        WRITE(MLATEX,4002) 'L3','L3',I,K,I,K, IC3
-                        IF (SCARC(NM)%LEVEL(NL0+2)%NCC>=1) THEN
-                        IF (NL==3) CYCLE
-                        IC4=SCARC(NM)%LEVEL(NL0+3)%CELLTYPE(IC3)
-                        IF (IC4>0) THEN
-                           WRITE(MLATEX,4002) 'L4','L4',I,K,I,K, IC4
-                           IF (SCARC(NM)%LEVEL(NL0+3)%NCC>=1) THEN
-                           IF (NL==4) CYCLE
-                           IC5=SCARC(NM)%LEVEL(NL0+4)%CELLTYPE(IC4)
-                           IF (IC5>0) THEN
-                              WRITE(MLATEX,4002) 'L5','L5',I,K,I,K, IC5
-                              IF (SCARC(NM)%LEVEL(NL0+3)%NCC>=1) THEN
-                              IF (NL==5) CYCLE
-                              IC6=SCARC(NM)%LEVEL(NL0+4)%CELLTYPE(IC4)
-                              IF (IC6>0) THEN
-                                 WRITE(MLATEX,4002) 'L6','L6',I,K,I,K, IC6
-                                 WRITE(MLATEX,4002) 'L7','L7',I,K,I,K, IC6
-                              ENDIF
-                              ENDIF
-                           ENDIF
-                           ENDIF
-                        ENDIF
-                        ENDIF
-                     ENDIF
-                     ENDIF
-                  ENDIF
-                  ENDIF
-               ELSE
-                  WRITE(MLATEX,4002) 'L1','L1',I,K,I,K, IC1
-               ENDIF
-            ENDDO
-         ENDDO
-
-         WRITE(MLATEX,1002)
-         CLOSE(MLATEX)
-
-      ENDDO
-END SELECT
-
-1001 FORMAT('\documentclass[11pt]{minimal}' ,/,&
-            '\usepackage{tikz}' ,/,&
-            '\usetikzlibrary{positioning}' ,/,&
-            '\begin{document}' ,/,&
-            '\begin{tikzpicture}')
-1002 FORMAT('\end{tikzpicture}',/,&
-            '\end{document}')
-
-2001 FORMAT ('[inner sep=1mm,',/,&
-            ' scale=0.9,',/,&
-            ' L7/.style={rectangle, draw=black!40, fill=yellow!100  , thin, minimum size=12mm},',/,&
-            ' L6/.style={rectangle, draw=black!40, fill=black!80  , thin, minimum size=10mm},',/,&
-            ' L5/.style={rectangle, draw=black!40, fill=blue!80 , thin, minimum size=8mm},',/,&
-            ' L4/.style={rectangle, draw=black!40, fill=green!50 , thin, minimum size=6mm},',/,&
-            ' L3/.style={rectangle, draw=black!40, fill=red!50   , thin, minimum size=4mm},',/,&
-            ' L2/.style={rectangle, draw=black!40, fill=blue!40  , thin, minimum size=2mm},',/,&
-            ' L1/.style={rectangle, draw=black!40, fill=black!02, thin, minimum size=10mm}],')
-2002 FORMAT('\node [',A,']  (',A2,I3.3,I3.3,')  at (',I2,',',I2,')  {};')
-
-3001 FORMAT ('[inner sep=0.1mm,',/,&
-            ' scale=0.9,',/,&
-            ' L6/.style={rectangle, draw=black!40, fill=black!80  , thin, minimum size=2mm},',/,&
-            ' L5/.style={rectangle, draw=black!40, fill=blue!80 , thin, minimum size=3mm},',/,&
-            ' L4/.style={rectangle, draw=black!40, fill=green!50 , thin, minimum size=5mm},',/,&
-            ' L3/.style={rectangle, draw=black!40, fill=red!50   , thin, minimum size=7mm},',/,&
-            ' L2/.style={rectangle, draw=black!40, fill=blue!40  , thin, minimum size=9mm},',/,&
-            ' L1/.style={rectangle, draw=black!40, fill=black!02, thin, minimum size=10mm}],')
-3002 FORMAT('\node [',A,']  (',A2,I3.3,I3.3,')  at (',I2,',',I2,')  {};')
-
-4001 FORMAT ('[inner sep=1mm,',/,&
-            ' scale=0.9,',/,&
-            ' L7/.style={rectangle, draw=black!40, fill=yellow!100,thin, minimum size=10mm},',/,&
-            ' L6/.style={rectangle, draw=black!40, fill=red!80  , thin, minimum size=10mm},',/,&
-            ' L5/.style={rectangle, draw=black!40, fill=black!60 , thin, minimum size=10mm},',/,&
-            ' L4/.style={rectangle, draw=black!40, fill=green!50 , thin, minimum size=10mm},',/,&
-            ' L3/.style={rectangle, draw=black!40, fill=red!50   , thin, minimum size=10mm},',/,&
-            ' L2/.style={rectangle, draw=black!40, fill=blue!40  , thin, minimum size=10mm},',/,&
-            ' L1/.style={rectangle, draw=black!40, fill=black!02, thin, minimum size=10mm}],')
-4002 FORMAT('\node [',A,']  (',A2,I3.3,I3.3,')  at (',I2,',',I2,')  {',i2,'};')
-
-END SUBROUTINE SCARC_LATEX_GRID
 
 
 
