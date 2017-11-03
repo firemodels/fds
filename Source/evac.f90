@@ -7,7 +7,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2012
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2017
 !
 !!!!!!!!!!!!!!
 !
@@ -24,7 +24,7 @@ MODULE EVAC
   USE MEMORY_FUNCTIONS
   USE MESH_POINTERS
   USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION, FED
-  USE DCDFLIB, ONLY : DCDFLIB_Gamma => Gamma
+  USE DCDFLIB, ONLY : DCDFLIB_Gamma => Gamma_ieva
   USE DEVICE_VARIABLES
   USE CONTROL_VARIABLES
 
@@ -45,8 +45,6 @@ MODULE EVAC
   PUBLIC NO_EVAC_MESHES, INPUT_EVAC_GRIDS
   !
   CHARACTER(255):: EVAC_VERSION = '2.5.2'
-  CHARACTER(255) :: EVAC_COMPILE_DATE
-  INTEGER :: EVAC_MODULE_REV
 
   INTEGER :: INPUT_EVAC_GRIDS
   LOGICAL :: NO_EVAC_MESHES
@@ -128,7 +126,7 @@ MODULE EVAC
      REAL(EB) :: Tau_mean=0._EB, Tau_para=0._EB, Tau_para2=0._EB, Tau_low=0._EB, Tau_high=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
-     REAL(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
+     REAL(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB, m_agent=0._EB
      REAL(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
      REAL(EB) :: FAC_V0_UP=-1._EB, FAC_V0_DOWN=-1._EB, FAC_V0_HORI=-1._EB, MAXIMUM_V0_FACTOR=-1.0_EB
      !Issue1547: Added MAXIMUM_V0_FACTOR to person class type (structured type).
@@ -379,11 +377,10 @@ MODULE EVAC
   TYPE (EVAC_EMESH_STAIRS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EMESH_STAIRS
 
   !
-  REAL(EB), DIMENSION(:,:), ALLOCATABLE :: TT_Evac, FF_Evac
-  INTEGER, DIMENSION(:), ALLOCATABLE :: NTT_Evac
   !
   !
-  LOGICAL :: NOT_RANDOM, L_FALLING_MODEL=.FALSE.
+  LOGICAL :: NOT_RANDOM, L_FALLING_MODEL=.FALSE., DISCARD_SMOKE_INFO=.FALSE.
+
   INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM, SMOKE_KS_SPEED_FUNCTION, &
              FED_ACTIVITY, I_HERDING_TYPE
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
@@ -420,13 +417,10 @@ MODULE EVAC
   INTEGER :: STRS_LANDING_TYPE=1, STRS_STAIR_TYPE=2
 
  ! Human constants
-  INTEGER :: HUMAN_SAME_MESH_TARGET=-2,HUMAN_IMPOSSIBLE_TARGET=-1, &
-             HUMAN_NO_TARGET=0,&
+  INTEGER :: HUMAN_NO_TARGET=0,&
              HUMAN_TARGET_UNSPECIFIED = 1, &
              HUMAN_ANOTHER_MESH_TARGET=2,&
-             HUMAN_CORRIDOR_TARGET=3,&
-             HUMAN_STRS_TARGET=4, &
-             HUMAN_EXIT_TARGET=5
+             HUMAN_STRS_TARGET=4
          ! hr%ior = 0: not entering a door
          !          1: moving but target not specified
          !          2: put to an another mesh (target is door/entry)
@@ -475,7 +469,7 @@ CONTAINS
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y, &
-         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR, TIME_START_FED
+         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR, TIME_START_FED, MASS_OF_AGENT
     !Issue1547: The MAXIMUM_V0_FACTOR should be difined as a variable in Fortran, because it is used
     !Issue1547: in a namelist (PERS-namelist) to read an user input, if given.
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
@@ -583,7 +577,7 @@ CONTAINS
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
          MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
          SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY, &
-         CROWBAR_DT_READ
+         CROWBAR_DT_READ, MASS_OF_AGENT, DISCARD_SMOKE_INFO
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
     !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
@@ -1558,6 +1552,7 @@ CONTAINS
       OUTPUT_CONTACT_FORCE = .FALSE.
       OUTPUT_TOTAL_FORCE   = .FALSE.
       OUTPUT_NERVOUSNESS   = .FALSE.
+      DISCARD_SMOKE_INFO   = .FALSE. ! Set true in input file for debug purposes only
       !Issue1547: This subroutine reads the PERS namelists. All the namelist entries should
       !Issue1547: have some default values that are used if no value is given in the input.
       !Issue1547: This way you will not have any uninitialized variables in Fortran.
@@ -1616,7 +1611,8 @@ CONTAINS
          D_TORSO_MEAN = 0.30_EB
          D_SHOULDER_MEAN = 0.19_EB
          TAU_ROT   = 0.2_EB
-         M_INERTIA = -4.0_EB
+         M_INERTIA = -4.0_EB ! Default male mass of inertia
+         MASS_OF_AGENT = -80.0_EB ! Default male mass
 
          ! If not given on PERS line, use those given on EVSS lines
          FAC_V0_UP   = -1.0_EB
@@ -2036,6 +2032,7 @@ CONTAINS
          ELSE
             PCP%m_iner = M_INERTIA  ! kg m2
          END IF
+         PCP%m_agent = ABS(MASS_OF_AGENT) ! kg, default male body size mass
 
          PCP%FAC_V0_UP = FAC_V0_UP
          PCP%FAC_V0_DOWN = FAC_V0_DOWN
@@ -4506,7 +4503,7 @@ CONTAINS
          TIME_DELAY    = 0.0_EB
          GLOBAL        = .TRUE.
          PROB          = 0.0_EB
-         PRE_EVAC_DIST = -1
+         PRE_EVAC_DIST = -1 ! If pre dist given on EDEV, override evac/pers values
          PRE_MEAN      = 0.0_EB
          PRE_PARA      = 0.0_EB
          PRE_PARA2     = 0.0_EB
@@ -4526,6 +4523,7 @@ CONTAINS
          EDV%GLOBAL     = GLOBAL
          EDV%TIME_DELAY = TIME_DELAY
          EDV%PROB       = MIN(1.0_EB,MAX(0.0_EB,PROB))
+         EDV%I_pre_dist = PRE_EVAC_DIST
          EDV%Tpre_mean  = PRE_MEAN
          EDV%Tpre_para  = PRE_PARA
          EDV%Tpre_para2 = PRE_PARA2
@@ -5965,7 +5963,7 @@ CONTAINS
     ! Next means that only EVAC_PROCESS is doing something
     IF (MYID /= PROCESS(NM)) RETURN
 
-    TNOW = SECOND()
+    TNOW = CURRENT_TIME()
     !
     ! Gaussian random numbers, initialize (only once during
     ! the whole calculation is needed). We are now in the
@@ -6584,7 +6582,7 @@ CONTAINS
     END DO EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
     WRITE (LU_EVACOUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', 0.0_EB,' mesh ',nm,' number of humans ',n_humans
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
     !
   END SUBROUTINE INITIALIZE_EVACUATION
 
@@ -6608,7 +6606,7 @@ CONTAINS
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (STOP_STATUS > 0) RETURN
 
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
 
     !
     ilh_dim = ilh           ! lonely humans dimension
@@ -6831,7 +6829,7 @@ CONTAINS
     END DO
     WRITE (LU_EVACOUT,FMT='(/)')
 
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
   END SUBROUTINE INIT_EVAC_GROUPS
 !
   SUBROUTINE EVAC_MESH_EXCHANGE(T,T_SAVE,I_MODE, ICYC, EXCHANGE_EVACUATION, MODE)
@@ -6888,7 +6886,7 @@ CONTAINS
     !
     ! Update interval (seconds) fire ==> evac information
 
-    TNOW = SECOND()
+    TNOW = CURRENT_TIME()
     DT_SAVE = 2.0_EB
     IOS = 0
     L_USE_FED  = .FALSE.
@@ -7002,9 +7000,12 @@ CONTAINS
                    HUMAN_GRID(I,J)%TMP_G = TMPOUT3
                    HUMAN_GRID(I,J)%RADFLUX = TMPOUT4
                 END IF   ! calculate and save FED
-
              END DO     ! J=1,JBAR
           END DO       ! I=1,IBAR
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%FED_CO_CO2_O2 = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%TMP_G         = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%SOOT_DENS     = 0.0_EB
+          IF (DISCARD_SMOKE_INFO)  HUMAN_GRID(:,:)%RADFLUX       = 0.0_EB
 
        END DO MESH_LOOP
 
@@ -7014,7 +7015,7 @@ CONTAINS
           !
           IF (L_FED_SAVE) THEN
 
-             IF ( EVAC_CORRS(I)%FED_MESH > 0 ) THEN
+             IF ( EVAC_CORRS(I)%FED_MESH > 0 .AND. .NOT.DISCARD_SMOKE_INFO) THEN
                 ! Here the fire properties are saved to the arrays.
                 I1 = EVAC_CORRS(I)%II(1)
                 J1 = EVAC_CORRS(I)%JJ(1)
@@ -7031,7 +7032,7 @@ CONTAINS
                 EVAC_CORRS(I)%RADFLUX(1) = 0.0_EB
              END IF                ! FED_MESH > 0, i.e. fire grid found
 
-             IF ( EVAC_CORRS(I)%FED_MESH2 > 0 ) THEN
+             IF ( EVAC_CORRS(I)%FED_MESH2 > 0 .AND. .NOT.DISCARD_SMOKE_INFO) THEN
                 I1 = EVAC_CORRS(I)%II(2)
                 J1 = EVAC_CORRS(I)%JJ(2)
                 K1 = EVAC_CORRS(I)%KK(2)
@@ -7064,6 +7065,10 @@ CONTAINS
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE) ; RETURN
+             END IF
+             IF (DISCARD_SMOKE_INFO) THEN
+                TMPOUT1 = 0.0_EB; TMPOUT2 = 0.0_EB; TMPOUT3 = 0.0_EB; TMPOUT4 = 0.0_EB
+                TMPOUT5 = 0.0_EB; TMPOUT6 = 0.0_EB; TMPOUT7 = 0.0_EB; TMPOUT8 = 0.0_EB
              END IF
              EVAC_CORRS(I)%FED_CO_CO2_O2(1) = TMPOUT1
              EVAC_CORRS(I)%SOOT_DENS(1) = TMPOUT2
@@ -7168,7 +7173,7 @@ CONTAINS
        T_SAVE = 1.0E15
     END IF
 
-    T_USED(12) = T_USED(12) + SECOND() - TNOW
+    T_USED(12) = T_USED(12) + CURRENT_TIME() - TNOW
   END SUBROUTINE EVAC_MESH_EXCHANGE
 !
   SUBROUTINE PREPARE_TO_EVACUATE(ICYC)
@@ -7245,7 +7250,7 @@ CONTAINS
     !
     ! Local variables
     !
-    LOGICAL, INTRINSIC :: BTEST
+    INTRINSIC :: BTEST
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (ICYC < 1) RETURN
     ! Check if FED is used
@@ -7273,9 +7278,9 @@ CONTAINS
     !
     ! Local variables
     INTEGER, PARAMETER :: N_SECTORS = 2
-    REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA, WSPB
-    INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
-    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
+    REAL(EB) :: DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA=0._EB, WSPB=0._EB
+    INTEGER :: ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
+    INTEGER  :: IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2, MAX_V0_FAC
     !Issue1547: MAX_V0_FAC is declared as a real variable.
     REAL(EB), DIMENSION(4) :: D_XY
@@ -7341,10 +7346,10 @@ CONTAINS
     TYPE (EVAC_EDEV_TYPE),   POINTER :: EDV=>NULL()
     TYPE (EVAC_HOLE_TYPE),   POINTER :: EHX=>NULL()
     !
-    LOGICAL, INTRINSIC :: BTEST
+    INTRINSIC :: BTEST
     !
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
     ! Check if FED is used
     USE_FED = .FALSE.
     IF (BTEST(I_EVAC,3) .OR. BTEST(I_EVAC,1)) USE_FED = .TRUE.
@@ -8202,9 +8207,14 @@ CONTAINS
                       KK = EDV%INPUT_DEVC_INDEX(N)
                       IF (EVAC_DEVICES(KK)%T_Change <= T .AND. EVAC_DEVICES(KK)%CURRENT .AND. &
                            EVAC_DEVICES(KK)%USE_NOW) THEN
-                         CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
-                              EDV%Tpre_para2,TPRE)
-                         IF (STOP_STATUS>NO_STOP) RETURN
+
+                         IF (EDV%i_pre_dist > -1) THEN
+                            CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
+                                 EDV%Tpre_para2,TPRE)
+                            IF (STOP_STATUS>NO_STOP) RETURN
+                         ELSE
+                            TPRE = HR%TPRE ! Use evac/pers namelist reaction times
+                         END IF
                          HR%DETECT1 = IBSET(HR%DETECT1,2)  ! Detected by some device, bit 2
                          IF (T+TPRE < HR%TDET+HR%TPRE) THEN
                             WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A,F6.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
@@ -8231,7 +8241,7 @@ CONTAINS
              ! but UBAR,VBAR are not needed.
              IF (NM_STRS_MESH .OR. HR%CROWBAR_UPDATE_V0 .OR. HR%CROWBAR_READ_IN) &
                   CALL FIND_PREFERRED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+                  II, JJ, XI, YJ, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
              IF (STOP_STATUS>NO_STOP) RETURN
              ! Crowbar (read in camera data) needs tau and speed updates
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
@@ -8239,14 +8249,14 @@ CONTAINS
           ELSE
              ! Update v0 on every time step, no collision avoidance.
              IF(GUARD_MEN == 1) THEN
-                CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+!!$                CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
                 UBAR = WSPA
                 VBAR = WSPB
                 EVEL = SQRT(UBAR**2 + VBAR**2)
                 UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
              ELSE
                 CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                     II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+                     II, JJ, XI, YJ, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
                 IF (STOP_STATUS>NO_STOP) RETURN
              END IF
           END IF
@@ -8633,7 +8643,7 @@ CONTAINS
        ! ========================================================
        ! Remove out-of-bounds persons (outside the grid)
        ! ========================================================
-       IF (N_HUMANS > 0) CALL REMOVE_OUT_OF_GRIDS(T,NM)
+       IF (N_HUMANS > 0) CALL REMOVE_OUT_OF_GRIDS
        IF (STOP_STATUS>NO_STOP) RETURN
 
        IF ( ICYC >= 0) THEN
@@ -8939,14 +8949,14 @@ CONTAINS
           ! ========================================================
           N = NM_STRS_INDEX
           IF(GUARD_MEN == 1) THEN
-             CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+!!$             CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
              UBAR = WSPA
              VBAR = WSPB
              EVEL = SQRT(UBAR**2 + VBAR**2)
              UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
           ELSE
              CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+                  IIN, JJN, XI, YJ, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
              IF (STOP_STATUS>NO_STOP) RETURN
           END IF
           EVEL = UBAR**2 + VBAR**2
@@ -9712,13 +9722,13 @@ CONTAINS
           HR%COMMITMENT = COMMITMENT
 
           IF (.NOT.L_FALLEN_DOWN .AND. .NOT.L_DEAD) &
-               CALL WALL_SOCIALFORCES(NM, X_TMP, Y_TMP, R_TMP, P2P_DIST_MAX, D_XY, P2P_U, P2P_V, SOCIAL_F, FOUNDWALL_XY)
+               CALL WALL_SOCIALFORCES(X_TMP, Y_TMP, R_TMP, P2P_DIST_MAX, D_XY, P2P_U, P2P_V, SOCIAL_F, FOUNDWALL_XY)
 
-          CALL WALL_CONTACTFORCES(NM, X_TMP(1), Y_TMP(1), R_TMP(1), U_TMP(1), V_TMP(1), D_XY, &
+          CALL WALL_CONTACTFORCES(X_TMP(1), Y_TMP(1), R_TMP(1), U_TMP(1), V_TMP(1), D_XY, &
                P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
-          CALL WALL_CONTACTFORCES(NM, X_TMP(2), Y_TMP(2), R_TMP(2), U_TMP(2), V_TMP(2), D_XY, &
+          CALL WALL_CONTACTFORCES(X_TMP(2), Y_TMP(2), R_TMP(2), U_TMP(2), V_TMP(2), D_XY, &
                P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
-          CALL WALL_CONTACTFORCES(NM, X_TMP(3), Y_TMP(3), R_TMP(3), U_TMP(3), V_TMP(3), D_XY, &
+          CALL WALL_CONTACTFORCES(X_TMP(3), Y_TMP(3), R_TMP(3), U_TMP(3), V_TMP(3), D_XY, &
                P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
           IF (STOP_STATUS>NO_STOP) THEN
              STOP_STATUS=EVACUATION_STOP
@@ -9726,7 +9736,7 @@ CONTAINS
           END IF
 
           ! Add forces from the door case
-          CALL DOOR_FORCES(NM, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, P2P_DIST_MAX, D_XY,&
+          CALL DOOR_FORCES(X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, P2P_DIST_MAX, D_XY,&
                P2P_U, P2P_V, SOCIAL_F, CONTACT_F, P2P_TORQUE, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
           IF (STOP_STATUS>NO_STOP) THEN
              STOP_STATUS=EVACUATION_STOP
@@ -10196,435 +10206,436 @@ CONTAINS
     ! ========================================================
     ! Evacuation routine ends here
     ! ========================================================
-    T_USED(12)=T_USED(12)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+CURRENT_TIME()-TNOW
 
   CONTAINS
 
-    SUBROUTINE GUARD (NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
-      ! Dane potrzebne na wejxxciu:
-      !   mapWidth
-      !   mapHeight
-      !   tileSize
-      !   numberPeopl
-      !   startX,Y
-      !   targetX,Y
-      !   walkability
-      IMPLICIT NONE
-      INTEGER, INTENT(IN) :: NM
-      REAL(EB), INTENT(IN) :: XI, YJ, TARGET_X, TARGET_Y
-      REAL(EB), INTENT(OUT) :: WSPA, WSPB
-      INTEGER :: ic, iw, xt, yt
-      TYPE (MESH_TYPE), POINTER :: M =>NULL()
-
-      INTEGER :: mapWidth, mapHeight, tileSize, numberPeople = 2, &
-           onClosedList = 10, &
-           notfinished = 0, notStarted = 0, &
-           found = 1, nonexistent = 2, &
-           walkable = 0, unwalkable = 1
-      ! Create needed arrays
-      INTEGER, DIMENSION(:,:), ALLOCATABLE :: walkability, pathBank
-      INTEGER, DIMENSION(:), ALLOCATABLE :: openList, openX, openY, Fcost, &
-           Hcost, pathLength, pathLocation, pathStatus, xPath, yPath
-      INTEGER, DIMENSION(:,:), ALLOCATABLE :: whichList, parentX, parentY, &
-           Gcost
-
-      ! Local pathfinding
-      INTEGER :: onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, n=0, &
-           u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, &
-           tempGcost=0, path=0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0
-      INTEGER :: startX, startY, x, y
-      INTEGER :: startingX, startingY, targetX, targetY, pathfinderID ! in
-
-      M => MESHES(NM)
-
-      mapWidth = (M%XF - M%XS)*100
-      mapHeight = (M%YF - M%YS)*100
-      tileSize = mapWidth/M%IBAR
-
-      ALLOCATE(walkability(0:M%IBAR,0:M%JBAR)) ! Dimensions of mesh
-      ALLOCATE(openList(0:mapWidth*mapHeight+2))
-      ALLOCATE(whichList(0:mapWidth+1,0:mapHeight+1))
-      ALLOCATE(openX(0:mapWidth*mapHeight+2))
-      ALLOCATE(openY(0:mapWidth*mapHeight+2))
-      ALLOCATE(parentX(0:mapWidth+1,0:mapHeight+1))
-      ALLOCATE(parentY(0:mapWidth+1,0:mapHeight+1))
-      ALLOCATE(Fcost(0:mapWidth*mapHeight+2))
-      ALLOCATE(Gcost(0:mapWidth+1,0:mapHeight+1))
-      ALLOCATE(Hcost(0:mapWidth*mapHeight+2))
-      ALLOCATE(pathLength(0:numberPeople+1))
-      ALLOCATE(pathLocation(0:numberPeople+1))
-
-      ! Path reading variables
-      ALLOCATE(pathStatus(0:numberPeople+1))
-      ALLOCATE(xPath(0:numberPeople+1))
-      ALLOCATE(yPath(0:numberPeople+1))
-
-      ! Mam juxx wymiar mapy
-      ! WRITE(LU_ERR,*) M%XS
-      ! WRITE(LU_ERR,*) M%XF
-      ! WRITE(LU_ERR,*) M%YS
-      ! WRITE(LU_ERR,*) M%YF
-
-      ! Oraz na ile jest podzielona elementxxw
-      ! WRITE(LU_ERR,*) M%IBAR
-      ! WRITE(LU_ERR,*) M%JBAR
-
-      ! Teraz podzielxx jxx na komxxrki i sprawdzxx czy sxx przeszkody
-      ! Ewidentnie robimy tylko raz
-      DO xt = 1, M%IBAR
-         DO yt = 1, M%JBAR
-            ic  = M%CELL_INDEX(xt,yt,1)
-            iw  = M%OBST_INDEX_C(ic)
-            walkability(xt-1,yt-1) = iw
-         END DO
-      END DO
-
-      ! 1. Convert location data (in pixels) to coordinates in the walkability array.
-      !startX = startingX/tileSize
-      !startY = startingY/tileSize
-      !targetX = targetX/tileSize
-      !targetY = targetY/tileSize
-      startX = FLOOR(XI)
-      startY = FLOOR(YJ)
-
-      targetX = FLOOR(M%CELLSI(FLOOR((TARGET_X-M%XS)*M%RDXINT))+1.0_EB)
-      targetY = FLOOR(M%CELLSJ(FLOOR((TARGET_Y-M%YS)*M%RDYINT))+1.0_EB)
-      !write(lu_err,*)'**** targetX, targetY ',targetX, targetY,target_X, target_Y
-      !targetX = 19
-      !targetY = 19
-
-      ! 2.Quick Path Checks: Under the some circumstances no path needs to
-      ! be generated ...
-      ! If starting location and target are in the same location...
-      IF((startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)>0) .OR.(startX==targetX .AND. &
-           startY==targetY .AND. pathLocation(pathfinderID)==0)) THEN
-         !path = found
-      ELSE
-         !IF(startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)==0) THEN
-         !path = nonexistent
-         !END IF
-
-         ! If target square is unwalkable, return that it's a nonexistent path.
-         !if (walkability[targetX][targetY] == unwalkable)
-         !goto noPath;
-
-         ! 3.Reset some variables that need to be cleared
-         IF(onClosedList>1000000) THEN ! reset whichList occasionally
-            DO x=0, mapWidth-1
-               DO y=0, mapHeight-1
-                  whichList(x,y) = 0
-               END DO
-            END DO
-            onClosedList = 10
-         END IF
-         ! changing the values of onOpenList and onClosed list is faster than redimming whichList() array
-         onClosedList = onClosedList+2
-         onOpenList = onClosedList-1
-         pathLength(pathfinderID) = notStarted ! i.e, = 0
-         pathLocation(pathfinderID) = notStarted ! i.e, = 0
-         Gcost(startX,startY) = 0 ! reset starting square's G value to 0
-
-         ! 4.Add the starting location to the open list of squares to be checked.
-         numberOfOpenListItems = 1
-         ! assign it as the top (and currently only) item in the open list, which is maintained as a binary heap (explained below)
-         openList(1) = 1
-         openX(1) = startX
-         openY(1) = startY
-
-         ! 5.Do the following until a path is found or deemed nonexistent.
-         DO
-
-            ! 6.If the open list is not empty, take the first cell off of the list.
-            ! This is the lowest F cost cell on the open list.
-            IF(numberOfOpenListItems /= 0) THEN
-
-               ! 7. Pop the first item off the open list.
-               parentXval = openX(openList(1))
-               parentYval = openY(openList(1)) ! record cell coordinates of the item
-               whichList(parentXval,parentYval) = onClosedList ! add the item to the closed list
-
-               ! Open List = Binary Heap: Delete this item from the open list, which
-               ! is maintained as a binary heap. For more information on binary heaps, see:
-               ! http://www.policyalmanac.org/games/binaryHeaps.htm
-               numberOfOpenListItems = numberOfOpenListItems - 1 ! reduce number of open list items by 1
-
-               ! Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
-               openList(1) = openList(numberOfOpenListItems+1) ! move the last item in the heap up to slot #1
-               v = 1
-
-               ! Repeat the following until the new item in slot #1 sinks to its proper spot in the heap.
-               DO
-                  u = v
-                  IF(2*u+1<=numberOfOpenListItems) THEN ! if both children exist
-                     ! Check if the F cost of the parent is greater than each child.
-                     ! Select the lowest of the two children.
-                     IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN
-                        v = 2*u;
-                     END IF
-                     IF(Fcost(openList(v)) >= Fcost(openList(2*u+1))) THEN
-                        v = 2*u+1
-                     END IF
-                  ELSE
-                     IF(2*u<=numberOfOpenListItems) THEN ! if only child #1 exists
-                        ! Check if the F cost of the parent is greater than child #1
-                        IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN
-                           v = 2*u;
-                        END IF
-                     END IF
-                  END IF
-
-                  IF(u /= v) THEN ! if parent's F is > one of its children, swap them
-                     temp = openList(u)
-                     openList(u) = openList(v)
-                     openList(v) = temp
-                  ELSE
-                     EXIT ! otherwise, exit loop
-                  END IF
-               END DO
-               !while (!KeyDown(27))//reorder the binary heap
-
-               ! 7.Check the adjacent squares. (Its "children" -- these path children
-               ! are similar, conceptually, to the binary heap children mentioned
-               ! above, but don't confuse them. They are different. Path children
-               ! are portrayed in Demo 1 with grey pointers pointing toward
-               ! their parents.) Add these adjacent child squares to the open list
-               ! for later consideration if appropriate (see various if statements
-               ! below).
-               DO b=parentYval-1, parentYval+1
-                  DO a=parentXval-1, parentXval+1
-                     ! If not off the map (do this first to avoid array out-of-bounds errors)
-                     IF(a /= -1 .AND. b /= -1 .AND. a /= mapWidth/tileSize .AND. b /= mapHeight/tileSize) THEN
-                        ! If not already on the closed list (items on the closed list have
-                        ! already been considered and can now be ignored).
-                        IF(whichList(a,b) /= onClosedList) THEN
-                           ! If not a wall/obstacle square.
-                           IF(walkability(a,b) < unwalkable) THEN
-                              ! Don't cut across corners
-                              corner = walkable
-                              IF(a==parentXval-1) THEN
-                                 IF(b == parentYval-1) THEN
-                                    IF(walkability(parentXval-1,parentYval) >= unwalkable .OR. &
-                                         walkability(parentXval,parentYval-1) >= unwalkable) THEN
-                                       corner = unwalkable
-                                    END IF
-                                 ELSE IF(b == parentYval+1) THEN
-                                    IF(walkability(parentXval,parentYval+1) >= unwalkable .OR. &
-                                         walkability(parentXval-1,parentYval) >= unwalkable) THEN
-                                       corner = unwalkable
-                                    END IF
-                                 END IF
-                              ELSE IF(a == parentXval+1) THEN
-                                 IF(b == parentYval-1) THEN
-                                    IF(walkability(parentXval,parentYval-1) >= unwalkable .OR. &
-                                         walkability(parentXval+1,parentYval) >= unwalkable) THEN
-                                       corner = unwalkable
-                                    END IF
-                                 ELSE IF(b == parentYval+1) THEN
-                                    IF(walkability(parentXval+1,parentYval) >= unwalkable .OR. &
-                                         walkability(parentXval,parentYval+1) >= unwalkable) THEN
-                                       corner = unwalkable
-                                    END IF
-                                 END IF
-                              END IF
-                              IF(corner == walkable) THEN
-                                 ! If not already on the open list, add it to the open list.
-                                 IF(whichList(a,b) /= onOpenList) THEN
-                                    ! Create a new open list item in the binary heap.
-                                    newOpenListItemID = newOpenListItemID + 1 ! each new item has a unique ID #
-                                    n = numberOfOpenListItems+1
-                                    ! place the new open list item (actually, its ID#) at the bottom of the heap
-                                    openList(n) = newOpenListItemID
-                                    openX(newOpenListItemID) = a
-                                    openY(newOpenListItemID) = b ! record the x and y coordinates of the new item
-
-                                    ! Figure out its G cost
-                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
-                                       addedGCost = 14 ! cost of going to diagonal squares
-                                    ELSE
-                                       addedGCost = 10 !cost of going to non-diagonal squares
-                                    END IF
-                                    Gcost(a,b) = Gcost(parentXval,parentYval) + addedGCost
-                                    ! Figure out its H and F costs and parent
-                                    Hcost(openList(n)) = 10*(abs(a - targetX) + abs(b - targetY))
-                                    Fcost(openList(n)) = Gcost(a,b) + Hcost(openList(n))
-                                    parentX(a,b) = parentXval
-                                    parentY(a,b) = parentYval
-                                    ! Move the new open list item to the proper place in the binary heap.
-                                    ! Starting at the bottom, successively compare to parent items,
-                                    ! swapping as needed until the item finds its place in the heap
-                                    ! or bubbles all the way to the top (if it has the lowest F cost).
-                                    DO WHILE(n /= 1) ! While item hasn't bubbled to the top (n=1)
-                                       ! Check if child's F cost is < parent's F cost. If so, swap them.
-                                       IF(Fcost(openList(n)) <= Fcost(openList(n/2))) THEN
-                                          temp = openList(n/2)
-                                          openList(n/2) = openList(n)
-                                          openList(n) = temp
-                                          n = n/2
-                                       ELSE
-                                          EXIT
-                                       END IF
-                                    END DO
-                                    numberOfOpenListItems = numberOfOpenListItems+1 ! add one to the number of items in the heap
-                                    ! Change whichList to show that the new item is on the open list.
-                                    whichList(a,b) = onOpenList
-
-                                    ! 8.If adjacent cell is already on the open list, check to see if this
-                                    ! path to that cell from the starting location is a better one.
-                                    ! If so, change the parent of the cell and its G and F costs.
-                                 ELSE ! If whichList(a,b) = onOpenList
-                                    ! Figure out the G cost of this possible new path
-                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
-                                       addedGCost = 14 ! cost of going to diagonal tiles
-                                    ELSE
-                                       addedGCost = 10 ! cost of going to non-diagonal tiles
-                                    END IF
-                                    tempGcost = Gcost(parentXval,parentYval) + addedGCost
-                                    ! If this path is shorter (G cost is lower) then change
-                                    ! the parent cell, G cost and F cost.
-                                    IF(tempGcost < Gcost(a,b)) THEN ! if G cost is less,
-                                       parentX(a,b) = parentXval ! change the square's parent
-                                       parentY(a,b) = parentYval
-                                       Gcost(a,b) = tempGcost ! change the G cost
-                                       ! Because changing the G cost also changes the F cost, if
-                                       ! the item is on the open list we need to change the item's
-                                       ! recorded F cost and its position on the open list to make
-                                       ! sure that we maintain a properly ordered open list.
-                                       DO x = 1, numberOfOpenListItems !//look for the item in the heap
-                                          IF(openX(openList(x)) == a .AND. openY(openList(x)) == b) THEN ! item found
-                                             Fcost(openList(x)) = Gcost(a,b) + Hcost(openList(x)) ! change the F cost
-                                             ! See if changing the F score bubbles the item up from it's current location
-                                             ! in the heap
-                                             n = x;
-                                             DO WHILE (n /= 1) ! While item hasn't bubbled to the top (n=1)
-                                                ! Check if child is < parent. If so, swap them.
-                                                IF(Fcost(openList(n)) < Fcost(openList(n/2))) THEN
-                                                   temp = openList(n/2)
-                                                   openList(n/2) = openList(n)
-                                                   openList(n) = temp
-                                                   n = n/2
-                                                ELSE
-                                                   EXIT
-                                                END IF
-                                             END DO
-                                             EXIT ! exit for x = loop
-                                          END IF ! If openX(openList(x)) = a
-                                       END DO ! For x = 1 To numberOfOpenListItems
-                                    END IF ! If tempGcost < Gcost(a,b)
-                                 END IF ! else If whichList(a,b) = onOpenList
-                              END IF ! If not cutting a corner
-                           END IF ! If not a wall/obstacle square.
-                        END IF ! If not already on the closed list
-                     END IF ! If not off the map
-                  END DO ! for (a = parentXval-1; a <= parentXval+1; a++){
-               END DO ! for (b = parentYval-1; b <= parentYval+1; b++){
-            ELSE ! if (numberOfOpenListItems != 0)
-               ! 9.If open list is empty then there is no path.
-               path = nonexistent
-               EXIT
-            END IF
-            ! If target is added to open list then path has been found.
-            IF(whichList(targetX,targetY) == onOpenList) THEN
-               path = found
-               EXIT
-            END IF
-         END DO
-
-         ! 10.Save the path if it exists.
-         IF(path == found) THEN
-            ! a.Working backwards from the target to the starting location by checking
-            ! each cell's parent, figure out the length of the path.
-            pathX = targetX
-            pathY = targetY
-            DO WHILE(pathX /= startX .OR. pathY /= startY)
-               ! Look up the parent of the current cell.
-               tempx = parentX(pathX,pathY)
-               pathY = parentY(pathX,pathY)
-               pathX = tempx
-               ! Figure out the path length
-               pathLength(pathfinderID) = pathLength(pathfinderID) + 1;
-            END DO
-            !b.Resize the data bank to the right size in bytes
-            ALLOCATE(pathBank(0:pathLength(pathfinderID),0:1))
-
-            !c. Now copy the path information over to the databank. Since we are
-            ! working backwards from the target to the start location, we copy
-            ! the information to the data bank in reverse order. The result is
-            ! a properly ordered set of path data, from the first step to the
-            ! last.
-            pathX = targetX
-            pathY = targetY
-            pathBank(0,0) = startX
-            pathBank(0,1) = startY
-            !cellPosition = pathLength(pathfinderID)*2 ! start at the end
-            DO WHILE(pathX /= startX .OR. pathY /= startY)
-               !cellPosition = cellPosition - 2 ! work backwards 2 integers
-               !pathBank(pathfinderID,cellPosition) = pathX
-               !pathBank(pathfinderID,cellPosition+1) = pathY
-               ! d.Look up the parent of the current cell.
-               tempx = parentX(pathX,pathY)
-               pathY = parentY(pathX,pathY)
-               pathX = tempx
-               pathBank(pathLength(pathfinderID),0) = pathX
-               pathBank(pathLength(pathfinderID),1) = pathY
-               pathLength(pathfinderID) = pathLength(pathfinderID) - 1
-               ! WRITE(LU_ERR,*) 'pathX=',pathX
-               ! WRITE(LU_ERR,*) 'pathY=',pathY
-               ! e.If we have reached the starting square, exit the loop.
-            END DO
-            ! WRITE(LU_ERR,*) 'koniec----------'
-
-            ! 11.Read the first path step into xPath/yPath arrays
-            !ReadPath(pathfinderID,startingX,startingY,1);
-         END IF
-         !return path;
-
-
-
-         ! 13.If there is no path to the selected target, set the pathfinder's
-         ! xPath and yPath equal to its current location and return that the
-         ! path is nonexistent.
-         ! noPath:
-         ! xPath[pathfinderID] = startingX;
-         ! yPath[pathfinderID] = startingY;
-         ! return nonexistent;
-
-         !WRITE(LU_ERR,*) 'Xend=',pathBank(2,0)
-         !WRITE(LU_ERR,*) 'Xsta=',startX
-         !WRITE(LU_ERR,*) 'Yend=',pathBank(2,1)
-         !WRITE(LU_ERR,*) 'Ysta=',startY
-         !WRITE(LU_ERR,*) '====================='
-
-         WSPA = pathBank(2,0) - startX
-         WSPB = pathBank(2,1) - startY
-
-         IF(path == found) THEN
-            DEALLOCATE(pathBank)
-         END IF
-
-      END IF ! if startX==targetX
-
-      DEALLOCATE(walkability)
-      DEALLOCATE(openList)
-      DEALLOCATE(whichList)
-      DEALLOCATE(openX)
-      DEALLOCATE(openY)
-      DEALLOCATE(parentX)
-      DEALLOCATE(parentY)
-      DEALLOCATE(Fcost)
-      DEALLOCATE(Gcost)
-      DEALLOCATE(Hcost)
-      DEALLOCATE(pathLength)
-      DEALLOCATE(pathLocation)
-
-      ! Path reading variables
-      DEALLOCATE(pathStatus)
-      DEALLOCATE(xPath)
-      DEALLOCATE(yPath)
-
-    END SUBROUTINE GUARD
+!!$    SUBROUTINE GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+!!$      ! Dane potrzebne na wejxxciu:
+!!$      !   mapWidth
+!!$      !   mapHeight
+!!$      !   tileSize
+!!$      !   numberPeopl
+!!$      !   startX,Y
+!!$      !   targetX,Y
+!!$      !   walkability
+!!$      IMPLICIT NONE
+!!$      INTEGER, INTENT(IN) :: NM
+!!$      REAL(EB), INTENT(IN) :: XI, YJ, TARGET_X, TARGET_Y
+!!$      REAL(EB), INTENT(OUT) :: WSPA, WSPB
+!!$      INTEGER :: ic, iw, xt, yt
+!!$      TYPE (MESH_TYPE), POINTER :: M =>NULL()
+!!$
+!!$      INTEGER :: mapWidth, mapHeight, tileSize, numberPeople = 2, &
+!!$           onClosedList = 10, &
+!!$           notStarted = 0, &
+!!$           found = 1, nonexistent = 2, &
+!!$           walkable = 0, unwalkable = 1
+!!$      ! Create needed arrays
+!!$      INTEGER, DIMENSION(:,:), ALLOCATABLE :: walkability, pathBank
+!!$      INTEGER, DIMENSION(:), ALLOCATABLE :: openList, openX, openY, Fcost, &
+!!$           Hcost, pathLength, pathLocation, pathStatus, xPath, yPath
+!!$      INTEGER, DIMENSION(:,:), ALLOCATABLE :: whichList, parentX, parentY, &
+!!$           Gcost
+!!$
+!!$      ! Local pathfinding
+!!$      INTEGER :: onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, n=0, &
+!!$           u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, &
+!!$           tempGcost=0, path=0, tempx, pathX, pathY, newOpenListItemID=0
+!!$      INTEGER :: startX, startY, x, y
+!!$      INTEGER :: targetX, targetY, pathfinderID ! in
+!!$
+!!$      M => MESHES(NM)
+!!$
+!!$      mapWidth = NINT((M%XF - M%XS)*100)
+!!$      mapHeight = NINT((M%YF - M%YS)*100)
+!!$      tileSize = mapWidth/M%IBAR
+!!$
+!!$      ALLOCATE(walkability(0:M%IBAR,0:M%JBAR)) ! Dimensions of mesh
+!!$      ALLOCATE(openList(0:mapWidth*mapHeight+2))
+!!$      ALLOCATE(whichList(0:mapWidth+1,0:mapHeight+1))
+!!$      ALLOCATE(openX(0:mapWidth*mapHeight+2))
+!!$      ALLOCATE(openY(0:mapWidth*mapHeight+2))
+!!$      ALLOCATE(parentX(0:mapWidth+1,0:mapHeight+1))
+!!$      ALLOCATE(parentY(0:mapWidth+1,0:mapHeight+1))
+!!$      ALLOCATE(Fcost(0:mapWidth*mapHeight+2))
+!!$      ALLOCATE(Gcost(0:mapWidth+1,0:mapHeight+1))
+!!$      ALLOCATE(Hcost(0:mapWidth*mapHeight+2))
+!!$      ALLOCATE(pathLength(0:numberPeople+1))
+!!$      ALLOCATE(pathLocation(0:numberPeople+1))
+!!$
+!!$      ! Path reading variables
+!!$      ALLOCATE(pathStatus(0:numberPeople+1))
+!!$      ALLOCATE(xPath(0:numberPeople+1))
+!!$      ALLOCATE(yPath(0:numberPeople+1))
+!!$
+!!$      ! Mam juxx wymiar mapy
+!!$      ! WRITE(LU_ERR,*) M%XS
+!!$      ! WRITE(LU_ERR,*) M%XF
+!!$      ! WRITE(LU_ERR,*) M%YS
+!!$      ! WRITE(LU_ERR,*) M%YF
+!!$
+!!$      ! Oraz na ile jest podzielona elementxxw
+!!$      ! WRITE(LU_ERR,*) M%IBAR
+!!$      ! WRITE(LU_ERR,*) M%JBAR
+!!$
+!!$      ! Teraz podzielxx jxx na komxxrki i sprawdzxx czy sxx przeszkody
+!!$      ! Ewidentnie robimy tylko raz
+!!$      DO xt = 1, M%IBAR
+!!$         DO yt = 1, M%JBAR
+!!$            ic  = M%CELL_INDEX(xt,yt,1)
+!!$            iw  = M%OBST_INDEX_C(ic)
+!!$            walkability(xt-1,yt-1) = iw
+!!$         END DO
+!!$      END DO
+!!$
+!!$      ! 1. Convert location data (in pixels) to coordinates in the walkability array.
+!!$      !startX = startingX/tileSize
+!!$      !startY = startingY/tileSize
+!!$      !targetX = targetX/tileSize
+!!$      !targetY = targetY/tileSize
+!!$      startX = FLOOR(XI)
+!!$      startY = FLOOR(YJ)
+!!$
+!!$      targetX = FLOOR(M%CELLSI(FLOOR((TARGET_X-M%XS)*M%RDXINT))+1.0_EB)
+!!$      targetY = FLOOR(M%CELLSJ(FLOOR((TARGET_Y-M%YS)*M%RDYINT))+1.0_EB)
+!!$      !write(lu_err,*)'**** targetX, targetY ',targetX, targetY,target_X, target_Y
+!!$      !targetX = 19
+!!$      !targetY = 19
+!!$
+!!$      ! 2.Quick Path Checks: Under the some circumstances no path needs to
+!!$      ! be generated ...
+!!$      ! If starting location and target are in the same location...
+!!$      IF((startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)>0) .OR.(startX==targetX .AND. &
+!!$           startY==targetY .AND. pathLocation(pathfinderID)==0)) THEN
+!!$         !path = found
+!!$      ELSE
+!!$         !IF(startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)==0) THEN
+!!$         !path = nonexistent
+!!$         !END IF
+!!$
+!!$         ! If target square is unwalkable, return that it's a nonexistent path.
+!!$         !if (walkability[targetX][targetY] == unwalkable)
+!!$         !goto noPath;
+!!$
+!!$         ! 3.Reset some variables that need to be cleared
+!!$         IF(onClosedList>1000000) THEN ! reset whichList occasionally
+!!$            DO x=0, mapWidth-1
+!!$               DO y=0, mapHeight-1
+!!$                  whichList(x,y) = 0
+!!$               END DO
+!!$            END DO
+!!$            onClosedList = 10
+!!$         END IF
+!!$         ! changing the values of onOpenList and onClosed list is faster than redimming whichList() array
+!!$         onClosedList = onClosedList+2
+!!$         onOpenList = onClosedList-1
+!!$         pathLength(pathfinderID) = notStarted ! i.e, = 0
+!!$         pathLocation(pathfinderID) = notStarted ! i.e, = 0
+!!$         Gcost(startX,startY) = 0 ! reset starting square's G value to 0
+!!$
+!!$         ! 4.Add the starting location to the open list of squares to be checked.
+!!$         numberOfOpenListItems = 1
+!!$         ! assign it as the top (and currently only) item in the open list, which is maintained
+!!$         ! as a binary heap (explained below)
+!!$         openList(1) = 1
+!!$         openX(1) = startX
+!!$         openY(1) = startY
+!!$
+!!$         ! 5.Do the following until a path is found or deemed nonexistent.
+!!$         DO
+!!$
+!!$            ! 6.If the open list is not empty, take the first cell off of the list.
+!!$            ! This is the lowest F cost cell on the open list.
+!!$            IF(numberOfOpenListItems /= 0) THEN
+!!$
+!!$               ! 7. Pop the first item off the open list.
+!!$               parentXval = openX(openList(1))
+!!$               parentYval = openY(openList(1)) ! record cell coordinates of the item
+!!$               whichList(parentXval,parentYval) = onClosedList ! add the item to the closed list
+!!$
+!!$               ! Open List = Binary Heap: Delete this item from the open list, which
+!!$               ! is maintained as a binary heap. For more information on binary heaps, see:
+!!$               ! http://www.policyalmanac.org/games/binaryHeaps.htm
+!!$               numberOfOpenListItems = numberOfOpenListItems - 1 ! reduce number of open list items by 1
+!!$
+!!$               ! Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
+!!$               openList(1) = openList(numberOfOpenListItems+1) ! move the last item in the heap up to slot #1
+!!$               v = 1
+!!$
+!!$               ! Repeat the following until the new item in slot #1 sinks to its proper spot in the heap.
+!!$               DO
+!!$                  u = v
+!!$                  IF(2*u+1<=numberOfOpenListItems) THEN ! if both children exist
+!!$                     ! Check if the F cost of the parent is greater than each child.
+!!$                     ! Select the lowest of the two children.
+!!$                     IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN
+!!$                        v = 2*u;
+!!$                     END IF
+!!$                     IF(Fcost(openList(v)) >= Fcost(openList(2*u+1))) THEN
+!!$                        v = 2*u+1
+!!$                     END IF
+!!$                  ELSE
+!!$                     IF(2*u<=numberOfOpenListItems) THEN ! if only child #1 exists
+!!$                        ! Check if the F cost of the parent is greater than child #1
+!!$                        IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN
+!!$                           v = 2*u;
+!!$                        END IF
+!!$                     END IF
+!!$                  END IF
+!!$
+!!$                  IF(u /= v) THEN ! if parent's F is > one of its children, swap them
+!!$                     temp = openList(u)
+!!$                     openList(u) = openList(v)
+!!$                     openList(v) = temp
+!!$                  ELSE
+!!$                     EXIT ! otherwise, exit loop
+!!$                  END IF
+!!$               END DO
+!!$               !while (!KeyDown(27))//reorder the binary heap
+!!$
+!!$               ! 7.Check the adjacent squares. (Its "children" -- these path children
+!!$               ! are similar, conceptually, to the binary heap children mentioned
+!!$               ! above, but don't confuse them. They are different. Path children
+!!$               ! are portrayed in Demo 1 with grey pointers pointing toward
+!!$               ! their parents.) Add these adjacent child squares to the open list
+!!$               ! for later consideration if appropriate (see various if statements
+!!$               ! below).
+!!$               DO b=parentYval-1, parentYval+1
+!!$                  DO a=parentXval-1, parentXval+1
+!!$                     ! If not off the map (do this first to avoid array out-of-bounds errors)
+!!$                     IF(a /= -1 .AND. b /= -1 .AND. a /= mapWidth/tileSize .AND. b /= mapHeight/tileSize) THEN
+!!$                        ! If not already on the closed list (items on the closed list have
+!!$                        ! already been considered and can now be ignored).
+!!$                        IF(whichList(a,b) /= onClosedList) THEN
+!!$                           ! If not a wall/obstacle square.
+!!$                           IF(walkability(a,b) < unwalkable) THEN
+!!$                              ! Don't cut across corners
+!!$                              corner = walkable
+!!$                              IF(a==parentXval-1) THEN
+!!$                                 IF(b == parentYval-1) THEN
+!!$                                    IF(walkability(parentXval-1,parentYval) >= unwalkable .OR. &
+!!$                                         walkability(parentXval,parentYval-1) >= unwalkable) THEN
+!!$                                       corner = unwalkable
+!!$                                    END IF
+!!$                                 ELSE IF(b == parentYval+1) THEN
+!!$                                    IF(walkability(parentXval,parentYval+1) >= unwalkable .OR. &
+!!$                                         walkability(parentXval-1,parentYval) >= unwalkable) THEN
+!!$                                       corner = unwalkable
+!!$                                    END IF
+!!$                                 END IF
+!!$                              ELSE IF(a == parentXval+1) THEN
+!!$                                 IF(b == parentYval-1) THEN
+!!$                                    IF(walkability(parentXval,parentYval-1) >= unwalkable .OR. &
+!!$                                         walkability(parentXval+1,parentYval) >= unwalkable) THEN
+!!$                                       corner = unwalkable
+!!$                                    END IF
+!!$                                 ELSE IF(b == parentYval+1) THEN
+!!$                                    IF(walkability(parentXval+1,parentYval) >= unwalkable .OR. &
+!!$                                         walkability(parentXval,parentYval+1) >= unwalkable) THEN
+!!$                                       corner = unwalkable
+!!$                                    END IF
+!!$                                 END IF
+!!$                              END IF
+!!$                              IF(corner == walkable) THEN
+!!$                                 ! If not already on the open list, add it to the open list.
+!!$                                 IF(whichList(a,b) /= onOpenList) THEN
+!!$                                    ! Create a new open list item in the binary heap.
+!!$                                    newOpenListItemID = newOpenListItemID + 1 ! each new item has a unique ID #
+!!$                                    n = numberOfOpenListItems+1
+!!$                                    ! place the new open list item (actually, its ID#) at the bottom of the heap
+!!$                                    openList(n) = newOpenListItemID
+!!$                                    openX(newOpenListItemID) = a
+!!$                                    openY(newOpenListItemID) = b ! record the x and y coordinates of the new item
+!!$
+!!$                                    ! Figure out its G cost
+!!$                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
+!!$                                       addedGCost = 14 ! cost of going to diagonal squares
+!!$                                    ELSE
+!!$                                       addedGCost = 10 !cost of going to non-diagonal squares
+!!$                                    END IF
+!!$                                    Gcost(a,b) = Gcost(parentXval,parentYval) + addedGCost
+!!$                                    ! Figure out its H and F costs and parent
+!!$                                    Hcost(openList(n)) = 10*(abs(a - targetX) + abs(b - targetY))
+!!$                                    Fcost(openList(n)) = Gcost(a,b) + Hcost(openList(n))
+!!$                                    parentX(a,b) = parentXval
+!!$                                    parentY(a,b) = parentYval
+!!$                                    ! Move the new open list item to the proper place in the binary heap.
+!!$                                    ! Starting at the bottom, successively compare to parent items,
+!!$                                    ! swapping as needed until the item finds its place in the heap
+!!$                                    ! or bubbles all the way to the top (if it has the lowest F cost).
+!!$                                    DO WHILE(n /= 1) ! While item hasn't bubbled to the top (n=1)
+!!$                                       ! Check if child's F cost is < parent's F cost. If so, swap them.
+!!$                                       IF(Fcost(openList(n)) <= Fcost(openList(n/2))) THEN
+!!$                                          temp = openList(n/2)
+!!$                                          openList(n/2) = openList(n)
+!!$                                          openList(n) = temp
+!!$                                          n = n/2
+!!$                                       ELSE
+!!$                                          EXIT
+!!$                                       END IF
+!!$                                    END DO
+!!$                                    numberOfOpenListItems = numberOfOpenListItems+1 ! add one to the number of items in the heap
+!!$                                    ! Change whichList to show that the new item is on the open list.
+!!$                                    whichList(a,b) = onOpenList
+!!$
+!!$                                    ! 8.If adjacent cell is already on the open list, check to see if this
+!!$                                    ! path to that cell from the starting location is a better one.
+!!$                                    ! If so, change the parent of the cell and its G and F costs.
+!!$                                 ELSE ! If whichList(a,b) = onOpenList
+!!$                                    ! Figure out the G cost of this possible new path
+!!$                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
+!!$                                       addedGCost = 14 ! cost of going to diagonal tiles
+!!$                                    ELSE
+!!$                                       addedGCost = 10 ! cost of going to non-diagonal tiles
+!!$                                    END IF
+!!$                                    tempGcost = Gcost(parentXval,parentYval) + addedGCost
+!!$                                    ! If this path is shorter (G cost is lower) then change
+!!$                                    ! the parent cell, G cost and F cost.
+!!$                                    IF(tempGcost < Gcost(a,b)) THEN ! if G cost is less,
+!!$                                       parentX(a,b) = parentXval ! change the square's parent
+!!$                                       parentY(a,b) = parentYval
+!!$                                       Gcost(a,b) = tempGcost ! change the G cost
+!!$                                       ! Because changing the G cost also changes the F cost, if
+!!$                                       ! the item is on the open list we need to change the item's
+!!$                                       ! recorded F cost and its position on the open list to make
+!!$                                       ! sure that we maintain a properly ordered open list.
+!!$                                       DO x = 1, numberOfOpenListItems !//look for the item in the heap
+!!$                                          IF(openX(openList(x)) == a .AND. openY(openList(x)) == b) THEN ! item found
+!!$                                             Fcost(openList(x)) = Gcost(a,b) + Hcost(openList(x)) ! change the F cost
+!!$                                             ! See if changing the F score bubbles the item up from it's current location
+!!$                                             ! in the heap
+!!$                                             n = x;
+!!$                                             DO WHILE (n /= 1) ! While item hasn't bubbled to the top (n=1)
+!!$                                                ! Check if child is < parent. If so, swap them.
+!!$                                                IF(Fcost(openList(n)) < Fcost(openList(n/2))) THEN
+!!$                                                   temp = openList(n/2)
+!!$                                                   openList(n/2) = openList(n)
+!!$                                                   openList(n) = temp
+!!$                                                   n = n/2
+!!$                                                ELSE
+!!$                                                   EXIT
+!!$                                                END IF
+!!$                                             END DO
+!!$                                             EXIT ! exit for x = loop
+!!$                                          END IF ! If openX(openList(x)) = a
+!!$                                       END DO ! For x = 1 To numberOfOpenListItems
+!!$                                    END IF ! If tempGcost < Gcost(a,b)
+!!$                                 END IF ! else If whichList(a,b) = onOpenList
+!!$                              END IF ! If not cutting a corner
+!!$                           END IF ! If not a wall/obstacle square.
+!!$                        END IF ! If not already on the closed list
+!!$                     END IF ! If not off the map
+!!$                  END DO ! for (a = parentXval-1; a <= parentXval+1; a++){
+!!$               END DO ! for (b = parentYval-1; b <= parentYval+1; b++){
+!!$            ELSE ! if (numberOfOpenListItems != 0)
+!!$               ! 9.If open list is empty then there is no path.
+!!$               path = nonexistent
+!!$               EXIT
+!!$            END IF
+!!$            ! If target is added to open list then path has been found.
+!!$            IF(whichList(targetX,targetY) == onOpenList) THEN
+!!$               path = found
+!!$               EXIT
+!!$            END IF
+!!$         END DO
+!!$
+!!$         ! 10.Save the path if it exists.
+!!$         IF(path == found) THEN
+!!$            ! a.Working backwards from the target to the starting location by checking
+!!$            ! each cell's parent, figure out the length of the path.
+!!$            pathX = targetX
+!!$            pathY = targetY
+!!$            DO WHILE(pathX /= startX .OR. pathY /= startY)
+!!$               ! Look up the parent of the current cell.
+!!$               tempx = parentX(pathX,pathY)
+!!$               pathY = parentY(pathX,pathY)
+!!$               pathX = tempx
+!!$               ! Figure out the path length
+!!$               pathLength(pathfinderID) = pathLength(pathfinderID) + 1;
+!!$            END DO
+!!$            !b.Resize the data bank to the right size in bytes
+!!$            ALLOCATE(pathBank(0:pathLength(pathfinderID),0:1))
+!!$
+!!$            !c. Now copy the path information over to the databank. Since we are
+!!$            ! working backwards from the target to the start location, we copy
+!!$            ! the information to the data bank in reverse order. The result is
+!!$            ! a properly ordered set of path data, from the first step to the
+!!$            ! last.
+!!$            pathX = targetX
+!!$            pathY = targetY
+!!$            pathBank(0,0) = startX
+!!$            pathBank(0,1) = startY
+!!$            !cellPosition = pathLength(pathfinderID)*2 ! start at the end
+!!$            DO WHILE(pathX /= startX .OR. pathY /= startY)
+!!$               !cellPosition = cellPosition - 2 ! work backwards 2 integers
+!!$               !pathBank(pathfinderID,cellPosition) = pathX
+!!$               !pathBank(pathfinderID,cellPosition+1) = pathY
+!!$               ! d.Look up the parent of the current cell.
+!!$               tempx = parentX(pathX,pathY)
+!!$               pathY = parentY(pathX,pathY)
+!!$               pathX = tempx
+!!$               pathBank(pathLength(pathfinderID),0) = pathX
+!!$               pathBank(pathLength(pathfinderID),1) = pathY
+!!$               pathLength(pathfinderID) = pathLength(pathfinderID) - 1
+!!$               ! WRITE(LU_ERR,*) 'pathX=',pathX
+!!$               ! WRITE(LU_ERR,*) 'pathY=',pathY
+!!$               ! e.If we have reached the starting square, exit the loop.
+!!$            END DO
+!!$            ! WRITE(LU_ERR,*) 'koniec----------'
+!!$
+!!$            ! 11.Read the first path step into xPath/yPath arrays
+!!$            !ReadPath(pathfinderID,startingX,startingY,1);
+!!$         END IF
+!!$         !return path;
+!!$
+!!$
+!!$
+!!$         ! 13.If there is no path to the selected target, set the pathfinder's
+!!$         ! xPath and yPath equal to its current location and return that the
+!!$         ! path is nonexistent.
+!!$         ! noPath:
+!!$         ! xPath[pathfinderID] = startingX;
+!!$         ! yPath[pathfinderID] = startingY;
+!!$         ! return nonexistent;
+!!$
+!!$         !WRITE(LU_ERR,*) 'Xend=',pathBank(2,0)
+!!$         !WRITE(LU_ERR,*) 'Xsta=',startX
+!!$         !WRITE(LU_ERR,*) 'Yend=',pathBank(2,1)
+!!$         !WRITE(LU_ERR,*) 'Ysta=',startY
+!!$         !WRITE(LU_ERR,*) '====================='
+!!$
+!!$         WSPA = pathBank(2,0) - startX
+!!$         WSPB = pathBank(2,1) - startY
+!!$
+!!$         IF(path == found) THEN
+!!$            DEALLOCATE(pathBank)
+!!$         END IF
+!!$
+!!$      END IF ! if startX==targetX
+!!$
+!!$      DEALLOCATE(walkability)
+!!$      DEALLOCATE(openList)
+!!$      DEALLOCATE(whichList)
+!!$      DEALLOCATE(openX)
+!!$      DEALLOCATE(openY)
+!!$      DEALLOCATE(parentX)
+!!$      DEALLOCATE(parentY)
+!!$      DEALLOCATE(Fcost)
+!!$      DEALLOCATE(Gcost)
+!!$      DEALLOCATE(Hcost)
+!!$      DEALLOCATE(pathLength)
+!!$      DEALLOCATE(pathLocation)
+!!$
+!!$      ! Path reading variables
+!!$      DEALLOCATE(pathStatus)
+!!$      DEALLOCATE(xPath)
+!!$      DEALLOCATE(yPath)
+!!$
+!!$    END SUBROUTINE GUARD
 
     SUBROUTINE FIND_PREFERRED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
+         II, JJ, XI, YJ, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR, HR_SPEED)
       IMPLICIT NONE
       !
       ! Calculate the prefered walking direction
@@ -10635,8 +10646,7 @@ CONTAINS
       !   T_BEGIN: The starting time of the simulation
       !   L_DEAD: Is the agent dead or not
       !   II,JJ: The grid cell indices of the agent
-      !   IIX,JJY: The grid cell indices of the agent for the velocity
-      !   XI,YJ,ZK: The grid cell coordinates of the agent for the velocity
+      !   XI,YJ: The grid cell coordinates of the agent for the velocity
       !   NM: The main evacuation mesh index
       !   NOUT: The index of the stairs mesh (if the agent is on stairs)
       !   NM_STRS_MESH: True, if the mesh is a stair mesh
@@ -10649,19 +10659,19 @@ CONTAINS
       !   HR%I_Door_Mode: 1: Use flow field, 2: use bee line to the door
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I, NM, NOUT
-      REAL(EB), INTENT(IN) :: XI, YJ, ZK, T, T_BEGIN
+      INTEGER, INTENT(IN) :: II, JJ, I, NM, NOUT
+      REAL(EB), INTENT(IN) :: XI, YJ, T, T_BEGIN
       LOGICAL, INTENT(IN) :: L_DEAD, NM_STRS_MESH
       INTEGER, INTENT(OUT) :: I_STRS_DOOR
       REAL(EB), INTENT(INOUT) :: HR_TAU
       REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE, HR_SPEED
       !
       ! Local variables
-      INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
+      INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J
       REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL, X1, X2, Y1, Y2, D_TMP, X_XYZ, Y_XYZ, D_X, D_Y
       REAL(EB) :: alpha, Dv0, Dv0_x, Dv0_y, D_DrV0, Dr_length, Dr_x, Dr_y
-      LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET, Is_Known_Door_tmp, Is_XB_Visible, Is_XYZ_Visible, Is_InFront
-      LOGICAL :: V0_IS_SET_ZERO, CROWBAR_LOST_AGENT
+      LOGICAL :: STRAIGHT_LINE_TO_TARGET, Is_Known_Door_tmp, Is_XB_Visible, Is_XYZ_Visible, Is_InFront
+      LOGICAL :: V0_IS_SET_ZERO
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -10937,7 +10947,7 @@ CONTAINS
          CASE(-1,+1)
             IF ((HR%Y > Y1) .AND. (HR%Y < Y2)) THEN
                IF (UBAR==0.0_EB) UBAR = HR%UBAR  ! used old one if at the door line
-               HR%SKIP_WALL_FORCE_IOR = SIGN(1.0_EB,UBAR)
+               HR%SKIP_WALL_FORCE_IOR = NINT(SIGN(1.0_EB,UBAR))
                IF ((HR%Y > Y1+HR%Radius) .AND. (HR%Y < Y2-HR%Radius)) THEN
                   UBAR = SIGN(1.0_EB,UBAR)
                   VBAR = 0._EB
@@ -10946,7 +10956,7 @@ CONTAINS
          CASE(-2,+2)
             IF ((HR%X > X1) .AND. (HR%X < X2)) THEN
                IF (VBAR==0.0_EB) VBAR = HR%VBAR  ! used old one if at the door line
-               HR%SKIP_WALL_FORCE_IOR = SIGN(1.0_EB,VBAR)*2
+               HR%SKIP_WALL_FORCE_IOR = NINT(SIGN(1.0_EB,VBAR)*2)
                IF ((HR%X > X1+HR%Radius) .AND. (HR%X < X2-HR%Radius)) THEN
                   UBAR = 0._EB
                   VBAR = SIGN(1.0_EB,VBAR)
@@ -11036,7 +11046,7 @@ CONTAINS
                JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
                IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
                   write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION'
-                  write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  write(lu_err,*)'*** ',TRIM(EVAC_EXITS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                END IF
             ELSE
                JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
@@ -11468,7 +11478,7 @@ CONTAINS
       !
       ! Local variables
       LOGICAL ISKNOWNDOOR, FINALTARGETFOUND, SOMEKNOWNDOORS
-      INTEGER :: I_TARGET = 0, I, ID, FINAL_NODE, IG, IN, INODE, STR_SUB_INDX
+      INTEGER :: I, ID, FINAL_NODE, IG, IN, INODE, STR_SUB_INDX
       REAL(EB) :: Z_NODE, Z_FINAL, DZ_NODE, DZ_FINAL, Z_FINAL_UNKNOWN,DZ_TMP1, DZ_TMP2, DZ_NODE_ACTUAL
       REAL(EB) :: DIST_TO_DOOR, X_NODE, Y_NODE, DIST_TO_DOOR_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL()
@@ -11901,7 +11911,6 @@ CONTAINS
       REAL(EB) X_OLD, Y_OLD, XX, YY, ZZ, PDXX1, PDXX2, PDXY1, PDXY2, V, ANGLE
       INTEGER :: IE,I,N_TMP, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
-      CHARACTER(60) :: TO_NODE
       CHARACTER(LABEL_LENGTH) :: NEW_FFIELD_NAME
       LOGICAL :: KEEP_XY, UPSTREAM, NO_TO_NODE, L_INIT_IOR, CLOSED
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX =>NULL()
@@ -12140,10 +12149,9 @@ CONTAINS
       INTEGER, INTENT(IN) :: NM
       !
       ! Local variables
-      REAL(EB) X_OLD, Y_OLD, XX, YY, ZZ, PCXX1, PCXX2, PCXY1, PCXY2, V, X_INT, ANGLE
-      INTEGER :: IE,I,N_TMP, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
+      REAL(EB) XX, YY, ZZ, V, X_INT, ANGLE
+      INTEGER :: IE, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
-      CHARACTER(60) :: TO_NODE
       CHARACTER(LABEL_LENGTH) :: NEW_FFIELD_NAME
       LOGICAL :: KEEP_XY
       TYPE (EVAC_CORR_TYPE),  POINTER :: PCX=>NULL()
@@ -12390,16 +12398,15 @@ CONTAINS
       ! Local variables
       REAL :: RN_REAL
       REAL(EB) RN, X1, X2, Y1, Y2, Z1, Z2, D_MAX, DIST, WIDTH, &
-           XX1,YY1, MAX_FED, AVE_K
+           XX1,YY1
       INTEGER  II, JJ, KK, IOR, IRNMAX, IRN, IE, IZERO, J1
       REAL(EB), DIMENSION(6) :: R_TMP, X_TMP, Y_TMP
-      INTEGER :: I_TMP, I_TIM, III, JJJ, I_OBST
-      LOGICAL :: PP_SEE_DOOR, KEEP_XY2, NM_STRS_MESH
+      INTEGER :: I_TMP, III, JJJ, I_OBST
+      LOGICAL :: KEEP_XY2, NM_STRS_MESH
 
-      TYPE (CORR_LL_TYPE), POINTER :: TMPCURRENT =>NULL(), TMPLOOP =>NULL()
+      TYPE (CORR_LL_TYPE), POINTER :: TMPCURRENT =>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP =>NULL()
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX2 =>NULL()
-      TYPE (MESH_TYPE), POINTER :: MMF =>NULL()
       TYPE (EVACUATION_TYPE), POINTER :: HPT =>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HRE =>NULL()
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL(), PNX2 =>NULL()
@@ -12820,18 +12827,12 @@ CONTAINS
       !
     END SUBROUTINE REMOVE_PERSON
     !
-    SUBROUTINE REMOVE_OUT_OF_GRIDS(T,NM)
+    SUBROUTINE REMOVE_OUT_OF_GRIDS
       IMPLICIT NONE
       !
       ! Remove humans that do not lie in any mesh
       !
-      ! Passed variables
-      INTEGER, INTENT(IN) :: NM
-      REAL(EB), INTENT(IN) :: T
-      !
-      ! Local variables
       INTEGER :: IKILL, I
-      REAL(EB) :: X1, X2, Y1, Y2, DIST_CB
       !
       IKILL = 0
       DROP_LOOP: DO I=1,N_HUMANS
@@ -13157,8 +13158,8 @@ CONTAINS
       ! Local variables
       REAL :: RN_REAL
       REAL(EB) :: RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
-      REAL(EB) :: CB_TIME, ANGLE, EVEL, CB_TIME_OLD, CB_TIME_NOW
-      INTEGER :: I, J, II, JJ, KK, ior, irnmax, irn, ie, NR, CB_LINE_TYPE, CB_N_AGENTS, CB_ID_CAMERA, &
+      REAL(EB) :: CB_TIME, EVEL, CB_TIME_OLD, CB_TIME_NOW
+      INTEGER :: I, J, II, JJ, KK, ior, irnmax, irn, ie, CB_LINE_TYPE, CB_N_AGENTS, CB_ID_CAMERA, &
            N_A_old, N_CBA_old, CB_N_AGENTS_PREV_DT
       LOGICAL :: FIRST_PASS, TITLE_WROTED, SOLID_OBSERVATION, CROWBAR_READ_IN_TMP
       REAL(EB), DIMENSION(6) :: y_tmp, x_tmp, r_tmp
@@ -13724,7 +13725,7 @@ CONTAINS
 
     END SUBROUTINE Corner_Forces
 
-    SUBROUTINE Door_Forces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
+    SUBROUTINE Door_Forces(x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
          P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy, CONTACT_FX, CONTACT_FY)
       IMPLICIT NONE
       !
@@ -13744,7 +13745,6 @@ CONTAINS
       !          d_walls: Shortest distance to walls
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: nm
       REAL(EB), INTENT(IN) :: p2p_dist_max
       REAL(EB), DIMENSION(4), INTENT(IN) :: d_xy
       LOGICAL, DIMENSION(4), INTENT(IN) :: FoundWall_xy
@@ -13752,8 +13752,7 @@ CONTAINS
       REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, CONTACT_FX, CONTACT_FY
       !
       ! Local variables
-      INTEGER :: is, idir, iin, jjn, istat
-      REAL(EB) :: CosPhiFac, dist, dist1, dist2
+      REAL(EB) :: dist1, dist2
 
       ! Check if there are doors (vents with vel >0)
       DO ii = 1, N_VENT
@@ -13825,7 +13824,7 @@ CONTAINS
 
     END SUBROUTINE Door_Forces
 
-    SUBROUTINE Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
+    SUBROUTINE Wall_SocialForces(x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
       IMPLICIT NONE
       !
       ! wall - agent social forces
@@ -13841,7 +13840,6 @@ CONTAINS
       !
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: nm
       REAL(EB), INTENT(IN) :: p2p_dist_max
       REAL(EB), DIMENSION(6), INTENT(IN) :: x_tmp, y_tmp, r_tmp
       REAL(EB), DIMENSION(4), INTENT(IN) :: d_xy
@@ -13931,7 +13929,7 @@ CONTAINS
 
     END SUBROUTINE Wall_SocialForces
 
-    SUBROUTINE Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
+    SUBROUTINE Wall_ContactForces(x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
          P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy, CONTACT_FX, CONTACT_FY)
       IMPLICIT NONE
       !
@@ -13951,7 +13949,6 @@ CONTAINS
       !          d_walls: Shortest distance to walls
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: nm
       REAL(EB), INTENT(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
       REAL(EB), DIMENSION(4), INTENT(IN) :: d_xy
       LOGICAL, DIMENSION(4), INTENT(IN) :: FoundWall_xy
@@ -14342,7 +14339,7 @@ CONTAINS
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST') ; RETURN
     END SELECT
-    HR%Mass   = 80.0_EB*(HR%Radius/0.27_EB)**2
+    HR%Mass   = PCP%m_agent*(HR%Radius/0.27_EB)**2
 
     SELECT CASE(PCP%I_TAU_DIST)
     CASE(-1)
@@ -14812,7 +14809,7 @@ CONTAINS
     !
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
-    TNOW=SECOND()
+    TNOW=CURRENT_TIME()
     !
     CALL POINT_TO_MESH(NM)
 
@@ -14891,7 +14888,7 @@ CONTAINS
           AP(NPP,3) =   2.0_FB*REAL(HR%r_torso,FB) ! diameter
           ! Height of a human scaled by radius, default male 1.80 m
           AP(NPP,4) =  1.80_FB*REAL(HR%Radius/0.27_EB,FB)
-
+          
           IF (CROWBAR_DUMP) THEN
              EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
              IF (EVEL >= TWO_EPSILON_EB) THEN
@@ -14986,7 +14983,7 @@ CONTAINS
     END DO HUMAN_CLASS_LOOP
 
     !
-    T_USED(12) = T_USED(12) + SECOND() - TNOW
+    T_USED(12) = T_USED(12) + CURRENT_TIME() - TNOW
   END SUBROUTINE DUMP_EVAC
 !
   FUNCTION GaussRand( gmean, gtheta, gcutmult )

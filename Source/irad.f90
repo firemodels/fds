@@ -1135,7 +1135,6 @@ END FUNCTION MALKMUS
 
 !==============================================================================
 FUNCTION ELSASSER(XSTAR,A_COLLISION) RESULT(X_ELSASSER)
-USE MATH_FUNCTIONS, ONLY : ERF
 !==============================================================================
 !! FUNCTION COMPUTES THE EQUIVALENT LINE WIDTH OVER THE AVERAGE LINE SPACING
 !! USING THE ELSASSER STATISTICAL MODEL
@@ -1755,7 +1754,7 @@ ELSEIF((OMEGA<=1100.0_EB).AND.(OMEGA>880.0_EB)) THEN
       IF(TTEMP>=2400._EB) TTEMP = 2399.99_EB
       IF(TTEMP < 300._EB) TTEMP =  300.00_EB
 
-      I = TTEMP/300._EB
+      I = INT(TTEMP/300._EB)
 
       IF (I<2) THEN
          T1=REAL(I,EB)*300._EB
@@ -1851,7 +1850,7 @@ IF (OMEGA>=50._EB.AND.OMEGA<9300) THEN
 ! COMPUTE DOPLLER HALF-WIDTH. EQ 5-35
 GD   = 5.94E-6_EB*OMEGA*SQRT(TEMP/(273._EB*WM_H2O))
 
-J    = (OMEGA-25._EB)/25._EB
+J    = INT((OMEGA-25._EB)/25._EB)
 TTEMP= TEMP
 
 IF(TEMP>=2500._EB) TTEMP = 2499.99_EB
@@ -2113,7 +2112,7 @@ ELSE
       GDINV  = .00734_EB*PE*SQRT(AZOT)*EXP(1.02_EB*(TOAZ-1._EB))
       GDDINV = GD/9.4_EB
 
-      J  = (OMEGA-2600._EB)/25._EB
+      J  = INT((OMEGA-2600._EB)/25._EB)
       W1 = 2600._EB+25._EB*REAL(J,EB)
       SDB= SD3(2,J)+(OMEGA-W1)/25._EB*(SD3(2,J+1)-SD3(2,J))
 
@@ -2139,7 +2138,7 @@ ELSE
       GDINV  = .0243_EB*PE*(TOAZ)**.8_EB
       GDDINV = GD/5.1_EB
 
-      J   = (OMEGA-1100._EB)/25._EB
+      J   = INT((OMEGA-1100._EB)/25._EB)
       W1  = 1100._EB+25._EB*REAL(J,EB)
       SDB = SD7(2,J)+(OMEGA-W1)/25._EB*(SD7(2,J+1)-SD7(2,J))
 
@@ -9777,11 +9776,11 @@ NSB = NUMBER_SPECTRAL_BANDS
 ! PHYSICAL PARAMETERS
 ! MINIMUM MEAN RADIUS (M)
 RMMIN = 0.5_EB*1.E-6*MIE_MINIMUM_DIAMETER
-IF (RMMIN < EPSILON_EB) RMMIN = 0.5E-6_EB
+IF (RMMIN < TWO_EPSILON_EB) RMMIN = 0.5E-6_EB
 
 ! MAXIMUM MEAN RADIUS (M)
 RMMAX = 0.5_EB*1.E-6*MIE_MAXIMUM_DIAMETER
-IF (RMMAX < EPSILON_EB) THEN
+IF (RMMAX < TWO_EPSILON_EB) THEN
    RMMAX = 0.5_EB*LPC%DIAMETER
    ! ALLOW INCREASE OF THE MEAN RADIUS
    RMMAX = 1.5_EB*RMMAX
@@ -10094,7 +10093,7 @@ PWGHT(NMIEANG2-1) = 0.5_EB*PWGHT(NMIEANG2-1)
 
 LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
 !
-   CREFIN = CMPLX( REAL_REF_INDX(NLAMBDA), CMPLX_REF_INDX(NLAMBDA) )
+   CREFIN = CMPLX( REAL_REF_INDX(NLAMBDA), CMPLX_REF_INDX(NLAMBDA), EB )
 
 ! CHOOSE PERFECTLY REFLECTING SPHERE, IF LARGE REAL INDEX IS GIVEN.
 
@@ -10597,11 +10596,11 @@ ELSE
       YESANG = NUMANG>0
    !                             ** NUMBER OF TERMS IN MIE SERIES; EQ R50
       IF( XX<=8.0_EB ) THEN
-      NTRM = XX + 4._EB*XX**ONETHR + 1._EB
+      NTRM = INT(XX + 4._EB*XX**ONETHR + 1._EB)
       ELSE IF( XX<4200._EB ) THEN
-      NTRM = XX + 4.05*XX**ONETHR + 2._EB
+      NTRM = INT(XX + 4.05*XX**ONETHR + 2._EB)
       ELSE
-      NTRM = XX + 4._EB*XX**ONETHR + 2._EB
+      NTRM =INT( XX + 4._EB*XX**ONETHR + 2._EB)
       END IF
       IF( NTRM+1 > MAXTRM )CALL ERRMSG('MIEV0--PARAMETER MAXTRM TOO SMALL',.TRUE.)
    !                            ** CALCULATE LOGARITHMIC DERIVATIVES OF
@@ -10615,8 +10614,8 @@ ELSE
       CHINM1 = COS( XX )
       PSIN   = PSINM1*XINV - CHINM1
       CHIN   = CHINM1*XINV + PSINM1
-      ZETNM1 = CMPLX( PSINM1, CHINM1 )
-      ZETN   = CMPLX( PSIN, CHIN )
+      ZETNM1 = CMPLX( PSINM1, CHINM1, EB )
+      ZETN   = CMPLX( PSIN, CHIN, EB )
    !                                     ** INITIALIZE PREVIOUS COEFFI-
    !                                     ** CIENTS FOR GQSC SERIES
       ANM1 = ( 0.0_EB, 0.0_EB )
@@ -11739,12 +11738,12 @@ INTEGER     J
 REAL(EB)    RTMP
 
 !                                                       ** EQ. R/A.5
-A( 1 ) = CMPLX( 0._EB, TWOTHR*( 1._EB - 0.2_EB*XX**2 ) ) / CMPLX( 1._EB - 0.5_EB*XX**2, TWOTHR*XX**3 )
+A( 1 ) = CMPLX( 0._EB,    TWOTHR*( 1._EB - 0.2_EB*XX**2 ), EB ) / CMPLX( 1._EB - 0.5_EB*XX**2, TWOTHR*XX**3, EB )
 !                                                      ** EQ. R/A.6
-B( 1 ) = CMPLX( 0._EB, - ( 1._EB - 0.1_EB*XX**2 ) / 3._EB) / CMPLX( 1._EB + 0.5_EB*XX**2, - XX**3 / 3._EB)
+B( 1 ) = CMPLX( 0._EB, - ( 1._EB - 0.1_EB*XX**2 ) / 3._EB, EB ) / CMPLX( 1._EB + 0.5_EB*XX**2, - XX**3 / 3._EB, EB)
 !                                                       ** EQ. R/A.7,8
-A( 2 ) = CMPLX( 0._EB,   XX**2 / 30._EB)
-B( 2 ) = CMPLX( 0._EB, - XX**2 / 45._EB)
+A( 2 ) = CMPLX( 0._EB,   XX**2 / 30._EB, EB)
+B( 2 ) = CMPLX( 0._EB, - XX**2 / 45._EB, EB)
 !                                                       ** EQ. R/A.9
 QSCA = 6._EB* XX**4 *( SQ( A(1) ) + SQ( B(1) ) + FIVTHR*( SQ( A(2) ) + SQ( B(2) ) ) )
 QEXT = QSCA
@@ -11806,7 +11805,7 @@ COMPLEX(EB)   CIORSQ, CTMP
 
 
 CIORSQ = CIOR**2
-CTMP   = CMPLX( 0._EB, TWOTHR )*( CIORSQ - 1.0_EB )
+CTMP   = CMPLX( 0._EB, TWOTHR, EB )*( CIORSQ - 1.0_EB )
 
 !                                           ** EQ. R42A
 A( 1 ) = CTMP*( 1._EB- 0.1_EB*XX**2 +   ( CIORSQ / 350._EB + 1._EB/280._EB)*XX**4 ) / &
