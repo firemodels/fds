@@ -105,6 +105,27 @@ CPDIR ()
   fi
 }
 
+# -------------------- CPDIRFILES -------------------
+
+CPDIRFILES ()
+{
+  FROMDIR=$1
+  TODIR=$2
+  if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist"
+  else
+    echo "*******************************"
+    echo copying files from directory $FROMDIR to $TODIR
+    echo "*******************************"
+    cp $FROMDIR/* $TODIR/.
+  fi
+  if [ -e $TODIR ]; then
+    echo "$FROMDIR copied"
+  else
+    echo "***error: unable to copy $FROMDIR" >> $errlog
+  fi
+}
+
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 manifest=manifest$FDSOS.html
@@ -132,8 +153,13 @@ background=background
 
 openmpidir=~/FDS_Guides
 
-fdsmpidir=mpi_intel$FDSOS$IB
-fdsmpi=fds_mpi_intel$FDSOS$IB
+if [ "$MPI_VERSION" == "INTEL" ]; then
+  fdsmpidir=impi_intel$FDSOS
+  fdsmpi=fds_impi_intel$FDSOS
+else
+  fdsmpidir=mpi_intel$FDSOS
+  fdsmpi=fds_mpi_intel$FDSOS
+fi
 
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS
@@ -172,6 +198,7 @@ cd $uploaddir
 rm -rf $bundlebase
 mkdir $bundledir
 mkdir $bundledir/bin
+mkdir $bundledir/bin/LIB64
 mkdir $bundledir/bin/hash
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
@@ -203,7 +230,7 @@ hashfile hashfile   > hash/hashfile.sha1
 cd $CURDIR
 
 SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
-CPDIR $texturedir $bundledir/bin/textures
+CPDIR $texturedir $bundledir/bin
 
 # FDS 
 
@@ -216,11 +243,13 @@ hashfile fds       > hash/fds.sha1
 hashfile fds2ascii > hash/fds2ascii.sha1
 cd $CURDIR
 
-if [ "$PLATFORM" == "LINUX64" ]; then
-   openmpifile=openmpi_${OPENMPI_VERSION}_linux_64.tar.gz
-fi
-if [ "$PLATFORM" == "OSX64" ]; then
-   openmpifile=openmpi_${OPENMPI_VERSION}_osx_64.tar.gz
+if [ "$MPI_VERSION" != "INTEL" ]; then
+  if [ "$PLATFORM" == "LINUX64" ]; then
+    openmpifile=openmpi_${MPI_VERSION}_linux_64.tar.gz
+  fi
+  if [ "$PLATFORM" == "OSX64" ]; then
+    openmpifile=openmpi_${MPI_VERSION}_osx_64.tar.gz
+  fi
 fi
 
 echo ""
@@ -238,7 +267,9 @@ CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
-CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+if [ "$MPI_VERSION" != "INTEL" ]; then
+  CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+fi
 
 echo ""
 echo "--- copying documentation ---"
@@ -253,24 +284,35 @@ CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
-if [ ! "$COMPFROM" == "" ]; then
-  COMPLIBFROM=~/$COMPFROM
-  if [ -d $COMPLIBFROM ]; then
+if [ ! "$INTELBINDIR" == "" ]; then
+  if [ -d $HOME/$INTELBINDIR ]; then
+    if [ "$MPI_VERSION" == "INTEL" ]; then
+    echo ""
+    echo "--- copying Intel exe's ---"
+    echo ""
+      CP $HOME/$INTELBINDIR mpiexec   $bundledir/bin mpiexec
+      CP $HOME/$INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
+    fi
+  fi
+fi
+if [ "$INTELLIBDIR" != "" ]; then
+  if [ -d $HOME/$INTELLIBDIR ]; then
 
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CPDIR $COMPLIBFROM $bundledir/bin/$COMPTO
+    CP $HOME/$INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
+    CP $HOME/$INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
+    CP $HOME/$INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
-if [ ! "$MISCFROM" == "" ]; then
-  MISCLIBFROM=~/$MISCFROM
-  if [ -d $MISCLIBFROM ]; then
+if [ "$OSLIBDIR" != "" ]; then
+  if [ -d $HOME/$OSLIBDIR ]; then
 
     echo ""
     echo "--- copying miscellaneous run time libraries ---"
     echo ""
-    CPDIR $MISCLIBFROM $bundledir/bin/$MISCTO
+    CPDIRFILES $HOME/$OSLIBDIR $bundledir/bin/LIB64
   fi
 fi
 

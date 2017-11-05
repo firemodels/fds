@@ -13,17 +13,18 @@ export PLATFORM=LINUX64
 export FDSEDITION=$4
 export FDSVERSION=$5
 export SMVVERSION=$6
-export OPENMPI_VERSION=$7
+export MPI_VERSION=$7
 export MAJOR=$8
-export COMPFROM=$9
 
-export MISCFROM=fire-notes/INSTALL/LIBS/LINUX/LIB64
-export IB=ib
+export INTELLIBDIR=fire-notes/INSTALL/INTEL/INTEL_17u4/LIB
+export INTELBINDIR=fire-notes/INSTALL/INTEL/INTEL_17u4/bin64
+export OSLIBDIR=fire-notes/INSTALL/OSLIBS/LINUX
+
 export FDSMODULE=$FDSEDITION
 
 export FDSOS=_linux_64
 export INSTALLDIR=FDS/$FDSEDITION
 export MISCTO=LIB64
-export COMPTO=INTELLIBS
+export COMPTO=INTEL
 
 $fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh

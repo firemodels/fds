@@ -4,13 +4,13 @@
 
 \label{HGL:Chapter}
 
-FDS, like any CFD model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for all the data presented in this chapter.
+FDS, like any CFD-based fire model, does not perform a direct calculation of the HGL temperature or height. These are constructs unique to two-zone models. Nevertheless, FDS does make predictions of gas temperature at the same locations as the thermocouples in the experiments, and these values can be reduced in the same manner as the experimental measurements to produce an ``average'' HGL temperature and height.  Regardless of the validity of the reduction method, the FDS predictions of the HGL temperature and height ought to be representative of the accuracy of its predictions of the individual thermocouple measurements that are used in the HGL reduction. The temperature measurements from all six test series are used to compute an HGL temperature and height with which to compare to FDS.  The same layer reduction method is used for all the data presented in this chapter.
 
 
 \section{HGL Reduction Method}
 \label{HGL_Reduction}
 
-Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a computational fluid dynamics (CFD) model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_{\rm u}$ as the upper layer temperature, $T_{\rm \ell}$ as the lower layer temperature, and $z_{\rm int}$ as the interface height. Compute the quantities:
+Fire protection engineers often need to estimate the location of the interface between the hot, smoke-laden upper layer and the cooler lower layer in a burning compartment.  Relatively simple fire models, often referred to as {\em two-zone models}, compute this quantity directly, along with the average temperature of the upper and lower layers.  In a CFD-based fire model like FDS, there are not two distinct zones, but rather a continuous profile of temperature. Nevertheless, there are methods that have been developed to estimate layer height and average temperatures from a continuous vertical profile of temperature. One such method~\cite{Janssens:JFS1992} is as follows: Consider a continuous function $T(z)$ defining temperature $T$ as a function of height above the floor $z$, where $z=0$ is the floor and $z=H$ is the ceiling. Define $T_{\rm u}$ as the upper layer temperature, $T_{\rm \ell}$ as the lower layer temperature, and $z_{\rm int}$ as the interface height. Compute the quantities:
 \begin{eqnarray*} (H-z_{\rm int})\; T_{\rm u} + z_{\rm int} \; T_{\rm \ell} = \int_0^H \; T(z) \; dz &=& I_1 \\
                   (H-z_{\rm int})\; \frac{1}{T_{\rm u}} + z_{\rm int} \; \frac{1}{T_{\rm \ell}} = \int_0^H \; \frac{1}{T(z)} \; dz &=& I_2 \end{eqnarray*}
 Solve for $z_{\rm int}$:
@@ -641,7 +641,7 @@ In all experiments, two vertical thermocouple arrays were placed along the cente
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_400_kW_HGL_Temp} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_400_kW_HGL_Height}
 \end{tabular*}
-\caption[NIST/NRC Corner Effects experiments, HGL temperature and height, corner experiments]
+\caption[NIST/NRC Corner Effects, HGL temperature and height, corner experiments]
 {NIST/NRC Corner Effects experiments, HGL temperature and height, corner experiments.}
 \label{NIST_NRC_Corner}
 \end{figure}
@@ -655,7 +655,7 @@ In all experiments, two vertical thermocouple arrays were placed along the cente
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_400_kW_HGL_Temp} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_400_kW_HGL_Height}
 \end{tabular*}
-\caption[NIST/NRC Corner Effects experiments, HGL temperature and height, wall experiments]
+\caption[NIST/NRC Corner Effects, HGL temperature and height, wall experiments]
 {NIST/NRC Corner Effects experiments, HGL temperature and height, wall experiments.}
 \label{NIST_NRC_Wall}
 \end{figure}
@@ -671,7 +671,7 @@ In all experiments, two vertical thermocouple arrays were placed along the cente
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_04_HGL_Temp} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_04_HGL_Height}
 \end{tabular*}
-\caption[NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 1-4]
+\caption[NIST/NRC Corner Effects, HGL temperature and height, cabinet experiments 1-4]
 {NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 1-4.}
 \label{NIST_NRC_Cabinet_1}
 \end{figure}
@@ -688,7 +688,7 @@ In all experiments, two vertical thermocouple arrays were placed along the cente
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_08_HGL_Temp} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_08_HGL_Height}
 \end{tabular*}
-\caption[NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 5-8]
+\caption[NIST/NRC Corner Effects, HGL temperature and height, cabinet experiments 5-8]
 {NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 5-8.}
 \label{NIST_NRC_Cabinet_2}
 \end{figure}
@@ -704,7 +704,7 @@ In all experiments, two vertical thermocouple arrays were placed along the cente
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_12_HGL_Temp} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_12_HGL_Height}
 \end{tabular*}
-\caption[NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 9-12]
+\caption[NIST/NRC Corner Effects, HGL temperature and height, cabinet experiments 9-12]
 {NIST/NRC Corner Effects experiments, HGL temperature and height, cabinet experiments 9-12.}
 \label{NIST_NRC_Cabinet_3}
 \end{figure}

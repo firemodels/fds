@@ -12,7 +12,6 @@ fi
 
 QUEUE=batch
 DEBUG=
-IB=
 nthreads=1
 resource_manager=
 walltime=
@@ -26,10 +25,8 @@ REGULAR=1
 BENCHMARK=1
 OOPT=
 POPT=
-
-if [ "$FDSNETWORK" == "infiniband" ] ; then
-  IB=ib
-fi
+INTEL=
+INTEL2=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -41,6 +38,7 @@ echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
 echo "-j - job prefix"
+echo "-J - use Intel MPI version of FDS"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
@@ -66,7 +64,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:dD:hj:L:m:o:O:P:q:r:Rsw:' OPTION
+while getopts 'bB:c:dD:hj:JL:m:o:O:P:q:r:Rsw:' OPTION
 do
 case $OPTION in
   b)
@@ -91,6 +89,10 @@ case $OPTION in
    ;;
   j)
    JOBPREFIX="-j $OPTARG"
+   ;;
+  J)
+   INTEL=i
+   INTEL2="-I"
    ;;
   L)
    BACKGROUND_LOAD="$OPTARG"
@@ -137,13 +139,8 @@ if [ "$POPT" != "" ]; then
   POPT="-O $POPT"
 fi
 
-IB=
-if [ "$FDSNETWORK" == "infiniband" ]; then
-  IB=ib
-fi
-
 export FDS=$SVNROOT/fds/Build/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export FDSMPI=$SVNROOT/fds/Build/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
+export FDSMPI=$SVNROOT/fds/Build/${INTEL}mpi_intel_$PLATFORM$DEBUG/fds_${INTEL}mpi_intel_$PLATFORM$DEBUG
 export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then
@@ -166,7 +163,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE $OOPT $POPT" 
+export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $INTEL2 $JOBPREFIX -e $FDSMPI $QUEUE $OOPT $POPT" 
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
