@@ -388,14 +388,14 @@ rm \$FDSMODULEtmp
 
 #--- create BASH startup file
 
-if [ "$MPI_VERSION" == "INTEL" ] ; then
 cat << BASH > \$BASHRCFDS
 #/bin/bash
 export PATH=\$FDS_root/bin:\\\$PATH
 BASH
-else
+
+if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\$FDS_root/bin:\$FDS_root/bin/openmpi_64/bin:\\\$PATH
+export PATH=\$FDS_root/bin/openmpi_64/bin:\\\$PATH
 export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
 BASH
 fi
@@ -403,13 +403,19 @@ fi
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
 export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
+#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" obtained from running
+#  grep -c processor /proc/cpuinfo
+export OMP_NUM_THREADS=4
 BASH
 fi
 
+if [ "$ostype" == "OSX" ] ; then
 cat << BASH >> \$BASHRCFDS
-# number of OpenMPI threads - set to no more than MIN(4,number of cores / 2)
+#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" obtained from running
+#  system_profiler SPHardwareDataType
 export OMP_NUM_THREADS=4
 BASH
+fi
 
 #--- create startup and readme files
 
