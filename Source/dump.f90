@@ -5355,7 +5355,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
                I = MIN( IBP1, MAX(0, DV%I + DV%GHOST_CELL_IOR(1) ) )
                J = MIN( JBP1, MAX(0, DV%J + DV%GHOST_CELL_IOR(2) ) )
                K = MIN( KBP1, MAX(0, DV%K + DV%GHOST_CELL_IOR(3) ) )
-
                VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
                                         DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,T,DT,NM)
 
@@ -5379,7 +5378,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                K_DEVICE_CELL_LOOP: DO K=DV%K1,DV%K2
                   J_DEVICE_CELL_LOOP: DO J=DV%J1,DV%J2
                      I_DEVICE_CELL_LOOP: DO I=DV%I1,DV%I2
-                        IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_DEVICE_CELL_LOOP
+                        IF (SOLID(CELL_INDEX(I,J,K))) THEN
+                            OB => OBSTRUCTION(OBST_INDEX_C(CELL_INDEX(I,J,K)))
+                            IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
+                        ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         NOT_FOUND = .FALSE.
                         VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
