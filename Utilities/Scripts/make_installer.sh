@@ -392,9 +392,9 @@ cat << BASH > \$BASHRCFDS
 #/bin/bash
 export PATH=\$FDS_root/bin:\\\$PATH
 BASH
+
 if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\$FDS_root/bin:\\\$PATH
 export PATH=\$FDS_root/bin/openmpi_64/bin:\\\$PATH
 export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
 BASH
