@@ -390,13 +390,14 @@ rm \$FDSMODULEtmp
 
 cat << BASH > \$BASHRCFDS
 #/bin/bash
-export PATH=\$FDS_root/bin:\\\$PATH
+FDSBINDIR=\$FDS_root/bin
+export PATH=\\\$FDSBINDIR:\\\$PATH
 BASH
 
 if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\$FDS_root/bin/openmpi_64/bin:\\\$PATH
-export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
+export PATH=\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 fi
 
@@ -408,7 +409,7 @@ fi
 
 if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
 BASH
 fi
 
