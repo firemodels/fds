@@ -390,32 +390,35 @@ rm \$FDSMODULEtmp
 
 cat << BASH > \$BASHRCFDS
 #/bin/bash
-export PATH=\$FDS_root/bin:\\\$PATH
+FDSBINDIR=\$FDS_root/bin
+export PATH=\\\$FDSBINDIR:\\\$PATH
 BASH
 
 if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\$FDS_root/bin/openmpi_64/bin:\\\$PATH
-export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
+export PATH=\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 fi
 
 if [ "$ostype" == "LINUX" ] ; then
+OMP_COMMAND="grep -c processor /proc/cpuinfo"
+else
+OMP_COMMAND="system_profiler SPHardwareDataType"
+fi
+
+if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
-#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" obtained from running
-#  grep -c processor /proc/cpuinfo
-export OMP_NUM_THREADS=4
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
 BASH
 fi
 
-if [ "$ostype" == "OSX" ] ; then
 cat << BASH >> \$BASHRCFDS
-#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" obtained from running
-#  system_profiler SPHardwareDataType
+#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" 
+#  obtained from running:
+#  \$OMP_COMMAND
 export OMP_NUM_THREADS=4
 BASH
-fi
 
 #--- create startup and readme files
 
