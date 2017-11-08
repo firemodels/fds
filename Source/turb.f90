@@ -1492,11 +1492,6 @@ REAL(EB), INTENT(IN) :: U_TAU,DZ,Z0,TMP_G,TMP_S,RHO,CP
 REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
 REAL(EB) :: PSI_H,L,ZP,Q3S,A,B,C,DET
 
-IF (ABS(TMP_S-TMP_G)<TWO_EPSILON_EB) THEN
-   H = 0._EB
-   RETURN
-ENDIF
-
 ! References:
 !
 ! Stoll, R., Porte-Agel, F. (2008) Large-Eddy Simulation of the Stable Atmospheric
