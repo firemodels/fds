@@ -379,6 +379,7 @@ INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =216 ! Size definition parameter. Max n
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 72 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
+   INTEGER :: IWC=0
    INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
@@ -480,6 +481,7 @@ TYPE IBM_REGFACE_TYPE
 END TYPE IBM_REGFACE_TYPE
 
 TYPE IBM_REGFACEZ_TYPE
+   INTEGER :: IWC=0
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
@@ -496,6 +498,7 @@ TYPE IBM_RCFACE_TYPE
 END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
+   INTEGER :: IWC=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
@@ -508,7 +511,7 @@ TYPE IBM_RCFACE_LST_TYPE
 END TYPE IBM_RCFACE_LST_TYPE
 
 TYPE IBM_EXIMFACE_TYPE
-   INTEGER :: LHFACE, UNKZ, IW=0
+   INTEGER :: LHFACE, UNKZ, IWC=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::       FLX
    REAL(EB) :: AREA,FN_H_S
