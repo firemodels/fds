@@ -674,7 +674,7 @@ By default, the diagnostics in the {\ct CHID.out} file are verbose.  When runnin
 \end{lstlisting}
 Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY\_ERROR'}, if necessary.
 
-To stop a calculation before its scheduled time, either kill the process, or preferably create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
+To stop a calculation before its scheduled time, create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
 
 Since calculations can be hours or days long, there is a restart feature in FDS. Details of how to use this feature are given in Section~\ref{info:restart}. Briefly, specify at the beginning of calculation how often a ``restart'' file should be saved. Should something happen to disrupt the calculation, like a power outage, the calculation can be restarted from the time the last restart file was saved.
 
@@ -1082,7 +1082,7 @@ Notes: An unspecified value will result in the default number of threads (see \r
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
-Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct .FALSE.}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information that is printed to the diagnostic output files. By default, its value is {\ct .TRUE.} for MPI jobs involving 50 or less processes, and {\ct .FALSE.} for larger jobs.
+Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct .FALSE.}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct .TRUE.} for MPI jobs involving 50 or less processes, and {\ct .FALSE.} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -1975,26 +1975,16 @@ In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundari
 \subsubsection{Periodic Vents}
 \label{sec:periodic}
 
-A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following (valid for a single mesh case):
+A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the opposite side of the domain.  If the domain consists of only a single mesh, the lines:
 \begin{lstlisting}
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
 \end{lstlisting}
-In this example, the entire {\ct XMIN} boundary is periodic with the {\ct XMAX} boundary.
-
-For multi-mesh cases with {\ct PERIODIC} boundaries the {\ct VENT} planes must be specified using {\ct PBX}, {\ct PBY}, or {\ct PBZ}.  If $x_{\si{min}}=0$ and $x_{\si{max}}=1$, for example, use
+designate that the simulation is periodic in the $x$-direction. For multi-mesh domains where {\ct PERIODIC} boundary conditions are applied, the entire domain must be a single large block and the {\ct VENT} planes must be specified using {\ct PBX}, {\ct PBY}, or {\ct PBZ}.  If $x_{\si{min}}=0$ and $x_{\si{max}}=1$, for example, use
 \begin{lstlisting}
 &VENT PBX=0, SURF_ID='PERIODIC' /
 &VENT PBX=1, SURF_ID='PERIODIC' /
 \end{lstlisting}
-Also, you must explicitly tell FDS that two non-connected meshes need to share information. To do this, use the parameter {\ct PERIODIC\_MESH\_IDS(1:3)} on the appropriate {\ct MESH} lines. For example, suppose you have three meshes side by side. Mesh~1 and Mesh~3 have periodic boundaries, but they do not physically touch each other. Provide this information as follows:
-\begin{lstlisting}
-&MESH ID='mesh1', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh3' /
-&MESH ID='mesh2', IJK=..., XB=... /
-&MESH ID='mesh3', IJK=..., XB=..., PERIODIC_MESH_IDS(1)='mesh1' /
-\end{lstlisting}
-Note that {\ct PERIODIC\_MESH\_IDS} is an array of three character strings because it is possible to have three periodic boundaries, one in each coordinate direction. In cases where the number of meshes is not large, say a few dozen, you can set {\ct PROCESS\_ALL\_MESHES} to {\ct .TRUE.} on the {\ct MISC} line, in which case FDS will store the geometry of all meshes for all MPI processes, and in which case you need not specify {\ct PERIODIC\_MESH\_IDS}.
-
 For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
@@ -9055,7 +9045,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_PROCESS}         & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct N\_THREADS}           & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }            & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct PERIODIC\_MESH\_IDS}  & Character Array               & Section~\ref{sec:periodic}                &    &                  \\ \hline
 {\ct RGB}                  & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct XB(6)}                & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
