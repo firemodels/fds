@@ -1430,6 +1430,8 @@ INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 REAL(EB) :: IDX, AF, VAL, TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
+REAL(EB) :: SUM_FH(2),MEAN_FH,SUM_XH(2),MEAN_XH
+INTEGER :: IERR
 
 ! CHARACTER(30) :: FILE_NAME
 ! INTEGER :: ICC, IERR
@@ -1585,6 +1587,15 @@ CASE(GLMAT_WHLDOM)
       MTYPE  =  2
    ENDIF
 
+   IF (H_MATRIX_INDEFINITE) THEN
+      SUM_FH(1:2) = SUM(F_H(1:NUNKH_LOCAL))
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_FH(1),SUM_FH(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+      MEAN_FH = SUM_FH(2)/REAL(NUNKH_TOTAL,EB)
+      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(RHS), SUM(RHS)=',MEAN_FH,SUM_FH(2)
+      ! Substract Mean:
+      F_H(:) = F_H(:) - MEAN_FH
+   ENDIF
+
    ! WRITE(LU_ERR,*) 'SUM_FH=',SUM(F_H),H_MATRIX_INDEFINITE
 
    !.. Back substitution and iterative refinement
@@ -1599,6 +1610,15 @@ CASE(GLMAT_WHLDOM)
 #endif
    IF (ERROR /= 0) &
    WRITE(0,*) 'GLMAT_SOLVER_H: The following ERROR was detected: ', ERROR
+
+   IF (H_MATRIX_INDEFINITE) THEN
+      SUM_XH(1:2) = SUM(X_H(1:NUNKH_LOCAL))
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_XH(1),SUM_XH(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+      MEAN_XH = SUM_XH(2)/REAL(NUNKH_TOTAL,EB)
+      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(H), SUM(H)=',MEAN_XH,SUM_XH(2)
+      ! Substract Mean:
+      X_H(:) = X_H(:) - MEAN_XH
+   ENDIF
 
    ! WRITE(LU_ERR,*) 'SUM_XH=',SUM(X_H),SUM(A_H(1:IA_H(NUNKH_LOCAL+1)))
    !
@@ -1749,9 +1769,15 @@ SUBROUTINE GLMAT_SOLVER_SETUP_H(STAGE_FLAG)
 INTEGER, INTENT(IN) :: STAGE_FLAG
 
 ! Local Variables:
+LOGICAL :: SUPPORTED_MESH=.TRUE.
 
 SELECT CASE(STAGE_FLAG)
 CASE(1)
+
+   ! Check for unsupported mesh configurations:
+   CALL CHECK_UNSUPPORTED_MESH(SUPPORTED_MESH)
+   IF (.NOT.SUPPORTED_MESH) RETURN
+
    ITERATE_PRESSURE = .TRUE.  ! Although there is no need to do pressure iterations to drive down velocity error
                               ! on wall cells (i.e. the solution should give the right unique dH/dxn), leave it
                               ! .TRUE. to write out velocity error diagnostics.
@@ -1827,6 +1853,186 @@ END SELECT
 RETURN
 END SUBROUTINE GLMAT_SOLVER_SETUP_H
 
+
+! ---------------------------- CHECK_UNSUPPORTED_MESH -------------------------------
+
+SUBROUTINE CHECK_UNSUPPORTED_MESH(SUPPORTED_MESH)
+
+USE MPI
+USE GLOBAL_CONSTANTS, ONLY : N_MPI_PROCESSES
+USE TRAN, ONLY : TRANS
+
+LOGICAL, INTENT(OUT) :: SUPPORTED_MESH
+
+INTEGER :: NM,TRN_ME(2),IERR
+REAL(EB):: DX_P(IAXIS:KAXIS)
+INTEGER :: COUNT
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_GRAPH,DSETS
+LOGICAL, ALLOCATABLE, DIMENSION(:)   :: COUNTED
+INTEGER, ALLOCATABLE, DIMENSION(:)   :: DIRI_SET,MESH_LIST
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+
+INTEGER :: NOM,IW,NMLOC,NSETS,ISET,PIVOT,PIVOT_LOC,MESHES_LEFT,CTMSH_LO,CTMSH_HI
+
+SUPPORTED_MESH = .TRUE.
+
+! 1. Stretched grids which is untested:
+TRN_ME(1:2) = 0
+MESH_LOOP_TRN : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   TRN_ME(1) = TRN_ME(1) + TRANS(NM)%NOCMAX
+ENDDO MESH_LOOP_TRN
+TRN_ME(2)=TRN_ME(1)
+IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (TRN_ME(2) > 0) THEN ! There is a TRNX, TRNY or TRNZ line defined for stretched grids. Not Unsupported.
+   IF (MYID == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Stretched grids currently unsupported.'
+   SUPPORTED_MESH = .FALSE.
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+
+IF (NMESHES == 1) RETURN
+
+! 2. Two different cell sizes in mesh (i.e. different refinement levels):
+NM = 1
+IF (MYID==PROCESS(NM)) THEN
+   CALL POINT_TO_MESH(NM)
+   DX_P(IAXIS) = DX(1)
+   DX_P(JAXIS) = DY(1)
+   DX_P(KAXIS) = DZ(1)
+ENDIF
+IF (N_MPI_PROCESSES > 1) CALL MPI_BCAST(DX_P,3,MPI_DOUBLE_PRECISION,PROCESS(NM),MPI_COMM_WORLD,IERR)
+TRN_ME(1:2) = 0
+MESH_LOOP_CELL : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   IF(ABS(DX_P(IAXIS)-DX(1)) > 10._EB*TWO_EPSILON_EB) TRN_ME(1) = TRN_ME(1) + 1
+   IF(ABS(DX_P(JAXIS)-DY(1)) > 10._EB*TWO_EPSILON_EB) TRN_ME(1) = TRN_ME(1) + 1
+   IF(ABS(DX_P(KAXIS)-DZ(1)) > 10._EB*TWO_EPSILON_EB) TRN_ME(1) = TRN_ME(1) + 1
+ENDDO MESH_LOOP_CELL
+TRN_ME(2)=TRN_ME(1)
+IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (TRN_ME(2) > 0) THEN ! Meshes at different refinement levels. Not Unsupported.
+   IF (MYID == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Meshes at different refinement levels unsupported.'
+   SUPPORTED_MESH = .FALSE.
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+
+! 3. Two (or more) disjoint domains, where at least one has all Neumann BCs and one has some Dirichlet bcs.
+! This is a topological problem that would require different Matrix types (i.e. one positive definite and one
+! indefinite), which would require separate solutions.
+! A possible approach to look at is to solve the whole system as indefinite, and then substract a constant in
+! zones with Dirichlet condition, s.t. the value of H is zero in open boundaries.
+
+! 1. Build global lists of other connected meshes:
+ALLOCATE(MESH_GRAPH(1:6,NMESHES)); MESH_GRAPH(:,:) = 0
+MESH_LOOP_GRAPH : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   COUNT=0
+   DO NOM=1,NMESHES
+      IF(MESHES(NM)%CONNECTED_MESH(NOM))THEN
+         COUNT=COUNT+1
+         MESH_GRAPH(COUNT,NM) = NOM
+      ENDIF
+   ENDDO
+ENDDO MESH_LOOP_GRAPH
+IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,MESH_GRAPH,6*NMESHES,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+! 2. Build sets of disjoint meshes:
+! Number of sets:
+ALLOCATE(COUNTED(NMESHES));  COUNTED(1:NMESHES)  =.FALSE.
+ALLOCATE(DSETS(2,NMESHES));  DSETS(1:2,1:NMESHES)= 0
+ALLOCATE(MESH_LIST(NMESHES));MESH_LIST(1:NMESHES)= 0
+NSETS    = 1
+CTMSH_LO = 1
+CTMSH_HI = CTMSH_LO
+PIVOT    = 1
+COUNTED(PIVOT)       = .TRUE.
+DSETS(LOW_IND,NSETS) =  CTMSH_LO
+MESH_LIST(CTMSH_LO)  =  PIVOT
+MESHES_LEFT          = NMESHES-1
+DISJ_LOOP : DO
+
+   DO NMLOC=1,6
+      PIVOT_LOC = MESH_GRAPH(NMLOC,PIVOT)
+      IF(PIVOT_LOC==0) CYCLE ! Cycle is other mesh not present.
+      IF(COUNTED(PIVOT_LOC)) CYCLE ! Cycle if mesh has been already added to mesh list.
+      ! Add mesh to list:
+      CTMSH_HI = CTMSH_HI + 1
+      COUNTED(PIVOT_LOC)   = .TRUE.
+      MESH_LIST(CTMSH_HI)  =  PIVOT_LOC
+      MESHES_LEFT          = MESHES_LEFT-1
+   ENDDO
+
+   ! No more new meshes on the set, increase NSETS by one and start again:
+   IF (CTMSH_LO == CTMSH_HI) THEN
+      DSETS(HIGH_IND,NSETS) = CTMSH_HI
+      IF (MESHES_LEFT==0) EXIT DISJ_LOOP ! Done with all meshes, finish and exit.
+      DO NM=1,NMESHES
+         IF(.NOT.COUNTED(NM))THEN
+            NSETS=NSETS+1
+            CTMSH_LO = CTMSH_LO + 1
+            CTMSH_HI = CTMSH_LO
+            PIVOT    = NM
+            COUNTED(PIVOT)       = .TRUE.
+            DSETS(LOW_IND,NSETS) = CTMSH_LO
+            MESH_LIST(CTMSH_LO)  = PIVOT
+            MESHES_LEFT          = MESHES_LEFT-1
+            CYCLE DISJ_LOOP ! This is such that we don't increase CTMSH_LO when starting a new set.
+         ENDIF
+      ENDDO
+   ENDIF
+
+   ! Increase CTMSH_LO by one:
+   CTMSH_LO = CTMSH_LO + 1
+   PIVOT    = MESH_LIST(CTMSH_LO)
+
+ENDDO DISJ_LOOP
+
+! If only one set, topology supported, return:
+IF (NSETS==1) THEN
+   DEALLOCATE(MESH_GRAPH,DSETS,COUNTED)
+   RETURN
+ENDIF
+
+! 3. Check for each set of disjoint meshes that all of them have at least one Pressure Dirichlet boundary condition
+! (open boundary). If not, return SETUP stop:
+ALLOCATE(DIRI_SET(NSETS)); DIRI_SET(:)=0
+SETS_LOOP : DO ISET=1,NSETS
+   DO NMLOC=DSETS(LOW_IND,ISET),DSETS(HIGH_IND,ISET)
+      NM=MESH_LIST(NMLOC)
+      IF (MYID/=PROCESS(NM)) CYCLE
+      CALL POINT_TO_MESH(NM)
+
+      ! Now for Mesh NM test for Dirichlet Pressure external BCs. Assume External Dirichlet is only related to
+      ! OPEN_BOUNDARY condition.
+      DO IW=1,N_EXTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF (WC%PRESSURE_BC_INDEX==DIRICHLET .AND. WC%BOUNDARY_TYPE==OPEN_BOUNDARY) DIRI_SET(ISET) = 1
+      ENDDO
+   ENDDO
+ENDDO SETS_LOOP
+
+IF(N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,DIRI_SET,NSETS,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+! IF (MYID==0) THEN
+!    WRITE(LU_ERR,*) ' '
+!    WRITE(LU_ERR,*) 'NSETS=',NSETS
+!    DO ISET=1,NSETS
+!       WRITE(LU_ERR,*) 'ISET=',ISET,DSETS(HIGH_IND,ISET)-DSETS(LOW_IND,ISET)+1,DIRI_SET(ISET)
+!    ENDDO
+! ENDIF
+
+! Finally do test:
+IF (ANY(DIRI_SET(1:NSETS) == 0)) THEN
+   IF (MYID==0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Unsupported disjoint domains present on the model.'
+   DEALLOCATE(MESH_GRAPH,DSETS,COUNTED,DIRI_SET)
+   SUPPORTED_MESH = .FALSE.
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+
+DEALLOCATE(MESH_GRAPH,DSETS,COUNTED,DIRI_SET)
+RETURN
+END SUBROUTINE CHECK_UNSUPPORTED_MESH
 
 ! ----------------------------- COPY_H_OMESH_TO_MESH --------------------------------
 
