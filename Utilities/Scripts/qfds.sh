@@ -247,10 +247,12 @@ shift $(($OPTIND-1))
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^parse options^^^^^^^^^^^^^^^^^^^^^^^^^
 
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  walltime=99-99:99:99
-else
-  walltime=999:0:0
+if [ "$walltime" == "" ]; then
+    if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+	walltime=99-99:99:99
+    else
+	walltime=999:0:0
+    fi
 fi
 if [ "$nodelist" != "" ]; then
   nodelist="-l nodes=$nodelist"
@@ -365,6 +367,10 @@ let "nodes=($nmpi_processes-1)/$nmpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
   nodes=1
 fi
+if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+    nodes=""
+fi
+
 
 # define processes per node
 
@@ -542,6 +548,7 @@ fi
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   QSUB="sbatch -p $queue --ignore-pbs"
+  MPIRUN='srun'
 fi
 
 # Set walltime parameter only if walltime is specified as input argument
@@ -567,10 +574,16 @@ if [ "$queue" != "none" ]; then
 #SBATCH -o $outlog
 #SBATCH -p $queue
 #SBATCH -n $nmpi_processes
-#SBATCH --nodes=$nodes
+####SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
 $SLURM_MEM
 EOF
+    if [ "$walltimestring_slurm" != "" ]; then
+      cat << EOF >> $scriptfile
+#SBATCH $walltimestring_slurm
+EOF
+    fi
+
   else
     cat << EOF >> $scriptfile
 #PBS -N $JOBPREFIX$TITLE
