@@ -1683,11 +1683,13 @@ SUBROUTINE CCIBM_SET_DATA
 
 USE MPI
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+USE TRAN, ONLY : TRANS
 
 ! Local Variables:
 INTEGER :: NM,IERR,ICALL
 REAL(EB):: LX,LY,LZ,MAX_DIST,MAX_DIST_AUX
-REAL(EB) :: TNOW,TDEL
+REAL(EB):: TNOW,TDEL
+INTEGER :: TRN_ME(1:2)
 
 INTEGER :: ICF
 CHARACTER(80) :: FN_CCTIME
@@ -1696,12 +1698,26 @@ CHARACTER(200)::TCFORM
 IF (N_GEOMETRY==0 .AND. .NOT.(PERIODIC_TEST==103 .OR. PERIODIC_TEST==11)) THEN
    IF (MYID==0) THEN
       WRITE(LU_ERR,*) ' '
-      WRITE(LU_ERR,*) 'Error : &MISC CC_IBM=.TRUE., but no &GEOM namelist defined on input file.'
+      WRITE(LU_ERR,*) 'CCIBM Setup Error : &MISC CC_IBM=.TRUE., but no &GEOM namelist defined on input file.'
       WRITE(LU_ERR,*) ' '
    ENDIF
    STOP_STATUS = SETUP_STOP
    RETURN
 ENDIF
+
+! Stretched grids not supported:
+TRN_ME(1:2) = 0
+MESH_LOOP_TRN : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   TRN_ME(1) = TRN_ME(1) + TRANS(NM)%NOCMAX
+ENDDO MESH_LOOP_TRN
+TRN_ME(2)=TRN_ME(1)
+IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (TRN_ME(2) > 0) THEN ! There is a TRNX, TRNY or TRNZ line defined for stretched grids. Not Unsupported.
+   IF (MYID == 0) WRITE(LU_ERR,*) 'CCIBM Setup Error : Stretched grids currently unsupported.'
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+
 
 MAX_DIST=0._EB
 ! Loop Meshes:

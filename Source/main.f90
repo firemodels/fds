@@ -246,6 +246,7 @@ ENDIF
 ! Initialize GLMat solver for H:
 IF (GLMAT_SOLVER) THEN
    CALL GLMAT_SOLVER_SETUP_H(1)
+   CALL STOP_CHECK(1)
    CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
    CALL GLMAT_SOLVER_SETUP_H(2)
    CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,) -> HS.
