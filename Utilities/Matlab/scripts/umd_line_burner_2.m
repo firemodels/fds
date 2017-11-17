@@ -330,6 +330,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_Chi_r_ramp_check']);
@@ -369,6 +370,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_eta']);
@@ -404,6 +406,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_N2_ramp_check']);
@@ -435,6 +438,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_rad_heat_flux']);
@@ -469,6 +473,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_flame_height']);
@@ -501,6 +506,7 @@ if is_case_run
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[pltdir,fuel_name{i_fuel},'_global_Chi_R']);
