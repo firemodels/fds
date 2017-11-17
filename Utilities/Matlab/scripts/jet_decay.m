@@ -95,6 +95,7 @@ PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/jet_decay'])

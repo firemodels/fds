@@ -355,6 +355,7 @@ for j=2:length(Q);
 
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[PDF_Paper_Width Scat_Paper_Height]);
         set(gcf,'Position',[0 0 PDF_Paper_Width Scat_Paper_Height]);
         display(['scatplot ',num2str(j),'...'])

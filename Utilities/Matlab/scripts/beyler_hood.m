@@ -187,6 +187,7 @@ for ns = 1:N_Species
    % print to pdf
    set(gcf,'Visible',Figure_Visibility);
    set(gcf,'Units',Paper_Units);
+   set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
    set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
    plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];

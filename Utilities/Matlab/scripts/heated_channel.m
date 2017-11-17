@@ -145,6 +145,7 @@ addverstr(a1,Git_Filename,'semilogx')
 
 set(f1,'Visible',Figure_Visibility);
 set(f1,'Units',Paper_Units)
+set(f1,'PaperUnits',Paper_Units);
 set(f1,'PaperSize',[Paper_Width Paper_Height]);
 set(f1,'Position',[0 0 Paper_Width Paper_Height]);
 print(f1,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
@@ -162,6 +163,7 @@ addverstr(a2,Git_Filename,'semilogx')
 
 set(f2,'Visible',Figure_Visibility);
 set(f2,'Units',Paper_Units)
+set(f2,'PaperUnits',Paper_Units);
 set(f2,'PaperSize',[Paper_Width Paper_Height]);
 set(f2,'Position',[0 0 Paper_Width Paper_Height]);
 print(f2,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
