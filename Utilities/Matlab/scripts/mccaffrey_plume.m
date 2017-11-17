@@ -117,6 +117,7 @@ for k=1:length(resolution)
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[plotdir,['McCaffrey_Velocity_Correlation_',resolution{k}]])
@@ -171,6 +172,7 @@ for k=1:length(resolution)
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
     print(gcf,'-dpdf',[plotdir,['McCaffrey_Temperature_Correlation_',resolution{k}]])
@@ -247,6 +249,7 @@ addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'McCaffrey_Velocity_Profile_Plume'])
@@ -315,6 +318,7 @@ addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'McCaffrey_Velocity_Profile_Intermittent'])
@@ -385,6 +389,7 @@ addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'McCaffrey_Velocity_Profile_Flame'])

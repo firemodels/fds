@@ -53,6 +53,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
@@ -96,6 +97,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
@@ -139,6 +141,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
@@ -185,6 +188,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
@@ -228,6 +232,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
@@ -271,6 +276,7 @@ for predc={'Prescribed','Predicted'},
         set(gca,'FontSize',Label_Font_Size)
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'Units',Paper_Units);
+        set(gcf,'PaperUnits',Paper_Units);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
         text(.05,.92,['Waterloo Methanol ',pred],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')

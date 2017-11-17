@@ -113,6 +113,7 @@ text(.295,1.25,'\eta=-1/3','FontSize',Label_Font_Size,'FontName',Font_Name)
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,'McCaffrey_Velocity_Correlation'])
@@ -139,6 +140,7 @@ text(.18,125,'\eta=-5/3','FontSize',Label_Font_Size,'FontName',Font_Name)
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,'McCaffrey_Temperature_Correlation'])
