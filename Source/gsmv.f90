@@ -1506,6 +1506,7 @@ ENDIF
 ON_BOX_PLANE=-1
 END FUNCTION ON_BOX_PLANE
 
+#ifdef MISC_GSMV_GEOM
 !  ------------------ RANK3 ------------------------
 
 SUBROUTINE RANK3(V1,V2,V3,I1,I2,I3)
@@ -1639,41 +1640,6 @@ NEDGES = ITO
 
 END SUBROUTINE FACES2EDGES
 
-!  ------------------ IN_BOX2 ------------------------
-
-INTEGER FUNCTION IN_BOX2(XB,V)
-REAL(EB) :: XB(6), V(3)
-
-IF (XB(1)<V(1) .AND.V(1)<XB(2) .AND.&
-   XB(3)<V(2) .AND.V(2)<XB(4) .AND.&
-   XB(5)<V(3) .AND.V(3)<XB(6)) THEN
-   IN_BOX2=1
-   RETURN
-ENDIF
-IN_BOX2=0
-END FUNCTION
-
-!  ------------------ BOXTRIANGLE ------------------------
-
-INTEGER FUNCTION BOXTRIANGLE(XB,V1,V2,V3)
-
-! determine if a box XB intersects with a triangle (V1, V2, V3)
-
-REAL(EB), INTENT(IN) :: XB(6), V1(3), V2(3), V3(3)
-
-IF (ON_BOX_PLANE(XB,V1,V2,V3)==-1) THEN
-   BOXTRIANGLE=0
-   RETURN
-ENDIF
-IF (IN_BOX2(XB,V1)==1 .OR. IN_BOX2(XB,V2)==1 .OR. IN_BOX2(XB,V3)==1) THEN
-   BOXTRIANGLE=1
-   RETURN
-ENDIF
-
-BOXTRIANGLE=0
-
-END FUNCTION BOXTRIANGLE
-
 !  ------------------ CLASSIFY_GEOM ------------------------
 
 SUBROUTINE CLASSIFY_GEOM(XGRID,NX,YGRID,NY,ZGRID,NZ,FACES,NFACES,VERTS,NVERTS,GEOM_STATE)
@@ -1711,6 +1677,42 @@ DO I = 1, NX-1
 ENDDO
 
 END SUBROUTINE CLASSIFY_GEOM
+#endif
+
+!  ------------------ IN_BOX2 ------------------------
+
+INTEGER FUNCTION IN_BOX2(XB,V)
+REAL(EB) :: XB(6), V(3)
+
+IF (XB(1)<V(1) .AND.V(1)<XB(2) .AND.&
+   XB(3)<V(2) .AND.V(2)<XB(4) .AND.&
+   XB(5)<V(3) .AND.V(3)<XB(6)) THEN
+   IN_BOX2=1
+   RETURN
+ENDIF
+IN_BOX2=0
+END FUNCTION
+
+!  ------------------ BOXTRIANGLE ------------------------
+
+INTEGER FUNCTION BOXTRIANGLE(XB,V1,V2,V3)
+
+! determine if a box XB intersects with a triangle (V1, V2, V3)
+
+REAL(EB), INTENT(IN) :: XB(6), V1(3), V2(3), V3(3)
+
+IF (ON_BOX_PLANE(XB,V1,V2,V3)==-1) THEN
+   BOXTRIANGLE=0
+   RETURN
+ENDIF
+IF (IN_BOX2(XB,V1)==1 .OR. IN_BOX2(XB,V2)==1 .OR. IN_BOX2(XB,V3)==1) THEN
+   BOXTRIANGLE=1
+   RETURN
+ENDIF
+
+BOXTRIANGLE=0
+
+END FUNCTION BOXTRIANGLE
 
 !  ------------------ DISTANCE3 ------------------------
 

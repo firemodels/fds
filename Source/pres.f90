@@ -1374,11 +1374,9 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NCVARS, GET_H_CUTF
                              JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, COPY_CC_UNKH_TO_HS, &
                              COPY_CC_HS_TO_UNKH
 
-#ifdef WITH_PARDISO
- USE MKL_PARDISO
-#elif WITH_CLUSTER_SPARSE_SOLVER
- USE MKL_CLUSTER_SPARSE_SOLVER
-#endif /* WITH_PARDISO */
+#ifdef WITH_MKL
+USE MKL_CLUSTER_SPARSE_SOLVER
+#endif /* WITH_MKL */
 
 IMPLICIT NONE
 
@@ -1423,7 +1421,7 @@ USE MPI
 
 ! Local Variables:
 INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 INTEGER :: PERM(1)
 #endif
 INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K
@@ -1601,10 +1599,9 @@ CASE(GLMAT_WHLDOM)
    !.. Back substitution and iterative refinement
    IPARM(8) =  0 ! max numbers of iterative refinement steps
    PHASE    = 33 ! only solving
-#ifdef WITH_PARDISO
-   CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
-              A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-#elif WITH_CLUSTER_SPARSE_SOLVER
+!   CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
+!              A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+#ifdef WITH_MKL
    CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
                 A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
 #endif
@@ -2264,7 +2261,7 @@ USE MPI
 
 ! Local Variables:
 INTEGER :: INNZ, IROW, JCOL
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 INTEGER :: PHASE, PERM(1)
 INTEGER :: I
 #endif
@@ -2280,9 +2277,8 @@ MNUM   = 1
 ALLOCATE(IPARM(64)); IPARM(:) = 0
 
 IPARM(1) = 1   ! no solver default
-#ifdef WITH_PARDISO
-IPARM(2) = 2   ! fill-in reordering from METIS
-#elif WITH_CLUSTER_SPARSE_SOLVER
+! Pardiso: IPARM(2) = 2   ! fill-in reordering from METIS
+#ifdef WITH_MKL
 IPARM(2) = 3   ! Parallel fill-in reordering from METIS
 #endif
 IPARM(4) = 0   ! no iterative-direct algorithm
@@ -2360,40 +2356,41 @@ CASE(GLMAT_WHLDOM)
    NUNKH_TOTAL = sum(NUNKH_TOT(1:NMESHES))
 
    ALLOCATE(PT_H(64))
-#ifdef WITH_PARDISO
+
+   ! PARDISO:
    ! Initialize solver pointer for H matrix solves:
-   DO I=1,64
-     PT_H(I)%DUMMY = 0
-   ENDDO
+   ! DO I=1,64
+   !   PT_H(I)%DUMMY = 0
+   ! ENDDO
 
    ! Reorder and Symbolic factorization:
-   PHASE = 11
-   CALL PARDISO (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
-       A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-
-   IF (ERROR /= 0) THEN
-      IF (MYID==0) &
-      WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
-      ! Some error - stop flag for CALL STOP_CHECK(1).
-      STOP_STATUS = SETUP_STOP
-      RETURN
-   END IF
+   ! PHASE = 11
+   ! CALL PARDISO (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
+   !     A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+   !
+   ! IF (ERROR /= 0) THEN
+   !    IF (MYID==0) &
+   !    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
+   !    ! Some error - stop flag for CALL STOP_CHECK(1).
+   !    STOP_STATUS = SETUP_STOP
+   !    RETURN
+   ! END IF
 
    ! Numerical Factorization.
-   PHASE = 22 ! only factorization
-   CALL PARDISO (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
-     A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+   ! PHASE = 22 ! only factorization
+   ! CALL PARDISO (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
+   !   A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+   !
+   ! IF (ERROR /= 0) THEN
+   !    IF (MYID==0) &
+   !    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
+   !    ! Some error - stop flag for CALL STOP_CHECK(1).
+   !    STOP_STATUS = SETUP_STOP
+   !    RETURN
+   ! ENDIF
 
-   IF (ERROR /= 0) THEN
-      IF (MYID==0) &
-      WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
-      ! Some error - stop flag for CALL STOP_CHECK(1).
-      STOP_STATUS = SETUP_STOP
-      RETURN
-   ENDIF
 
-
-#elif WITH_CLUSTER_SPARSE_SOLVER
+#ifdef WITH_MKL
    ! Initialize solver pointer for H matrix solves:
    DO I=1,64
      PT_H(I)%DUMMY = 0
@@ -2427,7 +2424,7 @@ CASE(GLMAT_WHLDOM)
 
 #else
    IF (MYID==0) WRITE(LU_ERR,'(A)') &
-   'Error: MKL SPARSE_SOLVER compile flag was not defined for PRES_ON_WHOLE_DOMAIN=.FALSE. and GLMAT solver.'
+   'Error: MKL Library compile flag was not defined for PRES_ON_WHOLE_DOMAIN=.FALSE. and GLMAT solver.'
    ! Some error - stop flag for CALL STOP_CHECK(1).
    STOP_STATUS = SETUP_STOP
    RETURN
@@ -3916,7 +3913,7 @@ USE MPI
 
 ! Local variables:
 INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR, MSGLVL
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 INTEGER :: PERM(1)
 #endif
 
@@ -3936,13 +3933,13 @@ IF (GLMAT_SETUP_FLAG == GLMAT_WHLDOM) THEN
 
    ! Finalize Pardiso:
    PHASE = -1
-#ifdef WITH_PARDISO
-   CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
-        A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-#elif WITH_CLUSTER_SPARSE_SOLVER
+   ! PARDISO:
+   ! CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
+   !      A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+#ifdef WITH_MKL
    CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
         A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
 ENDIF
 

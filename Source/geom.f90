@@ -12,7 +12,7 @@
 
 
 ! MKL Solver, defined in makefile:
-#ifdef WITH_PARDISO
+#ifdef WITH_MKL
 !!! #include "mkl_pardiso.f90"
 #define __MKL_PARDISO_F90
 MODULE MKL_PARDISO_PRIVATE
@@ -64,7 +64,6 @@ MODULE MKL_PARDISO
   END INTERFACE
 END MODULE MKL_PARDISO
 
-#elif WITH_CLUSTER_SPARSE_SOLVER
 !!! #include "mkl_cluster_sparse_solver.f90"
 #define __MKL_CLUSTER_SPARSE_SOLVER_F90
 MODULE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
@@ -116,7 +115,7 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
   END SUBROUTINE CLUSTER_SPARSE_SOLVER_D_2D
   END INTERFACE
 END MODULE MKL_CLUSTER_SPARSE_SOLVER
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
 MODULE COMPLEX_GEOMETRY
 
@@ -127,11 +126,9 @@ USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CHECKREAD,CHECK_XB,GET_FILE_NUMBER,SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 
-#ifdef WITH_PARDISO
- USE MKL_PARDISO
-#elif WITH_CLUSTER_SPARSE_SOLVER
+#ifdef WITH_MKL
  USE MKL_CLUSTER_SPARSE_SOLVER
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
 IMPLICIT NONE
 REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
@@ -311,15 +308,15 @@ INTEGER, ALLOCATABLE, DIMENSION(:)   :: IA_Z, JA_Z
 REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_Z
 
 ! Internal solver memory pointer for scalars solver:
-#ifdef WITH_PARDISO
- TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE :: PT_Z(:)
-#elif WITH_CLUSTER_SPARSE_SOLVER
+! PARDISO:
+! TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE :: PT_Z(:)
+#ifdef WITH_MKL
  TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), ALLOCATABLE :: PT_Z(:)
 #else
  INTEGER, ALLOCATABLE :: PT_Z(:)
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 INTEGER, ALLOCATABLE :: IPARMZ( : ) ! SOLVER Control Parameters array.
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 INTEGER :: MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NRHSZ, ERRORZ, MSGLVLZ, PERMZ(1)
 #endif
 
@@ -347,13 +344,13 @@ REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: F_H
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: X_H
 
 ! Internal solver memory pointer:
-#ifdef WITH_PARDISO
- TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE :: PT_H(:)
-#elif WITH_CLUSTER_SPARSE_SOLVER
+! PARDISO
+! TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE :: PT_H(:)
+#ifdef WITH_MKL
  TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), ALLOCATABLE :: PT_H(:)
 #else
  INTEGER, ALLOCATABLE :: PT_H(:)
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 INTEGER, ALLOCATABLE :: IPARM( : ) ! SOLVER Control Parameters array, defined in GET_HLU_3D
 
 ! Maximum number of search planes for interpolation:
@@ -6125,18 +6122,18 @@ MATRIX_DIFF_IF : IF (IMP_REGION_FROM_MATRIX_DIFF) THEN
    ENDDO
    IA_Z(NUNKZ_LOCAL+1) = INNZ + 1
 
-#ifdef WITH_PARDISO
-   CALL SYMBLU_ZZ
+   ! PARDISO:
+   ! CALL SYMBLU_ZZ
    ! Numerical Factorization and Solve.
-   PHASEZ = 23
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
+   ! PHASEZ = 23
+   ! CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+   !      A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
 
    ! Release internal memory for scalar:
-   PHASEZ = -1
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
-#elif WITH_CLUSTER_SPARSE_SOLVER
+   ! PHASEZ = -1
+   ! CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+   !      A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, ERRORZ)
+#ifdef WITH_MKL
    CALL SYMBLU_ZZ
    ! Numerical Factorization and Solve.
    PHASEZ = 23
@@ -6147,13 +6144,7 @@ MATRIX_DIFF_IF : IF (IMP_REGION_FROM_MATRIX_DIFF) THEN
    PHASEZ = -1
    CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_RHO, RZ_RHO, MPI_COMM_WORLD, ERRORZ)
-
-#else
-   WRITE(LU_ERR,*) 'Can not solve implicitly continuity on cut-cell region.'
-   WRITE(LU_ERR,*) 'PARDISO/CLUSTER_SPARSE_SOLVER solver compile flag was not defined.'
-   ! Some error - stop flag.
-   RETURN
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
    ! Copy back to RHOP and CUT_CELL:
    CALL PUT_RHOVECTOR_3D
@@ -6282,30 +6273,28 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       ENDIF
    ENDIF
 
-#ifdef WITH_PARDISO
-
-   IF ( DNS .OR. (N==1) ) THEN
-      CALL SYMBLU_ZZ
-      ! Numerical Factorization:
-      PHASEZ = 22
-      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
-   ENDIF
+   ! PARDISO:
+   ! IF ( DNS .OR. (N==1) ) THEN
+   !    CALL SYMBLU_ZZ
+   !    ! Numerical Factorization:
+   !    PHASEZ = 22
+   !    CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+   !         A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
+   ! ENDIF
 
    ! Solve Phase
-   PHASEZ = 33
-   CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
+   ! PHASEZ = 33
+   ! CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+   !      A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
 
    ! Release internal memory for scalar:
-   IF ( DNS .OR. (N==N_TOTAL_SCALARS) ) THEN
-      PHASEZ = -1
-      CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
-   ENDIF
+   ! IF ( DNS .OR. (N==N_TOTAL_SCALARS) ) THEN
+   !    PHASEZ = -1
+   !    CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+   !         A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
+   ! ENDIF
 
-#elif WITH_CLUSTER_SPARSE_SOLVER
-
+#ifdef WITH_MKL
 
 ! WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A,I2.2,A)') "Matrix_",MYID,'_',N_MPI_PROCESSES,'_',NMESHES,".dat"
 ! OPEN(unit=33, file=TRIM(FILE_NAME), status='unknown')
@@ -6432,13 +6421,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
    !
    ! CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
    ! !STOP
-
-#else
-   WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
-   WRITE(LU_ERR,*) 'PARDISO/CLUSTER_SPARSE_SOLVER solver compile flag was not defined.'
-   ! Some error - stop flag.
-   RETURN
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
    ! Copy back to RHOZZP and CUT_CELL:
    CALL PUT_RHOZZVECTOR_SCALAR_3D(N)
@@ -7501,16 +7484,14 @@ RETURN
 END SUBROUTINE GET_RHOZZ_CCIMPREG_3D
 
 ! -------------------------------- SYMBLU_ZZ -----------------------------
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 
 SUBROUTINE SYMBLU_ZZ
 
 USE MPI
 
 ! Local Variables:
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
 INTEGER :: I
-#endif
 ! Now we invoke the MKL_CLUSTER_SPARSE_SOLVER for LU decomposition:
 NRHSZ   = 1
 MAXFCTZ = 1
@@ -7518,11 +7499,10 @@ MNUMZ   = 1
 
 ! Define CLUSTER_SPARSE_SOLVER control parameter vector iparmz:
 IPARMZ(1) = 1   ! no solver default
-#ifdef WITH_PARDISO
-IPARMZ(2) = 2   ! fill-in reordering from METIS
-#elif WITH_CLUSTER_SPARSE_SOLVER
+! PARDISO:
+! IPARMZ(2) = 2   ! fill-in reordering from METIS
+! CLUSTER_SPARSE_SOLVER:
 IPARMZ(2) = 3   ! Parallel fill-in reordering from METIS
-#endif
 IPARMZ(4) = 0   ! no iterative-direct algorithm
 IPARMZ(5) = 0   ! no user fill-in reducing permutation
 IPARMZ(6) = 0   ! =0 solution on the first n components of x
@@ -7549,17 +7529,17 @@ MSGLVLZ =  0 ! print statistical information
 ! Matrix type real non-symmetric:
 MTYPEZ=11
 
-#ifdef WITH_PARDISO
+! PARDISO:
 ! Initialize solver pointer for H matrix solves:
-DO I=1,64
-   PT_Z(I)%DUMMY = 0
-ENDDO
+! DO I=1,64
+!    PT_Z(I)%DUMMY = 0
+! ENDDO
 ! Reorder and Symbolic factorization:
-PHASEZ = 11
-CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
-             A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
+! PHASEZ = 11
+! CALL PARDISO(PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
+!              A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, ERRORZ)
 
-#elif WITH_CLUSTER_SPARSE_SOLVER
+! CLUSTER_SPARSE_SOLVER:
 ! Initialize solver pointer for H matrix solves:
 DO I=1,64
    PT_Z(I)%DUMMY = 0
@@ -7568,12 +7548,11 @@ ENDDO
 PHASEZ = 11
 CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
     A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
-#else
-WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
-WRITE(LU_ERR,*) 'PARDISO solver compile flag was not defined.'
+! No WITH_MKL:
+! WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
+! WRITE(LU_ERR,*) 'MKL library compile flag was not defined.'
 ! Some error - stop flag.
 RETURN
-#endif /* WITH_PARDISO */
 
 ! WRITE(*,*) 'Reordering ZZ completed ... '
 ! IF (ERROR /= 0) THEN
@@ -7585,7 +7564,7 @@ RETURN
 RETURN
 END SUBROUTINE SYMBLU_ZZ
 
-#endif /* #if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER) */
+#endif /* WITH_MKL */
 
 ! --------------------------- PUT_RHOZZVECTOR_SCALAR_3D --------------------------
 
@@ -9949,7 +9928,7 @@ USE MPI
 
 ! Local Variables:
 INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR, MSGLVL
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 INTEGER :: PERM(1)
 #endif
 INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K, X1AXIS, ICF, IFACE, NFACE
@@ -10091,23 +10070,24 @@ ENDIF
 IPARM(8) = 0 ! max numbers of iterative refinement steps
 PHASE = 33   ! Solve system back-forth substitution.
 TNOW=CURRENT_TIME()
-#ifdef WITH_PARDISO
+! PARDISO:
+! CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
+!      A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+! WRITE(LU_ERR,*) "POTENTIAL_FLOW PARDISO time=",CURRENT_TIME()-TNOW,ERROR
 
-CALL PARDISO(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
-     A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-WRITE(LU_ERR,*) "POTENTIAL_FLOW PARDISO time=",CURRENT_TIME()-TNOW,ERROR
-
-#elif WITH_CLUSTER_SPARSE_SOLVER
+#ifdef WITH_MKL
 CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
              A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
-WRITE(LU_ERR,*) "POTENTIAL_FLOW CLUSTER_SPARSE_SOLVER time=",CURRENT_TIME()-TNOW,ERROR
+IF (MYID==0) WRITE(LU_ERR,*) "POTENTIAL_FLOW CLUSTER_SPARSE_SOLVER time=",CURRENT_TIME()-TNOW,ERROR
 
 #else
-WRITE(LU_ERR,*) 'Can not solve Potential flow problem on domain.'
-WRITE(LU_ERR,*) 'PARDISO solver compile flag was not defined.'
+IF (MYID==0) THEN
+   WRITE(LU_ERR,*) 'Can not solve Potential flow problem on domain.'
+   WRITE(LU_ERR,*) 'MKL Library compile flag was not defined.'
+ENDIF
 ! Some error - stop flag.
 RETURN
-#endif /* WITH_PARDISO */
+#endif /* WITH_MKL */
 
 ! Use result to define potential flow velocities:
 ! Meshes Loop:
@@ -15253,14 +15233,16 @@ IF (DO_IMPLICIT_CCREGION) THEN
    ALLOCATE(PT_Z(64))
 ENDIF
 
-#if defined(WITH_PARDISO) || defined(WITH_CLUSTER_SPARSE_SOLVER)
+#ifdef WITH_MKL
 ! Do nothing.
 #else
-! Here neither PARDISO nor CLUSTER_SPARSE_SOLVER have been defined. Therefore we can't integrate implicitly the
+! Here WITH_MKL preprocessor flag has not been defined. Therefore we can't integrate implicitly the
 ! cut-cell region.
 IF (DO_IMPLICIT_CCREGION) THEN
-   WRITE(LU_ERR,*) 'Error: MKL SPARSE_SOLVER compile flag was not defined for DO_IMPLICIT_CCREGION=.TRUE. and'
-   WRITE(LU_ERR,*) 'implicit time integration of cut-cell region.'
+   IF (MYID==0) THEN
+      WRITE(LU_ERR,*) 'Error: MKL Library compile flag was not defined for DO_IMPLICIT_CCREGION=.TRUE. and'
+      WRITE(LU_ERR,*) 'implicit time integration of cut-cell region.'
+   ENDIF
    STOP_STATUS = SETUP_STOP
 ENDIF
 #endif
