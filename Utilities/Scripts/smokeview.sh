@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ssffile=
-SMV=smokeview
+SMOKEVIEW=smokeview
 RUNSCRIPT=-runscript
-SMVDIR=$(dirname "$0")
+SMOKEVIEWDIR=$(dirname "$0")
 
 while getopts 'd:e:s:' OPTION
 do
@@ -12,7 +12,7 @@ case $OPTION in
    dir="$OPTARG"
    ;;
   e)
-   SMV="$OPTARG"
+   SMOKEVIEW="$OPTARG"
    ;;
   s)
    RUNSCRIPT="-scriptfile $OPTARG"
@@ -26,9 +26,9 @@ in=${in%*.*}
 
 ssffile=$in.ssf
 
-notfound=`$SMV -help 2>&1 | tail -1 | grep "not found" | wc -l`
+notfound=`$SMOKEVIEW -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ];  then
-  echo "*** Error (fatal): The program $SMV is not available. Run aborted."
+  echo "*** Error (fatal): The program $SMOKEVIEW is not available. Run aborted."
   exit
 fi
 
@@ -42,7 +42,7 @@ if ! [ -e $ssffile ]; then
 fi
 
 
-echo $SMV $RUNSCRIPT $in
-source $SMVDIR/startXserver.sh
-$SMV $RUNSCRIPT $in
-source $SMVDIR/stopXserver.sh
+echo $SMOKEVIEW $RUNSCRIPT $in
+source $SMOKEVIEWDIR/startXserver.sh
+$SMOKEVIEW $RUNSCRIPT $in
+source $SMOKEVIEWDIR/stopXserver.sh
