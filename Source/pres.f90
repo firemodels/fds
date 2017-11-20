@@ -2404,7 +2404,7 @@ CASE(GLMAT_WHLDOM)
    IF (ERROR /= 0) THEN
       IF (MYID==0) THEN
       WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP CLUSTER_SOLVER Sym Factor: The following ERROR was detected: ', ERROR
-      IF(ERROR == -4) WRITE(LU_ERR,'(A)') 'This error is probably due to having one or more sealed compartments ',&
+      IF(ERROR == -4) WRITE(LU_ERR,'(A,A)') 'This error is probably due to having one or more sealed compartments ',&
       ' besides a compartment with/without open boundary. Currently only one pressure zone is supported.'
       ENDIF
       ! Some error - stop flag for CALL STOP_CHECK(1).
@@ -2418,8 +2418,11 @@ CASE(GLMAT_WHLDOM)
      A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, MPI_COMM_WORLD, ERROR)
 
    IF (ERROR /= 0) THEN
-      IF (MYID==0) &
+      IF (MYID==0) THEN
       WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP CLUSTER_SOLVER Num Factor: The following ERROR was detected: ', ERROR
+      IF(ERROR == -4) WRITE(LU_ERR,'(A,A)') 'This error is probably due to having one or more sealed compartments ',&
+      ' besides a compartment with/without open boundary. Currently only one pressure zone is supported.'
+      ENDIF
       ! Some error - stop flag for CALL STOP_CHECK(1).
       STOP_STATUS = SETUP_STOP
       RETURN
