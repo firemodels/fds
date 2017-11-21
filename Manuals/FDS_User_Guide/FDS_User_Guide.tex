@@ -1165,7 +1165,7 @@ Experiment with different mesh configurations using relatively coarse mesh cells
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
 \label{info:TRNX}
 
-By default the mesh cells that fill the computational domain are uniform in size. However, it is possible to specify that the cells be non-uniform in one or two
+By default the mesh cells that fill the computational domain are uniform in size. However, it is possible to specify that the cells be non-uniform in one or two\footnote{If you are stretching the mesh in two coordinate directions, limit the number of cells to approximately 1~million. The Poisson solver that is used for two-coordinate stretching exhibits floating point overflow errors during the initialization phase when very large meshes are used. If you require more than a million cells, consider using multiple meshes instead of one large mesh.}
 \begin{figure}[ht]
 \begin{minipage}[t]{3.1in}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/piece_wise_linear_trnx}
