@@ -290,18 +290,9 @@ Smoke Alarm Activation Time   & 0.00            & 0.34              & 0.34      
 
 \section{Calculating Model Uncertainty}
 
-This section describes a method for calculating the {\em model uncertainty}~\cite{McGrattan:Metrologia}. Specifically, this entails developing formulae for
-the mean and standard deviation of a statistical distribution like the one shown in Fig.~\ref{bell_curve}. These formulae are functions
-solely of the model predictions and the experimental measurements against which the model is compared. The objective is to
-characterize the performance of the model in predicting a given quantity of interest (e.g., the hot gas layer temperature) with two
-parameters; one that expresses the tendency for the model to under or over-predict the true value of the quantity and one that expresses the degree of scatter
-about the true value.
+This section describes a method for calculating the {\em model uncertainty}~\cite{McGrattan:Metrologia}. Specifically, this entails developing formulae for the mean and standard deviation of a statistical distribution like the one shown in Fig.~\ref{bell_curve}. These formulae are functions solely of the model predictions and the experimental measurements against which the model is compared. The objective is to characterize the performance of the model in predicting a given quantity of interest (e.g., the hot gas layer temperature) with two parameters; one that expresses the tendency for the model to under or over-predict the true value of the quantity and one that expresses the degree of scatter about the true value.
 
-The predicted and measured values of the quantity of interest are obtained from one or more validation studies.
-Figure~\ref{temp_history} is a typical example of a comparison of model and measurement. Given that usually
-dozens of such measurements are made during each experiment,
-and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be
-produced for any given quantity of interest.
+The predicted and measured values of the quantity of interest are obtained from one or more validation studies. Figure~\ref{temp_history} is a typical example of a comparison of model and measurement. Given that usually dozens of such measurements are made during each experiment, and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be produced for any given quantity of interest.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.5in]{FIGURES/sample_time_history}
@@ -309,33 +300,17 @@ produced for any given quantity of interest.
 \caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
 \label{temp_history}
 \end{figure}
-Usually, the data is condensed into a more tractable form by way of a single metric with which to
-compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock et al.~\cite{Peacock:FSJ1999}
-discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
-If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
-this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
-expressing the increase in the value of a quantity above its ambient.
-As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
-reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
-a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly.
-For this reason, assume that a given experimental measurement, $E_i$, is normally
-distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
+Usually, the data is condensed into a more tractable form by way of a single metric with which to compare the two curves, like the ones shown in Fig.~\ref{temp_history}. Peacock et al.~\cite{Peacock:FSJ1999} discuss various possible metrics. The metric most often used in the FDS validation process is the difference between the peak values of the time-averaged predicted and measured time histories. Thus, for each measurement point, $i$, there is a pair of \underline{E}xperimental and \underline{M}odeled values, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $E_i$ and $M_i$ are positive numbers expressing the greatest rise in the value of the measured/predicted quantity above its ambient. Here, $n$ is the total number of measurement points of a particular quantity of interest from all the experiments.
+
+As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly. For this reason, assume that a given experimental measurement, $E_i$, is normally distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be
    E \; | \; \theta \sim N(\theta \; , \; \sigma_E^2) \label{expunc}
 \ee
-The notation\footnote{Note that the subscript, $i$, has been dropped merely to reduce the notational clutter.}
-$E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$.
-This is the usual way of defining a likelihood function.
-It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the
-delta method~\cite{Oehlert:1992} provides a way to estimate the distribution of a function of $X$:
-\[g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)\]} to obtain the approximate distribution
+The notation\footnote{Note that the subscript, $i$, has been dropped merely to reduce the notational clutter.} $E \; | \; \theta$ means that $E$ is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method~\cite{Oehlert:1992} provides a way to estimate the distribution of a function of $X$: \[g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)\]} to obtain the approximate distribution
 \be
    \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
 \ee
-The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the
-relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is the way that experimental uncertainties are reported. In addition,
-the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, form a wedge-shaped pattern that suggests
-that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
+The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is the way that experimental uncertainties are reported. In addition, the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, form a wedge-shaped pattern that suggests that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
 
 It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead,
 it is assumed that the model predictions are normally distributed about the true values
