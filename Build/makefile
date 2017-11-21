@@ -372,7 +372,7 @@ ieva.o : func.o prec.o cons.o type.o mesh.o
 fire.o : func.o prec.o cons.o type.o mesh.o mass.o
 hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o
-velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o
+velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o scrc.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o data.o
 divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
 mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o
@@ -405,7 +405,7 @@ ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj
-velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
+velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj scrc.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj
