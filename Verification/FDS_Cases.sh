@@ -187,7 +187,6 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
-$QFDS -d Pressure_Solver scarc2d_fft_1mesh.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -541,10 +540,6 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
