@@ -21,13 +21,15 @@ Codename:	trusty
 
 > sudo apt-get install build-essential
 
-gcc --version
+> gcc --version
 gcc (Ubuntu 4.8.5-2ubuntu1~14.04.1) 4.8.5
 
 
 
 
 ## Install GNU Fortran
+
+Add Ubuntu PPA repository
 
 vagrant@vagrant-ubuntu-trusty-64:~$ sudo add-apt-repository ppa:ubuntu-toolchain-r/test
  Toolchain test builds; see https://wiki.ubuntu.com/ToolChain
@@ -44,6 +46,7 @@ gpg: Total number processed: 1
 gpg:               imported: 1  (RSA: 1)
 OK
 
+Install GNU Fortran 7
 
 vagrant@vagrant-ubuntu-trusty-64:~$ sudo apt install gfortran-7
 Reading package lists... Done
@@ -78,6 +81,14 @@ Setting up libgfortran-7-dev:amd64 (7.2.0-1ubuntu1~14.04) ...
 Setting up gfortran-7 (7.2.0-1ubuntu1~14.04) ...
 Processing triggers for libc-bin (2.19-0ubuntu6.13) ...
 
+
+Verify installation
+
+vagrant@vagrant-ubuntu-trusty-64:~$ gfortran-7 --version
+GNU Fortran (Ubuntu 7.2.0-1ubuntu1~14.04) 7.2.0
+Copyright (C) 2017 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 ## Compile OpenMPI 3.X
@@ -169,6 +180,29 @@ vagrant@vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ ./fds_mpi_gnu_
 
  Hit Enter to Escape...
 
+
+## Run FDS as MPI application
+
+$> /shared/openmpi_64/bin/mpirun -quiet /vagrant/Build/mpi_gnu_linux_64/fds_mpi_gnu_linux_64 
+
+ Fire Dynamics Simulator
+
+ Current Date     : November 22, 2017  13:44:27
+ Version          : FDS 6.6.0
+ Revision         : -
+ Revision Date    : 
+ Compiler         : unknown
+ Compilation Date : Nov 22, 2017  12:05:17
+
+ MPI Enabled;    Number of MPI Processes:       2
+ OpenMP Enabled; Number of OpenMP Threads:      1
+
+ MPI version: 3.1
+ MPI library version: Open MPI v3.0.0, package: Open MPI vagrant@vagrant-ubuntu-trusty-64 Distribution, ident: 3.0.0, repo rev: v3.0.0, Sep 12, 2017
+
+ Consult FDS Users Guide Chapter, Running FDS, for further instructions.
+
+ Hit Enter to Escape...
 
 
 
