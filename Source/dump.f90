@@ -2999,29 +2999,28 @@ ENDIF WRITE_RADIATION
 
 WRITE_SCARC: IF (TRIM(PRES_METHOD)=='SCARC') THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' ScaRC Information'
-   WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Global solver       ', TRIM(SCARC_METHOD)
+   WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Global solver         ', TRIM(SCARC_METHOD)
    SELECT CASE(TRIM(SCARC_METHOD))
       CASE('KRYLOV')
-         WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Krylov variant      ', TRIM(SCARC_KRYLOV)
+         WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Krylov variant        ', TRIM(SCARC_KRYLOV)
          IF (TRIM(SCARC_PRECON)=='MG') THEN
-            WRITE(LU_OUTPUT,'(3X,A20,A10,A,A10)') 'Preconditioner      ', TRIM(SCARC_SMOOTH),'-',TRIM(SCARC_PRECON)
+            WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Preconditioner        ', TRIM(SCARC_SMOOTH)
          ELSE
-            WRITE(LU_OUTPUT,'(3X,A20,A10)')       'Preconditioner      ', TRIM(SCARC_PRECON)
+            WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Preconditioner        ', TRIM(SCARC_PRECON)
          ENDIF
-         WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Max iterations      ', SCARC_KRYLOV_ITERATIONS
-         WRITE(LU_OUTPUT,'(3X,A20,E10.2)') 'Stopping accuracy   ', SCARC_KRYLOV_ACCURACY
+         WRITE(LU_OUTPUT,'(3X,A20,I12)')   'Max iterations        ', SCARC_KRYLOV_ITERATIONS
+         WRITE(LU_OUTPUT,'(3X,A20,E12.2)') 'Stopping accuracy     ', SCARC_KRYLOV_ACCURACY
       CASE('MULTIGRID')
-         WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Smoother            ', TRIM(SCARC_SMOOTH)
-         IF (TRIM(SCARC_MULTIGRID)=='ALGEBRAIC') THEN
-            WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Coarsening strategy ', TRIM(SCARC_MULTIGRID_COARSENING)
-         ENDIF
-         WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Coarse grid solver  ', TRIM(SCARC_COARSE)
-         WRITE(LU_OUTPUT,'(3X,A20,A1)')   'Cycle type          ', TRIM(SCARC_MULTIGRID_CYCLE)
-         WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Max iterations      ', SCARC_MULTIGRID_ITERATIONS
-         WRITE(LU_OUTPUT,'(3X,A20,E10.2)') 'Stopping accuracy   ', SCARC_MULTIGRID_ACCURACY
-         WRITE(LU_OUTPUT,'(3X,A20,A20)')   'Interpolation method', SCARC_MULTIGRID_INTERPOL
+         WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Smoother              ', TRIM(SCARC_SMOOTH)
+         IF (TRIM(SCARC_MULTIGRID)=='ALGEBRAIC') &
+            WRITE(LU_OUTPUT,'(3X,A20,A12)')   'Coarsening strategy   ', TRIM(SCARC_MULTIGRID_COARSENING)
+         WRITE(LU_OUTPUT,'(3X,A20,A12)')   'Coarse grid solver    ', TRIM(SCARC_COARSE)
+         WRITE(LU_OUTPUT,'(3X,A20,A12)')   'Cycle type            ', TRIM(SCARC_MULTIGRID_CYCLE)
+         WRITE(LU_OUTPUT,'(3X,A20,I12)')   'Max iterations        ', SCARC_MULTIGRID_ITERATIONS
+         WRITE(LU_OUTPUT,'(3X,A20,E12.2)') 'Stopping accuracy     ', SCARC_MULTIGRID_ACCURACY
+         WRITE(LU_OUTPUT,'(3X,A20,A12)')   'Interpolation method  ', TRIM(SCARC_MULTIGRID_INTERPOL)
    END SELECT
-   WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Accuracy type       ', TRIM(SCARC_ACCURACY)
+   WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Accuracy type       ', TRIM(SCARC_ACCURACY)
 ENDIF WRITE_SCARC
 
 ! Write out GLMAT info:
