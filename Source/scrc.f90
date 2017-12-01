@@ -30,7 +30,7 @@ IMPLICIT NONE
 PUBLIC SCARC_SETUP                             !> Setup routine for ScaRC, needed in main.f90
 PUBLIC SCARC_SOLVER                            !> Call of basic ScaRC solver
 PUBLIC SCARC_TIMINGS                           !> Call of time measurements for ScaRC
-PUBLIC SCARC_SAVE_RHS                          !> Call of time measurements for ScaRC
+PUBLIC SCARC_SAVE_RHS                          !> Save right hand side computed in pres.f90 for later use
 
 !> ------------------------------------------------------------------------------------------------
 !> Public variables   (explanations in declaration part below)
@@ -48,9 +48,8 @@ PUBLIC SCARC_ACCURACY                          !> Chosen accuracy type (relative
 PUBLIC SCARC_ACCURACY_DIVERGENCE               !> Divergence accuracy
 PUBLIC SCARC_ACCURACY_RELATIVE                 !> Relative accuracy
 
-PUBLIC SCARC_FFT                               !> If 1: first FFT, then ScaRC
-PUBLIC SCARC_MKL                               !> Type of MKL method (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_Solver)
-PUBLIC SCARC_MKL_MTYPE                         !> Type of matrix (SYMMETRIC/NONSYMMETRIC)
+PUBLIC SCARC_FFT                               !> If .true. first FFT, then ScaRC
+PUBLIC SCARC_PRESSURE_ITERATIONS               !> Internal counter for pressure iterations per time step
 
 PUBLIC SCARC_KRYLOV                            !> Type of Krylov method
 PUBLIC SCARC_KRYLOV_ITERATIONS                 !> Maximum number of iterations for Krylov method
@@ -87,10 +86,9 @@ PUBLIC TYPE_DEBUG                              !> Debug file unit
 !> ------------------------------------------------------------------------------------------------
 !> Corresponding declarations (with default settings)
 !> ------------------------------------------------------------------------------------------------
-PRIVATE
 
 !! General definitions
-CHARACTER(40) :: SCARC_METHOD    = 'null'                   !> Requested solver method (KRYLOV/MULTIGRID)
+CHARACTER(40) :: SCARC_METHOD    = 'KRYLOV'                 !> Requested solver method (KRYLOV/MULTIGRID)
 CHARACTER(40) :: SCARC_INITIAL   = 'null'                   !> Initial solution (currently only default is used)
 
 !! General iteration parameters
@@ -104,8 +102,11 @@ CHARACTER(40) :: SCARC_ACCURACY             = 'ABSOLUTE'    !> Accuracy type (AB
 !! Parameter for DISCRET
 CHARACTER(40) :: SCARC_DISCRETIZATION   = 'STRUCTURED'      !> Discretization of whole domain or with OBSTs 
 
+!! Parameter for FFT-ScaRC combination
+LOGICAL       :: SCARC_FFT = .FALSE.                        !> If .true. use combination of FFT and ScaRC
+INTEGER       :: SCARC_PRESSURE_ITERATIONS = 0              !> internal counter for pressure iterations
+
 !! Parameter for MKL solver
-INTEGER       :: SCARC_FFT       = 0                        !> If >0 use combination of FFT and ScaRC
 CHARACTER(40) :: SCARC_MKL       = 'GLOBAL'                 !> Type of MKL solver (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_solver)
 CHARACTER(40) :: SCARC_MKL_MTYPE = 'SYMMETRIC'              !> Type of MKL solver (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_solver)
 
@@ -130,7 +131,7 @@ REAL (EB)     :: SCARC_SMOOTH_ACCURACY   = 1.E-10_EB        !> Requested accurac
 REAL (EB)     :: SCARC_SMOOTH_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
 
 !! Parameters for preconditioning method (used in Krylov-methods)
-CHARACTER(40) :: SCARC_PRECON            = 'SSOR'           !> Preconditioner for CG/BICG (JACOBI/SSOR/MG)
+CHARACTER(40) :: SCARC_PRECON            = 'FFT'            !> Preconditioner for CG/BICG (JACOBI/SSOR/FFT/PARDISO/MG)
 INTEGER       :: SCARC_PRECON_ITERATIONS = 100              !> Max number of iterations
 REAL (EB)     :: SCARC_PRECON_ACCURACY   = 1.E-12_EB        !> Requested accuracy for convergence
 REAL (EB)     :: SCARC_PRECON_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
@@ -153,7 +154,7 @@ INTEGER       :: SCARC_LAYER = 1                            !> Unit number for S
 !! order for the treatment of the single mesh faces
 INTEGER :: FACE_ORDER_XYZ(6) = (/1,-1,2,-2,3,-3/)           !> Coordinate direction related order of mesh faces
 
-
+!!PRIVATE
 !> ------------------------------------------------------------------------------------------------
 ! Time measurements
 !> ------------------------------------------------------------------------------------------------
@@ -390,13 +391,15 @@ INTEGER, PARAMETER :: NSCARC_CELL_TYPE_NONE         =  0, &
 
 INTEGER, PARAMETER :: NSCARC_INTERPOL_NONE          =  0, &
                       NSCARC_INTERPOL_STANDARD      =  1, &    !> standard interpolation
-                      NSCARC_INTERPOL_CLASSICAL     =  2, &    !> classical interpolation
-                      NSCARC_INTERPOL_CLASSICAL2    =  3, &    !> classical interpolation
-                      NSCARC_INTERPOL_DIRECT        =  4, &    !> direct interpolation
-                      NSCARC_INTERPOL_DIRECT_BDRY   =  5, &    !> direct interpolation with special boundary
-                      NSCARC_INTERPOL_MULTIPASS     =  6, &    !> multipass interpolation
-                      NSCARC_INTERPOL_GMG           =  7, &    !> GMG-like interpolation
-                      NSCARC_INTERPOL_GMG3          =  8       !> GMG3-like interpolation
+                      NSCARC_INTERPOL_CONSTANT      =  2, &    !> standard interpolation
+                      NSCARC_INTERPOL_BILINEAR      =  3, &    !> standard interpolation
+                      NSCARC_INTERPOL_CLASSICAL     =  4, &    !> classical interpolation
+                      NSCARC_INTERPOL_CLASSICAL2    =  5, &    !> classical interpolation
+                      NSCARC_INTERPOL_DIRECT        =  6, &    !> direct interpolation
+                      NSCARC_INTERPOL_DIRECT_BDRY   =  7, &    !> direct interpolation with special boundary
+                      NSCARC_INTERPOL_MULTIPASS     =  8, &    !> multipass interpolation
+                      NSCARC_INTERPOL_GMG           =  9, &    !> GMG-like interpolation
+                      NSCARC_INTERPOL_GMG3          = 10       !> GMG3-like interpolation
 
 INTEGER, PARAMETER :: NSCARC_LATEX_NONE             = -1, &    !> no latex information requested
                       NSCARC_LATEX_STAGGERED        =  1, &    !> show staggered latex information
@@ -1309,6 +1312,10 @@ IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MUL
    SELECT CASE (TRIM(SCARC_MULTIGRID_INTERPOL))
       CASE ('STANDARD')
          TYPE_INTERPOL = NSCARC_INTERPOL_STANDARD
+      CASE ('CONSTANT')
+         TYPE_INTERPOL = NSCARC_INTERPOL_CONSTANT
+      CASE ('BILINEAR')
+         TYPE_INTERPOL = NSCARC_INTERPOL_BILINEAR
       CASE ('CLASSICAL')
          TYPE_INTERPOL = NSCARC_INTERPOL_CLASSICAL
       CASE ('CLASSICAL2')
@@ -4103,7 +4110,6 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
                      IF (TYPE_MKL == NSCARC_MKL_COARSE) CALL SCARC_SETUP_MATRIX_MKL(NM, NLEVEL_MAX)
 #endif
 
-
                   !> Algebraic multigrid:
                   !>    -  use compact storage technique on all levels (no other choise possible!)
                   !>    -  assemble standard n-point-matrix only on finest level
@@ -4303,41 +4309,6 @@ IF (TWO_D) THEN
 
          IC  = SL%GRIDSTATE(IX, IY, IZ, UNKH)
          ICI = CELL_INDEX(IX, IY, IZ)
-
-         !> ACHTUNG, IOR-Richtungen vertauscht !!
-         !IWP1 = WALL_INDEX(ICI,  1)
-         !IWM1 = WALL_INDEX(ICI, -1)
-
-         !IWP3 = WALL_INDEX(ICI,  3)
-         !IWM3 = WALL_INDEX(ICI, -3)
-
-         !IF (IWP1 /= 0) THEN
-         !   IBP1 = SL%WALL(IWP1)%BOUNDARY_TYPE
-         !ELSE
-         !   IBP1 = 0
-         !ENDIF
-         !IF (IWM1 /= 0) THEN
-         !   IBM1 = SL%WALL(IWM1)%BOUNDARY_TYPE
-         !ELSE
-         !   IBM1 = 0
-         !ENDIF
-
-         !IF (IWP3 /= 0) THEN
-         !   IBP3 = SL%WALL(IWP3)%BOUNDARY_TYPE
-         !ELSE
-         !   IBP3 = 0
-         !ENDIF
-         !IF (IWM3 /= 0) THEN
-         !   IBM3 = SL%WALL(IWM3)%BOUNDARY_TYPE
-         !ELSE
-         !   IBM3 = 0
-         !ENDIF
-
-         !IWP2 = -99
-         !IWM2 = -99
-
-         !IBP2 = -99
-         !IBM2 = -99
 
          CALL SCARC_SETUP_MATRIX_MAINDIAG (IC, IP, IX, IY, IZ, NM, NL)
 
@@ -6264,7 +6235,7 @@ LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
          OSLF%P = 0.0_EB
 
          ALLOCATE (OSLF%R_COL(OSLF%NP+10), STAT=IERR)
-         CALL CHKMEMERR ('SCARC_SETUP_AMG_CnARSENING', 'R_COL', IERR)
+         CALL CHKMEMERR ('SCARC_SETUP_AMG_COARSENING', 'R_COL', IERR)
          OSLF%R_COL = 0
 
          ALLOCATE (OSLF%R_ROW(OSLF%NC+10), STAT=IERR)
@@ -11221,7 +11192,8 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
             DO I = 1, M%IBAR
                IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%GRIDSTATE(I,1,K,CGSC) /= IS_GASPHASE) CYCLE
                IC = SL%GRIDSTATE(I,1,K,UNKH)
-               IF (PRES_METHOD /= 'SCARC_FFT1') SL%F(IC) = M%PRHS (I, 1, K)
+               !IF (.NOT.(SCARC_FFT.AND.SCARC_PRESSURE_ITERATIONS=1)) SL%F(IC) = M%PRHS (I, J, K)
+               SL%F(IC) = M%PRHS (I, 1, K)
                IF (PREDICTOR) THEN
                   SL%X(IC) = M%H (I, 1, K)
                ELSE
@@ -11290,7 +11262,8 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
                DO I = 1, M%IBAR
                   IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SL%GRIDSTATE(I,J,K,CGSC) /= IS_GASPHASE) CYCLE
                   IC = SL%GRIDSTATE(I,J,K,UNKH)
-                  IF (PRES_METHOD /= 'SCARC_FFT1') SL%F(IC) = M%PRHS (I, J, K)
+                  !IF (.NOT.(SCARC_FFT.AND.SCARC_PRESSURE_ITERATIONS=1)) SL%F(IC) = M%PRHS (I, J, K)
+                  SL%F(IC) = M%PRHS (I, J, K)
                   IF (PREDICTOR) THEN
                      SL%X(IC) = M%H (I, J, K)
                   ELSE
@@ -11516,21 +11489,29 @@ END SUBROUTINE SCARC_CONVERGENCE_RATE
 !>    - 'FI' corresponds to finer   grid
 !>    - 'CO' corresponds to coarser grid
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_RESTRICTION (NVECTOR_FI, NVECTOR_CO, NL_FI, NL_CO)
-INTEGER, INTENT(IN) :: NVECTOR_FI, NVECTOR_CO, NL_FI, NL_CO
+SUBROUTINE SCARC_RESTRICTION (NVECTORF, NVECTORC, NLF, NLC)
+INTEGER, INTENT(IN) :: NVECTORF, NVECTORC, NLF, NLC
 INTEGER :: NM, ICOL, IC
-REAL(EB), POINTER, DIMENSION(:)     :: FC_CO, DC_FI, R
+REAL(EB), POINTER, DIMENSION(:)     :: FCC, DCF, R
 INTEGER , POINTER, DIMENSION(:)     :: R_ROW, R_COL
-INTEGER , POINTER :: NX_CO, NY_CO, NZ_CO, NC_CO
-INTEGER  :: NX_FI, NY_FI, NZ_FI
-INTEGER  :: IX_FI, IY_FI, IZ_FI, IC_FI(8)
-INTEGER  :: IX_CO, IY_CO, IZ_CO, IC_CO
-REAL(EB) :: AUX, AUX0
+INTEGER , POINTER :: NXC, NYC, NZC, NCC
+INTEGER  :: NXF, NYF, NZF
+INTEGER  :: IXF, IYF, IZF, ICF(8), ICFB(-2:2,-2:2)=0
+INTEGER  :: IXC, IYC, IZC, ICC
+REAL(EB) :: AUX, AUX0, SCAL, W1, W3, W4, W9, W12, W16
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SLC, SLF
 
-TYPE_VECTOR = NVECTOR_FI
+SCAL = 0.015625_EB
+W16  = 16.0_EB
+W12  = 12.0_EB
+W9   =  9.0_EB
+W4   =  4.0_EB
+W3   =  3.0_EB
+W1   =  1.0_EB
+
+TYPE_VECTOR = NVECTORF
 IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC.AND.TYPE_COARSENING < NSCARC_COARSENING_GMG) &
-   CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR, NL_FI)
+   CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR, NLF)
 
 SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 
@@ -11539,75 +11520,175 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 
       DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
-         SLC => SCARC(NM)%LEVEL(NL_CO)
-         SLF => SCARC(NM)%LEVEL(NL_FI)
+         SLC => SCARC(NM)%LEVEL(NLC)
+         SLF => SCARC(NM)%LEVEL(NLF)
 
-         NX_CO => SLC%NX
-         NY_CO => SLC%NY
-         NZ_CO => SLC%NZ
+         NXC => SLC%NX
+         NYC => SLC%NY
+         NZC => SLC%NZ
 
-         NX_FI = 2*NX_CO
-         NY_FI = 2*NY_CO
-         NZ_FI = 2*NZ_CO
+         NXF = 2*NXC
+         NYF = 2*NYC
+         NZF = 2*NZC
 
-         CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
-         CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, FC_CO)
+         CALL POINT_TO_VECTOR(NVECTORF, NM, NLF, DCF)
+         CALL POINT_TO_VECTOR(NVECTORC, NM, NLC, FCC)
 
          IF (TWO_D) THEN
 
-            DO IZ_CO = 1, NZ_CO
-               DO IX_CO = 1, NX_CO
+            SELECT_INTERPOL: SELECT CASE (TYPE_INTERPOL)
+     
+               CASE (NSCARC_INTERPOL_CONSTANT)
 
-                  IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%GRIDSTATE(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                  DO IZC = 1, NZC
+                     DO IXC = 1, NXC
 
-                  IX_FI = 2*IX_CO
-                  IZ_FI = 2*IZ_CO
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%GRIDSTATE(IXC,1,IZC,CGSC)/=IS_GASPHASE) CYCLE
 
-                  IC_CO = SLC%GRIDSTATE(IX_CO, 1, IZ_CO, UNKH) 
+                        IXF = 2*IXC
+                        IZF = 2*IZC
 
-                  IC_FI(1) = SLF%GRIDSTATE(IX_FI-1, 1, IZ_FI-1, UNKH) 
-                  IC_FI(2) = SLF%GRIDSTATE(IX_FI-1, 1, IZ_FI  , UNKH) 
-                  IC_FI(3) = SLF%GRIDSTATE(IX_FI  , 1, IZ_FI-1, UNKH) 
-                  IC_FI(4) = SLF%GRIDSTATE(IX_FI  , 1, IZ_FI  , UNKH) 
+                        ICC = SLC%GRIDSTATE(IXC, 1, IZC, UNKH) 
 
-                  FC_CO(IC_CO) = 0.25_EB * (  DC_FI(IC_FI(1)) &
-                                            + DC_FI(IC_FI(2)) &
-                                            + DC_FI(IC_FI(3)) &
-                                            + DC_FI(IC_FI(4)) )
+                        ICF(1) = SLF%GRIDSTATE(IXF-1, 1, IZF-1, UNKH) 
+                        ICF(2) = SLF%GRIDSTATE(IXF-1, 1, IZF  , UNKH) 
+                        ICF(3) = SLF%GRIDSTATE(IXF  , 1, IZF-1, UNKH) 
+                        ICF(4) = SLF%GRIDSTATE(IXF  , 1, IZF  , UNKH) 
 
-               ENDDO
-            ENDDO
+                        FCC(ICC) = 0.25_EB * (  DCF(ICF(1)) &
+                                              + DCF(ICF(2)) &
+                                              + DCF(ICF(3)) &
+                                              + DCF(ICF(4)) )
 
+                     ENDDO
+                  ENDDO
+
+               CASE (NSCARC_INTERPOL_BILINEAR)
+       
+                  FCC=0.0_EB
+         
+                  DO IZC = 1, NZC
+                     DO IXC = 1, NXC
+                        
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%GRIDSTATE(IXC,1,IZC,CGSC)/=IS_GASPHASE) CYCLE
+            
+                        IXF = 2*IXC
+                        IZF = 2*IZC
+            
+                        ICC = SLC%GRIDSTATE(IXC, 1, IZC, UNKH) 
+            
+                        ICFB(-2,-2) = SLF%GRIDSTATE(IXF-2, 1, IZF-2, UNKH) 
+                        ICFB(-1,-2) = SLF%GRIDSTATE(IXF-1, 1, IZF-2, UNKH) 
+                        ICFB( 1,-2) = SLF%GRIDSTATE(IXF  , 1, IZF-2, UNKH) 
+                        ICFB( 2,-2) = SLF%GRIDSTATE(IXF+1, 1, IZF-2, UNKH) 
+         
+                        ICFB(-2,-1) = SLF%GRIDSTATE(IXF-2, 1, IZF-1, UNKH) 
+                        ICFB(-1,-1) = SLF%GRIDSTATE(IXF-1, 1, IZF-1, UNKH) 
+                        ICFB( 1,-1) = SLF%GRIDSTATE(IXF  , 1, IZF-1, UNKH) 
+                        ICFB( 2,-1) = SLF%GRIDSTATE(IXF+1, 1, IZF-1, UNKH) 
+         
+                        ICFB(-2, 1) = SLF%GRIDSTATE(IXF-2, 1, IZF, UNKH) 
+                        ICFB(-1, 1) = SLF%GRIDSTATE(IXF-1, 1, IZF, UNKH) 
+                        ICFB( 1, 1) = SLF%GRIDSTATE(IXF  , 1, IZF, UNKH) 
+                        ICFB( 2, 1) = SLF%GRIDSTATE(IXF+1, 1, IZF, UNKH) 
+         
+                        ICFB(-2, 2) = SLF%GRIDSTATE(IXF-2, 1, IZF+1, UNKH) 
+                        ICFB(-1, 2) = SLF%GRIDSTATE(IXF-1, 1, IZF+1, UNKH) 
+                        ICFB( 1, 2) = SLF%GRIDSTATE(IXF  , 1, IZF+1, UNKH) 
+                        ICFB( 2, 2) = SLF%GRIDSTATE(IXF+1, 1, IZF+1, UNKH) 
+            
+         !IF (TYPE_DEBUG > NSCARC_DEBUG_EXTREME) THEN
+         !   WRITE(LU_SCARC,'(A,2i6)') 'RESTRICTION_NEW: ----------- ', IXC, IZC
+         !   WRITE(LU_SCARC,'(A,4i6)') ' 2:', ICFB(-2, 2), ICFB(-1, 2), ICFB(1, 2), ICFB(2, 2)
+         !   WRITE(LU_SCARC,'(A,4i6)') ' 1:', ICFB(-2, 1), ICFB(-1, 1), ICFB(1, 1), ICFB(2, 1)
+         !   WRITE(LU_SCARC,'(A,4i6)') '-1:', ICFB(-2,-1), ICFB(-1,-1), ICFB(1,-1), ICFB(2,-1)
+         !   WRITE(LU_SCARC,'(A,4i6)') '-2:', ICFB(-2,-2), ICFB(-1,-2), ICFB(1,-2), ICFB(2,-2)
+         !ENDIF
+                        IF (IXC==1.AND.IZC==1) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W4 *DCF(ICFB(-1, 2)) + W3 *DCF(ICFB(1, 2)) + W1*DCF(ICFB(2, 2)) + &
+                                        W12*DCF(ICFB(-1, 1)) + W9 *DCF(ICFB(1, 1)) + W3*DCF(ICFB(2, 1)) + &
+                                        W16*DCF(ICFB(-1,-1)) + W12*DCF(ICFB(1,-1)) + W4*DCF(ICFB(2,-1)) )
+                        ELSE IF (IXC==NXC.AND.IZC==  1) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W1 *DCF(ICFB(-2, 2)) + W3 *DCF(ICFB(-1, 2)) + W4 *DCF(ICFB(1, 2)) + &
+                                        W3 *DCF(ICFB(-2, 1)) + W9 *DCF(ICFB(-1, 1)) + W12*DCF(ICFB(1, 1)) + &
+                                        W4 *DCF(ICFB(-2,-1)) + W12*DCF(ICFB(-1,-1)) + W16*DCF(ICFB(1,-1)) )
+                        ELSE IF (IXC==  1.AND.IZC==NZC) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W16*DCF(ICFB(-1, 1)) + W12*DCF(ICFB(1, 1)) + W4*DCF(ICFB(2, 1)) + &
+                                        W12*DCF(ICFB(-1,-1)) + W9 *DCF(ICFB(1,-1)) + W3*DCF(ICFB(2,-1)) + &
+                                        W4 *DCF(ICFB(-1,-2)) + W3 *DCF(ICFB(1,-2)) + W1*DCF(ICFB(2,-2)) )
+                        ELSE IF (IXC==NXC.AND.IZC==NZC) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W4 *DCF(ICFB(-2, 1)) + W12*DCF(ICFB(-1, 1)) + W16*DCF(ICFB(1, 1)) + &
+                                        W3 *DCF(ICFB(-2,-1)) + W9 *DCF(ICFB(-1,-1)) + W12*DCF(ICFB(1,-1)) + &
+                                        W1 *DCF(ICFB(-2,-2)) + W3 *DCF(ICFB(-1,-2)) + W4 *DCF(ICFB(1,-2)) )
+                        ELSE IF (IZC==  1) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W1*DCF(ICFB(-2, 2)) + W3 *DCF(ICFB(-1, 2)) + W3 *DCF(ICFB(1, 2)) + W1*DCF(ICFB(2, 2)) + &
+                                        W3*DCF(ICFB(-2, 1)) + W9 *DCF(ICFB(-1, 1)) + W9 *DCF(ICFB(1, 1)) + W3*DCF(ICFB(2, 1)) + &
+                                        W4*DCF(ICFB(-2,-1)) + W12*DCF(ICFB(-1,-1)) + W12*DCF(ICFB(1,-1)) + W4*DCF(ICFB(2,-1)) )
+                        ELSE IF (IZC==NZC) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W4*DCF(ICFB(-2, 1)) + W12*DCF(ICFB(-1, 1)) + W12*DCF(ICFB(1, 1)) + W4*DCF(ICFB(2, 1)) + &
+                                        W3*DCF(ICFB(-2,-1)) + W9 *DCF(ICFB(-1,-1)) + W9 *DCF(ICFB(1,-1)) + W3*DCF(ICFB(2,-1)) + &
+                                        W1*DCF(ICFB(-2,-2)) + W3 *DCF(ICFB(-1,-2)) + W3 *DCF(ICFB(1,-2)) + W1*DCF(ICFB(2,-2)) )
+                        ELSE IF (IXC==  1) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W4 *DCF(ICFB(-1, 2)) + W3*DCF(ICFB(1, 2)) + W1*DCF(ICFB(2, 2)) +&
+                                        W12*DCF(ICFB(-1, 1)) + W9*DCF(ICFB(1, 1)) + W3*DCF(ICFB(2, 1)) +&
+                                        W12*DCF(ICFB(-1,-1)) + W9*DCF(ICFB(1,-1)) + W3*DCF(ICFB(2,-1)) +&
+                                        W4 *DCF(ICFB(-1,-2)) + W3*DCF(ICFB(1,-2)) + W1*DCF(ICFB(2,-2)) )
+                        ELSE IF (IXC==NXC) THEN
+                           FCC(ICC) = SCAL*( &
+                                        W1*DCF(ICFB(-2, 2)) + W3*DCF(ICFB(-1, 2)) + W4 *DCF(ICFB(1, 2)) + &
+                                        W3*DCF(ICFB(-2, 1)) + W9*DCF(ICFB(-1, 1)) + W12*DCF(ICFB(1, 1)) +&
+                                        W3*DCF(ICFB(-2,-1)) + W9*DCF(ICFB(-1,-1)) + W12*DCF(ICFB(1,-1)) +&
+                                        W1*DCF(ICFB(-2,-2)) + W3*DCF(ICFB(-1,-2)) + W4 *DCF(ICFB(1,-2)) )
+                        ELSE 
+                           FCC(ICC) = SCAL*( &
+                                        W1*DCF(ICFB(-2,-2)) + W3*DCF(ICFB(-1,-2)) + W3*DCF(ICFB(1,-2)) + W1*DCF(ICFB(2,-2)) +&
+                                        W3*DCF(ICFB(-2,-1)) + W9*DCF(ICFB(-1,-1)) + W9*DCF(ICFB(1,-1)) + W3*DCF(ICFB(2,-1)) +&
+                                        W3*DCF(ICFB(-2, 1)) + W9*DCF(ICFB(-1, 1)) + W9*DCF(ICFB(1, 1)) + W3*DCF(ICFB(2, 1)) +&
+                                        W1*DCF(ICFB(-2, 2)) + W3*DCF(ICFB(-1, 2)) + W3*DCF(ICFB(1, 2)) + W1*DCF(ICFB(2, 2)) )
+                        ENDIF
+                     ENDDO
+                  ENDDO
+
+            END SELECT SELECT_INTERPOL
+         
          ELSE
 
-            DO IZ_CO = 1, NZ_CO
-               DO IY_CO = 1, NY_CO
-                  DO IX_CO = 1, NX_CO
+            DO IZC = 1, NZC
+               DO IYC = 1, NYC
+                  DO IXC = 1, NXC
 
-                     IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%GRIDSTATE(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                     IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. SLC%GRIDSTATE(IXC,IYC,IZC,CGSC)/=IS_GASPHASE) CYCLE
 
-                     IX_FI = 2*IX_CO
-                     IY_FI = 2*IY_CO
-                     IZ_FI = 2*IZ_CO
+                     IXF = 2*IXC
+                     IYF = 2*IYC
+                     IZF = 2*IZC
 
-                     IC_CO = SLC%GRIDSTATE(IX_CO, IY_CO, IZ_CO, UNKH) 
-                     IC_FI(1) = SLF%GRIDSTATE(IX_FI-1, IY_FI-1, IZ_FI-1, UNKH) 
-                     IC_FI(2) = SLF%GRIDSTATE(IX_FI-1, IY_FI-1, IZ_FI  , UNKH) 
-                     IC_FI(3) = SLF%GRIDSTATE(IX_FI-1, IY_FI  , IZ_FI-1, UNKH) 
-                     IC_FI(4) = SLF%GRIDSTATE(IX_FI-1, IY_FI  , IZ_FI  , UNKH) 
-                     IC_FI(5) = SLF%GRIDSTATE(IX_FI  , IY_FI-1, IZ_FI-1, UNKH) 
-                     IC_FI(6) = SLF%GRIDSTATE(IX_FI  , IY_FI-1, IZ_FI  , UNKH) 
-                     IC_FI(7) = SLF%GRIDSTATE(IX_FI  , IY_FI  , IZ_FI-1, UNKH) 
-                     IC_FI(8) = SLF%GRIDSTATE(IX_FI  , IY_FI  , IZ_FI  , UNKH) 
+                     ICC = SLC%GRIDSTATE(IXC, IYC, IZC, UNKH) 
 
-                     FC_CO(IC_CO) = 0.125_EB * (  DC_FI(IC_FI(1)) &
-                                                + DC_FI(IC_FI(2)) &
-                                                + DC_FI(IC_FI(3)) &
-                                                + DC_FI(IC_FI(4)) &
-                                                + DC_FI(IC_FI(5)) &
-                                                + DC_FI(IC_FI(6)) &
-                                                + DC_FI(IC_FI(7)) &
-                                                + DC_FI(IC_FI(8)) )
+                     ICF(1) = SLF%GRIDSTATE(IXF-1, IYF-1, IZF-1, UNKH) 
+                     ICF(2) = SLF%GRIDSTATE(IXF-1, IYF-1, IZF  , UNKH) 
+                     ICF(3) = SLF%GRIDSTATE(IXF-1, IYF  , IZF-1, UNKH) 
+                     ICF(4) = SLF%GRIDSTATE(IXF-1, IYF  , IZF  , UNKH) 
+                     ICF(5) = SLF%GRIDSTATE(IXF  , IYF-1, IZF-1, UNKH) 
+                     ICF(6) = SLF%GRIDSTATE(IXF  , IYF-1, IZF  , UNKH) 
+                     ICF(7) = SLF%GRIDSTATE(IXF  , IYF  , IZF-1, UNKH) 
+                     ICF(8) = SLF%GRIDSTATE(IXF  , IYF  , IZF  , UNKH) 
+
+                     FCC(ICC) = 0.125_EB * (  DCF(ICF(1)) &
+                                            + DCF(ICF(2)) &
+                                            + DCF(ICF(3)) &
+                                            + DCF(ICF(4)) &
+                                            + DCF(ICF(5)) &
+                                            + DCF(ICF(6)) &
+                                            + DCF(ICF(7)) &
+                                            + DCF(ICF(8)) )
 
                   ENDDO
                ENDDO
@@ -11622,26 +11703,26 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 
       DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
-         SLC => SCARC(NM)%LEVEL(NL_CO)
-         SLF => SCARC(NM)%LEVEL(NL_FI)
+         SLC => SCARC(NM)%LEVEL(NLC)
+         SLF => SCARC(NM)%LEVEL(NLF)
 
-         CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
-         CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, FC_CO)
+         CALL POINT_TO_VECTOR(NVECTORF, NM, NLF, DCF)
+         CALL POINT_TO_VECTOR(NVECTORC, NM, NLC, FCC)
 
-         NC_CO => SLC%NCS
+         NCC => SLC%NCS
 
          R     => SLF%R
          R_ROW => SLF%R_ROW
          R_COL => SLF%R_COL
 
-         DO IC_CO = 1, NC_CO
+         DO ICC = 1, NCC
             AUX = 0.0_EB
-            DO ICOL = R_ROW(IC_CO), R_ROW(IC_CO+1)-1
+            DO ICOL = R_ROW(ICC), R_ROW(ICC+1)-1
                IC = R_COL(ICOL)
                AUX0 = AUX
-               AUX = AUX + DC_FI(IC) * R(ICOL)
+               AUX = AUX + DCF(IC) * R(ICOL)
             ENDDO
-            FC_CO(IC_CO) = AUX
+            FCC(ICC) = AUX
          ENDDO
 
       ENDDO
@@ -11657,18 +11738,25 @@ END SUBROUTINE SCARC_RESTRICTION
 !>    - 'CO' corresponds to coarser grid
 !>    - 'FI' corresponds to finer   grid
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_PROLONGATION (NVECTOR_CO, NVECTOR_FI, NL_CO, NL_FI)
-INTEGER, INTENT(IN) :: NVECTOR_CO, NVECTOR_FI, NL_CO, NL_FI
+SUBROUTINE SCARC_PROLONGATION (NVECTORC, NVECTORF, NLC, NLF)
+INTEGER, INTENT(IN) :: NVECTORC, NVECTORF, NLC, NLF
 INTEGER :: NM, ICOL, IC, I
-REAL(EB), POINTER, DIMENSION(:)     :: XC_CO, DC_FI, P
+REAL(EB), POINTER, DIMENSION(:)     :: XCC, DCF, P
 INTEGER , POINTER, DIMENSION(:)     :: P_ROW, P_COL
 INTEGER , POINTER, DIMENSION(:,:)   :: P_PTR
-INTEGER , POINTER :: NX_CO, NY_CO, NZ_CO, NC_FI, NCE_FI
-INTEGER  :: NX_FI, NY_FI, NZ_FI
-INTEGER  :: IX_FI, IY_FI, IZ_FI, IC_FI(8)
-INTEGER  :: IX_CO, IY_CO, IZ_CO, IC_CO
-REAL(EB) :: AUX, SCAL
+INTEGER , POINTER :: NXC, NYC, NZC, NCF, NCEF
+INTEGER  :: NXF, NYF, NZF
+INTEGER  :: IXF, IYF, IZF, ICF(8), ICFB(-1:1,-1:1)
+INTEGER  :: IXC, IYC, IZC, ICC
+REAL(EB) :: AUX, SCAL, W1, W3, W4, W9, W12
 TYPE (SCARC_LEVEL_TYPE), POINTER :: SLC, SLF
+
+SCAL = 0.0625_EB
+W12  = 12.0_EB
+W9   =  9.0_EB
+W4   =  4.0_EB
+W3   =  3.0_EB
+W1   =  1.0_EB
 
 
 SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
@@ -11678,69 +11766,145 @@ SELECT_MULTIGRID: SELECT CASE (TYPE_MULTIGRID)
 
       DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
-         SLC => SCARC(NM)%LEVEL(NL_CO)
-         SLF => SCARC(NM)%LEVEL(NL_FI)
+         SLC => SCARC(NM)%LEVEL(NLC)
+         SLF => SCARC(NM)%LEVEL(NLF)
 
-         NX_CO => SLC%NX
-         NY_CO => SLC%NY
-         NZ_CO => SLC%NZ
+         NXC => SLC%NX
+         NYC => SLC%NY
+         NZC => SLC%NZ
 
-         NX_FI = 2*NX_CO
-         NY_FI = 2*NY_CO
-         NZ_FI = 2*NZ_CO
+         NXF = 2*NXC
+         NYF = 2*NYC
+         NZF = 2*NZC
 
-         CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, XC_CO)
-         CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
+         CALL POINT_TO_VECTOR(NVECTORC, NM, NLC, XCC)
+         CALL POINT_TO_VECTOR(NVECTORF, NM, NLF, DCF)
 
          IF (TWO_D) THEN
 
-            DO IZ_CO = 1, NZ_CO
-               DO IX_CO = 1, NX_CO
+            SELECT_INTERPOL: SELECT CASE (TYPE_INTERPOL)
 
-                  IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%GRIDSTATE(IX_CO,1,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+               CASE (NSCARC_INTERPOL_CONSTANT)
 
-                  IX_FI = 2*IX_CO
-                  IY_FI = 1
-                  IZ_FI = 2*IZ_CO
-
-                  IC_CO = SLC%GRIDSTATE(IX_CO, 1, IZ_CO, UNKH) 
-
-                  IC_FI(1) = SLF%GRIDSTATE(IX_FI-1, 1, IZ_FI-1, UNKH) 
-                  IC_FI(2) = SLF%GRIDSTATE(IX_FI-1, 1, IZ_FI  , UNKH) 
-                  IC_FI(3) = SLF%GRIDSTATE(IX_FI  , 1, IZ_FI-1, UNKH) 
-                  IC_FI(4) = SLF%GRIDSTATE(IX_FI  , 1, IZ_FI  , UNKH) 
-
-                  DO I = 1, 4
-                     DC_FI(IC_FI(I)) = XC_CO(IC_CO)
+                  DO IZC = 1, NZC
+                     DO IXC = 1, NXC
+      
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%GRIDSTATE(IXC,1,IZC,CGSC)/=IS_GASPHASE) CYCLE
+      
+                        IXF = 2*IXC
+                        IYF = 1
+                        IZF = 2*IZC
+      
+                        ICC = SLC%GRIDSTATE(IXC, 1, IZC, UNKH) 
+      
+                        ICF(1) = SLF%GRIDSTATE(IXF-1, 1, IZF-1, UNKH) 
+                        ICF(2) = SLF%GRIDSTATE(IXF-1, 1, IZF  , UNKH) 
+                        ICF(3) = SLF%GRIDSTATE(IXF  , 1, IZF-1, UNKH) 
+                        ICF(4) = SLF%GRIDSTATE(IXF  , 1, IZF  , UNKH) 
+      
+                        DO I = 1, 4
+                           DCF(ICF(I)) = XCC(ICC)
+                        ENDDO
+                     ENDDO
                   ENDDO
-               ENDDO
-            ENDDO
+
+               CASE (NSCARC_INTERPOL_BILINEAR)
+
+                  DO IZC = 1, NZC
+                     DO IXC = 1, NXC
+         
+                        IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%GRIDSTATE(IXC,1,IZC,CGSC)/=IS_GASPHASE) CYCLE
+         
+                        IXF = 2*IXC
+                        IZF = 2*IZC
+         
+                        ICC = SLC%GRIDSTATE(IXC, 1, IZC, UNKH) 
+         
+                        ICFB(-1,-1) = SLF%GRIDSTATE(IXF-1, 1, IZF-1, UNKH) 
+                        ICFB(-1, 1) = SLF%GRIDSTATE(IXF-1, 1, IZF  , UNKH) 
+                        ICFB( 1,-1) = SLF%GRIDSTATE(IXF  , 1, IZF-1, UNKH) 
+                        ICFB( 1, 1) = SLF%GRIDSTATE(IXF  , 1, IZF  , UNKH) 
+         
+         !IF (TYPE_DEBUG > NSCARC_DEBUG_EXTREME) THEN
+         !   WRITE(LU_SCARC,'(A,2i6,A,4i6)') 'PROLONGATION_NEW:', IXC, IZC, ':', ICFB(-1,-1), ICFB(-1,1), ICFB(1,-1), ICFB(1,1)
+         !ENDIF
+                        IF (IXC==1.AND.IZC==1) THEN
+                           DCF(ICFB(-1,-1)) = XCC(ICC)
+                           DCF(ICFB(-1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+NXC))
+                           DCF(ICFB( 1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC+1))
+                        ELSE IF (IXC==1 .AND. IZC==NZC) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-NXC))
+                           DCF(ICFB(-1, 1)) = XCC(ICC)
+                           DCF(ICFB( 1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+1))
+                        ELSE IF (IXC==NXC .AND. IZC==1) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC-1))
+                           DCF(ICFB( 1,-1)) = XCC(ICC)
+                           DCF(ICFB( 1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+NXC))
+                        ELSE IF (IXC==NXC .AND. IZC==NZC) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-1))
+                           DCF(ICFB( 1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-NXC))
+                           DCF(ICFB( 1, 1)) = XCC(ICC)
+                        ELSE IF (IZC==1) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC-1))
+                           DCF(ICFB( 1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC+1))
+                        ELSE IF (IZC==NZC) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-1))
+                           DCF(ICFB( 1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+1))
+                        ELSE IF (IXC==1) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-NXC))
+                           DCF(ICFB(-1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+NXC))
+                           DCF(ICFB( 1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC+1))
+                        ELSE IF (IXC==NXC) THEN
+                           DCF(ICFB(-1,-1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W9 *XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC-1))
+                           DCF(ICFB( 1,-1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC-NXC))
+                           DCF(ICFB( 1, 1)) = SCAL*(W12*XCC(ICC)+W4*XCC(ICC+NXC))
+                        ELSE
+                           DCF(ICFB(-1,-1)) = SCAL*(W9*XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC-1))
+                           DCF(ICFB(-1, 1)) = SCAL*(W9*XCC(ICC)+W3*XCC(ICC-1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC-1))
+                           DCF(ICFB( 1,-1)) = SCAL*(W9*XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC-NXC)+W1*XCC(ICC-NXC+1))
+                           DCF(ICFB( 1, 1)) = SCAL*(W9*XCC(ICC)+W3*XCC(ICC+1)+W3*XCC(ICC+NXC)+W1*XCC(ICC+NXC+1))
+                        ENDIF
+                     ENDDO
+                  ENDDO
+
+            END SELECT SELECT_INTERPOL
 
          ELSE
 
-            DO IZ_CO = 1, NZ_CO
-               DO IY_CO = 1, NY_CO
-                  DO IX_CO = 1, NX_CO
+            ! Note: 3D-bilinear case is still missing
+            DO IZC = 1, NZC
+               DO IYC = 1, NYC
+                  DO IXC = 1, NXC
 
-                     IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%GRIDSTATE(IX_CO,IY_CO,IZ_CO,CGSC)/=IS_GASPHASE) CYCLE
+                     IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.SLC%GRIDSTATE(IXC,IYC,IZC,CGSC)/=IS_GASPHASE) CYCLE
 
-                     IX_FI = 2*IX_CO
-                     IY_FI = 2*IY_CO
-                     IZ_FI = 2*IZ_CO
+                     IXF = 2*IXC
+                     IYF = 2*IYC
+                     IZF = 2*IZC
 
-                     IC_CO = SLC%GRIDSTATE(IX_CO, IY_CO, IZ_CO, UNKH) 
+                     ICC = SLC%GRIDSTATE(IXC, IYC, IZC, UNKH) 
 
-                     IC_FI(1) = SLF%GRIDSTATE(IX_FI-1, IY_FI-1, IZ_FI-1, UNKH) 
-                     IC_FI(2) = SLF%GRIDSTATE(IX_FI-1, IY_FI-1, IZ_FI  , UNKH) 
-                     IC_FI(3) = SLF%GRIDSTATE(IX_FI-1, IY_FI  , IZ_FI-1, UNKH) 
-                     IC_FI(4) = SLF%GRIDSTATE(IX_FI-1, IY_FI  , IZ_FI  , UNKH) 
-                     IC_FI(5) = SLF%GRIDSTATE(IX_FI  , IY_FI-1, IZ_FI-1, UNKH) 
-                     IC_FI(6) = SLF%GRIDSTATE(IX_FI  , IY_FI-1, IZ_FI  , UNKH) 
-                     IC_FI(7) = SLF%GRIDSTATE(IX_FI  , IY_FI  , IZ_FI-1, UNKH) 
-                     IC_FI(8) = SLF%GRIDSTATE(IX_FI  , IY_FI  , IZ_FI  , UNKH) 
+                     ICF(1) = SLF%GRIDSTATE(IXF-1, IYF-1, IZF-1, UNKH) 
+                     ICF(2) = SLF%GRIDSTATE(IXF-1, IYF-1, IZF  , UNKH) 
+                     ICF(3) = SLF%GRIDSTATE(IXF-1, IYF  , IZF-1, UNKH) 
+                     ICF(4) = SLF%GRIDSTATE(IXF-1, IYF  , IZF  , UNKH) 
+                     ICF(5) = SLF%GRIDSTATE(IXF  , IYF-1, IZF-1, UNKH) 
+                     ICF(6) = SLF%GRIDSTATE(IXF  , IYF-1, IZF  , UNKH) 
+                     ICF(7) = SLF%GRIDSTATE(IXF  , IYF  , IZF-1, UNKH) 
+                     ICF(8) = SLF%GRIDSTATE(IXF  , IYF  , IZF  , UNKH) 
 
                      DO I = 1, 8
-                        DC_FI(IC_FI(I)) = XC_CO(IC_CO)
+                        DCF(ICF(I)) = XCC(ICC)
                      ENDDO
 
                   ENDDO
@@ -11759,30 +11923,30 @@ IF (TYPE_COARSENING >= NSCARC_COARSENING_GMG) SCAL=2.0_EB
 
       DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
-         SLC => SCARC(NM)%LEVEL(NL_CO)
-         SLF => SCARC(NM)%LEVEL(NL_FI)
+         SLC => SCARC(NM)%LEVEL(NLC)
+         SLF => SCARC(NM)%LEVEL(NLF)
 
-         CALL POINT_TO_VECTOR(NVECTOR_CO, NM, NL_CO, XC_CO)
-         CALL POINT_TO_VECTOR(NVECTOR_FI, NM, NL_FI, DC_FI)
+         CALL POINT_TO_VECTOR(NVECTORC, NM, NLC, XCC)
+         CALL POINT_TO_VECTOR(NVECTORF, NM, NLF, DCF)
 
-         NC_FI  => SLF%NCS
-         NCE_FI => SLF%NCE
+         NCF  => SLF%NCS
+         NCEF => SLF%NCE
 
          P      => SLF%P
          P_ROW  => SLF%P_ROW
          P_COL  => SLF%P_COL
          P_PTR  => SLF%P_PTR
 
-         DO IC = 1, NC_FI
+         DO IC = 1, NCF
             AUX = 0.0_EB
             DO ICOL = P_ROW(IC), P_ROW(IC+1)-1
-               IC_CO = P_COL(ICOL)
-               AUX = XC_CO(IC_CO) * P(ICOL)
+               ICC = P_COL(ICOL)
+               AUX = XCC(ICC) * P(ICOL)
             ENDDO
-            DC_FI(IC) = SCAL*AUX
+            DCF(IC) = SCAL*AUX
          ENDDO
-         DO IC = NC_FI+1, NCE_FI
-            DC_FI(IC) = 0.0_EB
+         DO IC = NCF+1, NCEF
+            DCF(IC) = 0.0_EB
          ENDDO
       ENDDO
 
@@ -11790,7 +11954,6 @@ END SELECT SELECT_MULTIGRID
 
 
 END SUBROUTINE SCARC_PROLONGATION
-
 
 
 !> ------------------------------------------------------------------------------------------------
@@ -13755,17 +13918,4 @@ END MODULE SCRC
 
 !> Remember variable format
 !> FORMAT( 3F<2*N+M>.1 )
-
-!> -----------------------------------------------------------------------------
-!> Handle MPI error
-!> -----------------------------------------------------------------------------
-!SUBROUTINE SCARC_HANDLE_MPI_ERROR(ERROR_MESSAGE,ERROR_CODE)
-!
-!INTEGER :: ERROR_CODE, IERR = 0
-!CHARACTER(*) :: ERROR_MESSAGE
-!
-!WRITE(*,'(A,A,I2)') TRIM(ERROR_MESSAGE),', ERROR_CODE=',ERROR_CODE
-!CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
-!
-!END SUBROUTINE SCARC_HANDLE_MPI_ERROR
 
