@@ -7880,6 +7880,14 @@ The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} can
 \dot{q}_{\si{w}} &= \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
 \end{align}
 
+\subsubsection{Mass Flux at a Boundary}
+\label{info:wallflux}
+
+There are two quantities that may be used for measuring mass flux on boundaries: {\ct 'MASS FLUX'} and {\ct 'MASS FLUX WALL'}.  Each takes a {\ct SPEC\_ID} if a certain species is desired.  If {\ct SPEC\_ID} is omitted, then the total flux is given.  The difference between the two outputs is that {\ct 'MASS FLUX'} has been designed primarily to work with the solid phase solver, and only provides mass fluxes at a solid surface.  Those fluxes may have been specified by the user on a {\ct SURF} line or computed by the pyrolysis model.
+
+The purpose of {\ct 'MASS FLUX WALL'} is for generating detailed species mass balances including flows in and out of the domain at {\ct OPEN} boundaries.  The value of the flux for species $\alpha$ is $\rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n$ where $\mathbf{n}$ is the normal direction of the surface.  The convention used here is that positive fluxes are entering the domain and negative fluxes are leaving. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  When used in conjunction with {\ct MASS\_FILE=.TRUE.} on {\ct DUMP}, a tight species mass balance should be obtainable.
+
+
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
 
@@ -8252,7 +8260,6 @@ For those output quantities that require a species name via {\ct SPEC\_ID}, the 
 Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just remember that all output quantity names ought to be in single quotes.
 
 
-
 \clearpage
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
@@ -8310,7 +8317,8 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
 {\ct MASS FLOW WALL}                            & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
-{\ct MASS FLUX}$^1$                             & Mass flux at solid surface                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
+{\ct MASS FLUX}$^1$                             & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
+{\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX X}$^1$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
 {\ct MASS FLUX Y}$^1$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
 {\ct MASS FLUX Z}$^1$                           & $\rho w Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
@@ -8373,16 +8381,17 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 
 \noindent
 \begin{tabbing}
-$^1$  \hspace{0.05in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^1$  \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                      \> Omit {\ct SPEC\_ID} for total flux. \\
                       \> Do not use for {\ct MIXTURE FRACTION}. \\
-$^2$                  \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
+$^2$                  \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                  \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
-$^4$                  \> Quantify allows for an optional {\ct MATL\_ID}.
+$^4$                  \> Allows for an optional {\ct MATL\_ID}.
 
 \end{tabbing}
 
-
+\clearpage
 
 \section{Summary of Infrequently-Used Output Quantities}
 \label{info:oddoutputquantities}
@@ -8409,7 +8418,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT}$^2$                                   & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^1$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
-%{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
+{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
@@ -8437,7 +8446,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
-{\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m^2.s)} & B,D         \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
 {\ct MOLECULAR VISCOSITY}                       & Molecular viscosity, $\mu(\mathbf{Z},T)$          & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
@@ -8476,12 +8484,15 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \noindent
 \begin{tabbing}
-$^1$ \hspace{0.05in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-$^2$                 \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
-$^3$                 \> Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \\
-$^4$                 \> Quantity allows for an optional {\ct MATL\_ID}.
+$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                     \> Omit {\ct SPEC\_ID} for total flux. \\
+$^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
+$^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
+$^4$                 \> Allows for an optional {\ct MATL\_ID}.
 \end{tabbing}
 
+
+\clearpage
 
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
