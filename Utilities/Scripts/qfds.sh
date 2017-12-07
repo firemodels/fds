@@ -32,6 +32,11 @@ if [ "$NCORES_COMPUTENODE" != "" ]; then
   ncores=$NCORES_COMPUTENODE
 fi
 
+platform="linux"
+if [ "`uname`" == "Darwin" ] ; then
+  platform="osx"
+fi
+
 MPIRUN=
 ABORTRUN=n
 DB=
@@ -44,6 +49,7 @@ if [ "$MPIRUN_MCA" != "" ]; then
   MCA=$MPIRUN_MCA
 fi
 
+SCRIPTFILES=
 nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
@@ -76,7 +82,7 @@ function usage {
   echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB]"
+  echo "    [default: $FDSROOT/fds/Build/mpi_intel_${platform}_64$DB/fds_mpi_intel_${platform}_64$DB]"
   echo " -h   - show commony used options"
   echo " -H   - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -137,7 +143,7 @@ fi
 
 # read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:l:m:MNO:P:n:o:p:q:rR:sStTuw:v' OPTION
+while getopts 'AbB:Ccd:e:E:f:iIhHj:L:l:m:MNO:P:n:o:p:q:rR:sStTuw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -188,6 +194,9 @@ case $OPTION  in
    ;;
   l)
    nodelist="$OPTARG"
+   ;;
+  L)
+   SCRIPPTFILES="$OPTARG"
    ;;
   M)
    MCA="--mca plm_rsh_agent /usr/bin/ssh "
@@ -301,11 +310,11 @@ else
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
-      exe=$FDSROOT/fds/Build/impi_intel_linux_64$DB/fds_impi_intel_linux_64$DB
+      exe=$FDSROOT/fds/Build/impi_intel_${platform}_64$DB/fds_impi_intel_${platform}_64$DB
     fi
   fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/mpi_intel_linux_64$DB/fds_mpi_intel_linux_64$DB
+    exe=$FDSROOT/fds/Build/mpi_intel_${platform}_64$DB/fds_mpi_intel_${platform}_64$DB
   fi
 fi
 
@@ -702,6 +711,9 @@ fi
 # run script
 
 chmod +x $scriptfile
+if [ "$SCRIPTFILES" != "" ]; then
+  echo $(basename "$scriptfile") >> $SCRIPTFILES
+fi
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
