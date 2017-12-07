@@ -34,7 +34,7 @@ mdot_out = F.data(:,find(strcmp(F.colheaders,'"H2O out"')));
 bal = dmdt - mdot_in - mdot_out;
 
 plot(t,zeros(1,length(t)),'k-'); hold on
-H(1)=plot(t,mdot_in); hold on
+H(1)=plot(t,mdot_in);
 H(2)=plot(t,-mdot_out);
 H(3)=plot(t,bal);
 
