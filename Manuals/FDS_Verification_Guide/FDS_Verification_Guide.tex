@@ -1910,15 +1910,15 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 
 \subsubsection{Case 2: Air Injection into a Pressurized Compartment}
 
- Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
+Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
 
 \subsubsection{Case 3: Gases Released by Solid Phase Reactions within a Solid Obstruction}
 
- A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
+A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
 
 \subsubsection{Case 4: Gases Released by Solid Phase Reactions at the Boundary of the Domain}
 
- This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
+This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -1929,6 +1929,26 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \end{tabular*}
 \caption[The \textct{species\_conservation} test cases]{Results of the \textct{species\_conservation} test cases. Case~1: Hot gas is injected at a very low flow rate into a 4~m cube. Case~2: Air is injected into one side of a partitioned compartment. Case~3: A solid cube vaporizes yielding four gases whose total mass is 0.8~kg. A small amount of nitrogen is created to fill the void left by the vaporized solid cube. Case~4: A patch of solid surface reacts to form four gases whose total mass is 0.4~kg.}
 \label{species_conservation}
+\end{figure}
+
+\subsection{Mass Flux through Domain Boundaries (\texorpdfstring{\textct{mass\_flux\_wall}}{mass\_flux\_wall})}
+\label{mass_flux_wall}
+
+This set of tests considers a specified mass injection of water vapor from a {\ct VENT} on the floor of a compartment.  The entire top of the compartment is {\ct OPEN} to the ambient.  The lighter water vapors are buoyant, so they rise creating a turbulent flow into and out of the domain.  Therefore, the input is steady, while the outflow of water vapor is quite chaotic.  To judge whether a proper mass balance is achieved by FDS we must monitor not only the inflow and outflow, but also the total mass of water vapor in the domain at a given time.  Therefore, we add {\ct DEVC} of quantity {\ct MASS\_FLUX\_WALL} and {\ct STATITSTICS=`SURFACE INTEGRAL`} for inflow and outflow, and we also add {\ct MASS\_FILE=.TRUE.} to the {\ct DUMP} line to monitor the total water vapor at any point in time in the domain.  With $\rho$ and $Y_{\mbox{\tiny H2O}}$ denoting the local mass density and mass fraction of water vapor in a cell, and with $\dot{m}_{\mbox{\tiny H2O}}^{\prime\prime}$ denoting the flux of water vapor at a cell face on the domain boundary, the mass balance may be written as,
+\begin{equation}
+\label{eq:H2O_mass_balance}
+\frac{\mbox{d}}{\mbox{d}t} \left( \int_{V} \rho Y_{\mbox{\tiny H2O}} \,\mbox{d}V \right) + \int_{S_{out}} \dot{m}_{\mbox{\tiny H2O}}^{\prime\prime} \,\mbox{d}S - \int_{S_{in}} \dot{m}_{\mbox{\tiny H2O}}^{\prime\prime} \,\mbox{d}S = 0
+\end{equation}
+
+Figure \ref{fig:H2O_mass_balance} shows the results of two cases that test the mass balance of water vapor in the domain just described.  The plot on the left tests lumped species balance.  In this case, the background humidity is set to zero and so the only water vapor in the domain is that of the tracked species injected at the bottom boundary.  In the second test case on the right we are showing the balance for the primitive species water vapor.  In this test, the background humidity is the default (40 \%) and so the output device must sum the water vapor contribution from the background air and the tracked species injected at the bottom.  In each plot, the blue and red lines show the inflow (blue, steady) and outflow (red, turbulent) as well as the balance from Eq.~\ref{eq:H2O_mass_balance} formed from the mass and devices files.  The balance (yellow line) fluctuates slightly around zero because of a first-order time error in reporting the boundary fluxes.  That is, within the actual simulation the mass transport equation is updated using a second-order Runge-Kutta scheme, whereas at the time the output routine is called the code does not have the machinery to perfectly reconstruct the second-order flux terms.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_flux_wall_zindex_mass_balance} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_flux_wall_yindex_mass_balance}
+\end{tabular*}
+\caption[The \textct{mass\_flux\_wall} test cases]{Results of the \textct{mass\_flux\_wall} test cases.  (Left) Lumped species balance, (Right) primitive species balance.}
+\label{fig:H2O_mass_balance}
 \end{figure}
 
 \subsection{Checking the Equation of State (\texorpdfstring{\textct{particle\_offgas}}{particle\_offgas})}
