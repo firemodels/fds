@@ -88,6 +88,8 @@ $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
 $QFDS -d Flowfields mean_forcing_hole.fds
+$QFDS -d Flowfields mass_flux_wall_yindex.fds
+$QFDS -d Flowfields mass_flux_wall_zindex.fds
 
 $QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds

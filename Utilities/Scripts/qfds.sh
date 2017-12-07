@@ -21,8 +21,11 @@ OMPPROCBIND=
 HELP=
 FDS_MODULE_OPTION=1
 
+queue=batch
 ncores=8
-if [ "`uname`" != "Darwin" ]; then
+if [ "`uname`" == "Darwin" ]; then
+  queue=none
+else
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
 if [ "$NCORES_COMPUTENODE" != "" ]; then
@@ -35,7 +38,6 @@ DB=
 JOBPREFIX=
 OUT2ERROR=
 EMAIL=
-queue=batch
 stopjob=0
 MCA=
 if [ "$MPIRUN_MCA" != "" ]; then
@@ -311,7 +313,7 @@ fi
 
 if [ -e $exe ]; then
   if [ "$use_mpi_intel" == "" ]; then
-    is_intel_mpi=`echo "" | $exe |& grep MPI | grep library | grep Intel | wc -l`
+    is_intel_mpi=`echo "" | $exe 2>&1 >/dev/null | grep MPI | grep library | grep Intel | wc -l`
     if [ "$is_intel_mpi" == "1" ]; then
          use_intel_mpi=1
          nosocket="1"
@@ -434,7 +436,7 @@ else                                 # using OpenMPI
   fi
   MPIRUNEXE=${mpibindir}mpirun
   if [ "$mpibindir" == "" ]; then  # OPENMPI_PATH blank so mpirun needs to be in path
-    notfound=`$MPIRUNEXE -h |& head -1 | grep "not found" | wc -l`
+    notfound=`$MPIRUNEXE -h 2>&1 >/dev/null | head -1 | grep "not found" | wc -l`
     if [ $notfound -eq 1 ]; then
       echo "*** error: $MPIRUNEXE not in PATH"
       ABORTRUN=y
