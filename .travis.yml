@@ -17,5 +17,6 @@ script:
   - cd Build/mpi_gnu_linux_64
   - ./make_fds.sh
 env:
-  - PATH=/shared/openmpi_64/bin:$PATH
-  - LD_LIBRARY_PATH=/shared/openmpi_64/lib:$LD_LIBRARY_PATH
+  global:
+    - PATH=/shared/openmpi_64/bin:$PATH
+    - LD_LIBRARY_PATH=/shared/openmpi_64/lib:$LD_LIBRARY_PATH
