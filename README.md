@@ -1,4 +1,7 @@
 # fds-smv
+
+[![Build Status](https://travis-ci.org/saschagottfried/fds.svg?branch=master)](https://travis-ci.org/saschagottfried/fds)
+
 Fire Dynamics Simulator and Smokeview
 
 *Continuous Integration. Continuous Improvement.*
