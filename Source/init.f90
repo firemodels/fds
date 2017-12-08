@@ -2966,6 +2966,19 @@ VENT_LOOP: DO N=1,N_VENT
    ! Over-ride DEVICE/CONTROL logic
 
    IF (.NOT.VT%ACTIVATED .AND. T<=T_BEGIN) DEACTIVATE_VENT = .TRUE.
+   
+   ! If the VENT is tied to a specific OBST, and the OBST is HIDDEN (not HIDDEN), and the VENT is activated (not activated), 
+   ! deactivate (activate) the vent.
+   
+   IF (VT%OBST_INDEX>0 .AND. OBSTRUCTION(VT%OBST_INDEX)%HIDDEN .AND. VT%ACTIVATED) THEN
+      VT%ACTIVATED = .FALSE.
+      DEACTIVATE_VENT = .TRUE.
+   ENDIF
+   
+   IF (VT%OBST_INDEX>0 .AND. .NOT.OBSTRUCTION(VT%OBST_INDEX)%HIDDEN .AND. .NOT.VT%ACTIVATED) THEN
+      VT%ACTIVATED = .TRUE.
+      ACTIVATE_VENT = .TRUE.
+   ENDIF
 
    ! Decide if a VENT is to activate or de-activate based on a DEVICE or CONTROLLER
 
