@@ -196,7 +196,7 @@ case $OPTION  in
    nodelist="$OPTARG"
    ;;
   L)
-   SCRIPPTFILES="$OPTARG"
+   SCRIPTFILES="$OPTARG"
    ;;
   M)
    MCA="--mca plm_rsh_agent /usr/bin/ssh "
