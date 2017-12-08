@@ -13,10 +13,16 @@ install:
   - ./configure FC=gfortran-7 CC=gcc-7 --prefix=/shared/openmpi_64 --enable-mpirun-prefix-by-default --enable-mpi-fortran --enable-static --disable-shared --quiet
   - make --quiet -j 4
   - sudo make install --quiet
+  - cd ..
+  - pwd
 script:
+  - pwd
+  - cd $TRAVIS_BUILD_DIR
   - cd Build/mpi_gnu_linux_64
   - ./make_fds.sh
 env:
   global:
     - PATH=/shared/openmpi_64/bin:$PATH
     - LD_LIBRARY_PATH=/shared/openmpi_64/lib:$LD_LIBRARY_PATH
+after_failure:
+  - pwd
