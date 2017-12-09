@@ -1,12 +1,15 @@
 #!/bin/bash
-JOBPREFIX=O
+#*** environment variables used by this script
+
+# OMP_PLACES       - cores, sockets or threads
+# OMP_PROC_BIND    - false, true, master, close or spread
+
+export JOBPREFIX=O
 OUTPUT=/tmp/openmp.out.$$
 HOST=`hostname`
 QUEUE=batch
 FORCE=
 KILL=
-OOPT=
-POPT=
 benchbot_pid=~/.openmp_lock
 
 #---------------------------------------------
@@ -24,8 +27,6 @@ echo "-k - kill this script if it is running"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "-s - stop FDS runs"
-echo "-P - pass through -P option to qfds.sh"
-echo "-O - pass through -O option to qfds.sh"
 exit
 }
 
@@ -63,7 +64,7 @@ LIST_DESCENDANTS ()
 #                   main script
 #---------------------------------------------
 
-while getopts 'fhkO:P:q:s' OPTION
+while getopts 'fhkq:s' OPTION
 do
 case $OPTION in
   f)
@@ -78,25 +79,12 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
-  O)
-   OOPT="$OPTARG"
-   ;;
-  P)
-   POPT="$OPTARG"
-   ;;
   s)
-   ./Run_FDS_Cases.sh -b -j $JOBPREFIX -s
+   ./Run_FDS_Cases.sh -b -s
    exit
    ;;
 esac
 done
-
-if [ "$OOPT" != "" ]; then
-  OOPT="-O $OOPT"
-fi
-if [ "$POPT" != "" ]; then
-  POPT="-P $POPT"
-fi
 
 if [ "$KILL" == "1" ]; then
   pidrunning=0
@@ -134,7 +122,7 @@ echo $$ > $benchbot_pid
 
 # run cases
 
-./Run_FDS_Cases.sh -b -j $JOBPREFIX $OOPT $POPT -q $QUEUE
+./Run_FDS_Cases.sh -b -j $JOBPREFIX -q $QUEUE
 wait_cases_release_end
 
 # copy 64x64x64 results to a file
