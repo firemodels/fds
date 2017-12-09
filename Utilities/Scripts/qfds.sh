@@ -1,5 +1,15 @@
 #!/bin/bash
 
+#*** environment varables used by qfds.sh
+
+# BACKGROUND_PROG  - defines location of background program (if 'none' queue is also specified)
+# FIREMODELS       - $FIREMODELS is location of git repo
+# JOBPREFIX        - prefix job title with $JOBPREFIX
+# OMP_PLACES       - values may be cores, sockets or threads
+# OMP_PROC_BIND    - values may be false, true, master, close or spread
+# QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL
+# RESOURCE_MANAGER - SLURM or TORQUE
+
 # ---------------------------- usage ----------------------------------
 
 function usage {
@@ -26,33 +36,20 @@ function usage {
     exit
   fi
   echo "Other options:"
-  echo " -A   - used by timing scripts"
-  echo " -b   - use debug version of FDS"
-  echo " -B   - location of background program"
-  echo " -c   - strip extension"
-  echo " -C   - use modules currently loaded."
+  echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -E email address - send an email when the job ends or if it aborts"
-  echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: $FDSROOT]" 
   echo " -i use installed fds"
   echo " -I use Intel mpi version of fds"
-  echo " -j job - job prefix"
-  echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
-  echo " -O OMP_PLACES - specify value for the OMP_PLACES environment variable"
-  echo "        options: cores, sockets, threads"
-  echo " -P OMP_PROC_BIND - specify value for the OMP_PROC_BIND environment variable"
-  echo "        options: false, true, master, close, spread"
   echo " -r   - report bindings"
-  echo " -R manager - specify resource manager (SLURM or TORQUE) default: $RESOURCE_MANAGER"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
-  echo " -u   - use development version of FDS"
   echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -T type - run dv (development) or db (debug) version of fds"
+  echo "           if -T is not specified then the release version of fds is used"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -74,8 +71,8 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
 else
   RESOURCE_MANAGER="TORQUE"
 fi
-OMPPLACES=
-OMPPROCBIND=
+OMPPLACES=$OMP_PLACES
+OMPPROCBIND=$OMP_PROCBIND
 HELP=
 FDS_MODULE_OPTION=1
 
@@ -98,9 +95,7 @@ fi
 MPIRUN=
 ABORTRUN=n
 DB=
-JOBPREFIX=
 OUT2ERROR=
-EMAIL=
 stopjob=0
 MCA=
 if [ "$MPIRUN_MCA" != "" ]; then
@@ -119,9 +114,7 @@ use_intel_mpi=
 dir=.
 benchmark=no
 showinput=0
-strip_extension=0
 REPORT_BINDINGS="--report-bindings"
-nodelist=
 nosocket=
 exe=
 STARTUP=
@@ -133,8 +126,8 @@ if [ $# -lt 1 ]; then
   usage
 fi
 
-if [ "$BACKGROUND" == "" ]; then
-   BACKGROUND=background
+if [ "$BACKGROUND_PROG" == "" ]; then
+   BACKGROUND_PROG=background
 fi
 if [ "$BACKGROUND_DELAY" == "" ]; then
    BACKGROUND_DELAY=10
@@ -145,20 +138,11 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'AbB:Ccd:e:E:f:iIhHj:L:l:m:MNO:P:n:o:p:q:rR:sStTuw:v' OPTION
+while getopts 'ACd:e:hHiIL:m:MNn:o:p:q:rsStT:vw:' OPTION
 do
 case $OPTION  in
-  A)
+  A) # used by timing scripts to identify benchmark cases
    DUMMY=1
-   ;;
-  b)
-   use_debug=1
-   ;;
-  B)
-   BACKGROUND="$OPTARG"
-   ;;
-  c)
-   strip_extension=1
    ;;
   C)
    FDS_MODULE_OPTION=
@@ -168,12 +152,6 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
-   ;;
-  E)
-   EMAIL="$OPTARG"
-   ;;
-  f)
-   FDSROOT="$OPTARG"
    ;;
   h)
    usage
@@ -190,12 +168,6 @@ case $OPTION  in
   I)
    use_intel_mpi=1
    nosocket="1"
-   ;;
-  j)
-   JOBPREFIX="$OPTARG"
-   ;;
-  l)
-   nodelist="$OPTARG"
    ;;
   L)
    SCRIPTFILES="$OPTARG"
@@ -215,26 +187,14 @@ case $OPTION  in
   o)
    nopenmp_threads="$OPTARG"
    ;;
-  O)
-   OMPPLACES="$OPTARG"
-   ;;
   p)
    nmpi_processes="$OPTARG"
-   ;;
-  P)
-   OMPPROCBIND="$OPTARG"
    ;;
   q)
    queue="$OPTARG"
    ;;
   r)
    REPORT_BINDINGS="--report-bindings"
-   ;;
-  R)
-   RESOURCE_MANAGER=`echo "$OPTARG" | tr /a-z/ /A-Z/`
-   if [  "$RESOURCE_MANAGER" != "SLURM" ]; then
-     RESOURCE_MANAGER="torque"
-   fi
    ;;
   s)
    stopjob=1
@@ -245,8 +205,16 @@ case $OPTION  in
   t)
    benchmark="yes"
    ;;
-  u)
-   use_devel=1
+  T)
+   TYPE="$OPTARG"
+   use_devel=
+   use_debug=
+   if [ "$TYPE" == "dv" ]; then
+     use_devel=1
+   fi
+   if [ "$TYPE" == "db" ]; then
+     use_debug=1
+   fi
    ;;
   v)
    showinput=1
@@ -268,13 +236,9 @@ if [ "$walltime" == "" ]; then
     fi
 fi
 
-if [ "$nodelist" != "" ]; then
-  nodelist="-l nodes=$nodelist"
-fi
-
 if [[ "$OMPPLACES" != "" ]]; then
-  if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" == "cores" ]]; then
-    echo "*** error: can only be specify cores, sockets or threads with -O option"
+  if [[ "$OMPPLACES" != "cores" ]] &&  [[ "$OMPPLACES" != "sockets" ]] &&  [[ "$OMPPLACES" == "threads" ]]; then
+    echo "*** error: OMP_PLACES can only be cores, sockets or threads"
     exit
   fi
   OMPPLACES="OMP_PLACES=$OMPPLACES"
@@ -282,7 +246,7 @@ fi
 
 if [ "$OMPPROCBIND" != "" ]; then
   if [[ "$OMPPROCBIND" != "false" ]] &&  [[ "$OMPPROCBIND" != "true" ]] &&  [[ "$OMPPROCBIND" != "master" ]] &&  [[ "$OMPPROCBIND" == "close" ]] &&  [[ "$OMPPROCBIND" == "spread" ]]; then
-    echo "*** error: can only specify false, true, master, close or spread with -P option"
+    echo "*** error: OMP_PROCBIND can only be false, true, master, close or spread"
     exit
   fi
   OMPPROCBIND="OMP_PROC_BIND=$OMPPROCBIND"
@@ -486,10 +450,6 @@ if ! [ -e $in_full_file ]; then
   fi
 fi
 
-if [ "$strip_extension" == "1" ]; then
-  in=$infile
-fi
-
 if [ $STOPFDS ]; then
  echo "stopping case: $in"
  touch $stopfile
@@ -533,8 +493,8 @@ if [ "$STOPFDSMAXITER" == "" ]; then
   fi
 fi
 
-#QSUB="qsub -k eo -q $queue $nodelist"
-QSUB="qsub -q $queue $nodelist"
+#QSUB="qsub -k eo -q $queue"
+QSUB="qsub -q $queue"
 
 if [ "$queue" == "terminal" ]; then
   QSUB=
@@ -546,17 +506,17 @@ fi
 
 if [ "$queue" == "none" ]; then
   OUT2ERROR=" 2> $outerr"
-  notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
+  notfound=`$BACKGROUND_PROG -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$showinput" == "0" ]; then
     if [ "$notfound" == "1" ];  then
-      echo "The program $BACKGROUND was not found."
+      echo "The program $BACKGROUND_PROG was not found."
       echo "Install FDS which has the background utility."
       echo "Run aborted"
       exit
     fi
   fi
   MPIRUN=
-  QSUB="$BACKGROUND -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
+  QSUB="$BACKGROUND_PROG -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
 fi
 
 #*** setup for SLURM (alternative to torque)
@@ -609,9 +569,9 @@ EOF
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
-    if [ "$EMAIL" != "" ]; then
+    if [ "$QFDS_EMAIL" != "" ]; then
       cat << EOF >> $scriptfile
-#PBS -M $EMAIL
+#PBS -M $QFDS_EMAIL
 #PBS -m ae
 EOF
     fi

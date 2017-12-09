@@ -17,10 +17,18 @@ resource_manager=
 walltime=
 RUNOPTION=
 CURDIR=`pwd`
-BACKGROUND=
-BACKGROUND_DELAY=2
-BACKGROUND_LOAD=75
-JOBPREFIX=
+if [ "$BACKGROUND_PROG" == "" ]; then
+  export BACKGROUND_PROG=background
+fi
+if [ "$BACKGROUND_DELAY" == "" ]; then
+  BACKGROUND_DELAY=2
+fi
+if [ "$BACKGROUND_LOAD" == "" ]; then
+  export BACKGROUND_LOAD=75
+fi
+if [ "$JOBPREFIX" == "" ]; then
+  export JOBPREFIX=FB_
+fi
 REGULAR=1
 BENCHMARK=1
 OOPT=
@@ -43,8 +51,6 @@ echo "-J - use Intel MPI version of FDS"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
-echo "-O - pass through -O option to qfds.sh"
-echo "-P - pass through -P option to qfds.sh"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire70s, vis"
@@ -65,7 +71,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:dD:hj:JL:m:o:O:P:q:r:RsS:w:' OPTION
+while getopts 'bB:c:dD:hj:JL:m:o:q:r:RsS:w:' OPTION
 do
 case $OPTION in
   b)
@@ -79,36 +85,18 @@ case $OPTION in
   d)
    DEBUG=_db
    ;;
-  B)
-   BACKGROUND="$OPTARG"
-   ;;
-  D)
-   BACKGROUND_DELAY="$OPTARG"
-   ;;
   h)
    usage;
-   ;;
-  j)
-   JOBPREFIX="-j $OPTARG"
    ;;
   J)
    INTEL=i
    INTEL2="-I"
-   ;;
-  L)
-   BACKGROUND_LOAD="$OPTARG"
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
   o)
    nthreads="$OPTARG"
-   ;;
-  O)
-   OOPT="$OPTARG"
-   ;;
-  P)
-   POPT="$OPTARG"
    ;;
   q)
    QUEUE="$OPTARG"
@@ -154,13 +142,6 @@ else
 fi
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
-      if [ "$BACKGROUND" == "" ]; then
-         BACKGROUND=background
-      fi
-      BACKGROUND="-B $BACKGROUND"
-      export BACKGROUND_DELAY
-      export BACKGROUND_LOAD
-      JOBPREFIX=
       if [ "$scriptlist" != "" ]; then
         if [ -e $scriptlist ]; then
           rm -f $scriptlist
@@ -173,7 +154,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $SCRIPTLIST $walltime -n $nthreads $INTEL2 $JOBPREFIX -e $FDSMPI $QUEUE $OOPT $POPT" 
+export QFDS="$QFDSSH $SCRIPTLIST $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
