@@ -1,14 +1,15 @@
 #!/bin/bash
 
 #*** environment varables used by qfds.sh
+#    (may be set in your .bashrc file - put an export before each variable)
 
 # BACKGROUND_PROG  - defines location of background program (if 'none' queue is also specified)
-# FIREMODELS       - $FIREMODELS is location of git repo
-# JOBPREFIX        - prefix job title with $JOBPREFIX
+# FIREMODELS       - define directory containing git repos - eg. /home/username/FireModels_fork
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. SB_ (for smokebot)
 # OMP_PLACES       - values may be cores, sockets or threads
 # OMP_PROC_BIND    - values may be false, true, master, close or spread
-# QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL
-# RESOURCE_MANAGER - SLURM or TORQUE
+# QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL after the job finishes
+# RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
 
 # ---------------------------- usage ----------------------------------
 
