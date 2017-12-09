@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #*** environment varables used by qfds.sh
-#    (may be set in your .bashrc file - put an export before each variable)
 
 # BACKGROUND_PROG  - defines location of background program (if 'none' queue is also specified)
 # FIREMODELS       - define directory containing git repos - eg. /home/username/FireModels_fork
@@ -9,9 +8,9 @@
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL after the job finishes
-# QFDS_SCRIPTFILES - if set, will output the name of the script file to $QFDS_SCRIPTFILES
-#                    ( used by firebot and smokebot to enable killing of running jobs)
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
+# SCRIPTFILES      - if set, will output the name of the script file to $SCRIPTFILES
+#                    ( used by firebot and smokebot to kill jobs if desired )
 
 # ---------------------------- usage ----------------------------------
 
@@ -679,8 +678,8 @@ fi
 #*** run script
 
 chmod +x $scriptfile
-if [ "$QFDS_SCRIPTFILES" != "" ]; then
-  echo $(basename "$scriptfile") >> $QFDS_SCRIPTFILES
+if [ "$SCRIPTFILES" != "" ]; then
+  echo $(basename "$scriptfile") >> $SCRIPTFILES
 fi
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
