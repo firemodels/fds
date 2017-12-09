@@ -7,7 +7,7 @@
 # JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or SB_ (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
-# QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL after the job finishes
+# EMAIL            - if set, will send email to $EMAIL after the job finishes
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
 # SCRIPTFILES      - if set, will output the name of the script file to $SCRIPTFILES
 #                    ( used by firebot and smokebot to kill jobs if desired )
@@ -567,9 +567,9 @@ EOF
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
-    if [ "$QFDS_EMAIL" != "" ]; then
+    if [ "$EMAIL" != "" ]; then
       cat << EOF >> $scriptfile
-#PBS -M $QFDS_EMAIL
+#PBS -M $EMAIL
 #PBS -m ae
 EOF
     fi
