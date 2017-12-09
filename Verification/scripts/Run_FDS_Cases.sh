@@ -35,7 +35,6 @@ OOPT=
 POPT=
 INTEL=
 INTEL2=
-scriptlist=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -104,9 +103,6 @@ case $OPTION in
   r)
    resource_manager="$OPTARG"
    ;;
-  S)
-   scriptlist="$OPTARG"
-   ;;
   s)
    export STOPFDS=1
    ;;
@@ -141,20 +137,12 @@ else
    export RESOURCE_MANAGER="PBS"
 fi
 if [ "$QUEUE" != "" ]; then
-   if [ "$QUEUE" == "none" ]; then
-      if [ "$scriptlist" != "" ]; then
-        if [ -e $scriptlist ]; then
-          rm -f $scriptlist
-        fi
-        SCRIPTLIST="-L $scriptlist"
-      fi
-   fi
    QUEUE="-q $QUEUE"
 fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $SCRIPTLIST $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then

@@ -5,10 +5,12 @@
 
 # BACKGROUND_PROG  - defines location of background program (if 'none' queue is also specified)
 # FIREMODELS       - define directory containing git repos - eg. /home/username/FireModels_fork
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. SB_ (for smokebot)
-# OMP_PLACES       - values may be cores, sockets or threads
-# OMP_PROC_BIND    - values may be false, true, master, close or spread
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or SB_ (for firebot or smokebot)
+# OMP_PLACES       - cores, sockets or threads
+# OMP_PROC_BIND    - false, true, master, close or spread
 # QFDS_EMAIL       - if set, will send email to $QFDS_EMAIL after the job finishes
+# QFDS_SCRIPTFILES - if set, will output the name of the script file to $QFDS_SCRIPTFILES
+#                    ( used by firebot and smokebot to enable killing of running jobs)
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
 
 # ---------------------------- usage ----------------------------------
@@ -103,7 +105,6 @@ if [ "$MPIRUN_MCA" != "" ]; then
   MCA=$MPIRUN_MCA
 fi
 
-SCRIPTFILES=
 nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
@@ -139,7 +140,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:hHiIL:m:MNn:o:p:q:rsStT:vw:' OPTION
+while getopts 'ACd:e:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -169,9 +170,6 @@ case $OPTION  in
   I)
    use_intel_mpi=1
    nosocket="1"
-   ;;
-  L)
-   SCRIPTFILES="$OPTARG"
    ;;
   M)
    MCA="--mca plm_rsh_agent /usr/bin/ssh "
@@ -681,8 +679,8 @@ fi
 #*** run script
 
 chmod +x $scriptfile
-if [ "$SCRIPTFILES" != "" ]; then
-  echo $(basename "$scriptfile") >> $SCRIPTFILES
+if [ "$QFDS_SCRIPTFILES" != "" ]; then
+  echo $(basename "$scriptfile") >> $QFDS_SCRIPTFILES
 fi
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
