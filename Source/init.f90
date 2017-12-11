@@ -767,7 +767,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==1) CYCLE
+         IF (I==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I-1,J,K)
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE ! Permanently covered face
          IOR = -1
@@ -790,7 +790,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO J=OB%J1+1,OB%J2
          I = OB%I2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (I==M%IBAR) CYCLE
+         IF (I==M%IBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I+1,J,K)
          ! Permanently covered face
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
@@ -814,7 +814,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==1) CYCLE
+         IF (J==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J-1,K)
          ! Permanently covered face
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
@@ -838,7 +838,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          J = OB%J2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (J==M%JBAR) CYCLE
+         IF (J==M%JBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J+1,K)
          ! Permanently covered face
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
@@ -862,7 +862,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==1) CYCLE
+         IF (K==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J,K-1)
          ! Permanently covered face
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
@@ -886,7 +886,7 @@ OBST_LOOP_2: DO N=1,M%N_OBST
       DO I=OB%I1+1,OB%I2
          K = OB%K2
          ! Don't assign wall cell index to obstruction face pointing out of the computational domain
-         IF (K==M%KBAR) CYCLE
+         IF (K==M%KBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J,K+1)
          ! Permanently covered face
          IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE
@@ -2966,15 +2966,15 @@ VENT_LOOP: DO N=1,N_VENT
    ! Over-ride DEVICE/CONTROL logic
 
    IF (.NOT.VT%ACTIVATED .AND. T<=T_BEGIN) DEACTIVATE_VENT = .TRUE.
-   
-   ! If the VENT is tied to a specific OBST, and the OBST is HIDDEN (not HIDDEN), and the VENT is activated (not activated), 
+
+   ! If the VENT is tied to a specific OBST, and the OBST is HIDDEN (not HIDDEN), and the VENT is activated (not activated),
    ! deactivate (activate) the vent.
-   
+
    IF (VT%OBST_INDEX>0 .AND. OBSTRUCTION(VT%OBST_INDEX)%HIDDEN .AND. VT%ACTIVATED) THEN
       VT%ACTIVATED = .FALSE.
       DEACTIVATE_VENT = .TRUE.
    ENDIF
-   
+
    IF (VT%OBST_INDEX>0 .AND. .NOT.OBSTRUCTION(VT%OBST_INDEX)%HIDDEN .AND. .NOT.VT%ACTIVATED) THEN
       VT%ACTIVATED = .TRUE.
       ACTIVATE_VENT = .TRUE.
