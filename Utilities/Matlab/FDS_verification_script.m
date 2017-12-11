@@ -101,5 +101,6 @@ disp('ht3d_sphere...');                   ht3d_sphere
 disp('vegetation...');                    vegetation
 disp('radiation_gas_panel...');           radiation_gas_panel
 disp('particle_size_distribution...');    particle_size_distribution
+disp('mass_blance...');                   mass_balance
 
 display('verification scripts completed successfully!')
