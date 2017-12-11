@@ -1323,7 +1323,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that are inside a solid obstruction
 
-      IF (SOLID(IC_OLD)) THEN
+      IF (SOLID(IC_OLD) .OR. EXTERIOR(IC_OLD)) THEN
          LP%X = 1.E6_EB
          CYCLE PARTICLE_LOOP
       ENDIF
