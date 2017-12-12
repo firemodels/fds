@@ -6,14 +6,13 @@
 #                    queue is also specified)
 # FIREMODELS       - define directory containing git repos - 
 #                    eg. /home/username/FireModels_fork
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or 
-#                    SB_ (for firebot or smokebot)
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or  SB_
+#                    (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
-# SCRIPTFILES      - if set, will output the name of the script file to
-#                    $SCRIPTFILES ( used by firebot and smokebot to kill
-#                     jobs if desired )
+# SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
+#                   ( used by firebot and smokebot to kill jobs )
 
 # ---------------------------- usage ----------------------------------
 
