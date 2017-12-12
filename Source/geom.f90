@@ -569,7 +569,7 @@ REAL(EB),INTENT(OUT):: VAL_CF
 ! Local Variables:
 INTEGER :: II_LO,II_HI,JJ_LO,JJ_HI,KK_LO,KK_HI,SOLID_LO,SOLID_HI
 REAL(EB):: CC1(LOW_IND:HIGH_IND),CCSUM
-REAL(EB) :: Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: Y_SPECIES,ZZ_GET(1:N_TRACKED_SPECIES),VAL_CF_LO,VAL_CF_HI
 
 VAL_CF    = 0._EB
 Y_SPECIES = 1._EB
@@ -612,12 +612,20 @@ SELECT CASE(IND)
      VAL_CF =  (CC1(LOW_IND)*RHO(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)*RHO(II_HI,JJ_HI,KK_HI))*Y_SPECIES
   CASE(5) ! TEMPERATURE
      VAL_CF =  CC1(LOW_IND)*TMP(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)*TMP(II_HI,JJ_HI,KK_HI) - TMPM
+  CASE( 9)  ! PRESSURE
+     VAL_CF_LO = PBAR(KK_LO,PRESSURE_ZONE(II_LO,JJ_LO,KK_LO)) + &
+                 RHO(II_LO,JJ_LO,KK_LO)*(H(II_LO,JJ_LO,KK_LO)-KRES(II_LO,JJ_LO,KK_LO)) - P_0(KK_LO)
+     VAL_CF_HI = PBAR(KK_HI,PRESSURE_ZONE(II_HI,JJ_HI,KK_HI)) + &
+                 RHO(II_HI,JJ_HI,KK_HI)*(H(II_HI,JJ_HI,KK_HI)-KRES(II_HI,JJ_HI,KK_HI)) - P_0(KK_HI)
+     VAL_CF = CC1(LOW_IND)*VAL_CF_LO + CC1(HIGH_IND)*VAL_CF_HI
   CASE(11) ! HRRPUV
      VAL_CF = (CC1(LOW_IND)*  Q(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)*  Q(II_HI,JJ_HI,KK_HI))*0.001_EB
   CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
      VAL_CF =  CC1(LOW_IND)*  H(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)*  H(II_HI,JJ_HI,KK_HI)
   CASE(14) ! DIVERGENCE
      VAL_CF =  CC1(LOW_IND)*  D(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)*  D(II_HI,JJ_HI,KK_HI)
+  CASE(17)  ! VISCOSITY
+     VAL_CF =  CC1(LOW_IND)* MU(II_LO,JJ_LO,KK_LO) + CC1(HIGH_IND)* MU(II_HI,JJ_HI,KK_HI)
   CASE(90) ! MASS FRACTION, uses Y_INDEX
      IF (Z_INDEX > 0) THEN
         Y_SPECIES = CC1(LOW_IND)*ZZ(II_LO,JJ_LO,KK_LO,Z_INDEX) + CC1(HIGH_IND)*ZZ(II_HI,JJ_HI,KK_HI,Z_INDEX)
@@ -746,12 +754,16 @@ IF (FOUND) THEN
         VAL_CF = RHO(II,JJ,KK)*Y_SPECIES
      CASE(5) ! TEMPERATURE
         VAL_CF = TMP(II,JJ,KK) - TMPM
+     CASE( 9)  ! PRESSURE
+        VAL_CF = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-KRES(II,JJ,KK)) - P_0(KK)
      CASE(11) ! HRRPUV
         VAL_CF = Q(II,JJ,KK)*0.001_EB
      CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
         VAL_CF = H(II,JJ,KK)
      CASE(14) ! DIVERGENCE
         VAL_CF = D(II,JJ,KK)
+     CASE(17)  ! VISCOSITY
+        VAL_CF = MU(II,JJ,KK)
      CASE(90) ! MASS FRACTION, uses Y_INDEX
         IF (Z_INDEX > 0) THEN
            Y_SPECIES = ZZ(II,JJ,KK,Z_INDEX)
@@ -768,16 +780,17 @@ END SUBROUTINE GET_SOLIDCUTFACE_SCALAR_SLICE
 
 ! ---------------------------- GET_GASCUTFACE_SCALAR_SLICE ------------------------------
 
-SUBROUTINE GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACE,IND,Y_INDEX,Z_INDEX,VAL_CF)
+SUBROUTINE GET_GASCUTFACE_SCALAR_SLICE(X1AXIS,ICF,IFACE,IND,CC_FACE_CENTERED,CC_CELL_CENTERED,Y_INDEX,Z_INDEX,VAL_CF)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
 
 INTEGER, INTENT(IN) :: X1AXIS,ICF,IFACE,IND,Y_INDEX,Z_INDEX
+LOGICAL, INTENT(IN) :: CC_FACE_CENTERED,CC_CELL_CENTERED
 REAL(EB),INTENT(OUT):: VAL_CF
 
 ! Local Variables:
 REAL(EB) :: X1F, IDX, CCM1, CCP1, VAL_LOC(LOW_IND:HIGH_IND)
-INTEGER  :: ISIDE, ICC, JCC
+INTEGER  :: ISIDE, ICC, JCC, LOCAL_IND, II, JJ, KK
 REAL(EB) :: Y_SPECIES(LOW_IND:HIGH_IND),ZZ_GET(1:N_TRACKED_SPECIES)
 
 ! Point to mesh has been called for MESHES(NM):
@@ -790,9 +803,16 @@ IDX= 1._EB/ ( CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
               CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
 CCM1= IDX*(CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
 CCP1= IDX*(X1F-CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+LOCAL_IND=HIGH_IND
+
+IF( .NOT.CC_FACE_CENTERED .AND. CC_CELL_CENTERED) THEN
+   CCM1=1._EB
+   CCP1=0._EB
+   LOCAL_IND=LOW_IND
+ENDIF
 
 VAL_LOC(LOW_IND:HIGH_IND)= 0._EB
-DO ISIDE=LOW_IND,HIGH_IND
+DO ISIDE=LOW_IND,LOCAL_IND
    SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE,IFACE))
    CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
       ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE,IFACE)
@@ -808,12 +828,19 @@ DO ISIDE=LOW_IND,HIGH_IND
            VAL_LOC(ISIDE) = CUT_CELL(ICC)%RHO(JCC)*Y_SPECIES(ISIDE)
         CASE(5) ! TEMPERATURE
            VAL_LOC(ISIDE) = CUT_CELL(ICC)%TMP(JCC) - TMPM
+        CASE( 9)  ! PRESSURE
+           II=CUT_CELL(ICC)%IJK(IAXIS)
+           JJ=CUT_CELL(ICC)%IJK(JAXIS)
+           KK=CUT_CELL(ICC)%IJK(KAXIS)
+           VAL_LOC(ISIDE) = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-KRES(II,JJ,KK)) - P_0(KK)
         CASE(11) ! HRRPUV
            VAL_LOC(ISIDE) = CUT_CELL(ICC)%Q(JCC)*0.001_EB
         CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
            VAL_LOC(ISIDE) = CUT_CELL(ICC)%H(JCC)
         CASE(14) ! DIVERGENCE
            VAL_LOC(ISIDE) = CUT_CELL(ICC)%D(JCC)/CUT_CELL(ICC)%VOLUME(JCC)
+        CASE(17)  ! VISCOSITY
+           VAL_LOC(ISIDE) = MU(CUT_CELL(ICC)%IJK(IAXIS),CUT_CELL(ICC)%IJK(JAXIS),CUT_CELL(ICC)%IJK(KAXIS))
         CASE(90) ! MASS FRACTION, uses Y_INDEX
            IF (Z_INDEX > 0) THEN
               Y_SPECIES = CUT_CELL(ICC)%ZZ(Z_INDEX,JCC)
@@ -870,12 +897,16 @@ DO ISIDE=LOW_IND,HIGH_IND
         VAL_LOC(ISIDE) = RHO(II,JJ,KK)*Y_SPECIES(ISIDE)
      CASE(5) ! TEMPERATURE
         VAL_LOC(ISIDE) = TMP(II,JJ,KK) - TMPM
+     CASE( 9)  ! PRESSURE
+        VAL_LOC(ISIDE) = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-KRES(II,JJ,KK)) - P_0(KK)
      CASE(11) ! HRRPUV
         VAL_LOC(ISIDE) = Q(II,JJ,KK)*0.001_EB
      CASE(12) ! H, interpolated to cut-cells if PRES_ON_CARTESIAN
         VAL_LOC(ISIDE) = H(II,JJ,KK)
      CASE(14) ! DIVERGENCE
         VAL_LOC(ISIDE) = D(II,JJ,KK)
+     CASE(17)  ! VISCOSITY
+        VAL_LOC(ISIDE) =MU(II,JJ,KK)
      CASE(90) ! MASS FRACTION, uses Y_INDEX
         IF (Z_INDEX > 0) THEN
            Y_SPECIES = ZZ(II,JJ,KK,Z_INDEX)
@@ -4907,13 +4938,15 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
       N_ZZ_MAX = MAXLOC(WC%ONE_D%ZZ_F(1:N_TRACKED_SPECIES),1)
-      RHO_D_DZDN = 2._EB*WC%ONE_D%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-WC%ONE_D%ZZ_F(N))*WC%ONE_D%RDN
-      IF (N==N_ZZ_MAX) THEN
-         RHO_D_DZDN_GET = 2._EB*WC%ONE_D%RHO_D_F(:)*(ZZP(IIG,JJG,KKG,:)-WC%ONE_D%ZZ_F(:))*WC%ONE_D%RDN
-         RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
-      ENDIF
-      IF (IOR < 0) RHO_D_DZDN = -RHO_D_DZDN ! Switch the sign of the spatial derivative in high side boundaries.
-      IBM_EXIM_FACE(IEXIM)%FLX(LOW_IND,N) = RHO_D_DZDN
+      DO N=1,N_TOTAL_SCALARS
+         RHO_D_DZDN = 2._EB*WC%ONE_D%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-WC%ONE_D%ZZ_F(N))*WC%ONE_D%RDN
+         IF (N==N_ZZ_MAX) THEN
+            RHO_D_DZDN_GET = 2._EB*WC%ONE_D%RHO_D_F(:)*(ZZP(IIG,JJG,KKG,:)-WC%ONE_D%ZZ_F(:))*WC%ONE_D%RDN
+            RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
+         ENDIF
+         IF (IOR < 0) RHO_D_DZDN = -RHO_D_DZDN ! Switch the sign of the spatial derivative in high side boundaries.
+         IBM_EXIM_FACE(IEXIM)%FLX(LOW_IND,N) = RHO_D_DZDN
+      ENDDO
       TMP_G = WC%ONE_D%TMP_F
    ELSE ! Internal faces:
       SELECT CASE(X1AXIS)
@@ -23554,44 +23587,62 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       WC=>WALL(IW)
       EWC=>EXTERNAL_WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1
+      IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
+                WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_1
 
       II  = WC%ONE_D%II
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
-      NOM = EWC%NOM
-
-      IIO = EWC%IIO_MIN
-      JJO = EWC%JJO_MIN
-      KKO = EWC%KKO_MIN
-
-      IF ((EWC%IIO_MAX+EWC%JJO_MAX+EWC%KKO_MAX- &
-          (EWC%IIO_MIN+EWC%JJO_MIN+EWC%KKO_MIN)) > 0) THEN ! There is an OMESH on finer refinement level, not allowed.
-      WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.'
+      IF(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+         NOM = EWC%NOM ! Use Other Mesh Data.
+         IIO = EWC%IIO_MIN
+         JJO = EWC%JJO_MIN
+         KKO = EWC%KKO_MIN
+         IF ((EWC%IIO_MAX+EWC%JJO_MAX+EWC%KKO_MAX- &
+             (EWC%IIO_MIN+EWC%JJO_MIN+EWC%KKO_MIN)) > 0) THEN ! There is an OMESH on finer refinement level, not allowed.
+         WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.'
+         ENDIF
+         ! Define underlying Cartesian faces indexes:
+         SELECT CASE(IOR)
+         CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+            IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side I boundary face has the same index as the high boundary cell
+         CASE(-IAXIS) ! Higher X boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II - 1; JJF = JJ    ; KKF = KK
+            IIOF= IIO- 1; JJOF= JJO   ; KKOF= KKO
+         CASE( JAXIS) ! Lower Y boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+            IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side J boundary face has the same index as the high boundary cell
+         CASE(-JAXIS) ! Higher Y boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II    ; JJF = JJ - 1; KKF = KK
+            IIOF= IIO   ; JJOF= JJO- 1; KKOF= KKO
+         CASE( KAXIS) ! Lower Z boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+            IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side K boundary face has the same index as the high boundary cell
+         CASE(-KAXIS) ! Higher Z boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK - 1
+            IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO- 1
+         END SELECT
+      ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
+         NOM = NM ! Use cut face data, same mesh.
+         ! Define underlying Cartesian faces indexes:
+         SELECT CASE(IOR)
+         CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-IAXIS) ! Higher X boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II - 1; JJF = JJ    ; KKF = KK
+         CASE( JAXIS) ! Lower Y boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-JAXIS) ! Higher Y boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II    ; JJF = JJ - 1; KKF = KK
+         CASE( KAXIS) ! Lower Z boundary for Mesh NM, Higher for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-KAXIS) ! Higher Z boundary for Mesh NM, Lower for mesh NOM.
+            IIF = II    ; JJF = JJ    ; KKF = KK - 1
+         END SELECT
+         IIOF=IIF; JJOF=JJF; KKOF=KKF
       ENDIF
-
-      ! Define underlying Cartesian faces indexes:
-      SELECT CASE(IOR)
-      CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side I boundary face has the same index as the high boundary cell
-      CASE(-IAXIS) ! Higher X boundary for Mesh NM, Lower for mesh NOM.
-         IIF = II - 1; JJF = JJ    ; KKF = KK
-         IIOF= IIO- 1; JJOF= JJO   ; KKOF= KKO
-      CASE( JAXIS) ! Lower Y boundary for Mesh NM, Higher for mesh NOM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side J boundary face has the same index as the high boundary cell
-      CASE(-JAXIS) ! Higher Y boundary for Mesh NM, Lower for mesh NOM.
-         IIF = II    ; JJF = JJ - 1; KKF = KK
-         IIOF= IIO   ; JJOF= JJO- 1; KKOF= KKO
-      CASE( KAXIS) ! Lower Z boundary for Mesh NM, Higher for mesh NOM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO  ! High side K boundary face has the same index as the high boundary cell
-      CASE(-KAXIS) ! Higher Z boundary for Mesh NM, Lower for mesh NOM.
-         IIF = II    ; JJF = JJ    ; KKF = KK - 1
-         IIOF= IIO   ; JJOF= JJO   ; KKOF= KKO- 1
-      END SELECT
 
       ! Now Obtain the CUT_FACE for the same face on NM-NOM:
       X1AXIS=ABS(IOR)
@@ -23633,17 +23684,24 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       WC=>WALL(IW)
       EWC=>EXTERNAL_WALL(IW)
-      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_2
+      IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
+                WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_2
 
       II  = WC%ONE_D%II
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
       IOR = WC%ONE_D%IOR
-      NOM = EWC%NOM
-
-      IIO = EWC%IIO_MIN
-      JJO = EWC%JJO_MIN
-      KKO = EWC%KKO_MIN
+      IF(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+         NOM = EWC%NOM ! Use Other Mesh Data.
+         IIO = EWC%IIO_MIN
+         JJO = EWC%JJO_MIN
+         KKO = EWC%KKO_MIN
+      ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
+         NOM = NM ! Use gas cell data, same mesh.
+         IIO = WC%ONE_D%IIG
+         JJO = WC%ONE_D%JJG
+         KKO = WC%ONE_D%KKG
+      ENDIF
 
       IF (MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) == IBM_CUTCFE) THEN
          ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,IBM_IDCC)
