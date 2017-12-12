@@ -6,15 +6,13 @@
 #                    queue is also specified)
 # FIREMODELS       - define directory containing git repos - 
 #                    eg. /home/username/FireModels_fork
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or 
-#                    SB_ (for firebot or smokebot)
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or  SB_
+#                    (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
-# EMAIL            - if set, will send email to $EMAIL after the job finishes
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
-# SCRIPTFILES      - if set, will output the name of the script file to
-#                    $SCRIPTFILES ( used by firebot and smokebot to kill
-#                     jobs if desired )
+# SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
+#                   ( used by firebot and smokebot to kill jobs )
 
 # ---------------------------- usage ----------------------------------
 
@@ -590,12 +588,6 @@ EOF
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
-    if [ "$EMAIL" != "" ]; then
-      cat << EOF >> $scriptfile
-#PBS -M $EMAIL
-#PBS -m ae
-EOF
-    fi
     if [ "$walltimestring_pbs" != "" ]; then
       cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
@@ -652,11 +644,18 @@ EOF
 if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
 cat << EOF >> $scriptfile
 
-# add 1 to fds case count
-count=\`head -1 $QFDS_COUNT\`
-let "count=count+1"
-echo \$count > $QFDS_COUNT
-
+FDS_COUNT ()
+{
+  VAL=\$1
+  count=\`head -1 $QFDS_COUNT\`
+  if [ "\$VAL" == "+" ]; then
+    let "count=count+1"
+  else
+    let "count=count-1"
+  fi
+  echo \$count > $QFDS_COUNT
+}
+FDS_COUNT +
 EOF
 fi
 cat << EOF >> $scriptfile
@@ -665,11 +664,7 @@ $MPIRUN $exe $in $OUT2ERROR
 EOF
 if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
 cat << EOF >> $scriptfile
-
-# fds case has finished, subtract 1 from fds case count
-count=\`head -1 $QFDS_COUNT\`
-let "count=count-1"
-echo \$count > $QFDS_COUNT
+FDS_COUNT -
 EOF
 fi
 
