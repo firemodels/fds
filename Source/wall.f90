@@ -581,7 +581,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
@@ -635,9 +635,19 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                NR = -NINT(MLP%K_S)
                K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+               K_S = 0.5_EB*(K_S_M+K_S_P)
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            ELSE
+               ! for discontinuous material properties maintain continuity of flux, C0 continuity of temperature
+               ! (allow C1 discontinuity of temperature due to jump in thermal properties across interface)
+               R_K_S = K_S_P/K_S_M * DX(I)/DX(I+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I+1,J,K))/(1._EB + R_K_S) ! interface temperature
+               !! KDTDX(I,J,K) = K_S_P * (TMP(I+1,J,K)-TMP_I) * 2._EB/DX(I+1) !! these two fluxes should be identical
+               KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -665,9 +675,16 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   NR = -NINT(MLP%K_S)
                   K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
                ENDIF
-               K_S = 0.5_EB*(K_S_M+K_S_P)
-               K_S_MAX = MAX(K_S_MAX,K_S)
-               KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+               IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+                  K_S = 0.5_EB*(K_S_M+K_S_P)
+                  K_S_MAX = MAX(K_S_MAX,K_S)
+                  KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+               ELSE
+                  R_K_S = K_S_P/K_S_M * DY(J)/DY(J+1)
+                  TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J+1,K))/(1._EB + R_K_S)
+                  KDTDY(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DY(J)
+                  K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
@@ -697,9 +714,16 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                NR = -NINT(MLP%K_S)
                K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+               K_S = 0.5_EB*(K_S_M+K_S_P)
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            ELSE
+               R_K_S = K_S_P/K_S_M * DZ(K)/DZ(K+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J,K+1))/(1._EB + R_K_S)
+               KDTDZ(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DZ(K)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
