@@ -2,15 +2,19 @@
 
 #*** environment varables used by qfds.sh
 
-# BACKGROUND_PROG  - defines location of background program (if 'none' queue is also specified)
-# FIREMODELS       - define directory containing git repos - eg. /home/username/FireModels_fork
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or SB_ (for firebot or smokebot)
+# BACKGROUND_PROG  - defines location of background program (if 'none' 
+#                    queue is also specified)
+# FIREMODELS       - define directory containing git repos - 
+#                    eg. /home/username/FireModels_fork
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or 
+#                    SB_ (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # EMAIL            - if set, will send email to $EMAIL after the job finishes
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
-# SCRIPTFILES      - if set, will output the name of the script file to $SCRIPTFILES
-#                    ( used by firebot and smokebot to kill jobs if desired )
+# SCRIPTFILES      - if set, will output the name of the script file to
+#                    $SCRIPTFILES ( used by firebot and smokebot to kill
+#                     jobs if desired )
 
 # ---------------------------- usage ----------------------------------
 
@@ -515,13 +519,14 @@ if [ "$queue" == "none" ]; then
   fi
   MPIRUN=
   QSUB="$BACKGROUND_PROG -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
-fi
+else
 
 #*** setup for SLURM (alternative to torque)
 
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  QSUB="sbatch -p $queue --ignore-pbs"
-  MPIRUN='srun'
+  if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+    QSUB="sbatch -p $queue --ignore-pbs"
+    MPIRUN='srun'
+  fi
 fi
 
 #*** Set walltime parameter only if walltime is specified as input argument
