@@ -643,7 +643,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                ! for discontinuous material properties maintain continuity of flux, C0 continuity of temperature
                ! (allow C1 discontinuity of temperature due to jump in thermal properties across interface)
                R_K_S = K_S_P/K_S_M * DX(I)/DX(I+1)
-               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I+1,J,K))/(1._EB + R_K_S)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I+1,J,K))/(1._EB + R_K_S) ! interface temperature
                !! KDTDX(I,J,K) = K_S_P * (TMP(I+1,J,K)-TMP_I) * 2._EB/DX(I+1) !! these two fluxes should be identical
                KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
                K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
