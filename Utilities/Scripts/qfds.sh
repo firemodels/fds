@@ -644,11 +644,18 @@ EOF
 if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
 cat << EOF >> $scriptfile
 
-# add 1 to fds case count
-count=\`head -1 $QFDS_COUNT\`
-let "count=count+1"
-echo \$count > $QFDS_COUNT
-
+FDS_COUNT ()
+{
+  VAL=\$1
+  count=\`head -1 $QFDS_COUNT\`
+  if [ "\$VAL" == "+" ]; then
+    let "count=count+1"
+  else
+    let "count=count-1"
+  fi
+  echo \$count > $QFDS_COUNT
+}
+FDS_COUNT +
 EOF
 fi
 cat << EOF >> $scriptfile
@@ -657,11 +664,7 @@ $MPIRUN $exe $in $OUT2ERROR
 EOF
 if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
 cat << EOF >> $scriptfile
-
-# fds case has finished, subtract 1 from fds case count
-count=\`head -1 $QFDS_COUNT\`
-let "count=count-1"
-echo \$count > $QFDS_COUNT
+FDS_COUNT -
 EOF
 fi
 
