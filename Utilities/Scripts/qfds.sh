@@ -10,7 +10,6 @@
 #                    SB_ (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
-# EMAIL            - if set, will send email to $EMAIL after the job finishes
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
 # SCRIPTFILES      - if set, will output the name of the script file to
 #                    $SCRIPTFILES ( used by firebot and smokebot to kill
@@ -590,12 +589,6 @@ EOF
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
-    if [ "$EMAIL" != "" ]; then
-      cat << EOF >> $scriptfile
-#PBS -M $EMAIL
-#PBS -m ae
-EOF
-    fi
     if [ "$walltimestring_pbs" != "" ]; then
       cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
