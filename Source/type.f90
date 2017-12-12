@@ -392,7 +392,8 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  UNKH, UNKZ
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XCENLOW, XCENHIGH
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  DIFF_FACE, RHO_D, VELD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, DIFF_FACE, RHO_D, VELD
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             :: TMP_FACE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)         :: RHO_D_DZDN
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: H_RHO_D_DZDN
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, DHDX, FN, VELNP1, VELINT
@@ -499,12 +500,13 @@ END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
    INTEGER :: IWC=0
+   REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                              :: ZZ_FACE=0._EB,DIFF_FACE=0._EB,RHO_D=0._EB,VELD=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
