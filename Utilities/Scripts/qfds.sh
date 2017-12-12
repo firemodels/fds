@@ -1,18 +1,19 @@
 #!/bin/bash
 
-#*** environment varables used by qfds.sh
+#*** environment varables
 
-# BACKGROUND_PROG  - defines location of background program (if 'none' 
-#                    queue is also specified)
 # FIREMODELS       - define directory containing git repos - 
 #                    eg. /home/username/FireModels_fork
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or  SB_
-#                    (for firebot or smokebot)
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
+
+#*** environment variables used by the bots
+# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or  SB_
+# BACKGROUND_PROG  - defines location of background program
+#                    ( if the 'none' queue is also specified)
 # SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
-#                   ( used by firebot and smokebot to kill jobs )
+#                    ( used to kill jobs )
 
 # ---------------------------- usage ----------------------------------
 
