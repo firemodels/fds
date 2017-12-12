@@ -641,8 +641,12 @@ echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
-echo rm $scriptfile
 EOF
+if [ "$queue" == "none" ]; then
+cat << EOF >> $scriptfile
+rm -f $scriptfile
+EOF
+fi
 
 #*** output script file to screen if -v option was selected
 
