@@ -61,12 +61,24 @@ function usage {
   exit
 }
 
-#*** default parameter settings
+#*** get directory containing qfds.sh
+
+QFDS_PATH=$(dirname `which $0`)
+CURDIR=`pwd`
+cd $QFDS_PATH
+QFDS_DIR=`pwd`
+cd $CURDIR
+QFDS_COUNT=/tmp/qfds_count_`whoami`
+
+#*** define toplevel of the repos
 
 FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
+
+#*** define resource manager that is used
+
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
   if [ "$SLURM_MEM" != "" ]; then
     SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
@@ -77,27 +89,33 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
 else
   RESOURCE_MANAGER="TORQUE"
 fi
-OMPPLACES=$OMP_PLACES
-OMPPROCBIND=$OMP_PROCBIND
-HELP=
-FDS_MODULE_OPTION=1
 
-queue=batch
-ncores=8
-if [ "`uname`" == "Darwin" ]; then
-  queue=none
-else
-  ncores=`grep processor /proc/cpuinfo | wc -l`
-fi
-if [ "$NCORES_COMPUTENODE" != "" ]; then
-  ncores=$NCORES_COMPUTENODE
-fi
+#*** determine platform
 
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
   platform="osx"
 fi
 
+#*** determine number of cores and default queue
+
+if [ "$platform" == "osx" ]; then
+  queue=none
+  ncores=`system_profiler SPHardwareDataType|grep Cores|awk -F' ' '{print $5}'`
+else
+  queue=batch
+  ncores=`grep processor /proc/cpuinfo | wc -l`
+fi
+if [ "$NCORES_COMPUTENODE" != "" ]; then
+  ncores=$NCORES_COMPUTENODE
+fi
+
+#*** set default parameter values
+
+OMPPLACES=$OMP_PLACES
+OMPPROCBIND=$OMP_PROCBIND
+HELP=
+FDS_MODULE_OPTION=1
 MPIRUN=
 ABORTRUN=n
 DB=
@@ -351,7 +369,6 @@ if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     nodes=""
 fi
 
-
 #*** define processes per node
 
 let "ppn=($nmpi_processes_per_node)"
@@ -519,6 +536,7 @@ if [ "$queue" == "none" ]; then
   fi
   MPIRUN=
   QSUB="$BACKGROUND_PROG -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
+  USE_BACKGROUND=1
 else
 
 #*** setup for SLURM (alternative to torque)
@@ -630,8 +648,30 @@ echo \`date\`
 echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
+EOF
+if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
+cat << EOF >> $scriptfile
+
+# add 1 to fds case count
+count=\`head -1 $QFDS_COUNT\`
+let "count=count+1"
+echo \$count > $QFDS_COUNT
+
+EOF
+fi
+cat << EOF >> $scriptfile
+# run fds case
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
+cat << EOF >> $scriptfile
+
+# fds case has finished, subtract 1 from fds case count
+count=\`head -1 $QFDS_COUNT\`
+let "count=count-1"
+echo \$count > $QFDS_COUNT
+EOF
+fi
 
 #*** output script file to screen if -v option was selected
 

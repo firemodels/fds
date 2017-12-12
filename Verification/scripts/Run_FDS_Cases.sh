@@ -17,6 +17,7 @@ resource_manager=
 walltime=
 RUNOPTION=
 CURDIR=`pwd`
+QFDS_COUNT=/tmp/qfds_count_`whoami`
 if [ "$BACKGROUND_PROG" == "" ]; then
   export BACKGROUND_PROG=background
 fi
@@ -137,6 +138,9 @@ else
    export RESOURCE_MANAGER="PBS"
 fi
 if [ "$QUEUE" != "" ]; then
+   if [ "$QUEUE" == "none" ]; then
+      echo 0 > $QFDS_COUNT
+   fi
    QUEUE="-q $QUEUE"
 fi
 
