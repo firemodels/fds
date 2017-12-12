@@ -191,9 +191,19 @@ The governing equation solved in {\ct HT3D} is
   \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
   \label{eq:3dheat}
 \end{equation}
-Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
+Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation. (That is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired.)
 
-Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  The intercell fluxes are continuous.  If the {\ct OBST} material properties of neighboring cells are the same, then thermal properties at face centers are taken as linear averages when computing the intercell flux.  If the neighboring cells have different material properties (consider the $x$ direction with cell indices $i$ and $i+1$), then the cell interface temperature, $T_{s,i+\frac{1}{2}}$, is computed as follows:
+\begin{equation}
+\label{eq:interface_tmp}
+T_{{\rm s},i+\frac{1}{2}}^n = \frac{T_{{\rm s},i}^n + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\rm s},i+1}^n}{1 + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
+\end{equation}
+Then the intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
+\begin{equation}
+\label{eq:intercell_flux}
+\left. k_{\rm s} \dod{T_{\rm s}}{x} \right|_{i+\frac{1}{2}} = k_{{\rm s},i} \frac{T_{{\rm s},i+\frac{1}{2}}^n - T_{{\rm s},i}^n}{\frac{1}{2}\delta x_i} = k_{{\rm s},i+1} \frac{T_{{\rm s},i+1}^n - T_{{\rm s},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
+\end{equation}
+The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
 
 For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
 \begin{equation}
