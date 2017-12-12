@@ -636,7 +636,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
             ENDIF
             IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
-               K_S = 0.5_EB*(K_S_M+K_S_P)
+               ! use linear average from inverse lever rule
+               K_S = ( K_S_M*DX(I+1) + K_S_P*DX(I) )/( DX(I) + DX(I+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
                KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
             ELSE
@@ -676,7 +677,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
                ENDIF
                IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
-                  K_S = 0.5_EB*(K_S_M+K_S_P)
+                  K_S = ( K_S_M*DY(J+1) + K_S_P*DY(J) )/( DY(J) + DY(J+1) )
                   K_S_MAX = MAX(K_S_MAX,K_S)
                   KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
                ELSE
@@ -715,7 +716,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
             ENDIF
             IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
-               K_S = 0.5_EB*(K_S_M+K_S_P)
+               K_S = ( K_S_M*DZ(K+1) + K_S_P*DZ(K) )/( DZ(K) + DZ(K+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
                KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
             ELSE
