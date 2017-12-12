@@ -876,6 +876,12 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
       END SELECT METHOD_OF_HEAT_TRANSFER
 
+      ! handle special case of 2D cylindrical coordinates with WC on X=0 boundary
+
+      IF (TWO_D .AND. CYLINDRICAL .AND. IOR==-1 .AND. ABS(XS)<TWO_EPSILON_EB) THEN
+         KDTDX(II-1,JJ,KK) = 0._EB
+      ENDIF
+
    ENDDO HT3D_WALL_LOOP
 
    DO K=1,KBAR
@@ -893,11 +899,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
             ENDIF
 
-            VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            IF (TWO_D) THEN
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDZ(K)**2) )
+            ELSE
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                                                                 (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) + &
+            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                                 (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
+                                                                 (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
 
          ENDDO
