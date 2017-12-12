@@ -640,6 +640,10 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(MESSAGE,'(A,I0)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
+            IF (CYLINDRICAL .AND. XB1<-TWO_EPSILON_EB) THEN
+               WRITE(MESSAGE,'(A,I0)') 'ERROR: XMIN < 0 with CYLINDRICAL on MESH ', NM
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
 
             M%XS    = XB1
             M%XF    = XB2
@@ -9731,9 +9735,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
-               
+
                ! Check if the VENT is attached to a specific OBST
-               
+
                IF (OBST_ID/='null') THEN
                   DO OBST_INDEX=1,N_OBST
                      IF (OBST_ID==OBSTRUCTION(OBST_INDEX)%ID) VT%OBST_INDEX = OBST_INDEX
