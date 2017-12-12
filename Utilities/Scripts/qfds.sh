@@ -67,7 +67,6 @@ CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
 cd $CURDIR
-QFDS_COUNT=/tmp/qfds_count_`whoami`
 
 #*** define toplevel of the repos
 
@@ -641,33 +640,9 @@ echo \`date\`
 echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
-EOF
-if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
-cat << EOF >> $scriptfile
-
-FDS_COUNT ()
-{
-  VAL=\$1
-  count=\`head -1 $QFDS_COUNT\`
-  if [ "\$VAL" == "+" ]; then
-    let "count=count+1"
-  else
-    let "count=count-1"
-  fi
-  echo \$count > $QFDS_COUNT
-}
-FDS_COUNT +
-EOF
-fi
-cat << EOF >> $scriptfile
-# run fds case
 $MPIRUN $exe $in $OUT2ERROR
+echo rm $scriptfile
 EOF
-if [[ -e $QFDS_COUNT ]] && [[ "$queue" == "none" ]]; then
-cat << EOF >> $scriptfile
-FDS_COUNT -
-EOF
-fi
 
 #*** output script file to screen if -v option was selected
 
