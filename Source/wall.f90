@@ -569,7 +569,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          IF (SOLID_OTHER) TMP(II,JJ,KK) = TMP_OTHER
       ENDIF
 
-      ONE_D%QCONF = 0._EB ! no convective heat transfer at interoplated boundary
+      ONE_D%QCONF = 0._EB ! no convective heat transfer at interpolated boundary
 
 END SELECT METHOD_OF_HEAT_TRANSFER
 
