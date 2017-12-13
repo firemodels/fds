@@ -1419,13 +1419,13 @@ WRITE(LU_SMV,'(A)') REVISION
 WRITE(LU_SMV,'(/A)') 'CHID'
 WRITE(LU_SMV,'(1X,A)') TRIM(CHID)
 
-! Write out the SOLID_HT3D
+! Write out SOLID_HT3D
 
 WRITE(LU_SMV,'(/A)') 'SOLID_HT3D'
 IF (SOLID_HT3D) THEN
-   WRITE(LU_SMV,'(1X,I)') 1
+   WRITE(LU_SMV,'(1X,I2)') 1
 ELSE
-   WRITE(LU_SMV,'(1X,I)') 0
+   WRITE(LU_SMV,'(1X,I2)') 0
 ENDIF
 
 ! Write out the names of the spreadsheet files
