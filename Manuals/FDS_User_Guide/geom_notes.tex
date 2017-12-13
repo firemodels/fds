@@ -1223,560 +1223,226 @@ The face values serve as Dirichlet boundary conditions.  If Neumann boundary con
 
 \subsubsection{Complex Geometry}
 
-As we move toward complex shapes immersed within the Cartesian mesh, to the extent possible we have tried to maintain a correspondence with the WC data type.  The analog in the new approach is, in 3D, a triangular facet, FC. This choice was made for the following reasons:
-\begin{enumerate}[{\,\,\,\,(}a{)}]
-\item For simplicity, we wanted to restrict ourselves to one generic element type.
-\item Curvilinear surfaces can be approximated to second-order accuracy with linear elements.
-\item Three points are unambiguously planar.
-\item Algorithms for triangle/box intersection are readily available.
-\end{enumerate}
-
-Note that a basic WC face must be constructed from two FC faces (see Fig.~\ref{fig:facetcell}), thus doubling computational effort for the same resolution.  The FC approach makes up for this deficiency with the following benefits:
-\begin{enumerate}[{(}i{)}]
-\item We have the flexibility to create arbitrarily complex shapes.
-\item The resolution of the solid surface need not be the same as the gas phase.  When coarser resolution is permissible, we achieve a cost savings.
-\end{enumerate}
-
-%The first item may be obvious, but the second deserves elaboration. For many objects in the scenario, the boundary conditions may not change much or may not be important enough to finely resolve.  Suppose there is a door that is only partially open (say 45$^\circ$ angle) and the gas phase resolution within the room is 10 cm.  A standard doorway in the U.S. is 91 cm by 203 cm.  Therefore, resolving each gas phase cell with a wall cell on the door would require roughly $9 \times 20 \times 2 = 360$ facets.  But if detailed resolution of the door is unnecessary, we can get away with only 2 facets (see Fig.~\ref{fig:opendoor}).
-
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}
-
-\draw (0,0)--(0,3);
-\draw (0,3)--(3,3);
-\draw (3,3)--(3,0);
-\draw (3,0)--(0,0);
-
-\draw (1,4)--(4,4);
-\draw (4,4)--(4,1);
-
-\draw (0,3)--(1,4);
-\draw (3,3)--(4,4);
-\draw (3,0)--(4,1);
-
-\draw (0,0)--(3,3);
-\draw (3,3)--(4,1);
-\draw (1,4)--(3,3);
-
-\end{tikzpicture}
-
-\caption{Triangular facets covering a cubic cell.  Two facets are needed for each face, as opposed to one wall cell.}
-\label{fig:facetcell}
-\end{center}
-\end{figure}
 
 
+
+
+
+\section{Verification Tests}
+
+
+\subsection{Cut-cell definition around immersed cone: split cells, piercing and alignment}
+
+
+\subsection{Cut-cell definition around sphere: serial performance and parallel scaling}
+
+
+\subsection{Explicit-implicit time integration for scalar transport}
+
+
+\subsubsection{Temporal Error analysis for variable density projection}
+
+
+
+
+
+\subsubsection{Variable-Density manufactured solution}
+
+
+
+
+
+
+\subsection{Immersed boundary method on manufactured solution around rotated cube}
+
+
+
+
+
+\subsection{Conservation test of isothermal helium plume around sphere}
+
+
+
+
+
+\subsection{Parallel consistency test of helium plume around sphere, 1 mesh vs. 3 meshes}
+
+
+
+
+\subsection{Consistency test for OBST and GEOM of flow around heated cubes}
+
+
+
+
+%\subsection{Flow around heated curved pipe ro something like that}
+
+
+
+
+\section{Validation Tests}
+
+\subsection{Vettori fire on sloped ceiling compartment experiments}
+
+
+
+
+
+\subsection{Lattimer flow around inclined wall experiments}
+
+
+
+
+
+
+
+
+
+
+
+
+
+%As we move toward complex shapes immersed within the Cartesian mesh, to the extent possible we have tried to maintain a correspondence with the WC data type.  The analog in the new approach is, in 3D, a triangular facet, FC. This choice was made for the following reasons:
+%\begin{enumerate}[{\,\,\,\,(}a{)}]
+%\item For simplicity, we wanted to restrict ourselves to one generic element type.
+%\item Curvilinear surfaces can be approximated to second-order accuracy with linear elements.
+%\item Three points are unambiguously planar.
+%\item Algorithms for triangle/box intersection are readily available.
+%\end{enumerate}
+%
+%Note that a basic WC face must be constructed from two FC faces (see Fig.~\ref{fig:facetcell}), thus doubling computational effort for the same resolution.  The FC approach makes up for this deficiency with the following benefits:
+%\begin{enumerate}[{(}i{)}]
+%\item We have the flexibility to create arbitrarily complex shapes.
+%\item The resolution of the solid surface need not be the same as the gas phase.  When coarser resolution is permissible, we achieve a cost savings.
+%\end{enumerate}
+%
+%%The first item may be obvious, but the second deserves elaboration. For many objects in the scenario, the boundary conditions may not change much or may not be important enough to finely resolve.  Suppose there is a door that is only partially open (say 45$^\circ$ angle) and the gas phase resolution within the room is 10 cm.  A standard doorway in the U.S. is 91 cm by 203 cm.  Therefore, resolving each gas phase cell with a wall cell on the door would require roughly $9 \times 20 \times 2 = 360$ facets.  But if detailed resolution of the door is unnecessary, we can get away with only 2 facets (see Fig.~\ref{fig:opendoor}).
+%
 %\begin{figure}
 %\begin{center}
-%\begin{tikzpicture}[scale=0.75]
+%\begin{tikzpicture}
 %
-%\draw (0,6) -- (2,8);
-%\draw (0,0) -- (2,2);
+%\draw (0,0)--(0,3);
+%\draw (0,3)--(3,3);
+%\draw (3,3)--(3,0);
+%\draw (3,0)--(0,0);
 %
-%\draw (12,6) -- (10,8);
-%\draw (12,0) -- (10,2);
+%\draw (1,4)--(4,4);
+%\draw (4,4)--(4,1);
 %
-%\draw (2,8) -- (10,8);
-%\draw (2,8) -- (2,2);
-%\draw (10,8) -- (10,2);
+%\draw (0,3)--(1,4);
+%\draw (3,3)--(4,4);
+%\draw (3,0)--(4,1);
 %
-%\draw (4,6.5) -- (6.5,6.5);
-%\draw (4,2) -- (4,6.5);
-%\draw (2,2) -- (4,2);
-%\draw (6.5,2) -- (10,2);
-%
-%\draw (0,0) -- (0,6);
-%\draw (12,0) -- (12,6);
-%\draw (0,0) -- (12,0);
-%
-%\draw[help lines] (1.499,1.499) grid [step=.25cm] (10.5,7.5);
-%
-%\draw[help lines,fill=white] (5,1) to (5,5.5) to (6.5,2) to (5,1);
-%\draw[help lines,fill=white] (6.5,6.5) to (5,5.5) to (6.5,2) to (6.5,6.5);
-%
-%\draw (6.5,2) -- (6.5,6.5);
-%\draw (6.5,6.5) -- (5,5.5);
-%\draw (6.5,2) -- (5,1);
-%\draw (5,1) -- (5,5.5);
-%\draw (5,5.5) -- (6.5,2);
-%
-%\draw[help lines] (5.7499,1.5) grid [step=.25cm] (7.5,7.5);
+%\draw (0,0)--(3,3);
+%\draw (3,3)--(4,1);
+%\draw (1,4)--(3,3);
 %
 %\end{tikzpicture}
 %
-%\caption{Partially open door composed of two facets, illustrating that the solid resolution may be coarser than the gas phase resolution.}
-%\label{fig:opendoor}
+%\caption{Triangular facets covering a cubic cell.  Two facets are needed for each face, as opposed to one wall cell.}
+%\label{fig:facetcell}
 %\end{center}
 %\end{figure}
-
-
-\subsection{Momentum}
-\label{sec:momentum}
-
-Consider the following semi-implicit (fractional step) update for the $i$th component of momentum:
-\begin{equation}
-\label{eqn:mom}
-\frac{u_i^{n+1} - u_i^n}{\delta t} = -\left(F_i^n + \frac{\delta H^{n+1}}{\delta x_i}\right)
-\end{equation}
-This is a fractional step method because a Poisson equation is solved to obtain the pressure term, $H$ (not discussed here). In a direct-forcing immersed boundary method, the force term is replaced by
-\begin{equation}
-\label{eqn:force}
-F_i^* = - \left( \frac{u_i^{ibm} - u_i^n}{\delta t} + \frac{\delta H^*}{\delta x_i}\right)
-\end{equation}
-which drives the velocity component $u_i^{n+1}$ toward $u_i^{ibm}$.  The superscript asterisk indicates that the initial guess for the pressure term is taken from the previous time step.  The update may be iterated to drive the error between $u_i^{n+1}$ and $u_i^{ibm}$ to a desired tolerance.  Note, however, that when this approach is embedded in a second-order predictor-corrector scheme the error in most cases is remarkably small when $H^n$ is used in the force term (no iteration).
-
-\subsubsection{Block Geometry}
-
-For the basic block geometry method used in FDS, the impermeability condition at a surface is enforced by setting $u_i^{ibm} = 0$. If mass transfer is present the surface-normal IBM velocity component is set to $u_i^{ibm} = u_n$, where $u_n$ is the wall-normal component of velocity satisfying the scalar transport equation.  Note that $u_n$ is stored as {\ct WC\%UW} in the code.
-
-\subsubsection{Complex Geometry}
-
-For complex geometry the surface usually does not align itself with the face of a Cartesian grid cell. A given velocity component, therefore, is not on a boundary, but must still satisfy the governing equations subject to the prescribed boundary conditions (position and properties of the surface).  The essential task of a direct-forcing immersed boundary method is to set $u_i^{ibm}$ to achieve a stable and accurate numerical solution as well as an adequate representation of the local flow physics (surface stress, pressure gradient, etc.) without the luxury of infinitely high resolution.
-
-In FDS, there are three IBM options for momentum, set by, for example,
-\small
-\begin{verbatim}
-&MISC IMMERSED_BOUNDARY_METHOD=1/ ! options are 0,1,2
-\end{verbatim}
-\normalsize
-Following is a brief description of each option. The basic linear interpolation method of Fadlun \cite{Fadlun:temp} is given by option (1), and will be used for the examples to follow later in this paper. Refer to the diagram in Fig.~\ref{fig:position_definitions} for position definitions.
-
-\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=0}
-
-The velocity component force term is unaltered if it falls on the positive side of the surface.  Let $\mathbf{x}_{velo}$ denote the location of the velocity component, $\mathbf{v}_i, (i=1,2,3)$ are the vertices of a face, $\mathbf{n} = (\mathbf{v}_2-\mathbf{v}_1) \times (\mathbf{v}_3-\mathbf{v}_1)$ is the face normal, and let $\mathbf{r} \equiv \mathbf{x}_{velo} - \mathbf{v}_1$ (any of the vertices will do); then if $\delta n =\mathbf{r} \cdot \mathbf{n} > 0$ the velocity component is processed as usual; if the dot product is negative the velocity is ``inside'' the obstruction and is set to zero.  This effectively leads to a zeroth-order (Lego block) representation of the surface.
-
-\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=1}
-
-The basic linear interpolation scheme of Fadlun starts by identifying a point $\mathbf{x}_{int}$ (see Fig.~\ref{fig:position_definitions}) which is twice the normal distance from the surface as the position of the velocity component, $\mathbf{x}_{velo}$.  The value $u_i(\mathbf{x}_{int}) = u_{i,int}$ is found from a trilinear interpolation of the neighboring staggered velocity component values from the previous time step.  The value of $u_i^{ibm}$ is then taken from a linear interpolation between $u_{i,int}$ and the wall value of the velocity component, $u_{i,w}$ (usually zero).  Thus, $u_i^{ibm} = \frac{1}{2}(u_{i,int} + u_{i,w})$.
-
-\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=2}
-
-Here the linear profile is replaced by a prescribed wall-normal profile for the mean streamwise velocity.  This requires that we first define a new streamwise coordinate system.  Referring to Fig.~\ref{fig:position_definitions}, let $\mathbf{e}_i, (i=1,2,3)$ define an orthonormal set of basis vectors for our Cartesian grid system and let $\mathbf{\bar{e}}_i, (i=1,2,3)$ define the new streamwise system where $\mathbf{\bar{e}}_1$ is the streamwise direction and $\mathbf{\bar{e}}_3$ is the wall-normal direction.  It is useful to define the new system so that the velocity component in $\mathbf{\bar{e}}_2$ is always zero.  This is achieved as follows: Define a tangent vector $\mathbf{t} \equiv \mathbf{n} \times (\mathbf{u} - \mathbf{u}_w)$ where $\mathbf{u}_w$ is the velocity of the wall (usually zero) and $\mathbf{n}$ is a wall-normal vector. The streamwise basis vector is then found from $\mathbf{\hat{s}} = \mathbf{\hat{t}} \times \mathbf{\hat{n}}$.  The hat represents a unit normal, e.g., $\mathbf{\hat{n}} \equiv \mathbf{n}/|\mathbf{n}|$.  The new streamwise system is then given by $\mathbf{\bar{e}_1}=\mathbf{\hat{s}}$, $\mathbf{\bar{e}_2}=\mathbf{\hat{t}}$, and $\mathbf{\bar{e}_3}=\mathbf{\hat{n}}$. (To conform to the convention used in the atmospheric community, in FDS, the ``vertical'' or surface-normal component is taken as the ``$z$'' component.  Hence, 2D flows are in the $x-z$ plane.)  The elements of the directional cosine matrix are now simply $a_{ij} = \mathbf{e}_i \cdot \mathbf{\bar{e}}_j$.  Velocity vectors may be transformed from the grid system to the streamwise system via $\bar{u}_k = a_{ik} u_i$ and back again via $u_i = a_{ik} \bar{u}_k$ (see, e.g., \cite{Pope:2000} Appendix B).
-
-To evaluate the streamwise profile, all three staggered velocity components are interpolated to $\mathbf{x}_{int}$ and the vector is transformed into the streamwise system.  The streamwise component at $\mathbf{x}_{int}$ is used to define the profile $f(n)$, which is then used to specify the streamwise component at the position of interest ($\mathbf{x}_{velo}$ in the grid system).  Thus, we obtain $\bar{u}_1^{ibm} = f(\delta n)$.  Here note that the bar indicates we are in the streamwise coordinate system.  We need to specify the other two components before we can transform back to the grid system.  As mentioned, the tangential component is zero by construction. Specification of the normal component is currently an active area of research \cite{Choi:2007:temp}.  What complicates matters is that we have two invariants to satisfy: (1) the divergence and (2) the kinetic energy. The kinetic energy is the easier of the two because it does not involve differences.  Still, since all we know from the model is a mean profile, some sort of \emph{ad hoc} assumption must be made.  Given $k_{int}=\frac{1}{2}u_i u_i$ at $\mathbf{x}_{int}$, we use a linear interpolation to determine $k(\delta n) = \frac{1}{2}(k_{int} + k_w)$, where $k_w$ is the kinetic energy at the wall (usually zero).  The magnitude of the normal component is then found from $|\bar{u}_3^{ibm}| = +\sqrt{2k(\delta n) - (\bar{u}_1^{ibm})^2}$.  Finally, the component value of interest is obtained from the transformation $u_i^{ibm} = a_{ik} \bar{u}_k^{ibm}$, where only the $i$th component is retained at the staggered location.
-
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}[scale=1.25]
-
-\draw [fill=lightgray] (0.2,0.5) -- (2.2,3.8) -- (4.5,3.1) -- (0.2,0.5);
-
-\draw[help lines] (-3,-1) grid [step=2cm] (5,7);
-
-\draw (0.30,0.25) node {$\mathbf{v}_1$};
-\draw (4.80,3.10) node {$\mathbf{v}_2$};
-\draw (2.20,4.00) node {$\mathbf{v}_3$};
-
-\draw [->, very thick, >=latex] (-2.5,5.0) -- (-1.5,5.0);
-\draw [->, very thick, >=latex] (-2.5,3.0) -- (-1.5,3.0);
-\draw [->, very thick, >=latex] (-0.5,5.0) -- (0.5,5.0);
-\draw [->, very thick, >=latex] (-0.5,3.0) -- (0.5,3.0);
-\draw (0.5,3.3) node {$\mathbf{x}_{velo}$};
-
-\draw [->, very thick, >=latex] (0.2,0.5) -- (0.0,3.0);
-\draw (-0.15,1.8) node {$\mathbf{r}$};
-
-\draw [->, very thick, >=latex] (0.2,0.5) -- (-1,2.0);
-\draw (-0.5,1.0) node {$\mathbf{n}$};
-
-\draw [->, >=*] (1.1,1.545) -- (-1.3,4.7);
-\draw (-1.5,4.3) node {$\mathbf{x}_{int}$};
-
-\draw [|-] (0.9,1.37) -- (0.57,1.8);
-\draw [-|] (0.24,2.25) -- (-0.19,2.85);
-\draw (.4,2.02) node {$\delta n$};
-
-\draw [->, very thick, >=latex] (1.08,1.55) -- (2.35,1.55);
-\draw [->, very thick, >=latex] (1.1,1.545) -- (0.45,2.4);
-\draw [->, very thick, >=latex] (1.1,1.545) -- (1.75,2.6);
-\draw (2.9,1.55) node {$\mathbf{\hat{s}} \, (\mathbf{\bar{e}}_1)$};
-\draw (1.9,2.60) node {$\mathbf{\hat{t}}$};
-\draw (0.6,2.60) node {$\mathbf{\hat{n}}$};
-
-\draw [->, very thick, >=latex] (-2,0) -- (-2,1);
-\draw [->, very thick, >=latex] (-2,0) -- (-1,0);
-\draw (-0.9,-0.25) node {$\mathbf{e}_1$};
-\draw (-2.35,1) node {$\mathbf{e}_3$};
-
-\draw (1,4.7) .. controls (2.5,2) .. (1.1,1.545);
-\draw [->] (-1.15,4.500) -- (1.10,4.500);
-\draw [->] (-0.58,3.750) -- (1.52,3.750);
-\draw [->] ( 0.20,3.003) -- (1.90,3.003);
-\draw [->] ( 0.54,2.280) -- (2.15,2.280);
-\draw [->] ( 0.90,1.800) -- (1.80,1.800);
-\draw (1.5,5.0) node {$f(n)$};
-
-\end{tikzpicture}
-
-\caption{Position definitions for a single facet.  The function $f(n)$ represents the mean streamwise velocity profile in the wall-normal direction.}
-\label{fig:position_definitions}
-\end{center}
-\end{figure}
-
-\paragraph{Remark} As can be seen, in going from IBM methods 0 to 2 the level of complexity increases significantly.  For the remainder of this paper, we utilize method 1.  The main reason is that our focus here is on the additional complexities that arise with considering heat and mass transfer near infinitely thin obstructions.
-
-%\subsubsection{Convergence of IBM 1}
-%\label{sec:momentum_convergence}
 %
-%In this section we show second-order convergence for IBM 1 by examining the 2D flow near a rotating disk.
-
-\subsection{Heat and Mass Transfer}
-
-This is where the formulation gets tricky.  Both heat and mass transfer present challenges for a typical IBM formulation.  For heat transfer, numerical diffusion from the gas phase domain into the solid domain implies that global energy is not conserved.  For mass transfer, when considering the ``mixed is burnt'' model for combustion chemistry, any numerical diffusion of reactant species across a solid boundary can be fatal to a calculation.  For these reasons, we have chosen to implement a hybrid cutcell immersed boundary method (CIBM), where the cutcells on the immersed boundary surface are treated by an unstructured finite volume solver for heat and mass transport.  This ensures strict conservation of mass and energy in the fluid domain.
-
-\subsubsection{To-Do List}
-
-\begin{enumerate}
-\item Identify cutcells.  Find the Cartesian cells that intersect with solid tet volumes.  To handle zero thickness obstructions we either need the ability to treat facets by themselves or we may allow ``volumes'' with zero volume.  To be discussed.
-\item Compute cutcell (CC) volumes.  Let $V_{cell}$ denote the volume of the Cartesian cell.  Let $V_{tet}$ denote a tetrahedral volume.  The cutcell volume is $V_{cc} = V_{cell} - ( V_{cell} \cap V_{tet} )$.
-\item Merge small cells.  If $V_{cc} < V_{tol}$, merge with a neighboring cell (Cartesian cell or cutcell).  This limits CFL time step restrictions.
-\item Compute surface areas and unit normal vectors for final cutcell volumes.
-\item Interpolate scalars (density, mass fractions, temperature) to CC volume faces (see below).
-\item Interpolate velocity components to CC faces (see below).
-\item Update finite volumes equations (see below).
-\item Construct Cartesian divergence from CC divergence integral (see below).
-\item Update Poisson equation as usual (see FDS Tech Guide).
-\item Reconstruct velocity field to satisfy projection and CC constraints (see below).
-\end{enumerate}
-
-\newpage
-
-\subsubsection{FDS Grid Data Structure}
-
-
-In the following, variables and proposed data lists for cut-cells and faces to be used in the FDS CCIBM code are described. Data structures from the prototype Matlab code and linked list definitions from the current FDS IBM implementation are included for clarity. Names can be changed if there are issues with the existing FDS namespace, etc. Also, we keep it general for now.
-
-
-\subsubsection*{Some type defining and indexing parameters:}
-
-The following parameters are used in defining the type (or status) of cell or cell face on Cartesian grid or solid surfaces: \\
-\texttt{INTEGER, PARAMETER :: GASPHASE     = -1} \\
-\texttt{INTEGER, PARAMETER :: CUTCF         =   0} \\
-\texttt{INTEGER, PARAMETER :: SOLID              =   1} \\
-\texttt{INTEGER, PARAMETER :: INBOUNDARY =   2} \\
-
-
-
-\subsubsection*{New Cartesian grid variables:}
-
-- \textit{Cell-centered} variables for cell-type identification, unknown numbering, etc.:  \\
- \texttt{INTEGER} \texttt{CCVAR(I,J,K,ICVAR)}: Here,  \texttt{ICVAR} can be equal to:   \\
 %
-\begin{itemize}
-
-  \item \texttt{INTEGER, PARAMETER :: IGSC = 1} such that: \\
-           - \texttt{CCVAR(I,J,K,IGSC) == GASPHASE} is a regular \texttt{GASPHASE} cell. \\
-           - \texttt{CCVAR(I,J,K,IGSC) == CUTCF} is a cut-cell, i.e. cell transversed by the solid wet surface. \\
-           - \texttt{CCVAR(I,J,K,IGSC) == SOLID} is a regular cell immersed completely in the solid region.
-
-  \item \texttt{ICVAR} can take other values (2, 3,... to be added later) to map unknowns to \texttt{CUT\_CELL} data, linear systems, etc.
-
-
-\end{itemize}
+%%\begin{figure}
+%%\begin{center}
+%%\begin{tikzpicture}[scale=0.75]
+%%
+%%\draw (0,6) -- (2,8);
+%%\draw (0,0) -- (2,2);
+%%
+%%\draw (12,6) -- (10,8);
+%%\draw (12,0) -- (10,2);
+%%
+%%\draw (2,8) -- (10,8);
+%%\draw (2,8) -- (2,2);
+%%\draw (10,8) -- (10,2);
+%%
+%%\draw (4,6.5) -- (6.5,6.5);
+%%\draw (4,2) -- (4,6.5);
+%%\draw (2,2) -- (4,2);
+%%\draw (6.5,2) -- (10,2);
+%%
+%%\draw (0,0) -- (0,6);
+%%\draw (12,0) -- (12,6);
+%%\draw (0,0) -- (12,0);
+%%
+%%\draw[help lines] (1.499,1.499) grid [step=.25cm] (10.5,7.5);
+%%
+%%\draw[help lines,fill=white] (5,1) to (5,5.5) to (6.5,2) to (5,1);
+%%\draw[help lines,fill=white] (6.5,6.5) to (5,5.5) to (6.5,2) to (6.5,6.5);
+%%
+%%\draw (6.5,2) -- (6.5,6.5);
+%%\draw (6.5,6.5) -- (5,5.5);
+%%\draw (6.5,2) -- (5,1);
+%%\draw (5,1) -- (5,5.5);
+%%\draw (5,5.5) -- (6.5,2);
+%%
+%%\draw[help lines] (5.7499,1.5) grid [step=.25cm] (7.5,7.5);
+%%
+%%\end{tikzpicture}
+%%
+%%\caption{Partially open door composed of two facets, illustrating that the solid resolution may be coarser than the gas phase resolution.}
+%%\label{fig:opendoor}
+%%\end{center}
+%%\end{figure}
 %
-- \textit{Face-centered} variables for face-type identification, generating data necessary for matrix and vector building (face based),  etc.:  \\
-\texttt{INTEGER} \texttt{FCVAR(I,J,K,IFVAR)}: Here,  \texttt{IFVAR} can be equal to:   \\
 %
-\begin{itemize}
-
-  \item \texttt{INTEGER, PARAMETER :: FGSC = 1} such that: \\
-           - \texttt{FCVAR(I,J,K,FGSC) == GASPHASE} is a regular \texttt{GASPHASE} face. \\
-           - \texttt{FCVAR(I,J,K,FGSC) == CUTCF} is a cut-face, i.e. face transversed by the solid wet surface. \\
-           - \texttt{FCVAR(I,J,K,FGSC) == SOLID} is a regular face immersed completely in the solid region.
-
-  \item \texttt{FCVAR} can take other values (2,3,... to be added later) to map face indexes to \texttt{CUT\_FACE} data, etc.
-
-
-\end{itemize}
+%\subsection{Momentum}
+%\label{sec:momentum}
 %
-These variables are defined by mesh, so they can be included as \texttt{ALLOCATABLE} in the \texttt{TYPE\_MESH}, and be allocated if using CCIBM.
-
-
-\subsubsection*{Data structures currently used on the Matlab prototype code:}
-
-- Data structure \texttt{CUT\_FACE}: Contains all \texttt{GASPHASE} and \texttt{INBOUNDARY} cut-faces. The latter are defined in the immersed solid surface and are used to impose boundary conditions for scalars. The total number of cut-faces is \texttt{NCUTFACE}. For a given cut-face \textit{icf}, the data structure has fields:
+%Consider the following semi-implicit (fractional step) update for the $i$th component of momentum:
+%\begin{equation}
+%\label{eqn:mom}
+%\frac{u_i^{n+1} - u_i^n}{\delta t} = -\left(F_i^n + \frac{\delta H^{n+1}}{\delta x_i}\right)
+%\end{equation}
+%This is a fractional step method because a Poisson equation is solved to obtain the pressure term, $H$ (not discussed here). In a direct-forcing immersed boundary method, the force term is replaced by
+%\begin{equation}
+%\label{eqn:force}
+%F_i^* = - \left( \frac{u_i^{ibm} - u_i^n}{\delta t} + \frac{\delta H^*}{\delta x_i}\right)
+%\end{equation}
+%which drives the velocity component $u_i^{n+1}$ toward $u_i^{ibm}$.  The superscript asterisk indicates that the initial guess for the pressure term is taken from the previous time step.  The update may be iterated to drive the error between $u_i^{n+1}$ and $u_i^{ibm}$ to a desired tolerance.  Note, however, that when this approach is embedded in a second-order predictor-corrector scheme the error in most cases is remarkably small when $H^n$ is used in the force term (no iteration).
 %
-\begin{itemize}
-
-  \item  \texttt{CUT\_FACE(icf).XYZVERT}: $x,y,z$ coordinates of cut-face \textit{icf} vertex points. They are composed of intersection points between solid and Cartesian cell faces, and cell or facet vertices. These can be stored on a Global array as discussed with Glenn, and \texttt{XYZVERT} can be replaced by an index vector. They are used to define geometric data and also for plotting purposes (would be used in SMV).
-
-  \item  \texttt{CUT\_FACE(icf).XYZCEN}: $x,y,z$ coordinates of cut-face \textit{icf} area centroid.
-
-  \item  \texttt{CUT\_FACE(icf).STATUS}: can be \texttt{GASPHASE} or \texttt{INBOUNDARY}.
-
-  \item  \texttt{CUT\_FACE(icf).IJK}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, \texttt{ijk} denotes the Cartesian grid \textit{face} the cut-face belongs to. If  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY},  \texttt{ijk} denotes the Cartesian grid \textit{cell} this cut-face belongs to.
-
-  \item  \texttt{CUT\_FACE(icf).AXIS}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, this face is normal to which axis? \texttt{AXIS} can be \texttt{== IAXIS=1} for x-faces, \texttt{== JAXIS=2} for y-faces and \texttt{== KAXIS=3} for z-faces.  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY}, then  \texttt{AXIS} is zero.
-
-  \item \texttt{CUT\_FACE(icf).NIJK}: normal unit vector to the cut-face. If \texttt{CUT\_FACE(icf).AXIS == IAXIS} then \texttt{NIJK=[1. 0. 0.]}, if
-  \texttt{CUT\_FACE(icf).AXIS == JAXIS} then \texttt{NIJK=[0. 1. 0.]}, \texttt{CUT\_FACE(icf).AXIS == KAXIS} then  \texttt{NIJK=[0. 0. 1.]}. If \texttt{CUT\_FACE(icf).AXIS == 0},  \texttt{NIJK} is the normal outside of the body for that \texttt{INBOUNDARY} cut-face.
-
-  \item \texttt{CUT\_FACE(icf).BCTYPE(1:NSCALARS)}: boundary condition type, integer that for \texttt{INBOUNDARY} cut-faces, specifies the type of boundary condition imposed for scalars (i.e. constant mass flux, wall, etc.).
-
-  \item \texttt{CUT\_FACE(icf).BCVAL(1:NSCALARS)}: mean boundary condition value assigned for this \texttt{INBOUNDARY} cut-face, for each scalar.
-
-\end{itemize}
+%\subsubsection{Block Geometry}
 %
-Some of the data here is redundant and won't need to be filled up. Now, as in this construct cut faces can be either \texttt{GASPHASE} or \texttt{INBOUNDARY}, we might want to separate these in two structs (i.e. CUT\_FACE\_GP and CUT\_FACE\_BD) to avoid conditionals on cut-face loops.
-
-
-- Data structure \texttt{CUT\_CELL}: Contains all \texttt{GASPHASE} cut-cells. The total number of cut-cells is \texttt{NCUTCELL}. For a given cut-cell \textit{icc}, the data structure has fields:
+%For the basic block geometry method used in FDS, the impermeability condition at a surface is enforced by setting $u_i^{ibm} = 0$. If mass transfer is present the surface-normal IBM velocity component is set to $u_i^{ibm} = u_n$, where $u_n$ is the wall-normal component of velocity satisfying the scalar transport equation.  Note that $u_n$ is stored as {\ct WC\%UW} in the code.
 %
-\begin{itemize}
-
-  \item \texttt{CUT\_CELL(icc).vol}: cut-cell volume.
-
-  \item \texttt{CUT\_CELL(icc).XYZCEN}:  $x,y,z$ coordinates of cut-cell \textit{icc} volume centroid.
-
-  \item \texttt{CUT\_CELL(icc).NCFACES}: number of faces in the \texttt{CUT\_FACE} data structure.
-
-  \item \texttt{CUT\_CELL(icc).CFACES}: index vector to location of cut-faces in \texttt{CUT\_FACE} data structure.
-
-  \item \texttt{CUT\_CELL(icc).IJK}: denotes the Cartesian grid \textit{cell} this cut-cell belongs to.
-
-  \item \texttt{CUT\_CELL(icc).HINTFLG}: Integer flag that denotes if the pressure $H$ needs to be interpolated to the \texttt{CUT\_CELL(icc).XYZCEN} from the \texttt{GASPHASE} surroundings, and type of interpolation to perform.
-
-\end{itemize}
+%\subsubsection{Complex Geometry}
 %
-Other fields will need to be incorporated to this data structure. Among them an unknown number for scalar and possibly the pressure H, if pressure is dealt with using the unstructured scheme.
-
-
-
-\subsubsection*{Data structures currently used on the FDS IBM code:}
-
-\begin{myfont}
-
-\noindent TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
-\indent  INTEGER :: INDEX                                   ! data \\
-\indent  TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt el \\
-\indent   REAL(EB) :: AREA                                   ! cutcell area for index \\
-\noindent END TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
-
-\noindent TYPE CUTCELL\_TYPE \\
-\indent   REAL(EB) :: VOL,RHO,TMP,DIV,A(6),S,N(3) \\
-\indent   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ \\
-\indent   ! identify each face with area contribution to current cutcell \\
-\indent   ! note: this must include the faces and areas of Cartesian cells \\
-\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_FACE\_LIST \\
-\noindent END TYPE CUTCELL\_TYPE \\
-
-\noindent TYPE FACET\_TYPE \\
-\indent   INTEGER :: VERTEX(3)=0,SURF\_INDEX=0,BOUNDARY\_TYPE \\
-\indent   CHARACTER(LABEL\_LENGTH) :: SURF\_ID='null' \\
-\indent   REAL(EB) :: NVEC(3)=0.\_EB,AW,EW,KW,DN,RDN,RHO\_F,U\_TAU,Y\_PLUS,TMP\_F, \\
-\indent TMP\_G,QCONF,HEAT\_TRANS\_COEF,QRADIN,QRADOUT \\
-\indent   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHODW,ZZ\_F \\
-\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ILW \\
-\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_LIST \\
-\noindent END TYPE FACET\_TYPE \\
-
-\noindent TYPE(FACET\_TYPE), ALLOCATABLE, TARGET, DIMENSION(:) :: FACET \\
-
-\noindent TYPE VOLUME\_TYPE \\
-\indent   INTEGER :: VERTEX(4)=0 \\
-\indent   CHARACTER(LABEL\_LENGTH) :: MATL\_ID='null' \\
-\noindent END TYPE VOLUME\_TYPE \\
-
-\noindent TYPE(VOLUME\_TYPE), ALLOCATABLE, TARGET, DIMENSION(:) :: VOLUME \\
-
-\end{myfont}
-
-
-\subsubsection*{Proposed Data structures for the FDS CCIBM code:}
-
-The previously defined derived type \texttt{CUTCELL\_LINKED\_LIST\_TYPE} refers to \texttt{INBOUNDARY} cut-faces as defined in the Matlab data structures. Also, previously there was no need for a proper volume cut-cell linked list type, because (from what I understand) things on previous development didn't get to this stage (looks like Charles Luo was playing with one CC on the INIT\_IBM subroutine, line $\simeq 2750$ of \texttt{geom.f90}).
-We modify the previously derived types keeping the data already defined and needed, and considering the Matlab code data containers:
-\newline
-
-\noindent  - One type \texttt{CUTFACE\_LINKED\_LIST\_TYPE} to create a linked list with the data corresponding to the \texttt{CUT\_FACE} data structure in the Matlab code. The type proposed is:
-
-\begin{myfont}
-\noindent TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
-\indent  INTEGER :: INDEX                                                                        ! Cut- face index \\
-\indent  TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt cut-face \\
-\indent   REAL(EB), DIMENSION(NDIM) :: XYZCEN                                 ! cut-face centroid coords \\
-\indent   INTEGER :: NVERTEX, STATUS, IJK, AXIS, BCTYPE(NSCALARS)            \\
-\indent   ! Vertex coordinates, to be allocated (NDIM,NVERTEX) \\
-\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZVERT \\
-\indent   REAL(EB) :: BCVAL(NSCALARS) \\
-\noindent END TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
-\end{myfont}
-Other fields can be added as needed.
-
-\noindent  - One new type \texttt{CUTCELL\_LINKED\_LIST\_TYPE} to create a linked list with the data corresponding to the \texttt{CUT\_CELL} data with basic cut-cell info for flux definitions and volume integrals:
-\begin{myfont}
-\noindent TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
-\indent  INTEGER :: INDEX                                                                        ! Cut-cell index \\
-\indent  TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt cut-cell \\
-\indent  REAL(EB) :: VOL                                                                           ! cut-cell volume \\
-\indent  REAL(EB), DIMENSION(NDIM) :: XYZCEN                                 ! cut-cellcentroid coords \\
-\indent  ! List of cut-faces that are boundary of this cut-cell \\
-\indent  TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_CUTFACES\_LIST \\
-\indent  INTEGER :: IJK, HINTFLG ! IJK underlying Cartesian cell. \\
-\noindent END TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
-\end{myfont}
-Other fields added as needed (\texttt{RHO,TMP,DIV,ZZ} etc.).
-
-\noindent We need to change the name of the linked list to cut-faces in the \texttt{FACET\_TYPE} definition: \\
-\begin{myfont}
-\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_LIST \\
-\end{myfont}
-\noindent  to
-\begin{myfont}
-TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: FACET\_CUTFACES\_LIST \\
-\end{myfont}
-\noindent to define correctly the type of geometry entity the list refers to.
-
-Then we would define: \\
-\begin{myfont}
-\noindent !LL of cut-faces for mesh M. \\
-\noindent TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: CUT\_FACE\_LL \\
-\noindent !LL of cut-cells for mesh M. \\
-\noindent TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUT\_CELL\_LL \\
-\end{myfont}
-
-From my understanding on linked lists, using a \texttt{CUTCELL\_CUTFACES\_LIST} for each cut-cell defined in \texttt{CUT\_FACE\_LL, CUT\_CELL\_LL} and also for some \texttt{FACET} would mean we have to replicate cut-face data at least 3 times? Cut-faces stored on the different lists would be individualized by their global cut-face \texttt{INDEX}. This seems convoluted and prone to bugs.
-The other option is to use the \texttt{CUT\_FACE\_LL} linked list to generate an allocatable data structure \texttt{CUT\_FACE} with same fields, and define also \texttt{CUT\_CELL} in the same manner. The \texttt{CUT\_CELL} data structure size can be estimated from the beginning knowing the number of Cartesian cells that are cut. Then, \texttt{FACET} would have an allocatable index array to the \texttt{CUT\_FACE} data structure.
-
-\textit{We need to discuss this..}
-
-
-\subsubsection*{Containers for Pressure and scalar unknowns numbering:}
-
-\textit{To come..}
-
-\newpage
-
-
-
-
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}[scale=1]
-
-\coordinate (O) at (0,0);
-\coordinate (P) at (10,10);
-
-\draw[help lines] (O) grid [step=2cm] (P);
-
-\end{tikzpicture}
-\caption{Structured, staggered grid in FDS.  Mesh variables belong to {\ct M=>MESHES(NM)}. }
-\label{fig:struc_stag_grid}
-\end{center}
-\end{figure}
-
-
-\begin{figure}
-\begin{center}
-
-\newcommand{\Depth}{3}
-\newcommand{\Height}{3}
-\newcommand{\Width}{3}
-
-\tdplotsetmaincoords{70}{30}
-
-\begin{tikzpicture}[scale=2,tdplot_main_coords]
-
-  \coordinate (O) at (0,0,0);
-  \coordinate (A) at (0,\Width,0);
-  \coordinate (B) at (0,\Width,\Height);
-  \coordinate (C) at (0,0,\Height);
-  \coordinate (D) at (\Depth,0,0);
-  \coordinate (E) at (\Depth,\Width,0);
-  \coordinate (F) at (\Depth,\Width,\Height);
-  \coordinate (G) at (\Depth,0,\Height);
-
-  \tdplotsetcoord{P}{1}{45}{45}
-  \draw[ultra thick,->] (0,0,0) -- (1,0,0) node[anchor=north east]{$x$};
-  \draw[ultra thick,->] (0,0,0) -- (0,1,0) node[anchor=north west]{$y$};
-  \draw[ultra thick,->] (0,0,0) -- (0,0,1) node[anchor=north east]{$z$};
-%  \draw[-stealth,color=red] (O) -- (P);
-%  \draw[dashed, color=red] (O) -- (Px);
-%  \draw[dashed, color=red] (O) -- (Py);
-%  \draw[dashed, color=red] (O) -- (Pz);
-%  \draw[dashed, color=red] (Px) -- (Pxy);
-%  \draw[dashed, color=red] (Py) -- (Pxy);
-%  \draw[dashed, color=red] (Px) -- (Pxz);
-%  \draw[dashed, color=red] (Pz) -- (Pxz);
-%  \draw[dashed, color=red] (Py) -- (Pyz);
-%  \draw[dashed, color=red] (Pz) -- (Pyz);
-%  \draw[dashed, color=red] (Pxy) -- (P);
-%  \draw[dashed, color=red] (Pxz) -- (P);
-%  \draw[dashed, color=red] (Pyz) -- (P);
-
-  \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (E) -- (D) -- cycle;
-  \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (B) -- (C) -- cycle;
-  \draw[fill=gray!50,opacity=0.5] (A) -- (B) -- (F) -- (E) -- cycle;
-
-  \draw[fill=gray!50,opacity=0.5,thick] (D) -- (E) -- (F) -- (G) -- cycle;
-  \draw[fill=gray!50,opacity=0.5,thick] (C) -- (B) -- (F) -- (G) -- cycle;
-  \draw[fill=gray!50,opacity=0.5,thick] (O) -- (C) -- (G) -- (D) -- cycle;
-
-  %% Following is for debugging purposes so you can see where the points are
-  % These are last so that they show up on top
-  \foreach \xy in {O, A, B, C, D, E, F, G}{
-      \node at (\xy) {\xy};
-  }
-
-  % DX(I)
-  \draw [blue,<-] (0,-.4*\Width,0) -- (.35*\Depth,-.4*\Width,0);
-  \draw [blue,->] (.65*\Depth,-.4*\Width,0) -- (\Depth,-.4*\Width,0);
-  \draw [blue,-] (0,-.5*\Width,0) -- (0,-.1*\Width,0);
-  \draw [blue,-] (\Depth,-.5*\Width,0) -- (\Depth,-.1*\Width,0);
-  \draw (.5*\Depth,-.4*\Width,0) node {\ct DX(I)};
-
-  % DY(J)
-  \draw [blue,<-] (1.3*\Depth,0,0) -- (1.3*\Depth,0.35*\Width,0);
-  \draw [blue,->] (1.3*\Depth,0.65*\Width,0) -- (1.3*\Depth,\Width,0);
-  \draw [blue,-] (1.1*\Depth,0,0) -- (1.4*\Depth,0,0);
-  \draw [blue,-] (1.1*\Depth,\Width,0) -- (1.4*\Depth,\Width,0);
-  \draw (1.3*\Depth,.5*\Width,0) node {\ct DY(J)};
-
-  % DZ(K)
-  \draw [blue,<-] (1.3*\Depth,\Width,0) -- (1.3*\Depth,\Width,0.45*\Height);
-  \draw [blue,->] (1.3*\Depth,\Width,0.55*\Height) -- (1.3*\Depth,\Width,\Height);
-  \draw [blue,-] (1.1*\Depth,\Width,\Height) -- (1.4*\Depth,\Width,\Height);
-  \draw (1.3*\Depth,\Width,.5*\Height) node {\ct DZ(K)};
-
-  % XC(I),YC(J),ZC(K)
-  \filldraw [black] (.5*\Depth,.5*\Width,.5*\Height) circle (2pt);
-  \node at (.5*\Depth,1.3*\Width,1.2*\Height) {\ct XC(I),YC(J),ZC(K)};
-  \node at (.5*\Depth,1.3*\Width,1.3*\Height) {\ct RHO(I,J,K),ZZ(I,J,K,N),TMP(I,J,K),H(I,J,K)};
-  \draw [blue] (.5*\Depth,.55*\Width,.55*\Height) -- (.5*\Depth,1.25*\Width,1.15*\Height);
-
-  % velocity components
-  \draw [->, ultra thick, >=latex] (.9*\Depth,.5*\Width,.5*\Height) -- (1.1*\Depth,.5*\Width,.5*\Height);
-  \draw [->, ultra thick, >=latex] (.5*\Depth,.9*\Width,.5*\Height) -- (.5*\Depth,1.1*\Width,.5*\Height);
-  \draw [->, ultra thick, >=latex] (.5*\Depth,.5*\Width,.9*\Height) -- (.5*\Depth,.5*\Width,1.1*\Height);
-
-  \node at (\Depth,.5*\Width,.4*\Height) {\ct U(I,J,K)};
-  \node at (.75*\Depth,\Width,.5*\Height) {\ct V(I,J,K)};
-  \node at (.45*\Depth,.6*\Width,1.1*\Height) {\ct W(I,J,K)};
-
-  % shade solid volume
-  \coordinate (V1) at (0,.75*\Width,\Height);
-  \coordinate (V2) at (.75*\Depth,0,\Height);
-  \coordinate (V3) at (0,0,.1*\Height);
-
-  % face normal
-  \coordinate (N1) at (.25*\Depth,.25*\Width,.7*\Height);
-  \coordinate (N2) at (.4*\Depth,.4*\Width,.55*\Height);
-  \draw [->, thick, >=latex] (N1) -- (N2);
-  \draw [fill=red,opacity=0.5,thick] (V1) -- (V2) -- (V3) -- cycle;
-  \draw [fill=green,opacity=0.5] (V2) -- (V1) -- (C) -- (V3) -- cycle;
-
-  % facet vertices intersecting with box
-  \draw (C) -- (G);
-  \filldraw [gray] (V1) circle (2pt);
-  \filldraw [gray] (V2) circle (2pt);
-  \filldraw [gray] (V3) circle (2pt);
-  \node at (.75*\Depth,0,.9*\Height) {$V_2$};
-  \node at (-.05*\Depth,.75*\Width,1.05*\Height) {$V_1$};
-  \node at (-.05*\Depth,-.05*\Width,.1*\Height) {$V_3$};
-
-\end{tikzpicture}
-
+%For complex geometry the surface usually does not align itself with the face of a Cartesian grid cell. A given velocity component, therefore, is not on a boundary, but must still satisfy the governing equations subject to the prescribed boundary conditions (position and properties of the surface).  The essential task of a direct-forcing immersed boundary method is to set $u_i^{ibm}$ to achieve a stable and accurate numerical solution as well as an adequate representation of the local flow physics (surface stress, pressure gradient, etc.) without the luxury of infinitely high resolution.
+%
+%In FDS, there are three IBM options for momentum, set by, for example,
+%\small
+%\begin{verbatim}
+%&MISC IMMERSED_BOUNDARY_METHOD=1/ ! options are 0,1,2
+%\end{verbatim}
+%\normalsize
+%Following is a brief description of each option. The basic linear interpolation method of Fadlun \cite{Fadlun:temp} is given by option (1), and will be used for the examples to follow later in this paper. Refer to the diagram in Fig.~\ref{fig:position_definitions} for position definitions.
+%
+%\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=0}
+%
+%The velocity component force term is unaltered if it falls on the positive side of the surface.  Let $\mathbf{x}_{velo}$ denote the location of the velocity component, $\mathbf{v}_i, (i=1,2,3)$ are the vertices of a face, $\mathbf{n} = (\mathbf{v}_2-\mathbf{v}_1) \times (\mathbf{v}_3-\mathbf{v}_1)$ is the face normal, and let $\mathbf{r} \equiv \mathbf{x}_{velo} - \mathbf{v}_1$ (any of the vertices will do); then if $\delta n =\mathbf{r} \cdot \mathbf{n} > 0$ the velocity component is processed as usual; if the dot product is negative the velocity is ``inside'' the obstruction and is set to zero.  This effectively leads to a zeroth-order (Lego block) representation of the surface.
+%
+%\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=1}
+%
+%The basic linear interpolation scheme of Fadlun starts by identifying a point $\mathbf{x}_{int}$ (see Fig.~\ref{fig:position_definitions}) which is twice the normal distance from the surface as the position of the velocity component, $\mathbf{x}_{velo}$.  The value $u_i(\mathbf{x}_{int}) = u_{i,int}$ is found from a trilinear interpolation of the neighboring staggered velocity component values from the previous time step.  The value of $u_i^{ibm}$ is then taken from a linear interpolation between $u_{i,int}$ and the wall value of the velocity component, $u_{i,w}$ (usually zero).  Thus, $u_i^{ibm} = \frac{1}{2}(u_{i,int} + u_{i,w})$.
+%
+%\paragraph{\ct IMMERSED\_BOUNDARY\_METHOD=2}
+%
+%Here the linear profile is replaced by a prescribed wall-normal profile for the mean streamwise velocity.  This requires that we first define a new streamwise coordinate system.  Referring to Fig.~\ref{fig:position_definitions}, let $\mathbf{e}_i, (i=1,2,3)$ define an orthonormal set of basis vectors for our Cartesian grid system and let $\mathbf{\bar{e}}_i, (i=1,2,3)$ define the new streamwise system where $\mathbf{\bar{e}}_1$ is the streamwise direction and $\mathbf{\bar{e}}_3$ is the wall-normal direction.  It is useful to define the new system so that the velocity component in $\mathbf{\bar{e}}_2$ is always zero.  This is achieved as follows: Define a tangent vector $\mathbf{t} \equiv \mathbf{n} \times (\mathbf{u} - \mathbf{u}_w)$ where $\mathbf{u}_w$ is the velocity of the wall (usually zero) and $\mathbf{n}$ is a wall-normal vector. The streamwise basis vector is then found from $\mathbf{\hat{s}} = \mathbf{\hat{t}} \times \mathbf{\hat{n}}$.  The hat represents a unit normal, e.g., $\mathbf{\hat{n}} \equiv \mathbf{n}/|\mathbf{n}|$.  The new streamwise system is then given by $\mathbf{\bar{e}_1}=\mathbf{\hat{s}}$, $\mathbf{\bar{e}_2}=\mathbf{\hat{t}}$, and $\mathbf{\bar{e}_3}=\mathbf{\hat{n}}$. (To conform to the convention used in the atmospheric community, in FDS, the ``vertical'' or surface-normal component is taken as the ``$z$'' component.  Hence, 2D flows are in the $x-z$ plane.)  The elements of the directional cosine matrix are now simply $a_{ij} = \mathbf{e}_i \cdot \mathbf{\bar{e}}_j$.  Velocity vectors may be transformed from the grid system to the streamwise system via $\bar{u}_k = a_{ik} u_i$ and back again via $u_i = a_{ik} \bar{u}_k$ (see, e.g., \cite{Pope:2000} Appendix B).
+%
+%To evaluate the streamwise profile, all three staggered velocity components are interpolated to $\mathbf{x}_{int}$ and the vector is transformed into the streamwise system.  The streamwise component at $\mathbf{x}_{int}$ is used to define the profile $f(n)$, which is then used to specify the streamwise component at the position of interest ($\mathbf{x}_{velo}$ in the grid system).  Thus, we obtain $\bar{u}_1^{ibm} = f(\delta n)$.  Here note that the bar indicates we are in the streamwise coordinate system.  We need to specify the other two components before we can transform back to the grid system.  As mentioned, the tangential component is zero by construction. Specification of the normal component is currently an active area of research \cite{Choi:2007:temp}.  What complicates matters is that we have two invariants to satisfy: (1) the divergence and (2) the kinetic energy. The kinetic energy is the easier of the two because it does not involve differences.  Still, since all we know from the model is a mean profile, some sort of \emph{ad hoc} assumption must be made.  Given $k_{int}=\frac{1}{2}u_i u_i$ at $\mathbf{x}_{int}$, we use a linear interpolation to determine $k(\delta n) = \frac{1}{2}(k_{int} + k_w)$, where $k_w$ is the kinetic energy at the wall (usually zero).  The magnitude of the normal component is then found from $|\bar{u}_3^{ibm}| = +\sqrt{2k(\delta n) - (\bar{u}_1^{ibm})^2}$.  Finally, the component value of interest is obtained from the transformation $u_i^{ibm} = a_{ik} \bar{u}_k^{ibm}$, where only the $i$th component is retained at the staggered location.
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tikzpicture}[scale=1.25]
+%
+%\draw [fill=lightgray] (0.2,0.5) -- (2.2,3.8) -- (4.5,3.1) -- (0.2,0.5);
+%
+%\draw[help lines] (-3,-1) grid [step=2cm] (5,7);
+%
 %\draw (0.30,0.25) node {$\mathbf{v}_1$};
 %\draw (4.80,3.10) node {$\mathbf{v}_2$};
 %\draw (2.20,4.00) node {$\mathbf{v}_3$};
@@ -1819,11 +1485,424 @@ The other option is to use the \texttt{CUT\_FACE\_LL} linked list to generate an
 %\draw [->] ( 0.54,2.280) -- (2.15,2.280);
 %\draw [->] ( 0.90,1.800) -- (1.80,1.800);
 %\draw (1.5,5.0) node {$f(n)$};
-
-\caption{Cartesian cell {\ct (I,J,K)} in FDS.}
-\label{fig:cartesian_cell}
-\end{center}
-\end{figure}
+%
+%\end{tikzpicture}
+%
+%\caption{Position definitions for a single facet.  The function $f(n)$ represents the mean streamwise velocity profile in the wall-normal direction.}
+%\label{fig:position_definitions}
+%\end{center}
+%\end{figure}
+%
+%\paragraph{Remark} As can be seen, in going from IBM methods 0 to 2 the level of complexity increases significantly.  For the remainder of this paper, we utilize method 1.  The main reason is that our focus here is on the additional complexities that arise with considering heat and mass transfer near infinitely thin obstructions.
+%
+%%\subsubsection{Convergence of IBM 1}
+%%\label{sec:momentum_convergence}
+%%
+%%In this section we show second-order convergence for IBM 1 by examining the 2D flow near a rotating disk.
+%
+%\subsection{Heat and Mass Transfer}
+%
+%This is where the formulation gets tricky.  Both heat and mass transfer present challenges for a typical IBM formulation.  For heat transfer, numerical diffusion from the gas phase domain into the solid domain implies that global energy is not conserved.  For mass transfer, when considering the ``mixed is burnt'' model for combustion chemistry, any numerical diffusion of reactant species across a solid boundary can be fatal to a calculation.  For these reasons, we have chosen to implement a hybrid cutcell immersed boundary method (CIBM), where the cutcells on the immersed boundary surface are treated by an unstructured finite volume solver for heat and mass transport.  This ensures strict conservation of mass and energy in the fluid domain.
+%
+%\subsubsection{To-Do List}
+%
+%\begin{enumerate}
+%\item Identify cutcells.  Find the Cartesian cells that intersect with solid tet volumes.  To handle zero thickness obstructions we either need the ability to treat facets by themselves or we may allow ``volumes'' with zero volume.  To be discussed.
+%\item Compute cutcell (CC) volumes.  Let $V_{cell}$ denote the volume of the Cartesian cell.  Let $V_{tet}$ denote a tetrahedral volume.  The cutcell volume is $V_{cc} = V_{cell} - ( V_{cell} \cap V_{tet} )$.
+%\item Merge small cells.  If $V_{cc} < V_{tol}$, merge with a neighboring cell (Cartesian cell or cutcell).  This limits CFL time step restrictions.
+%\item Compute surface areas and unit normal vectors for final cutcell volumes.
+%\item Interpolate scalars (density, mass fractions, temperature) to CC volume faces (see below).
+%\item Interpolate velocity components to CC faces (see below).
+%\item Update finite volumes equations (see below).
+%\item Construct Cartesian divergence from CC divergence integral (see below).
+%\item Update Poisson equation as usual (see FDS Tech Guide).
+%\item Reconstruct velocity field to satisfy projection and CC constraints (see below).
+%\end{enumerate}
+%
+%\newpage
+%
+%\subsubsection{FDS Grid Data Structure}
+%
+%
+%In the following, variables and proposed data lists for cut-cells and faces to be used in the FDS CCIBM code are described. Data structures from the prototype Matlab code and linked list definitions from the current FDS IBM implementation are included for clarity. Names can be changed if there are issues with the existing FDS namespace, etc. Also, we keep it general for now.
+%
+%
+%\subsubsection*{Some type defining and indexing parameters:}
+%
+%The following parameters are used in defining the type (or status) of cell or cell face on Cartesian grid or solid surfaces: \\
+%\texttt{INTEGER, PARAMETER :: GASPHASE     = -1} \\
+%\texttt{INTEGER, PARAMETER :: CUTCF         =   0} \\
+%\texttt{INTEGER, PARAMETER :: SOLID              =   1} \\
+%\texttt{INTEGER, PARAMETER :: INBOUNDARY =   2} \\
+%
+%
+%
+%\subsubsection*{New Cartesian grid variables:}
+%
+%- \textit{Cell-centered} variables for cell-type identification, unknown numbering, etc.:  \\
+% \texttt{INTEGER} \texttt{CCVAR(I,J,K,ICVAR)}: Here,  \texttt{ICVAR} can be equal to:   \\
+%%
+%\begin{itemize}
+%
+%  \item \texttt{INTEGER, PARAMETER :: IGSC = 1} such that: \\
+%           - \texttt{CCVAR(I,J,K,IGSC) == GASPHASE} is a regular \texttt{GASPHASE} cell. \\
+%           - \texttt{CCVAR(I,J,K,IGSC) == CUTCF} is a cut-cell, i.e. cell transversed by the solid wet surface. \\
+%           - \texttt{CCVAR(I,J,K,IGSC) == SOLID} is a regular cell immersed completely in the solid region.
+%
+%  \item \texttt{ICVAR} can take other values (2, 3,... to be added later) to map unknowns to \texttt{CUT\_CELL} data, linear systems, etc.
+%
+%
+%\end{itemize}
+%%
+%- \textit{Face-centered} variables for face-type identification, generating data necessary for matrix and vector building (face based),  etc.:  \\
+%\texttt{INTEGER} \texttt{FCVAR(I,J,K,IFVAR)}: Here,  \texttt{IFVAR} can be equal to:   \\
+%%
+%\begin{itemize}
+%
+%  \item \texttt{INTEGER, PARAMETER :: FGSC = 1} such that: \\
+%           - \texttt{FCVAR(I,J,K,FGSC) == GASPHASE} is a regular \texttt{GASPHASE} face. \\
+%           - \texttt{FCVAR(I,J,K,FGSC) == CUTCF} is a cut-face, i.e. face transversed by the solid wet surface. \\
+%           - \texttt{FCVAR(I,J,K,FGSC) == SOLID} is a regular face immersed completely in the solid region.
+%
+%  \item \texttt{FCVAR} can take other values (2,3,... to be added later) to map face indexes to \texttt{CUT\_FACE} data, etc.
+%
+%
+%\end{itemize}
+%%
+%These variables are defined by mesh, so they can be included as \texttt{ALLOCATABLE} in the \texttt{TYPE\_MESH}, and be allocated if using CCIBM.
+%
+%
+%\subsubsection*{Data structures currently used on the Matlab prototype code:}
+%
+%- Data structure \texttt{CUT\_FACE}: Contains all \texttt{GASPHASE} and \texttt{INBOUNDARY} cut-faces. The latter are defined in the immersed solid surface and are used to impose boundary conditions for scalars. The total number of cut-faces is \texttt{NCUTFACE}. For a given cut-face \textit{icf}, the data structure has fields:
+%%
+%\begin{itemize}
+%
+%  \item  \texttt{CUT\_FACE(icf).XYZVERT}: $x,y,z$ coordinates of cut-face \textit{icf} vertex points. They are composed of intersection points between solid and Cartesian cell faces, and cell or facet vertices. These can be stored on a Global array as discussed with Glenn, and \texttt{XYZVERT} can be replaced by an index vector. They are used to define geometric data and also for plotting purposes (would be used in SMV).
+%
+%  \item  \texttt{CUT\_FACE(icf).XYZCEN}: $x,y,z$ coordinates of cut-face \textit{icf} area centroid.
+%
+%  \item  \texttt{CUT\_FACE(icf).STATUS}: can be \texttt{GASPHASE} or \texttt{INBOUNDARY}.
+%
+%  \item  \texttt{CUT\_FACE(icf).IJK}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, \texttt{ijk} denotes the Cartesian grid \textit{face} the cut-face belongs to. If  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY},  \texttt{ijk} denotes the Cartesian grid \textit{cell} this cut-face belongs to.
+%
+%  \item  \texttt{CUT\_FACE(icf).AXIS}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, this face is normal to which axis? \texttt{AXIS} can be \texttt{== IAXIS=1} for x-faces, \texttt{== JAXIS=2} for y-faces and \texttt{== KAXIS=3} for z-faces.  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY}, then  \texttt{AXIS} is zero.
+%
+%  \item \texttt{CUT\_FACE(icf).NIJK}: normal unit vector to the cut-face. If \texttt{CUT\_FACE(icf).AXIS == IAXIS} then \texttt{NIJK=[1. 0. 0.]}, if
+%  \texttt{CUT\_FACE(icf).AXIS == JAXIS} then \texttt{NIJK=[0. 1. 0.]}, \texttt{CUT\_FACE(icf).AXIS == KAXIS} then  \texttt{NIJK=[0. 0. 1.]}. If \texttt{CUT\_FACE(icf).AXIS == 0},  \texttt{NIJK} is the normal outside of the body for that \texttt{INBOUNDARY} cut-face.
+%
+%  \item \texttt{CUT\_FACE(icf).BCTYPE(1:NSCALARS)}: boundary condition type, integer that for \texttt{INBOUNDARY} cut-faces, specifies the type of boundary condition imposed for scalars (i.e. constant mass flux, wall, etc.).
+%
+%  \item \texttt{CUT\_FACE(icf).BCVAL(1:NSCALARS)}: mean boundary condition value assigned for this \texttt{INBOUNDARY} cut-face, for each scalar.
+%
+%\end{itemize}
+%%
+%Some of the data here is redundant and won't need to be filled up. Now, as in this construct cut faces can be either \texttt{GASPHASE} or \texttt{INBOUNDARY}, we might want to separate these in two structs (i.e. CUT\_FACE\_GP and CUT\_FACE\_BD) to avoid conditionals on cut-face loops.
+%
+%
+%- Data structure \texttt{CUT\_CELL}: Contains all \texttt{GASPHASE} cut-cells. The total number of cut-cells is \texttt{NCUTCELL}. For a given cut-cell \textit{icc}, the data structure has fields:
+%%
+%\begin{itemize}
+%
+%  \item \texttt{CUT\_CELL(icc).vol}: cut-cell volume.
+%
+%  \item \texttt{CUT\_CELL(icc).XYZCEN}:  $x,y,z$ coordinates of cut-cell \textit{icc} volume centroid.
+%
+%  \item \texttt{CUT\_CELL(icc).NCFACES}: number of faces in the \texttt{CUT\_FACE} data structure.
+%
+%  \item \texttt{CUT\_CELL(icc).CFACES}: index vector to location of cut-faces in \texttt{CUT\_FACE} data structure.
+%
+%  \item \texttt{CUT\_CELL(icc).IJK}: denotes the Cartesian grid \textit{cell} this cut-cell belongs to.
+%
+%  \item \texttt{CUT\_CELL(icc).HINTFLG}: Integer flag that denotes if the pressure $H$ needs to be interpolated to the \texttt{CUT\_CELL(icc).XYZCEN} from the \texttt{GASPHASE} surroundings, and type of interpolation to perform.
+%
+%\end{itemize}
+%%
+%Other fields will need to be incorporated to this data structure. Among them an unknown number for scalar and possibly the pressure H, if pressure is dealt with using the unstructured scheme.
+%
+%
+%
+%\subsubsection*{Data structures currently used on the FDS IBM code:}
+%
+%\begin{myfont}
+%
+%\noindent TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
+%\indent  INTEGER :: INDEX                                   ! data \\
+%\indent  TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt el \\
+%\indent   REAL(EB) :: AREA                                   ! cutcell area for index \\
+%\noindent END TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
+%
+%\noindent TYPE CUTCELL\_TYPE \\
+%\indent   REAL(EB) :: VOL,RHO,TMP,DIV,A(6),S,N(3) \\
+%\indent   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ \\
+%\indent   ! identify each face with area contribution to current cutcell \\
+%\indent   ! note: this must include the faces and areas of Cartesian cells \\
+%\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_FACE\_LIST \\
+%\noindent END TYPE CUTCELL\_TYPE \\
+%
+%\noindent TYPE FACET\_TYPE \\
+%\indent   INTEGER :: VERTEX(3)=0,SURF\_INDEX=0,BOUNDARY\_TYPE \\
+%\indent   CHARACTER(LABEL\_LENGTH) :: SURF\_ID='null' \\
+%\indent   REAL(EB) :: NVEC(3)=0.\_EB,AW,EW,KW,DN,RDN,RHO\_F,U\_TAU,Y\_PLUS,TMP\_F, \\
+%\indent TMP\_G,QCONF,HEAT\_TRANS\_COEF,QRADIN,QRADOUT \\
+%\indent   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHODW,ZZ\_F \\
+%\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ILW \\
+%\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_LIST \\
+%\noindent END TYPE FACET\_TYPE \\
+%
+%\noindent TYPE(FACET\_TYPE), ALLOCATABLE, TARGET, DIMENSION(:) :: FACET \\
+%
+%\noindent TYPE VOLUME\_TYPE \\
+%\indent   INTEGER :: VERTEX(4)=0 \\
+%\indent   CHARACTER(LABEL\_LENGTH) :: MATL\_ID='null' \\
+%\noindent END TYPE VOLUME\_TYPE \\
+%
+%\noindent TYPE(VOLUME\_TYPE), ALLOCATABLE, TARGET, DIMENSION(:) :: VOLUME \\
+%
+%\end{myfont}
+%
+%
+%\subsubsection*{Proposed Data structures for the FDS CCIBM code:}
+%
+%The previously defined derived type \texttt{CUTCELL\_LINKED\_LIST\_TYPE} refers to \texttt{INBOUNDARY} cut-faces as defined in the Matlab data structures. Also, previously there was no need for a proper volume cut-cell linked list type, because (from what I understand) things on previous development didn't get to this stage (looks like Charles Luo was playing with one CC on the INIT\_IBM subroutine, line $\simeq 2750$ of \texttt{geom.f90}).
+%We modify the previously derived types keeping the data already defined and needed, and considering the Matlab code data containers:
+%\newline
+%
+%\noindent  - One type \texttt{CUTFACE\_LINKED\_LIST\_TYPE} to create a linked list with the data corresponding to the \texttt{CUT\_FACE} data structure in the Matlab code. The type proposed is:
+%
+%\begin{myfont}
+%\noindent TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
+%\indent  INTEGER :: INDEX                                                                        ! Cut- face index \\
+%\indent  TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt cut-face \\
+%\indent   REAL(EB), DIMENSION(NDIM) :: XYZCEN                                 ! cut-face centroid coords \\
+%\indent   INTEGER :: NVERTEX, STATUS, IJK, AXIS, BCTYPE(NSCALARS)            \\
+%\indent   ! Vertex coordinates, to be allocated (NDIM,NVERTEX) \\
+%\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZVERT \\
+%\indent   REAL(EB) :: BCVAL(NSCALARS) \\
+%\noindent END TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
+%\end{myfont}
+%Other fields can be added as needed.
+%
+%\noindent  - One new type \texttt{CUTCELL\_LINKED\_LIST\_TYPE} to create a linked list with the data corresponding to the \texttt{CUT\_CELL} data with basic cut-cell info for flux definitions and volume integrals:
+%\begin{myfont}
+%\noindent TYPE CUTCELL\_LINKED\_LIST\_TYPE \\
+%\indent  INTEGER :: INDEX                                                                        ! Cut-cell index \\
+%\indent  TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: NEXT    ! nxt cut-cell \\
+%\indent  REAL(EB) :: VOL                                                                           ! cut-cell volume \\
+%\indent  REAL(EB), DIMENSION(NDIM) :: XYZCEN                                 ! cut-cellcentroid coords \\
+%\indent  ! List of cut-faces that are boundary of this cut-cell \\
+%\indent  TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_CUTFACES\_LIST \\
+%\indent  INTEGER :: IJK, HINTFLG ! IJK underlying Cartesian cell. \\
+%\noindent END TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
+%\end{myfont}
+%Other fields added as needed (\texttt{RHO,TMP,DIV,ZZ} etc.).
+%
+%\noindent We need to change the name of the linked list to cut-faces in the \texttt{FACET\_TYPE} definition: \\
+%\begin{myfont}
+%\indent   TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUTCELL\_LIST \\
+%\end{myfont}
+%\noindent  to
+%\begin{myfont}
+%TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: FACET\_CUTFACES\_LIST \\
+%\end{myfont}
+%\noindent to define correctly the type of geometry entity the list refers to.
+%
+%Then we would define: \\
+%\begin{myfont}
+%\noindent !LL of cut-faces for mesh M. \\
+%\noindent TYPE(CUTFACE\_LINKED\_LIST\_TYPE), POINTER :: CUT\_FACE\_LL \\
+%\noindent !LL of cut-cells for mesh M. \\
+%\noindent TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUT\_CELL\_LL \\
+%\end{myfont}
+%
+%From my understanding on linked lists, using a \texttt{CUTCELL\_CUTFACES\_LIST} for each cut-cell defined in \texttt{CUT\_FACE\_LL, CUT\_CELL\_LL} and also for some \texttt{FACET} would mean we have to replicate cut-face data at least 3 times? Cut-faces stored on the different lists would be individualized by their global cut-face \texttt{INDEX}. This seems convoluted and prone to bugs.
+%The other option is to use the \texttt{CUT\_FACE\_LL} linked list to generate an allocatable data structure \texttt{CUT\_FACE} with same fields, and define also \texttt{CUT\_CELL} in the same manner. The \texttt{CUT\_CELL} data structure size can be estimated from the beginning knowing the number of Cartesian cells that are cut. Then, \texttt{FACET} would have an allocatable index array to the \texttt{CUT\_FACE} data structure.
+%
+%\textit{We need to discuss this..}
+%
+%
+%\subsubsection*{Containers for Pressure and scalar unknowns numbering:}
+%
+%\textit{To come..}
+%
+%\newpage
+%
+%
+%
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tikzpicture}[scale=1]
+%
+%\coordinate (O) at (0,0);
+%\coordinate (P) at (10,10);
+%
+%\draw[help lines] (O) grid [step=2cm] (P);
+%
+%\end{tikzpicture}
+%\caption{Structured, staggered grid in FDS.  Mesh variables belong to {\ct M=>MESHES(NM)}. }
+%\label{fig:struc_stag_grid}
+%\end{center}
+%\end{figure}
+%
+%
+%\begin{figure}
+%\begin{center}
+%
+%\newcommand{\Depth}{3}
+%\newcommand{\Height}{3}
+%\newcommand{\Width}{3}
+%
+%\tdplotsetmaincoords{70}{30}
+%
+%\begin{tikzpicture}[scale=2,tdplot_main_coords]
+%
+%  \coordinate (O) at (0,0,0);
+%  \coordinate (A) at (0,\Width,0);
+%  \coordinate (B) at (0,\Width,\Height);
+%  \coordinate (C) at (0,0,\Height);
+%  \coordinate (D) at (\Depth,0,0);
+%  \coordinate (E) at (\Depth,\Width,0);
+%  \coordinate (F) at (\Depth,\Width,\Height);
+%  \coordinate (G) at (\Depth,0,\Height);
+%
+%  \tdplotsetcoord{P}{1}{45}{45}
+%  \draw[ultra thick,->] (0,0,0) -- (1,0,0) node[anchor=north east]{$x$};
+%  \draw[ultra thick,->] (0,0,0) -- (0,1,0) node[anchor=north west]{$y$};
+%  \draw[ultra thick,->] (0,0,0) -- (0,0,1) node[anchor=north east]{$z$};
+%%  \draw[-stealth,color=red] (O) -- (P);
+%%  \draw[dashed, color=red] (O) -- (Px);
+%%  \draw[dashed, color=red] (O) -- (Py);
+%%  \draw[dashed, color=red] (O) -- (Pz);
+%%  \draw[dashed, color=red] (Px) -- (Pxy);
+%%  \draw[dashed, color=red] (Py) -- (Pxy);
+%%  \draw[dashed, color=red] (Px) -- (Pxz);
+%%  \draw[dashed, color=red] (Pz) -- (Pxz);
+%%  \draw[dashed, color=red] (Py) -- (Pyz);
+%%  \draw[dashed, color=red] (Pz) -- (Pyz);
+%%  \draw[dashed, color=red] (Pxy) -- (P);
+%%  \draw[dashed, color=red] (Pxz) -- (P);
+%%  \draw[dashed, color=red] (Pyz) -- (P);
+%
+%  \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (E) -- (D) -- cycle;
+%  \draw[fill=gray!50,opacity=0.5] (O) -- (A) -- (B) -- (C) -- cycle;
+%  \draw[fill=gray!50,opacity=0.5] (A) -- (B) -- (F) -- (E) -- cycle;
+%
+%  \draw[fill=gray!50,opacity=0.5,thick] (D) -- (E) -- (F) -- (G) -- cycle;
+%  \draw[fill=gray!50,opacity=0.5,thick] (C) -- (B) -- (F) -- (G) -- cycle;
+%  \draw[fill=gray!50,opacity=0.5,thick] (O) -- (C) -- (G) -- (D) -- cycle;
+%
+%  %% Following is for debugging purposes so you can see where the points are
+%  % These are last so that they show up on top
+%  \foreach \xy in {O, A, B, C, D, E, F, G}{
+%      \node at (\xy) {\xy};
+%  }
+%
+%  % DX(I)
+%  \draw [blue,<-] (0,-.4*\Width,0) -- (.35*\Depth,-.4*\Width,0);
+%  \draw [blue,->] (.65*\Depth,-.4*\Width,0) -- (\Depth,-.4*\Width,0);
+%  \draw [blue,-] (0,-.5*\Width,0) -- (0,-.1*\Width,0);
+%  \draw [blue,-] (\Depth,-.5*\Width,0) -- (\Depth,-.1*\Width,0);
+%  \draw (.5*\Depth,-.4*\Width,0) node {\ct DX(I)};
+%
+%  % DY(J)
+%  \draw [blue,<-] (1.3*\Depth,0,0) -- (1.3*\Depth,0.35*\Width,0);
+%  \draw [blue,->] (1.3*\Depth,0.65*\Width,0) -- (1.3*\Depth,\Width,0);
+%  \draw [blue,-] (1.1*\Depth,0,0) -- (1.4*\Depth,0,0);
+%  \draw [blue,-] (1.1*\Depth,\Width,0) -- (1.4*\Depth,\Width,0);
+%  \draw (1.3*\Depth,.5*\Width,0) node {\ct DY(J)};
+%
+%  % DZ(K)
+%  \draw [blue,<-] (1.3*\Depth,\Width,0) -- (1.3*\Depth,\Width,0.45*\Height);
+%  \draw [blue,->] (1.3*\Depth,\Width,0.55*\Height) -- (1.3*\Depth,\Width,\Height);
+%  \draw [blue,-] (1.1*\Depth,\Width,\Height) -- (1.4*\Depth,\Width,\Height);
+%  \draw (1.3*\Depth,\Width,.5*\Height) node {\ct DZ(K)};
+%
+%  % XC(I),YC(J),ZC(K)
+%  \filldraw [black] (.5*\Depth,.5*\Width,.5*\Height) circle (2pt);
+%  \node at (.5*\Depth,1.3*\Width,1.2*\Height) {\ct XC(I),YC(J),ZC(K)};
+%  \node at (.5*\Depth,1.3*\Width,1.3*\Height) {\ct RHO(I,J,K),ZZ(I,J,K,N),TMP(I,J,K),H(I,J,K)};
+%  \draw [blue] (.5*\Depth,.55*\Width,.55*\Height) -- (.5*\Depth,1.25*\Width,1.15*\Height);
+%
+%  % velocity components
+%  \draw [->, ultra thick, >=latex] (.9*\Depth,.5*\Width,.5*\Height) -- (1.1*\Depth,.5*\Width,.5*\Height);
+%  \draw [->, ultra thick, >=latex] (.5*\Depth,.9*\Width,.5*\Height) -- (.5*\Depth,1.1*\Width,.5*\Height);
+%  \draw [->, ultra thick, >=latex] (.5*\Depth,.5*\Width,.9*\Height) -- (.5*\Depth,.5*\Width,1.1*\Height);
+%
+%  \node at (\Depth,.5*\Width,.4*\Height) {\ct U(I,J,K)};
+%  \node at (.75*\Depth,\Width,.5*\Height) {\ct V(I,J,K)};
+%  \node at (.45*\Depth,.6*\Width,1.1*\Height) {\ct W(I,J,K)};
+%
+%  % shade solid volume
+%  \coordinate (V1) at (0,.75*\Width,\Height);
+%  \coordinate (V2) at (.75*\Depth,0,\Height);
+%  \coordinate (V3) at (0,0,.1*\Height);
+%
+%  % face normal
+%  \coordinate (N1) at (.25*\Depth,.25*\Width,.7*\Height);
+%  \coordinate (N2) at (.4*\Depth,.4*\Width,.55*\Height);
+%  \draw [->, thick, >=latex] (N1) -- (N2);
+%  \draw [fill=red,opacity=0.5,thick] (V1) -- (V2) -- (V3) -- cycle;
+%  \draw [fill=green,opacity=0.5] (V2) -- (V1) -- (C) -- (V3) -- cycle;
+%
+%  % facet vertices intersecting with box
+%  \draw (C) -- (G);
+%  \filldraw [gray] (V1) circle (2pt);
+%  \filldraw [gray] (V2) circle (2pt);
+%  \filldraw [gray] (V3) circle (2pt);
+%  \node at (.75*\Depth,0,.9*\Height) {$V_2$};
+%  \node at (-.05*\Depth,.75*\Width,1.05*\Height) {$V_1$};
+%  \node at (-.05*\Depth,-.05*\Width,.1*\Height) {$V_3$};
+%
+%\end{tikzpicture}
+%
+%%\draw (0.30,0.25) node {$\mathbf{v}_1$};
+%%\draw (4.80,3.10) node {$\mathbf{v}_2$};
+%%\draw (2.20,4.00) node {$\mathbf{v}_3$};
+%%
+%%\draw [->, very thick, >=latex] (-2.5,5.0) -- (-1.5,5.0);
+%%\draw [->, very thick, >=latex] (-2.5,3.0) -- (-1.5,3.0);
+%%\draw [->, very thick, >=latex] (-0.5,5.0) -- (0.5,5.0);
+%%\draw [->, very thick, >=latex] (-0.5,3.0) -- (0.5,3.0);
+%%\draw (0.5,3.3) node {$\mathbf{x}_{velo}$};
+%%
+%%\draw [->, very thick, >=latex] (0.2,0.5) -- (0.0,3.0);
+%%\draw (-0.15,1.8) node {$\mathbf{r}$};
+%%
+%%\draw [->, very thick, >=latex] (0.2,0.5) -- (-1,2.0);
+%%\draw (-0.5,1.0) node {$\mathbf{n}$};
+%%
+%%\draw [->, >=*] (1.1,1.545) -- (-1.3,4.7);
+%%\draw (-1.5,4.3) node {$\mathbf{x}_{int}$};
+%%
+%%\draw [|-] (0.9,1.37) -- (0.57,1.8);
+%%\draw [-|] (0.24,2.25) -- (-0.19,2.85);
+%%\draw (.4,2.02) node {$\delta n$};
+%%
+%%\draw [->, very thick, >=latex] (1.08,1.55) -- (2.35,1.55);
+%%\draw [->, very thick, >=latex] (1.1,1.545) -- (0.45,2.4);
+%%\draw [->, very thick, >=latex] (1.1,1.545) -- (1.75,2.6);
+%%\draw (2.9,1.55) node {$\mathbf{\hat{s}} \, (\mathbf{\bar{e}}_1)$};
+%%\draw (1.9,2.60) node {$\mathbf{\hat{t}}$};
+%%\draw (0.6,2.60) node {$\mathbf{\hat{n}}$};
+%%
+%%\draw [->, very thick, >=latex] (-2,0) -- (-2,1);
+%%\draw [->, very thick, >=latex] (-2,0) -- (-1,0);
+%%\draw (-0.9,-0.25) node {$\mathbf{e}_1$};
+%%\draw (-2.35,1) node {$\mathbf{e}_3$};
+%%
+%%\draw (1,4.7) .. controls (2.5,2) .. (1.1,1.545);
+%%\draw [->] (-1.15,4.500) -- (1.10,4.500);
+%%\draw [->] (-0.58,3.750) -- (1.52,3.750);
+%%\draw [->] ( 0.20,3.003) -- (1.90,3.003);
+%%\draw [->] ( 0.54,2.280) -- (2.15,2.280);
+%%\draw [->] ( 0.90,1.800) -- (1.80,1.800);
+%%\draw (1.5,5.0) node {$f(n)$};
+%
+%\caption{Cartesian cell {\ct (I,J,K)} in FDS.}
+%\label{fig:cartesian_cell}
+%\end{center}
+%\end{figure}
 
 \bibliography{../Bibliography/FDS_general,../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
 
