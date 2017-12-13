@@ -273,7 +273,7 @@ fi
 #*** define executable
 
 if [ "$use_installed" == "1" ]; then
-  notfound=`echo | fds |& tail -1 | grep "not found" | wc -l`
+  notfound=`echo | fds 2>&1 >/dev/null | tail -1 | grep "not found" | wc -l`
   if [ $notfound -eq 1 ]; then
     echo "fds is not installed. Run aborted."
     ABORTRUN=y
@@ -641,8 +641,12 @@ echo "    Input file: $in"
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
-echo rm $scriptfile
 EOF
+if [ "$queue" == "none" ]; then
+cat << EOF >> $scriptfile
+rm -f $scriptfile
+EOF
+fi
 
 #*** output script file to screen if -v option was selected
 
