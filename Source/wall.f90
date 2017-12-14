@@ -899,13 +899,13 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
       END SELECT METHOD_OF_HEAT_TRANSFER
 
-      ! handle special case of 2D cylindrical coordinates with WC on X=0 boundary
-
-      IF (TWO_D .AND. CYLINDRICAL .AND. IOR==-1 .AND. ABS(XS)<TWO_EPSILON_EB) THEN
-         KDTDX(II-1,JJ,KK) = 0._EB
-      ENDIF
-
    ENDDO HT3D_WALL_LOOP
+
+   ! handle special case of 2D cylindrical coordinates with WC on X=0 boundary
+
+   IF (TWO_D .AND. CYLINDRICAL .AND. ABS(XS)<TWO_EPSILON_EB) THEN
+      KDTDX(0,1,:) = 0._EB
+   ENDIF
 
    DO K=1,KBAR
       DO J=1,JBAR
