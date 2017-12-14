@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N sphere_helium_3meshes(MPI)
+#PBS -W umask=0022
+#PBS -e /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Complex_Geometry/sphere_helium_3meshes.err
+#PBS -o /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Complex_Geometry/sphere_helium_3meshes.log
+#PBS -l nodes=3:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Complex_Geometry
+echo
+echo `date`
+echo "    Input file: sphere_helium_3meshes.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings    -np 3 /Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db sphere_helium_3meshes.fds 
+#qsub -q -j  /tmp/script.53385.c9Tlqf

@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N objects_static(MPI)
+#PBS -W umask=0022
+#PBS -e /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Detectors/objects_static.err
+#PBS -o /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Detectors/objects_static.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Detectors
+echo
+echo `date`
+echo "    Input file: objects_static.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db objects_static.fds 
+#qsub -q -j  /tmp/script.53768.V1Wsyr

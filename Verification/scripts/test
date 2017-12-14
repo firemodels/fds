@@ -1,0 +1,283 @@
+FDS benchmark cases submitted
+FDS non-benchmark cases submitted
+creating delayed stop file: openmp_test64a
+         Input file:openmp_test64a.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: openmp_test64b
+         Input file:openmp_test64b.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:2
+creating delayed stop file: openmp_test64c
+         Input file:openmp_test64c.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:3
+creating delayed stop file: openmp_test64d
+         Input file:openmp_test64d.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:4
+creating delayed stop file: openmp_test64e
+         Input file:openmp_test64e.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:5
+creating delayed stop file: openmp_test64f
+         Input file:openmp_test64f.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:6
+creating delayed stop file: openmp_test64g
+         Input file:openmp_test64g.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:7
+creating delayed stop file: openmp_test64h
+         Input file:openmp_test64h.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:8
+creating delayed stop file: openmp_test128a
+         Input file:openmp_test128a.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: openmp_test128b
+         Input file:openmp_test128b.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:2
+creating delayed stop file: openmp_test128c
+         Input file:openmp_test128c.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:3
+creating delayed stop file: openmp_test128d
+         Input file:openmp_test128d.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:4
+creating delayed stop file: openmp_test128e
+         Input file:openmp_test128e.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:5
+creating delayed stop file: openmp_test128f
+         Input file:openmp_test128f.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:6
+creating delayed stop file: openmp_test128g
+         Input file:openmp_test128g.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:7
+creating delayed stop file: openmp_test128h
+         Input file:openmp_test128h.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Threads per process:8
+FDS benchmark cases submitted
+creating delayed stop file: lee_waves
+         Input file:lee_waves.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: stack_effect
+         Input file:stack_effect.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: lapse_rate
+         Input file:lapse_rate.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: sphere_helium_1mesh
+         Input file:sphere_helium_1mesh.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: sphere_helium_3meshes
+         Input file:sphere_helium_3meshes.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:3
+          Processes:3
+ Processes per node:1
+creating delayed stop file: sphere_helium_conserve_3meshes
+         Input file:sphere_helium_conserve_3meshes.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:3
+          Processes:3
+ Processes per node:1
+creating delayed stop file: activate_vents
+         Input file:activate_vents.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: control_test
+         Input file:control_test.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: control_test_2
+         Input file:control_test_2.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: create_remove
+         Input file:create_remove.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: cycle_test
+         Input file:cycle_test.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: device_test
+         Input file:device_test.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: hrr_freeze
+         Input file:hrr_freeze.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: rms_cov_corr
+         Input file:rms_cov_corr.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: aspiration_detector
+         Input file:aspiration_detector.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: beam_detector
+         Input file:beam_detector.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: objects_dynamic
+         Input file:objects_dynamic.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: objects_static
+         Input file:objects_static.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: smoke_detector
+         Input file:smoke_detector.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: energy_budget_adiabatic_walls
+         Input file:energy_budget_adiabatic_walls.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: energy_budget_adiabatic_two_fuels
+         Input file:energy_budget_adiabatic_two_fuels.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1
+creating delayed stop file: energy_budget_cold_walls
+         Input file:energy_budget_cold_walls.fds
+         Executable:/Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db
+              Queue:-j
+              Nodes:1
+          Processes:1
+ Processes per node:1

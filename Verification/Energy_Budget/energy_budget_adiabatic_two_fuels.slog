@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N energy_budget_adiabatic_two_fuels(MPI)
+#PBS -W umask=0022
+#PBS -e /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Energy_Budget/energy_budget_adiabatic_two_fuels.err
+#PBS -o /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Energy_Budget/energy_budget_adiabatic_two_fuels.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Energy_Budget
+echo
+echo `date`
+echo "    Input file: energy_budget_adiabatic_two_fuels.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db energy_budget_adiabatic_two_fuels.fds 
+#qsub -q -j  /tmp/script.53855.7oWvFA

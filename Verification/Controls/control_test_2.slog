@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N control_test_2(MPI)
+#PBS -W umask=0022
+#PBS -e /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Controls/control_test_2.err
+#PBS -o /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Controls/control_test_2.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Volumes/FettesBrot/GIT/01_Firemodels/fds/Verification/Controls
+echo
+echo `date`
+echo "    Input file: control_test_2.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Volumes/FettesBrot/GIT/01_Firemodels/fds/Build/mpi_intel_osx_64_db/fds_mpi_intel_osx_64_db control_test_2.fds 
+#qsub -q -j  /tmp/script.53501.o74oks
