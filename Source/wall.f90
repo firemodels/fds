@@ -727,7 +727,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       ENDDO
    ENDDO
 
-   ! build fluxes on boundaries
+   ! build fluxes on boundaries of INTERNAL WALL CELLS
 
    HT3D_WALL_LOOP: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
@@ -757,7 +757,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
-         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE
+         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SPECIFIED_TEMPERATURE
 
             SELECT CASE(IOR)
                CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
@@ -901,11 +901,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ENDDO HT3D_WALL_LOOP
 
-   ! handle special case of 2D cylindrical coordinates with WC on X=0 boundary
-
-   IF (TWO_D .AND. CYLINDRICAL .AND. ABS(XS)<TWO_EPSILON_EB) THEN
-      KDTDX(0,1,:) = 0._EB
-   ENDIF
+   ! Note: for 2D cylindrical KDTDX remains zero after initialization
 
    DO K=1,KBAR
       DO J=1,JBAR
