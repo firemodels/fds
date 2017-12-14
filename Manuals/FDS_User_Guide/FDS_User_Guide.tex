@@ -2562,7 +2562,7 @@ The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  Th
 \end{lstlisting}
 (Make sure that the {\ct {SURF}} doesn't also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.)
 
-{\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements. 
+{\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements.
 
   Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
 \begin{equation}
@@ -4166,7 +4166,7 @@ An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} f
 
 \subsection{Temporal and Spatial Variation of the Wind}
 
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, and {\ct RAMP\_W0\_T} to vary the velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_DIRECTION}, {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, or {\ct RAMP\_W0\_T} to vary the wind direction or its velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
 \begin{lstlisting}
 &RAMP ID='t-ramp', T=  0., F=0. /
 &RAMP ID='t-ramp', T=100., F=1. /
@@ -4209,11 +4209,13 @@ There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are o
 \subsection{The Mean Forcing Concept}
 \label{info:SPONGE_CELLS}
 
-The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} or its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), on the {\ct WIND} line, FDS will drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS will automatically drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
 \be
    \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
 \ee
 Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+
+Note that if instead of specifying the wind {\ct SPEED}, you specify its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), FDS will {\em not} automatically assert mean forcing, but rather just initialize the flow field to these constant values of velocity. If you want to override this behavior, you can direct FDS to assert meaning forcing in all coordinate directions by setting {\ct MEAN\_FORCING=.TRUE.}, or you can assert mean forcing in the $x$, $y$, or $z$ directions using {\ct MEAN\_FORCING(N)=.TRUE.} where {\ct N} is set to 1, 2, or 3, respectively.
 
 When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
 
@@ -4236,18 +4238,14 @@ You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\
 
 
 
-
-
-
 \section{Wind Method 3: The ``Wall of Wind''}
 \label{info:wall_of_wind}
-\label{info:INITIALIZATION_ONLY}
 
 An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
 
 To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error
 
-Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0}, and also set {\ct INITIALIZATION\_ONLY=.TRUE.} This will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
 
 
 
@@ -5097,12 +5095,12 @@ Note that the sign of {\ct NU} corresponds to whether that species is consumed (
 
 There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
-1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.23436\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
-1\,\underbrace{\mathrm{(19.79113\; CO_2 + 0.166587 \; CO + 20.71987 \; H_2O + 5.60253\; C_{0.9}H_{0.1} + 103.40121 \; N_2)}}_\text{Products\_1}
+1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.234364\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
+1\,\underbrace{\mathrm{(19.791134\; CO_2 + 0.166587 \; CO + 20.719873 \; H_2O + 5.602533\; C_{0.9}H_{0.1} + 103.40121 \; N_2)}}_\text{Products\_1}
 \end{multline}
 and the reaction for wood with a soot yield of $y_{\rm s}$ = 0.015 and a CO yield of $y_{\mathrm{CO}}$= 0.004 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:wood_combust}
-1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.02121\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
+1\,\underbrace{\mathrm{(CH_{1.7}O_{0.74}N_{0.002})}}_\text{Fuel} + 1.020627\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(0.964679\; CO_2 + 0.003655 \; CO + 0.848241 \; H_2O + 0.035184\; C_{0.9}H_{0.1} + 3.838558 \; N_2)}}_\text{Products\_2}
 \end{multline}
 Similar to example in Section~\ref{info:Complex_Fuel}, we will use the lumped species approach to minimize the number of species that FDS needs to transport. Therefore, the species are defined in the following manner:
@@ -6662,6 +6660,8 @@ When a device or control function is applied to a {\ct VENT}, the purpose is to 
 Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there is no explicit time function associated with the {\ct 'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If {\ct INITIAL\_STATE=.TRUE.}, then the fan should turn off at 30~s. Essentially, ``activation'' of a {\ct VENT} causes all associated time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
 
 A {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated. You can, however, place an obstruction in front of an {\ct 'OPEN'} {\ct VENT} and then create it or remove it to model the closing or opening of a door or window.
+
+There are sometimes circumstances when you might want to create or remove obstructions that have {\ct VENT}s attached. If the obstructions overlap, there can be confusion as to which {\ct VENT} goes with which {\ct OBST}. If you come across a situation like this, give the {\ct OBST} an {\ct ID} and assign this {\ct OBST\_ID} on the {\ct VENT} line.
 
 
 
@@ -9905,7 +9905,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MESH\_ID    }          & Character         & Reference~\cite{FDS_Evac_Users_Guide}                     &               &                     \\ \hline
 {\ct MULT\_ID    }          & Character         & Section~\ref{info:MULT}                                   &               &                     \\ \hline
 {\ct N\_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
-{\ct OUTLINE}               & Logical           & Section~\ref{info:VENT_Basics}                            &               &  {\ct .FALSE.}     \\ \hline
+{\ct OBST\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
+{\ct OUTLINE}               & Logical           & Section~\ref{info:VENT_Basics}                            &               &  {\ct .FALSE.}      \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct PRESSURE\_RAMP}        & Character         & Section~\ref{info:pressure_boundary}                      &               &                     \\ \hline
 {\ct REYNOLDS\_STRESS(3,3)} & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m$^2$/s$^2$   & 0.                  \\ \hline
@@ -9948,7 +9949,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
-{\ct INITIALIZATION\_ONLY}                      & Logical       & Section~\ref{info:INITIALIZATION_ONLY}        &               & {\ct .FALSE.}     \\ \hline
 {\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline

@@ -5,12 +5,12 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR corner_200_kW.fds
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR corner_300_kW.fds
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR corner_400_kW.fds
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR wall_200_kW.fds
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR wall_300_kW.fds
-$QFDS $DEBUG $QUEUE -p 8 -d $INDIR wall_400_kW.fds
+$QFDS $DEBUG $QUEUE -p 15 -d $INDIR corner_200_kW.fds
+$QFDS $DEBUG $QUEUE -p 15 -d $INDIR corner_300_kW.fds
+$QFDS $DEBUG $QUEUE -p 15 -d $INDIR corner_400_kW.fds
+$QFDS $DEBUG $QUEUE -p 17 -d $INDIR wall_200_kW.fds
+$QFDS $DEBUG $QUEUE -p 17 -d $INDIR wall_300_kW.fds
+$QFDS $DEBUG $QUEUE -p 17 -d $INDIR wall_400_kW.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_01.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_02.fds
 $QFDS $DEBUG $QUEUE -p 6 -d $INDIR cabinet_03.fds
