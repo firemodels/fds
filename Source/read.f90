@@ -6855,24 +6855,24 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    SF%INTERNAL_RADIATION = .FALSE.
    DO NL=1,SF%N_LAYERS
-   DO NN =1,SF%N_LAYER_MATL(NL)
-      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
-   ENDDO
+      DO NN =1,SF%N_LAYER_MATL(NL)
+         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+         IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+      ENDDO
    ENDDO
 
    ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
       DO NL=1,SF%N_LAYERS
-      DO NN =1,SF%N_LAYER_MATL(NL)
-         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-         IF (ML%EMISSIVITY == 0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
-            ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
+         DO NN =1,SF%N_LAYER_MATL(NL)
+            ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+            IF (ML%EMISSIVITY == 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
+               ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+         ENDDO
       ENDDO
    ENDIF
 
@@ -8385,6 +8385,10 @@ MESH_LOOP: DO NM=1,NMESHES
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
+
+                  DO NNN=0,N_SURF
+                     IF ( ANY(OB%SURF_INDEX==NNN) ) SURFACE(NNN)%EMISSIVITY=MATERIAL(NNN)%EMISSIVITY
+                  ENDDO
                ENDIF
 
                ! Make obstruction invisible if it's within a finer mesh

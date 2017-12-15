@@ -579,7 +579,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
@@ -879,8 +879,10 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                CASE( 3); RDN = RDZ(KK)
             END SELECT
             IF (RADIATION) THEN
-               TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
-                       ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_S*RDN       )
+               TH_EST4 = 3._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**4
+               FO_EST3 = 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3
+               TMP_F = ( WC%ONE_D%QRADIN + TH_EST4 + HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                       (                   FO_EST3 + HTC       + 2._EB*K_S*RDN       )
             ELSE
                TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
                        ( HTC       + 2._EB*K_S*RDN       )
