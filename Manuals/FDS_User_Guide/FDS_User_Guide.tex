@@ -1195,6 +1195,7 @@ Two types of transformation functions are allowed. The first, and simplest, is a
 &TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
 \end{lstlisting}
 The integer {\ct MESH\_NUMBER} indicates which mesh to apply the transformation. If you want the transformation to be applied to all meshes, set {\ct MESH\_NUMBER} to 0. The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on the vertical axis.  The slopes of the line segments in the plot indicate whether the mesh is being stretched (slopes greater than 1) or shrunk (slopes less than 1). The tricky part about this process is that you usually have a desired shrinking/stretching strategy for the Physical Coordinate on the vertical axis, and must work backwards to determine what the corresponding points should be for the Computational Coordinate on the horizontal axis. Note that the above transformation is applied to the second mesh in a multiple mesh job.
+It should be also noted that the start and endpoints should not be specified in this linear grid transformation.
 
 The second type of transformation is a polynomial function whose constraints are of the form
 \[ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   \]
