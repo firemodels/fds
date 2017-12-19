@@ -30,9 +30,9 @@ REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB
 INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED,MAX_LEAK_PATHS,I_DUM(10)
 INTEGER :: FUEL_SMIX_INDEX ! Simple chemistry fuel index
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
+TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
@@ -6008,6 +6008,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
 
+   ! If HT3D set THICKNESS(1) to null value to pass error traps
+
+   IF (HT3D) THICKNESS(1) = 1._EB
+
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
@@ -7896,7 +7900,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
@@ -7915,6 +7919,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
+
    ! Count OBST lines
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -7961,7 +7966,7 @@ MESH_LOOP: DO NM=1,NMESHES
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
       ID       = 'null'
-      MATL_ID  = 'null' ! for HT3D only
+      MATL_ID  = 'null'
       MULT_ID  = 'null'
       PROP_ID  = 'null'
       SURF_ID  = 'null'
@@ -7972,7 +7977,7 @@ MESH_LOOP: DO NM=1,NMESHES
       RGB         = -1
       BULK_DENSITY= -1._EB
       HT3D        = .FALSE.
-      INTERNAL_HEAT_SOURCE = 0._EB  ! for HT3D only
+      INTERNAL_HEAT_SOURCE = 0._EB
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -8004,10 +8009,6 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Reorder OBST coordinates if necessary
 
       CALL CHECK_XB(XB)
-
-      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
-
-      IF (HT3D) SOLID_HT3D = .TRUE.
 
       ! No device and controls for evacuation obstructions
 
@@ -8357,20 +8358,21 @@ MESH_LOOP: DO NM=1,NMESHES
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
-               OB%HT3D = HT3D
-               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
-                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
-               ENDIF
 
-               IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+               ! 3D Solid heat transfer and pyrolysis
 
-               ! Set MATL_INDEX for HT3D
+               HT3D_IF: IF (HT3D) THEN
 
-               IF (OB%HT3D) THEN
+                  OB%HT3D = HT3D
+                  SOLID_HT3D = .TRUE. ! global parameter
+
+                  IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                     WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                     OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                  ENDIF
+
+                  ! Set MATL_ID for HT3D
+
                   OB%MATL_ID = MATL_ID
                   DO NNN=1,N_MATL
                      ML=>MATERIAL(NNN)
@@ -8380,16 +8382,65 @@ MESH_LOOP: DO NM=1,NMESHES
                         EXIT
                      ENDIF
                   ENDDO
-                  IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
+
+                  OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
+
+                     !!! this is under construction
+                     WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
                      CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
+                     !!!
+
+                     ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           OB%MATL_SURF_INDEX = OB%SURF_INDEX(NNN)
+                           EXIT
+                        ENDIF
+                     ENDDO
+
+                     ! MATL_ID not found on OBST or SURF lines
+
+                     IF (OB%MATL_SURF_INDEX==-1) THEN
+                        WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! SURF associated with HT3D may have only 1 layer
+
+                     IF (SURFACE(OB%MATL_SURF_INDEX)%N_LAYERS/=1) THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                           TRIM(SURFACE(OB%MATL_SURF_INDEX)%ID),"', N_LAYERS must be 1 for HT3D SURF."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! Emissivities for SURF with MATL_IDs set in READ_SURF
+
+                  ELSE OBST_MATL_IF
+
+                     ! Don't allow both OBST and SURF with MATL_IDs
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                              TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        ENDIF
+                     ENDDO
+
+                     ! Set SURF emissivities to MATL emissivity
+
+                     DO NNN=-3,3
+                        SURFACE(OB%SURF_INDEX(NNN))%EMISSIVITY = MATERIAL(OB%MATL_INDEX)%EMISSIVITY
+                     ENDDO
+
+                  ENDIF OBST_MATL_IF
+
+                  ! Volumetric heat source term
+
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
 
-                  DO NNN=0,N_SURF
-                     IF ( ANY(OB%SURF_INDEX==NNN) ) SURFACE(NNN)%EMISSIVITY=MATERIAL(NNN)%EMISSIVITY
-                  ENDDO
-               ENDIF
+               ENDIF HT3D_IF
 
                ! Make obstruction invisible if it's within a finer mesh
 
