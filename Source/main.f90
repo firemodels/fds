@@ -141,7 +141,7 @@ T = T_BEGIN
 IF (SET_UP_ONLY) THEN
    IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
    STOP_STATUS = SETUP_ONLY_STOP
-   CALL STOP_CHECK(1)
+   IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
 ENDIF
 
 ! Allocate various utility arrays
@@ -872,7 +872,7 @@ SUBROUTINE CHECK_MPI
 ! Check the threading support level
 
 IF (PROVIDED<REQUIRED) THEN
-   IF (MYID==0) WRITE(LU_ERR,*) "WARNING:  This MPI implementation provides insufficient threading support."
+   IF (MYID==0) WRITE(LU_ERR,'(A)') ' WARNING:  This MPI implementation provides insufficient threading support.'
    !$ CALL OMP_SET_NUM_THREADS(1)
 ENDIF
 
@@ -1144,7 +1144,7 @@ END SELECT
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
-IF (MYID==0) WRITE(LU_ERR,'(A,I2)') ' Completed Initialization Step ',TASK_NUMBER
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I2)') ' Completed Initialization Step ',TASK_NUMBER
 
 END SUBROUTINE MPI_INITIALIZATION_CHORES
 
@@ -1329,7 +1329,7 @@ LOGICAL :: OPN
 
 IF (STOP_STATUS==NO_STOP .OR. STOP_STATUS==USER_STOP) CALL DUMP_TIMERS
 
-IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') 'MPI process ',MYID,' has completed'
+IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MYID,' has completed'
 CALL MPI_FINALIZE(IERR)
 
 IF (MYID==0) THEN

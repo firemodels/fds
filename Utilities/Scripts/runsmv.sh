@@ -6,9 +6,11 @@ RUNSCRIPT=
 ssffile=
 dummy=
 
-while getopts 'd:fl:mt' OPTION
+while getopts 'Ad:fl:mt' OPTION
 do
 case $OPTION in
+  A) # passthrough option
+   ;;
   d)
    dir="$OPTARG"
    ;;

@@ -132,9 +132,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = ZZP(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG,1:N_TRACKED_SPECIES)
    ONE_D%RSUM_G  = RSUM(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
    ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
-   ONE_D%U_TANG  = 0.25_EB*SQRT ( (UU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+UU(ONE_D%IIG-1,ONE_D%JJG,ONE_D%KKG))**2 + &
-                                  (VV(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+VV(ONE_D%IIG,ONE_D%JJG-1,ONE_D%KKG))**2 + &
-                                  (WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-1))**2 )
+   ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
    CALL CALCULATE_TMP_F(WALL_INDEX=IW)
    IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,WALL_INDEX=IW)
 ENDDO WALL_CELL_LOOP
@@ -569,7 +567,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          IF (SOLID_OTHER) TMP(II,JJ,KK) = TMP_OTHER
       ENDIF
 
-      ONE_D%QCONF = 0._EB ! no convective heat transfer at interoplated boundary
+      ONE_D%QCONF = 0._EB ! no convective heat transfer at interpolated boundary
 
 END SELECT METHOD_OF_HEAT_TRANSFER
 
@@ -581,7 +579,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
@@ -635,9 +633,20 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                NR = -NINT(MLP%K_S)
                K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+               ! use linear average from inverse lever rule
+               K_S = ( K_S_M*DX(I+1) + K_S_P*DX(I) )/( DX(I) + DX(I+1) )
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            ELSE
+               ! for discontinuous material properties maintain continuity of flux, C0 continuity of temperature
+               ! (allow C1 discontinuity of temperature due to jump in thermal properties across interface)
+               R_K_S = K_S_P/K_S_M * DX(I)/DX(I+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I+1,J,K))/(1._EB + R_K_S) ! interface temperature
+               !! KDTDX(I,J,K) = K_S_P * (TMP(I+1,J,K)-TMP_I) * 2._EB/DX(I+1) !! these two fluxes should be identical
+               KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -665,9 +674,16 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   NR = -NINT(MLP%K_S)
                   K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
                ENDIF
-               K_S = 0.5_EB*(K_S_M+K_S_P)
-               K_S_MAX = MAX(K_S_MAX,K_S)
-               KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+               IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+                  K_S = ( K_S_M*DY(J+1) + K_S_P*DY(J) )/( DY(J) + DY(J+1) )
+                  K_S_MAX = MAX(K_S_MAX,K_S)
+                  KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+               ELSE
+                  R_K_S = K_S_P/K_S_M * DY(J)/DY(J+1)
+                  TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J+1,K))/(1._EB + R_K_S)
+                  KDTDY(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DY(J)
+                  K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
@@ -697,16 +713,23 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                NR = -NINT(MLP%K_S)
                K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+               K_S = ( K_S_M*DZ(K+1) + K_S_P*DZ(K) )/( DZ(K) + DZ(K+1) )
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            ELSE
+               R_K_S = K_S_P/K_S_M * DZ(K)/DZ(K+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J,K+1))/(1._EB + R_K_S)
+               KDTDZ(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DZ(K)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
 
-   ! build fluxes on boundaries
+   ! build fluxes on boundaries of INTERNAL WALL CELLS
 
-   HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   HT3D_WALL_LOOP: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
 
@@ -734,7 +757,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
-         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE
+         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SPECIFIED_TEMPERATURE
 
             SELECT CASE(IOR)
                CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
@@ -856,8 +879,10 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                CASE( 3); RDN = RDZ(KK)
             END SELECT
             IF (RADIATION) THEN
-               TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
-                       ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_S*RDN       )
+               TH_EST4 = 3._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**4
+               FO_EST3 = 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3
+               TMP_F = ( WC%ONE_D%QRADIN + TH_EST4 + HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                       (                   FO_EST3 + HTC       + 2._EB*K_S*RDN       )
             ELSE
                TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
                        ( HTC       + 2._EB*K_S*RDN       )
@@ -878,6 +903,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ENDDO HT3D_WALL_LOOP
 
+   ! Note: for 2D cylindrical KDTDX remains zero after initialization
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -893,11 +920,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
             ENDIF
 
-            VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            IF (TWO_D) THEN
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDZ(K)**2) )
+            ELSE
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                                                                 (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) + &
+            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                                 (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
+                                                                 (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
 
          ENDDO
@@ -1100,7 +1131,8 @@ IF (N_TRACKED_SPECIES==1) RETURN
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+       WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
    ONE_D => WC%ONE_D
    CALL CALCULATE_RHO_D_F
 ENDDO WALL_LOOP
@@ -1116,15 +1148,23 @@ CONTAINS
 
 SUBROUTINE CALCULATE_RHO_D_F
 
-INTEGER :: N,ITMP
+INTEGER :: N,ITMP,IIG,JJG,KKG
 
-IF (LES .AND. .NOT. RESEARCH_MODE) THEN
+IF (LES .AND. .NOT. RESEARCH_MODE) THEN ! default
    DO N=1,N_TRACKED_SPECIES
       ONE_D%RHO_D_F(N) = ONE_D%MU_G*RSC*ONE_D%RHO_F/ONE_D%RHO_G
    ENDDO
-ELSE
+ELSEIF (LES .AND. RESEARCH_MODE) THEN
+   ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+   IIG = ONE_D%IIG
+   JJG = ONE_D%JJG
+   KKG = ONE_D%KKG
    DO N=1,N_TRACKED_SPECIES
-      ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+      ONE_D%RHO_D_F(N) = ONE_D%RHO_F*( D_Z(ITMP,N) + (ONE_D%MU_G-MU_DNS(IIG,JJG,KKG))/ONE_D%RHO_G*RSC )
+   ENDDO
+ELSE ! DNS
+   ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+   DO N=1,N_TRACKED_SPECIES
       ONE_D%RHO_D_F(N) = ONE_D%RHO_F*D_Z(ITMP,N)
    ENDDO
 ENDIF

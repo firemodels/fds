@@ -30,9 +30,9 @@ REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB
 INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED,MAX_LEAK_PATHS,I_DUM(10)
 INTEGER :: FUEL_SMIX_INDEX ! Simple chemistry fuel index
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
+TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
@@ -638,6 +638,10 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ENDIF
             IF (EVACUATION .AND. ABS(XB5 - XB6) <= SPACING(XB(6))) THEN
                WRITE(MESSAGE,'(A,I0)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            IF (CYLINDRICAL .AND. XB1<-TWO_EPSILON_EB) THEN
+               WRITE(MESSAGE,'(A,I0)') 'ERROR: XMIN < 0 with CYLINDRICAL on MESH ', NM
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -1689,7 +1693,6 @@ VISIBILITY_FACTOR    = 3._EB
 TURBULENCE_MODEL     = 'null'
 NEAR_WALL_TURBULENCE_MODEL = 'null'
 MAX_LEAK_PATHS       = 200
-IF (N_MPI_PROCESSES<=50) VERBOSE = .TRUE.
 
 ! Initial read of the MISC line
 
@@ -1899,7 +1902,6 @@ USE PHYSICAL_FUNCTIONS, ONLY: MONIN_OBUKHOV_SIMILARITY
 REAL(EB) :: CORIOLIS_VECTOR(3)=0._EB,FORCE_VECTOR(3)=0._EB,OBUKHOV_LENGTH,L,ZZZ,ZETA,Z_0,AERODYNAMIC_ROUGHNESS,SPEED,DIRECTION,&
             REFERENCE_HEIGHT,Z_REF,U_STAR,THETA_0,THETA_STAR,TMP,U,REFERENCE_TEMPERATURE,THETA_REF,TMP_REF,P_REF
 INTEGER :: NM
-LOGICAL :: INITIALIZATION_ONLY
 CHARACTER(LABEL_LENGTH) :: RAMP_FVX_T,RAMP_FVY_T,RAMP_FVZ_T,RAMP_U0_T,RAMP_V0_T,RAMP_W0_T,&
                            RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,RAMP_TMP0_Z,RAMP_DIRECTION,RAMP_SPEED
 TYPE(RESERVED_RAMPS_TYPE), POINTER :: RRP,RRP2
@@ -1909,7 +1911,7 @@ EQUIVALENCE(TMP_REF,REFERENCE_TEMPERATURE)
 EQUIVALENCE(L,OBUKHOV_LENGTH)
 REAL(EB), PARAMETER :: KAPPA_VK = 0.41_EB
 
-NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUND_LEVEL,INITIALIZATION_ONLY,L,&
+NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUND_LEVEL,L,&
                 LAPSE_RATE,MEAN_FORCING,OBUKHOV_LENGTH,&
                 POTENTIAL_TEMPERATURE_CORRECTION,RAMP_DIRECTION,RAMP_SPEED,RAMP_FVX_T,RAMP_FVY_T,RAMP_FVZ_T,&
                 RAMP_TMP0_Z,RAMP_U0_T,RAMP_V0_T,RAMP_W0_T,RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,REFERENCE_HEIGHT,REFERENCE_TEMPERATURE,&
@@ -1919,7 +1921,6 @@ NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUN
 
 DIRECTION           = 270._EB   ! westerly wind
 DT_MEAN_FORCING     = 1._EB    ! s
-INITIALIZATION_ONLY = .FALSE.
 LAPSE_RATE          = 0._EB     ! K/m
 MEAN_FORCING        = .FALSE.
 OBUKHOV_LENGTH      = 0._EB     ! m
@@ -1960,19 +1961,19 @@ ENDDO WIND_LOOP
 ! Check compatibility of constant_specific_heat_ratio and stratification
 
 IF (CONSTANT_SPECIFIC_HEAT_RATIO .AND. STRATIFICATION) THEN
-   WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONSTANT_SPECIFIC_HEAT_RATIO option is incompatible with STRATIFICATION.'
-   CALL SHUTDOWN(MESSAGE) ; RETURN
+   STRATIFICATION = .FALSE.
+   WRITE(MESSAGE,'(A,A,A)')  'WARNING: CONSTANT_SPECIFIC_HEAT_RATIO option sets STRATIFICATION=.FALSE.'
+   IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
-! Do not impose MEAN_FORCING if the user just wants to initialize the wind speed
-
-IF (INITIALIZATION_ONLY) MEAN_FORCING = .FALSE.
-
-! Convert wind speed to directions
+! Determine the appropriate wind speed if the user specifies SPEED or U_STAR. If
+! the user specifies U0, V0, or W0, MEAN_FORCING will not be invokes unless the
+! user specifies it.
 
 IF (U_STAR>0._EB) SPEED = U_STAR*LOG(Z_REF/Z_0)/KAPPA_VK
 DIRECTION = DIRECTION*PI/180._EB
 IF (SPEED>0._EB) THEN
+   MEAN_FORCING = .TRUE.
    IF (RAMP_DIRECTION/='null') THEN
       U0 = SPEED
       V0 = SPEED
@@ -1980,13 +1981,7 @@ IF (SPEED>0._EB) THEN
       U0 = -SPEED*SIN(DIRECTION)
       V0 = -SPEED*COS(DIRECTION)
    ENDIF
-ELSE
-   SPEED = SQRT(U0**2 + V0**2)
 ENDIF
-
-! Apply mean forcing in all directions if any wind component is non-sero
-
-IF ((U0/=0._EB .OR. V0/=0._EB .OR. W0/=0._EB) .AND. .NOT. INITIALIZATION_ONLY) MEAN_FORCING = .TRUE.
 
 ! Miscellaneous
 
@@ -3533,6 +3528,10 @@ TABLE_LOOP: DO J=1,5000
    ENDDO
 ENDDO TABLE_LOOP
 
+D_Z(0,:) = D_Z(1,:)
+MU_RSQMW_Z(0,:) = MU_RSQMW_Z(1,:)
+K_RSQMW_Z(0,:) = K_RSQMW_Z(1,:)
+
 ! Adjust H_SENS_Z to 0 at the H_F_REFERENCE_TEMPERATURE
 IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    REF_TEMP = 0._EB
@@ -3628,10 +3627,12 @@ ENDDO COUNT_REAC_LOOP
 
 ! Check extinction
 IF (N_REACTIONS>=1 .AND. SUPPRESSION .AND. EXTINCT_MOD/=1 .AND. CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-   WRITE(MESSAGE,'(A,A)') "ERROR: EXTINCTION_MODEL='EXTINCTION 1' or SUPPRESSION=.FALSE. ", &
-                          "must be used if CONSTANT_SPECIFC_HEAT_RATIO=.TRUE."
-   CALL SHUTDOWN(MESSAGE) ; RETURN
+   EXTINCT_MOD=1
+   EXTINCTION_MODEL='EXTINCTION 1'
+   WRITE(MESSAGE,'(A,A,A)')  "WARNING: CONSTANT_SPECIFIC_HEAT_RATIO option sets EXTINCTION_MODEL='EXTINCTION 1'"
+   IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
+
 
 435 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -6007,6 +6008,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
 
+   ! If HT3D set THICKNESS(1) to null value to pass error traps
+
+   IF (HT3D) THICKNESS(1) = 1._EB
+
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
@@ -6854,24 +6859,24 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    SF%INTERNAL_RADIATION = .FALSE.
    DO NL=1,SF%N_LAYERS
-   DO NN =1,SF%N_LAYER_MATL(NL)
-      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
-   ENDDO
+      DO NN =1,SF%N_LAYER_MATL(NL)
+         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+         IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+      ENDDO
    ENDDO
 
    ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
       DO NL=1,SF%N_LAYERS
-      DO NN =1,SF%N_LAYER_MATL(NL)
-         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-         IF (ML%EMISSIVITY == 0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
-            ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
+         DO NN =1,SF%N_LAYER_MATL(NL)
+            ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+            IF (ML%EMISSIVITY == 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
+               ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+         ENDDO
       ENDDO
    ENDIF
 
@@ -7895,7 +7900,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
@@ -7914,6 +7919,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
+
    ! Count OBST lines
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -7960,7 +7966,7 @@ MESH_LOOP: DO NM=1,NMESHES
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
       ID       = 'null'
-      MATL_ID  = 'null' ! for HT3D only
+      MATL_ID  = 'null'
       MULT_ID  = 'null'
       PROP_ID  = 'null'
       SURF_ID  = 'null'
@@ -7971,7 +7977,7 @@ MESH_LOOP: DO NM=1,NMESHES
       RGB         = -1
       BULK_DENSITY= -1._EB
       HT3D        = .FALSE.
-      INTERNAL_HEAT_SOURCE = 0._EB  ! for HT3D only
+      INTERNAL_HEAT_SOURCE = 0._EB
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -8003,10 +8009,6 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Reorder OBST coordinates if necessary
 
       CALL CHECK_XB(XB)
-
-      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
-
-      IF (HT3D) SOLID_HT3D = .TRUE.
 
       ! No device and controls for evacuation obstructions
 
@@ -8296,6 +8298,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Creation and removal logic
 
+               OB%ID      = ID
                OB%DEVC_ID = DEVC_ID
                OB%CTRL_ID = CTRL_ID
                OB%HIDDEN = .FALSE.
@@ -8355,20 +8358,21 @@ MESH_LOOP: DO NM=1,NMESHES
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
-               OB%HT3D = HT3D
-               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
-                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
-               ENDIF
 
-               IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+               ! 3D Solid heat transfer and pyrolysis
 
-               ! Set MATL_INDEX for HT3D
+               HT3D_IF: IF (HT3D) THEN
 
-               IF (OB%HT3D) THEN
+                  OB%HT3D = HT3D
+                  SOLID_HT3D = .TRUE. ! global parameter
+
+                  IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                     WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                     OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                  ENDIF
+
+                  ! Set MATL_ID for HT3D
+
                   OB%MATL_ID = MATL_ID
                   DO NNN=1,N_MATL
                      ML=>MATERIAL(NNN)
@@ -8378,12 +8382,65 @@ MESH_LOOP: DO NM=1,NMESHES
                         EXIT
                      ENDIF
                   ENDDO
-                  IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
+
+                  OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
+
+                     !!! this is under construction
+                     WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
                      CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
+                     !!!
+
+                     ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           OB%MATL_SURF_INDEX = OB%SURF_INDEX(NNN)
+                           EXIT
+                        ENDIF
+                     ENDDO
+
+                     ! MATL_ID not found on OBST or SURF lines
+
+                     IF (OB%MATL_SURF_INDEX==-1) THEN
+                        WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! SURF associated with HT3D may have only 1 layer
+
+                     IF (SURFACE(OB%MATL_SURF_INDEX)%N_LAYERS/=1) THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                           TRIM(SURFACE(OB%MATL_SURF_INDEX)%ID),"', N_LAYERS must be 1 for HT3D SURF."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! Emissivities for SURF with MATL_IDs set in READ_SURF
+
+                  ELSE OBST_MATL_IF
+
+                     ! Don't allow both OBST and SURF with MATL_IDs
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                              TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        ENDIF
+                     ENDDO
+
+                     ! Set SURF emissivities to MATL emissivity
+
+                     DO NNN=-3,3
+                        SURFACE(OB%SURF_INDEX(NNN))%EMISSIVITY = MATERIAL(OB%MATL_INDEX)%EMISSIVITY
+                     ENDDO
+
+                  ENDIF OBST_MATL_IF
+
+                  ! Volumetric heat source term
+
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-               ENDIF
+
+               ENDIF HT3D_IF
 
                ! Make obstruction invisible if it's within a finer mesh
 
@@ -9274,16 +9331,16 @@ USE DEVICE_VARIABLES, ONLY : DEVICE
 USE CONTROL_VARIABLES, ONLY : CONTROL
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 
-INTEGER :: N,NN,NM,NNN,N_VENT_O,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,N_VENT_NEW,II,JJ,KK
+INTEGER :: N,NN,NM,NNN,N_VENT_O,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,N_VENT_NEW,II,JJ,KK,OBST_INDEX
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB1,XB2,XB3,XB4,XB5,XB6, &
             REYNOLDS_STRESS(3,3),L_EDDY,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
-CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID
+CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 LOGICAL :: REJECT_VENT,EVACUATION,OUTLINE,EVACUATION_VENT,WIND
-NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,MULT_ID,N_EDDY,OUTLINE,&
-                PBX,PBY,PBZ,PRESSURE_RAMP,RADIUS,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,&
+NAMELIST /VENT/ COLOR,CTRL_ID,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,ID,IOR,L_EDDY,L_EDDY_IJ,MB,MESH_ID,MULT_ID,N_EDDY,OBST_ID,&
+                OUTLINE,PBX,PBY,PBZ,PRESSURE_RAMP,RADIUS,REYNOLDS_STRESS,RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,&
                 TMP_EXTERIOR_RAMP,TRANSPARENCY,UVW,VEL_RMS,WIND,XB,XYZ
 
 MESH_LOOP_1: DO NM=1,NMESHES
@@ -9357,6 +9414,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       COLOR   = 'null'
       MESH_ID = 'null'
       MULT_ID = 'null'
+      OBST_ID = 'null'
       ID      = 'null'
       RGB     =-1
       TRANSPARENCY = 1._EB
@@ -9722,6 +9780,14 @@ MESH_LOOP_1: DO NM=1,NMESHES
                      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,' Synthetic Eddy Method not permitted with HVAC'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
+               ENDIF
+
+               ! Check if the VENT is attached to a specific OBST
+
+               IF (OBST_ID/='null') THEN
+                  DO OBST_INDEX=1,N_OBST
+                     IF (OBST_ID==OBSTRUCTION(OBST_INDEX)%ID) VT%OBST_INDEX = OBST_INDEX
+                  ENDDO
                ENDIF
 
                ! Miscellaneous

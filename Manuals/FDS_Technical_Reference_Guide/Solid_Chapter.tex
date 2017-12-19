@@ -131,7 +131,7 @@ where Pr and Pr$_{\rm t}$ are the molecular and turbulent Prandtl numbers  (Pr$_
 \label{eqn_friction_temperature}
 T_{\tau} \equiv \frac{\dot{q}_{\rm c}''}{{\rho}{c_p}{u_{\tau}}}
 \end{equation}
-where $\dot{q}_{\rm c}''$, $\rho$, and $c_p$ are the convective heat flux at the wall, the gas density, and the specific heat, respectively.
+where $\dot{q}_{\rm c}''$, $\rho$, $c_p$ and $u_{\tau}$  are the convective heat flux at the wall, the gas density, the specific heat, and the friction velocity, respectively.
 
 The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
 \begin{align}
@@ -191,24 +191,34 @@ The governing equation solved in {\ct HT3D} is
   \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
   \label{eq:3dheat}
 \end{equation}
-Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
+Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation. (That is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired.)
 
-Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  The intercell fluxes are continuous.  If the {\ct OBST} material properties of neighboring cells are the same, then thermal properties at face centers are taken as linear averages when computing the intercell flux.  If the neighboring cells have different material properties (consider the $x$ direction with cell indices $i$ and $i+1$), then the cell interface temperature, $T_{s,i+\frac{1}{2}}$, is computed as follows:
+\begin{equation}
+\label{eq:interface_tmp}
+T_{{\rm s},i+\frac{1}{2}}^n = \frac{T_{{\rm s},i}^n + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\rm s},i+1}^n}{1 + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
+\end{equation}
+The intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
+\begin{equation}
+\label{eq:intercell_flux}
+\left. k_{\rm s} \dod{T_{\rm s}}{x} \right|_{i+\frac{1}{2}} = k_{{\rm s},i} \frac{T_{{\rm s},i+\frac{1}{2}}^n - T_{{\rm s},i}^n}{\frac{1}{2}\delta x_i} = k_{{\rm s},i+1} \frac{T_{{\rm s},i+1}^n - T_{{\rm s},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
+\end{equation}
+The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.5$ in order to satisfy accuracy and stability constraints.
 
 For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
 \begin{equation}
 \label{eq:fluxcontinuity}
 \dot{q}_{\rm r, in}'' - \dot{q}_{\rm r, out}'' + \dot{q}_{\rm c}'' = -k_{\rm s} \left. \frac{\partial T_{\rm s}}{\partial n} \right|_{\rm w}
 \end{equation}
-To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$, and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
+To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$ using Eq.~(\ref{T_taylor}), and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
 \begin{equation}
 \label{eq:discflux}
-( \dot{q}_{\rm r, in}'' )^n - \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
+( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
 \end{equation}
 which leads to our final result for the boundary temperature
 \begin{equation}
 \label{eq:tmpwall}
-T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
+T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
 \end{equation}
 
 \newpage

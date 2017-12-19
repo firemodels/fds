@@ -263,8 +263,8 @@ for j=2:length(Q);
 
         % Calculate statistics
 
-        E_bar = sum(log(Measured_Values).*weight)/sum(weight);
-        M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
+        log_E_bar = sum(log(Measured_Values).*weight)/sum(weight);
+        log_M_bar = sum(log(Predicted_Values).*weight)/sum(weight);
         Size_Measured = size(Measured_Values);
         Size_Predicted = size(Predicted_Values);
 
@@ -273,12 +273,12 @@ for j=2:length(Q);
             continue
         end
 
-        u2 = sum(    (((log(Predicted_Values)-log(Measured_Values)) - (M_bar-E_bar)).^2).*weight   )/(sum(weight)-1);
+        u2 = sum(    (((log(Predicted_Values)-log(Measured_Values)) - (log_M_bar-log_E_bar)).^2).*weight   )/(sum(weight)-1);
         u  = sqrt(u2);
         Sigma_E = Sigma_E/100;
         Sigma_E = min(u/sqrt(2),Sigma_E);
         Sigma_M = sqrt( max(0,u*u - Sigma_E.^2) );
-        delta = exp(M_bar-E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
+        delta = exp(log_M_bar-log_E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
 
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
