@@ -234,8 +234,10 @@ Build FDS on Linux
 - AppVeyor - free for open source projects (Windows)
 - Visual Studio Team Services - (Linux, MacOSX, Windows)
 
-Travis CI - Install dependencies
- - https://docs.travis-ci.com/user/installing-dependencies/#Installing-Packages-from-a-custom-APT-repository
+Travis CI
+
+ - [Install dependencies](https://docs.travis-ci.com/user/installing-dependencies/#Installing-Packages-from-a-custom-APT-repository)
+ - [Embed badges](https://docs.travis-ci.com/user/status-images/)
 
 ## Useful tooling
 
