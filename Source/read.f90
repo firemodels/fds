@@ -8378,7 +8378,7 @@ MESH_LOOP: DO NM=1,NMESHES
                      ML=>MATERIAL(NNN)
                      IF (TRIM(OB%MATL_ID)==TRIM(ML%ID)) THEN
                         OB%MATL_INDEX=NNN
-                        OB%BULK_DENSITY=ML%RHO_S
+                        IF (ABS(OB%VOLUME_ADJUST)>TWO_EPSILON_EB) OB%BULK_DENSITY=ML%RHO_S
                         EXIT
                      ENDIF
                   ENDDO
