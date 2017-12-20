@@ -13,6 +13,9 @@ then
   exit
 fi
 
+FDSMODULE=$FDSEDITION
+SMVMODULE=$SMVEDITION
+
 FDSVARS=${FDSEDITION}VARS.sh
 INSTALLDIR=
 FDS_TAR=
@@ -184,6 +187,7 @@ THISDIR=\`pwd\`
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
 FDSMODULEtmp=/tmp/fds_module.\$\$
+SMVMODULEtmp=/tmp/smv_module.\$\$
 STARTUPtmp=/tmp/readme.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
@@ -385,6 +389,33 @@ fi
 
 cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
 rm \$FDSMODULEtmp
+
+cat << MODULE > \$SMVMODULEtmp
+#%Module1.0#####################################################################
+###
+### SMV6 modulefile
+###
+
+proc ModulesHelp { } {
+        puts stderr "\tAdds Smokview bin location to your PATH environment variable"
+}
+
+module-whatis   "Loads smokeview paths and libraries."
+
+conflict FDS6
+conflict SMV6
+
+prepend-path    PATH            \$FDS_root/bin
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
+MODULE
+if [ "$ostype" == "LINUX" ] ; then
+cat << MODULE >> \$SMVMODULEtmp
+prepend-path    LD_LIBRARY_PATH /usr/lib64
+MODULE
+fi
+
+cp \$SMVMODULEtmp \$FDS_root/bin/modules/$SMVMODULE
+rm \$SMVMODULEtmp
 
 #--- create BASH startup file
 

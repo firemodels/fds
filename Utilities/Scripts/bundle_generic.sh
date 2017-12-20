@@ -127,6 +127,14 @@ CPDIRFILES ()
 }
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+if [ "`uname`" == "Darwin" ]; then
+  FDSOS=_osx_64
+  PLATFORM=OSX64
+else
+  FDSOS=_linux_64
+  PLATFORM=LINUX64
+fi
+
 
 manifest=manifest$FDSOS.html
 

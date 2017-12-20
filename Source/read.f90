@@ -30,9 +30,9 @@ REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB
 INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED,MAX_LEAK_PATHS,I_DUM(10)
 INTEGER :: FUEL_SMIX_INDEX ! Simple chemistry fuel index
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
+TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
@@ -1902,7 +1902,6 @@ USE PHYSICAL_FUNCTIONS, ONLY: MONIN_OBUKHOV_SIMILARITY
 REAL(EB) :: CORIOLIS_VECTOR(3)=0._EB,FORCE_VECTOR(3)=0._EB,OBUKHOV_LENGTH,L,ZZZ,ZETA,Z_0,AERODYNAMIC_ROUGHNESS,SPEED,DIRECTION,&
             REFERENCE_HEIGHT,Z_REF,U_STAR,THETA_0,THETA_STAR,TMP,U,REFERENCE_TEMPERATURE,THETA_REF,TMP_REF,P_REF
 INTEGER :: NM
-LOGICAL :: INITIALIZATION_ONLY
 CHARACTER(LABEL_LENGTH) :: RAMP_FVX_T,RAMP_FVY_T,RAMP_FVZ_T,RAMP_U0_T,RAMP_V0_T,RAMP_W0_T,&
                            RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,RAMP_TMP0_Z,RAMP_DIRECTION,RAMP_SPEED
 TYPE(RESERVED_RAMPS_TYPE), POINTER :: RRP,RRP2
@@ -1912,7 +1911,7 @@ EQUIVALENCE(TMP_REF,REFERENCE_TEMPERATURE)
 EQUIVALENCE(L,OBUKHOV_LENGTH)
 REAL(EB), PARAMETER :: KAPPA_VK = 0.41_EB
 
-NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUND_LEVEL,INITIALIZATION_ONLY,L,&
+NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUND_LEVEL,L,&
                 LAPSE_RATE,MEAN_FORCING,OBUKHOV_LENGTH,&
                 POTENTIAL_TEMPERATURE_CORRECTION,RAMP_DIRECTION,RAMP_SPEED,RAMP_FVX_T,RAMP_FVY_T,RAMP_FVZ_T,&
                 RAMP_TMP0_Z,RAMP_U0_T,RAMP_V0_T,RAMP_W0_T,RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,REFERENCE_HEIGHT,REFERENCE_TEMPERATURE,&
@@ -1922,7 +1921,6 @@ NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUN
 
 DIRECTION           = 270._EB   ! westerly wind
 DT_MEAN_FORCING     = 1._EB    ! s
-INITIALIZATION_ONLY = .FALSE.
 LAPSE_RATE          = 0._EB     ! K/m
 MEAN_FORCING        = .FALSE.
 OBUKHOV_LENGTH      = 0._EB     ! m
@@ -1968,15 +1966,14 @@ IF (CONSTANT_SPECIFIC_HEAT_RATIO .AND. STRATIFICATION) THEN
    IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
-! Do not impose MEAN_FORCING if the user just wants to initialize the wind speed
-
-IF (INITIALIZATION_ONLY) MEAN_FORCING = .FALSE.
-
-! Convert wind speed to directions
+! Determine the appropriate wind speed if the user specifies SPEED or U_STAR. If
+! the user specifies U0, V0, or W0, MEAN_FORCING will not be invokes unless the
+! user specifies it.
 
 IF (U_STAR>0._EB) SPEED = U_STAR*LOG(Z_REF/Z_0)/KAPPA_VK
 DIRECTION = DIRECTION*PI/180._EB
 IF (SPEED>0._EB) THEN
+   MEAN_FORCING = .TRUE.
    IF (RAMP_DIRECTION/='null') THEN
       U0 = SPEED
       V0 = SPEED
@@ -1984,13 +1981,7 @@ IF (SPEED>0._EB) THEN
       U0 = -SPEED*SIN(DIRECTION)
       V0 = -SPEED*COS(DIRECTION)
    ENDIF
-ELSE
-   SPEED = SQRT(U0**2 + V0**2)
 ENDIF
-
-! Apply mean forcing in all directions if any wind component is non-sero
-
-IF ((U0/=0._EB .OR. V0/=0._EB .OR. W0/=0._EB) .AND. .NOT. INITIALIZATION_ONLY) MEAN_FORCING = .TRUE.
 
 ! Miscellaneous
 
@@ -4498,7 +4489,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       MINIMUM_DIAMETER                  = 0.005_EB*DIAMETER
    ENDIF
    LPC%MINIMUM_DIAMETER                 = MINIMUM_DIAMETER*1.E-6_EB
-   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.171_EB ! 0.171 ???
+   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.005**ONTH ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
    LPC%PERIODIC_Y                       = PERIODIC_Y
@@ -6017,6 +6008,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
 
+   ! If HT3D set THICKNESS(1) to null value to pass error traps
+
+   IF (HT3D) THICKNESS(1) = 1._EB
+
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
@@ -6864,24 +6859,24 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    SF%INTERNAL_RADIATION = .FALSE.
    DO NL=1,SF%N_LAYERS
-   DO NN =1,SF%N_LAYER_MATL(NL)
-      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
-   ENDDO
+      DO NN =1,SF%N_LAYER_MATL(NL)
+         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+         IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+      ENDDO
    ENDDO
 
    ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
       DO NL=1,SF%N_LAYERS
-      DO NN =1,SF%N_LAYER_MATL(NL)
-         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-         IF (ML%EMISSIVITY == 0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
-            ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
+         DO NN =1,SF%N_LAYER_MATL(NL)
+            ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+            IF (ML%EMISSIVITY == 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
+               ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+         ENDDO
       ENDDO
    ENDIF
 
@@ -7905,7 +7900,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
@@ -7924,6 +7919,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
+
    ! Count OBST lines
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -7970,7 +7966,7 @@ MESH_LOOP: DO NM=1,NMESHES
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
       ID       = 'null'
-      MATL_ID  = 'null' ! for HT3D only
+      MATL_ID  = 'null'
       MULT_ID  = 'null'
       PROP_ID  = 'null'
       SURF_ID  = 'null'
@@ -7981,7 +7977,7 @@ MESH_LOOP: DO NM=1,NMESHES
       RGB         = -1
       BULK_DENSITY= -1._EB
       HT3D        = .FALSE.
-      INTERNAL_HEAT_SOURCE = 0._EB  ! for HT3D only
+      INTERNAL_HEAT_SOURCE = 0._EB
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -8013,10 +8009,6 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Reorder OBST coordinates if necessary
 
       CALL CHECK_XB(XB)
-
-      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
-
-      IF (HT3D) SOLID_HT3D = .TRUE.
 
       ! No device and controls for evacuation obstructions
 
@@ -8366,35 +8358,100 @@ MESH_LOOP: DO NM=1,NMESHES
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
-               OB%HT3D = HT3D
-               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
-                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
-               ENDIF
 
-               IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+               ! 3D Solid heat transfer and pyrolysis
 
-               ! Set MATL_INDEX for HT3D
+               HT3D_IF: IF (HT3D) THEN
 
-               IF (OB%HT3D) THEN
+                  OB%HT3D = HT3D
+                  SOLID_HT3D = .TRUE. ! global parameter
+
+                  IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                     WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                     OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                  ENDIF
+
+                  ! Set MATL_ID for HT3D
+
                   OB%MATL_ID = MATL_ID
                   DO NNN=1,N_MATL
                      ML=>MATERIAL(NNN)
                      IF (TRIM(OB%MATL_ID)==TRIM(ML%ID)) THEN
                         OB%MATL_INDEX=NNN
-                        OB%BULK_DENSITY=ML%RHO_S
+                        IF (ABS(OB%VOLUME_ADJUST)>TWO_EPSILON_EB) OB%BULK_DENSITY=ML%RHO_S
                         EXIT
                      ENDIF
                   ENDDO
-                  IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
+
+                  OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
+
+                     !!! this is under construction
+                     WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
                      CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
+                     !!!
+
+                     ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           OB%MATL_SURF_INDEX = OB%SURF_INDEX(NNN)
+                           EXIT
+                        ENDIF
+                     ENDDO
+
+                     ! MATL_ID not found on OBST or SURF lines
+
+                     IF (OB%MATL_SURF_INDEX==-1) THEN
+                        WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     SF => SURFACE(OB%MATL_SURF_INDEX)
+
+                     ! SURF associated with HT3D may have only 1 layer
+
+                     IF (SF%N_LAYERS/=1) THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                           TRIM(SF%ID),"', N_LAYERS must be 1 for HT3D SURF."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! Emissivities for SURF with MATL_IDs set in READ_SURF
+
+                     ! Allocate and initialize MATL densities in OBST for 3D pyrolysis
+
+                     ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
+                     CALL ChkMemErr('READ_OBST','RHO',IZERO)
+                     DO NNN=1,SF%N_MATL
+                        ML=>MATERIAL(SF%MATL_INDEX(NNN))
+                        OB%RHO(:,:,:,NNN) = ML%RHO_S
+                     ENDDO
+
+                  ELSE OBST_MATL_IF
+
+                     ! Don't allow both OBST and SURF with MATL_IDs
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                              TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        ENDIF
+                     ENDDO
+
+                     ! Set SURF emissivities to MATL emissivity
+
+                     DO NNN=-3,3
+                        SURFACE(OB%SURF_INDEX(NNN))%EMISSIVITY = MATERIAL(OB%MATL_INDEX)%EMISSIVITY
+                     ENDDO
+
+                  ENDIF OBST_MATL_IF
+
+                  ! Volumetric heat source term
+
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-               ENDIF
+
+               ENDIF HT3D_IF
 
                ! Make obstruction invisible if it's within a finer mesh
 
