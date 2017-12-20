@@ -1,7 +1,10 @@
 echo off
+set FDSMAJORVERSION=6
+set FDSEDITION=FDS6
+set SMVEDITION=SMV6
 
-set fdsversion=%fds_edition%
-set smvversion=SMV6
+set fdsversion=%FDSEDITION%
+set smvversion=$SMVEDITION%
 
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_%platform%
@@ -67,7 +70,7 @@ mkdir %out_uninstall%
 mkdir %out_fdshash%
 mkdir %out_smvhash%
 
-set release_version=%fdssmv_major_version%_win_%platform%
+set release_version=%FDSMAJORVERSION%_win_%platform%
 set release_version=
 
 echo.
