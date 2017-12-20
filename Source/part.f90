@@ -1920,7 +1920,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,&
             M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
-INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
+INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
@@ -2029,8 +2029,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       I_BOIL   = INT(T_BOIL_EFF)
       ! Determine how many sub-time step iterations are needed and then iterate over the time step.
 
-      N_SUBSTEPS = N_INITIAL_PARTICLE_SUBSTEPS
-      DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB)
+      DT_SUBSTEP = DT/REAL(N_INITIAL_PARTICLE_SUBSTEPS,EB)
       DT_SUM = 0._EB
       WGT    = LP%PWT
 
@@ -2372,12 +2371,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (TMP_DROP_NEW < 0.9999_EB*TMP_DROP .AND. 1.05_EB*Y_EQUIL < Y_GAS_NEW .AND. M_VAP > 0._EB) THEN
                   IF (Y_GAS_NEW - Y_GAS > 1.E-7_EB) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                        CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
-                        RETURN
+                        DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                        WRITE(LU_ERR,*) 'WARNING Y_EQ < Y_G_N',NM,IP,R_DROP,TMP_DROP,TMP_G,Y_EQUIL,Y_GAS_NEW
+                        !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
+                        !RETURN
+                     ELSE
+                        CYCLE TIME_ITERATION_LOOP
                      ENDIF
-                     CYCLE TIME_ITERATION_LOOP
                   ENDIF
                ENDIF
 
@@ -2386,12 +2387,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (Y_GAS < Y_EQUIL .AND. M_VAP > 0._EB) THEN
                   IF (Y_GAS_NEW/Y_EQUIL > 1.01_EB) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                        CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
-                        RETURN
-                     ENDIF
+                        DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                        WRITE(LU_ERR,*) 'WARNING Y_G_N > Y_EQ',NM,IP,R_DROP,TMP_DROP,TMP_G,Y_EQUIL,Y_GAS_NEW
+                        !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
+                        !RETURN
+                     ELSE
                      CYCLE TIME_ITERATION_LOOP
+                     ENDIF
                   ENDIF
                ENDIF
 
@@ -2422,7 +2425,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                   IF (TMP_G_I < 0._EB) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                     N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
 
@@ -2440,12 +2442,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                     CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
-                     RETURN
+                     DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                     WRITE(LU_ERR,*) 'WARNING Delta TMP_G',NM,IP,R_DROP,TMP_DROP,TMP_G,TMP_DROP_NEW,TMP_G_NEW
+                     !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
+                     !RETURN
+                  ELSE
+                     CYCLE TIME_ITERATION_LOOP
                   ENDIF
-                  CYCLE TIME_ITERATION_LOOP
                ENDIF
 
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,H_L)
@@ -2453,10 +2457,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                IF (TMP_G_NEW < 0.9999_EB*TMP_G .AND. TMP_G_NEW < TMP_DROP_NEW) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
-                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
-                     CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
-                     RETURN
+                     DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
+                     WRITE(LU_ERR,*) 'WARNING TMP_G_N < TMP_D_N',NM,IP,R_DROP,TMP_DROP,TMP_G,TMP_DROP_NEW,TMP_G_NEW
+                     !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
+                     !RETURN
+                  ELSE
+                     CYCLE TIME_ITERATION_LOOP
                   ENDIF
                ENDIF
 

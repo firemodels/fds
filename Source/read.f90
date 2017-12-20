@@ -4489,7 +4489,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       MINIMUM_DIAMETER                  = 0.005_EB*DIAMETER
    ENDIF
    LPC%MINIMUM_DIAMETER                 = MINIMUM_DIAMETER*1.E-6_EB
-   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.171_EB ! 0.171 ???
+   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.005**ONTH ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
    LPC%PERIODIC_Y                       = PERIODIC_Y
