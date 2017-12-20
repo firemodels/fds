@@ -8406,15 +8406,26 @@ MESH_LOOP: DO NM=1,NMESHES
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
 
+                     SF => SURFACE(OB%MATL_SURF_INDEX)
+
                      ! SURF associated with HT3D may have only 1 layer
 
-                     IF (SURFACE(OB%MATL_SURF_INDEX)%N_LAYERS/=1) THEN
+                     IF (SF%N_LAYERS/=1) THEN
                         WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
-                           TRIM(SURFACE(OB%MATL_SURF_INDEX)%ID),"', N_LAYERS must be 1 for HT3D SURF."
+                           TRIM(SF%ID),"', N_LAYERS must be 1 for HT3D SURF."
                         CALL SHUTDOWN(MESSAGE) ; RETURN
                      ENDIF
 
                      ! Emissivities for SURF with MATL_IDs set in READ_SURF
+
+                     ! Allocate and initialize MATL densities in OBST for 3D pyrolysis
+
+                     ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
+                     CALL ChkMemErr('READ_OBST','RHO',IZERO)
+                     DO NNN=1,SF%N_MATL
+                        ML=>MATERIAL(SF%MATL_INDEX(NNN))
+                        OB%RHO(:,:,:,NNN) = ML%RHO_S
+                     ENDDO
 
                   ELSE OBST_MATL_IF
 

@@ -579,11 +579,13 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
 REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3,VOLSUM
+INTEGER  :: N,II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP,MIM,MIP
+LOGICAL :: CONT_MATL_PROP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 
 ! Initialize verification tests
 
@@ -619,21 +621,80 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
             IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-            MLM => MATERIAL(OBM%MATL_INDEX)
-            MLP => MATERIAL(OBP%MATL_INDEX)
-            IF (MLM%K_S>0._EB) THEN
-               K_S_M = MLM%K_S
-            ELSE
-               NR = -NINT(MLM%K_S)
-               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+
+            !!! All this insanity is needed to compute a single number, K_S !!!
+
+            ! need to condense to make this loop readable
+
+            CONT_MATL_PROP=.FALSE.
+
+            IF (OBM%MATL_INDEX>0) THEN
+               MLM => MATERIAL(OBM%MATL_INDEX)
+               IF (MLM%K_S>0._EB) THEN
+                  K_S_M = MLM%K_S
+               ELSE
+                  NR = -NINT(MLM%K_S)
+                  K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+               ENDIF
+               IF (OBM%MATL_INDEX==OBP%MATL_INDEX) CONT_MATL_PROP=.TRUE.
             ENDIF
-            IF (MLP%K_S>0._EB) THEN
-               K_S_P = MLP%K_S
-            ELSE
-               NR = -NINT(MLP%K_S)
-               K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
+
+            IF (OBP%MATL_INDEX>0) THEN
+               MLP => MATERIAL(OBP%MATL_INDEX)
+               IF (MLP%K_S>0._EB) THEN
+                  K_S_P = MLP%K_S
+               ELSE
+                  NR = -NINT(MLP%K_S)
+                  K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
+               ENDIF
             ENDIF
-            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+
+            IF (OBM%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OBM%MATL_SURF_INDEX)
+               K_S_M = 0._EB
+               VOLSUM = 0._EB
+               MATL_LOOP_X_M: DO N=1,SF%N_MATL
+                  IF (OBM%RHO(I,J,K,N)<=TWO_EPSILON_EB) CYCLE MATL_LOOP_X_M
+                  ML => MATERIAL(SF%MATL_INDEX(N))
+                  VOLSUM = VOLSUM + OBM%RHO(I,J,K,N)/ML%RHO_S
+                  IF (ML%K_S>0._EB) THEN
+                     K_S_M = K_S_M + OBM%RHO(I,J,K,N)*ML%K_S/ML%RHO_S
+                  ELSE
+                     NR = -NINT(ML%K_S)
+                     K_S_M = K_S_M + OBM%RHO(I,J,K,N)*EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)/ML%RHO_S
+                  ENDIF
+               ENDDO MATL_LOOP_X_M
+               IF (VOLSUM > 0._EB) THEN
+                  K_S_M = K_S_M/VOLSUM
+               ENDIF
+               IF (K_S_M<=TWO_EPSILON_EB) K_S_M = 10000._EB
+               IF (OBM%MATL_SURF_INDEX==OBP%MATL_SURF_INDEX) CONT_MATL_PROP=.TRUE.
+            ENDIF
+
+            IF (OBP%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OBP%MATL_SURF_INDEX)
+               K_S_P = 0._EB
+               VOLSUM = 0._EB
+               MATL_LOOP_X_P: DO N=1,SF%N_MATL
+                  IF (OBP%RHO(I+1,J,K,N)<=TWO_EPSILON_EB) CYCLE MATL_LOOP_X_P
+                  ML => MATERIAL(SF%MATL_INDEX(N))
+                  VOLSUM = VOLSUM + OBP%RHO(I+1,J,K,N)/ML%RHO_S
+                  IF (ML%K_S>0._EB) THEN
+                     K_S_P = K_S_P + OBP%RHO(I+1,J,K,N)*ML%K_S/ML%RHO_S
+                  ELSE
+                     NR = -NINT(ML%K_S)
+                     K_S_P = K_S_P + OBP%RHO(I+1,J,K,N)*EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)/ML%RHO_S
+                  ENDIF
+               ENDDO MATL_LOOP_X_P
+               IF (VOLSUM > 0._EB) THEN
+                  K_S_P = K_S_P/VOLSUM
+               ENDIF
+               IF (K_S_P<=TWO_EPSILON_EB) K_S_P = 10000._EB
+            ENDIF
+
+            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            IF (CONT_MATL_PROP) THEN
                ! use linear average from inverse lever rule
                K_S = ( K_S_M*DX(I+1) + K_S_P*DX(I) )/( DX(I) + DX(I+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
@@ -647,6 +708,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
                K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
             ENDIF
+
          ENDDO
       ENDDO
    ENDDO
