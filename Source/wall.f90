@@ -22,6 +22,7 @@ TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: MM
 TYPE(MATERIAL_TYPE), POINTER :: ML
+LOGICAL :: CALL_HT_1D
 
 CONTAINS
 
@@ -109,13 +110,13 @@ ENDIF
 
 ! For thermally-thick boundary conditions, set the flag to call the routine PYROLYSIS
 
-CALL_PYROLYSIS = .FALSE.
+CALL_HT_1D = .FALSE.
 IF (.NOT.INITIALIZATION_PHASE .AND. CORRECTOR) THEN
    WALL_COUNTER = WALL_COUNTER + 1
    IF (WALL_COUNTER==WALL_INCREMENT) THEN
       DT_BC    = T - BC_CLOCK
       BC_CLOCK = T
-      CALL_PYROLYSIS = .TRUE.
+      CALL_HT_1D = .TRUE.
       WALL_COUNTER = 0
    ENDIF
 ENDIF
@@ -134,7 +135,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
    ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
    CALL CALCULATE_TMP_F(WALL_INDEX=IW)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,WALL_INDEX=IW)
+   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,WALL_INDEX=IW)
 ENDDO WALL_CELL_LOOP
 
 ! Loop through all CFACEs and apply heat transfer BCs
@@ -147,7 +148,7 @@ CFACE_LOOP: DO ICF=1,N_CFACE_CELLS
    ! Populate ONE_D%TMP_G, ONE_D%RHO_G, ONE_D%ZZ_G(:), ONE_D%RSUM_G, ONE_D%U_TANG
    CALL CFACE_THERMAL_GASVARS(ICF,ONE_D)
    CALL CALCULATE_TMP_F(CFACE_INDEX=ICF)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,CFACE_INDEX=ICF)
+   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,CFACE_INDEX=ICF)
 ENDDO CFACE_LOOP
 
 ! Loop through all particles and apply heat transfer BCs
@@ -168,7 +169,7 @@ IF (SOLID_PARTICLES) THEN
                                         (VV(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+VV(ONE_D%IIG,ONE_D%JJG-1,ONE_D%KKG))**2 + &
                                         (WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-1))**2 )
          IF (LPC%SOLID_PARTICLE) CALL CALCULATE_TMP_F(PARTICLE_INDEX=IP)
-         IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,PARTICLE_INDEX=IP)
+         IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,PARTICLE_INDEX=IP)
       ENDIF
    ENDDO
 ENDIF
@@ -1312,7 +1313,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    ! In PYROLYSIS, all the mass fluxes are normalized by a virtual area based on the INITIAL radius.
    ! Here, correct the mass flux using the CURRENT radius.
 
-   IF (CALL_PYROLYSIS) THEN
+   IF (CALL_HT_1D) THEN
       ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)     *AREA_SCALING
       ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES)*AREA_SCALING
       ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = ONE_D%MASSFLUX_MATL(1:SF%N_MATL)        *AREA_SCALING
@@ -1826,29 +1827,27 @@ ENDDO WALL_CELL_LOOP
 END SUBROUTINE ZETA_BC
 
 
-SUBROUTINE PYROLYSIS(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
+SUBROUTINE HT_1D(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
 
 ! Loop through all the boundary cells that require a 1-D heat transfer calc
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT, GET_MASS_FRACTION, GET_VISCOSITY
 USE GEOMETRY_FUNCTIONS
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 REAL(EB), INTENT(IN) :: DT_BC,T
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL:: WALL_INDEX,PARTICLE_INDEX,CFACE_INDEX
 REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
-            DXKF,DXKB,REACTION_RATE,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
-            MFLUX, MFLUX_S, VOLSUM, REGRID_MAX, REGRID_SUM,  &
-            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,&
-            MW_G,H_MASS,X_G,X_O2,Y_O2,X_W,D_AIR,MU_AIR,RE_L,RE_V,SC_AIR,SH_FAC_WALL,SHERWOOD,TMP_BACK,&
-            QCELL,DVOL,SIGMA_BETA
-INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NN,NNN,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
-REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,ZZ_GET(1:N_TRACKED_SPECIES)
+            DXKF,DXKB,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
+            VOLSUM, REGRID_MAX, REGRID_SUM,  &
+            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,TMP_BACK,&
+            QCELL,DVOL,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
+            M_DOT_S_PPP(MAX_MATERIALS),GEOM_FACTOR,RHO_TEMP(MAX_MATERIALS)
+INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
+REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS
 REAL(EB),ALLOCATABLE,DIMENSION(:) :: TMP_W_NEW
 REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: INT_WGT
-REAL(EB), POINTER, DIMENSION(:,:) :: PBARP
-INTEGER  :: NWP_NEW,I_GRAD,STEPCOUNT,SMIX_PTR,IZERO,SURF_INDEX
+INTEGER  :: NWP_NEW,I_GRAD,STEPCOUNT,IZERO,SURF_INDEX,PART_INDEX=0
 LOGICAL :: REMESH,ITERATE,E_FOUND
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE(WALL_TYPE), POINTER :: WALL_P
@@ -1889,6 +1888,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
    LP => LAGRANGIAN_PARTICLE(PARTICLE_INDEX)
    ONE_D => LP%ONE_D
    SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
+   PART_INDEX = PARTICLE_INDEX
    SF => SURFACE(SURF_INDEX)
    KK  = ONE_D%KKG
    I_OBST = 0
@@ -1923,19 +1923,6 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
    ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,PARTICLE_INDEX=PARTICLE_INDEX)
 ENDIF
 ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
-
-! Set pointers
-
-IF (PREDICTOR) THEN
-   PBARP => PBAR
-ELSE
-   PBARP => PBAR_S
-ENDIF
-
-! Miscellaneous coefficients
-
-SC_AIR = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
-SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
 
 ! Exponents for cylindrical or spherical coordinates
 
@@ -2089,158 +2076,45 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       REGRID_MAX       = 0._EB
       REGRID_SUM       = 0._EB
 
+      ! Compute the pyrolysis reaction terms
+
+      IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID .OR. I<2) THEN
+
+         ! Send the array of component densities, ONE_D%RHO(I,N), into the PYROLYSIS routine
+
+         RHO_TEMP(1:SF%N_MATL) = ONE_D%RHO(I,1:SF%N_MATL)
+         CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,SURF_INDEX,ONE_D%IIG,ONE_D%JJG,ONE_D%KKG,ONE_D%TMP(I),ONE_D%TMP_F,&
+                        RHO_TEMP(1:SF%N_MATL),RHO_S0,ONE_D%X(I-1),DT_BC,&
+                        M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),PART_INDEX=PART_INDEX)
+         ONE_D%RHO(I,1:SF%N_MATL) = RHO_TEMP(1:SF%N_MATL)
+   
+         ! Compute the mass flux of reaction gases at the surface
+ 
+         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
+                               (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
+         DO NS = 1,N_TRACKED_SPECIES
+            ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR
+            ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR
+         ENDDO
+         DO N=1,SF%N_MATL
+            ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
+         ENDDO
+
+      ENDIF
+
+      ! Compute regrid factors
+
       MATERIAL_LOOP1a: DO N=1,SF%N_MATL
-
-         IF (ONE_D%RHO(I,N) <= 0._EB) CYCLE MATERIAL_LOOP1a
-
          ML  => MATERIAL(SF%MATL_INDEX(N))
-
-         SELECT CASE (ML%PYROLYSIS_MODEL)
-
-            CASE (PYROLYSIS_LIQUID)
-
-               IF (I > 1) THEN
-                  REGRID_SUM = 1._EB
-                  CYCLE MATERIAL_LOOP1a
-               ENDIF
-               SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
-               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-               CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
-               X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
-               X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/ONE_D%TMP_F)))
-               IF (DNS) THEN
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),ONE_D%TMP_G,D_AIR)
-                  H_MASS = 2._EB*D_AIR*(RDX(ONE_D%IIG)*RDY(ONE_D%JJG)*RDZ(ONE_D%KKG))**ONTH
-               ELSE
-                  CALL GET_VISCOSITY(ZZ_GET,MU_AIR,ONE_D%TMP_G)
-                  RE_L     = MAX(5.E5_EB,ONE_D%RHO_G*ONE_D%U_TANG*SF%CONV_LENGTH/MU_AIR)
-                  SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-                  H_MASS = SHERWOOD*MU_AIR/(ONE_D%RHO_G*SC*SF%CONV_LENGTH)
-               ENDIF
-               IF(SF%HM_FIXED>=0._EB) THEN
-                  H_MASS=SF%HM_FIXED
-               ENDIF
-               MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/ONE_D%TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
-               MFLUX = MFLUX * PBARP(ONE_D%KKG,PRESSURE_ZONE(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
-               MFLUX = MIN(MFLUX,ONE_D%LAYER_THICKNESS(LAYER_INDEX(1))*ML%RHO_S/DT_BC)
-
-               ! CYLINDRICAL and SPHERICAL scaling not implemented
-               DO NS = 1,N_TRACKED_SPECIES
-                  ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
-                  ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,1)*MFLUX
-                  ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,1)*MFLUX
-               ENDDO
-               J = 0
-               ! Always remesh for liquid fuels
-               IF(MFLUX>TWO_EPSILON_EB) REMESH=.TRUE.
-               DO WHILE (MFLUX > 0._EB)
-                  J = J + 1
-                  MFLUX_S = MIN(MFLUX,DX_S(J)*ML%RHO_S/DT_BC)
-                  Q_S(1) = Q_S(1) - MFLUX_S*ML%H_R(1)/DX_S(J)
-                  ONE_D%RHO(J,N) = MAX( 0._EB , ONE_D%RHO(J,N) - DT_BC*MFLUX_S/DX_S(J) )
-                  MFLUX = MFLUX-MFLUX_S
-               ENDDO
-
-            CASE (PYROLYSIS_SOLID)
-
-               REACTION_LOOP: DO J=1,ML%N_REACTIONS
-                  ! Reaction rate in 1/s
-                  REACTION_RATE = ML%A(J)*(ONE_D%RHO(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*ONE_D%TMP(I)))
-                  ! power term
-                  DTMP = ML%THR_SIGN(J)*(ONE_D%TMP(I)-ML%TMP_THR(J))
-                  IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) THEN
-                     IF (DTMP > 0._EB) THEN
-                        REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
-                     ELSE
-                        REACTION_RATE = 0._EB
-                     ENDIF
-                  ELSE ! threshold
-                     IF (DTMP < 0._EB) REACTION_RATE = 0._EB
-                  ENDIF
-                  ! Phase change reaction?
-                  IF (ML%PCR(J)) THEN
-                     REACTION_RATE = REACTION_RATE / ((ABS(ML%H_R(J))/1000._EB) * DT_BC)
-                  ENDIF
-                  ! Oxidation reaction?
-                  IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-                     ! Get oxygen mass fraction
-                     ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-                     CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-                     ! Calculate oxygen volume fraction in the gas cell
-                     X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/ONE_D%RSUM_G
-                     ! Calculate oxygen concentration inside the material, assuming decay function
-                     X_O2 = X_O2 * EXP(-ONE_D%X(I-1)/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
-                     REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
-                  ENDIF
-                  ! Reaction rate in kg/(m3s)
-                  REACTION_RATE = RHO_S0 * REACTION_RATE
-                  ! Limit reaction rate
-                  REACTION_RATE = MIN(REACTION_RATE , ONE_D%RHO(I,N)/DT_BC)
-                  ! Compute mdot''_norm
-                  MFLUX_S = MF_FRAC(I)*REACTION_RATE*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
-                            (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
-                  ! Sum up local mass fluxes
-                  DO NS = 1,N_TRACKED_SPECIES
-                     ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,J)*MFLUX_S
-                  ENDDO
-                  Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
-                  ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
-                  DO NN=1,ML%N_RESIDUE(J)
-                     IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                        NNN = SF%RESIDUE_INDEX(N,NN,J)
-                        ONE_D%RHO(I,NNN) = ONE_D%RHO(I,NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-                     ENDIF
-                  ENDDO
-               ENDDO REACTION_LOOP
-
-            CASE (PYROLYSIS_VEGETATION)
-
-               REACTION_LOOP_VEG: DO J=1,ML%N_REACTIONS
-                  ! Reaction rate in 1/s
-                  REACTION_RATE = ML%A(J)*(ONE_D%RHO(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*ONE_D%TMP(I)))
-                  ! power term
-                  IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * ONE_D%TMP(I)**ML%N_T(J)
-                  ! Oxidation reaction?
-                  IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-                     ! Get oxygen mass fraction
-                     ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-                     CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-                     SIGMA_BETA = LP%PWT*ONE_D%AREA*RDX(ONE_D%IIG)*RDY(ONE_D%JJG)*RDZ(ONE_D%KKG)
-                     CALL GET_VISCOSITY(ZZ_GET,MU_AIR,ONE_D%TMP_G)
-                     RE_V   = ONE_D%RHO_G*ONE_D%U_TANG*2._EB*SF%THICKNESS/MU_AIR
-                     REACTION_RATE = REACTION_RATE * &
-                                     ONE_D%RHO_G*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_V))/(RHO_S0*ML%NU_O2(J))
-                  ENDIF
-                  ! Reaction rate in kg/(m3s)
-                  REACTION_RATE = RHO_S0 * REACTION_RATE
-                  ! Limit reaction rate
-                  REACTION_RATE = MIN(REACTION_RATE , ONE_D%RHO(I,N)/DT_BC)
-                  ! Compute mdot''_norm
-                  MFLUX_S = MF_FRAC(I)*REACTION_RATE*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
-                            (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
-                  ! Sum up local mass fluxes
-                  DO NS = 1,N_TRACKED_SPECIES
-                     ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,J)*MFLUX_S
-                  ENDDO
-                  Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
-                  ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
-                  DO NN=1,ML%N_RESIDUE(J)
-                     IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                        NNN = SF%RESIDUE_INDEX(N,NN,J)
-                        ONE_D%RHO(I,NNN) = ONE_D%RHO(I,NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-                     ENDIF
-                  ENDDO
-               ENDDO REACTION_LOOP_VEG
-
-         END SELECT
-
+         IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
+            REMESH = .TRUE.
+            IF (I>1) THEN
+               REGRID_SUM = 1._EB
+               CYCLE MATERIAL_LOOP1a
+            ENDIF
+         ENDIF
          REGRID_MAX = MAX(REGRID_MAX,ONE_D%RHO(I,N)/ML%RHO_S)
          REGRID_SUM = REGRID_SUM + ONE_D%RHO(I,N)/ML%RHO_S
-
       ENDDO MATERIAL_LOOP1a
 
       IF (REGRID_SUM <= 1._EB) REGRID_FACTOR(I) = REGRID_SUM
@@ -2617,6 +2491,182 @@ ENDIF
 
 ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF * (ONE_D%TMP_G - 0.5_EB * (ONE_D%TMP_F + TMP_F_OLD) )
 
+END SUBROUTINE HT_1D
+
+
+SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,RHO_S,RHO_S0,DEPTH,DT_BC,&
+                     M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_S_PPP,PART_INDEX)
+
+! Calculate the solid phase reaction. Return heat and mass generation rates per unit volume.
+
+! N_MATS = Number of MATerialS
+! MATL_INDEX(1:N_MATS) = Indices of the materials from the master material list.
+! SURF_INDEX = Index of surface, used only for liquids
+! (IIG,JJG,KKG) = Indices of nearest gas phase cell
+! TMP_S = Solid temperature (K)
+! TMP_F = Solid surface temperature (K)
+! RHO_S(1:N_MATS) = Array of component densities (kg/m3)
+! RHO_S0 = Original solid density (kg/m3)
+! DEPTH = Distance from surface (m)
+! DT_BC = Time step used by the solid phase solver (s)
+! M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) = Adjusted mass generation rate per unit volume of the gas species
+! M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) = Actual mass generation rate per unit volume of the gas species
+! M_DOT_S_PPP(1:N_MATS) = Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
+! Q_DOT_S_PPP = Heat release rate per unit volume (W/m3)
+! PART_INDEX = Optional Lagrangian particle index for vegetation
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT,GET_VISCOSITY
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+INTEGER, INTENT(IN) :: N_MATS,SURF_INDEX,IIG,JJG,KKG
+INTEGER, INTENT(IN), OPTIONAL :: PART_INDEX
+REAL(EB), INTENT(IN) :: TMP_S,TMP_F,RHO_S0,DT_BC,DEPTH
+REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
+                                       M_DOT_S_PPP(MAX_MATERIALS)
+INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
+INTEGER :: N,NN,NNN,J,NS,SMIX_PTR
+TYPE(MATERIAL_TYPE), POINTER :: ML
+TYPE(SURFACE_TYPE), POINTER :: SF
+REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,SIGMA_BETA
+
+Q_DOT_S_PPP = 0._EB
+M_DOT_S_PPP = 0._EB
+M_DOT_G_PPP_ADJUST = 0._EB
+M_DOT_G_PPP_ACTUAL = 0._EB
+
+MATERIAL_LOOP: DO N=1,N_MATS
+
+   IF (RHO_S(N) <= 0._EB) CYCLE MATERIAL_LOOP
+
+   ML => MATERIAL(MATL_INDEX(N))
+
+   SELECT CASE (ML%PYROLYSIS_MODEL)
+
+      CASE (PYROLYSIS_LIQUID)
+
+         SF => SURFACE(SURF_INDEX)
+         SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
+         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+         CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
+         X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
+         X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/TMP_F)))
+         IF (SF%HM_FIXED>=0._EB) THEN
+            H_MASS = SF%HM_FIXED
+         ELSEIF (DNS) THEN
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),TMP(IIG,JJG,KKG),D_AIR)
+            H_MASS = 2._EB*D_AIR*(RDX(IIG)*RDY(JJG)*RDZ(KKG))**ONTH
+         ELSE
+            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
+            U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
+            RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*U_TANG*SF%CONV_LENGTH/MU_AIR)
+            SC_AIR   = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
+            SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
+            H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
+         ENDIF
+         MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+         MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
+         MFLUX = MIN(MFLUX,DX_S(1)*ML%RHO_S/DT_BC)
+         Q_DOT_S_PPP = Q_DOT_S_PPP - MFLUX*ML%H_R(1)/DX_S(1)
+         DO NS=1,N_TRACKED_SPECIES
+            M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
+            M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
+            M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         +                           ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
+         ENDDO
+         RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*MFLUX/DX_S(1) )
+
+      CASE (PYROLYSIS_SOLID)
+
+         REACTION_LOOP: DO J=1,ML%N_REACTIONS
+            ! Reaction rate in 1/s
+            REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
+            ! power term
+            DTMP = ML%THR_SIGN(J)*(TMP_S-ML%TMP_THR(J))
+            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) THEN
+               IF (DTMP > 0._EB) THEN
+                  REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
+               ELSE
+                  REACTION_RATE = 0._EB
+               ENDIF
+            ELSE ! threshold
+               IF (DTMP < 0._EB) REACTION_RATE = 0._EB
+            ENDIF
+            ! Phase change reaction?
+            IF (ML%PCR(J)) REACTION_RATE = REACTION_RATE / ((ABS(ML%H_R(J))/1000._EB) * DT_BC)
+            ! Oxidation reaction?
+            IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+               ! Get oxygen mass fraction
+               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               ! Calculate oxygen volume fraction in the gas cell
+               X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
+               ! Calculate oxygen concentration inside the material, assuming decay function
+               X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
+               REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
+            ENDIF
+            ! Reaction rate in kg/m3/s
+            REACTION_RATE = MIN(RHO_S0*REACTION_RATE,RHO_S(N)/DT_BC)
+            Q_DOT_S_PPP = Q_DOT_S_PPP - REACTION_RATE * ML%H_R(J)
+            DO NS=1,N_TRACKED_SPECIES
+               M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*REACTION_RATE
+               M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) +                           ML%NU_GAS(NS,J)*REACTION_RATE
+               M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         +                           ML%NU_GAS(NS,J)*REACTION_RATE
+            ENDDO
+            RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*REACTION_RATE )
+            DO NN=1,ML%N_RESIDUE(J)
+               IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
+                  DO NNN=1,N_MATS
+                     IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) &
+                        RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
+                  ENDDO
+               ENDIF
+            ENDDO
+         ENDDO REACTION_LOOP
+
+      CASE (PYROLYSIS_VEGETATION)
+
+         SF => SURFACE(SURF_INDEX)
+         LP => LAGRANGIAN_PARTICLE(PART_INDEX)
+         REACTION_LOOP_VEG: DO J=1,ML%N_REACTIONS
+            ! Reaction rate in 1/s
+            REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
+            ! power term
+            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
+            ! Oxidation reaction?
+            IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+               ! Get oxygen mass fraction
+               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               SIGMA_BETA = LP%PWT*LP%ONE_D%AREA*RDX(IIG)*RDY(JJG)*RDZ(KKG)
+               CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
+               U_TANG = SQRT(2._EB*KRES(IIG,JJG,KKG))
+               RE_L   = RHO(IIG,JJG,KKG)*U_TANG*2._EB*SF%THICKNESS/MU_AIR
+               REACTION_RATE = REACTION_RATE * &
+                               RHO(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2(J))
+            ENDIF
+            ! Reaction rate in kg/m3/s
+            REACTION_RATE = RHO_S0 * REACTION_RATE
+            ! Limit reaction rate
+            REACTION_RATE = MIN(REACTION_RATE , RHO_S(N)/DT_BC)
+            Q_DOT_S_PPP = Q_DOT_S_PPP - REACTION_RATE * ML%H_R(J)
+            DO NS=1,N_TRACKED_SPECIES
+               M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*REACTION_RATE
+               M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*REACTION_RATE
+               M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*REACTION_RATE
+            ENDDO
+            RHO_S(N) = MAX(0._EB , RHO_S(N) - DT_BC*REACTION_RATE )
+            ! Residue
+            DO NN=1,ML%N_RESIDUE(J)
+               IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
+                  NNN = SF%RESIDUE_INDEX(N,NN,J)
+                  RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
+               ENDIF
+            ENDDO
+         ENDDO REACTION_LOOP_VEG
+
+   END SELECT
+
+ENDDO MATERIAL_LOOP
+
 END SUBROUTINE PYROLYSIS
 
 
@@ -2767,10 +2817,10 @@ DO I=1,N_TGA
    T_TGA = I*DT_TGA
    ASSUMED_GAS_TEMPERATURE = TMPA + TGA_HEATING_RATE*T_TGA
    IF (TGA_WALL_INDEX>0) THEN
-      CALL PYROLYSIS(1,T_TGA,DT_TGA,WALL_INDEX=IW)
+      CALL HT_1D(1,T_TGA,DT_TGA,WALL_INDEX=IW)
       SURF_DEN = SURFACE_DENSITY(1,0,WALL_INDEX=IW)
    ELSE
-      CALL PYROLYSIS(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
+      CALL HT_1D(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
       SURF_DEN = SURFACE_DENSITY(1,0,LAGRANGIAN_PARTICLE_INDEX=IP)
    ENDIF
    IF (MOD(I,NINT(1._EB/(TGA_HEATING_RATE*DT_TGA)))==0) THEN
