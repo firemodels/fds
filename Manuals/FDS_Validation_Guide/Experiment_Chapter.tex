@@ -42,6 +42,90 @@ A common validation experiment for CFD codes involves flow through a channel wit
 Craig Beyler performed a large number of experiments involving a variety of fuels, fire sizes, burner diameters, and burner distances beneath a hood~\cite{Beyler:Hood}.  The hood consisted of concentric cylinders separated by an air gap.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood.  Based on the published measurement uncertainties, species errors are estimated at 6~\%.  148 tests were performed with measurements made in the exhaust duct.  The fuels in those tests were as follows: 16 acetone, 11 ethanol, 13 isopropanol, 18 methanol, 51 propane, 28 propylene, and 11 toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 tests spanning the equivalence ratio range for each fuel was simulated for validation (5, 5, 5, 5, 15, 7, and 5 respectively for the fuels mentioned above).
 
 
+\section{Bittern Sprinkler Experiments}
+\label{bittern-experiments}
+
+In 2004, a set of 22 fire experiments was conducted at the University of Canterbury, New Zealand, by Adam Bittern~\cite{Bittern:Thesis,Wade:FT2007}. In each experiment, a single chair was burned within an enclosure with two sprinklers installed. The sprinklers were not charged with flowing water during the experiments, but pressure gauges were installed immediately upstream of each sprinkler to indicate activation. The sprinkler actuation time, chair mass loss rate, and gas temperature profile were measured. The HRR was estimated from the measured mass loss rate and heat of combustion of the fuel.
+
+The experiments incorporated four different types of sprinklers, two fire locations (the center and corner of the enclosure), and two ventilation conditions (open or closed door). The enclosure was timber-framed and lined with 10~mm thick gypsum plasterboard. The door was made of plywood and was 0.8~m wide by 2.1~high. The compartment layout, dimensions and experimental arrangement are shown in Figure~\ref{bit_plan}. The chair used as fuel for each experiment was made of flexible polyurethane foam slabs, where each slab measured approximately 0.5~m by 0.4~m by 0.1~m. The seat was ignited using a solid petroleum lighter.
+
+Table~\ref{bit_sum} reports the sprinkler actuation times of each sprinkler.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{FIGURES/Bittern_Sprinkler_Experiments/Bittern_Sketch}
+\caption[Plan view of the Bittern Sprinkler Experiments]{Plan view of the Bittern Sprinkler Experiments.}
+\label{bit_plan}
+\end{figure}
+
+
+\begin{table}[!ht]
+\centering
+\caption{Summary of results, Bittern experiments. Note that Exp.~11 has been excluded because of a failed mass loss measurement.}
+\label{bit_sum}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Exp. & Spr.~1 & Time (s) & Spr.~2 & Time (s) & $T_0$ ($^\circ$C) & Door   & Fire Position \\ \hline \hline
+1    & Res A  & 210      & Res A  & 250      & 23.7              & Open   & Center        \\ \hline
+2    & Res A  & 225      & Res A  & 211      & 25.5              & Open   & Center        \\ \hline
+3    & Res B  & 192      & Res B  & 192      & 25.5              & Open   & Center        \\ \hline
+4    & SS68   & 226      & SS68   & 226      & 25.7              & Open   & Center        \\ \hline
+5    & SS68   & 266      & SS68   & 272      & 27.5              & Open   & Center        \\ \hline
+6    & SS68   & 216      & SS68   & 211      & 27.7              & Open   & Center        \\ \hline
+7    & Res A  & 182      & Res A  & 186      & 28.2              & Open   & Center        \\ \hline
+8    & Res B  & 182      & Res B  & 187      & 27.9              & Open   & Center        \\ \hline
+9    & Res B  & 233      & Res B  & 230      & 28.9              & Open   & Center        \\ \hline
+10   & Res A  & 183      & Res B  & 184      & 29.4              & Open   & Center        \\ \hline
+12   & SS68   & 246      & Res B  & 228      & 24.0              & Closed & Center        \\ \hline
+13   & SS68   & 204      & Res B  & 194      & 24.5              & Closed & Center        \\ \hline
+14   & SS68   & 203      & Res B  & 187      & 24.2              & Closed & Center        \\ \hline
+15   & SS68   & 270      & Res B  & 253      & 23.7              & Closed & Center        \\ \hline
+16   & Res B  & 178      & Res A  & 224      & 20.6              & Closed & Corner        \\ \hline
+17   & Res B  & 181      & Res A  & 228      & 23.8              & Closed & Corner        \\ \hline
+18   & SS68   & 187      & Res A  & 221      & 25.0              & Closed & Corner        \\ \hline
+19   & SS68   & 189      & Res A  & 223      & 26.4              & Closed & Corner        \\ \hline
+20   & SS68   & 205      & Res A  & DNA      & 25.3              & Closed & Corner        \\ \hline
+21   & SS93   & 216      & SS93   & 330      & 25.2              & Closed & Corner        \\ \hline
+22   & SS93   & 205      & SS93   & 263      & 25.2              & Closed & Corner        \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Modeling Assumptions}
+
+The assumptions given in this section were used in the original analysis of the experiments~\cite{Bittern:Thesis}.
+
+\subsubsection{Material Properties}
+
+The gypsum board had a thickness of 1~cm, density of 731~kg/m\textsuperscript{3}, specific heat of 0.90~kJ/(kg$\cdot$K), conductivity of 0.17~W/(m$\cdot$K), and emissivity of 0.88. The concrete floor was assumed to have a thickness of 10~cm, density of 2300~kg/m$^3$, specific heat of 0.88~kJ/(kg$\cdot$K), conductivity of 1.2~W/(m$\cdot$K), and emissivity of 0.5.
+
+\subsubsection{Sprinkler Properties}
+
+The properties of the sprinklers are shown in Table~\ref{Bittern_Sprinklers}. These properties are based on the manufacturer's specification where available or otherwise estimated based on measured values of comparable sprinklers. For modeling purposes, the sprinkler offset, 2~cm, was selected based on an approximate 2~cm glass bulb length, and the C-factor selected was based on a sensitivity analyses undertaken in the original study.
+
+\begin{table}[!ht]
+\centering
+\caption[Properties of sprinklers used in Bittern Experiments]{Properties of sprinklers used in Bittern Experiments.}
+\label{Bittern_Sprinklers}
+\begin{tabular}{|l|l|c|c|c|}
+\hline
+\textbf{Short} & \textbf{Description}                & \textbf{RTI}        & \textbf{C-Factor} & \textbf{Act. Temp.} \\
+\textbf{Name}  &                                     & (m$\cdot$s)$^{1/2}$ & (m/s)$^{1/2}$     & $^\circ$C           \\ \hline
+Res A          & Residential, 3 mm glass bulb        & 36                  & 0.4               & 68                  \\ \hline
+Res B          & Residential, 3 mm glass bulb        & 36                  & 0.4               & 68                  \\ \hline
+SS68           & Standard Response, 5 mm glass bulb  & 95                  & 0.4               & 68                  \\ \hline
+SS93           & Standard Response, 5 mm glass bulb  & 95                  & 0.4               & 93                  \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Fire and Combustion}
+
+The average heat of combustion of the upholstery was measured in a cone calorimeter to be 21.9~MJ/kg (Exp.~1-10) and 20.4~MJ/kg (Exp.~12-22). Since the primary fuel used in the experiments was flexible polyurethane foam, the radiant loss fraction assumed in the fire model was 0.46. Other combustion parameters were as for polyurethane foam, and all parameters selected are consistent with those used in the original BRANZFIRE study~\cite{Wade:FT2007}. For the ``simple chemistry'' combustion model, inputs for stoichiometric yields have been selected from literature based on GM23 foam, with an effective molecular formula of CH\textsubscript{1.8}O\textsubscript{0.35}N\textsubscript{0.06}. The soot yield was assumed to be 0.227~kg/kg. The area of the fire was taken to be 0.4~m by 0.5~m. The height of the fire was assumed to be 0.65~m above the floor.
+
+\subsubsection{Ventilation and Leakage}
+
+For experiments 11 to 22, the door to the compartment was closed. The estimated leakage area was assumed based on data for loose-fitting internal walls. An area of 0.053 m\textsuperscript{2} was evenly distributed across the door.
+
+
 \section{Bouchair Solar Chimney}
 
 To evaluate solar-induced ventilation systems in desert climates, Bouchair~\cite{Bouchair:Thesis} constructed a simple test apparatus shown in Fig.~\ref{Bouchair_Drawing}. A compartment with interior dimensions of approximately 1.6~m long, 1.8~m, and 2.0~m high had a window on one side and an air inlet slot on the other, leading into a 1.5~m wide cavity with two heating panels spanning the long dimension. The panels were heated to 10~$^\circ$C, 20~$^\circ$C, 30~$^\circ$C, or 40~$^\circ$C above ambient, drawing air through the compartment and into the thermal cavity. The mass flow rate of air through the cavity was measured. The inlet slot was either 0.1~m or 0.4~m high, and 1.4~m wide. The thermal cavity was 1.5~m wide, and the hot panels were separated by 0.1~m, 0.2~m, 0.3~m, 0.5~m, or 1.0~m. In all, there were 40 different sets of test parameters.
@@ -53,7 +137,6 @@ In addition to the results presented in this guide, simulations of this experime
 \caption[Geometry of the Bouchair Solar Chimney experiment]{Geometry of the Bouchair Solar Chimney experiment.}
 \label{Bouchair_Drawing}
 \end{figure}
-
 
 
 \section{BRE Spray Test for Radiation Attenuation}
@@ -597,7 +680,7 @@ and \SI{0.195 \pm 0.052}{kg/kg} for heptane and toluene, respectively.
 
 \section{NIST/NRC Corner, Wall, and Cabinet Experiments}
 
-In the summer of 2017, experiments were conducted in a large compartment in the NIST large fire laboratory on behalf of the U.S. Nuclear Regulatory Commission. There were two sets of experiments. In the first set, conducted in July, 2017, a natural gas burner was positioned either in a corner or against a wall, and gradually moved outward. In the second set of experiments, conducted in September, 2017, a natural gas burner was placed inside one of two steel cabinets meant to represent typical industrial-scale electrical enclosures. 
+In the summer of 2017, experiments were conducted in a large compartment in the NIST large fire laboratory on behalf of the U.S. Nuclear Regulatory Commission. There were two sets of experiments. In the first set, conducted in July, 2017, a natural gas burner was positioned either in a corner or against a wall, and gradually moved outward. In the second set of experiments, conducted in September, 2017, a natural gas burner was placed inside one of two steel cabinets meant to represent typical industrial-scale electrical enclosures.
 
 The compartment for all experiments was 11~m long, 7~m wide, and 3.8~m high. The long dimension of the compartment ran east-west. A 1.8~m wide, 2.4~m high door was centered on the east (short) wall.
 
