@@ -2525,57 +2525,51 @@ INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
 INTEGER :: N,NN,NNN,J,NS,SMIX_PTR
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
-REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,SIGMA_BETA
+REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
+            SIGMA_BETA,RHO_DOT
 
 Q_DOT_S_PPP = 0._EB
 M_DOT_S_PPP = 0._EB
 M_DOT_G_PPP_ADJUST = 0._EB
 M_DOT_G_PPP_ACTUAL = 0._EB
 
-MATERIAL_LOOP: DO N=1,N_MATS
+MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
-   IF (RHO_S(N) <= 0._EB) CYCLE MATERIAL_LOOP
-
+   IF (RHO_S(N) <= 0._EB) CYCLE MATERIAL_LOOP  ! If component alpha density is zero, go on to the next material.
    ML => MATERIAL(MATL_INDEX(N))
 
-   SELECT CASE (ML%PYROLYSIS_MODEL)
+   REACTION_LOOP: DO J=1,ML%N_REACTIONS  ! Tech Guide: Sum over the reactions, beta
 
-      CASE (PYROLYSIS_LIQUID)
+      SELECT CASE (ML%PYROLYSIS_MODEL)
 
-         SF => SURFACE(SURF_INDEX)
-         SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
-         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
-         CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
-         X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
-         X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/TMP_F)))
-         IF (SF%HM_FIXED>=0._EB) THEN
-            H_MASS = SF%HM_FIXED
-         ELSEIF (DNS) THEN
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),TMP(IIG,JJG,KKG),D_AIR)
-            H_MASS = 2._EB*D_AIR*(RDX(IIG)*RDY(JJG)*RDZ(KKG))**ONTH
-         ELSE
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
-            U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
-            RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*U_TANG*SF%CONV_LENGTH/MU_AIR)
-            SC_AIR   = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
-            SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
-            H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
-         ENDIF
-         MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
-         MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
-         MFLUX = MIN(MFLUX,DX_S(1)*ML%RHO_S/DT_BC)
-         Q_DOT_S_PPP = Q_DOT_S_PPP - MFLUX*ML%H_R(1)/DX_S(1)
-         DO NS=1,N_TRACKED_SPECIES
-            M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
-            M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
-            M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         +                           ML%NU_GAS(NS,1)*MFLUX/DX_S(1)
-         ENDDO
-         RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*MFLUX/DX_S(1) )
+         CASE (PYROLYSIS_LIQUID)
 
-      CASE (PYROLYSIS_SOLID)
+            SF => SURFACE(SURF_INDEX)
+            SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
+            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+            CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
+            X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
+            X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/TMP_F)))
+            IF (SF%HM_FIXED>=0._EB) THEN
+               H_MASS = SF%HM_FIXED
+            ELSEIF (DNS) THEN
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),TMP(IIG,JJG,KKG),D_AIR)
+               H_MASS = 2._EB*D_AIR*(RDX(IIG)*RDY(JJG)*RDZ(KKG))**ONTH
+            ELSE
+               CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
+               U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
+               RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*U_TANG*SF%CONV_LENGTH/MU_AIR)
+               SC_AIR   = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
+               SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
+               H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
+            ENDIF
+            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+            MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
+            RHO_DOT = MIN(MFLUX/DX_S(1),ML%RHO_S/DT_BC)  ! kg/m3/s
 
-         REACTION_LOOP: DO J=1,ML%N_REACTIONS
-            ! Reaction rate in 1/s
+         CASE (PYROLYSIS_SOLID)
+
+            ! Reaction rate in 1/s (Tech Guide: r_alpha_beta)
             REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
             ! power term
             DTMP = ML%THR_SIGN(J)*(TMP_S-ML%TMP_THR(J))
@@ -2601,31 +2595,13 @@ MATERIAL_LOOP: DO N=1,N_MATS
                X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
             ENDIF
-            ! Reaction rate in kg/m3/s
-            REACTION_RATE = MIN(RHO_S0*REACTION_RATE,RHO_S(N)/DT_BC)
-            Q_DOT_S_PPP = Q_DOT_S_PPP - REACTION_RATE * ML%H_R(J)
-            DO NS=1,N_TRACKED_SPECIES
-               M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*REACTION_RATE
-               M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) +                           ML%NU_GAS(NS,J)*REACTION_RATE
-               M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         +                           ML%NU_GAS(NS,J)*REACTION_RATE
-            ENDDO
-            RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*REACTION_RATE )
-            DO NN=1,ML%N_RESIDUE(J)
-               IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                  DO NNN=1,N_MATS
-                     IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) &
-                        RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-                  ENDDO
-               ENDIF
-            ENDDO
-         ENDDO REACTION_LOOP
+            RHO_DOT  = MIN(RHO_S0*REACTION_RATE,RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
-      CASE (PYROLYSIS_VEGETATION)
+         CASE (PYROLYSIS_VEGETATION)
 
-         SF => SURFACE(SURF_INDEX)
-         LP => LAGRANGIAN_PARTICLE(PART_INDEX)
-         REACTION_LOOP_VEG: DO J=1,ML%N_REACTIONS
-            ! Reaction rate in 1/s
+            SF => SURFACE(SURF_INDEX)
+            LP => LAGRANGIAN_PARTICLE(PART_INDEX)
+            ! Tech Guide: r_alpha,beta (1/s)
             REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
             ! power term
             IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
@@ -2641,27 +2617,27 @@ MATERIAL_LOOP: DO N=1,N_MATS
                REACTION_RATE = REACTION_RATE * &
                                RHO(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2(J))
             ENDIF
-            ! Reaction rate in kg/m3/s
-            REACTION_RATE = RHO_S0 * REACTION_RATE
-            ! Limit reaction rate
-            REACTION_RATE = MIN(REACTION_RATE , RHO_S(N)/DT_BC)
-            Q_DOT_S_PPP = Q_DOT_S_PPP - REACTION_RATE * ML%H_R(J)
-            DO NS=1,N_TRACKED_SPECIES
-               M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*REACTION_RATE
-               M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*REACTION_RATE
-               M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*REACTION_RATE
-            ENDDO
-            RHO_S(N) = MAX(0._EB , RHO_S(N) - DT_BC*REACTION_RATE )
-            ! Residue
-            DO NN=1,ML%N_RESIDUE(J)
-               IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                  NNN = SF%RESIDUE_INDEX(N,NN,J)
-                  RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-               ENDIF
-            ENDDO
-         ENDDO REACTION_LOOP_VEG
+            RHO_DOT  = MIN(RHO_S0*REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
-   END SELECT
+      END SELECT
+
+      RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*RHO_DOT )  ! Tech Guide: rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
+      Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%H_R(J)  ! Tech Guide: q_dot_s,c'''
+      DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
+         M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
+         M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
+         M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
+      ENDDO
+      DO NN=1,ML%N_RESIDUE(J)
+         IF (ML%NU_RESIDUE(NN,J)>0._EB) THEN
+            DO NNN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
+               ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
+               IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*RHO_DOT
+            ENDDO
+         ENDIF
+      ENDDO
+
+   ENDDO REACTION_LOOP
 
 ENDDO MATERIAL_LOOP
 
