@@ -2,8 +2,6 @@
 
 #*** environment varables
 
-# FIREMODELS       - define directory containing git repos - 
-#                    eg. /home/username/FireModels_fork
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
@@ -43,6 +41,8 @@ function usage {
   echo "Other options:"
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -f repository root - name and location of repository where FDS is located"
+  echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
   echo " -I use Intel mpi version of fds"
   echo " -m m - reserve m processes per node [default: 1]"
@@ -159,7 +159,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
+while getopts 'ACd:e:f:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -173,6 +173,9 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
+   ;;
+  f)
+   FDSROOT="$OPTARG"
    ;;
   h)
    usage
