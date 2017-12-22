@@ -80,7 +80,7 @@ SUBROUTINE THERMAL_BC(T,NM)
 ! Note also that gas phase values are assigned here to be used for all subsequent BCs.
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR
 USE COMPLEX_GEOMETRY, ONLY : CFACE_THERMAL_GASVARS
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_BC,DTMP,DT_BC_HT3D
@@ -577,14 +577,16 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
-REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3,VOLSUM
-INTEGER  :: N,II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
+REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,K_S_M,K_S_P,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3,&
+            RHO_GET(1:N_MATL),K_GET,K_OTHER,RHOCBAR_S
+INTEGER  :: N,II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP,IIO,JJO,KKO,NOM,N_INT_CELLS
 LOGICAL :: CONT_MATL_PROP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(MESH_TYPE), POINTER :: OM=>NULL()
 
 ! Initialize verification tests
 
@@ -600,6 +602,7 @@ KDTDX=>WORK1; KDTDX=0._EB
 KDTDY=>WORK2; KDTDY=0._EB
 KDTDZ=>WORK3; KDTDZ=0._EB
 TMP_NEW=>WORK4; TMP_NEW=TMP
+KP=>WORK5; KP=0._EB
 
 DT_SUB = DT_BC_HT3D
 T_LOC = 0._EB
@@ -610,88 +613,96 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
    K_S_MAX = 0._EB
    VN_HT3D = 0._EB
 
+   ! compute material thermal conductivity
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
+            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D)   CYCLE
+            IF (OB%MATL_INDEX>0) THEN
+               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OB%MATL_SURF_INDEX)
+               RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
+               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+   KP_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
+
+      II = WC%ONE_D%II
+      JJ = WC%ONE_D%JJ
+      KK = WC%ONE_D%KK
+
+      EWC=>EXTERNAL_WALL(IW)
+      NOM=EWC%NOM
+      OM=>MESHES(NOM)
+
+      K_OTHER = 0._EB
+      DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+         DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+            DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+
+               IC = OM%CELL_INDEX(IIO,JJO,KKO);           IF (.NOT.OM%SOLID(IC)) CYCLE
+               OB => OM%OBSTRUCTION(OM%OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
+               TMP_OTHER = OM%TMP(IIO,JJO,KKO)
+
+               IF (OB%MATL_INDEX>0) THEN
+                  CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_MATL_INDEX=OB%MATL_INDEX)
+               ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                  SF => SURFACE(OB%MATL_SURF_INDEX)
+                  RHO_GET(1:SF%N_MATL) = OB%RHO(IIO,JJO,KKO,1:SF%N_MATL)
+                  CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               ENDIF
+               K_OTHER = K_OTHER + K_GET
+
+            ENDDO
+         ENDDO
+      ENDDO
+      N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
+      KP(II,JJ,KK) = K_OTHER/REAL(N_INT_CELLS,EB)
+
+   ENDDO KP_WALL_LOOP
+
    ! build heat flux vectors
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
-            ICM = CELL_INDEX(MAX(I,1),J,K)
-            ICP = CELL_INDEX(MIN(I+1,IBAR),J,K)
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I+1,J,K)
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
+            ! At present OBST_INDEX_C is not defined for ghost cells.
+            ! This means that:
+            !    1. continuous material properties will be assumed at a mesh boundary
+            !    2. we assume that if either OBM%HT3D .OR. OBP%HT3D we should process the boundary
+            IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
 
-            !!! All this insanity is needed to compute a single number, K_S !!!
+            K_S_M = KP(I,J,K)
+            K_S_P = KP(I+1,J,K)
 
-            ! need to condense to make this loop readable
-
-            CONT_MATL_PROP=.FALSE.
-
-            IF (OBM%MATL_INDEX>0) THEN
-               MLM => MATERIAL(OBM%MATL_INDEX)
-               IF (MLM%K_S>0._EB) THEN
-                  K_S_M = MLM%K_S
-               ELSE
-                  NR = -NINT(MLM%K_S)
-                  K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
-               ENDIF
-               IF (OBM%MATL_INDEX==OBP%MATL_INDEX) CONT_MATL_PROP=.TRUE.
+            IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+               KDTDX(I,J,K) = 0._EB
+               CYCLE
             ENDIF
 
-            IF (OBP%MATL_INDEX>0) THEN
-               MLP => MATERIAL(OBP%MATL_INDEX)
-               IF (MLP%K_S>0._EB) THEN
-                  K_S_P = MLP%K_S
-               ELSE
-                  NR = -NINT(MLP%K_S)
-                  K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
-               ENDIF
+            ! determine if we have continuous material properties
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
             ENDIF
-
-            IF (OBM%MATL_SURF_INDEX>0) THEN
-               SF => SURFACE(OBM%MATL_SURF_INDEX)
-               K_S_M = 0._EB
-               VOLSUM = 0._EB
-               MATL_LOOP_X_M: DO N=1,SF%N_MATL
-                  IF (OBM%RHO(I,J,K,N)<=TWO_EPSILON_EB) CYCLE MATL_LOOP_X_M
-                  ML => MATERIAL(SF%MATL_INDEX(N))
-                  VOLSUM = VOLSUM + OBM%RHO(I,J,K,N)/ML%RHO_S
-                  IF (ML%K_S>0._EB) THEN
-                     K_S_M = K_S_M + OBM%RHO(I,J,K,N)*ML%K_S/ML%RHO_S
-                  ELSE
-                     NR = -NINT(ML%K_S)
-                     K_S_M = K_S_M + OBM%RHO(I,J,K,N)*EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)/ML%RHO_S
-                  ENDIF
-               ENDDO MATL_LOOP_X_M
-               IF (VOLSUM > 0._EB) THEN
-                  K_S_M = K_S_M/VOLSUM
-               ENDIF
-               IF (K_S_M<=TWO_EPSILON_EB) K_S_M = 10000._EB
-               IF (OBM%MATL_SURF_INDEX==OBP%MATL_SURF_INDEX) CONT_MATL_PROP=.TRUE.
-            ENDIF
-
-            IF (OBP%MATL_SURF_INDEX>0) THEN
-               SF => SURFACE(OBP%MATL_SURF_INDEX)
-               K_S_P = 0._EB
-               VOLSUM = 0._EB
-               MATL_LOOP_X_P: DO N=1,SF%N_MATL
-                  IF (OBP%RHO(I+1,J,K,N)<=TWO_EPSILON_EB) CYCLE MATL_LOOP_X_P
-                  ML => MATERIAL(SF%MATL_INDEX(N))
-                  VOLSUM = VOLSUM + OBP%RHO(I+1,J,K,N)/ML%RHO_S
-                  IF (ML%K_S>0._EB) THEN
-                     K_S_P = K_S_P + OBP%RHO(I+1,J,K,N)*ML%K_S/ML%RHO_S
-                  ELSE
-                     NR = -NINT(ML%K_S)
-                     K_S_P = K_S_P + OBP%RHO(I+1,J,K,N)*EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)/ML%RHO_S
-                  ENDIF
-               ENDDO MATL_LOOP_X_P
-               IF (VOLSUM > 0._EB) THEN
-                  K_S_P = K_S_P/VOLSUM
-               ENDIF
-               IF (K_S_P<=TWO_EPSILON_EB) K_S_P = 10000._EB
-            ENDIF
-
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             IF (CONT_MATL_PROP) THEN
                ! use linear average from inverse lever rule
@@ -707,7 +718,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
                K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
             ENDIF
-
          ENDDO
       ENDDO
    ENDDO
@@ -715,27 +725,33 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
-               ICM = CELL_INDEX(I,MAX(J,1),K)
-               ICP = CELL_INDEX(I,MIN(J+1,JBAR),K)
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J+1,K)
                IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
                OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
                OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-               IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-               MLM => MATERIAL(OBM%MATL_INDEX)
-               MLP => MATERIAL(OBP%MATL_INDEX)
-               IF (MLM%K_S>0._EB) THEN
-                  K_S_M = MLM%K_S
-               ELSE
-                  NR = -NINT(MLM%K_S)
-                  K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+               IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
+
+               K_S_M = KP(I,J,K)
+               K_S_P = KP(I,J+1,K)
+
+               IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+                  KDTDY(I,J,K) = 0._EB
+                  CYCLE
                ENDIF
-               IF (MLP%K_S>0._EB) THEN
-                  K_S_P = MLP%K_S
-               ELSE
-                  NR = -NINT(MLP%K_S)
-                  K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
+
+               CONT_MATL_PROP=.TRUE.
+               IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
                ENDIF
-               IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+
+               IF (CONT_MATL_PROP) THEN
                   K_S = ( K_S_M*DY(J+1) + K_S_P*DY(J) )/( DY(J) + DY(J+1) )
                   K_S_MAX = MAX(K_S_MAX,K_S)
                   KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
@@ -754,27 +770,33 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ICM = CELL_INDEX(I,J,MAX(K,1))
-            ICP = CELL_INDEX(I,J,MIN(K+1,KBAR))
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I,J,K+1)
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-            MLM => MATERIAL(OBM%MATL_INDEX)
-            MLP => MATERIAL(OBP%MATL_INDEX)
-            IF (MLM%K_S>0._EB) THEN
-               K_S_M = MLM%K_S
-            ELSE
-               NR = -NINT(MLM%K_S)
-               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
+
+            K_S_M = KP(I,J,K)
+            K_S_P = KP(I,J,K+1)
+
+            IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+               KDTDZ(I,J,K) = 0._EB
+               CYCLE
             ENDIF
-            IF (MLP%K_S>0._EB) THEN
-               K_S_P = MLP%K_S
-            ELSE
-               NR = -NINT(MLP%K_S)
-               K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
+
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
             ENDIF
-            IF (OBM%MATL_INDEX==OBP%MATL_INDEX) THEN
+
+            IF (CONT_MATL_PROP) THEN
                K_S = ( K_S_M*DZ(K+1) + K_S_P*DZ(K) )/( DZ(K) + DZ(K+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
                KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
@@ -808,11 +830,12 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE HT3D_WALL_LOOP
       ML => MATERIAL(OB%MATL_INDEX)
 
-      IF (ML%K_S>0._EB) THEN
-         K_S = ML%K_S
-      ELSE
-         NR = -NINT(ML%K_S)
-         K_S = EVALUATE_RAMP(WC%ONE_D%TMP_F,0._EB,NR)
+      IF (OB%MATL_INDEX>0) THEN
+         CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_MATL_INDEX=OB%MATL_INDEX)
+      ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+         SF => SURFACE(OB%MATL_SURF_INDEX)
+         RHO_GET(1:SF%N_MATL) = OB%RHO(II,JJ,KK,1:SF%N_MATL)
+         CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
       ENDIF
       K_S_MAX = MAX(K_S_MAX,K_S)
 
@@ -964,7 +987,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ENDDO HT3D_WALL_LOOP
 
-   ! Note: for 2D cylindrical KDTDX remains zero after initialization
+   ! Note: for 2D cylindrical KDTDX at X=0 remains zero after initialization
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -973,21 +996,21 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             IF (.NOT.SOLID(IC)) CYCLE
             OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
             ML => MATERIAL(OB%MATL_INDEX)
-            RHO_S = ML%RHO_S
-            IF (ML%C_S>0._EB) THEN
-               C_S = ML%C_S
-            ELSE
-               NR = -NINT(ML%C_S)
-               C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            IF (OB%MATL_INDEX>0) THEN
+               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OB%MATL_SURF_INDEX)
+               RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
+               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
             ENDIF
 
             IF (TWO_D) THEN
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDZ(K)**2) )
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2) )
             ELSE
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
             ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHOCBAR_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
                                                                  (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
                                                                  (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
