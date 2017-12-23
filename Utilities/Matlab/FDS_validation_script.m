@@ -31,16 +31,6 @@ addpath 'scripts'
 
 % Scripts that run prior to dataplot
 
-flame_height
-NIST_RSE
-sippola_aerosol_deposition
-layer_height
-NIST_NRC_Corner_Effects
-combine_csiro
-fm_datacenter_scatter
-LNG_Dispersion
-LNG_wind_profiles
-FM_Vertical_Wall_Flames
 
 % Dataplot and scatplot options
 
@@ -64,33 +54,18 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir);
-scatplot(saved_data, drange, ...
-         'Manuals_Dir', Manuals_Dir, ...
-         'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
-         'Stats_Output', Stats_Output, ...
-         'Output_File', Output_File, ...
-         'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'Histogram_Tex_Output', Histogram_Tex_Output, ...
-         'NRC_Options', NRC_Options, ...
-         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir,'Pool Fires');
+%scatplot(saved_data, drange, ...
+%         'Manuals_Dir', Manuals_Dir, ...
+%         'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
+%         'Stats_Output', Stats_Output, ...
+%         'Output_File', Output_File, ...
+%         'Statistics_Tex_Output', Statistics_Tex_Output, ...
+%         'Histogram_Tex_Output', Histogram_Tex_Output, ...
+%         'NRC_Options', NRC_Options, ...
+%         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
 % Miscellaneous other scripts for special cases
 
-backward_facing_step
-beyler_hood
-sandia_helium_plume
-sandia_methane_fire
-spray_attenuation
-Cup_burner
-flame_height2
-purdue_flames
-christifire
-pressure_coefficient
-VTT_Sprays
-fm_datacenter_veltest
-umd_line_burner_3
-% waterloo_methanol
-mccaffrey_plume
 
 display('validation scripts completed successfully!')

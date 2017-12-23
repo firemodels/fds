@@ -17,7 +17,7 @@ $QFDS $DEBUG -p 16 $QUEUE -d $INDIR Waterloo_Methanol_Predicted_0p5cm.fds
 $QFDS $DEBUG -p 64 $QUEUE -d $INDIR Waterloo_Methanol_Prescribed_0p25cm.fds
 $QFDS $DEBUG -p 64 $QUEUE -d $INDIR Waterloo_Methanol_Predicted_0p25cm.fds
 
-#$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR Waterloo_Methanol_Prescribed_0p125cm.fds
-#$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR Waterloo_Methanol_Predicted_0p125cm.fds
+$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR Waterloo_Methanol_Prescribed_0p125cm.fds
+$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR Waterloo_Methanol_Predicted_0p125cm.fds
 
 echo FDS cases submitted
