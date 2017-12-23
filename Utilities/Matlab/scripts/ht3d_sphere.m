@@ -83,7 +83,7 @@ end
 
 ddir = '../../Verification/Heat_Transfer/';
 fnt = {'ht3d_sphere_75'};
-fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_75'};
+fileName = {'ht3d_sphere_25','ht3d_sphere_51'}; %,'ht3d_sphere_75'};
 nc_array = {25,51,75};
 dx_array = {0.25/25,0.25/51,0.25/75};
 
