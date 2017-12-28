@@ -1,0 +1,36 @@
+! This case is only for demo and testing purposes at this time.
+
+&HEAD CHID='ht3d_A_B', TITLE='Test of HT3D pyrolysis, specifying MATL props with SURF'/
+
+&MESH IJK=10,10,10, XB=0,1,0,1,0,1/
+
+&TIME T_END=3600/
+
+&MISC SOLID_PHASE_ONLY=T/
+
+&MATL ID='A'
+      CONDUCTIVITY=1.0
+      SPECIFIC_HEAT=1.0
+      DENSITY=100.
+      EMISSIVITY=1/
+
+&MATL ID='B'
+      CONDUCTIVITY=0.5
+      SPECIFIC_HEAT=0.5
+      DENSITY=50.
+      EMISSIVITY=0.5/
+
+&SURF ID='side', ADIABATIC=T, COLOR='GRAY'/
+
+&SURF ID='s1', HT3D=T, EXTERNAL_FLUX=1000, COLOR='RED', TRANSPARENCY=0.1,
+      MATL_ID(1,1:2) = 'A','B'
+      MATL_MASS_FRACTION(1,1:2) = 0.5, 0.5/
+
+&SURF ID='s2', HT3D=T, EXTERNAL_FLUX=1000, COLOR='RED', TRANSPARENCY=0.1/
+
+&OBST XB=0.2,0.8,0.2,0.8,0.2,0.8, HT3D=T, MATL_ID='A', SURF_IDS='s2','side','side', TRANSPARENCY=0.1/
+
+&SLCF PBY=0.45, QUANTITY='TEMPERATURE', CELL_CENTERED=T/
+
+&TAIL/
+
