@@ -1,3 +1,5 @@
+! This case is only for demo and testing purposes at this time.
+
 &HEAD CHID='ht3d_A_B', TITLE='Test of HT3D pyrolysis, specifying MATL props with SURF'/
 
 &MESH IJK=10,10,10, XB=0,1,0,1,0,1/
