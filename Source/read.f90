@@ -7906,11 +7906,11 @@ CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE
+            INTERNAL_HEAT_SOURCE,XYZ(3),RADIUS,DIST_SQUARED
 LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
                 COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HT3D,ID,INTERNAL_HEAT_SOURCE,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
-                OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,REMOVABLE,RGB,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
+                OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,RADIUS,REMOVABLE,RGB,XYZ,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
                 TRANSPARENCY,XB
 
 MESH_LOOP: DO NM=1,NMESHES
@@ -7999,6 +7999,8 @@ MESH_LOOP: DO NM=1,NMESHES
       ALLOW_VENT  = .TRUE.
       REMOVABLE   = .TRUE.
       XB          = -9.E30_EB
+      XYZ         = 0._EB
+      RADIUS      = -1._EB
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE  = .FALSE.
@@ -8007,11 +8009,11 @@ MESH_LOOP: DO NM=1,NMESHES
 
       EVACUATION_OBST = .FALSE.
       IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_OBSTS(NM,2,EVAC_N)
-      EVACUATION_OBSTS: IF (.NOT. EVACUATION_OBST) THEN
+      IF (.NOT. EVACUATION_OBST) THEN
          CALL CHECKREAD('OBST',LU_INPUT,IOS)
          IF (IOS==1) EXIT READ_OBST_LOOP
          READ(LU_INPUT,OBST,END=35)
-      END IF EVACUATION_OBSTS
+      ENDIF
 
       ! Reorder OBST coordinates if necessary
 
@@ -8020,10 +8022,10 @@ MESH_LOOP: DO NM=1,NMESHES
       ! No device and controls for evacuation obstructions
 
       IF (EVACUATION_ONLY(NM)) THEN
-         DEVC_ID    = 'null'
-         CTRL_ID    = 'null'
-         PROP_ID    = 'null'
-      END IF
+         DEVC_ID = 'null'
+         CTRL_ID = 'null'
+         PROP_ID = 'null'
+      ENDIF
 
       ! Loop over all possible multiples of the OBST
 
@@ -8125,6 +8127,38 @@ MESH_LOOP: DO NM=1,NMESHES
                   N = N-1
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
+               ENDIF
+
+               ! Throw out obstructions that are outside sphere radius
+
+               IF (RADIUS>0._EB) THEN
+                  ! Algorithm from Schneider and Eberly, p. 644
+                  ! Intersection of Sphere and Axis-Aligned Bounding Box
+
+                  ! Compute distance in each direction, summing as we go
+                  DIST_SQUARED = 0._EB
+                  IF (XYZ(1)<XB1) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(1)-XB1)**2
+                  ELSEIF (XYZ(1)>XB2) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(1)-XB2)**2
+                  ENDIF
+                  IF (XYZ(2)<XB3) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(2)-XB3)**2
+                  ELSEIF (XYZ(2)>XB4) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(2)-XB4)**2
+                  ENDIF
+                  IF (XYZ(3)<XB5) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(3)-XB5)**2
+                  ELSEIF (XYZ(3)>XB6) THEN
+                     DIST_SQUARED = DIST_SQUARED + (XYZ(3)-XB6)**2
+                  ENDIF
+
+                  ! Compare squared distance to radius squared
+                  IF (DIST_SQUARED > RADIUS*RADIUS) THEN
+                     N = N-1
+                     N_OBST = N_OBST-1
+                     CYCLE I_MULT_LOOP
+                  ENDIF
                ENDIF
 
                ! Begin processing of OBSTruction
