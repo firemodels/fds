@@ -8154,7 +8154,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDIF
 
                   ! Compare squared distance to radius squared
-                  IF (DIST_SQUARED > RADIUS*RADIUS) THEN
+                  IF (DIST_SQUARED > (RADIUS*RADIUS-TWO_EPSILON_EB)) THEN
                      N = N-1
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
