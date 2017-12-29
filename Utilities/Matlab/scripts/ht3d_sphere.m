@@ -82,8 +82,8 @@ end
 %% gather FDS results
 
 ddir = '../../Verification/Heat_Transfer/';
-fnt = {'ht3d_sphere_75'};
-fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_75'};
+fnt = {'ht3d_sphere_100'};
+fileName = {'ht3d_sphere_25','ht3d_sphere_50','ht3d_sphere_100'};
 nc_array = {25,51,75};
 dx_array = {0.25/25,0.25/51,0.25/75};
 
@@ -113,7 +113,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_75_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_100_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
@@ -161,7 +161,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_75_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_100_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
@@ -192,7 +192,7 @@ ylabel('L2 error (\circC)')
 lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-Git_Filename = [ddir,'ht3d_sphere_75_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_100_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
