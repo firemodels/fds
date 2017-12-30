@@ -84,8 +84,8 @@ end
 ddir = '../../Verification/Heat_Transfer/';
 fnt = {'ht3d_sphere_100'};
 fileName = {'ht3d_sphere_25','ht3d_sphere_50','ht3d_sphere_100'};
-nc_array = {25,51,75};
-dx_array = {0.25/25,0.25/51,0.25/75};
+nc_array = {25,50,100};
+dx_array = {0.25/25,0.25/50,0.25/100};
 
 M = importdata([ddir,fnt{1},'_devc.csv'],',',2);
 T_fds1 = M.data(2,2:end);
