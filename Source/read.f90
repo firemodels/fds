@@ -7900,7 +7900,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N,MULT_INDEX
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
@@ -7936,20 +7936,50 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (IOS==1) EXIT COUNT_OBST_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=OBST,END=1,ERR=2,IOSTAT=IOS)
+      MULT_INDEX = -1
       N_OBST_NEW = 0
       IF (MULT_ID=='null') THEN
-         N_OBST_NEW = 1
+         MULT_INDEX = 0
       ELSE
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
-            IF (MULT_ID==MR%ID) N_OBST_NEW = MR%N_COPIES
+            IF (MULT_ID==MR%ID) THEN
+               MULT_INDEX = N
+            ENDIF
          ENDDO
-         IF (N_OBST_NEW==0) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1,&
-                                             ', line number',INPUT_FILE_LINE_NUMBER
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
       ENDIF
+      IF (MULT_INDEX==-1) THEN
+         WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1,&
+                                          ', line number',INPUT_FILE_LINE_NUMBER
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+      N_OBST_NEW = 0
+      MR => MULTIPLIER(MULT_INDEX)
+      K_MULT_LOOP2: DO KK=MR%K_LOWER,MR%K_UPPER
+         J_MULT_LOOP2: DO JJ=MR%J_LOWER,MR%J_UPPER
+            I_MULT_LOOP2: DO II=MR%I_LOWER,MR%I_UPPER
+               IF (.NOT.MR%SEQUENTIAL) THEN
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
+               ELSE
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + II*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + II*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
+               ENDIF
+               IF (XB1>M%XF+M%DX(IBAR) .OR. XB2<M%XS-M%DX(1) .OR. &
+                   XB3>M%YF+M%DY(JBAR) .OR. XB4<M%YS-M%DY(1) .OR. &
+                   XB5>M%ZF+M%DZ(KBAR) .OR. XB6<M%ZS-M%DZ(1)) CYCLE I_MULT_LOOP2
+               N_OBST_NEW = N_OBST_NEW + 1
+            ENDDO I_MULT_LOOP2
+         ENDDO J_MULT_LOOP2
+      ENDDO K_MULT_LOOP2
       N_OBST = N_OBST + N_OBST_NEW
       2 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with OBST number',N_OBST+1,', line number',INPUT_FILE_LINE_NUMBER
