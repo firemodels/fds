@@ -8092,15 +8092,15 @@ MESH_LOOP: DO NM=1,NMESHES
 
                EVAC_N = EVAC_N + 1
                IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
-                     N = N-1
-                     N_OBST = N_OBST-1
-                     CYCLE I_MULT_LOOP
+                  N = N-1
+                  N_OBST = N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
-                     N = N-1
-                     N_OBST = N_OBST-1
-                     CYCLE I_MULT_LOOP
+                  N = N-1
+                  N_OBST = N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                ! Look for obstructions that are within a half grid cell of the current mesh. If the obstruction is thin and has the
@@ -8287,10 +8287,10 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDIF
                ENDDO EMBED_LOOP
 
-               IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
-                     N = N-1
-                     N_OBST= N_OBST-1
-                     CYCLE I_MULT_LOOP
+               IF (EMBEDDED .AND. DEVC_ID=='null' .AND. REMOVABLE .AND. CTRL_ID=='null' ) THEN
+                  N = N-1
+                  N_OBST= N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                ! Check if the SURF IDs exist
@@ -8361,7 +8361,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                VOL_SPECIFIED = (OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
                VOL_ADJUSTED  = (X(OB%I2)-X(OB%I1))*(Y(OB%J2)-Y(OB%J1))*(Z(OB%K2)-Z(OB%K1))
-               IF (VOL_SPECIFIED>0._EB .AND..NOT.EVACUATION_ONLY(NM)) THEN
+               IF (VOL_SPECIFIED>0._EB .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   OB%VOLUME_ADJUST = VOL_ADJUSTED/VOL_SPECIFIED
                ELSE
                   OB%VOLUME_ADJUST = 0._EB
@@ -8438,7 +8438,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   SOLID_HT3D = .TRUE. ! global parameter
 
                   IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                     WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
+                     WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
+                        ' has zero volume, consider THICKEN=T, HT3D set to F.'
                      OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
                   ENDIF
 
