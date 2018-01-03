@@ -7897,6 +7897,7 @@ END SUBROUTINE READ_TABL
 SUBROUTINE READ_OBST
 
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
+USE COMPLEX_GEOMETRY, ONLY: INTERSECT_SPHERE_AABB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
@@ -7906,7 +7907,7 @@ CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE,XYZ(3),RADIUS,DIST_SQUARED
+            INTERNAL_HEAT_SOURCE,XYZ(3),RADIUS,XB_LOC(6)
 LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
                 COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HT3D,ID,INTERNAL_HEAT_SOURCE,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
@@ -8161,29 +8162,8 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Throw out obstructions that are outside sphere radius
 
                IF (RADIUS>0._EB) THEN
-                  ! Algorithm from Schneider and Eberly, p. 644
-                  ! Intersection of Sphere and Axis-Aligned Bounding Box
-
-                  ! Compute distance in each direction, summing as we go
-                  DIST_SQUARED = 0._EB
-                  IF (XYZ(1)<XB1) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(1)-XB1)**2
-                  ELSEIF (XYZ(1)>XB2) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(1)-XB2)**2
-                  ENDIF
-                  IF (XYZ(2)<XB3) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(2)-XB3)**2
-                  ELSEIF (XYZ(2)>XB4) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(2)-XB4)**2
-                  ENDIF
-                  IF (XYZ(3)<XB5) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(3)-XB5)**2
-                  ELSEIF (XYZ(3)>XB6) THEN
-                     DIST_SQUARED = DIST_SQUARED + (XYZ(3)-XB6)**2
-                  ENDIF
-
-                  ! Compare squared distance to radius squared
-                  IF (DIST_SQUARED > (RADIUS*RADIUS-TWO_EPSILON_EB)) THEN
+                  XB_LOC = (/XB1,XB2,XB3,XB4,XB5,XB6/)
+                  IF (.NOT.INTERSECT_SPHERE_AABB(XYZ,RADIUS,XB_LOC)) THEN
                      N = N-1
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
