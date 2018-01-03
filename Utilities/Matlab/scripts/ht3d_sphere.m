@@ -24,8 +24,8 @@ a2   = 0.1; % m
 a3   = 0.1; % m
 
 n1 = 32;
-n2 = 22;
-n3 = 12;
+n2 = 20;
+n3 = 11;
 r1 = linspace(0,a1,n1);
 r2 = linspace(0,a2,n2);
 r3 = linspace(0,a3,n3);
