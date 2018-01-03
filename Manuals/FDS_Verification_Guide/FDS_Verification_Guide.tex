@@ -3583,6 +3583,7 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \label{adiabatic_flux}
 \end{figure}
 
+\newpage
 
 \section{Solid Heat Transfer 3D (Beta)}
 \label{sec:ht3d}
@@ -3694,8 +3695,8 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 
 \subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
 \label{sec:ht3d_sphere}
-\label{ht3d_sphere_75}
-\label{ht3d_sphere_51}
+\label{ht3d_sphere_100}
+\label{ht3d_sphere_50}
 \label{ht3d_sphere_25}
 
 \textbf{Salah Benkorichi, Ulster University}\\
@@ -3716,27 +3717,20 @@ where $T_0$ is the initial temperature and $a=$ is the radius of the sphere. The
 T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
 \end{equation}
 
-The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case\footnote{The reason for displaying the medium resolution image is that the high resolution case is run with multiple meshes and the overlap of the slice files shows mesh artifacts.} (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
+The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the $L_\infty$ error as a function of cell size.
 
 \begin{figure}[ht]
 \centering
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
- & \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_50_165}
-\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}  \\
-\end{tabular*}
-
-\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s for $n=50$ cells across diameter. (Right) A comparison between the analytical and numerical solution for $n=100$ cells across diameter.}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_50_165}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}
+\caption[The \textct{ht3d\_sphere} profiles]{(Left) Temperature contours at $t = 165$ s for $n=50$ cells across diameter. (Right) A comparison between radial profiles of the analytical and numerical solution at various times in the simulation.}
 \label{fig:ht3d_sphere_time}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
- & \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
-\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2}  \\
-\end{tabular*}
-
-\caption[The \textct{ht3d\_sphere} test cases]{L1 (left) and L2 (right) norm errors in temperature for the convergence study with different cell numbers [75, 51, 25] from left to right. The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
+\caption[The \textct{ht3d\_sphere} convergence]{$L_{\infty}$ error in sphere temperature at $t=180$ s with different cell numbers [100, 50, 25] from left to right.}
 \label{fig:ht3d_sphere_conv}
 \end{figure}
 
