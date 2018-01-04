@@ -30,9 +30,9 @@ REAL(EB) :: MW_MIN,MW_MAX
 REAL(EB) :: REAC_ATOM_ERROR,REAC_MASS_ERROR,HUMIDITY=-1._EB
 INTEGER  :: I,J,K,IZERO,IOS,N_INIT_RESERVED,MAX_LEAK_PATHS,I_DUM(10)
 INTEGER :: FUEL_SMIX_INDEX ! Simple chemistry fuel index
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
+TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
@@ -4489,7 +4489,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       MINIMUM_DIAMETER                  = 0.005_EB*DIAMETER
    ENDIF
    LPC%MINIMUM_DIAMETER                 = MINIMUM_DIAMETER*1.E-6_EB
-   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.171_EB ! 0.171 ???
+   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.005**ONTH ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
    LPC%PERIODIC_Y                       = PERIODIC_Y
@@ -6008,6 +6008,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (RADIUS>0._EB) THICKNESS(1) = RADIUS
 
+   ! If HT3D set THICKNESS(1) to null value to pass error traps
+
+   IF (HT3D) THICKNESS(1) = 1._EB
+
    ! Check SURF parameters for potential problems
 
    LAYER_LOOP: DO IL=1,MAX_LAYERS
@@ -6855,24 +6859,24 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    SF%INTERNAL_RADIATION = .FALSE.
    DO NL=1,SF%N_LAYERS
-   DO NN =1,SF%N_LAYER_MATL(NL)
-      ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-      IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
-   ENDDO
+      DO NN =1,SF%N_LAYER_MATL(NL)
+         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+         IF (ML%KAPPA_S<5.0E4_EB) SF%INTERNAL_RADIATION = .TRUE.
+      ENDDO
    ENDDO
 
    ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
       DO NL=1,SF%N_LAYERS
-      DO NN =1,SF%N_LAYER_MATL(NL)
-         ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
-         IF (ML%EMISSIVITY == 0._EB) THEN
-            WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
-            ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-      ENDDO
+         DO NN =1,SF%N_LAYER_MATL(NL)
+            ML => MATERIAL(SF%LAYER_MATL_INDEX(NL,NN))
+            IF (ML%EMISSIVITY == 0._EB) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: Zero emissivity of MATL '//TRIM(MATL_NAME(SF%LAYER_MATL_INDEX(NL,NN)))// &
+               ' is inconsistent with internal radiation in SURF '//TRIM(SF%ID)//'.'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+         ENDDO
       ENDDO
    ENDIF
 
@@ -7329,7 +7333,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC
                 SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, &
                 SCARC_SMOOTH_ITERATIONS, SCARC_SMOOTH_ACCURACY, SCARC_SMOOTH_OMEGA, &
                 SCARC_PRECON_ITERATIONS, SCARC_PRECON_ACCURACY, SCARC_PRECON_OMEGA, &
-                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, SCARC_FFT, SCARC_TWOLEVEL
+                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, SCARC_FFT
 
 CHARACTER(60) :: SOLVER='FFT'
 
@@ -7342,7 +7346,7 @@ NAMELIST /PRES/ CHECK_POISSON,FISHPAK_BC,ITERATION_SUSPEND_FACTOR,LAPLACE_PRESSU
                 SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, &
                 SCARC_SMOOTH_ITERATIONS, SCARC_SMOOTH_ACCURACY, SCARC_SMOOTH_OMEGA, &
                 SCARC_PRECON_ITERATIONS, SCARC_PRECON_ACCURACY, SCARC_PRECON_OMEGA, &
-                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, SCARC_FFT, SCARC_TWOLEVEL, &
+                SCARC_COARSE_ITERATIONS, SCARC_COARSE_ACCURACY, SCARC_FFT, &
                 SOLVER,SUSPEND_PRESSURE_ITERATIONS,VELOCITY_TOLERANCE
 
 ! Read the single PRES line
@@ -7363,7 +7367,7 @@ ENDDO READ_LOOP
 SELECT CASE(TRIM(SOLVER))
    CASE('SCARC')
       PRES_METHOD = 'SCARC'
-      ITERATE_PRESSURE = .TRUE.
+      ITERATE_PRESSURE = .FALSE.
       IF (SCARC_METHOD == 'null') SCARC_METHOD = 'KRYLOV' ! Taken as default for SCARC when SOLVER is SCARC and
                                                           ! SCARC_METHOD is not defined.
    CASE('GLMAT')
@@ -7893,54 +7897,92 @@ END SUBROUTINE READ_TABL
 SUBROUTINE READ_OBST
 
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
+USE COMPLEX_GEOMETRY, ONLY: INTERSECT_SPHERE_AABB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK,EVAC_N
+INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,EVAC_N,MULT_INDEX
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
-LOGICAL :: EVACUATION_OBST,OVERLAY
+LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE
+            INTERNAL_HEAT_SOURCE,XYZ(3),RADIUS,XB_LOC(6)
 LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
                 COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HT3D,ID,INTERNAL_HEAT_SOURCE,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
-                OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,REMOVABLE,RGB,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
+                OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,RADIUS,REMOVABLE,RGB,XYZ,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
                 TRANSPARENCY,XB
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF (PROCESS(NM)/=MYID .AND. MYID/=EVAC_PROCESS) CYCLE MESH_LOOP
+   M => MESHES(NM)
 
-   M=>MESHES(NM)
+   PROCESS_OBSTS = .FALSE.
+   DO N=1,M%N_NEIGHBORING_MESHES
+      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
+   ENDDO
+   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
+
+   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP
+
    CALL POINT_TO_MESH(NM)
+
    ! Count OBST lines
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-   N_OBST = 0
+   N_OBST_DIM = 0  ! Dimension of MESHES(NM)%OBSTRUCTION
+   N_OBST_O   = 0  ! Number of "Original" obstructions; that is, obstructions in the input file
    COUNT_OBST_LOOP: DO
       CALL CHECKREAD('OBST',LU_INPUT,IOS)
       IF (IOS==1) EXIT COUNT_OBST_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=OBST,END=1,ERR=2,IOSTAT=IOS)
-      N_OBST_NEW = 0
+      MULT_INDEX = -1
       IF (MULT_ID=='null') THEN
-         N_OBST_NEW = 1
+         MULT_INDEX = 0
       ELSE
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
-            IF (MULT_ID==MR%ID) N_OBST_NEW = MR%N_COPIES
+            IF (MULT_ID==MR%ID) THEN
+               MULT_INDEX = N
+            ENDIF
          ENDDO
-         IF (N_OBST_NEW==0) THEN
-            WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1,&
-                                             ', line number',INPUT_FILE_LINE_NUMBER
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
       ENDIF
-      N_OBST = N_OBST + N_OBST_NEW
+      IF (MULT_INDEX==-1) THEN
+         WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST_O+1,&
+                                          ', line number',INPUT_FILE_LINE_NUMBER
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+      MR => MULTIPLIER(MULT_INDEX)
+      K_MULT_LOOP2: DO KK=MR%K_LOWER,MR%K_UPPER
+         J_MULT_LOOP2: DO JJ=MR%J_LOWER,MR%J_UPPER
+            I_MULT_LOOP2: DO II=MR%I_LOWER,MR%I_UPPER
+               IF (.NOT.MR%SEQUENTIAL) THEN
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
+               ELSE
+                  XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  XB3 = XB(3) + MR%DY0 + II*MR%DXB(3)
+                  XB4 = XB(4) + MR%DY0 + II*MR%DXB(4)
+                  XB5 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+                  XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
+               ENDIF
+               N_OBST_O = N_OBST_O + 1
+               IF (XB1>M%XF+M%DX(IBAR) .OR. XB2<M%XS-M%DX(1) .OR. &
+                   XB3>M%YF+M%DY(JBAR) .OR. XB4<M%YS-M%DY(1) .OR. &
+                   XB5>M%ZF+M%DZ(KBAR) .OR. XB6<M%ZS-M%DZ(1)) CYCLE I_MULT_LOOP2
+               N_OBST_DIM = N_OBST_DIM + 1
+            ENDDO I_MULT_LOOP2
+         ENDDO J_MULT_LOOP2
+      ENDDO K_MULT_LOOP2
       2 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with OBST number',N_OBST+1,', line number',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with OBST number',N_OBST_O+1,', line number',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO COUNT_OBST_LOOP
@@ -7950,18 +7992,18 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Allocate OBSTRUCTION array
 
-   ALLOCATE(M%OBSTRUCTION(0:N_OBST),STAT=IZERO)
+   ALLOCATE(M%OBSTRUCTION(0:N_OBST_DIM),STAT=IZERO)
    CALL ChkMemErr('READ','OBSTRUCTION',IZERO)
    OBSTRUCTION=>M%OBSTRUCTION
 
    N        = 0
-   N_OBST_O = N_OBST
+   N_OBST   = N_OBST_O
    EVAC_N   = 1
 
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
       ID       = 'null'
-      MATL_ID  = 'null' ! for HT3D only
+      MATL_ID  = 'null'
       MULT_ID  = 'null'
       PROP_ID  = 'null'
       SURF_ID  = 'null'
@@ -7972,7 +8014,7 @@ MESH_LOOP: DO NM=1,NMESHES
       RGB         = -1
       BULK_DENSITY= -1._EB
       HT3D        = .FALSE.
-      INTERNAL_HEAT_SOURCE = 0._EB  ! for HT3D only
+      INTERNAL_HEAT_SOURCE = 0._EB
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
       BNDF_OBST   = BNDF_DEFAULT
@@ -7987,6 +8029,8 @@ MESH_LOOP: DO NM=1,NMESHES
       ALLOW_VENT  = .TRUE.
       REMOVABLE   = .TRUE.
       XB          = -9.E30_EB
+      XYZ         = 0._EB
+      RADIUS      = -1._EB
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE  = .FALSE.
@@ -7995,27 +8039,23 @@ MESH_LOOP: DO NM=1,NMESHES
 
       EVACUATION_OBST = .FALSE.
       IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_OBSTS(NM,2,EVAC_N)
-      EVACUATION_OBSTS: IF (.NOT. EVACUATION_OBST) THEN
+      IF (.NOT. EVACUATION_OBST) THEN
          CALL CHECKREAD('OBST',LU_INPUT,IOS)
          IF (IOS==1) EXIT READ_OBST_LOOP
          READ(LU_INPUT,OBST,END=35)
-      END IF EVACUATION_OBSTS
+      ENDIF
 
       ! Reorder OBST coordinates if necessary
 
       CALL CHECK_XB(XB)
 
-      ! If any obstruction is to do 3D heat transfer (HT3D), set a global parameter
-
-      IF (HT3D) SOLID_HT3D = .TRUE.
-
       ! No device and controls for evacuation obstructions
 
       IF (EVACUATION_ONLY(NM)) THEN
-         DEVC_ID    = 'null'
-         CTRL_ID    = 'null'
-         PROP_ID    = 'null'
-      END IF
+         DEVC_ID = 'null'
+         CTRL_ID = 'null'
+         PROP_ID = 'null'
+      ENDIF
 
       ! Loop over all possible multiples of the OBST
 
@@ -8052,15 +8092,15 @@ MESH_LOOP: DO NM=1,NMESHES
 
                EVAC_N = EVAC_N + 1
                IF (MESH_ID/=MESH_NAME(NM) .AND. MESH_ID/='null') THEN
-                     N = N-1
-                     N_OBST = N_OBST-1
-                     CYCLE I_MULT_LOOP
+                  N = N-1
+                  N_OBST = N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) THEN
-                     N = N-1
-                     N_OBST = N_OBST-1
-                     CYCLE I_MULT_LOOP
+                  N = N-1
+                  N_OBST = N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                ! Look for obstructions that are within a half grid cell of the current mesh. If the obstruction is thin and has the
@@ -8117,6 +8157,17 @@ MESH_LOOP: DO NM=1,NMESHES
                   N = N-1
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
+               ENDIF
+
+               ! Throw out obstructions that are outside sphere radius
+
+               IF (RADIUS>0._EB) THEN
+                  XB_LOC = (/XB1,XB2,XB3,XB4,XB5,XB6/)
+                  IF (.NOT.INTERSECT_SPHERE_AABB(XYZ,RADIUS,XB_LOC)) THEN
+                     N = N-1
+                     N_OBST = N_OBST-1
+                     CYCLE I_MULT_LOOP
+                  ENDIF
                ENDIF
 
                ! Begin processing of OBSTruction
@@ -8215,10 +8266,10 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDIF
                ENDDO EMBED_LOOP
 
-               IF (EMBEDDED  .AND. DEVC_ID=='null' .AND.  REMOVABLE .AND. CTRL_ID=='null' ) THEN
-                     N = N-1
-                     N_OBST= N_OBST-1
-                     CYCLE I_MULT_LOOP
+               IF (EMBEDDED .AND. DEVC_ID=='null' .AND. REMOVABLE .AND. CTRL_ID=='null' ) THEN
+                  N = N-1
+                  N_OBST= N_OBST-1
+                  CYCLE I_MULT_LOOP
                ENDIF
 
                ! Check if the SURF IDs exist
@@ -8289,7 +8340,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                VOL_SPECIFIED = (OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
                VOL_ADJUSTED  = (X(OB%I2)-X(OB%I1))*(Y(OB%J2)-Y(OB%J1))*(Z(OB%K2)-Z(OB%K1))
-               IF (VOL_SPECIFIED>0._EB .AND..NOT.EVACUATION_ONLY(NM)) THEN
+               IF (VOL_SPECIFIED>0._EB .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   OB%VOLUME_ADJUST = VOL_ADJUSTED/VOL_SPECIFIED
                ELSE
                   OB%VOLUME_ADJUST = 0._EB
@@ -8357,35 +8408,101 @@ MESH_LOOP: DO NM=1,NMESHES
                ! No HT3D for EVAC or zero volume OBST
 
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
-               OB%HT3D = HT3D
-               IF (OB%HT3D .AND. ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                  WRITE(LU_ERR,'(A,I0,A)') 'WARNING: OBST number ',NN,' has zero volume, consider THICKEN=T, HT3D set to F.'
-                  OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
-               ENDIF
 
-               IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', HT3D requires MATL_ID.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+               ! 3D Solid heat transfer and pyrolysis
 
-               ! Set MATL_INDEX for HT3D
+               HT3D_IF: IF (HT3D) THEN
 
-               IF (OB%HT3D) THEN
+                  OB%HT3D = HT3D
+                  SOLID_HT3D = .TRUE. ! global parameter
+
+                  IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                     WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
+                        ' has zero volume, consider THICKEN=T, HT3D set to F.'
+                     OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                  ENDIF
+
+                  ! Set MATL_ID for HT3D
+
                   OB%MATL_ID = MATL_ID
                   DO NNN=1,N_MATL
                      ML=>MATERIAL(NNN)
                      IF (TRIM(OB%MATL_ID)==TRIM(ML%ID)) THEN
                         OB%MATL_INDEX=NNN
-                        OB%BULK_DENSITY=ML%RHO_S
+                        IF (ABS(OB%VOLUME_ADJUST)>TWO_EPSILON_EB) OB%BULK_DENSITY=ML%RHO_S
                         EXIT
                      ENDIF
                   ENDDO
-                  IF (OB%MATL_INDEX<0) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', MATL_ID not found.'
+
+                  OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
+
+                     !!! this is under construction
+                     WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
                      CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
+                     !!!
+
+                     ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           OB%MATL_SURF_INDEX = OB%SURF_INDEX(NNN)
+                           EXIT
+                        ENDIF
+                     ENDDO
+
+                     ! MATL_ID not found on OBST or SURF lines
+
+                     IF (OB%MATL_SURF_INDEX==-1) THEN
+                        WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     SF => SURFACE(OB%MATL_SURF_INDEX)
+
+                     ! SURF associated with HT3D may have only 1 layer
+
+                     IF (SF%N_LAYERS/=1) THEN
+                        WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                           TRIM(SF%ID),"', N_LAYERS must be 1 for HT3D SURF."
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ENDIF
+
+                     ! Emissivities for SURF with MATL_IDs set in READ_SURF
+
+                     ! Allocate and initialize MATL densities in OBST for 3D pyrolysis
+
+                     ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
+                     CALL ChkMemErr('READ_OBST','RHO',IZERO)
+                     DO NNN=1,SF%N_MATL
+                        ML=>MATERIAL(SF%MATL_INDEX(NNN))
+                        OB%RHO(:,:,:,NNN) = ML%RHO_S
+                     ENDDO
+
+                  ELSE OBST_MATL_IF
+
+                     ! Don't allow both OBST and SURF with MATL_IDs
+
+                     DO NNN=-3,3
+                        IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
+                           WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
+                              TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
+                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                        ENDIF
+                     ENDDO
+
+                     ! Set SURF emissivities to MATL emissivity
+
+                     DO NNN=-3,3
+                        SURFACE(OB%SURF_INDEX(NNN))%EMISSIVITY = MATERIAL(OB%MATL_INDEX)%EMISSIVITY
+                     ENDDO
+
+                  ENDIF OBST_MATL_IF
+
+                  ! Volumetric heat source term
+
                   OB%INTERNAL_HEAT_SOURCE = INTERNAL_HEAT_SOURCE * 1000._EB ! W/m^3
-               ENDIF
+
+               ENDIF HT3D_IF
 
                ! Make obstruction invisible if it's within a finer mesh
 
@@ -8429,9 +8546,16 @@ CALL READ_HOLE
 
 MESH_LOOP_2: DO NM=1,NMESHES
 
-   IF (PROCESS(NM)/=MYID .AND. MYID/=EVAC_PROCESS) CYCLE MESH_LOOP_2
+   M => MESHES(NM)
 
-   M=>MESHES(NM)
+   PROCESS_OBSTS = .FALSE.
+   DO N=1,M%N_NEIGHBORING_MESHES
+      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
+   ENDDO
+   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
+
+   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP_2
+
    CALL POINT_TO_MESH(NM)
 
    N_OBST_O = N_OBST
@@ -8489,9 +8613,16 @@ ALLOCATE(CELL_COUNT(NMESHES)) ; CELL_COUNT = 0
 
 MESH_LOOP_3: DO NM=1,NMESHES
 
-   IF (PROCESS(NM)/=MYID .AND. MYID/=EVAC_PROCESS) CYCLE MESH_LOOP_3
+   M => MESHES(NM)
 
-   M=>MESHES(NM)
+   PROCESS_OBSTS = .FALSE.
+   DO N=1,M%N_NEIGHBORING_MESHES
+      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
+   ENDDO
+   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
+
+   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP_3
+
    CALL POINT_TO_MESH(NM)
 
    ! Compute areas of obstruction faces, both actual (AB0) and FDS approximated (AB)
