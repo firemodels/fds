@@ -39,6 +39,7 @@ PROCESS Arup_Tunnel
 PROCESS ATF_Corridors
 PROCESS Backward_Facing_Step
 PROCESS Beyler_Hood
+PROCESS Bittern_Sprinkler_Experiments
 PROCESS Bouchair_Solar_Chimney
 PROCESS BRE_Spray
 PROCESS Bryant_Doorway

@@ -175,7 +175,7 @@ where $\rho_{\rm s}$ is the density of the composite material and $Y_\alpha$ is 
 \ee
 and the volume fraction of component $\alpha$ is computed as
 \be
-  X_\alpha = \frac{\rho_{\rm s,\alpha}}{\rho_\alpha}  \left/ \sum_{\alpha'=1}^{N_{\rm m}}\frac{\rho_{\rm s,\alpha'}}{\rho_{\alpha'} }  \right.
+  X_\alpha = \frac{\rho_{\rm s,\alpha}}{\rho_\alpha}  \left/ \sum_{\beta=1}^{N_{\rm m}}\frac{\rho_{\rm s,\beta}}{\rho_{\beta} }  \right.
   \label{volfrac}
 \ee
 where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
@@ -198,27 +198,27 @@ Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume sche
 \label{eq:interface_tmp}
 T_{{\rm s},i+\frac{1}{2}}^n = \frac{T_{{\rm s},i}^n + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\rm s},i+1}^n}{1 + \left[\frac{k_{{\rm s},i+1}}{k_{{\rm s},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
 \end{equation}
-Then the intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
+The intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
 \begin{equation}
 \label{eq:intercell_flux}
 \left. k_{\rm s} \dod{T_{\rm s}}{x} \right|_{i+\frac{1}{2}} = k_{{\rm s},i} \frac{T_{{\rm s},i+\frac{1}{2}}^n - T_{{\rm s},i}^n}{\frac{1}{2}\delta x_i} = k_{{\rm s},i+1} \frac{T_{{\rm s},i+1}^n - T_{{\rm s},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
 \end{equation}
-The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.5$ in order to satisfy accuracy and stability constraints.
 
 For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
 \begin{equation}
 \label{eq:fluxcontinuity}
 \dot{q}_{\rm r, in}'' - \dot{q}_{\rm r, out}'' + \dot{q}_{\rm c}'' = -k_{\rm s} \left. \frac{\partial T_{\rm s}}{\partial n} \right|_{\rm w}
 \end{equation}
-To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$, and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
+To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$ using Eq.~(\ref{T_taylor}), and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
 \begin{equation}
 \label{eq:discflux}
-( \dot{q}_{\rm r, in}'' )^n - \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
+( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
 \end{equation}
 which leads to our final result for the boundary temperature
 \begin{equation}
 \label{eq:tmpwall}
-T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
+T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
 \end{equation}
 
 \newpage

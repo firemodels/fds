@@ -4,6 +4,7 @@
 # be sure to include the data set in ~/FDS-SMV/Validation/Process_All_Output.sh
 
 cd Beyler_Hood; ./Run_All.sh -y; cd ..
+cd Bittern_Sprinkler_Experiments; ./Run_All.sh -y; cd ..
 cd BRE_Spray; ./Run_All.sh -y; cd ..
 cd Bryant_Doorway; ./Run_All.sh -y; cd ..
 cd CAROLFIRE; ./Run_All.sh -y; cd ..
