@@ -34628,38 +34628,50 @@ END FUNCTION INTERSECT_SPHERE_AABB
 ! ---------------------------- INTERSECT_CYLINDER_AABB ----------------------------------------
 
 ! Intersection of Cylinder and Axis-Aligned Bounding Box
+!
+! Cylinder is represented by:
+!   X_IN   = center of cylinder (X,Y,Z) in grid reference frame
+!   H      = length of cylinder
+!   RADIUS = radius of cylinder
+!   AX_VEC = unit vector pointing along cylinder axis (which leads to ROT_MAT using ROTATION_MATRIX)
+!
+! The basic algorithm is:
+!   1. rotate the cylinder into a frame where the axis points in the vertical direction (+zbar in new frame)
+!   2. find the vertex point locations of AABB in this new frame
+!   3. test each vertex location against the end caps of cylinder
+!   4. test each vertex against radius of cylinder
 
-LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,XB_IN)
+LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,ROT_MAT,XB)
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,XB_IN(6)
-REAL(EB) :: X(3),U(2),V(2),Z0,ZH,XB(6),R2,DIST_SQUARED
-INTEGER :: II,JJ
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROT_MAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,R2,DIST_SQUARED
+INTEGER :: II,JJ,KK
 
 INTERSECT_CYLINDER_AABB=.FALSE.
 
-! For now, cylinder is vertical (no rotation required).
+X  = MATMUL(ROT_MAT,X_IN) ! transform center
+Z0 = X(3) - 0.5_EB*H      ! lower cap in new reference frame
+ZH = X(3) + 0.5_EB*H      ! upper cap in new reference frame
 
-X = X_IN
-XB = XB_IN
-Z0 = X(3) - 0.5_EB*H
-ZH = X(3) + 0.5_EB*H
-
-! First, check to see if vertices are within end-cap planes.
-IF (XB(5)>ZH .OR. XB(6)<Z0) RETURN
-
-! Next, check to see if distance from center to vertices is less than radius.
-! If any vertex is inside cylinder, intersection is true.
+! transform vertices and test against end caps, then radius
 R2 = RADIUS*RADIUS
-DO JJ=3,4
-   DO II=1,2
-      V = (/XB(II),XB(JJ)/)
-      U = V-X(1:2)
-      DIST_SQUARED = DOT_PRODUCT(U,V)
-      IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
-         INTERSECT_CYLINDER_AABB = .TRUE.
-         RETURN
-      ENDIF
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROT_MAT,V)
+         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+            ! vertex is within end-cap range, now test against radius
+            ! in new frame the distance from vertex to cylinder axis only requires the 1st and 2nd vector components
+            DUX = U(1:2) - X(1:2)
+            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+            IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
+               INTERSECT_CYLINDER_AABB = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDDO
    ENDDO
 ENDDO
 
@@ -34681,6 +34693,8 @@ R_OUT = 0._EB
 R_OUT(1,1) = 1._EB
 R_OUT(2,2) = 1._EB
 R_OUT(3,3) = 1._EB
+
+RETURN
 
 ! normalize input vectors
 DENOM = SQRT(DOT_PRODUCT(A_IN,A_IN))
