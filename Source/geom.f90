@@ -416,9 +416,9 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
-          INIT_CUTCELL_DATA,INTERSECT_SPHERE_AABB, &
+          INIT_CUTCELL_DATA,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB, &
           LINEARFIELDS_INTERP_TEST,MASS_CONSERVE_INIT,NUMBER_UNKH_CUTCELLS,POTENTIAL_FLOW_INIT,&
-          READ_GEOM,&
+          READ_GEOM,ROTATION_MATRIX, &
           SET_CCIBM_MATVEC_DATA,SET_DOMAINDIFFLX_3D,SET_DOMAINADVFLX_3D, &
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D, &
           WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA, &
@@ -34624,6 +34624,89 @@ IF (DIST_SQUARED > (RADIUS*RADIUS-TWO_EPSILON_EB)) INTERSECT_SPHERE_AABB=.FALSE.
 
 RETURN
 END FUNCTION INTERSECT_SPHERE_AABB
+
+! ---------------------------- INTERSECT_CYLINDER_AABB ----------------------------------------
+
+! Intersection of Cylinder and Axis-Aligned Bounding Box
+
+LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,XB_IN)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,XB_IN(6)
+REAL(EB) :: X(3),U(2),V(2),Z0,ZH,XB(6),R2,DIST_SQUARED
+INTEGER :: II,JJ
+
+INTERSECT_CYLINDER_AABB=.FALSE.
+
+! For now, cylinder is vertical (no rotation required).
+
+X = X_IN
+XB = XB_IN
+Z0 = X(3) - 0.5_EB*H
+ZH = X(3) + 0.5_EB*H
+
+! First, check to see if vertices are within end-cap planes.
+IF (XB(5)>ZH .OR. XB(6)<Z0) RETURN
+
+! Next, check to see if distance from center to vertices is less than radius.
+! If any vertex is inside cylinder, intersection is true.
+R2 = RADIUS*RADIUS
+DO JJ=3,4
+   DO II=1,2
+      V = (/XB(II),XB(JJ)/)
+      U = V-X(1:2)
+      DIST_SQUARED = DOT_PRODUCT(U,V)
+      IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
+         INTERSECT_CYLINDER_AABB = .TRUE.
+         RETURN
+      ENDIF
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_CYLINDER_AABB
+
+! ---------------------------- ROTATION_MATRIX ----------------------------------------
+
+SUBROUTINE ROTATION_MATRIX(R_OUT,A_IN,B_IN)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: R_OUT(3,3)
+REAL(EB), INTENT(IN) :: A_IN(3),B_IN(3)
+REAL(EB) :: A(3),B(3),C,DENOM,V(3)
+
+! initialize as identity matrix
+R_OUT = 0._EB
+R_OUT(1,1) = 1._EB
+R_OUT(2,2) = 1._EB
+R_OUT(3,3) = 1._EB
+
+! normalize input vectors
+DENOM = SQRT(DOT_PRODUCT(A_IN,A_IN))
+IF (DENOM<TWO_EPSILON_EB) RETURN
+A = A_IN/DENOM
+
+DENOM = SQRT(DOT_PRODUCT(B_IN,B_IN))
+IF (DENOM<TWO_EPSILON_EB) RETURN
+B = B_IN/DENOM
+
+CALL CROSS_PRODUCT(V,A,B)
+C = DOT_PRODUCT(A,B)
+
+IF (DOT_PRODUCT(V,V)<TWO_EPSILON_EB) THEN
+   ! if cross product has zero length, there are two possibilities:
+   !   1. vectors are aligned in same direction, no rotation required
+   !   2. vectors are aligned in opposite direction, 180 degree rotation
+   IF (C>0._EB) THEN
+      RETURN
+   ELSE
+      R_OUT = -R_OUT
+      RETURN
+   ENDIF
+ENDIF
+
+END SUBROUTINE ROTATION_MATRIX
 
 ! ! ---------------------------- TRIANGLE_ON_CELL_SURF ----------------------------------------
 !
