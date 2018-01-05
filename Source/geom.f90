@@ -34680,13 +34680,13 @@ END FUNCTION INTERSECT_CYLINDER_AABB
 
 ! ---------------------------- ROTATION_MATRIX ----------------------------------------
 
-SUBROUTINE ROTATION_MATRIX(R_OUT,A_IN,B_IN)
+SUBROUTINE ROTATION_MATRIX(R_OUT,A_IN)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 IMPLICIT NONE
 
 REAL(EB), INTENT(OUT) :: R_OUT(3,3)
-REAL(EB), INTENT(IN) :: A_IN(3),B_IN(3)
-REAL(EB) :: A(3),B(3),C,DENOM,V(3)
+REAL(EB), INTENT(IN) :: A_IN(3)
+REAL(EB) :: A(3),C,DENOM,V(3),A1(3),A2(3),A3(3),B1(3),B2(3),B3(3)
 
 ! initialize as identity matrix
 R_OUT = 0._EB
@@ -34694,19 +34694,18 @@ R_OUT(1,1) = 1._EB
 R_OUT(2,2) = 1._EB
 R_OUT(3,3) = 1._EB
 
-RETURN
-
-! normalize input vectors
+! normalize input vector
 DENOM = SQRT(DOT_PRODUCT(A_IN,A_IN))
 IF (DENOM<TWO_EPSILON_EB) RETURN
 A = A_IN/DENOM
 
-DENOM = SQRT(DOT_PRODUCT(B_IN,B_IN))
-IF (DENOM<TWO_EPSILON_EB) RETURN
-B = B_IN/DENOM
+! orthonormal basis in new system
+B1 = (/1._EB,0._EB,0._EB/)
+B2 = (/0._EB,1._EB,0._EB/)
+B3 = (/0._EB,0._EB,1._EB/)
 
-CALL CROSS_PRODUCT(V,A,B)
-C = DOT_PRODUCT(A,B)
+CALL CROSS_PRODUCT(V,A,B3)
+C = DOT_PRODUCT(A,B3)
 
 IF (DOT_PRODUCT(V,V)<TWO_EPSILON_EB) THEN
    ! if cross product has zero length, there are two possibilities:
@@ -34719,6 +34718,25 @@ IF (DOT_PRODUCT(V,V)<TWO_EPSILON_EB) THEN
       RETURN
    ENDIF
 ENDIF
+
+! find orthnormal basis for A=A3 in old system
+
+A3 = A
+CALL CROSS_PRODUCT(A2,B3,A3)
+CALL CROSS_PRODUCT(A1,A2,A3)
+
+! rotation matrix (direction cosines), Pope (2000), Eq. (A.11)
+
+R_OUT(1,1) = DOT_PRODUCT(A1,B1); R_OUT(1,2) = DOT_PRODUCT(A1,B2); R_OUT(1,3) = DOT_PRODUCT(A1,B3)
+R_OUT(2,1) = DOT_PRODUCT(A2,B1); R_OUT(2,2) = DOT_PRODUCT(A2,B2); R_OUT(2,3) = DOT_PRODUCT(A2,B3)
+R_OUT(3,1) = DOT_PRODUCT(A3,B1); R_OUT(3,2) = DOT_PRODUCT(A3,B2); R_OUT(3,3) = DOT_PRODUCT(A3,B3)
+
+! ! test
+! print *,R_OUT(1,:)
+! print *,R_OUT(2,:)
+! print *,R_OUT(3,:)
+! print *,MATMUL(R_OUT,A) ! result should be B3
+! stop
 
 END SUBROUTINE ROTATION_MATRIX
 
