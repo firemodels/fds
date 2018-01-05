@@ -9775,41 +9775,6 @@ END SELECT
 
 END SUBROUTINE POINT_TO_VECTOR
 
-
-!> ------------------------------------------------------------------------------------------------
-!> Set pointer to chosen vector for compact storage technique for neighbor
-!> ------------------------------------------------------------------------------------------------
-FUNCTION POINT_TO_OVECTOR_REAL(NVECTOR, NM, NOM, NL)
-REAL(EB), POINTER, DIMENSION(:) :: POINT_TO_OVECTOR_REAL
-INTEGER, INTENT(IN):: NVECTOR, NM, NOM, NL
-
-SELECT CASE (NVECTOR)
-   CASE (NSCARC_VECTOR_X)
-      POINT_TO_OVECTOR_REAL => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)%X
-   CASE (NSCARC_VECTOR_MEASURE)
-      POINT_TO_OVECTOR_REAL => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)%MEASURE
-END SELECT
-
-RETURN
-END FUNCTION POINT_TO_OVECTOR_REAL
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Set pointer to chosen vector for compact storage technique for neighbor
-!> ------------------------------------------------------------------------------------------------
-FUNCTION POINT_TO_OVECTOR_INT(NVECTOR, NM, NOM, NL)
-INTEGER, POINTER, DIMENSION(:) :: POINT_TO_OVECTOR_INT
-INTEGER, INTENT(IN):: NVECTOR, NM, NOM, NL
-
-SELECT CASE (NVECTOR)
-   CASE (NSCARC_VECTOR_CELL_TYPE)
-      POINT_TO_OVECTOR_INT => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)%CELL_TYPE
-END SELECT
-
-RETURN
-END FUNCTION POINT_TO_OVECTOR_INT
-
-
 !> ------------------------------------------------------------------------------------------------
 !> Compute global matrix-vector product (including data exchange along internal boundaries)
 !> ------------------------------------------------------------------------------------------------
@@ -9824,18 +9789,18 @@ INTEGER :: NM, IC, JC, ICOL
 
 TNOW = CURRENT_TIME()
 
-!> ------------------------------------------------------------------------------------------------
+!> 
 !> Exchange internal boundary values of vector1 such that the ghost values contain the corresponding
 !> overlapped values of adjacent neighbor
-!> ------------------------------------------------------------------------------------------------
+!>
 TYPE_VECTOR = NVECTOR1
 IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
 
-!> ------------------------------------------------------------------------------------------------
+!> 
 !> Perform global matrix-vector product:
 !> Note: - matrix already contains subdiagonal values from neighbor along internal boundaries
 !>       - if vector1 contains neighboring values, then correct values of global matvec are achieved
-!> ------------------------------------------------------------------------------------------------
+!> 
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL POINT_TO_VECTOR (NVECTOR1, NM, NL, V1)
@@ -10122,6 +10087,13 @@ SELECT CASE (NSCOPE)
    CASE (NSCARC_SCOPE_COARSE)
      NPRECON = NSCARC_PRECON_SSOR
 END SELECT
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_MUCH) THEN
+   WRITE(LU_SCARC,*) 'BLOCK_SOLVER: NSOL=',NSOL
+   WRITE(LU_SCARC,*) 'BLOCK_SOLVER: NRHS=',NRHS
+   WRITE(LU_SCARC,*) 'BLOCK_SOLVER: NSCOPE=',NSCOPE
+   WRITE(LU_SCARC,*) 'BLOCK_SOLVER: NL=',NL
+ENDIF
 
 SELECT CASE (NPRECON)
 
@@ -10494,7 +10466,7 @@ call scarc_debug_level (CG%W, 'CG', 'W INIT', NL)
 ISTATE = SCARC_CONVERGENCE_STATE (CG, 0, NL)                       !>  RES < TOL already ??
 
 IF (ISTATE /= NSCARC_STATE_CONV0) THEN                             !>  if no convergence yet, start precon
-   CALL SCARC_PRECONDITIONING(CG, NSCOPE, NL)
+   CALL SCARC_PRECONDITIONER(CG, NSCOPE, NL)
    SIGMA0 = SCARC_SCALAR_PRODUCT(CG%W, CG%G, NL)                   !>  SIGMA0 := (W,G)
    CALL SCARC_VECTOR_COPY (CG%G, CG%D, -1.0_EB, NL)                !>  D := -G
 ELSE
@@ -10527,7 +10499,7 @@ call scarc_debug_level (CG%W, 'CG', 'W ITE FINE', NL)
    ISTATE = SCARC_CONVERGENCE_STATE (CG, ITE, NL)                  !>  RES < TOL ??
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT CG_LOOP
 
-   CALL SCARC_PRECONDITIONING(CG, NSCOPE, NL)
+   CALL SCARC_PRECONDITIONER(CG, NSCOPE, NL)
 
    SIGMA1 = SCARC_SCALAR_PRODUCT (CG%W, CG%G, NL)                  !>  SIGMA1 := (W,G)
    GAMMA0 = SIGMA1/SIGMA0
@@ -10568,7 +10540,7 @@ END SUBROUTINE SCARC_METHOD_CG
 !> ------------------------------------------------------------------------------------------------
 !> Preconditioning method
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_PRECONDITIONING(SC, NSCOPE, NL)
+SUBROUTINE SCARC_PRECONDITIONER(SC, NSCOPE, NL)
 TYPE (SCARC_SCOPE_TYPE), INTENT(IN):: SC
 INTEGER, INTENT(IN) :: NSCOPE, NL
 
@@ -10649,7 +10621,7 @@ call scarc_debug_level (SC%G, 'PRECON', 'MUL: G AFTER BLOCK', NL)
 
 END SELECT 
 
-END SUBROUTINE SCARC_PRECONDITIONING
+END SUBROUTINE SCARC_PRECONDITIONER
 
 !> ------------------------------------------------------------------------------------------------
 !> Perform global BICGstab-method based on global possion-matrix
@@ -10815,6 +10787,10 @@ CALL SCARC_SETUP_WORKSPACE(NL)
 CALL SCARC_MATVEC_PRODUCT (MG%X, MG%D, NL)                                       !>  D := A*X
 CALL SCARC_VECTOR_SUM     (MG%F, MG%D, 1.0_EB, -1.0_EB, NL)                      !>  D := F - D
 
+call scarc_debug_level (MG%X, 'MG', 'X BEFORE', NL)
+call scarc_debug_level (MG%F, 'MG', 'F BEFORE', NL)
+call scarc_debug_level (MG%D, 'MG', 'D BEFORE', NL)
+
 ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_SETUP, NL)
 MG%RESIN = SCARC_L2NORM (MG%D, NL)                                               !>  RESIN := ||D||
 
@@ -10834,15 +10810,18 @@ MULTIGRID_LOOP: DO ITE = 1, MG%NIT
 
       !> presmoothing  (smoothing/restriction till coarsest level is reached)
       PRESMOOTHING_LOOP: DO WHILE (NL < NLEVEL_MAX)
-         CALL SCARC_SMOOTHER (MG, NSCARC_CYCLE_PRESMOOTH, NL, NSCOPE)            !> D_fine   := smooth(defect)
+         CALL SCARC_SMOOTHER (MG, NSCARC_CYCLE_PRESMOOTH, NSCOPE, NL)            !> D_fine   := smooth(defect)
          CALL SCARC_RESTRICTION (MG%D, MG%F, NL, NL+1)                           !> F_coarse := rest(D_fine)
          CALL SCARC_VECTOR_CLEAR (MG%X, NL+1)                                    !> X_coarse := 0.0
+call scarc_debug_level (MG%D, 'MG', 'D AFTER SMOOTHING', NL)
+call scarc_debug_level (MG%F, 'MG', 'F AFTER RESTRICTION', NL+1)
          NL = NL + 1                                                             !> set coarser level
       ENDDO PRESMOOTHING_LOOP
 
       !> coarse grid solver
       TNOW_COARSE = CURRENT_TIME()
       CALL SCARC_COARSE_SOLVER (MG%F, NLEVEL_MAX)                                 !> X_coarse := exact_sol(.)
+call scarc_debug_level (MG%X, 'MG', 'X AFTER COARSE', NLEVEL_MAX)
       SCARC_TIME_COARSE_STEP(MYID+1)=MAX(SCARC_TIME_COARSE_STEP(MYID+1),CURRENT_TIME()-TNOW_COARSE)
       SCARC_TIME_COARSE_SUM(MYID+1) =SCARC_TIME_COARSE_SUM(MYID+1)+CURRENT_TIME()-TNOW_COARSE
 
@@ -10851,7 +10830,9 @@ MULTIGRID_LOOP: DO ITE = 1, MG%NIT
          NL=NL-1
          CALL SCARC_PROLONGATION (MG%X, MG%D, NL+1, NL)                          !> D_fine := prol(X_coarse)
          CALL SCARC_VECTOR_SUM (MG%D, MG%X, 1.0_EB, 1.0_EB, NL)                  !> X_fine := D_fine + X_fine
-         CALL SCARC_SMOOTHER (MG, NSCARC_CYCLE_POSTSMOOTH, NL, NSCOPE)           !> D_fine := smooth(defect)
+         CALL SCARC_SMOOTHER (MG, NSCARC_CYCLE_POSTSMOOTH, NSCOPE, NL)           !> D_fine := smooth(defect)
+call scarc_debug_level (MG%D, 'MG', 'D AFTER PROLONGATION', NL)
+call scarc_debug_level (MG%X, 'MG', 'X AFTER SUMMING', NL)
          ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_PROCEED, NL)                  !> perform requested cycle
          IF (ICYCLE /= NSCARC_CYCLE_POSTSMOOTH) CYCLE CYCLE_LOOP
       ENDDO POSTSMOOTHING_LOOP
@@ -10871,6 +10852,8 @@ MULTIGRID_LOOP: DO ITE = 1, MG%NIT
 
    MG%RES = SCARC_L2NORM (MG%D, NL)                                              !> RES := ||D||
    ISTATE = SCARC_CONVERGENCE_STATE(MG, ITE, NL)                                 !> convergence ?
+
+call scarc_debug_level (MG%D, 'MG', 'D NEW DEFECT ', NL)
 
    IF (TYPE_DEBUG>=NSCARC_DEBUG_INFO1.AND.MYID==0) &
       WRITE(LU_OUTPUT,'(a,i3,a,e14.5,a,e14.5)') '       SCARC_MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
@@ -10894,6 +10877,8 @@ SELECT CASE (TYPE_SCOPE)
    CASE (NSCARC_SCOPE_PRECON)
       CALL SCARC_VECTOR_COPY(MG%X, MG%F, 1.0_EB, NLEVEL_MIN)
 END SELECT
+
+call scarc_debug_level (MG%X, 'MG', 'X FINAL ', NL)
 
 CALL SCARC_RESET_PARENT(PARENT)
 
@@ -10983,7 +10968,7 @@ END FUNCTION SCARC_CYCLE_CONTROL
 !> ------------------------------------------------------------------------------------------------
 !> Perform smoothing
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SMOOTHER(MG, NTYPE, NL, NSCOPE)
+SUBROUTINE SCARC_SMOOTHER(MG, NTYPE, NSCOPE, NL)
 INTEGER , INTENT(IN) :: NTYPE, NL, NSCOPE
 TYPE (SCARC_SCOPE_TYPE), INTENT(INOUT) :: MG
 INTEGER :: ITE, ISTATE=0
