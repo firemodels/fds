@@ -8065,7 +8065,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
       ! Compute direction cosines for special shapes
 
-      IF (SHAPE_LENGTH>0._EB) CALL ROTATION_MATRIX(SHAPE_ROT,SHAPE_VEC,Z_VEC)
+      IF (SHAPE_LENGTH>0._EB) CALL ROTATION_MATRIX(SHAPE_ROT,SHAPE_VEC)
 
       ! Loop over all possible multiples of the OBST
 
