@@ -34641,18 +34641,18 @@ END FUNCTION INTERSECT_SPHERE_AABB
 !   3. test each vertex location against the end caps of cylinder
 !   4. test each vertex against radius of cylinder
 
-LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,ROT_MAT,XB)
+LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,ROTMAT,XB)
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROT_MAT(3,3),XB(6)
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
 REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,R2,DIST_SQUARED
 INTEGER :: II,JJ,KK
 
 INTERSECT_CYLINDER_AABB=.FALSE.
 
-X  = MATMUL(ROT_MAT,X_IN) ! transform center
-Z0 = X(3) - 0.5_EB*H      ! lower cap in new reference frame
-ZH = X(3) + 0.5_EB*H      ! upper cap in new reference frame
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+Z0 = X(3)                ! lower cap in new reference frame
+ZH = X(3) + H            ! upper cap in new reference frame
 
 ! transform vertices and test against end caps, then radius
 R2 = RADIUS*RADIUS
@@ -34660,7 +34660,7 @@ DO KK=5,6
    DO JJ=3,4
       DO II=1,2
          V = (/XB(II),XB(JJ),XB(KK)/)
-         U = MATMUL(ROT_MAT,V)
+         U = MATMUL(ROTMAT,V)
          IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
             ! vertex is within end-cap range, now test against radius
             ! in new frame the distance from vertex to cylinder axis only requires the 1st and 2nd vector components
