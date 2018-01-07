@@ -225,6 +225,9 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   T)
    TYPE="$OPTARG"
