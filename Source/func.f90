@@ -3077,6 +3077,7 @@ CHARACTER(LEN=MPI_MAX_LIBRARY_VERSION_STRING) :: MPILIBVERSION
 CALL GET_DATE(DATE)
 
 WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
+WRITE(LU,'(/A/)')      ' This version has been modified as part of the WFDS -> FDS effort'
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
 WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)

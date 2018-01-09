@@ -4750,6 +4750,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ENDDO
       LPC%DENSITY = MASS/VOLUME
       LPC%FTPR = FOTH*PI*LPC%DENSITY
+print '(A,1x,1ES12.4)','read.f90: lpc%density',lpc%density
    ENDIF
 
    IF (SF%HEAT_TRANSFER_MODEL>0) THEN ; CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART') ; RETURN ; ENDIF
@@ -6335,6 +6336,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
                INDEX_LIST(N_LIST) = NNN
                SF%LAYER_MATL_INDEX(NL,NN) = NNN
                SF%LAYER_DENSITY(NL) = SF%LAYER_DENSITY(NL)+SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S
+print '(A,1x,1I3,3ES12.4)','read_surf: NL,LAYER_DENSITY,LAYER_MATL_FRAC,RHOS_S',NL,SF%LAYER_DENSITY(NL),SF%LAYER_MATL_FRAC(NL,NN), &
+                                                                                MATERIAL(NNN)%RHO_S
                EMISSIVITY = EMISSIVITY + &
                   MATERIAL(NNN)%EMISSIVITY*SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S ! volume based
             ENDIF
@@ -7258,6 +7261,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
          DO N=1,SF%N_MATL
             IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) &
                SF%RHO_0(II,N) = SF%LAYER_MATL_FRAC(IL,NN)*SF%LAYER_DENSITY(IL)
+print '(A,1x,1I3,2ES12.4)','read.f90: ii,layer_matl_frac,layer_density',ii,sf%layer_matl_frac(il,nn),sf%layer_density(il)
          ENDDO
       ENDDO
    ENDDO

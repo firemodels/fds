@@ -1969,14 +1969,14 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    POINT_LOOP1: DO I=1,NWP
 
-!print '(A)','----------------------'
+print '(A)','----------------------'
       RHO_S0 = SF%LAYER_DENSITY(LAYER_INDEX(I))
       REGRID_FACTOR(I) = 1._EB
       REGRID_MAX       = 0._EB
       REGRID_SUM       = 0._EB
 
       MATERIAL_LOOP1a: DO N=1,SF%N_MATL
-!print '(A,1x,2I2)','====================== N_MATL,N =',SF%N_MATL,N
+print '(A,1x,2I2)','====================== N_MATL,N =',SF%N_MATL,N
 
          IF (ONE_D%RHO(I,N) <= 0._EB) CYCLE MATERIAL_LOOP1a
 
@@ -2100,8 +2100,8 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                      REACTION_RATE = REACTION_RATE * &
                                      ONE_D%RHO_G*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_V))/(RHO_S0*ML%NU_O2(J))
                   ENDIF
-!print '(A,1x,1I2,1ES12.4)','ML%N_REACTIONS,R0',ML%N_REACTIONS,R0
-!print '(A,1x,1I2,6ES12.4)','J,A,RHO,RHO_S0,N_S,E,NU_02',J,ML%A(J),ONE_D%RHO(I,N),RHO_S0,ML%N_S(J),ML%E(J),ML%NU_O2(J)
+print '(A,1x,1I2,1ES12.4)','ML%N_REACTIONS,R0',ML%N_REACTIONS,R0
+print '(A,1x,1I2,6ES12.4)','J,A,RHO,RHO_S0,N_S,E,NU_02',J,ML%A(J),ONE_D%RHO(I,N),RHO_S0,ML%N_S(J),ML%E(J),ML%NU_O2(J)
                   ! Reaction rate in kg/(m3s)
                   REACTION_RATE = RHO_S0 * REACTION_RATE
                   ! Limit reaction rate
