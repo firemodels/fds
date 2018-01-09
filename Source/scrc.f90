@@ -473,30 +473,30 @@ INTEGER :: CGSC=IS_CGSC, UNKH=IS_UNKH, NCVARS=IS_NCVARS
 !> Global variables
 !> --------------------------------------------------------------------------------------------
 !> use integer types for the user defined input data (based on SCARC_TYPE_... variables)
-INTEGER :: TYPE_DISCRET    = NSCARC_UNDEFINED             !> Type of discretization (structured/unstructured)
-INTEGER :: TYPE_SCOPE      = NSCARC_UNDEFINED             !> Type of surrounding solver scopy
+INTEGER :: TYPE_DISCRET    = NSCARC_DISCRET_STRUCTURED    !> Type of discretization (structured/unstructured)
+INTEGER :: TYPE_SCOPE      = NSCARC_SCOPE_MAIN            !> Type of surrounding solver scope
 INTEGER :: TYPE_SCOPE0     = NSCARC_SCOPE_MAIN            !> Type of surrounding solver scope II
-INTEGER :: TYPE_METHOD     = NSCARC_UNDEFINED             !> Type of global ScaRC method
-INTEGER :: TYPE_METHOD0    = NSCARC_UNDEFINED             !> Type of local ScaRC method
+INTEGER :: TYPE_METHOD     = NSCARC_METHOD_KRYLOV         !> Type of global ScaRC method
+INTEGER :: TYPE_METHOD0    = NSCARC_METHOD_KRYLOV         !> Type of local ScaRC method
+INTEGER :: TYPE_TWOLEVEL   = NSCARC_UNDEFINED             !> Type of two-level method
 INTEGER :: TYPE_TWOLEVEL0  = NSCARC_UNDEFINED             !> Type of twolevel method
+INTEGER :: TYPE_INTERPOL   = NSCARC_UNDEFINED             !> Type of interpolation for AMG
 INTEGER :: TYPE_INTERPOL0  = NSCARC_UNDEFINED             !> Type of interpolation method
-INTEGER :: TYPE_KRYLOV     = NSCARC_UNDEFINED             !> Type of Krylov method (CG/BICG)
-INTEGER :: TYPE_MULTIGRID  = NSCARC_UNDEFINED             !> Type of multigrid method (GMG/AMG)
+INTEGER :: TYPE_KRYLOV     = NSCARC_KRYLOV_CG             !> Type of Krylov method (CG/BICG)
+INTEGER :: TYPE_MULTIGRID  = NSCARC_MULTIGRID_GEOMETRIC   !> Type of multigrid method (GMG/AMG)
 INTEGER :: TYPE_MKL        = NSCARC_UNDEFINED             !> Type of MKL method (PARDISO/CLUSTER_SPARSE_SOLVER)
-INTEGER :: TYPE_ACCURACY   = NSCARC_UNDEFINED             !> Type of requested accuracy
+INTEGER :: TYPE_ACCURACY   = NSCARC_ACCURACY_ABSOLUTE     !> Type of requested accuracy
 INTEGER :: TYPE_SMOOTH     = NSCARC_SMOOTH_SSOR           !> Type of smoother for multigrid method
 INTEGER :: TYPE_PRECON     = NSCARC_PRECON_SSOR           !> Type of preconditioner for global iterative solver
 INTEGER :: TYPE_PRECON0    = NSCARC_PRECON_SSOR           !> Type of preconditioner for local iterative solver
 INTEGER :: TYPE_CYCLE      = NSCARC_CYCLE_V               !> Type of cycling for multigrid method
 INTEGER :: TYPE_COARSENING = NSCARC_UNDEFINED             !> Type of coarsening algorithm for AMG
-INTEGER :: TYPE_INTERPOL   = NSCARC_UNDEFINED             !> Type of interpolation for AMG
-INTEGER :: TYPE_TWOLEVEL   = NSCARC_UNDEFINED             !> Type of two-level method
-INTEGER :: TYPE_COARSE     = NSCARC_UNDEFINED             !> Type of coarse grid solver for multigrid method
+INTEGER :: TYPE_COARSE     = NSCARC_COARSE_ITERATIVE      !> Type of coarse grid solver for multigrid method
 INTEGER :: TYPE_CASE       = NSCARC_UNDEFINED             !> Type of predefined test case
 INTEGER :: TYPE_DEBUG      = NSCARC_UNDEFINED             !> Type of debugging level
 INTEGER :: TYPE_INITIAL    = NSCARC_UNDEFINED             !> Type of initial solution
 INTEGER :: TYPE_EXCHANGE   = NSCARC_UNDEFINED             !> Type of data exchange
-INTEGER :: TYPE_VECTOR     = NSCARC_UNDEFINED             !> Type of vector to point to
+INTEGER :: TYPE_PTR        = NSCARC_UNDEFINED             !> Type of vector to point to
 INTEGER :: TYPE_LAYER      = NSCARC_LAYER_ONE             !> Type of layers (for overlap)
 
 INTEGER :: TYPE_MKL_LEVEL(NSCARC_LEVEL_MAX)=NSCARC_UNDEFINED
@@ -535,6 +535,9 @@ INTEGER  :: NX, NY, NZ                               !> number of cells in x-, y
 REAL(EB) :: XS, XF, YS, YF, ZS, ZF                   !> x-, y- and z-bounds of mesh (same for all levels)
 
 
+!> --------------------------------------------------------------------------------------------
+!> Miscellaneous other types
+!> --------------------------------------------------------------------------------------------
 #ifdef WITH_MKL
 TYPE (SCARC_MKL_TYPE)   , POINTER, DIMENSION(:) :: MKL       !> MKL-type
 #endif
@@ -7026,7 +7029,7 @@ SELECT CASE (NTYPE)
 
       !> Initial exchange of measure array
       IF (NMESHES > 1) THEN
-         TYPE_VECTOR = NSCARC_PTR_MEASURE
+         TYPE_PTR = NSCARC_PTR_MEASURE
          CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR , NL)
       ENDIF
 
@@ -7098,7 +7101,7 @@ SELECT CASE (NTYPE)
 
             IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MEASURE_ADD, NL)
             !IF (NMESHES > 1) THEN
-            !   TYPE_VECTOR = NSCARC_PTR_MEASURE
+            !   TYPE_PTR = NSCARC_PTR_MEASURE
             !   CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
             !ENDIF
 
@@ -7140,7 +7143,7 @@ SELECT CASE (NTYPE)
 
             !> exchanges measure and CELL_TYPEs of neighboring cells
             IF (NMESHES > 1) THEN
-               TYPE_VECTOR = NSCARC_PTR_MEASURE
+               TYPE_PTR = NSCARC_PTR_MEASURE
                CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
                CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_CELL_TYPE, NL)
             ENDIF
@@ -9671,7 +9674,7 @@ TNOW = CURRENT_TIME()
 !> Exchange internal boundary values of vector1 such that the ghost values contain the corresponding
 !> overlapped values of adjacent neighbor
 !>
-TYPE_VECTOR = NVECTOR1
+TYPE_PTR = NVECTOR1
 IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
 
 !> 
@@ -11546,7 +11549,7 @@ W4   =  4.0_EB
 W3   =  3.0_EB
 W1   =  1.0_EB
 
-TYPE_VECTOR = NVECTORF
+TYPE_PTR = NVECTORF
 IF (BAMG.AND.TYPE_COARSENING < NSCARC_COARSENING_GMG) CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR, NLF)
 
 !>
@@ -12459,7 +12462,7 @@ MESH_PACK_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          !> ---------------------------------------------------------------------------------------
          CASE (NSCARC_EXCHANGE_VECTOR)
 
-            CALL POINT_TO_VECTOR(TYPE_VECTOR, NM, NL, VECTOR)
+            CALL POINT_TO_VECTOR(TYPE_PTR, NM, NL, VECTOR)
 
             LL = 1
             DO ICG= 1, OSL%NCG
@@ -12973,7 +12976,7 @@ MESH_UNPACK_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             !> ------------------------------------------------------------------------------------
             CASE (NSCARC_EXCHANGE_VECTOR)
 
-               CALL POINT_TO_VECTOR (TYPE_VECTOR, NM, NL, VECTOR)
+               CALL POINT_TO_VECTOR (TYPE_PTR, NM, NL, VECTOR)
 
                LL = 1
                UNPACK_VECTOR: DO IWL = 1, OSL%NWL
