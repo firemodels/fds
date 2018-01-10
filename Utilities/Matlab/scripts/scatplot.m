@@ -78,6 +78,7 @@ end
 
 % Read in global plot options
 plot_style
+Font_Interpreter = 'LaTeX';
 
 % Override the plot style options with NRC 1824 plot options
 if NRC_Options == true

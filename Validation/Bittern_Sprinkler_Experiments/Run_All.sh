@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
+export SVNROOT=`pwd`/../..
+source $SVNROOT/Validation/Common_Run_All.sh
+
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_1.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_2.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_3.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_4.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_5.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_7.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_9.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_10.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_12.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_13.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_14.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_15.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_17.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_18.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_19.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_20.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_21.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BITTERN_22.fds
+
+echo FDS cases submitted

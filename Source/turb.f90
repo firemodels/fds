@@ -1541,7 +1541,7 @@ REAL(EB), DIMENSION(2), PARAMETER :: XX=(/1._EB, 0._EB/),YY=(/0._EB, 1._EB/)
 ! streamwise unit vector
 SS = (/NN(2),-NN(1)/)
 
-! directional cosines (see Pope, Eq. A.11)
+! direction cosines (see Pope, Eq. A.11)
 C(1,1) = DOT_PRODUCT(XX,SS)
 C(1,2) = DOT_PRODUCT(XX,NN)
 C(2,1) = DOT_PRODUCT(YY,SS)

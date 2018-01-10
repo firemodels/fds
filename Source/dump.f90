@@ -680,28 +680,28 @@ IF (N_DEVC_LINE>0) THEN
                LINE_DEVC_UNITS(NN) = TRIM(DV%UNITS)
             CASE(1)
                LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(2)
                LINE_DEVC_LABEL(NN) = TRIM(DV%Y_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(3)
                LINE_DEVC_LABEL(NN) = TRIM(DV%Z_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(4)
                LINE_DEVC_LABEL(NN) = TRIM(DV%R_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(12)
                LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Y_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(13)
                LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(23)
                LINE_DEVC_LABEL(NN) = TRIM(DV%Y_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
             CASE(123)
                LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Y_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
-               LINE_DEVC_UNITS(NN) = 'm,m,m,'//TRIM(DV%UNITS)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%XYZ_UNITS)//','//TRIM(DV%XYZ_UNITS)//','//TRIM(DV%XYZ_UNITS)//','//TRIM(DV%UNITS)
          END SELECT
       ENDIF
    ENDDO
@@ -5515,7 +5515,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ! Convert units of device quantity
 
-   VALUE = DV%CONVERSION_FACTOR*VALUE
+   VALUE = DV%CONVERSION_FACTOR*VALUE + DV%CONVERSION_ADDEND
 
    ! Record initial value and then subtract from computed value
 

@@ -138,8 +138,9 @@ $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
 $QFDS -d Heat_Transfer ht3d_sphere_25.fds
-$QFDS -d Heat_Transfer ht3d_sphere_51.fds
-$QFDS -p 27 -d Heat_Transfer ht3d_sphere_75.fds
+$QFDS -d Heat_Transfer ht3d_sphere_50.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_100.fds
+$QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -175,6 +176,9 @@ $QFDS -d HVAC leak_test.fds
 
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
+$QFDS -d Miscellaneous obst_sphere.fds
+$QFDS -d Miscellaneous obst_cylinder.fds
+$QFDS -d Miscellaneous obst_cone.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds

@@ -417,9 +417,9 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
-          INIT_CUTCELL_DATA, &
+          INIT_CUTCELL_DATA,INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB, &
           LINEARFIELDS_INTERP_TEST,MASS_CONSERVE_INIT,NUMBER_UNKH_CUTCELLS,POTENTIAL_FLOW_INIT,&
-          READ_GEOM,&
+          READ_GEOM,ROTATION_MATRIX, &
           SET_CCIBM_MATVEC_DATA,SET_DOMAINDIFFLX_3D,SET_DOMAINADVFLX_3D, &
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D, &
           WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA, &
@@ -34617,6 +34617,199 @@ ENDDO
 
 RETURN
 END FUNCTION POLYGON_CENTROID
+
+! ---------------------------- INTERSECT_SPHERE_AABB ----------------------------------------
+
+! Algorithm from Schneider and Eberly, p. 644
+! Intersection of Sphere and Axis-Aligned Bounding Box
+
+LOGICAL FUNCTION INTERSECT_SPHERE_AABB(X0,RADIUS,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X0(3),RADIUS,XB(6)
+REAL(EB) :: DIST_SQUARED
+
+INTERSECT_SPHERE_AABB=.TRUE.
+
+! Compute distance in each direction, summing as we go
+DIST_SQUARED = 0._EB
+IF (X0(1)<XB(1)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(1)-XB(1))**2
+ELSEIF (X0(1)>XB(2)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(1)-XB(2))**2
+ENDIF
+IF (X0(2)<XB(3)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(2)-XB(3))**2
+ELSEIF (X0(2)>XB(4)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(2)-XB(4))**2
+ENDIF
+IF (X0(3)<XB(5)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(3)-XB(5))**2
+ELSEIF (X0(3)>XB(6)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(3)-XB(6))**2
+ENDIF
+
+! Compare squared distance to radius squared
+IF (DIST_SQUARED > (RADIUS*RADIUS-TWO_EPSILON_EB)) INTERSECT_SPHERE_AABB=.FALSE.
+
+RETURN
+END FUNCTION INTERSECT_SPHERE_AABB
+
+! ---------------------------- INTERSECT_CYLINDER_AABB ----------------------------------------
+
+! Intersection of Cylinder and Axis-Aligned Bounding Box
+!
+! Cylinder is represented by:
+!   X_IN   = center of cylinder (X,Y,Z) in grid reference frame
+!   H      = length of cylinder
+!   RADIUS = radius of cylinder
+!   AX_VEC = unit vector pointing along cylinder axis (which leads to ROT_MAT using ROTATION_MATRIX)
+!
+! The basic algorithm is:
+!   1. rotate the cylinder into a frame where the axis points in the vertical direction (+zbar in new frame)
+!   2. find the vertex point locations of AABB in this new frame
+!   3. test each vertex location against the end caps of cylinder
+!   4. test each vertex against radius of cylinder
+
+LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,ROTMAT,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,R2,DIST_SQUARED
+INTEGER :: II,JJ,KK
+
+INTERSECT_CYLINDER_AABB=.FALSE.
+
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+Z0 = X(3)                ! lower cap in new reference frame
+ZH = X(3) + H            ! upper cap in new reference frame
+
+! transform vertices and test against end caps, then radius
+R2 = RADIUS*RADIUS
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROTMAT,V)
+         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+            ! vertex is within end-cap range, now test against radius
+            ! in new frame the distance from vertex to cylinder axis only requires the 1st and 2nd vector components
+            DUX = U(1:2) - X(1:2)
+            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+            IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
+               INTERSECT_CYLINDER_AABB = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_CYLINDER_AABB
+
+! ---------------------------- ROTATION_MATRIX ----------------------------------------
+
+SUBROUTINE ROTATION_MATRIX(R_OUT,A_IN)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: R_OUT(3,3)
+REAL(EB), INTENT(IN) :: A_IN(3)
+REAL(EB) :: A(3),C,DENOM,V(3),A1(3),A2(3),A3(3),B1(3),B2(3),B3(3)
+
+! initialize as identity matrix
+R_OUT = 0._EB
+R_OUT(1,1) = 1._EB
+R_OUT(2,2) = 1._EB
+R_OUT(3,3) = 1._EB
+
+! normalize input vector
+DENOM = SQRT(DOT_PRODUCT(A_IN,A_IN))
+IF (DENOM<TWO_EPSILON_EB) RETURN
+A = A_IN/DENOM
+
+! orthonormal basis in new system
+B1 = (/1._EB,0._EB,0._EB/)
+B2 = (/0._EB,1._EB,0._EB/)
+B3 = (/0._EB,0._EB,1._EB/)
+
+CALL CROSS_PRODUCT(V,A,B3)
+C = DOT_PRODUCT(A,B3)
+
+IF (DOT_PRODUCT(V,V)<TWO_EPSILON_EB) THEN
+   ! if cross product has zero length, there are two possibilities:
+   !   1. vectors are aligned in same direction, no rotation required
+   !   2. vectors are aligned in opposite direction, 180 degree rotation
+   IF (C>0._EB) THEN
+      RETURN
+   ELSE
+      R_OUT = -R_OUT
+      RETURN
+   ENDIF
+ENDIF
+
+! find orthnormal basis for A=A3 in old system
+
+A3 = A
+CALL CROSS_PRODUCT(A2,B3,A3)
+CALL CROSS_PRODUCT(A1,A2,A3)
+
+! rotation matrix (direction cosines), Pope (2000), Eq. (A.11)
+
+R_OUT(1,1) = DOT_PRODUCT(A1,B1); R_OUT(1,2) = DOT_PRODUCT(A1,B2); R_OUT(1,3) = DOT_PRODUCT(A1,B3)
+R_OUT(2,1) = DOT_PRODUCT(A2,B1); R_OUT(2,2) = DOT_PRODUCT(A2,B2); R_OUT(2,3) = DOT_PRODUCT(A2,B3)
+R_OUT(3,1) = DOT_PRODUCT(A3,B1); R_OUT(3,2) = DOT_PRODUCT(A3,B2); R_OUT(3,3) = DOT_PRODUCT(A3,B3)
+
+! ! test
+! print *,R_OUT(1,:)
+! print *,R_OUT(2,:)
+! print *,R_OUT(3,:)
+! print *,MATMUL(R_OUT,A) ! result should be B3
+! stop
+
+END SUBROUTINE ROTATION_MATRIX
+
+! ---------------------------- INTERSECT_CONE_AABB ----------------------------------------
+
+! This routine basically follows the INTERSECT_CYLINDER_AABB algorithm, with radius = R(Z)
+
+LOGICAL FUNCTION INTERSECT_CONE_AABB(X_IN,H,RADIUS,ROTMAT,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,DIST_SQUARED,R_Z
+INTEGER :: II,JJ,KK
+
+INTERSECT_CONE_AABB=.FALSE.
+
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+Z0 = X(3)                ! lower cap in new reference frame
+ZH = X(3) + H            ! upper cap in new reference frame
+
+! transform vertices and test against end caps, then radius
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROTMAT,V)
+         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+            ! vertex is within end-cap range, now test against radius
+            ! in new frame the distance from vertex to CONE axis only requires the 1st and 2nd vector components
+            DUX = U(1:2) - X(1:2)
+            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+            R_Z = RADIUS*(1._EB-(U(3)-Z0)/H)
+            IF (DIST_SQUARED < R_Z*R_Z+TWO_EPSILON_EB) THEN
+               INTERSECT_CONE_AABB = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_CONE_AABB
 
 ! ! ---------------------------- TRIANGLE_ON_CELL_SURF ----------------------------------------
 !

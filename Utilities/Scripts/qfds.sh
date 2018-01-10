@@ -2,8 +2,6 @@
 
 #*** environment varables
 
-# FIREMODELS       - define directory containing git repos - 
-#                    eg. /home/username/FireModels_fork
 # OMP_PLACES       - cores, sockets or threads
 # OMP_PROC_BIND    - false, true, master, close or spread
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
@@ -43,6 +41,8 @@ function usage {
   echo "Other options:"
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -f repository root - name and location of repository where FDS is located"
+  echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
   echo " -I use Intel mpi version of fds"
   echo " -m m - reserve m processes per node [default: 1]"
@@ -52,7 +52,7 @@ function usage {
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
-  echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
@@ -104,7 +104,9 @@ else
   queue=batch
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
-if [ "$NCORES_COMPUTENODE" != "" ]; then
+if [ "$NCORES_COMPUTENODE" == "" ]; then
+  NCORES_COMPUTENODE=$ncores
+else
   ncores=$NCORES_COMPUTENODE
 fi
 
@@ -159,7 +161,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
+while getopts 'ACd:e:f:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -173,6 +175,9 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
+   ;;
+  f)
+   FDSROOT="$OPTARG"
    ;;
   h)
    usage
@@ -222,6 +227,9 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   T)
    TYPE="$OPTARG"
@@ -591,11 +599,6 @@ EOF
     if [ "$walltimestring_pbs" != "" ]; then
       cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
-EOF
-    fi
-    if [ "$benchmark" == "yes" ]; then
-cat << EOF >> $scriptfile
-#PBS -l naccesspolicy=singlejob
 EOF
     fi
   fi

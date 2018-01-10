@@ -6243,11 +6243,9 @@ By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seco
 
 A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
-You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.  You can also change the scaling of the coordinates by applying a {\ct COORD\_FACTOR}.  This is handy for plotting nondimensional distance, for example.
+You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and/or adding {\ct CONVERSION\_ADDEND}. For example, to change temperature output from the default $^\circ$C to $^\circ$F, the {\ct CONVERSION\_FACTOR} should be set to 1.8 and the {\ct CONVERSION\_ADDEND} to 32. You can then change the units that appear in the output files by setting {\ct UNITS='F'} or whatever the case may be. If you do not convert the output {\ct QUANTITY} from its default value, you need not set the {\ct UNITS}.  
 
 If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output file, set {\ct OUTPUT=.FALSE.} on the {\ct DEVC} line. Sometimes, devices are just used as clocks or control devices. In these cases, you might want to prevent its output from cluttering the output file. If the {\ct DEVC} {\ct QUANTITY='TIME'}, then {\ct OUTPUT} is set to {\ct .FALSE.} automatically.
-
-
 
 All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY} specified on a {\ct PROP} line. A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override a {\ct QUANTITY} specified on the {\ct DEVC} line.
 
@@ -7081,7 +7079,9 @@ Sometimes it is convenient to calculate a steady-state profile. For example, the
 \end{lstlisting}
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
 
-A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}. 
+
+You can convert the spatial coordinate of a steady-state profile by setting {\ct COORD\_FACTOR} on the {\ct DEVC} line. For example, to convert from the default unit of meters to centimeters, set {\ct COORD\_FACTOR} to 100. Also set {\ct XYZ\_UNITS} to the appropriate character string, in this case {\ct XYZ\_UNITS='cm'}.
 
 \subsubsection{Time-Varying Profile}
 
@@ -8675,8 +8675,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 \hline \hline
 \endhead
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
+{\ct CONVERSION\_ADDEND}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
-{\ct COORD\_FACTOR}         & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
+{\ct COORD\_FACTOR}         & Real            & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
 {\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
@@ -8724,6 +8725,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct X\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-x}   \\ \hline
 {\ct Y\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-y}   \\ \hline
 {\ct Z\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-z}   \\ \hline
+{\ct XYZ\_UNITS}            & Character       & Section~\ref{info:line_file}                                    &       &  {\ct 'm'}    \\ \hline
 \end{longtable}
 
 
