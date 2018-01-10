@@ -7942,6 +7942,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (IOS==1) EXIT COUNT_OBST_LOOP
       MULT_ID = 'null'
       READ(LU_INPUT,NML=OBST,END=1,ERR=2,IOSTAT=IOS)
+      CALL CHECK_XB(XB)
       MULT_INDEX = -1
       IF (MULT_ID=='null') THEN
          MULT_INDEX = 0
@@ -7978,9 +7979,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   XB6 = XB(6) + MR%DZ0 + II*MR%DXB(6)
                ENDIF
                N_OBST_O = N_OBST_O + 1
-               IF (XB1>M%XF+M%DX(IBAR) .OR. XB2<M%XS-M%DX(1) .OR. &
-                   XB3>M%YF+M%DY(JBAR) .OR. XB4<M%YS-M%DY(1) .OR. &
-                   XB5>M%ZF+M%DZ(KBAR) .OR. XB6<M%ZS-M%DZ(1)) CYCLE I_MULT_LOOP2
+               IF (XB1>M%XF+M%DX(M%IBAR) .OR. XB2<M%XS-M%DX(1) .OR. &
+                   XB3>M%YF+M%DY(M%JBAR) .OR. XB4<M%YS-M%DY(1) .OR. &
+                   XB5>M%ZF+M%DZ(M%KBAR) .OR. XB6<M%ZS-M%DZ(1)) CYCLE I_MULT_LOOP2
                N_OBST_DIM = N_OBST_DIM + 1
             ENDDO I_MULT_LOOP2
          ENDDO J_MULT_LOOP2
