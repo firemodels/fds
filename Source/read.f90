@@ -7896,25 +7896,27 @@ END SUBROUTINE READ_TABL
 SUBROUTINE READ_OBST
 
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
-USE COMPLEX_GEOMETRY, ONLY: INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB,ROTATION_MATRIX
+USE COMPLEX_GEOMETRY, ONLY: INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB,INTERSECT_OBB_AABB,ROTATION_MATRIX
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
 INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,EVAC_N,MULT_INDEX,SHAPE_TYPE
-INTEGER, PARAMETER :: SPHERE_TYPE=1,CYLINDER_TYPE=2,CONE_TYPE=3
+INTEGER, PARAMETER :: SPHERE_TYPE=1,CYLINDER_TYPE=2,CONE_TYPE=3,BOX_TYPE=4
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS,IS_INTERSECT
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
-            INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3)
-LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D,WARN_HT3D
+            INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH
+LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,&
+           HT3D,WARN_HT3D
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
-                COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HEIGHT,HT3D,ID,INTERNAL_HEAT_SOURCE,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
+                COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HEIGHT,HT3D,ID,INTERNAL_HEAT_SOURCE,&
+                LENGTH,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
                 ORIENTATION,OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,&
                 RADIUS,REMOVABLE,RGB,&
-                SHAPE,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
-                TRANSPARENCY,XB,XYZ
+                SHAPE,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THETA,THICKEN,&
+                TRANSPARENCY,WIDTH,XB,XYZ
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -8035,8 +8037,11 @@ MESH_LOOP: DO NM=1,NMESHES
       SHAPE_TYPE  = -1
       XYZ         = 0._EB
       RADIUS      = -1._EB
+      LENGTH      = -1._EB
+      WIDTH       = -1._EB
       HEIGHT      = -1._EB
       ORIENTATION = (/0._EB,0._EB,1._EB/)
+      THETA       = 0._EB
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE  = .FALSE.
@@ -8071,17 +8076,24 @@ MESH_LOOP: DO NM=1,NMESHES
                SHAPE_TYPE = SPHERE_TYPE
             CASE('CYLINDER')
                SHAPE_TYPE = CYLINDER_TYPE
-               CALL ROTATION_MATRIX(ROTMAT,ORIENTATION)
+               CALL ROTATION_MATRIX(ROTMAT,ORIENTATION,THETA)
             CASE('CONE')
                SHAPE_TYPE = CONE_TYPE
-               CALL ROTATION_MATRIX(ROTMAT,ORIENTATION)
+               CALL ROTATION_MATRIX(ROTMAT,ORIENTATION,THETA)
+            CASE('BOX')
+               SHAPE_TYPE = BOX_TYPE
+               CALL ROTATION_MATRIX(ROTMAT,ORIENTATION,THETA)
          END SELECT
-         IF (RADIUS<0._EB) THEN
+         IF ((SHAPE_TYPE==SPHERE_TYPE .OR. SHAPE_TYPE==CYLINDER_TYPE .OR. SHAPE_TYPE==CONE_TYPE) .AND. RADIUS<0._EB) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires RADIUS'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF ((SHAPE_TYPE==CYLINDER_TYPE .OR. SHAPE_TYPE==CONE_TYPE) .AND. HEIGHT<0._EB) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires HEIGHT'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (SHAPE_TYPE==BOX_TYPE .AND. (LENGTH<0._EB .OR. WIDTH<0._EB .OR. HEIGHT<0._EB)) THEN
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' BOX SHAPE requires LENGTH, WIDTH, HEIGHT'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -8135,37 +8147,39 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Look for obstructions that are within a half grid cell of the current mesh. If the obstruction is thin and has the
                ! THICKEN attribute, look for it within an entire grid cell.
 
+               THICKEN_LOC = THICKEN
+
                IF ( (XB2>=XS-0.5_EB*DX(0)   .AND. XB2<XS) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)>=XS-DX(0)    .AND. XB2<XS) ) THEN
                   XB1 = XS
                   XB2 = XS
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
                IF ( (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)< XF+DX(IBP1) .AND. XB1>XF) ) THEN
                   XB1 = XF
                   XB2 = XF
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
                IF ( (XB4>=YS-0.5_EB*DY(0)   .AND. XB4<YS) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)>=YS-DY(0)    .AND. XB4<YS) ) THEN
                   XB3 = YS
                   XB4 = YS
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
                IF ( (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)< YF+DY(JBP1) .AND. XB3>YF) ) THEN
                   XB3 = YF
                   XB4 = YF
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
                IF ( ((XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)>=ZS-DZ(0)    .AND. XB6<ZS)) .AND. &
                   .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZS
                   XB6 = ZS
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
                IF ( ((XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF)) .AND. &
                   .NOT.EVACUATION_ONLY(NM)) THEN
                   XB5 = ZF
                   XB6 = ZF
-                  THICKEN = .FALSE.
+                  THICKEN_LOC = .FALSE.
                ENDIF
 
                ! Save the original, undivided obstruction face areas.
@@ -8186,22 +8200,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   N = N-1
                   N_OBST = N_OBST-1
                   CYCLE I_MULT_LOOP
-               ENDIF
-
-               ! Throw out obstructions that are outside shape hull
-
-               IF (SHAPE_TYPE>0) THEN
-                  AABB = (/XB1,XB2,XB3,XB4,XB5,XB6/)
-                  SELECT CASE (SHAPE_TYPE)
-                     CASE (SPHERE_TYPE);   IS_INTERSECT = INTERSECT_SPHERE_AABB(XYZ,RADIUS,AABB)
-                     CASE (CYLINDER_TYPE); IS_INTERSECT = INTERSECT_CYLINDER_AABB(XYZ,HEIGHT,RADIUS,ROTMAT,AABB)
-                     CASE (CONE_TYPE);     IS_INTERSECT = INTERSECT_CONE_AABB(XYZ,HEIGHT,RADIUS,ROTMAT,AABB)
-                  END SELECT
-                  IF (.NOT.IS_INTERSECT) THEN
-                     N = N-1
-                     N_OBST = N_OBST-1
-                     CYCLE I_MULT_LOOP
-                  ENDIF
                ENDIF
 
                ! Begin processing of OBSTruction
@@ -8241,7 +8239,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! If desired, thicken small obstructions
 
-               IF (THICKEN) THEN
+               IF (THICKEN_LOC) THEN
                   IF(OB%I1==OB%I2) THEN
                      OB%I1 = INT(GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI)
                      OB%I2 = MIN(OB%I1+1,IBAR)
@@ -8285,6 +8283,24 @@ MESH_LOOP: DO NM=1,NMESHES
                   N = N-1
                   N_OBST= N_OBST-1
                   CYCLE I_MULT_LOOP
+               ENDIF
+
+               ! Throw out obstructions that are outside shape hull
+
+               IF (SHAPE_TYPE>0) THEN
+                  !AABB = (/XB1,XB2,XB3,XB4,XB5,XB6/)
+                  AABB = (/X(OB%I1),X(OB%I2),Y(OB%J1),Y(OB%J2),Z(OB%K1),Z(OB%K2)/) ! possibly THICKENed OBST
+                  SELECT CASE (SHAPE_TYPE)
+                     CASE (SPHERE_TYPE);   IS_INTERSECT = INTERSECT_SPHERE_AABB(XYZ,RADIUS,AABB)
+                     CASE (CYLINDER_TYPE); IS_INTERSECT = INTERSECT_CYLINDER_AABB(XYZ,HEIGHT,RADIUS,ROTMAT,AABB)
+                     CASE (CONE_TYPE);     IS_INTERSECT = INTERSECT_CONE_AABB(XYZ,HEIGHT,RADIUS,ROTMAT,AABB)
+                     CASE (BOX_TYPE);      IS_INTERSECT = INTERSECT_OBB_AABB(XYZ,LENGTH,WIDTH,HEIGHT,ROTMAT,AABB)
+                  END SELECT
+                  IF (.NOT.IS_INTERSECT) THEN
+                     N = N-1
+                     N_OBST = N_OBST-1
+                     CYCLE I_MULT_LOOP
+                  ENDIF
                ENDIF
 
                ! Check to see if obstruction is completely embedded in another
