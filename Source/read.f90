@@ -7908,7 +7908,7 @@ CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS,IS_INTERSECT
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
             INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3)
-LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D
+LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D,WARN_HT3D
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
                 COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HEIGHT,HT3D,ID,INTERNAL_HEAT_SOURCE,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
                 ORIENTATION,OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,&
@@ -8451,9 +8451,16 @@ MESH_LOOP: DO NM=1,NMESHES
                   SOLID_HT3D = .TRUE. ! global parameter
 
                   IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
-                     WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
-                        ' has zero volume, consider THICKEN=T, HT3D set to F.'
-                     OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                     ! test if OB is on boundary
+                     WARN_HT3D = .TRUE.
+                     IF (OB%I1==OB%I2 .AND. (OB%I1==0 .OR. OB%I2==IBAR)) WARN_HT3D = .FALSE.
+                     IF (OB%J1==OB%J2 .AND. (OB%J1==0 .OR. OB%J2==IBAR)) WARN_HT3D = .FALSE.
+                     IF (OB%K1==OB%K2 .AND. (OB%K1==0 .OR. OB%K2==IBAR)) WARN_HT3D = .FALSE.
+                     IF (WARN_HT3D) THEN
+                        WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
+                           ' has zero volume, consider THICKEN=T, HT3D set to F.'
+                        OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
+                     ENDIF
                   ENDIF
 
                   ! Set MATL_ID for HT3D
