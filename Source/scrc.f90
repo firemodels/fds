@@ -126,7 +126,7 @@ REAL (EB)     :: SCARC_MULTIGRID_ACCURACY   = 1.E-8_EB      !> Requested accurac
 CHARACTER(40) :: SCARC_KRYLOV            = 'CG'             !> Type of Krylov-method (CG/BICG)
 INTEGER       :: SCARC_KRYLOV_ITERATIONS = 500              !> Max number of iterations
 REAL (EB)     :: SCARC_KRYLOV_ACCURACY   = 1.E-8_EB         !> Requested accuracy for convergence
-CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'CONSTANT'       !> Type of Krylov-method (CG/BICG)
+CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'NONE'           !> Interpolation type (only for two-level variants)
 
 !> Parameters for smoothing method (used in multigrids-methods)
 CHARACTER(40) :: SCARC_SMOOTH            = 'SSOR'           !> Smoother for MG (JACOBI/SSOR)
@@ -258,7 +258,8 @@ INTEGER, PARAMETER :: NSCARC_PRECON_JACOBI          =  1, &    !> preconditionin
                       NSCARC_PRECON_CLUSTER         =  5, &    !> preconditioning by CLUSTER-method
                       NSCARC_PRECON_MULTIGRID       =  6       !> preconditioning by MG-method
 
-INTEGER, PARAMETER :: NSCARC_TWOLEVEL_ADD           =  1, &    !> additive 2-level method
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_NONE          =  0, &    !> no two levels, only one level
+                      NSCARC_TWOLEVEL_ADD           =  1, &    !> additive 2-level method
                       NSCARC_TWOLEVEL_MUL           =  2, &    !> multiplicative 2-level method
                       NSCARC_TWOLEVEL_MUL2          =  3       !> multiplicative 2-level method
 
@@ -332,10 +333,8 @@ INTEGER, PARAMETER :: NSCARC_PTR_X_CG               =  1, &    !> selection para
                       NSCARC_PTR_D_CG               =  6, &    !> selection parameter for vector D
                       NSCARC_PTR_Z_CG               =  7, &    !> selection parameter for vector Z
                       NSCARC_PTR_X_MG               =  8, &    !> selection parameter for vector X2
-                      NSCARC_PTR_G_MG               =  9, &    !> selection parameter for vector D2
+                      NSCARC_PTR_F_MG               =  9, &    !> selection parameter for vector D2
                       NSCARC_PTR_D_MG               = 10, &    !> selection parameter for vector D2
-                      NSCARC_PTR_W_MG               = 11, &    !> selection parameter for vector R2
-                      NSCARC_PTR_Y_MG               = 12, &    !> selection parameter for vector Y2
                       NSCARC_PTR_Z_MG               = 13, &    !> selection parameter for vector Y2
                       NSCARC_PTR_H_MAIN             = 14, &    !> selection parameter for vector Y2
                       NSCARC_PTR_HS_MAIN            = 15, &    !> selection parameter for vector Y2
@@ -478,8 +477,8 @@ INTEGER :: TYPE_SCOPE      = NSCARC_SCOPE_MAIN            !> Type of surrounding
 INTEGER :: TYPE_SCOPE0     = NSCARC_SCOPE_MAIN            !> Type of surrounding solver scope II
 INTEGER :: TYPE_METHOD     = NSCARC_METHOD_KRYLOV         !> Type of global ScaRC method
 INTEGER :: TYPE_METHOD0    = NSCARC_METHOD_KRYLOV         !> Type of local ScaRC method
-INTEGER :: TYPE_TWOLEVEL   = NSCARC_UNDEFINED             !> Type of two-level method
-INTEGER :: TYPE_TWOLEVEL0  = NSCARC_UNDEFINED             !> Type of twolevel method
+INTEGER :: TYPE_TWOLEVEL   = NSCARC_TWOLEVEL_NONE         !> Type of two-level method
+INTEGER :: TYPE_TWOLEVEL0  = NSCARC_TWOLEVEL_NONE         !> Type of twolevel method
 INTEGER :: TYPE_INTERPOL   = NSCARC_UNDEFINED             !> Type of interpolation for AMG
 INTEGER :: TYPE_INTERPOL0  = NSCARC_UNDEFINED             !> Type of interpolation method
 INTEGER :: TYPE_KRYLOV     = NSCARC_KRYLOV_CG             !> Type of Krylov method (CG/BICG)
@@ -776,9 +775,9 @@ END TYPE SCARC_OBST_TYPE
 
 
 !> --------------------------------------------------------------------------------------------
-!> Save parent settings when starting new solution method
+!> Save ENV settings when starting new solution method
 !> --------------------------------------------------------------------------------------------
-TYPE SCARC_PARENT_TYPE
+TYPE SCARC_SETTINGS_TYPE
 INTEGER :: TYPE_METHOD           !> type of solution method
 INTEGER :: TYPE_SCOPE            !> type of related scope
 INTEGER :: TYPE_PRECON           !> type of preconditioning method
@@ -787,7 +786,7 @@ INTEGER :: TYPE_TWOLEVEL         !> type of twolevel method
 INTEGER :: TYPE_INTERPOL         !> type of interpolation method
 INTEGER :: TYPE_ACCURACY         !> type of accuracy requirements (relative/absolute)
 INTEGER :: TYPE_CYCLE            !> type of multigrid cycle
-END TYPE SCARC_PARENT_TYPE
+END TYPE SCARC_SETTINGS_TYPE
 
 
 !> --------------------------------------------------------------------------------------------
@@ -5380,7 +5379,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
             !> Preconditioning by blockwise Multigrid
             CASE (NSCARC_PRECON_MULTIGRID)          
-               DO NL = NLEVEL_MIN, NLEVEL_MAX
+               DO NL = NLEVEL_MIN, NLEVEL_MAX-1
                   CALL SCARC_SETUP_MULTIGRID(NM, NL)
                   IF (NL == NLEVEL_MAX) CYCLE
                   IF (TYPE_SMOOTH == NSCARC_SMOOTH_FFT)     CALL SCARC_SETUP_FFT(NM, NL)
@@ -9596,9 +9595,9 @@ SCARC_TIME_SOLVER_SUM(MYID+1) =SCARC_TIME_SOLVER_SUM(MYID+1)+CURRENT_TIME()-TNOW
 END SUBROUTINE SCARC_SOLVER
 
 
-!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>
+!> ------------------------------------------------------------------------------------------------
 !>!> Set pointer to chosen vector for banded storage technique
-!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>!>
+!> ------------------------------------------------------------------------------------------------
 FUNCTION POINT_TO_HVECTOR(NVECTOR, NM)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: POINT_TO_HVECTOR
 INTEGER, INTENT(IN):: NVECTOR, NM
@@ -10153,44 +10152,44 @@ SCARC_TIME_PRECON_SUM(MYID+1) =SCARC_TIME_PRECON_SUM(MYID+1)+CURRENT_TIME()-TNOW
 END SUBROUTINE SCARC_BLOCK_SOLVER
 
 !> ------------------------------------------------------------------------------------------------
-!> Save settings of calling parent-routine
+!> Save settings of calling ENV-routine
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SAVE_PARENT(PARENT)
-TYPE (SCARC_PARENT_TYPE), INTENT(OUT):: PARENT
-PARENT%TYPE_METHOD   = TYPE_METHOD
-PARENT%TYPE_SCOPE    = TYPE_SCOPE
-PARENT%TYPE_PRECON   = TYPE_PRECON
-PARENT%TYPE_SMOOTH   = TYPE_SMOOTH
-PARENT%TYPE_INTERPOL = TYPE_INTERPOL
-PARENT%TYPE_TWOLEVEL = TYPE_TWOLEVEL
-PARENT%TYPE_CYCLE    = TYPE_CYCLE
-PARENT%TYPE_ACCURACY = TYPE_ACCURACY
-END SUBROUTINE SCARC_SAVE_PARENT
+SUBROUTINE SCARC_SAVE_SETTINGS(CURRENT)
+TYPE (SCARC_SETTINGS_TYPE), INTENT(OUT):: CURRENT
+CURRENT%TYPE_METHOD   = TYPE_METHOD
+CURRENT%TYPE_SCOPE    = TYPE_SCOPE
+CURRENT%TYPE_PRECON   = TYPE_PRECON
+CURRENT%TYPE_SMOOTH   = TYPE_SMOOTH
+CURRENT%TYPE_INTERPOL = TYPE_INTERPOL
+CURRENT%TYPE_TWOLEVEL = TYPE_TWOLEVEL
+CURRENT%TYPE_CYCLE    = TYPE_CYCLE
+CURRENT%TYPE_ACCURACY = TYPE_ACCURACY
+END SUBROUTINE SCARC_SAVE_SETTINGS
 
 
 !> ------------------------------------------------------------------------------------------------
-!> Reset settings of calling parent-routine
+!> Reset settings of calling CURRENT-routine
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_RESET_PARENT(PARENT)
-TYPE (SCARC_PARENT_TYPE), INTENT(IN):: PARENT
+SUBROUTINE SCARC_RESTORE_SETTINGS(CURRENT)
+TYPE (SCARC_SETTINGS_TYPE), INTENT(IN):: CURRENT
 IF ((TYPE_METHOD==NSCARC_METHOD_KRYLOV).AND.&
      TYPE_SCOPE ==NSCARC_SCOPE_MAIN) THEN
    TYPE_METHOD   = TYPE_METHOD0
+   TYPE_SCOPE    = TYPE_SCOPE0
    TYPE_PRECON   = TYPE_PRECON0
    TYPE_TWOLEVEL = TYPE_TWOLEVEL0
    TYPE_INTERPOL = TYPE_INTERPOL0
-   TYPE_SCOPE    = TYPE_SCOPE0
 ELSE
-   TYPE_METHOD   = PARENT%TYPE_METHOD
-   TYPE_PRECON   = PARENT%TYPE_PRECON
-   TYPE_TWOLEVEL = PARENT%TYPE_TWOLEVEL
-   TYPE_INTERPOL = PARENT%TYPE_INTERPOL
-   TYPE_SCOPE    = PARENT%TYPE_SCOPE
+   TYPE_METHOD   = CURRENT%TYPE_METHOD
+   TYPE_SCOPE    = CURRENT%TYPE_SCOPE
+   TYPE_PRECON   = CURRENT%TYPE_PRECON
+   TYPE_TWOLEVEL = CURRENT%TYPE_TWOLEVEL
+   TYPE_INTERPOL = CURRENT%TYPE_INTERPOL
 ENDIF
-TYPE_SMOOTH   = PARENT%TYPE_SMOOTH
-TYPE_CYCLE    = PARENT%TYPE_CYCLE
-TYPE_ACCURACY = PARENT%TYPE_ACCURACY
-END SUBROUTINE SCARC_RESET_PARENT
+TYPE_SMOOTH   = CURRENT%TYPE_SMOOTH
+TYPE_CYCLE    = CURRENT%TYPE_CYCLE
+TYPE_ACCURACY = CURRENT%TYPE_ACCURACY
+END SUBROUTINE SCARC_RESTORE_SETTINGS
 
 
 !> ------------------------------------------------------------------------------------------------
@@ -10205,11 +10204,11 @@ REAL(EB), POINTER, DIMENSION(:) :: XS, FS
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
 TYPE (SCARC_MKL_TYPE)   , POINTER :: SM
 TYPE (SCARC_SCOPE_TYPE) :: MKL
-TYPE (SCARC_PARENT_TYPE) :: PARENT
+TYPE (SCARC_SETTINGS_TYPE) :: CURRENT
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SAVE_PARENT(PARENT)
+CALL SCARC_SAVE_SETTINGS(CURRENT)
 CALL SCARC_SETUP_SCOPE(MKL, TYPE_MKL, NSCOPE, NRHS, NL)
 CALL SCARC_SETUP_WORKSPACE(NL)
 
@@ -10236,7 +10235,7 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    CALL SCARC_UPDATE_PRESSURE_GHOSTCELLS (NLEVEL_MIN)
 ENDIF
 
-CALL SCARC_RESET_PARENT(PARENT)
+CALL SCARC_RESTORE_SETTINGS(CURRENT)
 
 SCARC_TIME_CLUSTER_STEP(MYID+1)=MAX(SCARC_TIME_CLUSTER_STEP(MYID+1),CURRENT_TIME()-TNOW)
 SCARC_TIME_CLUSTER_SUM(MYID+1) =SCARC_TIME_CLUSTER_SUM(MYID+1)+CURRENT_TIME()-TNOW
@@ -10258,11 +10257,11 @@ REAL(EB), POINTER, DIMENSION(:) :: XS, FS
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: SL
 TYPE (SCARC_MKL_TYPE)   , POINTER :: SM
 TYPE (SCARC_SCOPE_TYPE) :: MKL
-TYPE (SCARC_PARENT_TYPE) :: PARENT
+TYPE (SCARC_SETTINGS_TYPE) :: CURRENT
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SAVE_PARENT(PARENT)
+CALL SCARC_SAVE_SETTINGS(CURRENT)
 CALL SCARC_SETUP_SCOPE(MKL, TYPE_MKL, NSCOPE, NRHS, NL)
 CALL SCARC_SETUP_WORKSPACE(NL)
 
@@ -10290,7 +10289,7 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    CALL SCARC_UPDATE_PRESSURE_GHOSTCELLS (NLEVEL_MIN)
 ENDIF
 
-CALL SCARC_RESET_PARENT(PARENT)
+CALL SCARC_RESTORE_SETTINGS(CURRENT)
 
 SCARC_TIME_PARDISO_STEP(MYID+1)=MAX(SCARC_TIME_PARDISO_STEP(MYID+1),CURRENT_TIME()-TNOW)
 SCARC_TIME_PARDISO_SUM(MYID+1) =SCARC_TIME_PARDISO_SUM(MYID+1)+CURRENT_TIME()-TNOW
@@ -10310,17 +10309,17 @@ INTEGER   :: ISTATE, ITE
 REAL (EB) :: SIGMA0, SIGMA1, ALPHA0, GAMMA0
 REAL (EB) :: TNOW
 TYPE (SCARC_SCOPE_TYPE) :: CG
-TYPE (SCARC_PARENT_TYPE) :: PARENT
+TYPE (SCARC_SETTINGS_TYPE) :: CURRENT
 
 TNOW = CURRENT_TIME()
 
 !> ------------------------------------------------------------------------------------------------
 !> Initialization:
-!>   - Set environment variables and define working level
-!>   - Initialize solution, right hand side vector and auxiliary vectors
-!>   - Define iterations parameters
+!>   - Save SETTINGS (in case that subsequent solvers with different settings are called)
+!>   - Define parameters for current scope (note: NL denotes the finest level)
+!>   - Initialize solution, right hand side vector
 !> ------------------------------------------------------------------------------------------------
-CALL SCARC_SAVE_PARENT(PARENT)
+CALL SCARC_SAVE_SETTINGS(CURRENT)
 CALL SCARC_SETUP_SCOPE(CG, TYPE_PRECON, NSCOPE, NRHS, NL)
 CALL SCARC_SETUP_WORKSPACE(NL)
 
@@ -10407,7 +10406,7 @@ ENDIF
 call scarc_debug_level (CG%F, 'CG', 'F FINAL', NL)
 call scarc_debug_level (CG%X, 'CG', 'X FINAL', NL)
 
-CALL SCARC_RESET_PARENT(PARENT)
+CALL SCARC_RESTORE_SETTINGS(CURRENT)
 
 SCARC_TIME_KRYLOV_STEP(MYID+1)=MAX(SCARC_TIME_KRYLOV_STEP(MYID+1),CURRENT_TIME()-TNOW)
 SCARC_TIME_KRYLOV_SUM(MYID+1) =SCARC_TIME_KRYLOV_SUM(MYID+1)+CURRENT_TIME()-TNOW
@@ -10510,17 +10509,17 @@ INTEGER   :: ISTATE, ITE
 REAL (EB) :: ALPHA0, ALPHA1, ALPHA2, RHO0, RHO1, DTHETA, DBETA
 REAL (EB) :: TNOW
 TYPE (SCARC_SCOPE_TYPE)  :: BICG
-TYPE (SCARC_PARENT_TYPE) :: PARENT
+TYPE (SCARC_SETTINGS_TYPE) :: CURRENT
 
 TNOW = CURRENT_TIME()
 
 !> ------------------------------------------------------------------------------------------------
-!> Initialization
-!>   - Set environment variables and define working level
-!>   - Initialize solution, right hand side vector and auxiliary vectors
-!>   - Define iterations parameters
+!> Initialization:
+!>   - Save SETTINGS (in case that subsequent solvers with different settings are called)
+!>   - Define parameters for current scope (note: NL denotes the finest level)
+!>   - Initialize solution, right hand side vector
 !> ------------------------------------------------------------------------------------------------
-CALL SCARC_SAVE_PARENT(PARENT)
+CALL SCARC_SAVE_SETTINGS(CURRENT)
 CALL SCARC_SETUP_SCOPE(BICG, TYPE_PRECON, NSCOPE, NRHS, NL)
 CALL SCARC_SETUP_WORKSPACE(NL)
 
@@ -10596,7 +10595,7 @@ IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    CALL SCARC_UPDATE_PRESSURE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
-CALL SCARC_RESET_PARENT(PARENT)
+CALL SCARC_RESTORE_SETTINGS(CURRENT)
 
 SCARC_TIME_KRYLOV_STEP(MYID+1)=MAX(SCARC_TIME_KRYLOV_STEP(MYID+1),CURRENT_TIME()-TNOW)
 SCARC_TIME_KRYLOV_SUM(MYID+1) =SCARC_TIME_KRYLOV_SUM(MYID+1)+CURRENT_TIME()-TNOW
@@ -10641,17 +10640,17 @@ INTEGER   :: NL = NSCARC_UNDEFINED
 INTEGER   :: ISTATE, ICYCLE, ITE
 REAL (EB) :: TNOW, TNOW_COARSE
 TYPE (SCARC_SCOPE_TYPE)  :: MG
-TYPE (SCARC_PARENT_TYPE) :: PARENT
+TYPE (SCARC_SETTINGS_TYPE) :: CURRENT
 
 TNOW = CURRENT_TIME()
 
 !> ------------------------------------------------------------------------------------------------
 !> Initialization:
-!>   - Set environment variables and define working level
+!>   - Save SETTINGS (in case that subsequent solvers with different settings are called)
+!>   - Define parameters for current scope (note: NL denotes the finest level)
 !>   - Initialize solution, right hand side vector
-!>   - Define iterations parameters (NL is set to finest level)
 !> ------------------------------------------------------------------------------------------------
-CALL SCARC_SAVE_PARENT(PARENT)
+CALL SCARC_SAVE_SETTINGS(CURRENT)
 CALL SCARC_SETUP_SCOPE(MG, TYPE_SMOOTH, NSCOPE, NRHS, NL)
 CALL SCARC_SETUP_WORKSPACE(NL)
 
@@ -10757,7 +10756,7 @@ END SELECT
 
 call scarc_debug_level (MG%X, 'MG', 'X FINAL ', NL)
 
-CALL SCARC_RESET_PARENT(PARENT)
+CALL SCARC_RESTORE_SETTINGS(CURRENT)
 
 SCARC_TIME_MULTIGRID_STEP(MYID+1)=MAX(SCARC_TIME_MULTIGRID_STEP(MYID+1),CURRENT_TIME()-TNOW)
 SCARC_TIME_MULTIGRID_SUM(MYID+1) =SCARC_TIME_MULTIGRID_SUM(MYID+1)+CURRENT_TIME()-TNOW
