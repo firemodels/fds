@@ -125,6 +125,7 @@ OUT2ERROR=
 stopjob=0
 MCA=
 OPENMPCASES=
+OPENMPTEST=
 if [ "$MPIRUN_MCA" != "" ]; then
   MCA=$MPIRUN_MCA
 fi
@@ -164,7 +165,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:f:hHiIm:MNn:o:O:p:q:rsStT:vw:' OPTION
+while getopts 'ACd:e:f:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -218,6 +219,10 @@ case $OPTION  in
    ;;
   p)
    nmpi_processes="$OPTARG"
+   ;;
+  P)
+   OPENMPCASES="2"
+   OPENMPTEST="1"
    ;;
   q)
    queue="$OPTARG"
@@ -483,6 +488,9 @@ if [ "$OPENMPCASES" == "" ]; then
   fi
 else
 for nthreads in `seq 1 $OPENMPCASES`; do
+  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
+    nthreads=4
+  fi
   arg=`echo $nthreads | tr 123456789 abcdefghi`
   in_full_file=$in$arg.fds
   if ! [ -e $in_full_file ]; then
@@ -674,6 +682,9 @@ $MPIRUN $exe $in $OUT2ERROR
 EOF
 else
 for nthreads in `seq 1 $OPENMPCASES`; do
+  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
+    nthreads=4
+  fi
   arg=`echo $nthreads | tr 123456789 abcdefghi`
 cat << EOF >> $scriptfile
 
