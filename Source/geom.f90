@@ -34800,7 +34800,7 @@ REAL(EB), INTENT(IN) :: X_IN(3),L,W,H,ROTMAT(3,3),XB(6)
 REAL(EB) :: X(3),U(3),V(3),X0,XL,Y0,YW,Z0,ZH
 INTEGER :: II,JJ,KK
 
-INTERSECT_OBB_AABB=.TRUE.
+INTERSECT_OBB_AABB=.FALSE.
 
 X  = MATMUL(ROTMAT,X_IN) ! transform center
 X0 = X(1) - 0.5_EB*L - TWO_EPSILON_EB
@@ -34810,18 +34810,16 @@ YW = X(2) + 0.5_EB*W + TWO_EPSILON_EB
 Z0 = X(3) - 0.5_EB*H - TWO_EPSILON_EB
 ZH = X(3) + 0.5_EB*H + TWO_EPSILON_EB
 
-! transform vertices and test against end planes
+! transform and test vertices (probably a more efficient way, but just to get going...)
 DO KK=5,6
    DO JJ=3,4
       DO II=1,2
          V = (/XB(II),XB(JJ),XB(KK)/)
          U = MATMUL(ROTMAT,V)
-         IF (U(1)<X0) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
-         IF (U(1)>XL) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
-         IF (U(2)<Y0) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
-         IF (U(2)>YW) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
-         IF (U(3)<Z0) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
-         IF (U(3)>ZH) THEN; INTERSECT_OBB_AABB=.FALSE.; RETURN; ENDIF
+         IF (U(1)>X0 .AND. U(1)<XL .AND. U(2)>Y0 .AND. U(2)<YW .AND. U(3)>Z0 .AND. U(3)<ZH) THEN
+            INTERSECT_OBB_AABB=.TRUE.
+            RETURN
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
