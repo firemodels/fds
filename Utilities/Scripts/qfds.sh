@@ -13,6 +13,69 @@
 # SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
 #                    ( used to kill jobs )
 
+# ---------------------------- stop_fds_if_requested ----------------------------------
+
+function stop_fds_if_requested {
+if [ "$OPENMPCASES" == "" ]; then
+  if [ "$STOPFDS" != "" ]; then
+   echo "stopping case: $in"
+   touch $stopfile
+   exit
+  fi
+
+  if [ "$STOPFDSMAXITER" != "" ]; then
+    echo "creating delayed stop file: $infile"
+    echo $STOPFDSMAXITER > $stopfile
+  fi
+
+  if [ "$stopjob" == "1" ]; then
+    echo "stopping case: $in"
+    touch $stopfile
+    exit
+  fi
+
+  if [ "$STOPFDSMAXITER" == "" ]; then
+    if [ -e $stopfile ]; then
+      rm $stopfile
+    fi
+  fi
+else
+  for nthreads in `seq 1 $OPENMPCASES`; do
+    if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
+      nthreads=4
+    fi
+    arg=`echo $nthreads | tr 123456789 abcdefghi`
+    stopfile=$in$arg.stop
+    if [ "$STOPFDS" != "" ]; then
+      echo "stopping case: $in$arg.fds"
+      touch $stopfile
+    fi
+
+    if [ "$STOPFDSMAXITER" != "" ]; then
+      echo "creating delayed stop file: $stopfile"
+      echo $STOPFDSMAXITER > $stopfile
+    fi
+
+    if [ "$stopjob" == "1" ]; then
+      echo "stopping case: $in$arg.fds"
+      touch $stopfile
+    fi
+
+    if [ "$STOPFDSMAXITER" == "" ]; then
+      if [ -e $stopfile ]; then
+        rm $stopfile
+      fi
+    fi
+  done
+  if [ "$STOPFDS" != "" ]; then
+    exit
+  fi
+  if [ "$stopjob" == "1" ]; then
+    exit
+  fi
+fi
+}
+
 # ---------------------------- usage ----------------------------------
 
 function usage {
@@ -505,48 +568,29 @@ if [ "$ABORTRUN" == "y" ]; then
 fi
 fi
 
-if [ $STOPFDS ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
-fi
+if [ "$STOPFDS" == "" ]; then
+  if [ "$exe" != "" ]; then
+    if ! [ -e "$exe" ]; then
+      if [ "$showinput" == "0" ]; then
+        echo "The program, $exe, does not exist. Run aborted."
+        ABORTRUN=y
+      fi
+    fi
+  fi
 
-if [ "$exe" != "" ]; then
-  if ! [ -e "$exe" ]; then
+  if [ -e $outlog ]; then
+    echo "Removing log file: $outlog"
+    rm $outlog
+  fi
+
+  if [ "$ABORTRUN" == "y" ]; then
     if [ "$showinput" == "0" ]; then
-      echo "The program, $exe, does not exist. Run aborted."
-      ABORTRUN=y
+      exit
     fi
   fi
 fi
 
-if [ -e $outlog ]; then
-  echo "Removing log file: $outlog"
-  rm $outlog
-fi
-
-if [ "$ABORTRUN" == "y" ]; then
-  if [ "$showinput" == "0" ]; then
-    exit
-  fi
-fi
-
-if [ "$STOPFDSMAXITER" != "" ]; then
-  echo "creating delayed stop file: $infile"
-  echo $STOPFDSMAXITER > $stopfile
-fi
-
-if [ "$stopjob" == "1" ]; then
-  echo "stopping case: $in"
-  touch $stopfile
-  exit
-fi
-
-if [ "$STOPFDSMAXITER" == "" ]; then
-  if [ -e $stopfile ]; then
-    rm $stopfile
-  fi
-fi
+stop_fds_if_requested
 
 #QSUB="qsub -k eo -q $queue"
 QSUB="qsub -q $queue"
