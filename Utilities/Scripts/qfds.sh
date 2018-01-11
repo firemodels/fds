@@ -62,8 +62,10 @@ else
     fi
 
     if [ "$STOPFDSMAXITER" == "" ]; then
-      if [ -e $stopfile ]; then
-        rm $stopfile
+      if [ "$STOPFDS" == "" ]; then
+        if [ -e $stopfile ]; then
+          rm $stopfile
+        fi
       fi
     fi
   done
