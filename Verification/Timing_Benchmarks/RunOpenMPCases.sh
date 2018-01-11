@@ -2,8 +2,8 @@
 
 export JOBPREFIX=MP_
 OUTFILE=openmp_summary.csv
-QFDS="../../Utilities/Scripts/qfds.sh  -I  -t -q bench1 " 
-NCASES=5
+QFDS="../../Utilities/Scripts/qfds.sh  -P -I  -t -q aspen " 
+NCASES=2
 
 #---------------------------------------------
 #                   wait_cases_end
@@ -24,17 +24,15 @@ arg=0$i
   if [ $i -gt 9 ]; then
     arg=$i
   fi
-  ./makecase64.sh 64 test64a$arg
-  $QFDS -o 1 test64a$arg.fds
+  base=t64${arg}
+  ./makecase.sh 64 ${base}a
+  ./makecase.sh 64 ${base}d
+  $QFDS $base
 
-  ./makecase64.sh 64 test64d$arg
-  $QFDS -o 4 test64d$arg.fds
-
-  ./makecase128.sh 128 test128a$arg
-  $QFDS -o 1 test128a$arg.fds
-
-  ./makecase128.sh 128 test128d$arg
-  $QFDS -o 4 test128d$arg.fds
+  base=t128${arg}
+  ./makecase.sh 128 ${base}a
+  ./makecase.sh 128 ${base}d
+  $QFDS $base
 done
 
 wait_cases_end
@@ -45,15 +43,16 @@ arg=0$i
   if [ $i -gt 9 ]; then
     arg=$i
   fi
-  
-  HOST1=`grep Host test64a$arg.log  | awk '{print $2}'`
-  HOST2=`grep Host test64d$arg.log  | awk '{print $2}'`
-  HOST3=`grep Host test128a$arg.log | awk '{print $2}'`
-  HOST4=`grep Host test128d$arg.log | awk '{print $2}'`
-  TIME1=`grep Time test64a$arg.out  | grep Stepping | awk '{print $7}'`
-  TIME2=`grep Time test64d$arg.out  | grep Stepping | awk '{print $7}'`
-  TIME3=`grep Time test128a$arg.out | grep Stepping | awk '{print $7}'`
-  TIME4=`grep Time test128d$arg.out | grep Stepping | awk '{print $7}'`
+  arga=${arg}a 
+  argd=${arg}d 
+  HOST1=`grep Host t64$arga.log  | awk '{print $2}'`
+  HOST2=`grep Host t64$argd.log  | awk '{print $2}'`
+  HOST3=`grep Host t128$arga.log | awk '{print $2}'`
+  HOST4=`grep Host t128$argd.log | awk '{print $2}'`
+  TIME1=`grep Time t64$arga.out  | grep Stepping | awk '{print $7}'`
+  TIME2=`grep Time t64$argd.out  | grep Stepping | awk '{print $7}'`
+  TIME3=`grep Time t128$arga.out | grep Stepping | awk '{print $7}'`
+  TIME4=`grep Time t128$argd.out | grep Stepping | awk '{print $7}'`
   echo "$TIME1,$HOST1,$TIME2,$HOST2,$TIME3,$HOST3,$TIME4,$HOST4">>$OUTFILE
 done
 echo complete
