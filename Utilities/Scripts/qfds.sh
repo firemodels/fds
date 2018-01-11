@@ -281,9 +281,17 @@ case $OPTION  in
    ;;
   O)
    OPENMPCASES="$OPTARG"
+   benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   p)
    nmpi_processes="$OPTARG"
+   benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   P)
    OPENMPCASES="2"
