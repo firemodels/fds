@@ -718,7 +718,26 @@ cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
+EOF
+if [ "$OPENMPCASES" == "" ]; then
+cat << EOF >> $scriptfile
 echo "    Input file: $in"
+EOF
+else
+cat << EOF >> $scriptfile
+echo "    Input files:"
+EOF
+for nthreads in `seq 1 $OPENMPCASES`; do
+  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
+    nthreads=4
+  fi
+  arg=`echo $nthreads | tr 123456789 abcdefghi`
+cat << EOF >> $scriptfile
+echo "       $in$arg.fds"
+EOF
+done
+fi
+cat << EOF >> $scriptfile
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
 EOF
@@ -734,8 +753,8 @@ for nthreads in `seq 1 $OPENMPCASES`; do
   arg=`echo $nthreads | tr 123456789 abcdefghi`
 cat << EOF >> $scriptfile
 
-  export OMP_NUM_THREADS=$nthreads
-  $MPIRUN $exe $in$arg.fds $OUT2ERROR
+export OMP_NUM_THREADS=$nthreads
+$MPIRUN $exe $in$arg.fds $OUT2ERROR
 EOF
 done
 fi
@@ -755,7 +774,18 @@ fi
 #*** output info to screen
 
 if [ "$queue" != "none" ]; then
+if [ "$OPENMPCASES" == "" ]; then
   echo "         Input file:$in"
+else
+  echo "         Input files:"
+for nthreads in `seq 1 $OPENMPCASES`; do
+  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
+    nthreads=4
+  fi
+  arg=`echo $nthreads | tr 123456789 abcdefghi`
+  echo "            $in$arg.fds"
+done
+fi
   echo "         Executable:$exe"
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH"
