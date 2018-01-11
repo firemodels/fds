@@ -9,7 +9,7 @@ else
 fi
 echo generating test case $casename
 cat <<EOF > $casename
-&HEAD CHID='$chid', TITLE='General purpose input file to test FDS timings /
+&HEAD CHID='$chid', TITLE='General purpose input file to test FDS timings' /
 
 REM DO NOT EDIT the .fds input files directly.  When making changes:
 REM 1. edit the template file, makecase.sh
