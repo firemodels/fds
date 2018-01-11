@@ -8138,6 +8138,8 @@ MESH_LOOP: DO NM=1,NMESHES
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
+               IF (MR%SKIP(II,JJ,KK)) CYCLE I_MULT_LOOP
+
                IF (.NOT.MR%SEQUENTIAL) THEN
                   XB1 = XB(1) + MR%DX0 + II*MR%DXB(1)
                   XB2 = XB(2) + MR%DX0 + II*MR%DXB(2)
@@ -9162,6 +9164,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
+               IF (MR%SKIP(II,JJ,KK)) CYCLE I_MULT_LOOP
+
                IF (.NOT.MR%SEQUENTIAL) THEN
                   X1 = XB(1) + MR%DX0 + II*MR%DXB(1)
                   X2 = XB(2) + MR%DX0 + II*MR%DXB(2)
@@ -9701,6 +9705,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
       K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
          J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
             I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
+
+               IF (MR%SKIP(II,JJ,KK)) CYCLE I_MULT_LOOP
 
                REJECT_VENT = .FALSE.
 
@@ -10396,6 +10402,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
    K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
       J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
          I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
+
+            IF (MR%SKIP(II,JJ,KK)) CYCLE I_MULT_LOOP
 
             NNN = NNN + 1  ! Counter for MULT INIT lines
 
