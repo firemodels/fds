@@ -40,14 +40,10 @@ if [ "$OPENMPCASES" == "" ]; then
     fi
   fi
 else
-  for nthreads in `seq 1 $OPENMPCASES`; do
-    if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
-      nthreads=4
-    fi
-    arg=`echo $nthreads | tr 123456789 abcdefghi`
-    stopfile=$in$arg.stop
+  for i in `seq 1 $OPENMPCASES`; do
+    stopfile=$filebase[$i].stop
     if [ "$STOPFDS" != "" ]; then
-      echo "stopping case: $in$arg.fds"
+      echo "stopping case: $files[$i]"
       touch $stopfile
     fi
 
@@ -57,7 +53,7 @@ else
     fi
 
     if [ "$stopjob" == "1" ]; then
-      echo "stopping case: $in$arg.fds"
+      echo "stopping case: $files[$i]"
       touch $stopfile
     fi
 
@@ -336,6 +332,20 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [ "$OPENMPCASES" == "" ]; then
+  files[1]=$in
+else
+  for i in `seq 1 $OPENMPCASES`; do
+    nthreads[$i]=$i
+    if [[ "$OPENMPTEST" == "1" ]] && [[ "$i" == "2" ]]; then
+      nthreads[$i]=4
+    fi
+    arg=`echo $nthreads[$i] | tr 123456789 abcdefghi`
+    filebase[$i]=$in$arg
+    files[$i]=$in$arg.fds
+  done
+fi
+
 #*** parse options
 
 if [ "$walltime" == "" ]; then
@@ -560,12 +570,8 @@ if [ "$OPENMPCASES" == "" ]; then
     fi
   fi
 else
-for nthreads in `seq 1 $OPENMPCASES`; do
-  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
-    nthreads=4
-  fi
-  arg=`echo $nthreads | tr 123456789 abcdefghi`
-  in_full_file=$in$arg.fds
+for i in `seq 1 $OPENMPCASES`; do
+  in_full_file=files[$i]
   if ! [ -e $in_full_file ]; then
     if [ "$showinput" == "0" ]; then
       echo "The input file, $in_full_file, does not exist."
@@ -727,6 +733,7 @@ cd $fulldir
 echo
 echo \`date\`
 EOF
+
 if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 echo "    Input file: $in"
@@ -735,13 +742,9 @@ else
 cat << EOF >> $scriptfile
 echo "    Input files:"
 EOF
-for nthreads in `seq 1 $OPENMPCASES`; do
-  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
-    nthreads=4
-  fi
-  arg=`echo $nthreads | tr 123456789 abcdefghi`
+for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
-echo "       $in$arg.fds"
+echo "       $files[$i]"
 EOF
 done
 fi
@@ -754,15 +757,11 @@ cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 else
-for nthreads in `seq 1 $OPENMPCASES`; do
-  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
-    nthreads=4
-  fi
-  arg=`echo $nthreads | tr 123456789 abcdefghi`
+for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
 
-export OMP_NUM_THREADS=$nthreads
-$MPIRUN $exe $in$arg.fds $OUT2ERROR
+export OMP_NUM_THREADS=$nthreads[$i]
+$MPIRUN $exe $files[$i] $OUT2ERROR
 EOF
 done
 fi
@@ -786,12 +785,8 @@ if [ "$OPENMPCASES" == "" ]; then
   echo "         Input file:$in"
 else
   echo "         Input files:"
-for nthreads in `seq 1 $OPENMPCASES`; do
-  if [[ "$OPENMPTEST" == "1" ]] && [[ "$nthreads" == "2" ]]; then
-    nthreads=4
-  fi
-  arg=`echo $nthreads | tr 123456789 abcdefghi`
-  echo "            $in$arg.fds"
+for i in `seq 1 $OPENMPCASES`; do
+  echo "            $files[$i]"
 done
 fi
   echo "         Executable:$exe"
