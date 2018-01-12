@@ -9,6 +9,7 @@
 #define MPI_ENABLED
 ! Debug:
 !#define DEBUG_SET_CUTCELLS /* Debug cut-cell definition algorithm. */
+!#define DEBUG_IBM_INTERPOLATION /* Debug IBM interpolation and forcing scheme. */
 !#define DEBUG_MATVEC_DATA /* Debug cut-cell region indexing, construction of regular, rc faces for scalars, etc. */
 
 
@@ -1787,7 +1788,6 @@ IF (PERIODIC_TEST == 105) THEN ! Cut-cell definition timings test.
     ENDDO
     WRITE_SET_CUTCELLS_TIMINGS = .TRUE.
     COMPUTE_CUTCELLS_ONLY =.TRUE.
-    STOP_STATUS = SETUP_ONLY_STOP
 ENDIF
 
 ! Write out SET_CUTCELLS_3D loop time:
@@ -1839,8 +1839,10 @@ IF (WRITE_SET_CUTCELLS_TIMINGS) THEN
    ENDIF
 ENDIF
 
-IF (COMPUTE_CUTCELLS_ONLY) RETURN
-
+IF (COMPUTE_CUTCELLS_ONLY) THEN
+   STOP_STATUS = SETUP_ONLY_STOP
+   RETURN
+ENDIF
 CALL GET_CRTCFCC_INTERPOLATION_STENCILS ! Computes interpolation stencils for face and cell centers.
 CALL SET_CFACES_ONE_D_RDN               ! Set inverse DXN for CFACES.
 CALL SET_CCIBM_MATVEC_DATA              ! Defines data for discretization matrix-vectors.
@@ -10268,6 +10270,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = U_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE IAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,U_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10357,6 +10368,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = V_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE JAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,V_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10447,6 +10467,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = W_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE KAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,W_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10520,7 +10549,15 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = U_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL IAXIS=',MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,U_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          U_IBM = U_INT
          IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
@@ -10553,7 +10590,15 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = V_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL JAXIS=',MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,V_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          V_IBM = V_INT
          IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
@@ -10586,7 +10631,16 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = W_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL KAXIS=',PREDICTOR,MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,W_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT),&
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN(IPT),MESHES(NM)%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          W_IBM = W_INT
          IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
@@ -12314,6 +12368,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ALLOCATE( IJKFACE(ILO_FACE:IHI_FACE,JLO_FACE:JHI_FACE,KLO_FACE:KHI_FACE,IAXIS:KAXIS) )
    IJKFACE(:,:,:,:) = 0
 
+   ! Regular Faces thar are boundary of cut-cells:
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
       NCELL = CUT_CELL(ICC)%NCELL
       IJK(IAXIS:KAXIS) = CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
@@ -12396,7 +12451,9 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       END SELECT
 
       ! Now search in ix2 +- 1, ix3 +- 1:
-      DO IX1=X1LO_FACE,X1HI_FACE
+      ! The loop is separated in internal and boundary faces to the block, such that faces next to cut-faces laying on
+      ! external domain boundaries are not forced (except PERIODIC boundaries):
+      DO IX1=X1LO_FACE+1,X1HI_FACE-1
          DO IX2=X2LO_CELL,X2HI_CELL
             DO IX3=X3LO_CELL,X3HI_CELL
 
@@ -12426,6 +12483,39 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDDO
       ENDDO
+
+      ! Then external wall cells:
+      DO IX1=X1LO_FACE,X1HI_FACE,(X1HI_FACE-X1LO_FACE) ! This sets the loop to run over X1LO_FACE and X1HI_FACE values.
+         DO IX2=X2LO_CELL,X2HI_CELL
+            DO IX3=X3LO_CELL,X3HI_CELL
+
+               ! Faces indexes:
+               INDXI1(IAXIS:KAXIS) = (/ IX1, IX2, IX3 /)
+               INDI = INDXI1(XIAXIS)
+               INDJ = INDXI1(XJAXIS)
+               INDK = INDXI1(XKAXIS)
+
+               IF ( FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) /= IBM_GASPHASE ) CYCLE
+               IF ( FCVAR(INDI,INDJ,INDK,IBM_FFNF,X1AXIS) == IBM_CUTCFE )   CYCLE
+
+               DO ADDX=1,4
+                  ADDX2 = ADDVEC(1,ADDX)
+                  ADDX3 = ADDVEC(2,ADDX)
+
+                  ! FIRST CARTESIAN FACE:
+                  INDXI1(IAXIS:KAXIS) = (/ IX1, IX2+ADDX2, IX3+ADDX3 /)
+                  INFACE = INDXI1(XIAXIS)
+                  JNFACE = INDXI1(XJAXIS)
+                  KNFACE = INDXI1(XKAXIS)
+                  IF( FCVAR(INFACE,JNFACE,KNFACE,IBM_FGSC,X1AXIS) == IBM_CUTCFE ) THEN
+                     IJKFACE(INDI,INDJ,INDK,X1AXIS) = 1
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+
    ENDDO
    ENDIF ! DO_GASNXT_CUTFACE
 

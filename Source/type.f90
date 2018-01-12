@@ -408,8 +408,10 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
    REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN,VELS_CARTCEN ! Stencil velocity values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN,DHDX1_CARTCEN! Stencil FV and DHDX1.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN=0._EB,VELS_CARTCEN=0._EB
+                                                                      ! Stencil velocity values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN=0._EB,DHDX1_CARTCEN=0._EB
+                                                                      ! Stencil FV and DHDX1.
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::    IJK_CFCEN ! [ I J K ]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: XYZ_BP_CFCEN ! [x y z] location of bnd pt.
@@ -465,8 +467,8 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), DIMENSION(MAX_DIM)                              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  DIMENSION(3)                                    ::  INBFC_CARTCEN ! Inbound face BP belongs to.
    REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::H_CARTCEN       ! Stencil H values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::RHO_0_CARTCEN,W_CARTCEN
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::H_CARTCEN=0._EB       ! Stencil H values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::RHO_0_CARTCEN=0._EB,W_CARTCEN=0._EB
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   ::    IJK_CCCEN ! [ I J K ]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: XYZ_BP_CCCEN ! [x y z] location of bnd pt.
@@ -534,8 +536,10 @@ TYPE IBM_RCVEL_TYPE
    REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
    REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN,VELS_CARTCEN ! Stencil velocity values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN,DHDX1_CARTCEN! Stencil FV and DHDX1.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN=0._EB,VELS_CARTCEN=0._EB
+                                                                     ! Stencil velocity values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN=0._EB,DHDX1_CARTCEN=0._EB
+                                                                     ! Stencil FV and DHDX1.
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
    REAL(EB) :: VELINT
 END TYPE IBM_RCVEL_TYPE
@@ -550,8 +554,8 @@ TYPE IBM_RCELL_TYPE
    REAL(EB), DIMENSION(MAX_DIM)                          :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  DIMENSION(3)                                ::  INBFC_CARTCEN ! Inbound face BP belongs to.
    REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::H_CARTCEN       ! Stencil H values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::RHO_0_CARTCEN,W_CARTCEN
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::H_CARTCEN=0._EB       ! Stencil H values.
+   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::RHO_0_CARTCEN=0._EB,W_CARTCEN=0._EB
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
    REAL(EB) :: HINT
 END TYPE IBM_RCELL_TYPE
