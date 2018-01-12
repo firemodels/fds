@@ -576,7 +576,7 @@ if [ "$OPENMPCASES" == "" ]; then
   fi
 else
 for i in `seq 1 $OPENMPCASES`; do
-  in_full_file=$fulldir$/${files[$i]}
+  in_full_file=$fulldir/${files[$i]}
   if ! [ -e $in_full_file ]; then
     if [ "$showinput" == "0" ]; then
       echo "The input file, $in_full_file, does not exist."
