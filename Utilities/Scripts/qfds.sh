@@ -43,7 +43,7 @@ else
   for i in `seq 1 $OPENMPCASES`; do
     stopfile=$filebase[$i].stop
     if [ "$STOPFDS" != "" ]; then
-      echo "stopping case: $files[$i]"
+      echo "stopping case: ${files[$i]}"
       touch $stopfile
     fi
 
@@ -53,7 +53,7 @@ else
     fi
 
     if [ "$stopjob" == "1" ]; then
-      echo "stopping case: $files[$i]"
+      echo "stopping case: ${files[$i]}"
       touch $stopfile
     fi
 
@@ -277,6 +277,10 @@ case $OPTION  in
    ;;
   O)
    OPENMPCASES="$OPTARG"
+   if [ $OPENMPCASES -gt 99 ]; then
+     OPENMPCASES=99
+   fi
+   nmpi_process=1
    benchmark="yes"
    if [ "$NCORES_COMPUTENODE" != "" ]; then
      nmpi_processes_per_node="$NCORES_COMPUTENODE"
@@ -284,14 +288,15 @@ case $OPTION  in
    ;;
   p)
    nmpi_processes="$OPTARG"
-   benchmark="yes"
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     nmpi_processes_per_node="$NCORES_COMPUTENODE"
-   fi
    ;;
   P)
    OPENMPCASES="2"
    OPENMPTEST="1"
+   benchmark="yes"
+   nmpi_process=1
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   q)
    queue="$OPTARG"
@@ -332,15 +337,22 @@ esac
 done
 shift $(($OPTIND-1))
 
+#*** define input file
+
+in=$1
+infile=${in%.*}
+
 if [ "$OPENMPCASES" == "" ]; then
   files[1]=$in
+  filebase[1]=$infile
+  nthreads[1]=$nopenmp_threads
 else
   for i in `seq 1 $OPENMPCASES`; do
     nthreads[$i]=$i
     if [[ "$OPENMPTEST" == "1" ]] && [[ "$i" == "2" ]]; then
       nthreads[$i]=4
     fi
-    arg=`echo $nthreads[$i] | tr 123456789 abcdefghi`
+    arg=`echo ${nthreads[$i]} | tr 123456789 abcdefghi`
     filebase[$i]=$in$arg
     files[$i]=$in$arg.fds
   done
@@ -439,13 +451,6 @@ if [ "$STARTUP" == "" ]; then
     MODULES=$CURRENT_LOADED_MODULES
   fi
 fi
-
-#*** define input file
-
-in=$1
-infile=${in%.*}
-
-TITLE="$infile"
 
 #*** define number of nodes
 
@@ -571,7 +576,7 @@ if [ "$OPENMPCASES" == "" ]; then
   fi
 else
 for i in `seq 1 $OPENMPCASES`; do
-  in_full_file=files[$i]
+  in_full_file=$fulldir$/${files[$i]}
   if ! [ -e $in_full_file ]; then
     if [ "$showinput" == "0" ]; then
       echo "The input file, $in_full_file, does not exist."
@@ -740,11 +745,11 @@ echo "    Input file: $in"
 EOF
 else
 cat << EOF >> $scriptfile
-echo "    Input files:"
+echo "    Input files: "
 EOF
 for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
-echo "       $files[$i]"
+echo "       ${files[$i]}"
 EOF
 done
 fi
@@ -760,8 +765,8 @@ else
 for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
 
-export OMP_NUM_THREADS=$nthreads[$i]
-$MPIRUN $exe $files[$i] $OUT2ERROR
+export OMP_NUM_THREADS=${nthreads[$i]}
+$MPIRUN $exe ${files[$i]} $OUT2ERROR
 EOF
 done
 fi
@@ -786,7 +791,7 @@ if [ "$OPENMPCASES" == "" ]; then
 else
   echo "         Input files:"
 for i in `seq 1 $OPENMPCASES`; do
-  echo "            $files[$i]"
+  echo "            ${files[$i]}"
 done
 fi
   echo "         Executable:$exe"
