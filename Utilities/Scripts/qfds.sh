@@ -41,7 +41,7 @@ if [ "$OPENMPCASES" == "" ]; then
   fi
 else
   for i in `seq 1 $OPENMPCASES`; do
-    stopfile=$filebase[$i].stop
+    stopfile=${filebase[$i]}.stop
     if [ "$STOPFDS" != "" ]; then
       echo "stopping case: ${files[$i]}"
       touch $stopfile
