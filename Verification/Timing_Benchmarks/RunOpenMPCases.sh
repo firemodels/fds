@@ -2,8 +2,8 @@
 
 export JOBPREFIX=MP_
 OUTFILE=openmp_summary.csv
-QFDS="../../Utilities/Scripts/qfds.sh  -P -I  -t -q aspen " 
-NCASES=2
+QFDS="../../Utilities/Scripts/qfds.sh  -P -I  -t -q batch " 
+NCASES=1
 
 #---------------------------------------------
 #                   wait_cases_end
@@ -43,12 +43,13 @@ arg=0$i
   if [ $i -gt 9 ]; then
     arg=$i
   fi
-  arga=${arg}a 
-  argd=${arg}d 
-  HOST1=`grep Host t64$arga.log  | awk '{print $2}'`
-  HOST2=`grep Host t64$argd.log  | awk '{print $2}'`
-  HOST3=`grep Host t128$arga.log | awk '{print $2}'`
-  HOST4=`grep Host t128$argd.log | awk '{print $2}'`
+  arglog=${arg} 
+  arga=${arg}a
+  argd=${arg}a
+  HOST1=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
+  HOST2=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
+  HOST3=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
+  HOST4=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
   TIME1=`grep Time t64$arga.out  | grep Stepping | awk '{print $7}'`
   TIME2=`grep Time t64$argd.out  | grep Stepping | awk '{print $7}'`
   TIME3=`grep Time t128$arga.out | grep Stepping | awk '{print $7}'`
