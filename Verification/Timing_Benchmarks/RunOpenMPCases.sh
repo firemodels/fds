@@ -3,7 +3,7 @@
 export JOBPREFIX=MP_
 OUTFILE=openmp_summary.csv
 QFDS="../../Utilities/Scripts/qfds.sh  -P -I  -t -q batch " 
-NCASES=1
+NCASES=25
 
 #---------------------------------------------
 #                   wait_cases_end
@@ -46,14 +46,34 @@ arg=0$i
   arglog=${arg} 
   arga=${arg}a
   argd=${arg}a
-  HOST1=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
-  HOST2=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
-  HOST3=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
-  HOST4=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
-  TIME1=`grep Time t64$arga.out  | grep Stepping | awk '{print $7}'`
-  TIME2=`grep Time t64$argd.out  | grep Stepping | awk '{print $7}'`
-  TIME3=`grep Time t128$arga.out | grep Stepping | awk '{print $7}'`
-  TIME4=`grep Time t128$argd.out | grep Stepping | awk '{print $7}'`
+  HOST1=
+  HOST2=
+  HOST3=
+  HOST4=
+  TIME1=
+  TIME2=
+  TIME3=
+  TIME4=
+  if [ -e t64$arglog.log ]; then
+    HOST1=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
+    HOST2=`grep Host t64$arglog.log  | tail -1 | awk '{print $2}'`
+  fi
+  if [ -e t128$arglog.log ]; then
+    HOST3=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
+    HOST4=`grep Host t128$arglog.log | tail -1 | awk '{print $2}'`
+  fi
+  if [ -e t64$arga.log ]; then
+    TIME1=`grep Time t64$arga.out  | grep Stepping | awk '{print $7}'`
+  fi
+  if [ -e t64$argd.log ]; then
+    TIME2=`grep Time t64$argd.out  | grep Stepping | awk '{print $7}'`
+  fi
+  if [ -e t128$arga.log ]; then
+    TIME3=`grep Time t128$arga.out | grep Stepping | awk '{print $7}'`
+  fi
+  if [ -e t128$argd.log ]; then
+    TIME4=`grep Time t128$argd.out | grep Stepping | awk '{print $7}'`
+  fi
   echo "$TIME1,$HOST1,$TIME2,$HOST2,$TIME3,$HOST3,$TIME4,$HOST4">>$OUTFILE
 done
 echo complete
