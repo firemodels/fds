@@ -6041,7 +6041,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! If HT3D set THICKNESS(1) to null value to pass error traps
 
-   IF (HT3D) THICKNESS(1) = 1._EB
+   IF (HT3D .AND. MATL_ID(1,1)/='null') THICKNESS(1) = 1._EB
 
    ! Check SURF parameters for potential problems
 
@@ -7197,6 +7197,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 
 INTEGER :: SURF_INDEX,N,NL,II,IL,NN,N_CELLS_MAX
 REAL(EB) :: K_S_0,C_S_0,SMALLEST_CELL_SIZE(MAX_LAYERS),SWELL_RATIO,DENSITY_MAX,DENSITY_MIN
+LOGICAL :: PROC_SURF_GRID
 
 ! Calculate ambient temperature thermal DIFFUSIVITY for each MATERIAL, to be used in determining number of solid cells
 
@@ -7223,8 +7224,11 @@ NWP_MAX = 0  ! For some utility arrays, need to know the greatest number of poin
 
 SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
 
+   PROC_SURF_GRID = .FALSE.
    SF => SURFACE(SURF_INDEX)
-   IF (SF%THERMAL_BC_INDEX /= THERMALLY_THICK) CYCLE SURF_GRID_LOOP
+   IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) PROC_SURF_GRID = .TRUE.
+   IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK_HT3D .AND. SF%LAYER_THICKNESS(1)>TWO_EPSILON_EB) PROC_SURF_GRID = .TRUE.
+   IF (.NOT.PROC_SURF_GRID) CYCLE SURF_GRID_LOOP
 
    ! Compute number of points per layer, and then sum up to get total points for the surface
 
@@ -8527,11 +8531,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   ENDDO
 
                   OBST_MATL_IF: IF (OB%MATL_INDEX<0) THEN
-
-                     !!! this is under construction
-                     WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                     !!!
 
                      ! If no MATL_ID is specified on OBST, look for a SURF_ID with a MATL_ID (used for 3D pyrolysis)
 
