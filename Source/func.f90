@@ -1194,7 +1194,7 @@ DO N=1,M%N_OBST
                   ENDIF
                   IF (KK==1) CELL_COUNT(-3) = 1000000
                ENDDO MARCH_DOWN
- 
+
                M%WALL_INDEX(IC,0) = M%WALL_INDEX(IC,MINLOC(CELL_COUNT,DIM=1)-4)
 
             ENDDO I_LOOP
