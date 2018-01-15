@@ -1037,24 +1037,6 @@ DO N=1,N_OBST
    ENDIF
 ENDDO
 
-! SUBROUTINE PYROLYSIS(...)
-
-! N_MATS = Number of MATerialS
-! MATL_INDEX(1:N_MATS) = Indices of the materials from the master material list.
-! SURF_INDEX = Index of surface, used only for liquids
-! (IIG,JJG,KKG) = Indices of nearest gas phase cell
-! TMP_S = Solid temperature (K)
-! TMP_F = Solid surface temperature (K)
-! RHO_S(1:N_MATS) = Array of component densities (kg/m3)
-! RHO_S0 = Original solid density (kg/m3)
-! DEPTH = Distance from surface (m)
-! DT_BC = Time step used by the solid phase solver (s)
-! M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) = Adjusted mass generation rate per unit volume of the gas species
-! M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) = Actual mass generation rate per unit volume of the gas species
-! M_DOT_S_PPP(1:N_MATS) = Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
-! Q_DOT_S_PPP = Heat release rate per unit volume (W/m3)
-! PART_INDEX = Optional Lagrangian particle index for vegetation
-
 END SUBROUTINE SOLID_PYROLYSIS_3D
 
 
