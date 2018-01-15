@@ -135,7 +135,8 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
    ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
    CALL CALCULATE_TMP_F(WALL_INDEX=IW)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,WALL_INDEX=IW)
+   IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK .AND. CALL_HT_1D) &
+      CALL SOLID_HEAT_TRANSFER_1D(NM,T,DT_BC,WALL_INDEX=IW)
 ENDDO WALL_CELL_LOOP
 
 ! Loop through all CFACEs and apply heat transfer BCs
@@ -148,7 +149,8 @@ CFACE_LOOP: DO ICF=1,N_CFACE_CELLS
    ! Populate ONE_D%TMP_G, ONE_D%RHO_G, ONE_D%ZZ_G(:), ONE_D%RSUM_G, ONE_D%U_TANG
    CALL CFACE_THERMAL_GASVARS(ICF,ONE_D)
    CALL CALCULATE_TMP_F(CFACE_INDEX=ICF)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,CFACE_INDEX=ICF)
+   IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK .AND. CALL_HT_1D) &
+      CALL SOLID_HEAT_TRANSFER_1D(NM,T,DT_BC,CFACE_INDEX=ICF)
 ENDDO CFACE_LOOP
 
 ! Loop through all particles and apply heat transfer BCs
@@ -167,13 +169,13 @@ IF (SOLID_PARTICLES) THEN
          ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
          ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
          IF (LPC%SOLID_PARTICLE) CALL CALCULATE_TMP_F(PARTICLE_INDEX=IP)
-         IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,PARTICLE_INDEX=IP)
+         IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK .AND. CALL_HT_1D) &
+            CALL SOLID_HEAT_TRANSFER_1D(NM,T,DT_BC,PARTICLE_INDEX=IP)
       ENDIF
    ENDDO
 ENDIF
 
 ! *********************** UNDER CONSTRUCTION **************************
-! Note: With HT3D called after PRYOLYSIS, HT3D inherits the PYRO TMP_F
 IF (.NOT.INITIALIZATION_PHASE .AND. SOLID_HT3D .AND. CORRECTOR) THEN
    WALL_COUNTER_HT3D = WALL_COUNTER_HT3D + 1
    IF (WALL_COUNTER_HT3D==WALL_INCREMENT_HT3D) THEN
@@ -578,8 +580,8 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
 REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3,&
-            RHO_GET(1:N_MATL),K_GET,K_OTHER,RHOCBAR_S
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
+            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,SUBIT,NWP,IIO,JJO,KKO,NOM,N_INT_CELLS
 LOGICAL :: CONT_MATL_PROP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL()
@@ -907,40 +909,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                WC%ONE_D%QCONF = HTC*DTMP
             ENDIF SOLID_PHASE_ONLY_IF
 
-         CASE (THERMALLY_THICK) ! TMP_F and HEAT FLUX taken from PYROLYSIS
-
-            TMP_F = WC%ONE_D%TMP_F
-            NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
-            IF (NWP>=2) THEN
-               TMP_S = 0.5_EB*(WC%ONE_D%TMP(1) + WC%ONE_D%TMP(2))
-               DN    = WC%ONE_D%X(1) - WC%ONE_D%X(0)
-            ELSE
-               TMP_S = TMP(II,JJ,KK)
-               DN    = 2._EB/WC%ONE_D%RDN
-            ENDIF
-            HTC   = K_S / DN
-            KDTDN = HTC * (TMP_F-TMP_S)
-
-            SELECT CASE(IOR)
-               CASE( 1); KDTDX(II,JJ,KK)   =  KDTDN
-               CASE(-1); KDTDX(II-1,JJ,KK) = -KDTDN
-               CASE( 2); KDTDY(II,JJ,KK)   =  KDTDN
-               CASE(-2); KDTDY(II,JJ-1,KK) = -KDTDN
-               CASE( 3); KDTDZ(II,JJ,KK)   =  KDTDN
-               CASE(-3); KDTDZ(II,JJ,KK-1) = -KDTDN
-            END SELECT
-
-            ! check time step
-
-            IF (OB%MATL_INDEX>0) THEN
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_F,OPT_MATL_INDEX=OB%MATL_INDEX)
-            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
-               RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(II,JJ,KK,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_F,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
-            ENDIF
-
-            VN_HT3D = MAX( VN_HT3D, HTC/(RHOCBAR_S*DN) )
-
          CASE (THERMALLY_THICK_HT3D) ! thermally thick, continuous heat flux, not connected with PYROLYSIS
 
             IIG = WC%ONE_D%IIG
@@ -1017,6 +985,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    IF (DT_SUB*VN_HT3D <= 1._EB .OR. LOCK_TIME_STEP) THEN
       TMP = TMP_NEW
+      IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB)
       T_LOC = T_LOC + DT_SUB
       SUBIT = SUBIT + 1
    ENDIF
@@ -1024,146 +993,67 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
 ENDDO SUBSTEP_LOOP
 
-IF (COUPLED_1D3D_HEAT_TRANSFER) CALL HT3D_1D_RECONSTRUCTION
-
 END SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 
-SUBROUTINE HT3D_1D_RECONSTRUCTION
+SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB)
 
-USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
-INTEGER :: IW,IC,II,JJ,KK,IIG,JJG,KKG,IOR,NWP,I,J
-REAL(EB) :: VOL,DVOL,TMPMIN_LOC,TMPMAX_LOC
-TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-REAL(EB), POINTER, DIMENSION(:) :: XI=>NULL(),UI=>NULL(),UB=>NULL(),UP=>NULL(), &
-                                   XJ=>NULL(),UH=>NULL(),VH=>NULL(),XH=>NULL()
+REAL(EB), INTENT(IN) :: DT_SUB
+INTEGER :: N,II,JJ,KK,IC,IIG,JJG,KKG
+REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
+            RHO_GET(N_MATL)
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
-XI => ONE_D_WORK1
-UI => ONE_D_WORK2
-UP => ONE_D_WORK3
-UB => ONE_D_WORK4
+DO N=1,N_OBST
+   OB => OBSTRUCTION(N)
+   IF (OB%PYRO3D) THEN
+      DO KK=OB%K1+1,OB%K2
+         DO JJ=OB%J1+1,OB%J2
+            II_LOOP: DO II=OB%I1+1,OB%I2
+               IC = CELL_INDEX(II,JJ,KK)
+               IF (.NOT.SOLID(IC)) CYCLE II_LOOP
 
-UH => ONE_D_WORK5
-VH => ONE_D_WORK6
-XH => ONE_D_WORK7
-XJ => ONE_D_WORK8
+               WC=>WALL(WALL_INDEX(IC,0))
+               IIG = WC%ONE_D%IIG
+               JJG = WC%ONE_D%JJG
+               KKG = WC%ONE_D%KKG
+               DEPTH = 1._EB
 
-RECON_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+               SF => SURFACE(OB%MATL_SURF_INDEX)
+               RHO_GET(1:SF%N_MATL) = OB%RHO(II,JJ,KK,1:SF%N_MATL)
+               CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP(II,JJ,KK),WC%ONE_D%TMP_F,&
+                        RHO_GET(1:SF%N_MATL),SF%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                        M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(II,JJ,KK))
 
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY)      CYCLE RECON_LOOP
-   SURF_INDEX = WC%SURF_INDEX
-   SF => SURFACE(SURF_INDEX)
-   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) CYCLE RECON_LOOP
+               OB%RHO(II,JJ,KK,1:SF%N_MATL) = RHO_GET(1:SF%N_MATL)
 
-   II = WC%ONE_D%II
-   JJ = WC%ONE_D%JJ
-   KK = WC%ONE_D%KK
-
-   IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE RECON_LOOP
-   OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE RECON_LOOP
-
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
-   NWP = SUM(WC%ONE_D%N_LAYER_CELLS)
-   IF (NWP<2) CYCLE
-
-   XI(0:NWP) = WC%ONE_D%X(0:NWP)
-   UI(0:NWP) = WC%ONE_D%TMP(0:NWP)
-
-   TMPMIN_LOC=MINVAL(UI(0:NWP))
-   TMPMAX_LOC=MAXVAL(UI(0:NWP))
-
-   ! VH is the 3D cell temperature
-   ! XH is the 3D cell center depth
-   ! XJ is the 3D cell face depth
-
-   SELECT CASE (IOR)
-      CASE(1)
-         DO J=0,II
-            VH(J) = TMP(II+1-J,JJ,KK)
-            XH(J) = X(II) - XC(IIG-J)
-            XJ(J) = X(II) - X(II-J)
-            TMPMIN_LOC = MIN(TMPMIN_LOC,VH(J))
-            TMPMAX_LOC = MAX(TMPMAX_LOC,VH(J))
+            ENDDO II_LOOP
          ENDDO
-   END SELECT
+      ENDDO
+   ENDIF
+ENDDO
 
-   ! first steps: count cells and restrict 1D field from UI to UH
+! SUBROUTINE PYROLYSIS(...)
 
-   UH = UI(NWP)
-   DVOL = 0._EB
-   VOL  = 0._EB
-   J = 1
-   UH(J) = 0._EB
-   DO I=1,NWP
+! N_MATS = Number of MATerialS
+! MATL_INDEX(1:N_MATS) = Indices of the materials from the master material list.
+! SURF_INDEX = Index of surface, used only for liquids
+! (IIG,JJG,KKG) = Indices of nearest gas phase cell
+! TMP_S = Solid temperature (K)
+! TMP_F = Solid surface temperature (K)
+! RHO_S(1:N_MATS) = Array of component densities (kg/m3)
+! RHO_S0 = Original solid density (kg/m3)
+! DEPTH = Distance from surface (m)
+! DT_BC = Time step used by the solid phase solver (s)
+! M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) = Adjusted mass generation rate per unit volume of the gas species
+! M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) = Actual mass generation rate per unit volume of the gas species
+! M_DOT_S_PPP(1:N_MATS) = Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
+! Q_DOT_S_PPP = Heat release rate per unit volume (W/m3)
+! PART_INDEX = Optional Lagrangian particle index for vegetation
 
-      DVOL = MIN(XI(I),XJ(J)) - MAX(XI(I-1),XJ(J-1))
-      VOL = VOL + DVOL
-      UH(J) = UH(J) + UI(I) * DVOL
-
-      IF (XI(I)>=XJ(J) .AND. I<NWP) THEN
-         UH(J) = UH(J)/VOL
-         VOL = 0._EB
-         J = J+1
-         UH(J) = 0._EB
-      ELSEIF (I==NWP) THEN
-         IF (VOL > TWO_EPSILON_EB) THEN
-            UH(J) = UH(J)/VOL
-         ELSE
-            UH(J) = UI(I)
-         ENDIF
-      ENDIF
-
-   ENDDO
-
-   UH(0) = WC%ONE_D%TMP_F
-   VH(0) = WC%ONE_D%TMP_F
-   XH(0) = 0._EB
-
-   ! step 2: interpolate the cell data from 1D and 3D fields
-
-   UB(0) = UI(0)
-   DO I=1,NWP
-      CALL INTERPOLATE1D(XH(0:J),UH(0:J),XI(I),UB(I))
-   ENDDO
-
-   ! step 3: save the fine-grained structure of the 1D solution
-
-   UP(1:NWP) = UI(1:NWP) - UB(1:NWP)
-
-!    if (T>12.36 .and. IW==890) then
-!       print *
-!       print *, II,JJ,KK
-!       print *, J,XI(NWP),XJ(J)
-!       print *
-!       print *, XJ(0:J+1)
-!       print *, XH(0:J+1)
-!       print *, UH(0:J+1)
-!       print *, VH(0:J+1)
-!       print *
-!       print *, XI(0:NWP)
-!       print *, UP(0:NWP)
-!       print *, UI(0:NWP)
-!       print *, UB(0:NWP)
-!       print *
-!    endif
-
-   ! step 4: add fine structure back to 3D interpolated field
-
-   DO I=1,NWP
-      CALL INTERPOLATE1D(XH(0:J),VH(0:J),XI(I),UB(I))
-   ENDDO
-
-   UI(1:NWP) = UB(1:NWP) + UP(1:NWP)
-
-   WC%ONE_D%TMP(0:NWP) = MIN(TMPMAX_LOC,MAX(TMPMIN_LOC,UI(0:NWP)))
-
-ENDDO RECON_LOOP
-
-END SUBROUTINE HT3D_1D_RECONSTRUCTION
+END SUBROUTINE SOLID_PYROLYSIS_3D
 
 
 SUBROUTINE CRANK_TEST_1(DIM)
@@ -1842,7 +1732,7 @@ ENDDO WALL_CELL_LOOP
 END SUBROUTINE ZETA_BC
 
 
-SUBROUTINE HT_1D(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
+SUBROUTINE SOLID_HEAT_TRANSFER_1D(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
 
 ! Loop through all the boundary cells that require a 1-D heat transfer calc
 
@@ -1856,9 +1746,9 @@ REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             DXKF,DXKB,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             VOLSUM, REGRID_MAX, REGRID_SUM,  &
             DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,TMP_BACK,&
-            QCELL,DVOL,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
+            M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
             M_DOT_S_PPP(MAX_MATERIALS),GEOM_FACTOR,RHO_TEMP(MAX_MATERIALS)
-INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
+INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS
 REAL(EB),ALLOCATABLE,DIMENSION(:) :: TMP_W_NEW
 REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: INT_WGT
@@ -1866,6 +1756,8 @@ INTEGER  :: NWP_NEW,I_GRAD,STEPCOUNT,IZERO,SURF_INDEX,PART_INDEX=0
 LOGICAL :: REMESH,ITERATE,E_FOUND
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE(WALL_TYPE), POINTER :: WALL_P
+
+print *,'NOT SUPPOSED TO BE HERE!'
 
 ! Copy commonly used derived type variables into local variables.
 
@@ -2386,32 +2278,6 @@ IF (SF%INTERNAL_RADIATION) THEN
    ONE_D%QRADOUT = ONE_D%EMISSIVITY*RFLUX_DOWN
 ENDIF
 
-! If 3D heat transfer coupling, store solid cell mean chemical source term
-
-PYRO_HT3D_IF: IF (PYROLYSIS_HT3D) THEN
-
-   IF (ONE_D%IOR==1) THEN
-
-      ! print *, Q_S(1) * 0.001_EB
-
-      QCELL = 0._EB
-      J = 1
-      DO I=1,NWP
-         DVOL = MIN(ONE_D%X(I),X(ONE_D%IIG-1)-X(ONE_D%IIG-1-J)) - MAX(ONE_D%X(I-1),X(ONE_D%IIG-1)-X(ONE_D%IIG-J))
-         QCELL = QCELL + Q_S(I) * DVOL
-         IF (ONE_D%X(I)>(X(ONE_D%IIG-1)-X(ONE_D%IIG-1-J)) .AND. I<NWP) THEN
-            Q_DOT_PPP_S(ONE_D%IIG-J,ONE_D%JJG,ONE_D%KKG) = QCELL/DX(ONE_D%IIG-J)
-            QCELL = 0._EB
-            J = J+1
-         ELSEIF (I==NWP) THEN
-            Q_DOT_PPP_S(ONE_D%IIG-J,ONE_D%JJG,ONE_D%KKG) = QCELL/DX(ONE_D%IIG-J)
-         ENDIF
-      ENDDO
-
-   ENDIF
-
-ENDIF PYRO_HT3D_IF
-
 ! Update the 1-D heat transfer equation
 
 DT2_BC = DT_BC
@@ -2506,7 +2372,7 @@ ENDIF
 
 ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF * (ONE_D%TMP_G - 0.5_EB * (ONE_D%TMP_F + TMP_F_OLD) )
 
-END SUBROUTINE HT_1D
+END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 
 
 SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,RHO_S,RHO_S0,DEPTH,DT_BC,&
@@ -2808,10 +2674,10 @@ DO I=1,N_TGA
    T_TGA = I*DT_TGA
    ASSUMED_GAS_TEMPERATURE = TMPA + TGA_HEATING_RATE*T_TGA
    IF (TGA_WALL_INDEX>0) THEN
-      CALL HT_1D(1,T_TGA,DT_TGA,WALL_INDEX=IW)
+      CALL SOLID_HEAT_TRANSFER_1D(1,T_TGA,DT_TGA,WALL_INDEX=IW)
       SURF_DEN = SURFACE_DENSITY(1,0,WALL_INDEX=IW)
    ELSE
-      CALL HT_1D(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
+      CALL SOLID_HEAT_TRANSFER_1D(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
       SURF_DEN = SURFACE_DENSITY(1,0,LAGRANGIAN_PARTICLE_INDEX=IP)
    ENDIF
    IF (MOD(I,NINT(1._EB/(TGA_HEATING_RATE*DT_TGA)))==0) THEN
