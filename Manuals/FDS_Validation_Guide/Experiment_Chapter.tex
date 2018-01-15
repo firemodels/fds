@@ -1627,6 +1627,29 @@ A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
 The spray from a single water mist nozzle was measured at Tampere University of Technology using a direct imaging technique~\cite{Vaari:2012}. The model number of the nozzle is LN-2, manufactured by the Spraying Systems Company. It is a fine spray hydraulic atomizing nozzle of the standard spray, small capacity type. Measurements were made 40~cm and 62~cm below the nozzle. Measured quantities include the average droplet velocity, droplet flux, and median diameter.
 
 
+\section{Waterloo Methanol Pool Fire Experiment}
+
+Beth Weckman measured near-field temperatures and velocities of a 30.5~cm diameter methanol pool fire at the University of Waterloo, Ontario, Canada~\cite{Weckman:CF1996}. The methanol fuel flow rate was maintained at 1.35~cm$^3$/s to maintain a burner rim height of 1~cm. Assuming complete combustion, the heat release rate was approximately 24.6~kW.
+
+The burner was mounted on a traversing stand that allowed for radial and axial traverses of the fire flow field. The vapor core, continuous flame zone and fluctuating regions of the fire plume were characterized via profiles of axial and radial velocity and temperature taken at 2~cm intervals from the pool centerline to 16~cm from the centerline in the radial direction, and at heights from 2~cm to 20~cm above the fuel surface. A final radial profile was taken at a height of 30~cm. Measurements were made by moving the burner while the velocity and temperature transducers were held at a fixed point. To shield the fire from drafts, the entire system was enclosed by panels of wire mesh that was covered with an aluminum window screen.
+
+Time resolved velocity measurements were performed using a two component laser doppler anemometer. Time resolved temperature data was measured using 50~$\mu$m diameter, bare-wire thermocouples (Pt~vs~Pt-10\%~Rh) with known bead diameters in the range of 75~$\mu$m to 100~$\mu$m.
+
+Additional measurements of a 30.5~cm diameter methanol pool fire were made by Hamins et~al., including the heat flux to the pool surface~\cite{Hamins:CST1994}, centerline profiles of temperature and species concentrations~\cite{Hamins:TN1928}, and an additional radial profile of temperature 60~cm above the pool surface~\cite{Hamins:TN1928}.
+
+\subsubsection{Modeling Notes}
+
+The methanol pool fire is modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. Two sets of simulations are performed, one in which the mass loss rate of fuel is specified, and one in which it is predicted. The gas phase measurements are compared with the simulations for which the burning rate is specified.
+
+Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics.
+
+Physical properties of methanol are taken from a data sheet published by the Methanol Institute~\cite{Methanol}: boiling temperature, 64.6~$^\circ$C, heat of vaporization at 64.6~$^\circ$C, 1098.3~kJ/kg, thermal conductivity, 0.2~W/(m$\cdot$K), specific heat at 25~$^\circ$C, 2.53~kJ/(kg$\cdot$K), density at 20~$^\circ$C, 792~kg/m$^3$. The heat of combustion is given as 19.9~kJ/g, but this value is not input directly, but rather calculated based on the heats of formation of the reactants and products of combustion.
+
+The radiative fraction is specified to be 16~\% (Table A.39, {\em SFPE~Handbook}~\cite{SFPE}). The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm. Normally, its value is a function of grid size, but has been fixed so as not to influence the grid convergence study. The absorption coefficient of the liquid methanol is given as 52~m$^{-1}$, based on the discussion found in Appendix~L of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}, ``Absorption Coefficients of Liquid Fuels.''
+
+The modeled thermocouple has a bead diameter of 100~$\mu$m to match the experiments.
+
+
 \section{WTC Spray Burner Experiments}
 
 As part of its investigation of the World Trade Center disaster, the Building and Fire Research Laboratory at NIST conducted several series of fire experiments to both gain insight into the observed fire behavior and also to validate FDS for use in reconstructing the fires. The first series of experiments involved a relatively simple compartment with a liquid spray burner and various structural elements with varying amounts of sprayed fire-resistive materials (SFRM). A diagram of the compartment is shown in Fig.~\ref{WTC_Drawing}. A complete description of the experiments can be found in the NIST WTC report NCSTAR~1-5B~\cite{NIST_NCSTAR_1-5B}. The overall enclosure was rectangular, as were the vents and most of the obstructions. The compartment walls and ceiling were made of 2.54~cm thick marinite. The manufacturer provided the thermal properties of the material used in the calculation. The density was 737~kg/m$^3$, conductivity 0.12~W/m/K. The specific heat ranged from 1.17~kJ/kg/K at 93~$^\circ$C to 1.42~kJ/kg/K at 425~$^\circ$C. This value was assumed for higher temperatures. The steel used to construct the column and truss flanges was 0.64~cm thick.  The density of the steel was assumed to be 7,860~kg/m$^3$; its specific heat 0.45~kJ/kg/K.

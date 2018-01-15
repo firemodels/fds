@@ -68,6 +68,7 @@ end
 
 % Read in global plot options
 plot_style
+Font_Interpreter = 'LaTeX';
 
 % Read configuration file
 A = importdata(Dataplot_Inputs_File);

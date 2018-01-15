@@ -52,7 +52,7 @@ function usage {
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
-  echo " -t   - used for timing studies, run a job alone on a node"
+  echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
@@ -104,7 +104,9 @@ else
   queue=batch
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
-if [ "$NCORES_COMPUTENODE" != "" ]; then
+if [ "$NCORES_COMPUTENODE" == "" ]; then
+  NCORES_COMPUTENODE=$ncores
+else
   ncores=$NCORES_COMPUTENODE
 fi
 
@@ -225,6 +227,9 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   T)
    TYPE="$OPTARG"
@@ -594,11 +599,6 @@ EOF
     if [ "$walltimestring_pbs" != "" ]; then
       cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
-EOF
-    fi
-    if [ "$benchmark" == "yes" ]; then
-cat << EOF >> $scriptfile
-#PBS -l naccesspolicy=singlejob
 EOF
     fi
   fi
