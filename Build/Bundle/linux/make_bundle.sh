@@ -24,4 +24,4 @@ export INSTALLDIR=FDS/$FDSEDITION
 export MISCTO=LIB64
 export COMPTO=INTEL
 
-$fds_smvroot/fds/Build/Bundle/bundle_generic.sh
+$fds_smvroot/fds/Build/Bundle/scripts/bundle_generic.sh
