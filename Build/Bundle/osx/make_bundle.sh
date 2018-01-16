@@ -21,4 +21,4 @@ export MISCLIBFROM=
 
 export INSTALLDIR=FDS/$FDSEDITION
 
-$fds_smvroot/fds/Utilities/Scripts/bundle_generic.sh
+$fds_smvroot/fds/Build/Bundle/bundle_generic.sh
