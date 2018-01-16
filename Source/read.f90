@@ -197,11 +197,10 @@ END SUBROUTINE READ_DEAD
 
 SUBROUTINE READ_HEAD
 INTEGER :: NAMELENGTH
-NAMELIST /HEAD/ CHID,FYI,STOPFDS,TITLE
+NAMELIST /HEAD/ CHID,FYI,TITLE
 
 CHID    = 'null'
 TITLE   = '      '
-STOPFDS=-1
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 HEAD_LOOP: DO
@@ -238,13 +237,7 @@ IF (EX) THEN
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ELSE
       WRITE(LU_ERR,'(A,A,A)') "NOTE: The file, ",TRIM(FN_STOP),", was detected."
-      WRITE(LU_ERR,'(A,I0,A)')"This FDS run will stop after ",STOP_AT_ITER," iterations."
-   ENDIF
-ELSE
-   IF(STOPFDS>=0) THEN
-      STOP_AT_ITER = STOPFDS
-      WRITE(LU_ERR,'(A,A,A)') "NOTE: The STOPFDS keyword was detected on the &HEAD line."
-      WRITE(LU_ERR,'(A,I0,A)')"This FDS run will stop after ",STOP_AT_ITER," iterations."
+      WRITE(LU_ERR,'(A,I3,A)')"This FDS run will stop after ",STOP_AT_ITER," iterations."
    ENDIF
 ENDIF
 
