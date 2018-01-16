@@ -3099,7 +3099,7 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 \section{Extinction Model (\textct{extinction})}
 \label{Extinct}
 
-The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1600 K.
+The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1700 K.
 
 Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern combustion:
 \begin{equation}\label{eq:methane_ex}
