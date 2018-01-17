@@ -7180,7 +7180,6 @@ ENDDO PROCESS_SURF_LOOP
 END SUBROUTINE PROC_SURF_2
 
 
-
 SUBROUTINE PROC_WALL
 
 ! Set up 1-D grids and arrays for thermally-thick calcs
@@ -8559,8 +8558,8 @@ MESH_LOOP: DO NM=1,NMESHES
                      CALL ChkMemErr('READ_OBST','RHO',IZERO)
                      DO NNN=1,SF%N_MATL
                         ML=>MATERIAL(SF%MATL_INDEX(NNN))
-                        OB%RHO(:,:,:,NNN) = ML%RHO_S
                         IF (ML%N_REACTIONS>0) OB%PYRO3D=.TRUE.
+                        OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
                      ENDDO
 
                   ELSE OBST_MATL_IF
