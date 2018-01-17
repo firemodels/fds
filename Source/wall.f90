@@ -909,7 +909,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                WC%ONE_D%QCONF = HTC*DTMP
             ENDIF SOLID_PHASE_ONLY_IF
 
-         CASE (THERMALLY_THICK_HT3D) ! thermally thick, continuous heat flux, not connected with PYROLYSIS
+         CASE (THERMALLY_THICK_HT3D) ! thermally thick, continuous heat flux
 
             IIG = WC%ONE_D%IIG
             JJG = WC%ONE_D%JJG
@@ -985,7 +985,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    IF (DT_SUB*VN_HT3D <= 1._EB .OR. LOCK_TIME_STEP) THEN
       TMP = TMP_NEW
-      IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB)
+      IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
       T_LOC = T_LOC + DT_SUB
       SUBIT = SUBIT + 1
    ENDIF
@@ -996,32 +996,53 @@ ENDDO SUBSTEP_LOOP
 END SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 
-SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB)
+SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 
-REAL(EB), INTENT(IN) :: DT_SUB
-INTEGER :: N,I,J,K,IC,IIG,JJG,KKG
+REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
+INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_GET(N_MATL)
+            RHO_GET(N_MATL),GEOM_FACTOR,TIME_FACTOR
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
+TIME_FACTOR = DT_SUB/DT_BC_HT3D
+
 DO N=1,N_OBST
    OB => OBSTRUCTION(N)
    IF (OB%PYRO3D) THEN
+
+      IF (T_LOC<TWO_EPSILON_EB) THEN
+         ! Set mass fluxes to 0
+         DO K=OB%K1+1,OB%K2
+            DO J=OB%J1+1,OB%J2
+               I_LOOP: DO I=OB%I1+1,OB%I2
+                  IC = CELL_INDEX(I,J,K)
+                  IF (.NOT.SOLID(IC)) CYCLE I_LOOP
+                  WC=>WALL(WALL_INDEX(IC,0))
+                  SF=>SURFACE(OB%MATL_SURF_INDEX)
+                  WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+                  WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+                  WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+               ENDDO I_LOOP
+            ENDDO
+         ENDDO
+      ENDIF
+
       DO K=OB%K1+1,OB%K2
          DO J=OB%J1+1,OB%J2
-            I_LOOP: DO I=OB%I1+1,OB%I2
+            I_LOOP_2: DO I=OB%I1+1,OB%I2
                IC = CELL_INDEX(I,J,K)
-               IF (.NOT.SOLID(IC)) CYCLE I_LOOP
+               IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
 
-               WC=>WALL(WALL_INDEX(IC,0))
+               WC=>WALL(WALL_INDEX(IC,3)) ! for now, send pyrolyzate straight up
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
                KKG = WC%ONE_D%KKG
+               IOR = WC%ONE_D%IOR
                DEPTH = 1._EB
 
-               SF => SURFACE(OB%MATL_SURF_INDEX)
+               SF=>SURFACE(OB%MATL_SURF_INDEX)
                RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
                CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
                               RHO_GET(1:SF%N_MATL),SF%LAYER_DENSITY(1),DEPTH,DT_SUB,&
@@ -1029,9 +1050,30 @@ DO N=1,N_OBST
 
                OB%RHO(I,J,K,1:SF%N_MATL) = RHO_GET(1:SF%N_MATL)
 
-               ! to-do: mass transport, surface fluxes, heat sources
+               ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
 
-            ENDDO I_LOOP
+               SELECT CASE(ABS(IOR))
+                  CASE(1); GEOM_FACTOR = DX(I)
+                  CASE(2); GEOM_FACTOR = DY(J)
+                  CASE(3); GEOM_FACTOR = DZ(K)
+               END SELECT
+               DO NS = 1,N_TRACKED_SPECIES
+                  WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+                  WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+               DO NN=1,SF%N_MATL
+                  WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+
+               ! to-do: mass transport
+
+               ! If the fuel or water massflux is non-zero, set the ignition time
+
+               IF (WC%ONE_D%T_IGN > T) THEN
+                  IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+               ENDIF
+
+            ENDDO I_LOOP_2
          ENDDO
       ENDDO
    ENDIF

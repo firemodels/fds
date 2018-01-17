@@ -7012,7 +7012,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Ignition Time
 
    SF%T_IGN = T_BEGIN
-   IF (SF%TMP_IGN<5000._EB)                    SF%T_IGN = HUGE(T_END)
+   IF (SF%TMP_IGN<5000._EB)                     SF%T_IGN = HUGE(T_END)
    IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) SF%T_IGN = HUGE(T_END)
 
    ! Species Arrays and Method of Mass Transfer (SPECIES_BC_INDEX)
@@ -7178,7 +7178,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 ENDDO PROCESS_SURF_LOOP
 
 END SUBROUTINE PROC_SURF_2
-
 
 
 SUBROUTINE PROC_WALL
@@ -8559,8 +8558,8 @@ MESH_LOOP: DO NM=1,NMESHES
                      CALL ChkMemErr('READ_OBST','RHO',IZERO)
                      DO NNN=1,SF%N_MATL
                         ML=>MATERIAL(SF%MATL_INDEX(NNN))
-                        OB%RHO(:,:,:,NNN) = ML%RHO_S
                         IF (ML%N_REACTIONS>0) OB%PYRO3D=.TRUE.
+                        OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
                      ENDDO
 
                   ELSE OBST_MATL_IF
