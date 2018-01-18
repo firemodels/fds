@@ -370,6 +370,7 @@ $QFDS -d Species reactionrate_EDC_flim_2step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_1step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_prim.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_lump.fds
+$QFDS -d Species reactionrate_fast_slow.fds
 $QFDS -d Species reactionrate_lumped_two_air.fds
 $QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds

@@ -2847,13 +2847,14 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:reaction
 
 
 
+\FloatBarrier
+
 \subsection{Finite Rate Reactions (\texorpdfstring{\textct{reactionrate\_arrhenius}}{reactionrate\_arrhenius})}
 \label{finite_rate_reactions}
 \label{reactionrate_arrhenius_equilibrium}
 \label{reactionrate_arrhenius_0order_1step}
 \label{reactionrate_arrhenius_2order_1step}
 \label{reactionrate_arrhenius_1p75order_2step}
-\label{reactionrate_arrhenius_1p75order_2stepr}
 
 
 The main difference between Arrhenius rate reactions and the mixing-controlled reactions is that the reaction rate in finite rate reactions is found from local parameters such as species concentration and temperature as well as rate constants. The values of $a_{\alpha}$ in Eq.~(\ref{eq:finite_rate1}) are specific to each reaction and for non-zero values, $\d Y_{\alpha}/ \d t$ becomes  a non-linear differential equation. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
@@ -2989,6 +2990,41 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
+
+
+\FloatBarrier
+
+\subsection{Fast-Slow Reaction Scheme (\texorpdfstring{\textct{reactionrate\_fast\_slow}}{reactionrate\_fast\_slow})}
+\label{reactionrate_fast_slow}
+
+A simple two-step reaction scheme for a clean-burning fuel like methanol can be written as follows:
+\begin{subequations}
+\begin{align}
+\label{methanol_step1}
+\mathrm{CH_3OH + O_2} &\rightarrow \mathrm{CO + 2 \, H_2O} \\
+\label{methanol_step2}
+\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} 
+\end{align}
+\end{subequations}
+where the first reaction is infinitely fast and the second is not. Suppose the second reaction proceeds according to the evolution equation:
+\be 
+   \frac{\d [{\rm CO}]}{\d t} = -1\times 10^{10} \, [{\rm CO}] \, [{\rm O_2}]
+\ee
+where $[{\rm CO}]$ is the concentration of CO in units of mol/cm$^3$. To test the scheme, a sealed, adiabatic cube 1~m on a side is filled with nitrogen, fuel gas, and oxygen with initial volume fractions of 0.89, 0.05, and 0.06. Because the rates are independent of temperature, the reaction proceeds immediately assuming that the gases are thoroughly mixed via the parameter {\ct INITIAL\_UNMIXED\_FRACTION=0}. Figure~\ref{fig:reactionrate_fast_slow} shows the fuel volume fraction very quickly dropping to zero, leaving some oxygen which then reacts relatively slowly with CO to form CO$_2$. The effective combined reaction is:
+\be
+\label{methanol_combined}
+\mathrm{5 \, CH_3OH + 6 \, O_2} \rightarrow \mathrm{2 \, CO_2 + 3 \, CO + 10 \, H_2O} 
+\ee
+The {\ct 'EXPLICIT EULER'} integration scheme is used with an initial gas phase time step of $1\times 10^{-6}$~s. The final volume fractions of CO$_2$ and CO are expected to be $2/104 \approx 0.0192$ and $3/104 \approx 0.0288$, respectively.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_fast_slow}
+\caption[Species evolution in a fast-slow reaction scheme]{Species evolution in a fast-slow reaction scheme.}
+\label{fig:reactionrate_fast_slow}
+\end{figure}
+
+\FloatBarrier
 
 
 \section{Heat Release Rates from Reaction Mechanisms (\textct{hrrpuv\_reac})}
@@ -3603,7 +3639,7 @@ as shown in Fig.~\ref{fig:ht3d_vs_ht1d}.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_vs_ht1d} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_vs_ht1d}
 \caption[The \textct{ht3d\_vs\_ht1d} test case]{Comparison of the temperature rise based on a 3-D and 1-D heat conduction calculation.}
 \label{fig:ht3d_vs_ht1d}
 \end{figure}
