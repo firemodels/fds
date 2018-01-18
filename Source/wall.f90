@@ -1003,7 +1003,7 @@ INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
             RHO_GET(N_MATL),GEOM_FACTOR,TIME_FACTOR
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 TIME_FACTOR = DT_SUB/DT_BC_HT3D
@@ -1019,8 +1019,8 @@ DO N=1,N_OBST
                I_LOOP: DO I=OB%I1+1,OB%I2
                   IC = CELL_INDEX(I,J,K)
                   IF (.NOT.SOLID(IC)) CYCLE I_LOOP
-                  WC=>WALL(WALL_INDEX(IC,0))
-                  SF=>SURFACE(OB%MATL_SURF_INDEX)
+                  WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+                  SF=>SURFACE(WC%SURF_INDEX)
                   WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
                   WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
                   WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
@@ -1036,6 +1036,8 @@ DO N=1,N_OBST
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
 
                WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+               SF=>SURFACE(WC%SURF_INDEX)      ! PYROLYSIS SURFACE (ejection of pyrolyzate gas)
+               MS=>SURFACE(OB%MATL_SURF_INDEX) ! MATERIAL SURFACE (supplies material properties)
 
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
@@ -1043,13 +1045,12 @@ DO N=1,N_OBST
                IOR = WC%ONE_D%IOR
                DEPTH = 1._EB
 
-               SF=>SURFACE(OB%MATL_SURF_INDEX)
-               RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
-               CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                              RHO_GET(1:SF%N_MATL),SF%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+               RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
+               CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
+                              RHO_GET(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                               M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-               OB%RHO(I,J,K,1:SF%N_MATL) = RHO_GET(1:SF%N_MATL)
+               OB%RHO(I,J,K,1:MS%N_MATL) = RHO_GET(1:MS%N_MATL)
 
                ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
 

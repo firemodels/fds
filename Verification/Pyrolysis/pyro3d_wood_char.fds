@@ -1,6 +1,6 @@
 ! This case is only for demo and testing purposes at this time.
 
-&HEAD CHID='ht3d_wood', TITLE='Test of HT3D pyrolysis of wood'/
+&HEAD CHID='pyro3d_wood_char', TITLE='Test of HT3D pyrolysis of wood'/
 
 &MESH IJK=20,20,20, XB=-0.1,0.1,-0.1,0.1,0.0,0.2/
 
