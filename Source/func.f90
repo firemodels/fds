@@ -2858,6 +2858,7 @@ DATA CO_FED_FAC /0.70486250E-5_EB, 2.7641667E-5_EB,    8.2925E-5_EB/
 ! Total FED dose:
 ! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
 
+FED = 0._EB
 
 ! Carbon monoxide (CO)
 !          at rest    light work heavy work

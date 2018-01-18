@@ -130,7 +130,7 @@ nitrogen environment.}
 
 Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone Calorimeter. The results for samples of various thicknesses and imposed heat fluxes are shown in Fig.~\ref{HRR_PC}. A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}. It is assumed that the polymer undergoes a single step reaction that forms fuel gas and char.
 \be
-   \hbox{PC} \to 0.21 \, \hbox{Char} + 0.79 \, \hbox{Gas} 
+   \hbox{PC} \to 0.21 \, \hbox{Char} + 0.79 \, \hbox{Gas}
 \ee
 
 \begin{table}[h!]
@@ -966,6 +966,9 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \section{Liquid Pool Fires}
 
+
+\subsection{Pool Fire Measurements}
+
 In this section, the predicted burning rates of a variety of liquid fuels confined within a 10~cm deep, 1~m square tray are compared with an empirical correlation. The burning rate of liquid hydrocarbon fuels has been found to correlate well~\cite{SFPE:Gottuk_and_White} with the ratio of the heat of combustion, $\Delta h_{\rm c}$, and the heat of gasification, $\Delta h_{\rm g}$:
 \begin{equation}
 \dot{m}''= 0.001 \; \frac{\Delta h_{\rm c}}{\Delta h_{\rm g}} \quad ; \quad \Delta h_{\rm g} = \Delta h_{\rm v} + \int_{T_0}^{T_{\rm b}} c_p \; dT
@@ -1009,6 +1012,20 @@ Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 6
 \caption[Comparison of burning rates for various liquid pool fires.]{Comparison of burning rates for various liquid pool fires.}
 \label{POOL_MLR}
 \end{figure}
+
+\clearpage
+
+\subsection{Waterloo Methanol Pool Fire}
+
+Figure~\ref{Waterloo_HRR} displays the measured and predicted heat release rates (HRR) a 30~cm diameter methanol pool fire experiment conducted by Weckman at the University of Waterloo~\cite{Weckman:CF1996}. The experimental result came after at least 10~min of burning, whereas the model is only run for 1~min.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_HRR}
+\caption[Waterloo Methanol heat release rate]{Waterloo Methanol heat release rate.}
+\label{Waterloo_HRR}
+\end{figure}
+
 
 \clearpage
 
