@@ -1035,7 +1035,8 @@ DO N=1,N_OBST
                IC = CELL_INDEX(I,J,K)
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
 
-               WC=>WALL(WALL_INDEX(IC,3)) ! for now, send pyrolyzate straight up
+               WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
                KKG = WC%ONE_D%KKG
