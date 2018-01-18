@@ -6840,11 +6840,12 @@ IND_SELECT: SELECT CASE(IND)
          RHO_S = 0._EB
          SF => SURFACE(OB%MATL_SURF_INDEX)
          DO NN=1,SF%N_MATL
-            IF (NN==MATL_INDEX) THEN
+            IF (MATL_INDEX<=0) THEN
+               ! if no MATL_ID is specified, output total density
+               RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
+            ELSEIF (SF%LAYER_MATL_INDEX(1,NN)==MATL_INDEX) THEN
                GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
                RETURN
-            ELSE
-               RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
             ENDIF
          ENDDO
          GAS_PHASE_OUTPUT_RES = RHO_S
