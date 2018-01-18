@@ -306,7 +306,6 @@ if [ "$INTELLIBDIR" != "" ]; then
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CP $HOME/$INTELLIBDIR libifport.so     $bundledir/bin/LIB64 libifport.so
     CP $HOME/$INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
     CP $HOME/$INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
     CP $HOME/$INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
