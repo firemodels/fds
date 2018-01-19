@@ -2753,7 +2753,7 @@ TNOW = CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 T_TMP = T
-ANY_REMOVE_OBST = .TRUE.
+ANY_REMOVE_OBST = .FALSE.
 
 ! Check to see if an obstacle is to be removed or created
 
