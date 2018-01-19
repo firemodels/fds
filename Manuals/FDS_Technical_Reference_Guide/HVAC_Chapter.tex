@@ -112,7 +112,7 @@ where $D$ is the duct diameter.  $f$ is determined from the Colebrook equation. 
 \ee
 where $\epsilon$ is the absolute roughness of the duct.
 
-\subsection{Heating and Coiling Coils}
+\subsection{Heating and Cooling Coils}
 
 A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectiveness type heat exchanger model in which four parameters are specified: the enthalpy of the working fluid ($c_{p,\text{\tiny fl}}$), the temperature of the working fluid, ($T_\text{\tiny fl}$), the mass flow rate of the working fluid ($\dot{m}_\text{\tiny fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
 
