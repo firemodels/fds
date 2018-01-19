@@ -19444,25 +19444,25 @@ ENDDO
 
 ! First run over all regular and gasphase cut faces and insert-add lists of
 ! related unknows per unknown:
-MESH_LOOP_1 : DO NM=1,NMESHES
+MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
-   IF (PROCESS(NM)/=MYID) CYCLE
+   CALL POINT_TO_MESH(NM)
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
-   IHI_FACE = MESHES(NM)%IBAR      ! High mesh boundary face index.
+   IHI_FACE = IBAR                 ! High mesh boundary face index.
    ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
    IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
 
    ! Y direction bounds:
    JLO_FACE = 0                    ! Low mesh boundary face index.
-   JHI_FACE = MESHES(NM)%JBAR      ! High mesh boundary face index.
+   JHI_FACE = JBAR                 ! High mesh boundary face index.
    JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
    JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
 
    ! Z direction bounds:
    KLO_FACE = 0                    ! Low mesh boundary face index.
-   KHI_FACE = MESHES(NM)%KBAR      ! High mesh boundary face index.
+   KHI_FACE = KBAR                 ! High mesh boundary face index.
    KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
    KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
 
@@ -19470,13 +19470,13 @@ MESH_LOOP_1 : DO NM=1,NMESHES
    X1AXIS = IAXIS
    DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
-      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19495,13 +19495,13 @@ MESH_LOOP_1 : DO NM=1,NMESHES
    X1AXIS = JAXIS
    DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
-      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19520,13 +19520,13 @@ MESH_LOOP_1 : DO NM=1,NMESHES
    X1AXIS = KAXIS
    DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
-      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19544,14 +19544,14 @@ MESH_LOOP_1 : DO NM=1,NMESHES
    ! Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
    DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
 
-      I      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
-      J      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
-      K      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+      I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
+      IND(HIGH_IND) = IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19579,12 +19579,12 @@ MESH_LOOP_1 : DO NM=1,NMESHES
    ! Now Gasphase CUT_FACES:
    DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
 
-      IF ( MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
 
-      I = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
-      J = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
-      K = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS+1)
+      I = CUT_FACE(ICF)%IJK(IAXIS)
+      J = CUT_FACE(ICF)%IJK(JAXIS)
+      K = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
@@ -23590,6 +23590,60 @@ ENDDO
 RETURN
 
 CONTAINS
+
+! ------------------------ SET_FDS_SOLID_CELLS -----------------------------------
+
+! SUBROUTINE SET_FDS_SOLID_CELLS
+
+! ! Local Variables:
+! INTEGER :: CELL_COUNT_AUX
+! LOGICAL, ALLOCATABLE, DIMENSION(:) :: SOLID_AUX
+!
+! ! Main Loop:
+! MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+!
+!    CALL POINT_TO_MESH(NM)
+!
+!    CELL_COUNT_AUX = CELL_COUNT(NM)
+!    ! First loop add GEOM data to CELL_COUNT:
+!    DO K=0,KBP1
+!       DO J=0,JBP1
+!          DO I=0,IBP1
+!             ! Add cells of type IBM_SOLID and IBM_CUTFACE to CELL_COUNT:
+!             IF((CELL_INDEX(I,J,K)==0) .AND. CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) CELL_COUNT_AUX = CELL_COUNT_AUX + 1
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    NULLIFY(SOLID)
+!    IF(ALLOCATED(SOLID_AUX)) DEALLOCATE(SOLID_AUX); ALLOCATE(SOLID_AUX(0:CELL_COUNT(NM)))
+!    SOLID_AUX(0:CELL_COUNT(NM))=MESHES(NM)%SOLID(0:CELL_COUNT(NM))
+!    DEALLOCATE(MESHES(NM)%SOLID); ALLOCATE(MESHES(NM)%SOLID(0:CELL_COUNT_AUX))
+!    SOLID => MESHES(NM)%SOLID
+!    SOLID(:) = .FALSE.
+!    SOLID(0:CELL_COUNT(NM)) = SOLID_AUX(0:CELL_COUNT(NM))
+!
+!    ! Second loop, Add info to CELL_INDEX, SOLID from GEOMs:
+!    CELL_COUNT_AUX = CELL_COUNT(NM)
+!    DO K=0,KBP1
+!       DO J=0,JBP1
+!          DO I=0,IBP1
+!             ! Add cells of type IBM_SOLID and IBM_CUTFACE to CELL_COUNT:
+!             IF((CELL_INDEX(I,J,K)==0) .AND. CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) THEN
+!                CELL_COUNT_AUX = CELL_COUNT_AUX + 1
+!                CELL_INDEX(I,J,K) = CELL_COUNT_AUX
+!                SOLID(CELL_COUNT_AUX) = .TRUE. ! Define cell as FDS SOLID type.
+!             ENDIF
+!          ENDDO
+!       ENDDO
+!    ENDDO
+!
+!    CELL_COUNT(NM) = CELL_COUNT_AUX
+!
+! ENDDO MESH_LOOP
+
+! RETURN
+! END SUBROUTINE SET_FDS_SOLID_CELLS
 
 ! ---------------------- GET_INBCUTFACES_TO_CFACE --------------------------------
 
