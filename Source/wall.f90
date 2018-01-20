@@ -584,6 +584,7 @@ REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAM
             RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,SUBIT,IIO,JJO,KKO,NOM,N_INT_CELLS
 LOGICAL :: CONT_MATL_PROP
+REAL(EB), PARAMETER :: DT_SUB_MIN_HT3D=1.E-9_EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE(MESH_TYPE), POINTER :: OM=>NULL()
@@ -623,7 +624,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
             ELSEIF (OB%MATL_SURF_INDEX>0) THEN
                RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(I,J,K,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)
-               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET,&
+                  OPT_I_IN=I,OPT_J_IN=J,OPT_K_IN=K)
             ENDIF
          ENDDO
       ENDDO
@@ -990,7 +992,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       SUBIT = SUBIT + 1
    ENDIF
    IF (VN_HT3D > TWO_EPSILON_EB .AND. .NOT.LOCK_TIME_STEP) DT_SUB = 0.5_EB / VN_HT3D
-   IF (DT_SUB < DT_INITIAL*LIMITING_DT_RATIO .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
+   IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
+      WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
       STOP_STATUS = INSTABILITY_STOP
       RETURN
    ENDIF
@@ -1012,88 +1015,91 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 TIME_FACTOR = DT_SUB/DT_BC_HT3D
 
-DO N=1,N_OBST
+OBST_LOOP: DO N=1,N_OBST
    OB => OBSTRUCTION(N)
-   IF (OB%PYRO3D) THEN
+   IF (.NOT.OB%PYRO3D) CYCLE OBST_LOOP
 
-      IF (T_LOC<TWO_EPSILON_EB) THEN
-         ! Set mass fluxes to 0
-         DO K=OB%K1+1,OB%K2
-            DO J=OB%J1+1,OB%J2
-               I_LOOP: DO I=OB%I1+1,OB%I2
-                  IC = CELL_INDEX(I,J,K)
-                  IF (.NOT.SOLID(IC)) CYCLE I_LOOP
-                  WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
-                  IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP
-                  SF=>SURFACE(WC%SURF_INDEX)
-                  WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-                  WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-                  WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
-               ENDDO I_LOOP
-            ENDDO
-         ENDDO
-      ENDIF
-
+   IF (T_LOC<TWO_EPSILON_EB) THEN
+      ! Set mass fluxes to 0
       DO K=OB%K1+1,OB%K2
          DO J=OB%J1+1,OB%J2
-            I_LOOP_2: DO I=OB%I1+1,OB%I2
+            I_LOOP: DO I=OB%I1+1,OB%I2
                IC = CELL_INDEX(I,J,K)
-               IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
-
+               IF (.NOT.SOLID(IC)) CYCLE I_LOOP
                WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
-               IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP_2
-
-               SF=>SURFACE(WC%SURF_INDEX)      ! PYROLYSIS SURFACE (ejection of pyrolyzate gas)
-               MS=>SURFACE(OB%MATL_SURF_INDEX) ! MATERIAL SURFACE (supplies material properties)
-
-               IIG = WC%ONE_D%IIG
-               JJG = WC%ONE_D%JJG
-               KKG = WC%ONE_D%KKG
-               IOR = WC%ONE_D%IOR
-               DEPTH = 1._EB
-
-               RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
-               CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                              RHO_GET(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
-                              M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
-
-               OB%RHO(I,J,K,1:MS%N_MATL) = RHO_GET(1:MS%N_MATL)
-
-               IF (TWO_D) THEN
-                  CELL_VOLUME = DX(I)*DZ(K)
-               ELSE
-                  CELL_VOLUME = DX(I)*DY(J)*DZ(K)
-               ENDIF
-               IF (OB%CONSUMABLE) OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
-
-               ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
-
-               SELECT CASE(ABS(IOR))
-                  CASE(1); GEOM_FACTOR = DX(I)
-                  CASE(2); GEOM_FACTOR = DY(J)
-                  CASE(3); GEOM_FACTOR = DZ(K)
-               END SELECT
-               DO NS = 1,N_TRACKED_SPECIES
-                  WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-                  WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
-               ENDDO
-               DO NN=1,SF%N_MATL
-                  WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
-               ENDDO
-
-               ! to-do: mass transport
-
-               ! If the fuel or water massflux is non-zero, set the ignition time
-
-               IF (WC%ONE_D%T_IGN > T) THEN
-                  IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
-               ENDIF
-
-            ENDDO I_LOOP_2
+               IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP
+               SF=>SURFACE(WC%SURF_INDEX)
+               WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+               WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+               WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+            ENDDO I_LOOP
          ENDDO
       ENDDO
    ENDIF
-ENDDO
+
+   DO K=OB%K1+1,OB%K2
+      DO J=OB%J1+1,OB%J2
+         I_LOOP_2: DO I=OB%I1+1,OB%I2
+            IC = CELL_INDEX(I,J,K)
+            IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
+
+            WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+            IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP_2
+
+            SF=>SURFACE(WC%SURF_INDEX)      ! PYROLYSIS SURFACE (ejection of pyrolyzate gas)
+            MS=>SURFACE(OB%MATL_SURF_INDEX) ! MATERIAL SURFACE (supplies material properties)
+
+            IIG = WC%ONE_D%IIG
+            JJG = WC%ONE_D%JJG
+            KKG = WC%ONE_D%KKG
+            IOR = WC%ONE_D%IOR
+            DEPTH = 1._EB
+
+            RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
+            CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
+                           RHO_GET(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                           M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
+
+            OB%RHO(I,J,K,1:MS%N_MATL) = RHO_GET(1:MS%N_MATL)
+
+            IF (TWO_D) THEN
+               CELL_VOLUME = DX(I)*DZ(K)
+            ELSE
+               CELL_VOLUME = DX(I)*DY(J)*DZ(K)
+            ENDIF
+            IF (OB%CONSUMABLE) OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
+            IF (OB%MASS<TWO_EPSILON_EB) THEN
+               OB%HT3D=.FALSE.
+               OB%PYRO3D=.FALSE.
+            ENDIF
+
+            ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
+
+            SELECT CASE(ABS(IOR))
+               CASE(1); GEOM_FACTOR = DX(I)
+               CASE(2); GEOM_FACTOR = DY(J)
+               CASE(3); GEOM_FACTOR = DZ(K)
+            END SELECT
+            DO NS = 1,N_TRACKED_SPECIES
+               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+            ENDDO
+            DO NN=1,SF%N_MATL
+               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+            ENDDO
+
+            ! to-do: mass transport
+
+            ! If the fuel or water massflux is non-zero, set the ignition time
+
+            IF (WC%ONE_D%T_IGN > T) THEN
+               IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+            ENDIF
+
+         ENDDO I_LOOP_2
+      ENDDO
+   ENDDO
+ENDDO OBST_LOOP
 
 END SUBROUTINE SOLID_PYROLYSIS_3D
 
