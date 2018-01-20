@@ -139,7 +139,7 @@ $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
 $QFDS -d Heat_Transfer ht3d_sphere_25.fds
 $QFDS -d Heat_Transfer ht3d_sphere_51.fds
-$QFDS -p 8 -d Heat_Transfer ht3d_sphere_101.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
