@@ -258,6 +258,8 @@ $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
+$QFDS -d Pyrolysis pyro3d_A_B.fds
+$QFDS -d Pyrolysis pyro3d_wood_char.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
@@ -368,6 +370,7 @@ $QFDS -d Species reactionrate_EDC_flim_2step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_1step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_prim.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_lump.fds
+$QFDS -d Species reactionrate_fast_slow.fds
 $QFDS -d Species reactionrate_lumped_two_air.fds
 $QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds
