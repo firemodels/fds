@@ -19,14 +19,14 @@ cp    = 1000;       % J/kg/K
 g0    = 2e5;        % W/m3
 alpha = k/(rho*cp); % m2/s
 
-a1   = 0.10025; % m (this should match the last cell face in ht3d_sphere_101.fds)
+a1   = 0.10025; % m (this should match the last cell face in ht3d_sphere_102.fds)
 a2   = 0.1005;  % m (this should match the last cell face in ht3d_sphere_51.fds)
 a3   = 0.105;   % m (this should match the last cell face in ht3d_sphere_25.fds)
 
 n1 = 41;
 n2 = 21;
 n3 = 11;
-r1 = linspace(0.0,0.099,n1); % this should match line DEVC in ht3d_sphere_101.fds
+r1 = linspace(0.0,0.099,n1); % this should match line DEVC in ht3d_sphere_102.fds
 r2 = linspace(0.0,0.098,n2); % this should match line DEVC in ht3d_sphere_51.fds
 r3 = linspace(0.0,0.100,n3); % this should match line DEVC in ht3d_sphere_25.fds
 
@@ -83,7 +83,7 @@ end
 
 ddir = '../../Verification/Heat_Transfer/';
 fnt = {'ht3d_sphere_51'};
-fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_101'};
+fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_102'};
 nc_array = [25,51,101];
 dx_array = 0.25./nc_array;
 
@@ -161,7 +161,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_50_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
@@ -193,7 +193,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphe
 % lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 % set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% Git_Filename = [ddir,'ht3d_sphere_50_git.txt'];
+% Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
 % addverstr(gca,Git_Filename,'loglog')
 
 % % print to pdf
