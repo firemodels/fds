@@ -472,7 +472,8 @@ MAIN_LOOP: DO
    ! Check for program stops
 
    INQUIRE(FILE=FN_STOP,EXIST=EX)
-   IF ((EX.OR.STOPFDS>=0) .AND. ICYC>=STOP_AT_ITER) THEN
+   IF (EX .AND. ICYC>=STOP_AT_ITER) THEN
+      IF (VERBOSE) WRITE(LU_ERR,'(A,I5)') ' STOP file detected, MPI Process =',MYID
       STOP_STATUS = USER_STOP
       DIAGNOSTICS = .TRUE.
    ENDIF
