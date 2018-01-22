@@ -34751,7 +34751,7 @@ END FUNCTION INTERSECT_SPHERE_AABB
 ! Intersection of Cylinder and Axis-Aligned Bounding Box
 !
 ! Cylinder is represented by:
-!   X_IN   = center of cylinder (X,Y,Z) in grid reference frame
+!   X_IN   = bottom-center of cylinder (X,Y,Z) in grid reference frame
 !   H      = length of cylinder
 !   RADIUS = radius of cylinder
 !   AX_VEC = unit vector pointing along cylinder axis (which leads to ROT_MAT using ROTATION_MATRIX)
