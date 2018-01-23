@@ -17,7 +17,7 @@ cd $BUILDDIR
 BUILD()
 {
 dir=$1
-platform=intel_linux_64
+platform=intel_osx_64
 script=make_${dir}.sh
 
 echo
