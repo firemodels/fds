@@ -18,6 +18,8 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
+    read val
   fi
 }
 
@@ -30,7 +32,9 @@ CP ()
   TODIR=$3
   TOFILE=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the file $FROMFILE does not exist" >> $errlog
     echo "***error: the file $FROMFILE does not exist"
+    read val
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
@@ -38,6 +42,8 @@ CP ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
+    echo "***error: $FROMFILE not copied to bundle"
+    read val
   fi
 }
 
@@ -50,7 +56,9 @@ UNTAR ()
   TODIR=$3
   TODIR2=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the compressed file $FROMFILE does not exist" >> $errlog
     echo "***error: the compressed file $FROMFILE does not exist"
+    read val
   else
     curdir=`pwd`
     cd $TODIR
@@ -61,6 +69,8 @@ UNTAR ()
     echo "$FROMFILE untar'd"
   else
     echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
+    echo "***error: $FROMFILE not untar'd to bundle"
+    read val
   fi
 }
 
@@ -73,7 +83,9 @@ CP2 ()
   TODIR=$3
   TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the file $FROMFILE does not exist" >> $errorlog
     echo "***error: the file $FROMFILE does not exist"
+    read val
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
@@ -81,6 +93,8 @@ CP2 ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
+    echo "***error: $FROMFILE not copied to bundle"
+    read val
   fi
 }
 
@@ -91,7 +105,9 @@ CPDIR ()
   FROMDIR=$1
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist" >> $errlog
     echo "***error: the directory $FROMDIR does not exist"
+    read val
   else
     echo "*******************************"
     echo copying directory from $FROMDIR to $TODIR
@@ -102,6 +118,8 @@ CPDIR ()
     echo "$FROMDIR copied"
   else
     echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
+    echo "***error: the directory $FROMDIR not copied to bundle"
+    read val
   fi
 }
 
@@ -112,7 +130,9 @@ CPDIRFILES ()
   FROMDIR=$1
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist" >> $errlog
     echo "***error: the directory $FROMDIR does not exist"
+    read val
   else
     echo "*******************************"
     echo copying files from directory $FROMDIR to $TODIR
@@ -123,6 +143,8 @@ CPDIRFILES ()
     echo "$FROMDIR copied"
   else
     echo "***error: unable to copy $FROMDIR" >> $errlog
+    echo "***error: unable to copy $FROMDIR"
+    read val
   fi
 }
 
