@@ -111,7 +111,7 @@ function usage {
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
-  echo "        when qfds.sh .... case is specified on the command line"
+  echo "        where case is specified on the command line. N can be at most 9."
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
@@ -277,8 +277,8 @@ case $OPTION  in
    ;;
   O)
    OPENMPCASES="$OPTARG"
-   if [ $OPENMPCASES -gt 99 ]; then
-     OPENMPCASES=99
+   if [ $OPENMPCASES -gt 9 ]; then
+     OPENMPCASES=9
    fi
    nmpi_process=1
    benchmark="yes"
