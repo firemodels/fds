@@ -5,7 +5,7 @@ dir=$1
 platform=intel_osx_64
 script=$2
 echo
-echo "********** building $dir
+echo "********** building $dir"
 echo
 cd $dir/$platform
 ./$script
