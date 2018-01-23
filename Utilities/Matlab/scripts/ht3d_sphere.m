@@ -1,4 +1,4 @@
-% Salah BENKORICHI & Randy McDermott
+% Salah Benkorichi & Randy McDermott
 % 17-7-2017
 % ht3d_sphere.m
 %
@@ -19,16 +19,16 @@ cp    = 1000;       % J/kg/K
 g0    = 2e5;        % W/m3
 alpha = k/(rho*cp); % m2/s
 
-a1   = 0.1; % m
-a2   = 0.1; % m
-a3   = 0.105; % m
+a1   = 0.10025; % m (this should match the last cell face in ht3d_sphere_102.fds)
+a2   = 0.1005;  % m (this should match the last cell face in ht3d_sphere_51.fds)
+a3   = 0.105;   % m (this should match the last cell face in ht3d_sphere_25.fds)
 
-n1 = 40;
-n2 = 20;
+n1 = 41;
+n2 = 21;
 n3 = 11;
-r1 = linspace(0.00125,0.09875,n1); % this should match line DEVC in ht3d_sphere_100.fds
-r2 = linspace(0.00250,0.09750,n2); % this should match line DEVC in ht3d_sphere_50.fds
-r3 = linspace(0.00000,0.10000,n3); % this should match line DEVC in ht3d_sphere_25.fds
+r1 = linspace(0.0,0.099,n1); % this should match line DEVC in ht3d_sphere_102.fds
+r2 = linspace(0.0,0.098,n2); % this should match line DEVC in ht3d_sphere_51.fds
+r3 = linspace(0.0,0.100,n3); % this should match line DEVC in ht3d_sphere_25.fds
 
 t = [10 20 60 120 180]; % seconds
 
@@ -82,9 +82,9 @@ end
 %% gather FDS results
 
 ddir = '../../Verification/Heat_Transfer/';
-fnt = {'ht3d_sphere_50'};
-fileName = {'ht3d_sphere_25','ht3d_sphere_50','ht3d_sphere_100'};
-nc_array = [25,50,100];
+fnt = {'ht3d_sphere_51'};
+fileName = {'ht3d_sphere_25','ht3d_sphere_51','ht3d_sphere_102'};
+nc_array = [25,51,102];
 dx_array = 0.25./nc_array;
 
 M = importdata([ddir,fnt{1},'_devc.csv'],',',2);
@@ -113,7 +113,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_50_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
@@ -161,7 +161,7 @@ set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
 
-Git_Filename = [ddir,'ht3d_sphere_50_git.txt'];
+Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
@@ -193,7 +193,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphe
 % lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 % set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
-% Git_Filename = [ddir,'ht3d_sphere_50_git.txt'];
+% Git_Filename = [ddir,'ht3d_sphere_51_git.txt'];
 % addverstr(gca,Git_Filename,'loglog')
 
 % % print to pdf
