@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
+# this script is called by make_bundle.sh located in fds/Build/Bundle/linux or osx
 
 errlog=/tmp/errlog.$$
 
@@ -18,8 +18,10 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
-    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
+      read val
+    fi
   fi
 }
 
@@ -33,8 +35,10 @@ CP ()
   TOFILE=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errlog
-    echo "***error: the file $FROMFILE does not exist"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: the file $FROMFILE does not exist"
+      read val
+    fi
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
@@ -42,8 +46,10 @@ CP ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    echo "***error: $FROMFILE not copied to bundle"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: $FROMFILE not copied to bundle"
+      read val
+    fi
   fi
 }
 
@@ -57,8 +63,10 @@ UNTAR ()
   TODIR2=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the compressed file $FROMFILE does not exist" >> $errlog
-    echo "***error: the compressed file $FROMFILE does not exist"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: the compressed file $FROMFILE does not exist"
+      read val
+    fi
   else
     curdir=`pwd`
     cd $TODIR
@@ -69,8 +77,10 @@ UNTAR ()
     echo "$FROMFILE untar'd"
   else
     echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
-    echo "***error: $FROMFILE not untar'd to bundle"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: $FROMFILE not untar'd to bundle"
+      read val
+    fi
   fi
 }
 
@@ -84,8 +94,10 @@ CP2 ()
   TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errorlog
-    echo "***error: the file $FROMFILE does not exist"
-    read val
+    if [ "$FROM_PC" == "1" ]; then
+      echo "***error: the file $FROMFILE does not exist"
+      read val
+    fi
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
@@ -93,8 +105,10 @@ CP2 ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    echo "***error: $FROMFILE not copied to bundle"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: $FROMFILE not copied to bundle"
+      read val
+    fi
   fi
 }
 
@@ -106,8 +120,10 @@ CPDIR ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    echo "***error: the directory $FROMDIR does not exist"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: the directory $FROMDIR does not exist"
+      read val
+    fi
   else
     echo "*******************************"
     echo copying directory from $FROMDIR to $TODIR
@@ -118,8 +134,10 @@ CPDIR ()
     echo "$FROMDIR copied"
   else
     echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
-    echo "***error: the directory $FROMDIR not copied to bundle"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+       echo "***error: the directory $FROMDIR not copied to bundle"
+      read val
+    fi
   fi
 }
 
@@ -131,8 +149,10 @@ CPDIRFILES ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    echo "***error: the directory $FROMDIR does not exist"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: the directory $FROMDIR does not exist"
+      read val
+    fi
   else
     echo "*******************************"
     echo copying files from directory $FROMDIR to $TODIR
@@ -143,8 +163,10 @@ CPDIRFILES ()
     echo "$FROMDIR copied"
   else
     echo "***error: unable to copy $FROMDIR" >> $errlog
-    echo "***error: unable to copy $FROMDIR"
-    read val
+    if [ "$FROM_PC" == "" ]; then
+      echo "***error: unable to copy $FROMDIR"
+      read val
+    fi
   fi
 }
 
