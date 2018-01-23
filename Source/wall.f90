@@ -1026,7 +1026,7 @@ OBST_LOOP: DO N=1,N_OBST
             I_LOOP: DO I=OB%I1+1,OB%I2
                IC = CELL_INDEX(I,J,K)
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP
-               WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+               WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
                IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP
                SF=>SURFACE(WC%SURF_INDEX)
                WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
@@ -1043,7 +1043,7 @@ OBST_LOOP: DO N=1,N_OBST
             IC = CELL_INDEX(I,J,K)
             IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
 
-            WC=>WALL(WALL_INDEX(IC,OB%PYRO3D_IOR))
+            WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
             IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP_2
 
             SF=>SURFACE(WC%SURF_INDEX)      ! PYROLYSIS SURFACE (ejection of pyrolyzate gas)
