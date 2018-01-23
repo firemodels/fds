@@ -1,9 +1,25 @@
 #!/bin/bash
+BUILDFDS()
+{
+dir=$1
+platform=intel_linux_64
+script=make_${dir}.sh
+
+echo
+echo "********** building $dir"
+echo
+cd $CURDIR/../../../Utilities
+cd $dir/$platform
+./$script
+cd $BUILDDIR
+}
+
 BUILD()
 {
 dir=$1
 platform=intel_linux_64
-script=$2
+script=make_${dir}.sh
+
 echo
 echo "********** building $dir"
 echo
@@ -13,21 +29,24 @@ cd $BUILDDIR
 }
 
 CURDIR=`pwd`
-
+bundlelog=bundle.log
 
 cd ../../../../smv/Source
-git clean -dxf
+git clean -dxf >& /dev/null
 
 cd ../Build
-git clean -dxf
+git clean -dxf >& /dev/null
 
 BUILDDIR=`pwd`
+bundlelog=$CURDIR/bundle.log
+echo > $bundlelog
 
-BUILD LIBS make_LIBS.sh
-BUILD background make_background.sh
-BUILD dem2fds make_dem2fds.sh
-BUILD fds2ascii make_fds2ascii.sh
-BUILD hashfile make_hashfile.sh
-BUILD smokediff make_smokediff.sh
-BUILD wind2fds make_wind2fds.sh
-BUILD smokeview make_smokeview.sh
+BUILD LIBS | tee -a $bundlelog
+BUILD background  | tee -a $bundlelog
+BUILD dem2fds | tee -a $bundlelog
+BUILDFDS fds2ascii | tee -a $bundlelog
+BUILD hashfile | tee -a $bundlelog
+BUILD smokediff | tee -a $bundlelog
+BUILD wind2fds | tee -a $bundlelog
+BUILD smokeview | tee -a $bundlelog
+echo "bundle complete" | tee -a $bundlelog
