@@ -1,24 +1,24 @@
 #!/bin/bash
-#
-# this script is called from windows which passes in the directory 
-# containing this script
-#
+
+if [ -e ~/FDS_SMV_ENVpc.sh ]; then
+  source ~/FDS_SMV_ENVpc.sh
+else
+  source ~/FDS_SMV_ENV.sh
+fi
 
 export FDSEDITION=FDS6
 export SMVEDITION=SMV6
 
-export fds_smvroot=$1
-export bundlebase=$2
-export runhost=$3
-export fdshost=$3
-export smvhost=$3
+export fds_smvroot=$linux_svn_root
+export bundlebase=FDS_${fds_version}-SMV_${smv_version}_linux64
+export runhost=$osx_hostname
+export fdshost=$osx_hostname
+export smvhost=$osx_hostname
 export OSXBUNDLE=yes
-export FDSVERSION=$4
-export SMVVERSION=$5
-export MPI_VERSION=$6
-export COMPLIBFROM=
-export MISCLIBFROM=
+export FDSVERSION=$fds_version
+export SMVVERSION=$smv_version
+export MPI_VERSION=$osx_mpi_version
 
 export INSTALLDIR=FDS/$FDSEDITION
 
-$fds_smvroot/fds/Build/Bundle/scripts/bundle_generic.sh
+~/$fds_smvroot/fds/Build/Bundle/scripts/bundle_generic.sh
