@@ -16,7 +16,10 @@ function run_script(script){
   MyObject.Run(get_fullpath("Scripts/webRUN_script.bat ",script));
 }
 function bundle_fdssmv(platform){
-  MyObject.Run(get_fullpath("Scripts/webBUNDLEfdssmv.bat ",platform));
+  MyObject.Run(get_fullpath("../Build/Bundle/scripts/webBUNDLEfdssmv.bat ",platform));
+}
+function upload_settings(platform){
+  MyObject.Run(get_fullpath("../Build/Bundle/scripts/upload_settings.bat ",platform));
 }
 function install_fdssmv(platform){
   MyObject.Run(get_fullpath("Scripts/webINSTALLfdssmv.bat ",platform));
@@ -49,8 +52,14 @@ function install_fdssmv(platform){
 <tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
 <td align=center><button onclick="bundle_fdssmv('windows')">Bundle</button></td>
-<td align=center><button onclick="bundle_fdssmv('linux')">Bundle</button></td>
-<td align=center><button onclick="bundle_fdssmv('osx')">Bundle</button></td>
+<td align=center>
+<button onclick="upload_settings('linux')">Upload Settings</button><br>
+<button onclick="bundle_fdssmv('linux')">Bundle</button>
+</td>
+<td align=center>
+<button onclick="upload_settings('osx')">Upload Settings</button><br>
+<button onclick="bundle_fdssmv('osx')">Bundle</button>
+</td>
 </tr>
 
 <tr>

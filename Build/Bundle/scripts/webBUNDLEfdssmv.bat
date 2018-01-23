@@ -32,7 +32,7 @@ if "%platform%" == "windows" (
 )
 if "%platform%" == "linux" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux64
-  plink %linux_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_version% %smv_version% %linux_mpi_version%
+  plink %linux_logon% %linux_svn_root%/fds/Build/Bundle/linux/make_bundle_web.sh
 
   echo Downloading compressed archive to:
   echo   %svn_root%\fds\Utilities\uploads\!bundledir!.sh
@@ -42,7 +42,7 @@ if "%platform%" == "linux" (
 )
 if "%platform%" == "osx" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx64
-  plink %osx_logon% %linux_svn_root%/fds/Utilities/Scripts/BUNDLE_osx64.sh %linux_svn_root% !bundledir! %osx_hostname% %fds_version% %smv_version% %osx_mpi_version%
+  plink %osx_logon% %linux_svn_root%/fds/Build/Bundle/osx/make_bundle_web.sh
 
   echo Downloading compressed archive to:
   echo   %svn_root%\fds\Utilities\uploads\!bundledir!.sh
