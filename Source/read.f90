@@ -6112,6 +6112,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
          SF%HEAT_TRANSFER_MODEL = H_MORGAN
       CASE('VERTICAL PLATE')
          SF%HEAT_TRANSFER_MODEL = H_VERTICAL_PLATE
+      CASE('MORGAN ONLY')
+         SF%HEAT_TRANSFER_MODEL = H_MORGAN_ONLY
    END SELECT
    SF%HRRPUA               = 1000._EB*HRRPUA
    SF%MLRPUA               = MLRPUA
@@ -7278,7 +7280,7 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
          DO N=1,SF%N_MATL
             IF (SF%LAYER_MATL_INDEX(IL,NN)==SF%MATL_INDEX(N)) &
                SF%RHO_0(II,N) = SF%LAYER_MATL_FRAC(IL,NN)*SF%LAYER_DENSITY(IL)
-print '(A,1x,1I3,2ES12.4)','read.f90: ii,layer_matl_frac,layer_density',ii,sf%layer_matl_frac(il,nn),sf%layer_density(il)
+print '(A,1x,3I3,2ES12.4)','read.f90: ii,n_layer,n_matl,layer_matl_frac,layer_density',ii,nn,n,sf%layer_matl_frac(il,nn),sf%layer_density(il)
          ENDDO
       ENDDO
    ENDDO

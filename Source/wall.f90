@@ -2094,7 +2094,6 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    POINT_LOOP1: DO I=1,NWP
 
-print '(A)','----------------------'
       RHO_S0 = SF%LAYER_DENSITY(LAYER_INDEX(I))
       REGRID_FACTOR(I) = 1._EB
       REGRID_MAX       = 0._EB
@@ -2554,17 +2553,32 @@ TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
             SIGMA_BETA,RHO_DOT
 
+!rm ->
+REAL(EB) :: MLRMX,SFRHO_CHAR_MIN,SFRHO_VEG_MIN
+!rm <-
+
 Q_DOT_S_PPP = 0._EB
 M_DOT_S_PPP = 0._EB
 M_DOT_G_PPP_ADJUST = 0._EB
 M_DOT_G_PPP_ACTUAL = 0._EB
 
+!rm Remove 
+!IF (MATERIAL(MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_VEGETATION .AND. RHO_S(1) <= 0.001_EB*SURFACE(SURF_INDEX)%RHO_0(1,1) ) THEN 
+!  LAGRANGIAN_PARTICLE(PART_INDEX)%ONE_D%BURNAWAY = .TRUE.
+!print '(A)','in if then'
+!  RETURN
+!ENDIF
+
 MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
+!print '(A)','========================================='
+!print '(A,1x,2I3)','N,N_MATS----',n,n_mats
+!print '(A,1x,4ES12.3)','rho_s(1:4)',rho_s(1),rho_s(2),rho_s(3),rho_s(4)
 
    IF (RHO_S(N) <= 0._EB) CYCLE MATERIAL_LOOP  ! If component alpha density is zero, go on to the next material.
    ML => MATERIAL(MATL_INDEX(N))
 
    REACTION_LOOP: DO J=1,ML%N_REACTIONS  ! Tech Guide: Sum over the reactions, beta
+!print '(A,1x,3I3)','J,N_REACTIONS,ML%N_RESIDUE(J),--',j,ml%n_reactions,ml%n_residue(j)
 
       SELECT CASE (ML%PYROLYSIS_MODEL)
 
@@ -2627,11 +2641,28 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
             SF => SURFACE(SURF_INDEX)
             LP => LAGRANGIAN_PARTICLE(PART_INDEX)
+
+!rm -> Remove particle if it's fully charred and char oxidation is not modeled
+SFRHO_VEG_MIN  = 0.001_EB*SUM(SF%RHO_0(1:SF%N_CELLS_MAX+1,1))
+SFRHO_CHAR_MIN = ML%NU_RESIDUE(1,J)*SFRHO_VEG_MIN
+IF (ML%NU_O2(J) <= 0._EB) THEN 
+  IF(N==1 .AND. RHO_S(N) <= SFRHO_VEG_MIN) THEN  !remove particle if veg is fully charred
+    LAGRANGIAN_PARTICLE(PART_INDEX)%ONE_D%BURNAWAY = .TRUE.
+!print '(A)','in fully charred'
+    RETURN
+  ELSEIF (N==3 .AND. RHO_S(N) <= SFRHO_CHAR_MIN) THEN !remove particle if char is fully oxidized
+    LAGRANGIAN_PARTICLE(PART_INDEX)%ONE_D%BURNAWAY = .TRUE.
+!print '(A)','in fully oxidized'
+    RETURN
+  ENDIF
+ENDIF
+!rm <-
             ! Tech Guide: r_alpha,beta (1/s)
             REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
             ! power term
             IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
             ! Oxidation reaction?
+!print '(A,1x,1I3,2ES12.4)','N,PWT,AREA',n,lp%pwt,lp%one_d%area
             IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
                ! Get oxygen mass fraction
                ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
@@ -2643,25 +2674,44 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                REACTION_RATE = REACTION_RATE * &
                                RHO(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2(J))
             ENDIF
-            RHO_DOT  = MIN(RHO_S0*REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
+
+           RHO_DOT  = MIN(RHO_S0*REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
+
+!rm -> Impose maximum bound on pyrolysis generated fuel vapor creation kg/s/m^3 
+!if (n==1) print '(A,1x,1I3,3ES12.4)','N,RHO_S(N),DT_BC,RHO_S0*REACTION_RATE',n,rho_s(n),dt_bc,rho_s0*reaction_rate
+!           IF (N==1) THEN
+!             MLRMX = 0.35_EB*DX(IIG)*DY(JJG)*DZ(KKG)/(LP%PWT*PI*SF%LENGTH*SF%THICKNESS**2)
+!             MLRMX = (1.0_EB - ML%NU_RESIDUE(1,J))*MLRMX
+!             RHO_DOT = MIN(RHO_S0*REACTION_RATE,MLRMX)
+!print '(A,1x,1I3,1ES12.4)','N,MLRMX',n,mlrmx
+!             RHO_DOT  = MIN(RHO_DOT , RHO_S(N)/DT_BC)
+!           ENDIF
+!rm <-
 
       END SELECT
 
+!print '(A,1x,1I3,1ES12.4)','N,RHO_S(N)-',n,rho_s(n)
       RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*RHO_DOT )  ! Tech Guide: rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
+!print '(A,1x,1I3,1ES12.4)','N,RHO_S(N)+',n,rho_s(n)
       Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%H_R(J)  ! Tech Guide: q_dot_s,c'''
       DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
          M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
          M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
          M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
+!print '(A,1x,1I3,3ES12.4)','NS,ADJUST_BURN_RATE,NU_GAS,RHO_DOT',ns,ml%adjust_burn_rate(ns,j),ml%nu_gas(ns,j),rho_dot
       ENDDO
       DO NN=1,ML%N_RESIDUE(J)
          IF (ML%NU_RESIDUE(NN,J)>0._EB) THEN
             DO NNN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
                ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
                IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*RHO_DOT
+!print '(A,1x,2I3,1ES12.4)','ML%RESIDUE_MATL_INDEX(NN,J),MATL_INDEX(NNN),ML%NU_RESIDUE(NN,J)', &
+!                            ML%RESIDUE_MATL_INDEX(NN,J),MATL_INDEX(NNN),ML%NU_RESIDUE(NN,J)
             ENDDO
          ENDIF
       ENDDO
+!print '(A,1x,1I3)','N_TRACKED_SPECIES',n_tracked_species
+!print '(A)','---------------------------------------------'
 
    ENDDO REACTION_LOOP
 
@@ -2682,7 +2732,7 @@ INTEGER, INTENT(IN) :: SURF_INDEX
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,PARTICLE_INDEX,CFACE_INDEX
 INTEGER  :: ITMP
 REAL(EB) :: RE,H_NATURAL,H_FORCED,NUSSELT,FRICTION_VELOCITY,YPLUS,ZSTAR,DN,TMP_FILM,MU_G,K_G,CP_G,ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB) :: CN,CM,NUSSELT_VEG,RAYLEIGH_VEG
+REAL(EB) :: CN,CM,NUSSELT_CHU,NUSSELT_MORGAN,NUSSELT_VEG,RAYLEIGH_VEG
 TYPE(SURFACE_TYPE), POINTER :: SFX
 TYPE(WALL_TYPE), POINTER :: WCX
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_DX
@@ -2795,7 +2845,13 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
         CM = 0.333_EB
       ENDIF
       RE = ONE_DX%RHO_G*ONE_DX%U_TANG*SFX%CONV_LENGTH/MU_G
-      NUSSELT_VEG = CN*RAYLEIGH_VEG**CM
+      NUSSELT_MORGAN = CN*RAYLEIGH_VEG**CM
+
+      !Chu & Churchill correlatoin (Incropera & DeWitt, 4th Edition p. 502) for horizontal cylinder, free convection
+      NUSSELT_CHU = (0.6_EB + (0.387_EB*RAYLEIGH_VEG**(1._EB/6._EB))/(1._EB+(0.559_EB/PR_AIR)**(9._EB/16._EB))**(8._EB/27._EB))
+
+      NUSSELT_VEG = 0.5_EB*(NUSSELT_MORGAN + NUSSELT_CHU)
+
       H_NATURAL   = NUSSELT_VEG*K_G/SFX%CONV_LENGTH
       CALL FORCED_CONVECTION_MODEL(H_FORCED,RE,K_G,SFX%CONV_LENGTH,SFX%GEOMETRY)
 !print '(A,1x,6ES12.4)','TMPV,TMPG,RA,NUSS,H_NATURAL,H_FORCED',ONE_D%TMP_F,ONE_D%TMP_G,RAYLEIGH_VEG,NUSSELT_VEG,H_NATURAL,H_FORCED
@@ -2814,7 +2870,8 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
 !         GRAV,DELTA_TMP,SFX%CONV_LENGTH,ONE_DX%RHO_G,CP_G,TMP_FILM,MU_G,K_G
 END SELECT HTC_MODEL_SELECT
 
-HEAT_TRANSFER_COEFFICIENT = MAX(H_FORCED,H_NATURAL)
+!HEAT_TRANSFER_COEFFICIENT = MAX(H_FORCED,H_NATURAL)
+HEAT_TRANSFER_COEFFICIENT = H_NATURAL
 
 END FUNCTION HEAT_TRANSFER_COEFFICIENT
 
