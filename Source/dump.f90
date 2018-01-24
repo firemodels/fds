@@ -5773,7 +5773,7 @@ REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,MW,XHAT,ZHAT,BBF,RHO2,TMPUP,TMPLOW,ZINT,RHO_S
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
-           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
+           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,NRM,NNN
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 REAL :: CPUTIME
@@ -6840,13 +6840,27 @@ IND_SELECT: SELECT CASE(IND)
          RHO_S = 0._EB
          SF => SURFACE(OB%MATL_SURF_INDEX)
          DO NN=1,SF%N_MATL
-            IF (MATL_INDEX<=0) THEN
+            MATL_INDEX_IF: IF (MATL_INDEX<=0) THEN
                ! if no MATL_ID is specified, output total density
                RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
             ELSEIF (SF%LAYER_MATL_INDEX(1,NN)==MATL_INDEX) THEN
-               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
+               ! check original material layer
+               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
                RETURN
-            ENDIF
+            ELSE
+               ! check reaction residual material
+               ML => MATERIAL(SF%MATL_INDEX(NN))
+               DO NR=1,ML%N_REACTIONS
+                  DO NRM=1,ML%N_RESIDUE(NR)
+                     DO NNN=1,SF%N_MATL
+                        IF (ML%RESIDUE_MATL_INDEX(NRM,NR)==MATL_INDEX) THEN
+                           GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
+                           RETURN
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF MATL_INDEX_IF
          ENDDO
          GAS_PHASE_OUTPUT_RES = RHO_S
       ENDIF

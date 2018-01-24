@@ -14,8 +14,8 @@
 &VENT MB='ZMAX', SURF_ID='OPEN'/
 
 &REAC FUEL = 'PYROLYZATE'
-      SOOT_YIELD = 0.0
-      CO_YIELD = 0.0
+      SOOT_YIELD = 0.02
+      CO_YIELD = 0.02
       C = 3.4
       H = 6.2
       O = 2.5
