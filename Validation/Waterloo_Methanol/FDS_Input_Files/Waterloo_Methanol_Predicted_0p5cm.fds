@@ -8,25 +8,20 @@
 &MULT ID='mesh', DX=0.3, DY=0.3, DZ=0.4, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &MATL ID                     = 'METHANOL LIQUID'
-      EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'METHANOL'
-      HEAT_OF_REACTION       = 1135.7
-      CONDUCTIVITY           = 9.
-      SPECIFIC_HEAT          = 2.48
-      DENSITY                = 796
-      ABSORPTION_COEFFICIENT = 1140
-      REFERENCE_TEMPERATURE  = 64.55 /
+      HEAT_OF_REACTION       = 1098.3
+      CONDUCTIVITY           = 0.2
+      SPECIFIC_HEAT          = 2.53
+      DENSITY                = 792
+      ABSORPTION_COEFFICIENT = 52
+      REFERENCE_TEMPERATURE  = 64.6 /
 
 &BNDF CELL_CENTERED=.TRUE., QUANTITY='BURNING RATE' /
 &BNDF CELL_CENTERED=.TRUE., QUANTITY='WALL TEMPERATURE' /
 &BNDF CELL_CENTERED=.TRUE., QUANTITY='GAUGE HEAT FLUX' /
 
-&REAC FUEL               = 'METHANOL'
-      FYI                = 'Methanol C_1 H_4 O_1'
-      CO_YIELD           = 0.001
-      SOOT_YIELD         = 0.001
-      RADIATIVE_FRACTION = 0.17 /
+&REAC FUEL='METHANOL', RADIATIVE_FRACTION=0.16 /
 
 &SLCF PBY=0.001, QUANTITY='VELOCITY', VECTOR=.TRUE. /
 &SLCF PBY=0.001, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /

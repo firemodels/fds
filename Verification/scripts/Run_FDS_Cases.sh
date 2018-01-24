@@ -12,6 +12,7 @@ fi
 
 QUEUE=batch
 DEBUG=
+SINGLE=
 nthreads=1
 resource_manager=
 walltime=
@@ -84,6 +85,7 @@ case $OPTION in
    ;;
   d)
    DEBUG=_db
+   SINGLE="1"
    ;;
   h)
    usage;
@@ -150,7 +152,11 @@ export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POP
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
-  ./FDS_Benchmark_Cases.sh
+  if [ "$SINGLE" == "" ]; then
+    ./FDS_Benchmark_Cases.sh
+  else
+    ./FDS_Benchmark_Cases_single.sh
+  fi
   echo FDS benchmark cases submitted
 fi
 

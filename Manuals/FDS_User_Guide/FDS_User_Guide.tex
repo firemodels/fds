@@ -5217,19 +5217,15 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only
-when FDS is running in DNS mode ({\ct DNS=.TRUE.} on the {\ct MISC} line).
-You can use the finite-rate reaction model in an
-LES calculation, but because the temperature in a large scale calculation
-is smeared out over a mesh cell, some of the reaction parameters may need
-to be modified to account for the lower cell-averaged temperatures.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. It is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode ({\ct DNS=.TRUE.} on the {\ct MISC} line). You can use the finite-rate reaction model in an LES calculation, but because the temperature in a large scale calculation is smeared out over a mesh cell, some of the reaction parameters may need to be modified to account for the lower cell-averaged temperatures.
+
+\subsubsection{Single Step Reaction}
 
 Consider a single-step reaction mechanism for complete propane combustion:
 \begin{equation}\label{eq:propane_1step}
 \mathrm{C_3H_8 + 5\,O_{2} \rightarrow 3\,CO_{2} + 4\,H_{2}O}
 \end{equation}
-In this case we explicitly define all primitive species:
-
+In this case, we explicitly define all primitive species:
 \begin{lstlisting}
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
 &SPEC ID='PROPANE' /
@@ -5241,7 +5237,7 @@ The rate expression for the fuel, $\mathrm{C_3H_8}$, is
 \begin{equation}\label{eq:finite_rate}
 \frac{\d C_{\mathrm{C_3H_8}}}{\d t}= -k \, \prod C_{\alpha}\,^{N_{S,\alpha}}
 \end{equation}
-where the rate constant is defined as
+where $C_\alpha$ is the concentration of species $\alpha$ in units of mol/cm$^3$ and the rate constant is defined as
 \begin{equation}\label{eq:reac_rate}
 k = A \, T^{N_{T}} \, {\rm e}^{-E_a/RT}
 \end{equation}
@@ -5249,15 +5245,14 @@ k = A \, T^{N_{T}} \, {\rm e}^{-E_a/RT}
 \item[$A$] is the pre-exponential factor [\,((\si{mol/cm^3})$^{1-n}$)/s\,], where $n=\sum N_{S,\alpha}$ is the \emph{order} of the reaction,
 \item[$E_a$] is the activation energy [\,\si{J/mol}\,],
 \item[$N_{S,\alpha}$] is an array containing the concentration exponents (default 1),
-\item[$N_T$] is the temperature exponent (default is 0, meaning no temperature dependence).
+\item[$N_T$] is the temperature exponent (default 0, meaning no temperature dependence),
+\item[$R$] is the universal gas constant, 8.314~J/(mol$\cdot$K).
 \end{description}
-
 If we use Arrhenius parameters found from experiments or the literature (for this case Westbrook and Dryer~\cite{Westbrook:1}), the rate expression for the single-step propane reaction defined by Eq.~(\ref{eq:propane_1step}) becomes:
 \begin{equation}\label{eq:reac_rate2}
 \frac{\d C_{\mathrm{C_3H_8}}}{\d t} = -8.6 \times 10^{11} \; T^{0} \; {\rm e}^{-125520/RT} \; C_{\mathrm{C_3H_8}}\,^{0.1} \; C_{\mathrm{O_2}}\,^{1.65}
 \end{equation}
 and the resulting {\ct REAC} line is:
-
 \begin{lstlisting}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
@@ -5266,23 +5261,24 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR'
       NU = -1,-5,3,4
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
-      N_S = 0.1,1.65
+      N_S = 0.1,1.65 /
 \end{lstlisting}
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). 
 
-\noindent
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If we extend Eq.~(\ref{eq:propane_1step}) to include reactions from Westbrook and Dryer~\cite{Westbrook:1} that account for carbon monoxide production, we obtain:
+\subsection{Multiple Step Reaction}
+
+If we extend Eq.~(\ref{eq:propane_1step}) to include reactions from Westbrook and Dryer~\cite{Westbrook:1} that account for carbon monoxide production, we obtain:
 \begin{align}\label{eq:propane_2step}
 \mathrm{C_3H_8+3.5 \, O_2}&\rightarrow  \mathrm{3\,CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons \mathrm{CO_2}
 \end{align}
 In this case we will combine fast chemistry with finite-rate chemistry to create a mixed reaction mechanism. As before, we use primitive species rather than mixtures. A {\ct REAC} line is needed for each reaction including the reverse reaction. The propane oxidation reaction is a fast chemistry while the reversible carbon monoxide reaction is finite-rate. The Arrhenius parameters are modified from Andersen et al.~\cite{AndersenJ:1}:
-
 \begin{lstlisting}
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
       SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU = -1,-3.5,3,4
-      CRITICAL_FLAME_TEMPERATURE = 730./
+      CRITICAL_FLAME_TEMPERATURE = 730. /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
@@ -5291,7 +5287,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
       SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU = -1,-0.5,1
       SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      N_S = 0.25,1,0.5/
+      N_S = 0.25,1,0.5 /
 
 &REAC ID = 'R3'
       FUEL = 'CARBON DIOXIDE'
@@ -5301,30 +5297,30 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
       NU = -1,0.5,1
       SPEC_ID_N_S = 'OXYGEN','CARBON DIOXIDE','WATER VAPOR'
       N_S = -0.25,1,0.5
-      N_T = -0.97/
+      N_T = -0.97 /
 \end{lstlisting}
-
-\noindent For {\ct REAC ID='R2'}, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.  Reactions of this sort are often written in textbooks as
-
+For the reaction R2, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of {\ct N\_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, {\ct NU}.  Reactions of this sort are often written in textbooks as
 \begin{equation}\label{eq:inert_1step}
 \mathrm{a \, X + b \, Y \overset{H_2O}{\longrightarrow} X_aY_b}
 \end{equation}
-
 However, for the purposes of inputting into FDS, since H$_2$O is neither a product nor a reactant it would not be specified in the chemical reaction using either {\ct EQUATION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
-
-Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
-
-\begin{equation}\label{eq:third_body}
-\mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
-\end{equation}
-
-This type of reaction can be done by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
-\section{Special Topic: Chemical Time Integration}
+\subsection{Catalysts}
+
+Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
+\begin{equation}\label{eq:third_body}
+\mathrm{a \, X + b \, Y + M \rightarrow X_aY_b + M }
+\end{equation}
+This type of reaction is specified by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct REAC} line for the reaction.  The species M should not otherwise be defined.
+
+
+
+\subsection{Special Topic: Chemical Time Integration}
 \label{info:chem_integration}
-A diagnostic tool for the time integration of chemical reactions is the number of subiterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry the number of {\ct CHEMISTRY SUBITERATIONS} should always be 1. For finite rate chemical reactions the number can vary between 1 and the minimum between {\ct MAX\_CHEMISTRY\_ITERATIONS} and the number needed to satisfy the error tolerance of the ODE solver. If the maximum value is reached, the user can increase the number of iterations or decrease the error tolerance constraint of the integrator.
+
+An important consideration for the time integration of chemical reactions is the number of iterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry, the number of iterations is 1. For finite rate chemical reactions, the number of iterations can vary between 1 and the lesser of\linebreak[4] {\ct MAX\_CHEMISTRY\_ITERATIONS} and that needed to satisfy the error tolerance of the ODE solver,\linebreak[4] {\ct RICHARDSON\_ERROR\_TOLERANCE}. If the maximum value is reached, the user can increase the number of iterations or decrease the error tolerance constraint of the integrator. You may also just fix the number of iterations by setting {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}. Its default value is -1, meaning that the number of time steps is determined by the ODE solver.
 
 %\paragraph{Remark}
 %A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
@@ -6243,7 +6239,7 @@ By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seco
 
 A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
-You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and/or adding {\ct CONVERSION\_ADDEND}. For example, to change temperature output from the default $^\circ$C to $^\circ$F, the {\ct CONVERSION\_FACTOR} should be set to 1.8 and the {\ct CONVERSION\_ADDEND} to 32. You can then change the units that appear in the output files by setting {\ct UNITS='F'} or whatever the case may be. If you do not convert the output {\ct QUANTITY} from its default value, you need not set the {\ct UNITS}.  
+You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and/or adding {\ct CONVERSION\_ADDEND}. For example, to change temperature output from the default $^\circ$C to $^\circ$F, the {\ct CONVERSION\_FACTOR} should be set to 1.8 and the {\ct CONVERSION\_ADDEND} to 32. You can then change the units that appear in the output files by setting {\ct UNITS='F'} or whatever the case may be. If you do not convert the output {\ct QUANTITY} from its default value, you need not set the {\ct UNITS}.
 
 If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output file, set {\ct OUTPUT=.FALSE.} on the {\ct DEVC} line. Sometimes, devices are just used as clocks or control devices. In these cases, you might want to prevent its output from cluttering the output file. If the {\ct DEVC} {\ct QUANTITY='TIME'}, then {\ct OUTPUT} is set to {\ct .FALSE.} automatically.
 
@@ -7079,7 +7075,7 @@ Sometimes it is convenient to calculate a steady-state profile. For example, the
 \end{lstlisting}
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
 
-A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}. 
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
 
 You can convert the spatial coordinate of a steady-state profile by setting {\ct COORD\_FACTOR} on the {\ct DEVC} line. For example, to convert from the default unit of meters to centimeters, set {\ct COORD\_FACTOR} to 100. Also set {\ct XYZ\_UNITS} to the appropriate character string, in this case {\ct XYZ\_UNITS='cm'}.
 
@@ -9111,9 +9107,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
-%{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
-{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                               &              &   1.0               \\ \hline
+{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
@@ -9121,16 +9116,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
-%{\ct EVAPORATION}                               & Logical       & Allow evaporation                                     &               & {\ct .TRUE.}      \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Section~\ref{info:flux_limiters}                      &               & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Section~\ref{info:freeze_velocity}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
-{\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
+{\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           & $^\circ$C     & 25.             \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
-{\ct HVAC\_PRES\_RELAX}                        & Real           & Section ~\ref{info:HVAC}                 &               & 0.5     \\ \hline
+{\ct HVAC\_PRES\_RELAX}                         & Real          & Section ~\ref{info:HVAC}                              &               & 0.5               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
@@ -9138,7 +9132,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                              &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
-%{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
+{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
@@ -9150,7 +9144,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct PROCESS\_ALL\_MESHES}                      & Logical       & Section~\ref{sec:periodic}                            &               & {\ct .FALSE.}     \\ \hline
-{\ct PROJECTION}                                & Logical       & Formal projection                                     &               & {\ct .FALSE.}     \\ \hline
+{\ct PROJECTION}                                & Logical       & Section~\ref{info:CSVF}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
@@ -9158,11 +9152,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
-{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
+{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-3           \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
-{\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                          &               & {\ct .FALSE.}      \\ \hline
+{\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                         &               & {\ct .FALSE.}      \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline
@@ -9172,7 +9166,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}                        & Real Triplet  & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
-{\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & \si{\degree C} & 20.               \\ \hline
+{\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
