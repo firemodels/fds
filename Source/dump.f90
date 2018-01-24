@@ -5049,33 +5049,33 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    IF (.NOT.AGL_TERRAIN_SLICE .AND. .NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
 
-  ! node centered slice
+   ! node centered slice
 
-     DO K=K1,K2
-        DO J=J1,J2
-           DO I=I1,I2
-              SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-                 CASE(CELL_CENTER)
-                    QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
-                 CASE(CELL_FACE)
-                    QQ(I,J,K,IQQ) = REAL(FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND),FB)
-                    IC = CELL_INDEX(I,J,K)
-                    IF (IC>0) THEN
-                       SELECT CASE(IND)
-                          CASE(6)
-                             IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,1),FB)
-                          CASE(7)
-                             IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,2),FB)
-                          CASE(8)
-                             IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,3),FB)
-                       END SELECT
-                    ENDIF
-                 CASE(CELL_EDGE)
-                    QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
-              END SELECT
-           ENDDO
-        ENDDO
-     ENDDO
+   DO K=K1,K2
+      DO J=J1,J2
+         DO I=I1,I2
+            SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+               CASE(CELL_CENTER)
+                  QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
+               CASE(CELL_FACE)
+                  QQ(I,J,K,IQQ) = REAL(FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND),FB)
+                  IC = CELL_INDEX(I,J,K)
+                  IF (IC>0) THEN
+                     SELECT CASE(IND)
+                        CASE(6)
+                           IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,1),FB)
+                        CASE(7)
+                           IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,2),FB)
+                        CASE(8)
+                           IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,3),FB)
+                     END SELECT
+                  ENDIF
+               CASE(CELL_EDGE)
+                  QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
+            END SELECT
+         ENDDO
+      ENDDO
+   ENDDO
 
    !  or cell centered or terrain-following (treated as cell centered) slice
 
