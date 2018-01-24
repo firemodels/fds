@@ -10,7 +10,7 @@ git clean -dxf
 
 set BUILDDIR=%CD%
 
-call :BUILD LIBS
+call :BUILDLIB LIBS
 call :BUILD background
 call :BUILD dem2fds
 call :BUILDFDS fds2ascii
@@ -19,6 +19,8 @@ call :BUILD smokediff
 call :BUILD wind2fds
 call :BUILD smokeview
 echo "bundle complete"
+
+cd %CURDIR%
 
 goto :eof
 
@@ -34,7 +36,23 @@ echo ********** building %dir%
 echo
 cd %CURDIR%\..\..\..\Utilities
 cd %dir%\intel_win_64
-call %script%
+call %script% bot
+cd %BUILDDIR%
+exit /b /0
+
+:: -------------------------------------------------------------
+ :BUILDLIB
+:: -------------------------------------------------------------
+
+set dir=%1
+set script=make_LIBS_bot
+
+echo
+echo ********** building %dir%
+echo
+cd %CURDIR%\..\..\..\..\Build
+cd %dir%\intel_win_64
+call %script% bot
 cd %BUILDDIR%
 exit /b /0
 
@@ -48,11 +66,10 @@ set script=make_%dir%
 echo
 echo ********** building %dir%
 echo
-cd %CURDIR%\..\..\..\Utilities
-cd %dir%/intel_win_64
-call %script%
+cd %CURDIR%\..\..\..\..\Build
+cd %dir%\intel_win_64
+call %script% bot
 cd %BUILDDIR%
 exit /b /0
 
 :eof
-cd %CURDIR%
