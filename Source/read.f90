@@ -3623,6 +3623,9 @@ NAMELIST /REAC/ A,AUTO_IGNITION_TEMPERATURE,C,CHECK_ATOM_BALANCE,CO_YIELD,CRITIC
                 SPEC_ID_N_S,SPEC_ID_NU,TABLE_FS,TAU_CHEM,TAU_FLAME,&
                 THIRD_BODY,TURBULENT_FLAME_SPEED_ALPHA,TURBULENT_FLAME_SPEED_EXPONENT,Y_P_MIN_EDC
 
+! Set ODE_SOLVER once for all reactions
+ODE_SOLVER                  = 'null'
+
 CALL MAKE_PERIODIC_TABLE
 CALL SIMPLE_SPECIES_MW
 ATOM_COUNTS = 0._EB
@@ -3859,7 +3862,6 @@ NU                          = 0._EB
 N_S                         = -999._EB
 N_T                         = 0._EB
 O                           = 0._EB
-ODE_SOLVER                  = 'null'
 RADIATIVE_FRACTION          = -1._EB
 RAMP_CHI_R                  = 'null'
 RAMP_FS                     = 'null'
