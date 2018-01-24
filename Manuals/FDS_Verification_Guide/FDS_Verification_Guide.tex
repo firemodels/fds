@@ -1910,15 +1910,15 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 
 \subsubsection{Case 2: Air Injection into a Pressurized Compartment}
 
- Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
+Air is injected into one of two cubic chambers separated by a solid partition.  The mass flux of air is 1~kg/(m$^2\cdot$s) through a vent that is 0.04~m$^2$ in area. After 25~s, the mass of air introduced should be 1~kg. The accumulation of air in the chamber is shown in Fig.~\ref{species_conservation}.
 
 \subsubsection{Case 3: Gases Released by Solid Phase Reactions within a Solid Obstruction}
 
- A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
+A 0.2~m solid cube undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$. The inert gases have different yields, all summing to one, meaning that the solid cube ought to be vaporized creating a total mass of 0.8~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}. Note that in this case, when the solid cube vaporizes, its volume is filled with the background species, nitrogen. The total mass of the newly created nitrogen is 0.0093~kg.
 
 \subsubsection{Case 4: Gases Released by Solid Phase Reactions at the Boundary of the Domain}
 
- This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
+This case is similar to Case~3. A 0.2~m by 0.2~m solid surface undergoes a reaction that releases four different gases into a sealed unit cube. The solid has a density of 100~kg/m$^3$ and thickness of 0.1~m. The inert gases have different yields, all summing to one, meaning that the solid surface ought to be vaporized creating a total mass of 0.4~kg. The accumulation of all the gases in the chamber is shown in Fig.~\ref{species_conservation}.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -1929,6 +1929,26 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \end{tabular*}
 \caption[The \textct{species\_conservation} test cases]{Results of the \textct{species\_conservation} test cases. Case~1: Hot gas is injected at a very low flow rate into a 4~m cube. Case~2: Air is injected into one side of a partitioned compartment. Case~3: A solid cube vaporizes yielding four gases whose total mass is 0.8~kg. A small amount of nitrogen is created to fill the void left by the vaporized solid cube. Case~4: A patch of solid surface reacts to form four gases whose total mass is 0.4~kg.}
 \label{species_conservation}
+\end{figure}
+
+\subsection{Mass Flux through Domain Boundaries (\texorpdfstring{\textct{mass\_flux\_wall}}{mass\_flux\_wall})}
+\label{mass_flux_wall}
+
+This set of tests considers a specified mass injection of water vapor from a {\ct VENT} on the floor of a compartment.  The entire top of the compartment is {\ct OPEN} to the ambient.  The lighter water vapors are buoyant, so they rise creating a turbulent flow into and out of the domain.  Therefore, the input is steady, while the outflow of water vapor is quite chaotic.  To judge whether a proper mass balance is achieved by FDS we must monitor not only the inflow and outflow, but also the total mass of water vapor in the domain at a given time.  Therefore, we add {\ct DEVC} of quantity {\ct MASS\_FLUX\_WALL} and {\ct STATITSTICS=`SURFACE INTEGRAL`} for inflow and outflow, and we also add {\ct MASS\_FILE=.TRUE.} to the {\ct DUMP} line to monitor the total water vapor at any point in time in the domain.  With $\rho$ and $Y_{\mbox{\tiny H2O}}$ denoting the local mass density and mass fraction of water vapor in a cell, and with $\dot{m}_{\mbox{\tiny H2O}}^{\prime\prime}$ denoting the flux of water vapor at a cell face on the domain boundary, the mass balance may be written as,
+\begin{equation}
+\label{eq:H2O_mass_balance}
+\frac{\mbox{d}}{\mbox{d}t} \left( \int_{V} \rho Y_{\mbox{\tiny H2O}} \,\mbox{d}V \right) + \int_{S_{out}} \dot{m}_{\mbox{\tiny H2O}}^{\prime\prime} \,\mbox{d}S - \int_{S_{in}} \dot{m}_{\mbox{\tiny H2O}}^{\prime\prime} \,\mbox{d}S = 0
+\end{equation}
+
+Figure \ref{fig:H2O_mass_balance} shows the results of two cases that test the mass balance of water vapor in the domain just described.  The plot on the left tests lumped species balance.  In this case, the background humidity is set to zero and so the only water vapor in the domain is that of the tracked species injected at the bottom boundary.  In the second test case on the right we are showing the balance for the primitive species water vapor.  In this test, the background humidity is the default (40 \%) and so the output device must sum the water vapor contribution from the background air and the tracked species injected at the bottom.  In each plot, the blue and red lines show the inflow (blue, steady) and outflow (red, turbulent) as well as the balance from Eq.~\ref{eq:H2O_mass_balance} formed from the mass and devices files.  The balance (yellow line) fluctuates slightly around zero because of a first-order time error in reporting the boundary fluxes.  That is, within the actual simulation the mass transport equation is updated using a second-order Runge-Kutta scheme, whereas at the time the output routine is called the code does not have the machinery to perfectly reconstruct the second-order flux terms.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_flux_wall_zindex_mass_balance} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_flux_wall_yindex_mass_balance}
+\end{tabular*}
+\caption[The \textct{mass\_flux\_wall} test cases]{Results of the \textct{mass\_flux\_wall} test cases.  (Left) Lumped species balance, (Right) primitive species balance.}
+\label{fig:H2O_mass_balance}
 \end{figure}
 
 \subsection{Checking the Equation of State (\texorpdfstring{\textct{particle\_offgas}}{particle\_offgas})}
@@ -3563,11 +3583,33 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \label{adiabatic_flux}
 \end{figure}
 
+\newpage
+
+\clearpage
 
 \section{Solid Heat Transfer 3D (Beta)}
 \label{sec:ht3d}
 
 This section presents test cases for solid phase heat diffusion (conduction) in 3D.  This feature is not yet connected to the 1D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
+
+\subsection{3D vs 1D Heat Transfer (\texorpdfstring{\textct{ht3d\_vs\_ht1d}}{ht3d\_vs\_ht1d})}
+\label{ht3d_vs_ht1d}
+
+This case checks that the 3D heat conduction algorithm matches the 1D algorithm for a configuration that is only 1D. Consider a $\delta=0.02$~m thick block of tungsten that is insulated on the sides and back and exposed to $\dot{q}''=1350$~kW/m$^2$ for $\Delta t=7.15$~s. The density of tungsten is $\rho=19250$~kg/m$^3$ and the specific heat $c=0.132$~kJ/(kg$\cdot$K). Given an ambient temperature of $T_0=20$~$^\circ$C, the temperature of the block is expected to rise to:
+\be
+   T = T_0 + \frac{ \dot{q}'' \, \Delta t}{\delta \, c \, \rho} \approx 209.9 \; ^\circ \hbox{C}
+\ee
+as shown in Fig.~\ref{fig:ht3d_vs_ht1d}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_vs_ht1d} 
+\caption[The \textct{ht3d\_vs\_ht1d} test case]{Comparison of the temperature rise based on a 3-D and 1-D heat conduction calculation.}
+\label{fig:ht3d_vs_ht1d}
+\end{figure}
+
+\FloatBarrier
+
 
 \subsection{1D Heat Diffusion in a Square Bar (\texorpdfstring{\textct{ht3d\_nx\_x}}{ht3d\_nx\_x})}
 \label{sec:heat_diff}
@@ -3599,12 +3641,16 @@ Figure \ref{fig:ht3d_diff} shows the results of the FDS convergence study for ea
 \begin{figure}[ht]
 \centering
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_profile} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_test_1_convergence} \\
 \end{tabular*}
 \caption[The \textct{ht3d\_nx\_x} test cases]{One-dimensional heat diffusion in a square bar. (Left) Initial and final profiles for each case.  (Right) Spatial order-of-accuracy plot showing second-order convergence for all three spatial directions.}
 \label{fig:ht3d_diff}
 \end{figure}
+
+\FloatBarrier
+
 
 \subsection{Continuous Heat Flux Boundary (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
 \label{ht3d_slab}
@@ -3626,6 +3672,8 @@ The main purpose of this verification case is to check the accuracy of the conti
 \caption[The \textct{ht3d\_slab} test cases]{Test of continuous heat flux boundary condition for 3D heat transfer.}
 \label{fig:ht3d_slab}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{3D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\textct{ht3d\_ibeam}}{ht3d\_ibeam})}
 \label{ht3d_ibeam}
@@ -3656,6 +3704,8 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 \end{figure}
 
 
+\FloatBarrier
+
 \subsection{3D Heat Diffusion Across Mesh Boundaries (\texorpdfstring{\textct{ht3d\_2mesh}}{ht3d\_2mesh})}
 \label{sec:ht3d_2mesh}
 \label{ht3d_2mesh_x}
@@ -3671,16 +3721,17 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{fig:ht3d_2mesh}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{3D Heat Diffusion in a Sphere (\texorpdfstring{\textct{ht3d\_sphere}}{ht3d\_sphere})}
 \label{sec:ht3d_sphere}
-\label{ht3d_sphere_75}
-\label{ht3d_sphere_51}
+\label{ht3d_sphere_100}
+\label{ht3d_sphere_50}
 \label{ht3d_sphere_25}
 
 \textbf{Salah Benkorichi, Ulster University}\\
 
-In this example, a solid sphere with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
+In this example, a solid sphere of radius 0.1 m with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
 \label{eq:sphere}
 \frac{\partial T}{\partial t} = \alpha \left[ \frac{1}{r^2} \frac{\partial}{\partial r^2} \left( r^2 \frac{\partial T}{\partial r} \right) + \frac{\dot{q}^{\prime\prime\prime}}{k} \right]
@@ -3690,35 +3741,29 @@ where $k$ is the thermal conductivity and $\alpha$ is the thermal diffusivity.  
 \label{eq:sphere_int}
 \left. T  \right|_{t=0} =T_0 \qquad; \qquad \left. T \right|_{r=a} = T_0 \qquad; \qquad \left. \frac{\partial T}{\partial r} \right|_{r=0}=0
 \end{equation}
-where $T_0$ is the initial temperature and $a$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):
+where $T_0$ is the initial temperature and $a=$ is the radius of the sphere. The exact solution to Eqs.~(\ref{eq:sphere}) and (\ref{eq:sphere_int}) is from \cite{Carslaw:1} (Sec.~9.8, p.~243):
 \begin{equation}
 \label{eq:sphere_sol}
 T = T_0 + \frac{\dot{q}^{\prime\prime\prime}}{6k} \left ( a^2 - r^2 \right ) + 2 \frac{\dot{q}^{\prime\prime\prime}a^3}{k\pi^3 r} \sum\limits_{n=1}^\infty \frac{(-1)^n}{n^3}\sin \left(\frac{n\pi r}{a}\right)\exp \left( -\alpha t \frac{n^2 \pi^2}{a^2} \right)
 \end{equation}
 
-The solution is run for 180 s from an initial condition of \SI{20}{\degreeCelsius}. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case\footnote{The reason for displaying the medium resolution image is that the high resolution case is run with multiple meshes and the overlap of the slice files shows mesh artifacts.} (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.
+The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the temperature contours at $t=165$ s for the medium resolution case (left) and a comparison between the analytical and numerical solutions at several points in time for the high resolution case (right). Fig.~\ref{fig:ht3d_sphere_conv} shows the $L_\infty$ error as a function of cell size.
 
 \begin{figure}[ht]
 \centering
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
- & \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_51_165}
-\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}  \\
-\end{tabular*}
-
-\caption[The \textct{ht3d\_nx\_x} test cases]{(Left) Temperature contours at $t = 165$ s for $n=51$ cells across diameter. (Right) A comparison between the analytical and numerical solution for $n=75$ cells across diameter.}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_50_165}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_profile}
+\caption[The \textct{ht3d\_sphere} profiles]{(Left) Temperature contours at $t = 165$ s for $n=50$ cells across diameter. (Right) A comparison between radial profiles of the analytical and numerical solution at various times in the simulation.}
 \label{fig:ht3d_sphere_time}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
- & \includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
-\includegraphics[height=2.25in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence2}  \\
-\end{tabular*}
-
-\caption[The \textct{ht3d\_sphere} test cases]{L1 (left) and L2 (right) norm errors in temperature for the convergence study with different cell numbers [75, 51, 25] from left to right. The plots demonstrate that errors decrease for decreasing cell size. L1 and L2 norm errors decay as ${\cal O}(\Delta x)$.}
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
+\caption[The \textct{ht3d\_sphere} convergence]{$L_{\infty}$ error in sphere temperature at $t=180$ s with different cell numbers [100, 50, 25] from left to right.}
 \label{fig:ht3d_sphere_conv}
 \end{figure}
+
 
 
 \chapter{Pyrolysis}

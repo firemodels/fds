@@ -22,6 +22,7 @@ TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: MM
 TYPE(MATERIAL_TYPE), POINTER :: ML
+LOGICAL :: CALL_HT_1D
 
 CONTAINS
 
@@ -79,7 +80,7 @@ SUBROUTINE THERMAL_BC(T,NM)
 ! Note also that gas phase values are assigned here to be used for all subsequent BCs.
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR
 USE COMPLEX_GEOMETRY, ONLY : CFACE_THERMAL_GASVARS
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_BC,DTMP,DT_BC_HT3D
@@ -109,13 +110,13 @@ ENDIF
 
 ! For thermally-thick boundary conditions, set the flag to call the routine PYROLYSIS
 
-CALL_PYROLYSIS = .FALSE.
+CALL_HT_1D = .FALSE.
 IF (.NOT.INITIALIZATION_PHASE .AND. CORRECTOR) THEN
    WALL_COUNTER = WALL_COUNTER + 1
    IF (WALL_COUNTER==WALL_INCREMENT) THEN
       DT_BC    = T - BC_CLOCK
       BC_CLOCK = T
-      CALL_PYROLYSIS = .TRUE.
+      CALL_HT_1D = .TRUE.
       WALL_COUNTER = 0
    ENDIF
 ENDIF
@@ -132,11 +133,9 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = ZZP(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG,1:N_TRACKED_SPECIES)
    ONE_D%RSUM_G  = RSUM(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
    ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
-   ONE_D%U_TANG  = 0.25_EB*SQRT ( (UU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+UU(ONE_D%IIG-1,ONE_D%JJG,ONE_D%KKG))**2 + &
-                                  (VV(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+VV(ONE_D%IIG,ONE_D%JJG-1,ONE_D%KKG))**2 + &
-                                  (WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-1))**2 )
+   ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
    CALL CALCULATE_TMP_F(WALL_INDEX=IW)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,WALL_INDEX=IW)
+   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,WALL_INDEX=IW)
 ENDDO WALL_CELL_LOOP
 
 ! Loop through all CFACEs and apply heat transfer BCs
@@ -149,7 +148,7 @@ CFACE_LOOP: DO ICF=1,N_CFACE_CELLS
    ! Populate ONE_D%TMP_G, ONE_D%RHO_G, ONE_D%ZZ_G(:), ONE_D%RSUM_G, ONE_D%U_TANG
    CALL CFACE_THERMAL_GASVARS(ICF,ONE_D)
    CALL CALCULATE_TMP_F(CFACE_INDEX=ICF)
-   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,CFACE_INDEX=ICF)
+   IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,CFACE_INDEX=ICF)
 ENDDO CFACE_LOOP
 
 ! Loop through all particles and apply heat transfer BCs
@@ -166,11 +165,9 @@ IF (SOLID_PARTICLES) THEN
          ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = ZZP(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG,1:N_TRACKED_SPECIES)
          ONE_D%RSUM_G  = RSUM(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
          ONE_D%MU_G    = MU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)
-         ONE_D%U_TANG  = 0.25_EB*SQRT ( (UU(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+UU(ONE_D%IIG-1,ONE_D%JJG,ONE_D%KKG))**2 + &
-                                        (VV(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+VV(ONE_D%IIG,ONE_D%JJG-1,ONE_D%KKG))**2 + &
-                                        (WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG)+WW(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-1))**2 )
+         ONE_D%U_TANG  = SQRT(2._EB*KRES(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
          IF (LPC%SOLID_PARTICLE) CALL CALCULATE_TMP_F(PARTICLE_INDEX=IP)
-         IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_PYROLYSIS) CALL PYROLYSIS(NM,T,DT_BC,PARTICLE_INDEX=IP)
+         IF (SURFACE(SURF_INDEX)%THERMALLY_THICK .AND. CALL_HT_1D) CALL HT_1D(NM,T,DT_BC,PARTICLE_INDEX=IP)
       ENDIF
    ENDDO
 ENDIF
@@ -197,7 +194,7 @@ SUBROUTINE CALCULATE_TMP_F(WALL_INDEX,CFACE_INDEX,PARTICLE_INDEX)
 USE MASS, ONLY: SCALAR_FACE_VALUE
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX,PARTICLE_INDEX
-REAL(EB) :: ARO,FDERIV,QEXTRA,QNET,RAMP_FACTOR,RHO_G_2,RSUM_W,TMP_OTHER,TSI,UN, &
+REAL(EB) :: ARO,FDERIV,QEXTRA,QNET,RAMP_FACTOR,RHO_G_2,RSUM_W,PBAR_W,TMP_OTHER,TSI,UN, &
             RHO_ZZ_F(1:N_TOTAL_SCALARS),ZZ_GET(1:N_TRACKED_SPECIES),DUMMY, &
             ZZZ(1:4),RHO_OTHER,RHO_OTHER_2,RHO_ZZ_OTHER(1:N_TOTAL_SCALARS),RHO_ZZ_OTHER_2,RHO_ZZ_G,RHO_ZZ_G_2
 
@@ -482,7 +479,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
             ONE_D%RHO_F = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
       END SELECT
 
-      ! Species
+      ! Species and temperature
 
       SINGLE_SPEC_IF: IF (N_TOTAL_SCALARS > 1) THEN
          SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
@@ -499,6 +496,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZZ,FLUX_LIMITER)
+                  PBAR_W = PBAR_P(KKG,ONE_D%PRESSURE_ZONE)
                CASE(-1)
                   IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
                      RHO_ZZ_G_2 = RHOP(IIG-1,JJG,KKG)*ZZP(IIG-1,JJG,KKG,N)
@@ -506,6 +504,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZZ,FLUX_LIMITER)
+                  PBAR_W = PBAR_P(KKG,ONE_D%PRESSURE_ZONE)
                CASE( 2)
                   IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
                      RHO_ZZ_G_2 = RHOP(IIG,JJG+1,KKG)*ZZP(IIG,JJG+1,KKG,N)
@@ -513,6 +512,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZZ,FLUX_LIMITER)
+                  PBAR_W = PBAR_P(KKG,ONE_D%PRESSURE_ZONE)
                CASE(-2)
                   IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
                      RHO_ZZ_G_2 = RHOP(IIG,JJG-1,KKG)*ZZP(IIG,JJG-1,KKG,N)
@@ -520,6 +520,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZZ,FLUX_LIMITER)
+                  PBAR_W = PBAR_P(KKG,ONE_D%PRESSURE_ZONE)
                CASE( 3)
                   IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
                      RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG+1)*ZZP(IIG,JJG,KKG+1,N)
@@ -527,6 +528,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_OTHER_2,RHO_ZZ_OTHER(N),RHO_ZZ_G,RHO_ZZ_G_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZZ,FLUX_LIMITER)
+                  PBAR_W = (PBAR_P(KK,ONE_D%PRESSURE_ZONE)*DZ(KKG) + PBAR_P(KKG,ONE_D%PRESSURE_ZONE)*DZ(KK)) / (DZ(KK)+DZ(KKG))
                CASE(-3)
                   IF (SECOND_ORDER_INTERPOLATED_BOUNDARY) THEN
                      RHO_ZZ_G_2 = RHOP(IIG,JJG,KKG-1)*ZZP(IIG,JJG,KKG-1,N)
@@ -534,6 +536,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   ENDIF
                   ZZZ(1:4) = (/RHO_ZZ_G_2,RHO_ZZ_G,RHO_ZZ_OTHER(N),RHO_ZZ_OTHER_2/)
                   RHO_ZZ_F(N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZZ,FLUX_LIMITER)
+                  PBAR_W = (PBAR_P(KK,ONE_D%PRESSURE_ZONE)*DZ(KKG) + PBAR_P(KKG,ONE_D%PRESSURE_ZONE)*DZ(KK)) / (DZ(KK)+DZ(KKG))
             END SELECT
          ENDDO SPECIES_LOOP
 
@@ -541,10 +544,17 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          ONE_D%ZZ_F(1:N_TOTAL_SCALARS) = MAX(0._EB,MIN(1._EB,RHO_ZZ_F(1:N_TOTAL_SCALARS)/ONE_D%RHO_F))
          ZZ_GET(1:N_TRACKED_SPECIES) = ONE_D%ZZ_F(1:N_TRACKED_SPECIES)
          CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_W)
-         ONE_D%TMP_F = PBAR_P(KK,ONE_D%PRESSURE_ZONE)/(RSUM_W*ONE_D%RHO_F)
+         ONE_D%TMP_F = PBAR_W/(RSUM_W*ONE_D%RHO_F)
+
       ELSE SINGLE_SPEC_IF
          ONE_D%ZZ_F(1) = 1._EB
-         ONE_D%TMP_F = PBAR_P(KK,ONE_D%PRESSURE_ZONE)/(RSUM0*ONE_D%RHO_F)
+         SELECT CASE(IOR)
+            CASE DEFAULT
+               PBAR_W = PBAR_P(KKG,ONE_D%PRESSURE_ZONE)
+            CASE (-3,3)
+               PBAR_W = (PBAR_P(KK,ONE_D%PRESSURE_ZONE)*DZ(KKG) + PBAR_P(KKG,ONE_D%PRESSURE_ZONE)*DZ(KK)) / (DZ(KK)+DZ(KKG))
+         END SELECT
+         ONE_D%TMP_F = PBAR_W/(RSUM0*ONE_D%RHO_F)
       ENDIF SINGLE_SPEC_IF
 
       ! ghost cell value of temperature
@@ -556,7 +566,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
          IF (SOLID_OTHER) TMP(II,JJ,KK) = TMP_OTHER
       ENDIF
 
-      ONE_D%QCONF = 0._EB ! no convective heat transfer at interoplated boundary
+      ONE_D%QCONF = 0._EB ! no convective heat transfer at interpolated boundary
 
 END SELECT METHOD_OF_HEAT_TRANSFER
 
@@ -567,12 +577,16 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 ! Solves the 3D heat conduction equation internal to OBSTs.
 
-REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,TMP_OTHER,RAMP_FACTOR,&
-            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL()
+REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,K_S_M,K_S_P,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
+            QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,DN,KDTDN,R_K_S,TMP_I,TH_EST4,FO_EST3,&
+            RHO_GET(1:N_MATL),K_GET,K_OTHER,RHOCBAR_S
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ADCOUNT,SUBIT,NWP,IIO,JJO,KKO,NOM,N_INT_CELLS
+LOGICAL :: CONT_MATL_PROP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
-TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE(MESH_TYPE), POINTER :: OM=>NULL()
 
 ! Initialize verification tests
 
@@ -588,6 +602,7 @@ KDTDX=>WORK1; KDTDX=0._EB
 KDTDY=>WORK2; KDTDY=0._EB
 KDTDZ=>WORK3; KDTDZ=0._EB
 TMP_NEW=>WORK4; TMP_NEW=TMP
+KP=>WORK5; KP=0._EB
 
 DT_SUB = DT_BC_HT3D
 T_LOC = 0._EB
@@ -598,33 +613,113 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
    K_S_MAX = 0._EB
    VN_HT3D = 0._EB
 
+   ! compute material thermal conductivity
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
+            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D)   CYCLE
+            IF (OB%MATL_INDEX>0) THEN
+               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OB%MATL_SURF_INDEX)
+               RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
+               CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+   KP_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE KP_WALL_LOOP
+
+      II = WC%ONE_D%II
+      JJ = WC%ONE_D%JJ
+      KK = WC%ONE_D%KK
+
+      EWC=>EXTERNAL_WALL(IW)
+      NOM=EWC%NOM
+      IF (NOM<1) CYCLE KP_WALL_LOOP
+      OM=>MESHES(NOM)
+
+      K_OTHER = 0._EB
+      DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+         DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+            EWC_IIO_LOOP: DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+
+               IC = OM%CELL_INDEX(IIO,JJO,KKO);           IF (.NOT.OM%SOLID(IC)) CYCLE EWC_IIO_LOOP
+               OB => OM%OBSTRUCTION(OM%OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE EWC_IIO_LOOP
+               TMP_OTHER = OMESH(NOM)%TMP(IIO,JJO,KKO)
+
+               K_GET = 0._EB
+               IF (OB%MATL_INDEX>0) THEN
+                  CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_MATL_INDEX=OB%MATL_INDEX)
+               ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                  SF => SURFACE(OB%MATL_SURF_INDEX)
+                  RHO_GET(1:SF%N_MATL) = OB%RHO(IIO,JJO,KKO,1:SF%N_MATL)
+                  CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               ENDIF
+               K_OTHER = K_OTHER + K_GET
+
+            ENDDO EWC_IIO_LOOP
+         ENDDO
+      ENDDO
+      N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
+      KP(II,JJ,KK) = K_OTHER/REAL(N_INT_CELLS,EB)
+
+   ENDDO KP_WALL_LOOP
+
    ! build heat flux vectors
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
-            ICM = CELL_INDEX(MAX(I,1),J,K)
-            ICP = CELL_INDEX(MIN(I+1,IBAR),J,K)
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I+1,J,K)
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-            MLM => MATERIAL(OBM%MATL_INDEX)
-            MLP => MATERIAL(OBP%MATL_INDEX)
-            IF (MLM%K_S>0._EB) THEN
-               K_S_M = MLM%K_S
-            ELSE
-               NR = -NINT(MLM%K_S)
-               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            ! At present OBST_INDEX_C is not defined for ghost cells.
+            ! This means that:
+            !    1. continuous material properties will be assumed at a mesh boundary
+            !    2. we assume that if either OBM%HT3D .OR. OBP%HT3D we should process the boundary
+            IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
+
+            K_S_M = KP(I,J,K)
+            K_S_P = KP(I+1,J,K)
+
+            IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+               KDTDX(I,J,K) = 0._EB
+               CYCLE
             ENDIF
-            IF (MLP%K_S>0._EB) THEN
-               K_S_P = MLP%K_S
-            ELSE
-               NR = -NINT(MLP%K_S)
-               K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
+
+            ! determine if we have continuous material properties
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+
+            IF (CONT_MATL_PROP) THEN
+               ! use linear average from inverse lever rule
+               K_S = ( K_S_M*DX(I+1) + K_S_P*DX(I) )/( DX(I) + DX(I+1) )
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            ELSE
+               ! for discontinuous material properties maintain continuity of flux, C0 continuity of temperature
+               ! (allow C1 discontinuity of temperature due to jump in thermal properties across interface)
+               R_K_S = K_S_P/K_S_M * DX(I)/DX(I+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I+1,J,K))/(1._EB + R_K_S) ! interface temperature
+               !! KDTDX(I,J,K) = K_S_P * (TMP(I+1,J,K)-TMP_I) * 2._EB/DX(I+1) !! these two fluxes should be identical
+               KDTDX(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DX(I)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -632,29 +727,42 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
-               ICM = CELL_INDEX(I,MAX(J,1),K)
-               ICP = CELL_INDEX(I,MIN(J+1,JBAR),K)
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J+1,K)
                IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
                OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
                OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-               IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-               MLM => MATERIAL(OBM%MATL_INDEX)
-               MLP => MATERIAL(OBP%MATL_INDEX)
-               IF (MLM%K_S>0._EB) THEN
-                  K_S_M = MLM%K_S
-               ELSE
-                  NR = -NINT(MLM%K_S)
-                  K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+               IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
+
+               K_S_M = KP(I,J,K)
+               K_S_P = KP(I,J+1,K)
+
+               IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+                  KDTDY(I,J,K) = 0._EB
+                  CYCLE
                ENDIF
-               IF (MLP%K_S>0._EB) THEN
-                  K_S_P = MLP%K_S
-               ELSE
-                  NR = -NINT(MLP%K_S)
-                  K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
+
+               CONT_MATL_PROP=.TRUE.
+               IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
                ENDIF
-               K_S = 0.5_EB*(K_S_M+K_S_P)
-               K_S_MAX = MAX(K_S_MAX,K_S)
-               KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+
+               IF (CONT_MATL_PROP) THEN
+                  K_S = ( K_S_M*DY(J+1) + K_S_P*DY(J) )/( DY(J) + DY(J+1) )
+                  K_S_MAX = MAX(K_S_MAX,K_S)
+                  KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+               ELSE
+                  R_K_S = K_S_P/K_S_M * DY(J)/DY(J+1)
+                  TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J+1,K))/(1._EB + R_K_S)
+                  KDTDY(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DY(J)
+                  K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
@@ -664,36 +772,49 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ICM = CELL_INDEX(I,J,MAX(K,1))
-            ICP = CELL_INDEX(I,J,MIN(K+1,KBAR))
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I,J,K+1)
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-            MLM => MATERIAL(OBM%MATL_INDEX)
-            MLP => MATERIAL(OBP%MATL_INDEX)
-            IF (MLM%K_S>0._EB) THEN
-               K_S_M = MLM%K_S
-            ELSE
-               NR = -NINT(MLM%K_S)
-               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            IF (.NOT.(OBM%HT3D.OR.OBP%HT3D)) CYCLE
+
+            K_S_M = KP(I,J,K)
+            K_S_P = KP(I,J,K+1)
+
+            IF (K_S_M<TWO_EPSILON_EB .OR. K_S_P<TWO_EPSILON_EB) THEN
+               KDTDZ(I,J,K) = 0._EB
+               CYCLE
             ENDIF
-            IF (MLP%K_S>0._EB) THEN
-               K_S_P = MLP%K_S
-            ELSE
-               NR = -NINT(MLP%K_S)
-               K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
+
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
             ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            K_S_MAX = MAX(K_S_MAX,K_S)
-            KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+
+            IF (CONT_MATL_PROP) THEN
+               K_S = ( K_S_M*DZ(K+1) + K_S_P*DZ(K) )/( DZ(K) + DZ(K+1) )
+               K_S_MAX = MAX(K_S_MAX,K_S)
+               KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            ELSE
+               R_K_S = K_S_P/K_S_M * DZ(K)/DZ(K+1)
+               TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J,K+1))/(1._EB + R_K_S)
+               KDTDZ(I,J,K) = K_S_M * (TMP_I-TMP(I,J,K)) * 2._EB/DZ(K)
+               K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
 
-   ! build fluxes on boundaries
+   ! build fluxes on boundaries of INTERNAL WALL CELLS
 
-   HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   HT3D_WALL_LOOP: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
 
@@ -711,17 +832,18 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE HT3D_WALL_LOOP
       ML => MATERIAL(OB%MATL_INDEX)
 
-      IF (ML%K_S>0._EB) THEN
-         K_S = ML%K_S
-      ELSE
-         NR = -NINT(ML%K_S)
-         K_S = EVALUATE_RAMP(WC%ONE_D%TMP_F,0._EB,NR)
+      IF (OB%MATL_INDEX>0) THEN
+         CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_MATL_INDEX=OB%MATL_INDEX)
+      ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+         SF => SURFACE(OB%MATL_SURF_INDEX)
+         RHO_GET(1:SF%N_MATL) = OB%RHO(II,JJ,KK,1:SF%N_MATL)
+         CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
       ENDIF
       K_S_MAX = MAX(K_S_MAX,K_S)
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
-         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE
+         CASE DEFAULT METHOD_OF_HEAT_TRANSFER ! includes SPECIFIED_TEMPERATURE
 
             SELECT CASE(IOR)
                CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
@@ -843,8 +965,10 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                CASE( 3); RDN = RDZ(KK)
             END SELECT
             IF (RADIATION) THEN
-               TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
-                       ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_S*RDN       )
+               TH_EST4 = 3._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**4
+               FO_EST3 = 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3
+               TMP_F = ( WC%ONE_D%QRADIN + TH_EST4 + HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                       (                   FO_EST3 + HTC       + 2._EB*K_S*RDN       )
             ELSE
                TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
                        ( HTC       + 2._EB*K_S*RDN       )
@@ -865,6 +989,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ENDDO HT3D_WALL_LOOP
 
+   ! Note: for 2D cylindrical KDTDX at X=0 remains zero after initialization
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -872,19 +998,23 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             IF (.NOT.SOLID(IC)) CYCLE
             OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
             ML => MATERIAL(OB%MATL_INDEX)
-            RHO_S = ML%RHO_S
-            IF (ML%C_S>0._EB) THEN
-               C_S = ML%C_S
-            ELSE
-               NR = -NINT(ML%C_S)
-               C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            IF (OB%MATL_INDEX>0) THEN
+               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+               SF => SURFACE(OB%MATL_SURF_INDEX)
+               RHO_GET(1:SF%N_MATL) = OB%RHO(I,J,K,1:SF%N_MATL)
+               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
             ENDIF
 
-            VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHO_S*C_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            IF (TWO_D) THEN
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2) )
+            ELSE
+               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
+            ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                                                                 (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) + &
+            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHOCBAR_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                                 (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
+                                                                 (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
 
          ENDDO
@@ -1087,7 +1217,8 @@ IF (N_TRACKED_SPECIES==1) RETURN
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+       WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
    ONE_D => WC%ONE_D
    CALL CALCULATE_RHO_D_F
 ENDDO WALL_LOOP
@@ -1103,15 +1234,23 @@ CONTAINS
 
 SUBROUTINE CALCULATE_RHO_D_F
 
-INTEGER :: N,ITMP
+INTEGER :: N,ITMP,IIG,JJG,KKG
 
-IF (LES .AND. .NOT. RESEARCH_MODE) THEN
+IF (LES .AND. .NOT. RESEARCH_MODE) THEN ! default
    DO N=1,N_TRACKED_SPECIES
       ONE_D%RHO_D_F(N) = ONE_D%MU_G*RSC*ONE_D%RHO_F/ONE_D%RHO_G
    ENDDO
-ELSE
+ELSEIF (LES .AND. RESEARCH_MODE) THEN
+   ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+   IIG = ONE_D%IIG
+   JJG = ONE_D%JJG
+   KKG = ONE_D%KKG
    DO N=1,N_TRACKED_SPECIES
-      ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+      ONE_D%RHO_D_F(N) = ONE_D%RHO_F*( D_Z(ITMP,N) + (ONE_D%MU_G-MU_DNS(IIG,JJG,KKG))/ONE_D%RHO_G*RSC )
+   ENDDO
+ELSE ! DNS
+   ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+   DO N=1,N_TRACKED_SPECIES
       ONE_D%RHO_D_F(N) = ONE_D%RHO_F*D_Z(ITMP,N)
    ENDDO
 ENDIF
@@ -1197,7 +1336,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    ! In PYROLYSIS, all the mass fluxes are normalized by a virtual area based on the INITIAL radius.
    ! Here, correct the mass flux using the CURRENT radius.
 
-   IF (CALL_PYROLYSIS) THEN
+   IF (CALL_HT_1D) THEN
       ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)     *AREA_SCALING
       ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES)*AREA_SCALING
       ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = ONE_D%MASSFLUX_MATL(1:SF%N_MATL)        *AREA_SCALING
@@ -1344,7 +1483,7 @@ SPECIES_BC_INDEX = SF%SPECIES_BC_INDEX
 
 IF (PRESENT(WALL_INDEX)) THEN
    IF (WC%NODE_INDEX > 0) THEN
-      IF (-DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DUCTNODE(WC%NODE_INDEX)%DUCT_INDEX(1),1)>=0._EB) THEN
+      IF (-DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DUCTNODE(WC%NODE_INDEX)%DUCT_INDEX(1))>=0._EB) THEN
          SPECIES_BC_INDEX = SPECIFIED_MASS_FRACTION
       ELSE
          SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
@@ -1593,19 +1732,19 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! Compute R*Sum(Y_i/W_i) at the wall
 
    DU=DUCTNODE(WC%NODE_INDEX)%DUCT_INDEX(1)
-   MFT = -DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DU,1)/NODE_AREA_EX(WC%NODE_INDEX,1)
+   MFT = -DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DU)/NODE_AREA_EX(WC%NODE_INDEX)
    IF (.NOT. ANY(SF%LEAK_PATH>0)) THEN
-      IF (DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DU,1) > 0._EB) THEN
+      IF (DUCTNODE(WC%NODE_INDEX)%DIR(1)*DUCT_MF(DU) > 0._EB) THEN
          IF (SF%THERMAL_BC_INDEX==HVAC_BOUNDARY) THEN
-            ONE_D%TMP_F = NODE_TMP_EX(WC%NODE_INDEX,1)
+            ONE_D%TMP_F = NODE_TMP_EX(WC%NODE_INDEX)
             ONE_D%HEAT_TRANS_COEF = 0._EB
             ONE_D%QCONF = 0._EB
          ELSE
             IF (DUCT(DU)%LEAK_ENTHALPY) THEN
-               ZZ_GET(1:N_TRACKED_SPECIES) = NODE_ZZ_EX(WC%NODE_INDEX,1:N_TRACKED_SPECIES,1)
+               ZZ_GET(1:N_TRACKED_SPECIES) = NODE_ZZ_EX(WC%NODE_INDEX,1:N_TRACKED_SPECIES)
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_G,ONE_D%TMP_G)
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_D,NODE_TMP_EX(WC%NODE_INDEX,1))
-               WC%Q_LEAK = -MFT*(CP_D*NODE_TMP_EX(WC%NODE_INDEX,1)-CP_G*ONE_D%TMP_G)*ONE_D%RDN
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP_D,NODE_TMP_EX(WC%NODE_INDEX))
+               WC%Q_LEAK = -MFT*(CP_D*NODE_TMP_EX(WC%NODE_INDEX)-CP_G*ONE_D%TMP_G)*ONE_D%RDN
             ENDIF
          ENDIF
       ELSE
@@ -1625,7 +1764,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (PREDICTOR) ONE_D%UWS = UN
       IF (CORRECTOR) ONE_D%UW  = UN
    ELSE
-      ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = -NODE_ZZ_EX(WC%NODE_INDEX,1:N_TRACKED_SPECIES,1)*MFT
+      ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = -NODE_ZZ_EX(WC%NODE_INDEX,1:N_TRACKED_SPECIES)*MFT
    ENDIF
 
 ENDDO WALL_CELL_LOOP
@@ -1711,29 +1850,27 @@ ENDDO WALL_CELL_LOOP
 END SUBROUTINE ZETA_BC
 
 
-SUBROUTINE PYROLYSIS(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
+SUBROUTINE HT_1D(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
 
 ! Loop through all the boundary cells that require a 1-D heat transfer calc
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT, GET_MASS_FRACTION, GET_VISCOSITY
 USE GEOMETRY_FUNCTIONS
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 REAL(EB), INTENT(IN) :: DT_BC,T
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL:: WALL_INDEX,PARTICLE_INDEX,CFACE_INDEX
 REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
-            DXKF,DXKB,REACTION_RATE,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
-            MFLUX, MFLUX_S, VOLSUM, REGRID_MAX, REGRID_SUM,  &
-            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,&
-            MW_G,H_MASS,X_G,X_O2,Y_O2,X_W,D_AIR,MU_AIR,RE_L,RE_V,SC_AIR,SH_FAC_WALL,SHERWOOD,TMP_BACK,&
-            QCELL,DVOL,SIGMA_BETA
-INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NN,NNN,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
-REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,ZZ_GET(1:N_TRACKED_SPECIES)
+            DXKF,DXKB,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
+            VOLSUM, REGRID_MAX, REGRID_SUM,  &
+            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, RHO_S0,DT2_BC,TOLERANCE,LAYER_DIVIDE,TMP_BACK,&
+            QCELL,DVOL,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
+            M_DOT_S_PPP(MAX_MATERIALS),GEOM_FACTOR,RHO_TEMP(MAX_MATERIALS)
+INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,J,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS
+REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS
 REAL(EB),ALLOCATABLE,DIMENSION(:) :: TMP_W_NEW
 REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: INT_WGT
-REAL(EB), POINTER, DIMENSION(:,:) :: PBARP
-INTEGER  :: NWP_NEW,I_GRAD,STEPCOUNT,SMIX_PTR,IZERO,SURF_INDEX
+INTEGER  :: NWP_NEW,I_GRAD,STEPCOUNT,IZERO,SURF_INDEX,PART_INDEX=0
 LOGICAL :: REMESH,ITERATE,E_FOUND
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE(WALL_TYPE), POINTER :: WALL_P
@@ -1774,6 +1911,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
    LP => LAGRANGIAN_PARTICLE(PARTICLE_INDEX)
    ONE_D => LP%ONE_D
    SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
+   PART_INDEX = PARTICLE_INDEX
    SF => SURFACE(SURF_INDEX)
    KK  = ONE_D%KKG
    I_OBST = 0
@@ -1808,19 +1946,6 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
    ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,PARTICLE_INDEX=PARTICLE_INDEX)
 ENDIF
 ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF*DTMP
-
-! Set pointers
-
-IF (PREDICTOR) THEN
-   PBARP => PBAR
-ELSE
-   PBARP => PBAR_S
-ENDIF
-
-! Miscellaneous coefficients
-
-SC_AIR = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
-SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
 
 ! Exponents for cylindrical or spherical coordinates
 
@@ -1975,161 +2100,45 @@ print '(A)','----------------------'
       REGRID_MAX       = 0._EB
       REGRID_SUM       = 0._EB
 
+      ! Compute the pyrolysis reaction terms
+
+      IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID .OR. I<2) THEN
+
+         ! Send the array of component densities, ONE_D%RHO(I,N), into the PYROLYSIS routine
+
+         RHO_TEMP(1:SF%N_MATL) = ONE_D%RHO(I,1:SF%N_MATL)
+         CALL PYROLYSIS(SF%N_MATL,SF%MATL_INDEX,SURF_INDEX,ONE_D%IIG,ONE_D%JJG,ONE_D%KKG,ONE_D%TMP(I),ONE_D%TMP_F,&
+                        RHO_TEMP(1:SF%N_MATL),RHO_S0,ONE_D%X(I-1),DT_BC,&
+                        M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_S(I),PART_INDEX=PART_INDEX)
+         ONE_D%RHO(I,1:SF%N_MATL) = RHO_TEMP(1:SF%N_MATL)
+
+         ! Compute the mass flux of reaction gases at the surface
+
+         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
+                               (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
+         DO NS = 1,N_TRACKED_SPECIES
+            ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR
+            ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR
+         ENDDO
+         DO N=1,SF%N_MATL
+            ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
+         ENDDO
+
+      ENDIF
+
+      ! Compute regrid factors
+
       MATERIAL_LOOP1a: DO N=1,SF%N_MATL
-print '(A,1x,2I2)','====================== N_MATL,N =',SF%N_MATL,N
-
-         IF (ONE_D%RHO(I,N) <= 0._EB) CYCLE MATERIAL_LOOP1a
-
          ML  => MATERIAL(SF%MATL_INDEX(N))
-
-         SELECT CASE (ML%PYROLYSIS_MODEL)
-
-            CASE (PYROLYSIS_LIQUID)
-
-               IF (I > 1) THEN
-                  REGRID_SUM = 1._EB
-                  CYCLE MATERIAL_LOOP1a
-               ENDIF
-               SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
-               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-               CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
-               X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
-               X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/ONE_D%TMP_F)))
-               IF (DNS) THEN
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),ONE_D%TMP_G,D_AIR)
-                  H_MASS = 2._EB*D_AIR*(RDX(ONE_D%IIG)*RDY(ONE_D%JJG)*RDZ(ONE_D%KKG))**ONTH
-               ELSE
-                  CALL GET_VISCOSITY(ZZ_GET,MU_AIR,ONE_D%TMP_G)
-                  RE_L     = MAX(5.E5_EB,ONE_D%RHO_G*ONE_D%U_TANG*SF%CONV_LENGTH/MU_AIR)
-                  SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
-                  H_MASS = SHERWOOD*MU_AIR/(ONE_D%RHO_G*SC*SF%CONV_LENGTH)
-               ENDIF
-               IF(SF%HM_FIXED>=0._EB) THEN
-                  H_MASS=SF%HM_FIXED
-               ENDIF
-               MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/ONE_D%TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
-               MFLUX = MFLUX * PBARP(ONE_D%KKG,PRESSURE_ZONE(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG))
-               MFLUX = MIN(MFLUX,ONE_D%LAYER_THICKNESS(LAYER_INDEX(1))*ML%RHO_S/DT_BC)
-
-               ! CYLINDRICAL and SPHERICAL scaling not implemented
-               DO NS = 1,N_TRACKED_SPECIES
-                  ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
-                  ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,1)*MFLUX
-                  ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,1)*MFLUX
-               ENDDO
-               J = 0
-               ! Always remesh for liquid fuels
-               IF(MFLUX>TWO_EPSILON_EB) REMESH=.TRUE.
-               DO WHILE (MFLUX > 0._EB)
-                  J = J + 1
-                  MFLUX_S = MIN(MFLUX,DX_S(J)*ML%RHO_S/DT_BC)
-                  Q_S(1) = Q_S(1) - MFLUX_S*ML%H_R(1)/DX_S(J)
-                  ONE_D%RHO(J,N) = MAX( 0._EB , ONE_D%RHO(J,N) - DT_BC*MFLUX_S/DX_S(J) )
-                  MFLUX = MFLUX-MFLUX_S
-               ENDDO
-
-            CASE (PYROLYSIS_SOLID)
-
-               REACTION_LOOP: DO J=1,ML%N_REACTIONS
-                  ! Reaction rate in 1/s
-                  REACTION_RATE = ML%A(J)*(ONE_D%RHO(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*ONE_D%TMP(I)))
-                  ! power term
-                  DTMP = ML%THR_SIGN(J)*(ONE_D%TMP(I)-ML%TMP_THR(J))
-                  IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) THEN
-                     IF (DTMP > 0._EB) THEN
-                        REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
-                     ELSE
-                        REACTION_RATE = 0._EB
-                     ENDIF
-                  ELSE ! threshold
-                     IF (DTMP < 0._EB) REACTION_RATE = 0._EB
-                  ENDIF
-                  ! Phase change reaction?
-                  IF (ML%PCR(J)) THEN
-                     REACTION_RATE = REACTION_RATE / ((ABS(ML%H_R(J))/1000._EB) * DT_BC)
-                  ENDIF
-                  ! Oxidation reaction?
-                  IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-                     ! Get oxygen mass fraction
-                     ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-                     CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-                     ! Calculate oxygen volume fraction in the gas cell
-                     X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/ONE_D%RSUM_G
-                     ! Calculate oxygen concentration inside the material, assuming decay function
-                     X_O2 = X_O2 * EXP(-ONE_D%X(I-1)/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
-                     REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
-                  ENDIF
-                  ! Reaction rate in kg/(m3s)
-                  REACTION_RATE = RHO_S0 * REACTION_RATE
-                  ! Limit reaction rate
-                  REACTION_RATE = MIN(REACTION_RATE , ONE_D%RHO(I,N)/DT_BC)
-                  ! Compute mdot''_norm
-                  MFLUX_S = MF_FRAC(I)*REACTION_RATE*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
-                            (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
-                  ! Sum up local mass fluxes
-                  DO NS = 1,N_TRACKED_SPECIES
-                     ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,J)*MFLUX_S
-                  ENDDO
-                  Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
-                  ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
-                  DO NN=1,ML%N_RESIDUE(J)
-                     IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                        NNN = SF%RESIDUE_INDEX(N,NN,J)
-                        ONE_D%RHO(I,NNN) = ONE_D%RHO(I,NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-                     ENDIF
-                  ENDDO
-               ENDDO REACTION_LOOP
-
-            CASE (PYROLYSIS_VEGETATION)
-
-               REACTION_LOOP_VEG: DO J=1,ML%N_REACTIONS
-                  ! Reaction rate in 1/s
-                  REACTION_RATE = ML%A(J)*(ONE_D%RHO(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*ONE_D%TMP(I)))
-                  ! power term
-                  IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * ONE_D%TMP(I)**ML%N_T(J)
-                  ! Oxidation reaction?
-                  IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
-                     ! Get oxygen mass fraction
-                     ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ONE_D%ZZ_G(1:N_TRACKED_SPECIES))
-                     CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-                     SIGMA_BETA = LP%PWT*ONE_D%AREA*RDX(ONE_D%IIG)*RDY(ONE_D%JJG)*RDZ(ONE_D%KKG)
-                     CALL GET_VISCOSITY(ZZ_GET,MU_AIR,ONE_D%TMP_G)
-                     RE_V   = ONE_D%RHO_G*ONE_D%U_TANG*2._EB*SF%THICKNESS/MU_AIR
-                     REACTION_RATE = REACTION_RATE * &
-                                     ONE_D%RHO_G*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_V))/(RHO_S0*ML%NU_O2(J))
-                  ENDIF
-print '(A,1x,1I2,1ES12.4)','ML%N_REACTIONS,R0',ML%N_REACTIONS,R0
-print '(A,1x,1I2,6ES12.4)','J,A,RHO,RHO_S0,N_S,E,NU_02',J,ML%A(J),ONE_D%RHO(I,N),RHO_S0,ML%N_S(J),ML%E(J),ML%NU_O2(J)
-                  ! Reaction rate in kg/(m3s)
-                  REACTION_RATE = RHO_S0 * REACTION_RATE
-                  ! Limit reaction rate
-                  REACTION_RATE = MIN(REACTION_RATE , ONE_D%RHO(I,N)/DT_BC)
-                  ! Compute mdot''_norm
-                  MFLUX_S = MF_FRAC(I)*REACTION_RATE*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/ &
-                            (I_GRAD*(SF%INNER_RADIUS+SF%THICKNESS)**(I_GRAD-1))
-                  ! Sum up local mass fluxes
-                  DO NS = 1,N_TRACKED_SPECIES
-                     ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
-                     ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  +                           ML%NU_GAS(NS,J)*MFLUX_S
-                  ENDDO
-                  Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
-                  ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
-                  DO NN=1,ML%N_RESIDUE(J)
-                     IF (ML%NU_RESIDUE(NN,J) > 0._EB ) THEN
-                        NNN = SF%RESIDUE_INDEX(N,NN,J)
-                        ONE_D%RHO(I,NNN) = ONE_D%RHO(I,NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*REACTION_RATE
-                     ENDIF
-                  ENDDO
-               ENDDO REACTION_LOOP_VEG
-
-         END SELECT
-
+         IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
+            REMESH = .TRUE.
+            IF (I>1) THEN
+               REGRID_SUM = 1._EB
+               CYCLE MATERIAL_LOOP1a
+            ENDIF
+         ENDIF
          REGRID_MAX = MAX(REGRID_MAX,ONE_D%RHO(I,N)/ML%RHO_S)
          REGRID_SUM = REGRID_SUM + ONE_D%RHO(I,N)/ML%RHO_S
-
       ENDDO MATERIAL_LOOP1a
 
       IF (REGRID_SUM <= 1._EB) REGRID_FACTOR(I) = REGRID_SUM
@@ -2506,6 +2515,158 @@ ENDIF
 
 ONE_D%QCONF = ONE_D%HEAT_TRANS_COEF * (ONE_D%TMP_G - 0.5_EB * (ONE_D%TMP_F + TMP_F_OLD) )
 
+END SUBROUTINE HT_1D
+
+
+SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,RHO_S,RHO_S0,DEPTH,DT_BC,&
+                     M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_S_PPP,PART_INDEX)
+
+! Calculate the solid phase reaction. Return heat and mass generation rates per unit volume.
+
+! N_MATS = Number of MATerialS
+! MATL_INDEX(1:N_MATS) = Indices of the materials from the master material list.
+! SURF_INDEX = Index of surface, used only for liquids
+! (IIG,JJG,KKG) = Indices of nearest gas phase cell
+! TMP_S = Solid temperature (K)
+! TMP_F = Solid surface temperature (K)
+! RHO_S(1:N_MATS) = Array of component densities (kg/m3)
+! RHO_S0 = Original solid density (kg/m3)
+! DEPTH = Distance from surface (m)
+! DT_BC = Time step used by the solid phase solver (s)
+! M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) = Adjusted mass generation rate per unit volume of the gas species
+! M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) = Actual mass generation rate per unit volume of the gas species
+! M_DOT_S_PPP(1:N_MATS) = Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
+! Q_DOT_S_PPP = Heat release rate per unit volume (W/m3)
+! PART_INDEX = Optional Lagrangian particle index for vegetation
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT,GET_VISCOSITY
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+INTEGER, INTENT(IN) :: N_MATS,SURF_INDEX,IIG,JJG,KKG
+INTEGER, INTENT(IN), OPTIONAL :: PART_INDEX
+REAL(EB), INTENT(IN) :: TMP_S,TMP_F,RHO_S0,DT_BC,DEPTH
+REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
+                                       M_DOT_S_PPP(MAX_MATERIALS)
+INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
+INTEGER :: N,NN,NNN,J,NS,SMIX_PTR
+TYPE(MATERIAL_TYPE), POINTER :: ML
+TYPE(SURFACE_TYPE), POINTER :: SF
+REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
+            SIGMA_BETA,RHO_DOT
+
+Q_DOT_S_PPP = 0._EB
+M_DOT_S_PPP = 0._EB
+M_DOT_G_PPP_ADJUST = 0._EB
+M_DOT_G_PPP_ACTUAL = 0._EB
+
+MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
+
+   IF (RHO_S(N) <= 0._EB) CYCLE MATERIAL_LOOP  ! If component alpha density is zero, go on to the next material.
+   ML => MATERIAL(MATL_INDEX(N))
+
+   REACTION_LOOP: DO J=1,ML%N_REACTIONS  ! Tech Guide: Sum over the reactions, beta
+
+      SELECT CASE (ML%PYROLYSIS_MODEL)
+
+         CASE (PYROLYSIS_LIQUID)
+
+            SF => SURFACE(SURF_INDEX)
+            SMIX_PTR = MAXLOC(ML%NU_GAS(:,1),1)
+            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+            CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
+            X_G = ZZ_GET(SMIX_PTR)/SPECIES_MIXTURE(SMIX_PTR)%MW*MW_G
+            X_W = MIN(1._EB-TWO_EPSILON_EB,EXP(ML%H_R(1)*SPECIES_MIXTURE(SMIX_PTR)%MW/R0*(1._EB/ML%TMP_BOIL-1._EB/TMP_F)))
+            IF (SF%HM_FIXED>=0._EB) THEN
+               H_MASS = SF%HM_FIXED
+            ELSEIF (DNS) THEN
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_PTR),1),D_Z(:,SMIX_PTR),TMP(IIG,JJG,KKG),D_AIR)
+               H_MASS = 2._EB*D_AIR*(RDX(IIG)*RDY(JJG)*RDZ(KKG))**ONTH
+            ELSE
+               CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
+               U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
+               RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*U_TANG*SF%CONV_LENGTH/MU_AIR)
+               SC_AIR   = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
+               SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
+               H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
+            ENDIF
+            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_PTR)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+            MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
+            RHO_DOT = MIN(MFLUX/DX_S(1),ML%RHO_S/DT_BC)  ! kg/m3/s
+
+         CASE (PYROLYSIS_SOLID)
+
+            ! Reaction rate in 1/s (Tech Guide: r_alpha_beta)
+            REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
+            ! power term
+            DTMP = ML%THR_SIGN(J)*(TMP_S-ML%TMP_THR(J))
+            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) THEN
+               IF (DTMP > 0._EB) THEN
+                  REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
+               ELSE
+                  REACTION_RATE = 0._EB
+               ENDIF
+            ELSE ! threshold
+               IF (DTMP < 0._EB) REACTION_RATE = 0._EB
+            ENDIF
+            ! Phase change reaction?
+            IF (ML%PCR(J)) REACTION_RATE = REACTION_RATE / ((ABS(ML%H_R(J))/1000._EB) * DT_BC)
+            ! Oxidation reaction?
+            IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+               ! Get oxygen mass fraction
+               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               ! Calculate oxygen volume fraction in the gas cell
+               X_O2 = SPECIES(O2_INDEX)%RCON*Y_O2/RSUM(IIG,JJG,KKG)
+               ! Calculate oxygen concentration inside the material, assuming decay function
+               X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
+               REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
+            ENDIF
+            RHO_DOT  = MIN(RHO_S0*REACTION_RATE,RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
+
+         CASE (PYROLYSIS_VEGETATION)
+
+            SF => SURFACE(SURF_INDEX)
+            LP => LAGRANGIAN_PARTICLE(PART_INDEX)
+            ! Tech Guide: r_alpha,beta (1/s)
+            REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
+            ! power term
+            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
+            ! Oxidation reaction?
+            IF ( (ML%NU_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
+               ! Get oxygen mass fraction
+               ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+               CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
+               SIGMA_BETA = LP%PWT*LP%ONE_D%AREA*RDX(IIG)*RDY(JJG)*RDZ(KKG)
+               CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
+               U_TANG = SQRT(2._EB*KRES(IIG,JJG,KKG))
+               RE_L   = RHO(IIG,JJG,KKG)*U_TANG*2._EB*SF%THICKNESS/MU_AIR
+               REACTION_RATE = REACTION_RATE * &
+                               RHO(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2(J))
+            ENDIF
+            RHO_DOT  = MIN(RHO_S0*REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
+
+      END SELECT
+
+      RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*RHO_DOT )  ! Tech Guide: rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
+      Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%H_R(J)  ! Tech Guide: q_dot_s,c'''
+      DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
+         M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
+         M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
+         M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
+      ENDDO
+      DO NN=1,ML%N_RESIDUE(J)
+         IF (ML%NU_RESIDUE(NN,J)>0._EB) THEN
+            DO NNN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
+               ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
+               IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*RHO_DOT
+            ENDDO
+         ENDIF
+      ENDDO
+
+   ENDDO REACTION_LOOP
+
+ENDDO MATERIAL_LOOP
+
 END SUBROUTINE PYROLYSIS
 
 
@@ -2700,10 +2861,10 @@ DO I=1,N_TGA
    T_TGA = I*DT_TGA
    ASSUMED_GAS_TEMPERATURE = TMPA + TGA_HEATING_RATE*T_TGA
    IF (TGA_WALL_INDEX>0) THEN
-      CALL PYROLYSIS(1,T_TGA,DT_TGA,WALL_INDEX=IW)
+      CALL HT_1D(1,T_TGA,DT_TGA,WALL_INDEX=IW)
       SURF_DEN = SURFACE_DENSITY(1,0,WALL_INDEX=IW)
    ELSE
-      CALL PYROLYSIS(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
+      CALL HT_1D(1,T_TGA,DT_TGA,PARTICLE_INDEX=IP)
       SURF_DEN = SURFACE_DENSITY(1,0,LAGRANGIAN_PARTICLE_INDEX=IP)
    ENDIF
    IF (MOD(I,NINT(1._EB/(TGA_HEATING_RATE*DT_TGA)))==0) THEN

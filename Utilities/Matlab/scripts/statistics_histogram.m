@@ -49,6 +49,7 @@ if strcmp(Stats_Output, 'Validation')
 
             set(gcf,'Visible',Figure_Visibility);
             set(gcf,'Units',Paper_Units);
+            set(gcf,'PaperUnits',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
             set(gcf,'Position',[0 0 PDF_Paper_Width Paper_Height]);
             print(gcf,Image_File_Type,[Manuals_Dir,[Plot_Filename, '_Histogram']])

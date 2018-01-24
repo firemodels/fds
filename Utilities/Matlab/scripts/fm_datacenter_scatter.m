@@ -103,7 +103,7 @@ xlim([0.01 300]);
 ylim([0.01 300]);
 
 lh=legend([h1 h2 h3 h4 h5 h6],...
-    'C3H6 Low SF','C3H6 High SF','C3H6 Low HA','C3H6 High SF','Cable Low SF','Cable High SF',...
+    'C3H6 Low SF','C3H6 High SF','C3H6 Low HA','C3H6 High HA','Cable Low SF','Cable High SF',...
     'Location','southeast');
 set(lh,'FontSize',Key_Font_Size)
 
@@ -120,6 +120,7 @@ addverstr(gca,git_file,'loglog')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot'];

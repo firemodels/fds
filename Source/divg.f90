@@ -180,31 +180,35 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
 
-      ! Zero rho*D_n grad Z_n at boundaries
+      ! Store rho*D_n grad Z_n at OPEN boundaries, zero out otherwise
 
       WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-             WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
              WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
          IIG = WC%ONE_D%IIG
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
-         SELECT CASE(IOR)
-            CASE( 1)
-               RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
-            CASE(-1)
-               RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
-            CASE( 2)
-               RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
-            CASE(-2)
-               RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
-            CASE( 3)
-               RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
-            CASE(-3)
-               RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
-         END SELECT
+         IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+            SELECT CASE(IOR)
+               CASE( 1); WC%ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDX(IIG-1,JJG,KKG,N)
+               CASE(-1); WC%ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDX(IIG,JJG,KKG,N)
+               CASE( 2); WC%ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDY(IIG,JJG-1,KKG,N)
+               CASE(-2); WC%ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDY(IIG,JJG,KKG,N)
+               CASE( 3); WC%ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDZ(IIG,JJG,KKG-1,N)
+               CASE(-3); WC%ONE_D%RHO_D_DZDN_F(N) = -RHO_D_DZDZ(IIG,JJG,KKG,N)
+            END SELECT
+         ELSE
+            SELECT CASE(IOR)
+               CASE( 1); RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
+               CASE(-1); RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
+               CASE( 2); RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
+               CASE(-2); RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
+               CASE( 3); RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
+               CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
+            END SELECT
+         ENDIF
       ENDDO WALL_LOOP
 
       IF (CHECK_MASS_CONSERVE) THEN
@@ -256,7 +260,8 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    ENDDO
    !$OMP END PARALLEL DO
 
-   ! Store diffusive species flux on EXIM boundary faces if present:
+   ! Store diffusive species flux on EXIM boundary faces if present
+
    IF (CC_IBM) CALL SET_EXIMDIFFLX_3D(NM,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ)
 
    ! Diffusive heat flux
@@ -340,6 +345,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN_GET = 2._EB*WC%ONE_D%RHO_D_F(:)*(ZZP(IIG,JJG,KKG,:)-WC%ONE_D%ZZ_F(:))*WC%ONE_D%RDN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
+         WC%ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
 
          IF (PREDICTOR) THEN
             UWP = WC%ONE_D%UWS
@@ -378,7 +384,8 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
 ENDIF SPECIES_GT_1_IF
 
-! Store diffusive species flux at domain boundaries if true:
+! Store diffusive species flux at domain boundaries if true (this should be deprecated)
+
 IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINDIFFLX_3D(ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,.NOT.PREDICTOR)
 
 ! Get the specific heat

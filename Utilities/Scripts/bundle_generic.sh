@@ -127,6 +127,14 @@ CPDIRFILES ()
 }
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+if [ "`uname`" == "Darwin" ]; then
+  FDSOS=_osx_64
+  PLATFORM=OSX64
+else
+  FDSOS=_linux_64
+  PLATFORM=LINUX64
+fi
+
 
 manifest=manifest$FDSOS.html
 
@@ -255,9 +263,6 @@ fi
 echo ""
 echo "--- copying configuration files ---"
 echo ""
-if [ "$OSXBUNDLE" == "yes" ]; then
-  CP $fds_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-fi
 
 CP $fds_bundle README_repo.html   $bundledir/Documentation README_repo.html
 

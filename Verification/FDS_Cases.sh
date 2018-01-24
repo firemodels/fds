@@ -9,6 +9,14 @@ $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
+$QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
+$QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
+$QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
+$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p25.fds
+$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p125.fds
+$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p0625.fds
+
+
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
@@ -88,6 +96,8 @@ $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
 $QFDS -d Flowfields mean_forcing_hole.fds
+$QFDS -d Flowfields mass_flux_wall_yindex.fds
+$QFDS -d Flowfields mass_flux_wall_zindex.fds
 
 $QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
@@ -128,8 +138,9 @@ $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
 $QFDS -d Heat_Transfer ht3d_sphere_25.fds
-$QFDS -d Heat_Transfer ht3d_sphere_51.fds
-$QFDS -p 27 -d Heat_Transfer ht3d_sphere_75.fds
+$QFDS -d Heat_Transfer ht3d_sphere_50.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_100.fds
+$QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -165,6 +176,9 @@ $QFDS -d HVAC leak_test.fds
 
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
+$QFDS -d Miscellaneous obst_sphere.fds
+$QFDS -d Miscellaneous obst_cylinder.fds
+$QFDS -d Miscellaneous obst_cone.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -187,7 +201,6 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
-$QFDS -d Pressure_Solver scarc2d_fft_1mesh.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -541,10 +554,6 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
-$QFDS -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds

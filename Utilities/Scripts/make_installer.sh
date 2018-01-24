@@ -13,6 +13,9 @@ then
   exit
 fi
 
+FDSMODULE=$FDSEDITION
+SMVMODULE=$SMVEDITION
+
 FDSVARS=${FDSEDITION}VARS.sh
 INSTALLDIR=
 FDS_TAR=
@@ -184,6 +187,7 @@ THISDIR=\`pwd\`
 
 BASHRCFDS=/tmp/bashrc_fds.\$\$
 FDSMODULEtmp=/tmp/fds_module.\$\$
+SMVMODULEtmp=/tmp/smv_module.\$\$
 STARTUPtmp=/tmp/readme.\$\$
 
 #--- Find the beginning of the included FDS tar file so that it 
@@ -386,28 +390,64 @@ fi
 cp \$FDSMODULEtmp \$FDS_root/bin/modules/$FDSMODULE
 rm \$FDSMODULEtmp
 
+cat << MODULE > \$SMVMODULEtmp
+#%Module1.0#####################################################################
+###
+### SMV6 modulefile
+###
+
+proc ModulesHelp { } {
+        puts stderr "\tAdds Smokview bin location to your PATH environment variable"
+}
+
+module-whatis   "Loads smokeview paths and libraries."
+
+conflict FDS6
+conflict SMV6
+
+prepend-path    PATH            \$FDS_root/bin
+prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64
+MODULE
+if [ "$ostype" == "LINUX" ] ; then
+cat << MODULE >> \$SMVMODULEtmp
+prepend-path    LD_LIBRARY_PATH /usr/lib64
+MODULE
+fi
+
+cp \$SMVMODULEtmp \$FDS_root/bin/modules/$SMVMODULE
+rm \$SMVMODULEtmp
+
 #--- create BASH startup file
 
-if [ "$MPI_VERSION" == "INTEL" ] ; then
 cat << BASH > \$BASHRCFDS
 #/bin/bash
-export PATH=\$FDS_root/bin:\\\$PATH
+FDSBINDIR=\$FDS_root/bin
+export PATH=\\\$FDSBINDIR:\\\$PATH
 BASH
-else
+
+if [ "$MPI_VERSION" != "INTEL" ] ; then
 cat << BASH >> \$BASHRCFDS
-export PATH=\$FDS_root/bin:\$FDS_root/bin/openmpi_64/bin:\\\$PATH
-export OPAL_PREFIX=\$FDS_root/bin/openmpi_64
+export PATH=\\\$FDSBINDIR/openmpi_64/bin:\\\$PATH
+export OPAL_PREFIX=\\\$FDSBINDIR/openmpi_64
 BASH
 fi
 
 if [ "$ostype" == "LINUX" ] ; then
+OMP_COMMAND="grep -c processor /proc/cpuinfo"
+else
+OMP_COMMAND="system_profiler SPHardwareDataType"
+fi
+
+if [ "$ostype" == "LINUX" ] ; then
 cat << BASH >> \$BASHRCFDS
-export $LDLIBPATH=/usr/lib64:\$FDS_root/bin/LIB64:\\\$$LDLIBPATH
+export $LDLIBPATH=/usr/lib64:\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
 BASH
 fi
 
 cat << BASH >> \$BASHRCFDS
-# number of OpenMPI threads - set to no more than MIN(4,number of cores / 2)
+#  set OMP_NUM_THREADS to max of 4 and "Total Number of Cores" 
+#  obtained from running:
+#  \$OMP_COMMAND
 export OMP_NUM_THREADS=4
 BASH
 

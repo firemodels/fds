@@ -96,10 +96,11 @@ disp('saad_mms_temporal_error...');       saad_mms_temporal_error
 disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
-disp('ht3d_cond...');                     ht3d_cond
-disp('ht3d_sphere...');                   ht3d_sphere
 disp('vegetation...');                    vegetation
 disp('radiation_gas_panel...');           radiation_gas_panel
 disp('particle_size_distribution...');    particle_size_distribution
+disp('mass_blance...');                   mass_balance
+disp('ht3d_cond...');                     ht3d_cond
+disp('ht3d_sphere...');                   ht3d_sphere
 
 display('verification scripts completed successfully!')
