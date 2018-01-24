@@ -1067,10 +1067,12 @@ OBST_LOOP: DO N=1,N_OBST
             ELSE
                CELL_VOLUME = DX(I)*DY(J)*DZ(K)
             ENDIF
-            IF (OB%CONSUMABLE) OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
-            IF (OB%MASS<TWO_EPSILON_EB) THEN
-               OB%HT3D=.FALSE.
-               OB%PYRO3D=.FALSE.
+            IF (OB%CONSUMABLE) THEN
+               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
+               IF (OB%MASS<TWO_EPSILON_EB) THEN
+                  OB%HT3D=.FALSE.
+                  OB%PYRO3D=.FALSE.
+               ENDIF
             ENDIF
 
             ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
