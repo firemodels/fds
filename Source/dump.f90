@@ -3592,45 +3592,44 @@ END SUBROUTINE DUMP_PART
 
 SUBROUTINE DUMP_ISOF(T,DT,NM)
 
+! Write out isosurface data to file(s).
+
 REAL(EB), INTENT(IN) :: T,DT
+INTEGER, INTENT(IN) :: NM
 REAL(EB) :: SUM
 REAL(FB) :: STIME
 INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR
-INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY=>NULL(),B=>NULL(),S=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,B,S
 
 IF (EVACUATION_ONLY(NM)) RETURN
+
 STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 DATAFLAG = 1
 DRY=.FALSE.
+
 CALL POINT_TO_MESH(NM)
 
-! Set up blockage arrays
-
-B => WORK1
-B = 1._EB
-S => WORK2
-S = 0._EB
-
-! B's on surface of mesh are 1 so that ghost cells (values from neighboring meshes) may be used to generate isosurface
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) B(I,J,K) = 0._EB
-      ENDDO
-   ENDDO
-ENDDO
+! Create arrays, B and IBLK, that are 1 in open cells and 0 in solid cells.
 
 IBLK = 1
+B => WORK1
+B = 1._EB
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) IBLK(I,J,K) = 0
+         IF (SOLID(CELL_INDEX(I,J,K))) THEN
+            B(I,J,K) = 0._EB
+            IBLK(I,J,K) = 0
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
+
+! Create an array, S, that is the reciprocal of the sum of the B values.
+
+S => WORK2
+S = 0._EB
 
 DO K=0,KBAR
    DO J=0,JBAR
@@ -4828,17 +4827,18 @@ END SUBROUTINE
 
 SUBROUTINE DUMP_SLCF(T,DT,NM,IFRMT)
 
-! Write either Slice File or Plot3D file data to file(s)
+! Write either Slice (IFRMT=0) or Plot3D (IFRMT=1) or 3D slice (IFRMT=2) to a file
 
-USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
+USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_STRINGS
+USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE TRAN, ONLY : GET_IJK
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,IFRMT
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: SUM,TT
-INTEGER :: IFRMT,I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
-           IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX
+INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
+           IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO
 INTEGER :: KTS,NTSL
-REAL(EB), POINTER, DIMENSION(:,:,:) :: C=>NULL(),B=>NULL(),S=>NULL(),QUANTITY=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: C,B,S,QUANTITY
 REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
@@ -4846,29 +4846,21 @@ LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
 ! Return if there are no slices to process and this is not a Plot3D dump
 
 DRY=.FALSE.
-PLOT3D=.FALSE.
-SLCF3D=.FALSE.
+
 SELECT CASE(IFRMT)
-   CASE(1)
-      PLOT3D=.TRUE.
-   CASE(2)
-      SLCF3D=.TRUE.
+   CASE(0) ; PLOT3D=.FALSE. ; SLCF3D=.FALSE.
+   CASE(1) ; PLOT3D=.TRUE.  ; SLCF3D=.FALSE.
+   CASE(2) ; PLOT3D=.FALSE. ; SLCF3D=.TRUE.
 END SELECT
 
 IF (MESHES(NM)%N_SLCF==0 .AND. .NOT.PLOT3D) RETURN
 
 CALL POINT_TO_MESH(NM)
 
-! Set up blockage arrays
+! Create an array, C, that is 1 at cell faces (I,J,K) for which U, V, and W are defined and 0 otherwise.
 
-B => WORK1
-B = 0._EB
-S => WORK2
-S = 0._EB
 C => WORK3
-C = 1._EB  ! C is for cell face data (like U, V, W)
-
-! Zero out cell face data for ghost cells at the mesh edges
+C = 1._EB
 
 C(0,0,0:KBP1) = 0._EB
 C(0,JBP1,0:KBP1) = 0._EB
@@ -4886,15 +4878,24 @@ C(IBP1,0:JBP1,KBP1) = 0._EB
 IF (TWO_D) C(:,   0,:) = 0._EB
 IF (TWO_D) C(:,JBP1,:) = 0._EB
 
-! Zero out cell center data in all solid cells
+! Create an array, B, that is 1 in any cell that is to be included in the 8-cell corner average, 0 otherwise.
 
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         IF (.NOT.SOLID(CELL_INDEX(I,J,K))) B(I,J,K) = 1._EB
-      ENDDO
-   ENDDO
+B => WORK1
+B = 1._EB
+
+DO IC=1,CELL_COUNT(NM)
+   IF (SOLID(IC)) B(I_CELL(IC),J_CELL(IC),K_CELL(IC)) = 0._EB
+   IF (EXTERIOR(IC)) THEN
+      CALL SEARCH_OTHER_MESHES(XC(I_CELL(IC)),YC(J_CELL(IC)),ZC(K_CELL(IC)),NOM,IIO,JJO,KKO)
+      IF (NOM==0) B(I_CELL(IC),J_CELL(IC),K_CELL(IC)) = 0._EB
+   ENDIF
 ENDDO
+
+! Create an array, S, that is the reciprocal of the sum of the B values at cell corner (I,J,K).
+
+S => WORK2
+S = 0._EB
+
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
@@ -5049,33 +5050,33 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    IF (.NOT.AGL_TERRAIN_SLICE .AND. .NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
 
-  ! node centered slice
+   ! node centered slice
 
-     DO K=K1,K2
-        DO J=J1,J2
-           DO I=I1,I2
-              SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-                 CASE(CELL_CENTER)
-                    QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
-                 CASE(CELL_FACE)
-                    QQ(I,J,K,IQQ) = REAL(FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND),FB)
-                    IC = CELL_INDEX(I,J,K)
-                    IF (IC>0) THEN
-                       SELECT CASE(IND)
-                          CASE(6)
-                             IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,1),FB)
-                          CASE(7)
-                             IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,2),FB)
-                          CASE(8)
-                             IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,3),FB)
-                       END SELECT
-                    ENDIF
-                 CASE(CELL_EDGE)
-                    QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
-              END SELECT
-           ENDDO
-        ENDDO
-     ENDDO
+   DO K=K1,K2
+      DO J=J1,J2
+         DO I=I1,I2
+            SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+               CASE(CELL_CENTER)
+                  QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
+               CASE(CELL_FACE)
+                  QQ(I,J,K,IQQ) = REAL(FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND),FB)
+                  IC = CELL_INDEX(I,J,K)
+                  IF (IC>0) THEN
+                     SELECT CASE(IND)
+                        CASE(6)
+                           IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,1),FB)
+                        CASE(7)
+                           IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,2),FB)
+                        CASE(8)
+                           IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,3),FB)
+                     END SELECT
+                  ENDIF
+               CASE(CELL_EDGE)
+                  QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
+            END SELECT
+         ENDDO
+      ENDDO
+   ENDDO
 
    !  or cell centered or terrain-following (treated as cell centered) slice
 
@@ -5773,7 +5774,7 @@ REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,MW,XHAT,ZHAT,BBF,RHO2,TMPUP,TMPLOW,ZINT,RHO_S
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
-           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
+           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,NRM,NNN
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 REAL :: CPUTIME
@@ -6840,13 +6841,27 @@ IND_SELECT: SELECT CASE(IND)
          RHO_S = 0._EB
          SF => SURFACE(OB%MATL_SURF_INDEX)
          DO NN=1,SF%N_MATL
-            IF (MATL_INDEX<=0) THEN
+            MATL_INDEX_IF: IF (MATL_INDEX<=0) THEN
                ! if no MATL_ID is specified, output total density
                RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
             ELSEIF (SF%LAYER_MATL_INDEX(1,NN)==MATL_INDEX) THEN
-               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
+               ! check original material layer
+               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
                RETURN
-            ENDIF
+            ELSE
+               ! check reaction residual material
+               ML => MATERIAL(SF%MATL_INDEX(NN))
+               DO NR=1,ML%N_REACTIONS
+                  DO NRM=1,ML%N_RESIDUE(NR)
+                     DO NNN=1,SF%N_MATL
+                        IF (ML%RESIDUE_MATL_INDEX(NRM,NR)==MATL_INDEX) THEN
+                           GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
+                           RETURN
+                        ENDIF
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDIF MATL_INDEX_IF
          ENDDO
          GAS_PHASE_OUTPUT_RES = RHO_S
       ENDIF
