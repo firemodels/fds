@@ -1107,14 +1107,14 @@ END SUBROUTINE BLOCK_CELL
 
 SUBROUTINE ASSIGN_HT3D_WALL_INDICES(NM)
 
-! For each cell with CELL_INDEX=IC in an HT3D solid obstruction, fill in the array MESHES(NM)%WALL_INDEX(IC,-3:3) such that:
-! WALL_INDEX(IC,-3) is the wall index of the bottom of the solid obstruction
-! WALL_INDEX(IC,-2) is the wall index of the back   of the solid obstruction
-! WALL_INDEX(IC,-1) is the wall index of the left   of the solid obstruction
-! WALL_INDEX(IC, 1) is the wall index of the right  of the solid obstruction
-! WALL_INDEX(IC, 2) is the wall index of the front  of the solid obstruction
-! WALL_INDEX(IC, 3) is the wall index of the top    of the solid obstruction
-! WALL_INDEX(IC, 0) is the wall index of the nearest surface of the solid obstruction
+! For each cell with CELL_INDEX=IC in an HT3D solid obstruction, fill in the array MESHES(NM)%WALL_INDEX_HT3D(IC,-3:3) such that:
+! WALL_INDEX_HT3D(IC,-3) is the wall index of the bottom of the solid obstruction
+! WALL_INDEX_HT3D(IC,-2) is the wall index of the back   of the solid obstruction
+! WALL_INDEX_HT3D(IC,-1) is the wall index of the left   of the solid obstruction
+! WALL_INDEX_HT3D(IC, 1) is the wall index of the right  of the solid obstruction
+! WALL_INDEX_HT3D(IC, 2) is the wall index of the front  of the solid obstruction
+! WALL_INDEX_HT3D(IC, 3) is the wall index of the top    of the solid obstruction
+! WALL_INDEX_HT3D(IC, 0) is the wall index of the nearest surface of the solid obstruction
 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,IC,II,JJ,KK,ICN,CELL_COUNT(-3:3)
@@ -1131,7 +1131,7 @@ OBST_LOOP: DO N=1,M%N_OBST
             I_LOOP: DO I=OB%I1+1,OB%I2
                IC = M%CELL_INDEX(I,J,K)
                IF (.NOT.M%SOLID(IC)) CYCLE I_LOOP
-               M%WALL_INDEX(IC,:) = 0
+               M%WALL_INDEX_HT3D(IC,:) = 0
                CELL_COUNT = 0
                CELL_COUNT(0) = 1000000
 
@@ -1139,7 +1139,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(II,J,K)
                   CELL_COUNT(1) = CELL_COUNT(1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,1) = M%WALL_INDEX(ICN,-1)
+                     M%WALL_INDEX_HT3D(IC,1) = M%WALL_INDEX(ICN,-1)
                      EXIT MARCH_RIGHT
                   ENDIF
                   IF (II==M%IBAR) CELL_COUNT(1) = 1000000
@@ -1149,7 +1149,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(II,J,K)
                   CELL_COUNT(-1) = CELL_COUNT(-1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-1) = M%WALL_INDEX(ICN,1)
+                     M%WALL_INDEX_HT3D(IC,-1) = M%WALL_INDEX(ICN,1)
                      EXIT MARCH_LEFT
                   ENDIF
                   IF (II==1) CELL_COUNT(-1) = 1000000
@@ -1159,7 +1159,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,JJ,K)
                   CELL_COUNT(2) = CELL_COUNT(2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,2) = M%WALL_INDEX(ICN,-2)
+                     M%WALL_INDEX_HT3D(IC,2) = M%WALL_INDEX(ICN,-2)
                      EXIT MARCH_FORWARD
                   ENDIF
                   IF (JJ==M%JBAR) CELL_COUNT(2) = 1000000
@@ -1169,7 +1169,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,JJ,K)
                   CELL_COUNT(-2) = CELL_COUNT(-2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-2) = M%WALL_INDEX(ICN,2)
+                     M%WALL_INDEX_HT3D(IC,-2) = M%WALL_INDEX(ICN,2)
                      EXIT MARCH_BACK
                   ENDIF
                   IF (JJ==1) CELL_COUNT(-2) = 1000000
@@ -1179,7 +1179,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,J,KK)
                   CELL_COUNT(3) = CELL_COUNT(3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,3) = M%WALL_INDEX(ICN,-3)
+                     M%WALL_INDEX_HT3D(IC,3) = M%WALL_INDEX(ICN,-3)
                      EXIT MARCH_UP
                   ENDIF
                   IF (KK==M%KBAR) CELL_COUNT(3) = 1000000
@@ -1189,13 +1189,13 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,J,KK)
                   CELL_COUNT(-3) = CELL_COUNT(-3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-3) = M%WALL_INDEX(ICN,3)
+                     M%WALL_INDEX_HT3D(IC,-3) = M%WALL_INDEX(ICN,3)
                      EXIT MARCH_DOWN
                   ENDIF
                   IF (KK==1) CELL_COUNT(-3) = 1000000
                ENDDO MARCH_DOWN
 
-               M%WALL_INDEX(IC,0) = M%WALL_INDEX(IC,MINLOC(CELL_COUNT,DIM=1)-4)
+               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1)-4)
 
             ENDDO I_LOOP
          ENDDO J_LOOP
@@ -2493,7 +2493,7 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_I_IN,OPT_J_IN
 REAL(EB), INTENT(IN), OPTIONAL :: OPT_RHO_IN(1:N_MATL)
 REAL(EB), INTENT(IN) :: TMPG
 REAL(EB), INTENT(OUT) :: K_OUT
-INTEGER :: N,NR
+INTEGER :: N,NR,I_LOC,J_LOC,K_LOC
 REAL(EB) :: VOLSUM
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -2526,13 +2526,16 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
    IF (VOLSUM>TWO_EPSILON_EB) K_OUT = K_OUT/VOLSUM
 ENDIF
 IF (K_OUT<TWO_EPSILON_EB) THEN
+   IF (PRESENT(OPT_I_IN)) I_LOC = OPT_I_IN
+   IF (PRESENT(OPT_J_IN)) J_LOC = OPT_J_IN
+   IF (PRESENT(OPT_K_IN)) K_LOC = OPT_K_IN
    ! debug
    WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY K_OUT: ',K_OUT
    WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY VOLSUM: ',VOLSUM
-   IF (PRESENT(OPT_I_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY I: ',OPT_I_IN
-   IF (PRESENT(OPT_J_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY J: ',OPT_J_IN
-   IF (PRESENT(OPT_K_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY K: ',OPT_K_IN
-   K_OUT = 10000._EB
+   IF (PRESENT(OPT_I_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY I: ',I_LOC
+   IF (PRESENT(OPT_J_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY J: ',J_LOC
+   IF (PRESENT(OPT_K_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY K: ',K_LOC
+   ! K_OUT = 10000._EB
 ENDIF
 
 END SUBROUTINE GET_SOLID_CONDUCTIVITY
@@ -2572,7 +2575,7 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
       ENDIF
    ENDDO
 ENDIF
-IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 0.001_EB
+IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 1._EB
 
 END SUBROUTINE GET_SOLID_RHOCBAR
 
