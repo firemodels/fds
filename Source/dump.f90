@@ -6844,7 +6844,7 @@ IND_SELECT: SELECT CASE(IND)
             MATL_INDEX_IF: IF (MATL_INDEX<=0) THEN
                ! if no MATL_ID is specified, output total density
                RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
-            ELSEIF (SF%LAYER_MATL_INDEX(1,NN)==MATL_INDEX) THEN
+            ELSEIF (SF%MATL_INDEX(NN)==MATL_INDEX) THEN
                ! check original material layer
                GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
                RETURN

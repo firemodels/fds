@@ -1053,7 +1053,12 @@ OBST_LOOP: DO N=1,N_OBST
             JJG = WC%ONE_D%JJG
             KKG = WC%ONE_D%KKG
             IOR = WC%ONE_D%IOR
-            DEPTH = 1._EB
+            SELECT CASE(ABS(IOR))
+               CASE(1); GEOM_FACTOR = DX(I)
+               CASE(2); GEOM_FACTOR = DY(J)
+               CASE(3); GEOM_FACTOR = DZ(K)
+            END SELECT
+            DEPTH = GEOM_FACTOR
 
             ! cell volume
             IF (TWO_D) THEN
@@ -1070,14 +1075,24 @@ OBST_LOOP: DO N=1,N_OBST
             ENDDO
             VS = VC*VS
 
-            RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) * VC / VS
-            RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
+            IF (VS<TWO_EPSILON_EB) THEN
+               VS = 0._EB
+               OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+               M_DOT_G_PPP_ADJUST = 0._EB
+               M_DOT_G_PPP_ACTUAL = 0._EB
+               M_DOT_S_PPP = 0._EB
+               Q_DOT_PPP_S(I,J,K) = 0._EB
+            ELSE
+               RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) * VC/VS
+               RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
 
-            CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                           RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
-                           M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
+               CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
+                              RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                              M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)) * VS / VC
+               OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)) * VS/VC
+               Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * VS/VC
+            ENDIF
 
             IF (OB%CONSUMABLE) THEN
                OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
@@ -1089,17 +1104,12 @@ OBST_LOOP: DO N=1,N_OBST
 
             ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
 
-            SELECT CASE(ABS(IOR))
-               CASE(1); GEOM_FACTOR = DX(I)
-               CASE(2); GEOM_FACTOR = DY(J)
-               CASE(3); GEOM_FACTOR = DZ(K)
-            END SELECT
             DO NS = 1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR * VS/VC
+               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR * VS/VC
             ENDDO
             DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR * VS/VC
             ENDDO
 
             ! to-do: mass transport
