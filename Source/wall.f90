@@ -1008,7 +1008,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_GET(N_MATL),GEOM_FACTOR,TIME_FACTOR,CELL_VOLUME
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VS
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -1055,20 +1055,32 @@ OBST_LOOP: DO N=1,N_OBST
             IOR = WC%ONE_D%IOR
             DEPTH = 1._EB
 
-            RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
+            ! cell volume
+            IF (TWO_D) THEN
+               VC = DX(I)*DZ(K)
+            ELSE
+               VC = DX(I)*DY(J)*DZ(K)
+            ENDIF
+
+            ! solid volume
+            VS = 0._EB
+            DO NN=1,MS%N_MATL
+               ML => MATERIAL(MS%MATL_INDEX(NN))
+               VS = VS + OB%RHO(I,J,K,NN)/ML%RHO_S
+            ENDDO
+            VS = VC*VS
+
+            RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) * VC / VS
+            RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
+
             CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                           RHO_GET(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                           RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = RHO_GET(1:MS%N_MATL)
+            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)) * VS / VC
 
-            IF (TWO_D) THEN
-               CELL_VOLUME = DX(I)*DZ(K)
-            ELSE
-               CELL_VOLUME = DX(I)*DY(J)*DZ(K)
-            ENDIF
             IF (OB%CONSUMABLE) THEN
-               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
+               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
                IF (OB%MASS<TWO_EPSILON_EB) THEN
                   OB%HT3D=.FALSE.
                   OB%PYRO3D=.FALSE.
