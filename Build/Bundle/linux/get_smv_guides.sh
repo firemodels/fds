@@ -12,5 +12,5 @@ fi
 
 pubdir=$firebotrepo/smv/Manuals
 cp $pubdir/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf ~/FDS_Guides/.
-cp $pubdir/SMV_User_Guide/SMV_User_Guide.pdf                              ~/FDS_Guides/.
+cp $pubdir/SMV_User_Guide/SMV_User_Guide.pdf                               ~/FDS_Guides/.
 cp $pubdir/SMV_Verification_Guide/SMV_Verification_Guide.pdf               ~/FDS_Guides/.
