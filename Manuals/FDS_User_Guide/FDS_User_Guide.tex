@@ -6593,7 +6593,7 @@ The following parameters dictate how a device will control something:
 \item[{\ct SETPOINT}] The value of the device at which its state changes.  For a detection type of device (e.g., heat or smoke) this value is taken from the device's {\ct PROP} inputs and need not be specified on the {\ct DEVC} line.
 \item[{\ct TRIP\_DIRECTION}] A positive integer means the device will change from its {\ct INITIAL\_STATE} when the value of the device is greater than the {\ct SETPOINT} and be equal to the {\ct INITIAL\_STATE} when the value is less than the {\ct SETPOINT}. A negative integer has the opposite behavior. The device will change from its {\ct INITIAL\_STATE} when the value of the device is less than the {\ct SETPOINT} and be equal to the {\ct INITIAL\_STATE} when the value is greater than the {\ct SETPOINT}. The default value is +1.
 \item[{\ct LATCH}] If this logical value is set to {\ct .TRUE.} the device will only change state once. The default value is {\ct .TRUE.}.
-\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value is {\ct .FALSE.} For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}
+\item[{\ct INITIAL\_STATE}] This logical value is the initial state of the device. The default value is {\ct .FALSE.}. For example, if an obstruction associated with the device is to disappear, set {\ct INITIAL\_STATE=.TRUE.}.
 \end{description}
 If you desire to control FDS using more complex logic than can be provided
 by the use of a single device and its setpoint, control functions can be specified using the {\ct CTRL} input.
