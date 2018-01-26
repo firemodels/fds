@@ -11,13 +11,17 @@ git clean -dxf
 set BUILDDIR=%CD%
 
 call :BUILDLIB LIBS
-call :BUILD background
-call :BUILD dem2fds
+call :BUILD    background
+call :BUILD    dem2fds
 call :BUILDFDS fds2ascii
-call :BUILD hashfile
-call :BUILD smokediff
-call :BUILD wind2fds
-call :BUILD smokeview
+call :BUILD    hashfile
+call :BUILD    smokediff
+call :BUILD    smokezip
+call :BUILD    wind2fds
+call :BUILD    smokeview
+call :BUILD    setpath
+call :BUILD    sh2bat
+call :BUILD    get_time
 echo "bundle complete"
 
 cd %CURDIR%

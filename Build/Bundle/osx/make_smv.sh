@@ -41,12 +41,13 @@ BUILDDIR=`pwd`
 bundlelog=$CURDIR/bundle.log
 echo > $bundlelog
 
-BUILD LIBS | tee -a $bundlelog
-BUILD background  | tee -a $bundlelog
-BUILD dem2fds | tee -a $bundlelog
+BUILD LIBS         | tee -a $bundlelog
+BUILD background   | tee -a $bundlelog
+BUILD dem2fds      | tee -a $bundlelog
 BUILDFDS fds2ascii | tee -a $bundlelog
-BUILD hashfile | tee -a $bundlelog
-BUILD smokediff | tee -a $bundlelog
-BUILD wind2fds | tee -a $bundlelog
-BUILD smokeview | tee -a $bundlelog
+BUILD hashfile     | tee -a $bundlelog
+BUILD smokediff    | tee -a $bundlelog
+BUILD smokezip     | tee -a $bundlelog
+BUILD wind2fds     | tee -a $bundlelog
+BUILD smokeview    | tee -a $bundlelog
 echo "bundle complete" | tee -a $bundlelog
