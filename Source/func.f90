@@ -3278,7 +3278,6 @@ CALL GET_DATE(DATE)
 
 WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
-WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
 WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
 #ifdef COMPVER_PP
