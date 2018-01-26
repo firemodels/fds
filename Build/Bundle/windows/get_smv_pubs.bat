@@ -19,7 +19,7 @@ call %envfile%
 
 %svn_drive%
 
-set pubdir=%smokebotrepo%/.smokebot/pubs
+set pubdir=%smokebothome%/.smokebot/pubs
 pscp %linux_hostname%:%pubdir%/SMV_Technical_Reference_Guide.pdf %userprofile%\FDS_Guides
 pscp %linux_hostname%:%pubdir%/SMV_User_Guide.pdf                %userprofile%\FDS_Guides
 pscp %linux_hostname%:%pubdir%/SMV_Verification_Guide.pdf        %userprofile%\FDS_Guides
