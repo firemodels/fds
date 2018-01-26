@@ -5263,7 +5263,7 @@ and the resulting {\ct REAC} line is:
       SPEC_ID_N_S = 'PROPANE','OXYGEN'
       N_S = 0.1,1.65 /
 \end{lstlisting}
-The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). 
+The array {\ct SPEC\_ID\_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used in a reaction since it is not tracked separately.  The array {\ct SPEC\_ID\_N\_S} contains the list of species with the exponents, {\ct N\_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, {\ct NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}).
 
 \subsection{Multiple Step Reaction}
 
@@ -5989,7 +5989,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
 
 The {\ct MISC} input parameter {\ct DRAG\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct DRAG\_CFL\_MAX} may resolve them.
 
-\subsection{Electrical Cable Failure}
+\subsection{Electrical Cables}
 \label{info:THIEF}
 
 Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute (SP) have proposed that the thermally-induced electrical failure (THIEF) of a cable can be predicted via a simple one-dimensional heat transfer calculation, under the assumption that the cable can be treated as a homogeneous cylinder~\cite{Andersson:2005}. Their results for PVC cables were encouraging and suggested that the simplification of the analysis is reasonable and that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
@@ -7318,6 +7318,20 @@ If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is i
 \end{lstlisting}
 specify an array of 10 by 10 by 4 particles. We want to record the surface temperature of the 307-th particle. See Section~\ref{info:MULT} for details of how the {\ct MULT} line is interpreted.
 
+Solid particles can be used as a surrogate targets. For example, the following lines of input create a massless particle that can be used to record a heat flux at a given location away from a solid wall. In this case, the mock heat flux gauge is pointing in the $-x$ direction:
+\begin{lstlisting}
+&DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
+&INIT ID='f1', XYZ=..., N_PARTICLES=1, PART_ID='rad gauge' /
+&PART ID='rad gauge', STATIC=.TRUE., ORIENTATION=-1,0,0, SURF_ID='target' /
+&SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
+\end{lstlisting}
+Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''  Its volume is meaningless. The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
+\begin{lstlisting}
+&DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
+&INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
+\end{lstlisting}
+Note that the parameter {\ct DX} on the {\ct INIT} line creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m. For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}.
+
 
 
 
@@ -7433,60 +7447,52 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 
 There are various output quantities related to heat flux.
 
-\paragraph{\ct 'NET HEAT FLUX'} The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
+\begin{labeling}{SPACE}
+
+\item[\ct 'NET HEAT FLUX'] 
+\hspace{1in} \newline The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
 where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
 
-\paragraph{\ct 'RADIATIVE HEAT FLUX'}  This is the radiative component of Eq.~(\ref{net_flux}).
-\be
-   \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) \label{rad_flux}
-\ee
+\item[\ct 'RADIATIVE HEAT FLUX']  
+\hspace{1in} \newline This is the radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
 
-\paragraph{\ct 'CONVECTIVE HEAT FLUX'} This is the convective component of Eq.~(\ref{net_flux}).
-\be
-   \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s}) \label{con_flux}
-\ee
+\item[\ct 'CONVECTIVE HEAT FLUX']
+\hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s})$.
 
-\paragraph{\ct 'INCIDENT HEAT FLUX'} This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
+\item[\ct 'INCIDENT HEAT FLUX'] 
+\hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
 
-\paragraph{\ct 'GAUGE HEAT FLUX'} If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
+\item[\ct 'GAUGE HEAT FLUX'] 
+\hspace{1in} \newline This quantity simulates a measurement made with a cold water heat flux gauge:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
 \ee
 If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, use {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
 \begin{lstlisting}
-&DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hf props' /
-&PROP ID='hf props', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
+&DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hfp' /
+&PROP ID='hfp', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
 \end{lstlisting}
 The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
 
-\paragraph{\ct 'RADIOMETER'}  Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
+\item[\ct 'RADIOMETER'] 
+\hspace{1in} \newline Similar to a heat flux gauge, this quantity measures only the radiative heat flux:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
 The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
 
-\paragraph{\ct 'RADIATIVE HEAT FLUX GAS'}  All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\item[\ct 'RADIATIVE HEAT FLUX GAS'] 
+\hspace{1in} \newline All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
-&DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0 /
+&DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
 \end{lstlisting}
-Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  This single line of input is a special shortcut\footnote{This feature maintains backward compatibility with FDS~5.} for the following lines of input that make use of a Lagrangian particle as a surrogate target:
-\begin{lstlisting}
-&DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
-&INIT ID='f1', XYZ=..., N_PARTICLES=1, PART_ID='rad gauge' /
-&PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
-&SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
-\end{lstlisting}
-Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''  The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
-\begin{lstlisting}
-&DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
-&INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
-\end{lstlisting}
-For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
+Note that the parameter {\ct STATISTICS} is not appropriate for this quantity. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
 
-\paragraph{\ct 'RADIANCE'}  This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
+\item[\ct 'RADIANCE'] 
+\hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
@@ -7495,6 +7501,8 @@ This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that 
 &DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
 The units for {\ct 'RADIANCE'} are kW/m$^2$/sr.
+
+\end{labeling}
 
 
 \subsection{Adiabatic Surface Temperature}
@@ -7630,7 +7638,7 @@ The following example is used to write out a histogram of droplet size using 20 
 
 
 
-\subsection{Useful Solid Phase Outputs}
+\subsection{Output Associated with Thermogravimetric Analysis (TGA)}
 \label{info:material_components}
 
 In addition to the profile ({\ct PROF}) output, there are various additional quantities that are useful for monitoring reacting surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface element. {\ct 'SURFACE DENSITY'} gives the overall mass per unit area for the solid surface element, computed as an integral of material density over wall thickness. Both quantities are available both as {\ct DEVC} and {\ct BNDF}. For the quantity {\ct 'SURFACE DENSITY'}, you can add a {\ct MATL\_ID} to get the surface density of a single component of the solid material.
