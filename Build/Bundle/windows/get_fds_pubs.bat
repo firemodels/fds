@@ -19,9 +19,9 @@ call %envfile%
 
 %svn_drive%
 
-set pubdir=%firebotrepo%/fds/Manuals
-pscp %linux_hostname%:%pubdir%/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf       %userprofile%\FDS_Guides
-pscp %linux_hostname%:%pubdir%/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf %userprofile%\FDS_Guides
-pscp %linux_hostname%:%pubdir%/FDS_User_Reference_Guide/FDS_User_Reference_Guide.pdf           %userprofile%\FDS_Guides
-pscp %linux_hostname%:%pubdir%/FDS_Validation_Guide/FDS_Validation_Guide.pdf                   %userprofile%\FDS_Guides
-pscp %linux_hostname%:%pubdir%/FDS_Verification_Guide/FDS_Verification_Guide.pdf               %userprofile%\FDS_Guides
+set pubdir=%firebothome%/.firebot/pubs
+pscp %linux_hostname%:%pubdir%/FDS_Config_Management_Plan.pdf    %userprofile%\FDS_Guides
+pscp %linux_hostname%:%pubdir%/FDS_Technical_Reference_Guide.pdf %userprofile%\FDS_Guides
+pscp %linux_hostname%:%pubdir%/FDS_User_Reference_Guide.pdf      %userprofile%\FDS_Guides
+pscp %linux_hostname%:%pubdir%/FDS_Validation_Guide.pdf          %userprofile%\FDS_Guides
+pscp %linux_hostname%:%pubdir%/FDS_Verification_Guide.pdf        %userprofile%\FDS_Guides
