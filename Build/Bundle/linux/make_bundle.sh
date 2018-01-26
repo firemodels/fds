@@ -1,10 +1,6 @@
 #!/bin/bash
 
-if [ -e ~/FDS_SMV_ENVpc.sh ]; then
-  source ~/FDS_SMV_ENVpc.sh
-else
-  source ~/FDS_SMV_ENV.sh
-fi
+source ../scripts/GET_ENV.sh
 
 export FDSEDITION=FDS6
 export SMVEDITION=SMV6
