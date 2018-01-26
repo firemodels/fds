@@ -429,13 +429,10 @@ INTEGER :: CGSC=IS_CGSC, UNKH=IS_UNKH, NCVARS=IS_NCVARS
 !> use integer types for the user defined input data (based on SCARC_TYPE_... variables)
 INTEGER :: TYPE_DISCRET     = NSCARC_DISCRET_STRUCTURED    !> Type of discretization (structured/unstructured)
 INTEGER :: TYPE_SCOPE       = NSCARC_SCOPE_MAIN            !> Type of surrounding solver scope
-INTEGER :: TYPE_SCOPE0      = NSCARC_SCOPE_MAIN            !> Type of surrounding solver scope, restore
 INTEGER :: TYPE_METHOD      = NSCARC_METHOD_KRYLOV         !> Type of ScaRC method
-INTEGER :: TYPE_METHOD_CORE = NSCARC_METHOD_KRYLOV         !> Core type of ScaRC method
 INTEGER :: TYPE_TWOLEVEL    = NSCARC_TWOLEVEL_NONE         !> Type of two-level method
 INTEGER :: TYPE_INTERPOL    = NSCARC_INTERPOL_CONSTANT     !> Type of interpolation method
 INTEGER :: TYPE_PRECON      = NSCARC_PRECON_SSOR           !> Type of preconditioner for iterative solver
-INTEGER :: TYPE_PRECON_CORE = NSCARC_PRECON_SSOR           !> Core type of preconditioner for iterative solver
 INTEGER :: TYPE_KRYLOV      = NSCARC_KRYLOV_CG             !> Type of Krylov method (CG/BICG)
 INTEGER :: TYPE_MULTIGRID   = NSCARC_MULTIGRID_GEOMETRIC   !> Type of multigrid method (GMG/AMG)
 INTEGER :: TYPE_MKL         = NSCARC_UNDEFINED             !> Type of MKL method (PARDISO/CLUSTER_SPARSE_SOLVER)
@@ -823,7 +820,6 @@ SELECT CASE (TRIM(SCARC_METHOD))
    CASE ('KRYLOV')
 
       TYPE_METHOD      = NSCARC_METHOD_KRYLOV
-      TYPE_METHOD_CORE = NSCARC_METHOD_KRYLOV
 
       !> set type of Krylov-method (CG/BICG)
       SELECT CASE (TRIM(SCARC_KRYLOV))
@@ -902,12 +898,10 @@ SELECT CASE (TRIM(SCARC_METHOD))
             WRITE(SCARC_MESSAGE,'(3A)') TRIM(SCARC_ROUTINE),': Error with input parameter ',TRIM(SCARC_PRECON)
             CALL SHUTDOWN(SCARC_MESSAGE); RETURN
       END SELECT
-      TYPE_PRECON_CORE = TYPE_PRECON
 
    CASE ('MULTIGRID')
 
       TYPE_METHOD      = NSCARC_METHOD_MULTIGRID
-      TYPE_METHOD_CORE = NSCARC_METHOD_MULTIGRID
 
       !> set type of multigrid method (GEOMETRIC/ALGEBRAIC)
       SELECT CASE (TRIM(SCARC_MULTIGRID))
@@ -12734,7 +12728,7 @@ END SUBROUTINE SCARC_TIMINGS
 SUBROUTINE SCARC_SETUP_DISCRET
 
 INTEGER :: NM
-INTEGER :: I, J, K, IX, IY, IZ
+INTEGER :: I, J, K
 INTEGER, PARAMETER :: IMPADD = 1
 INTEGER, PARAMETER :: SHFTM(1:3,1:6) = RESHAPE((/-1,0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,1/),(/3,6/))
 TYPE (MESH_TYPE), POINTER :: M
@@ -12815,7 +12809,7 @@ END SUBROUTINE SCARC_SETUP_DISCRET
 SUBROUTINE SCARC_SETUP_DISCRET_GLOBAL(NL)
 
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, NM2, IX, IY, IZ
+INTEGER :: NM, NM2
 TYPE (SCARC_LEVEL_TYPE), POINTER :: L
 
 SCARC_ROUTINE = 'SCARC_SETUP_DISCRETi_GLOBAL'
