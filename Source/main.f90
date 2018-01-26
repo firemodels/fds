@@ -95,8 +95,6 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = CURRENT_TIME()
 
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') 'FDS 6.6.0'
-
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found

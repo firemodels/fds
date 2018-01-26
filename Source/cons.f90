@@ -101,7 +101,6 @@ CHARACTER(256) :: TERRAIN_IMAGE
 
 ! Dates, version numbers, revision numbers
 
-CHARACTER(LABEL_LENGTH) :: VERSION_STRING='null'
 REAL(FB) :: VERSION_NUMBER=6.0
 CHARACTER(255) :: REVISION='unknown'
 CHARACTER(255) :: REVISION_DATE='unknown'
