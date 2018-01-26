@@ -5,8 +5,9 @@ dir=$1
 platform=intel_linux_64
 script=make_${dir}.sh
 
-echo
-echo "********** building $dir"
+echo "-------------------------------------------------"
+echo "----------- building $dir ------------------------"
+echo "-------------------------------------------------"
 echo
 cd $CURDIR/../../../Utilities
 cd $dir/$platform
@@ -20,9 +21,9 @@ dir=$1
 platform=intel_linux_64
 script=make_${dir}.sh
 
-echo
-echo "********** building $dir"
-echo
+echo "-------------------------------------------------"
+echo "----------- building $dir ------------------------"
+echo "-------------------------------------------------"
 cd $dir/$platform
 ./$script
 cd $BUILDDIR
