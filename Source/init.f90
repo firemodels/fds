@@ -3115,7 +3115,7 @@ IF (REMOVE) THEN
          DO I=I1+1,I2
             RHOS(I,J,K) = RHOA
             RHO(I,J,K)  = RHOA
-            TMP(I,J,K)  = TMPA
+            IF (SOLID_PHASE_ONLY) TMP(I,J,K)  = TMPA
             ZZ(I,J,K,1:N_TRACKED_SPECIES)  = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
             ZZS(I,J,K,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          ENDDO
