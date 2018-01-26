@@ -10,7 +10,7 @@ if [ ! -e ~/FDS_Guides ]; then
   mkdir ~/FDS_Guides
 fi
 
-pubdir=$smokebotrepo/smv/Manuals
-scp $linux_hostname\:$pubdir/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf ~/FDS_Guides/.
-scp $linux_hostname\:$pubdir/SMV_User_Guide/SMV_User_Guide.pdf                               ~/FDS_Guides/.
-scp $linux_hostname\:$pubdir/SMV_Verification_Guide/SMV_Verification_Guide.pdf               ~/FDS_Guides/.
+pubdir=$smokebothome/.smokebot/pubs
+scp $linux_hostname\:$pubdir/SMV_Technical_Reference_Guide.pdf ~/FDS_Guides/.
+scp $linux_hostname\:$pubdir/SMV_User_Guide.pdf                ~/FDS_Guides/.
+scp $linux_hostname\:$pubdir/SMV_Verification_Guide.pdf        ~/FDS_Guides/.
