@@ -55,7 +55,10 @@ echo #  ---- bot locations ---- >> %bashscript%
 echo.  >> %bashscript%
 
 echo export firebotrepo=%firebotrepo% >> %bashscript%
+echo export firebothome=%firebothome% >> %bashscript%
+
 echo export smokebotrepo=%smokebotrepo% >> %bashscript%
+echo export smokebothome=%smokebothome% >> %bashscript%
 
 echo.  >> %bashscript%
 echo #  ---- hostnames ---- >> %bashscript%
