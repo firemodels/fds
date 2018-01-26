@@ -1,8 +1,8 @@
 #!/bin/bash
 
-CURDIR=`pwd
+CURDIR=`pwd`
 platform="linux"
-if [ "`uname`" == "Darwin" ] ; then
+if [ "`uname`" == "Darwin" ]; then
   platform="osx"
 fi
 cd $platform
