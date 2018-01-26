@@ -6846,19 +6846,17 @@ IND_SELECT: SELECT CASE(IND)
                RHO_S = RHO_S + OB%RHO(II,JJ,KK,NN)
             ELSEIF (SF%MATL_INDEX(NN)==MATL_INDEX) THEN
                ! check original material layer
-               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
+               GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
                RETURN
             ELSE
-               ! check reaction residual material
+               ! check reaction residual material (don't this is right yet)
                ML => MATERIAL(SF%MATL_INDEX(NN))
                DO NR=1,ML%N_REACTIONS
                   DO NRM=1,ML%N_RESIDUE(NR)
-                     DO NNN=1,SF%N_MATL
-                        IF (ML%RESIDUE_MATL_INDEX(NRM,NR)==MATL_INDEX) THEN
-                           GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
-                           RETURN
-                        ENDIF
-                     ENDDO
+                     IF (SF%RESIDUE_INDEX(NN,NRM,NR)==MATL_INDEX) THEN
+                        GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
+                        RETURN
+                     ENDIF
                   ENDDO
                ENDDO
             ENDIF MATL_INDEX_IF
