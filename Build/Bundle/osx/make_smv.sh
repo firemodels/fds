@@ -50,4 +50,4 @@ BUILD smokediff    | tee -a $bundlelog
 BUILD smokezip     | tee -a $bundlelog
 BUILD wind2fds     | tee -a $bundlelog
 BUILD smokeview    | tee -a $bundlelog
-echo "bundle complete" | tee -a $bundlelog
+echo "smokeview builds complete" | tee -a $bundlelog

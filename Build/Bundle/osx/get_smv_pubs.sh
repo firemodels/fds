@@ -7,6 +7,6 @@ if [ ! -e ~/FDS_Guides ]; then
 fi
 
 pubdir=$smokebothome/.smokebot/pubs
-scp $linux_hostname\:$pubdir/SMV_Technical_Reference_Guide.pdf ~/FDS_Guides/.
-scp $linux_hostname\:$pubdir/SMV_User_Guide.pdf                ~/FDS_Guides/.
-scp $linux_hostname\:$pubdir/SMV_Verification_Guide.pdf        ~/FDS_Guides/.
+scp -q $linux_hostname\:$pubdir/SMV_Technical_Reference_Guide.pdf ~/FDS_Guides/.
+scp -q $linux_hostname\:$pubdir/SMV_User_Guide.pdf                ~/FDS_Guides/.
+scp -q $linux_hostname\:$pubdir/SMV_Verification_Guide.pdf        ~/FDS_Guides/.
