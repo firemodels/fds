@@ -8492,6 +8492,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    !> Determine size of matrix RAP
    !> loop over interior c-cells
+   IC2 = 0
    LOOP1_OWN_CELLS: DO IC0 = 1, F%AMG%NCCE
 
       IROW_INIT = IROW
@@ -8547,6 +8548,7 @@ MESHES_LOOP_SYSTEM_AMG: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    F%P%TAG = 0
 
    IROW = 1
+   IC2 = 0
 
    !> loop over interior c-cells
    LOOP2_C_CELLS: DO IC0 = 1, F%AMG%NCC
@@ -9273,25 +9275,6 @@ END FUNCTION POINT_TO_HVECTOR
 
 
 !> ------------------------------------------------------------------------------------------------
-!> Set pointer to chosen vector for compact storage technique
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE POINT_TO_SOLVER(SOLVER, NM, NL, NTYPE)
-TYPE (SCARC_SOLVER_TYPE), POINTER, INTENT(OUT):: SOLVER
-INTEGER, INTENT(IN):: NM, NL, NTYPE
-
-SELECT CASE (NTYPE)
-   CASE (NSCARC_SOLVER_MAIN)
-      SOLVER => SCARC(NM)%LEVEL(NL)%MAIN
-   CASE (NSCARC_SOLVER_PRECON)
-      SOLVER => SCARC(NM)%LEVEL(NL)%PRECON
-   CASE (NSCARC_SOLVER_COARSE)
-      SOLVER => SCARC(NM)%LEVEL(NL)%COARSE
-END SELECT
-
-END SUBROUTINE POINT_TO_SOLVER
-
-
-!> ------------------------------------------------------------------------------------------------
 !> Compute global matrix-vector product (including data exchange along internal boundaries)
 !> ------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MATVEC_PRODUCT(NVECTOR1, NVECTOR2, NL)
@@ -9470,7 +9453,7 @@ SUBROUTINE SCARC_COPY_INT(X, Y, SCAL, NLEN)
 INTEGER,  INTENT(IN) , DIMENSION(:) :: X
 INTEGER,  INTENT(OUT), DIMENSION(:) :: Y
 INTEGER,  INTENT(IN) :: NLEN
-REAL(EB) :: SCAL
+INTEGER :: SCAL
 INTEGER :: ILEN
 
 IF (SCAL == 1.0_EB) THEN
@@ -12935,48 +12918,48 @@ END SUBROUTINE SCARC_ALLOCATE_INT1
 !> ------------------------------------------------------------------------------------------------
 !> Allocate and initialize integer array of dimension 2
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_ALLOCATE_INT2(WORKSPACE, NL1, NR1, NL2, NR2, CTEXT, BINIT)
-USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
-INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT):: WORKSPACE
-INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2
-CHARACTER(*), INTENT(IN) :: CTEXT
-LOGICAL, INTENT(IN) :: BINIT
-IF (.NOT.ALLOCATED(WORKSPACE)) THEN
-   ALLOCATE (WORKSPACE(NL1:NR1, NL2:NR2), STAT=IERROR)
-   CALL CHKMEMERR (SCARC_ROUTINE, CTEXT, IERROR)
-   IF (BINIT) WORKSPACE = NSCARC_ZERO_INTEGER
-ELSE
-   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
-       SIZE(WORKSPACE,2) /= NR2-NL2+1) THEN
-      WRITE(SCARC_MESSAGE,'(2A)') 'SCARC_ALLOCATE_INT2: Inconsistent length for vector ',CTEXT
-      CALL SHUTDOWN(SCARC_MESSAGE); RETURN
-   ENDIF
-ENDIF
-END SUBROUTINE SCARC_ALLOCATE_INT2
+!SUBROUTINE SCARC_ALLOCATE_INT2(WORKSPACE, NL1, NR1, NL2, NR2, CTEXT, BINIT)
+!USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
+!INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT):: WORKSPACE
+!INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2
+!CHARACTER(*), INTENT(IN) :: CTEXT
+!LOGICAL, INTENT(IN) :: BINIT
+!IF (.NOT.ALLOCATED(WORKSPACE)) THEN
+!   ALLOCATE (WORKSPACE(NL1:NR1, NL2:NR2), STAT=IERROR)
+!   CALL CHKMEMERR (SCARC_ROUTINE, CTEXT, IERROR)
+!   IF (BINIT) WORKSPACE = NSCARC_ZERO_INTEGER
+!ELSE
+!   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
+!       SIZE(WORKSPACE,2) /= NR2-NL2+1) THEN
+!      WRITE(SCARC_MESSAGE,'(2A)') 'SCARC_ALLOCATE_INT2: Inconsistent length for vector ',CTEXT
+!      CALL SHUTDOWN(SCARC_MESSAGE); RETURN
+!   ENDIF
+!ENDIF
+!END SUBROUTINE SCARC_ALLOCATE_INT2
 
 !> ------------------------------------------------------------------------------------------------
 !> Allocate and initialize integer array of dimension 3
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_ALLOCATE_INT3(WORKSPACE, NL1, NR1, NL2, NR2, NL3, NR3, CTEXT, BINIT)
-USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
-INTEGER, DIMENSION(:,:,:), ALLOCATABLE, INTENT(INOUT):: WORKSPACE
-INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2, NL3, NR3
-CHARACTER(*), INTENT(IN) :: CTEXT
-LOGICAL, INTENT(IN) :: BINIT
-IF (.NOT.ALLOCATED(WORKSPACE)) THEN
-   ALLOCATE (WORKSPACE(NL1:NR1, NL2:NR2, NL3:NR3), STAT=IERROR)
-   CALL CHKMEMERR (SCARC_ROUTINE, CTEXT, IERROR)
-   IF (BINIT) WORKSPACE = NSCARC_ZERO_INTEGER
-ELSE
-   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
-       SIZE(WORKSPACE,2) /= NR2-NL2+1 .OR. &
-       SIZE(WORKSPACE,3) /= NR3-NL3+1) THEN
-      WRITE(SCARC_MESSAGE,'(2A)') 'SCARC_ALLOCATE_INT3: Inconsistent length for vector ',CTEXT
-      CALL SHUTDOWN(SCARC_MESSAGE); RETURN
-   ENDIF
-ENDIF
-END SUBROUTINE SCARC_ALLOCATE_INT3
-
+!SUBROUTINE SCARC_ALLOCATE_INT3(WORKSPACE, NL1, NR1, NL2, NR2, NL3, NR3, CTEXT, BINIT)
+!USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
+!INTEGER, DIMENSION(:,:,:), ALLOCATABLE, INTENT(INOUT):: WORKSPACE
+!INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2, NL3, NR3
+!CHARACTER(*), INTENT(IN) :: CTEXT
+!LOGICAL, INTENT(IN) :: BINIT
+!IF (.NOT.ALLOCATED(WORKSPACE)) THEN
+!   ALLOCATE (WORKSPACE(NL1:NR1, NL2:NR2, NL3:NR3), STAT=IERROR)
+!   CALL CHKMEMERR (SCARC_ROUTINE, CTEXT, IERROR)
+!   IF (BINIT) WORKSPACE = NSCARC_ZERO_INTEGER
+!ELSE
+!   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
+!       SIZE(WORKSPACE,2) /= NR2-NL2+1 .OR. &
+!       SIZE(WORKSPACE,3) /= NR3-NL3+1) THEN
+!      WRITE(SCARC_MESSAGE,'(2A)') 'SCARC_ALLOCATE_INT3: Inconsistent length for vector ',CTEXT
+!      CALL SHUTDOWN(SCARC_MESSAGE); RETURN
+!   ENDIF
+!ENDIF
+!END SUBROUTINE SCARC_ALLOCATE_INT3
+ 
 !> ------------------------------------------------------------------------------------------------
 !> Allocate and initialize real array of dimension 1
 !> ------------------------------------------------------------------------------------------------
@@ -13091,24 +13074,24 @@ END SUBROUTINE SCARC_DEALLOCATE_MATRIX
 !> ------------------------------------------------------------------------------------------------
 !> Reduce size of matrix to specified size
 !> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_REDUCE_MATRIX(MAT, NAV, CMAT)
-TYPE (SCARC_MATRIX_TYPE), INTENT(INOUT) :: MAT
-INTEGER, INTENT(IN) :: NAV
-CHARACTER(*), INTENT(IN) :: CMAT
-CHARACTER(40) :: CINFO
-TYPE (SCARC_MATRIX_TYPE) :: AUX
-
-IF (MAT%NAV > NAV) THEN
-   WRITE(CINFO,'(A,A)') TRIM(CMAT),'.VAL'
-   CALL SCARC_COPY_MATRIX(MAT, AUX, 'AUX') 
-   CALL SCARC_DEALLOCATE_MATRIX(MAT)
-   CALL SCARC_COPY_MATRIX(AUX, MAT, 'MAT-copied')
-ELSE
-   WRITE(SCARC_MESSAGE,'(A)') 'SCARC_REDUCE_MATRIX: Length for resizing too big'
-   CALL SHUTDOWN(SCARC_MESSAGE); RETURN
-ENDIF
-   
-END SUBROUTINE SCARC_REDUCE_MATRIX
+!SUBROUTINE SCARC_REDUCE_MATRIX(MAT, NAV, CMAT)
+!TYPE (SCARC_MATRIX_TYPE), INTENT(INOUT) :: MAT
+!INTEGER, INTENT(IN) :: NAV
+!CHARACTER(*), INTENT(IN) :: CMAT
+!CHARACTER(40) :: CINFO
+!TYPE (SCARC_MATRIX_TYPE) :: AUX
+!
+!IF (MAT%NAV > NAV) THEN
+!   WRITE(CINFO,'(A,A)') TRIM(CMAT),'.VAL'
+!   CALL SCARC_COPY_MATRIX(MAT, AUX, 'AUX') 
+!   CALL SCARC_DEALLOCATE_MATRIX(MAT)
+!   CALL SCARC_COPY_MATRIX(AUX, MAT, 'MAT-copied')
+!ELSE
+!   WRITE(SCARC_MESSAGE,'(A)') 'SCARC_REDUCE_MATRIX: Length for resizing too big'
+!   CALL SHUTDOWN(SCARC_MESSAGE); RETURN
+!ENDIF
+!   
+!END SUBROUTINE SCARC_REDUCE_MATRIX
 
 !> ------------------------------------------------------------------------------------------------
 !> Copy matrix with all corresponding pointer and length structures
@@ -13130,11 +13113,11 @@ CALL SCARC_COPY_REAL(MAT1%VAL, MAT2%VAL, 1.0_EB, MAT1%NAV)
 
 WRITE(CINFO,'(A,A)') TRIM(CMAT2),'.COL'
 CALL SCARC_ALLOCATE_INT1(MAT2%COL, 1, MAT2%NAC, CINFO, .FALSE.)
-CALL SCARC_COPY_INT(MAT1%COL, MAT2%COL, 1.0_EB, MAT1%NAC)
+CALL SCARC_COPY_INT(MAT1%COL, MAT2%COL, 1, MAT1%NAC)
 
 WRITE(CINFO,'(A,A)') TRIM(CMAT2),'.ROW'
 CALL SCARC_ALLOCATE_INT1(MAT2%ROW, 1, MAT2%NAR, CINFO, .FALSE.)
-CALL SCARC_COPY_INT(MAT1%ROW, MAT2%ROW, 1.0_EB, MAT1%NAR)
+CALL SCARC_COPY_INT(MAT1%ROW, MAT2%ROW, 1, MAT1%NAR)
 
 END SUBROUTINE SCARC_COPY_MATRIX
 
