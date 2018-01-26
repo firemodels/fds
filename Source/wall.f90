@@ -985,13 +985,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ! time step adjustment
 
-   IF (DT_SUB*VN_HT3D <= 1._EB .OR. LOCK_TIME_STEP) THEN
+   IF (DT_SUB*VN_HT3D < VN_MAX .OR. LOCK_TIME_STEP) THEN
       TMP = TMP_NEW
       IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
       T_LOC = T_LOC + DT_SUB
       SUBIT = SUBIT + 1
+      IF (.NOT.LOCK_TIME_STEP) DT_SUB = MAX( DT_SUB, VN_MIN / MAX(VN_HT3D,TWO_EPSILON_EB) )
+   ELSE
+      DT_SUB = 0.5_EB*(VN_MIN+VN_MAX) / MAX(VN_HT3D,TWO_EPSILON_EB)
    ENDIF
-   IF (VN_HT3D > TWO_EPSILON_EB .AND. .NOT.LOCK_TIME_STEP) DT_SUB = 0.5_EB / VN_HT3D
    IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
       WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
       STOP_STATUS = INSTABILITY_STOP
@@ -1008,7 +1010,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_GET(N_MATL),GEOM_FACTOR,TIME_FACTOR,CELL_VOLUME
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VS,TMP_S
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -1053,39 +1055,71 @@ OBST_LOOP: DO N=1,N_OBST
             JJG = WC%ONE_D%JJG
             KKG = WC%ONE_D%KKG
             IOR = WC%ONE_D%IOR
-            DEPTH = 1._EB
+            TMP_S = TMP(I,J,K)
+            SELECT CASE(ABS(IOR))
+               CASE(1)
+                  GEOM_FACTOR = DX(I)
+                  ! this is a possible idea for coarse-grained 3D pyrolysis, but makes some cases unstable
+                  !IF (I==WC%ONE_D%II) TMP_S = WC%ONE_D%TMP_F
+               CASE(2)
+                  GEOM_FACTOR = DY(J)
+                  !IF (J==WC%ONE_D%JJ) TMP_S = WC%ONE_D%TMP_F
+               CASE(3)
+                  GEOM_FACTOR = DZ(K)
+                  !IF (K==WC%ONE_D%KK) TMP_S = WC%ONE_D%TMP_F
+            END SELECT
+            DEPTH = GEOM_FACTOR
 
-            RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
-            CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                           RHO_GET(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
-                           M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
-
-            OB%RHO(I,J,K,1:MS%N_MATL) = RHO_GET(1:MS%N_MATL)
-
+            ! cell volume
             IF (TWO_D) THEN
-               CELL_VOLUME = DX(I)*DZ(K)
+               VC = DX(I)*DZ(K)
             ELSE
-               CELL_VOLUME = DX(I)*DY(J)*DZ(K)
+               VC = DX(I)*DY(J)*DZ(K)
             ENDIF
-            IF (OB%CONSUMABLE) OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*CELL_VOLUME
-            IF (OB%MASS<TWO_EPSILON_EB) THEN
-               OB%HT3D=.FALSE.
-               OB%PYRO3D=.FALSE.
+
+            ! solid volume
+            VS = 0._EB
+            DO NN=1,MS%N_MATL
+               ML => MATERIAL(MS%MATL_INDEX(NN))
+               VS = VS + OB%RHO(I,J,K,NN)/ML%RHO_S
+            ENDDO
+            VS = VC*VS
+
+            IF (VS<TWO_EPSILON_EB) THEN
+               VS = 0._EB
+               OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+               M_DOT_G_PPP_ADJUST = 0._EB
+               M_DOT_G_PPP_ACTUAL = 0._EB
+               M_DOT_S_PPP = 0._EB
+               Q_DOT_PPP_S(I,J,K) = 0._EB
+            ELSE
+               RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) * VC/VS
+               RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
+
+               CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP_S,WC%ONE_D%TMP_F,&
+                              RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                              M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
+
+               OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)) * VS/VC
+               Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * VS/VC
+            ENDIF
+
+            IF (OB%CONSUMABLE) THEN
+               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
+               IF (OB%MASS<TWO_EPSILON_EB) THEN
+                  OB%HT3D=.FALSE.
+                  OB%PYRO3D=.FALSE.
+               ENDIF
             ENDIF
 
             ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
 
-            SELECT CASE(ABS(IOR))
-               CASE(1); GEOM_FACTOR = DX(I)
-               CASE(2); GEOM_FACTOR = DY(J)
-               CASE(3); GEOM_FACTOR = DZ(K)
-            END SELECT
             DO NS = 1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR * VS/VC
+               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR * VS/VC
             ENDDO
             DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR * VS/VC
             ENDDO
 
             ! to-do: mass transport

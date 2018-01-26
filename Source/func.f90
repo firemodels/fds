@@ -2575,7 +2575,7 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
       ENDIF
    ENDDO
 ENDIF
-IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 1._EB
+IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 0.001_EB
 
 END SUBROUTINE GET_SOLID_RHOCBAR
 
@@ -3278,7 +3278,6 @@ CALL GET_DATE(DATE)
 
 WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
-WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
 WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
 #ifdef COMPVER_PP
