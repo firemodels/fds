@@ -12,7 +12,7 @@ echo making bundle for $platform
 echo -------------------------------------------------
 echo -------------building fds------------------------
 echo -------------------------------------------------
-#./make_fds.sh
+./make_fds.sh
 echo -------------------------------------------------
 echo --- building smokeview and associated programs --
 echo -------------------------------------------------
