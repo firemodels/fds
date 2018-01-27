@@ -2749,10 +2749,9 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
    DO NR=1,ML%N_REACTIONS
       WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
-      DO NN=1,ML%N_RESIDUE(NR)
-         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
-                               '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN,NR)),', Material Index: ', &
-                                                        ML%RESIDUE_MATL_INDEX(NN,NR),', Yield: ',ML%NU_RESIDUE(NN,NR)
+      DO NN=1,N_MATL
+         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
+                               '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
       ENDDO
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
       DO NS = 1,N_TRACKED_SPECIES
@@ -5773,7 +5772,7 @@ REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,MW,XHAT,ZHAT,BBF,RHO2,TMPUP,TMPLOW,ZINT,RHO_S
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
-           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,NRM
+           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 REAL :: CPUTIME
@@ -6847,17 +6846,6 @@ IND_SELECT: SELECT CASE(IND)
                ! check original material layer
                GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
                RETURN
-            ELSE
-               ! check reaction residual material (don't this is right yet)
-               ML => MATERIAL(SF%MATL_INDEX(NN))
-               DO NR=1,ML%N_REACTIONS
-                  DO NRM=1,ML%N_RESIDUE(NR)
-                     IF (SF%RESIDUE_INDEX(NN,NRM,NR)==MATL_INDEX) THEN
-                        GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
-                        RETURN
-                     ENDIF
-                  ENDDO
-               ENDDO
             ENDIF MATL_INDEX_IF
          ENDDO
          GAS_PHASE_OUTPUT_RES = RHO_S
