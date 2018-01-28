@@ -5,9 +5,9 @@ source ../scripts/GET_ENV.sh
 export FDSEDITION=FDS6
 export SMVEDITION=SMV6
 
-export INTELLIBDIR=fire-notes/INSTALL/INTEL/INTEL_17u4/LIB
-export INTELBINDIR=fire-notes/INSTALL/INTEL/INTEL_17u4/bin64
-export OSLIBDIR=fire-notes/INSTALL/OSLIBS/LINUX
+export INTELLIBDIR=/var/local/bundle/INTEL/INTEL_17u4/LIB
+export INTELBINDIR=/var/local/bundle/INTEL/INTEL_17u4/bin64
+export OSLIBDIR=/var/local/bundle/OSLIBS/LINUX
 
 export fds_smvroot=$linux_svn_root
 export bundlebase=FDS_${fds_version}-SMV_${smv_version}_linux64

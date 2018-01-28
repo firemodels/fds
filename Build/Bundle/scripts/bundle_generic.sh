@@ -334,34 +334,34 @@ CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
 if [ ! "$INTELBINDIR" == "" ]; then
-  if [ -d $HOME/$INTELBINDIR ]; then
+  if [ -d $INTELBINDIR ]; then
     if [ "$MPI_VERSION" == "INTEL" ]; then
     echo ""
     echo "--- copying Intel exe's ---"
     echo ""
-      CP $HOME/$INTELBINDIR mpiexec   $bundledir/bin mpiexec
-      CP $HOME/$INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
+      CP $INTELBINDIR mpiexec   $bundledir/bin mpiexec
+      CP $INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
     fi
   fi
 fi
 if [ "$INTELLIBDIR" != "" ]; then
-  if [ -d $HOME/$INTELLIBDIR ]; then
+  if [ -d $INTELLIBDIR ]; then
 
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CP $HOME/$INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
-    CP $HOME/$INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
-    CP $HOME/$INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
+    CP $INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
+    CP $INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
+    CP $INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
 if [ "$OSLIBDIR" != "" ]; then
-  if [ -d $HOME/$OSLIBDIR ]; then
+  if [ -d $OSLIBDIR ]; then
 
     echo ""
     echo "--- copying miscellaneous run time libraries ---"
     echo ""
-    CPDIRFILES $HOME/$OSLIBDIR $bundledir/bin/LIB64
+    CPDIRFILES $OSLIBDIR $bundledir/bin/LIB64
   fi
 fi
 

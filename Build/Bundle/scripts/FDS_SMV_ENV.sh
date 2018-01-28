@@ -11,8 +11,6 @@ export smv_version=6.6.1test
 #  *** Linux/OSX 
   
 export linux_svn_root=FireModels_fork 
-export compiler_dir=fire-notes/INSTALL/LINUX/INTEL_17u4 
-export misc_dir=fire-notes/INSTALL/LIBS/LINUX/LIB64 
   
 #  ---- MPI library versions ---- 
   
