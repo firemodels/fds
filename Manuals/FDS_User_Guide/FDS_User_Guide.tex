@@ -7000,6 +7000,18 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \label{freeze_hrr}
 \end{figure}
 
+Note that is possible to use a heat/smoke detector or sprinkler instead of a {\ct SETPOINT} for temperature. An example of a heat detector would be as:
+\begin{lstlisting}
+&SURF ID='FIRE',HRRPUA=1000.,RAMP_Q='FRAMP',COLOR='ORANGE'/
+&RAMP ID='FRAMP',T=0,F=0,DEVC_ID='RAMP TIME'/
+&RAMP ID='FRAMP',T=50,F=1/
+&DEVC ID='Heat_Detector', PROP_ID='Acme Heat', XYZ=..., /
+&PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., 
+ACTIVATION_TEMPERATURE=74. /
+&DEVC XYZ=..., QUANTITY='TIME',NO_UPDATE_DEVC_ID='Heat_Detector',ID='RAMP TIME'/
+
+\end{lstlisting}
+
 It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
 
