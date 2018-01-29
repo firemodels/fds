@@ -99,16 +99,24 @@ Revision:~\gitrevision
 
 \chapter{Preface}
 
-This is Volume 4 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and numerical method. Volumes~2 and 3 document past and
-present model verification and validation work, respectively. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}. The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics
-Simulator (FDS) and the companion visualization program, Smokeview. Such a document is commonly referred to as a {\em Configuration Management Plan}, known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for FDS and Smokeview
-development. It is based in part on IEEE Standard 828~\cite{IEEE-828} and ASTM~E1355~\cite{ASTM:E1355}.
+This is Volume 4 of the FDS Technical Reference Guide. The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics
+Simulator (FDS) and the companion visualization program, Smokeview. Such a document is commonly referred to as a {\em Software Quality Assurance Plan}, known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for FDS and Smokeview development.
 
-The volumes that make up the FDS Technical Reference Guide are based in part on ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of
-Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process of assessing the accuracy of a fire model. Volumes~1 through 3 are the
-result of this evaluation process. The main purpose of the present volume is to describe the process by which the model software is developed and maintained. A model such
-as FDS cannot remain static. As progress is made in fire science, the model needs to be updated and improved, but still shown to reliably predict the kinds of
-phenomena for which it was originally designed.
+This plan is based in part on IEEE Standard 828~\cite{IEEE-828} and ASTM~E1355~\cite{ASTM:E1355}. The volumes that make up the FDS Technical Reference Guide are based in part on ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of
+Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process of assessing the accuracy of a fire model. Volumes~1 through 3 are the result of this evaluation process. A model such as FDS cannot remain static. As progress is made in fire science, the model needs to be updated and improved, but still shown to reliably predict the kinds of phenomena for which it was originally designed. The process to ensure this reliability includes
+
+\begin{itemize}
+    \item Relevant documentation for the model: Volume 1 describes the mathematical model and numerical method. Volumes~2 and 3 document past and present model verification and validation work, respectively. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
+
+    \item Description of the development process for the model.
+
+    \item Control and tracking of the source code using a centralized project repository on GitHub.
+
+    \item An automated build, verification, validation, and regression testing process then helps the FDS development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
+
+    \item Details of the review process used by the developers and NIST to ensure the quality of the model and related publications.
+
+\end{itemize}
 
 This document applies only to the program FDS, its companion visualization program called Smokeview,  the related NIST and VTT publications and Internet
 sites, and the various utility programs that support FDS and Smokeview. This document does not apply to third-party software developed by others
@@ -135,10 +143,16 @@ The idea for this Guide originated with Jason Floyd, a co-developer of FDS and p
 
 \chapter{Overview of FDS and Smokeview}
 
+This document describes the processes used during the development and deployment of the Fire Synamics Simulator (FDS) and its companion program Smokeview.  This software quality assurance (SQA) plan is intended to guide the planning for modifications to the model, provide required reviews for both software and associated documentation of the model, define testing to be conducted prior to the release of an updated model, describe problem reporting and resolution procedures, and ensure all records, source code, and released software is kept available for the life of the code.  While this report and many of our practices follow the ASTM International Standard 1355-05, ``Standard Guide for Evaluating the Predictive Capability of Deterministic Fire Models'' \cite{ASTM:E1355} which has been used extensively to guide the documentation, verification, and validation of the model, other standards have been followed as well.  Most notably, Institute of Electrical and Electronics Engineers (IEEE) standards IEEE 730-2002 \cite{IEEE:730} and 828~\cite{IEEE-828} define best practices in important areas of software quality assurance and guides the structure and content of this plan.
+
+The volumes that make up the FDS documentation are based in part on ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process of assessing the accuracy of a fire model. Volumes~1 through 3 are the result of this evaluation process. The main purpose of the present volume is to describe the process by which the model software is developed and maintained. A model such as FDS cannot remain static. As progress is made in fire science, the model needs to be updated and improved, but still shown to reliably predict the kinds of phenomena for which it was originally designed.
+
+The SQA process and requirements outlined in this document apply specifically to the FDS and Smokeview and is focused on ensuring the quality of the numerical predictions of the model.  Any user interface that may be used to develop input for the model is not included in this process. Users must ensure that the input files developed for the simulations accurately reflect the desired model inputs, whether developed using a third-party interface or manually input with a spreadsheet or text editor program.  Documentation of these inputs is included as part of the model documentation outlined below.
+
 This chapter provides a brief overview of the Fire Dynamics Simulator (FDS) and Smokeview, including its history, developers, features, and applications.
 
 
-\section{Type of Model}
+\section{Model Type}
 
 FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow. The model numerically solves a form of the Navier-Stokes equations
 appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The partial derivatives in the conservation
@@ -157,13 +171,13 @@ the input file containing all the necessary information needed to perform a simu
 
 
 
-\section{Version History}
+\section{Model Version}
 
 Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and version 6 in October 2013.
 
 Starting with FDS 5, a formal revision management system was implemented to track changes to the FDS source code. The open-source program development tools are provided by GitHub (https://github.com/).
 
-The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelfth maintenance release of 5.2, mostly bug fixes and minor user requests.  A Wiki file, located on the FDS/Smokeview web site, maintained by the developers describes the changes made for each release.
+Wiki files, located on the FDS/Smokeview web site, maintained by the developers, details the changes made for each release: \href{https://github.com/firemodels/fds/wiki/Release-Notes}{\textct{https://github.com/firemodels/fds/wiki/Release-Notes}} and \href{https://github.com/firemodels/smv/wiki/Release-Notes}{\textct{https://github.com/firemodels/smv/wiki/Release-Notes}}.
 
 
 \section{Model Developers}
@@ -177,24 +191,6 @@ Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Di
 \item Some recipients of external grants awarded by the NIST Fire Research Division,
 \item Engineering departments at various universities with a particular emphasis on fire.
 \end{itemize}
-Starting in 2007 with FDS version 5, the FDS development team adopted GoogleCode, a free Internet service designed to assist open source software development by providing a repository for source code, revision control, program distribution, bug tracking, and various other very useful services. In 2015, Google terminated this service, and provided all of its projects a migration path to GitHub, a similar free service that uses Git, rather than Subversion, as its version control software.
-
-Each member of the FDS development team has an account and password access~\footnote{Access to the FDS repository is by means of two-factor identification.} to the FDS repository. In addition, anonymous users can ``fork,'' or copy, the repository and receive the latest versions of the source code, manuals, and other items. These users may make changes to their own copy of the repository and can suggest these changes to the FDS developers by means of a ``pull request.'' If the changes are approved by one of the developers, these changes then merge into the main branch of the repository.
-
-The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either in the form of PDF or png files, depending on whether they are vector or raster format. There are a variety of \LaTeX\ packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
-
-Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include:
-\begin{enumerate}
-\item Developing new algorithms and improving program functionality
-\item Answering user questions
-\item Responding to bug reports
-\item Issuing periodic updates to the officially released versions of the programs
-\item Maintaining the Technical Reference and Users Guides
-\item Maintaining a suite of sample cases to demonstrate model use
-\item Maintaining a suite of verification and validation cases to test model accuracy and reliability
-\item Developing and updating a ``Roadmap'' of future development
-\end{enumerate}
-Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over a technical issue, the resolution is facilitated by the principal developers at NIST and VTT. Non-technical issues are addressed by the chief of the Fire Research Division at NIST or the respective counterpart at VTT. All policies and procedures described in this document are subject to review by NIST in consultation with VTT.
 
 
 \section{Intended Uses}
@@ -293,9 +289,28 @@ model are listed here.
 
 
 
-\chapter{Software Maintenance}
+\chapter{Configuration Management}
 
-Software maintenance consists of the following components: control of the project files and documents, procedures for making changes, and procedures for testing new versions.
+\section{Project Management}
+
+FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland. Like all projects at NIST, a designated project leader is responsible for directing and prioritizing model development, error correction, and preparation of documentation for the model development.
+
+Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include:
+\begin{enumerate}
+\item Developing new algorithms and improving program functionality
+\item Answering user questions
+\item Responding to bug reports
+\item Issuing periodic updates to the officially released versions of the programs
+\item Maintaining the Technical Reference and Users Guides
+\item Maintaining a suite of sample cases to demonstrate model use
+\item Maintaining a suite of verification and validation cases to test model accuracy and reliability
+\item Developing and updating a ``Roadmap'' of future development
+\end{enumerate}
+Most decisions concerning these various tasks are made individually or by consensus of the team members. In the event of a disagreement over a technical issue, the resolution is facilitated by the principal developers at NIST and VTT. Non-technical issues are addressed by the chief of the Fire Research Division at NIST or the respective counterpart at VTT. All policies and procedures described in this document are subject to review by NIST in consultation with VTT.
+
+Review and approval of software and documentation is part of the standard review process for any report or other product developed by NIST. A minimum of five reviews are required prior to release of reports or software, including two independent technical peer reviews, technical and management reviews at the technical workgroup and division level, and a policy review at the NIST-wide level.  This review is documented and recorded on the NIST standard form NIST 114 along with official approval notification provided to the primary author of the product.
+
+FDS/Smokeview is distributed exclusively through a NIST website dedicated to the model (https://pages.nist.gov/fds-smv/).  Content of the website is the responsibility of the FDS project leader. Additions and changes to the website are made through the same SQA process documented in this plan.
 
 
 \section{Document Identification and Control}
@@ -303,12 +318,16 @@ Software maintenance consists of the following components: control of the projec
 Document identification and control consists of placing all project files in a central location and maintaining a record of changes to those files.
 The central location is known as the {\em Repository}.
 
+Starting in 2007 with FDS version 5, the FDS development team adopted GoogleCode, a free Internet service designed to assist open source software development by providing a repository for source code, revision control, program distribution, bug tracking, and various other very useful services. In 2015, Google terminated this service, and provided all of its projects a migration path to GitHub, a similar free service that uses Git, rather than Subversion, as its version control software.
+
+The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either in the form of PDF or png files, depending on whether they are vector or raster format. There are a variety of \LaTeX\ packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
+
 
 \subsection{Project Repository}
 
-FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  Only Team Members described in the previous chapter can commit changes to the repository. All others must submit a ``pull request.''
+Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  
 
-Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{\textct{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{\textct{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
 
 \vskip\baselineskip
 \begin{tabular}{ll}
@@ -321,9 +340,13 @@ fds-smv & Web page html source
 \end{tabular}
 \vskip\baselineskip
 
-In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site. 
+Each member of the FDS/Smokeview development team has an account and password access~\footnote{Access to the FDS/Smokeview repositories is by means of two-factor identification.} to the FDS/Smokeview repository. In addition, anonymous users can ``fork,'' or copy, the repository and receive the latest versions of the source code, manuals, and other items. Only Team Members described in the previous chapter can commit changes to the repository. All others may make changes to their own copy of the repository and can suggest these changes to the FDS/Smokeview developers by means of a ``pull request.'' which is then reviewed by the development team for inclusion into the repository.
 
-\subsection{Version Identification}
+In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site.
+
+Additional details on the use of GitHub for the models are available on the wiki pages for the models at \href{https://github.com/firemodels/fds-smv/wiki}{\textct{https://github.com/firemodels/fds-smv/wiki}}.
+
+\subsection{Version Identification and Numbering}
 
 At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each official release of FDS is tagged with a specific version number (e.g., 6.5.3), there may be many commits of source code, documentation, or other files to the FDS repository before a new version is released.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the revision tag of the most recently committed source file. This is accomplished by using source file tagging. When FDS is compiled, the following lines in the main routine ({\ct main.f90}) are updated with the current repository information:
 \begin{lstlisting}
@@ -333,14 +356,29 @@ CHARACTER(255), PARAMETER :: GCOMPILE_DATE='$CompileDate: unknown $'
 \end{lstlisting}
 Upon compiling, these strings will be stored in the executable file. If the person who is compiling the code has changed the source files in any way but not committed them to the repository, the version tag will be appended with the word ``dirty'' to indicate that the code has been altered outside of the repository version control.
 
+Official versions of the model released by NIST are identified with specific version numbers tied to specific revisions in the repository and are identified on the download page for the model that can be compared to the version output from the model. For example, the following information is included on the FDS download website for FDS version 6.5.2
+
+\begin{lstlisting}
+ Version          : FDS 6.5.2
+ Revision         : Git-r21-0-g4e9103f
+ Revision Date    : Wed Aug 24 16:29:46 2016 -0400
+ Compilation Date : Aug 24, 2016  22:28:55
+\end{lstlisting}
+
+New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.5.3 indicates that this is FDS 6, the sixth major release. The 5 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 3 indicates the third maintenance release of 6.5, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
+ 
 
 
-
-\section{Development Process}
+\chapter{Software Requirements Identification, Design, Implementation, and Testing}
 
 Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 6.2.12 to 6.2.13, for example. This happens every few weeks. A change from 6.2 to 6.3 might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
 
-There is no formal process by which FDS is updated. Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A suite of simple verification calculations (included in this document) are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations (also included here) are run with each significant upgrade. Significant changes to FDS are made based on the following criteria, in no particular order:
+The software development process for FDS/Smokeview is intentionally simple. The process can be defined in five basic steps:
+
+\begin{description}
+\item [1. Identify and document the need for a change:] The need for minor changes to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model. 
+
+    Significant changes to FDS/Smokeview, guided by available research road maps (see ) are made based on the following criteria, in no particular order:
 \begin{description}
 \item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable or superior accuracy to its empirical counterpart.
 \item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance (Baum's Rule\footnote{After Howard Baum, NIST Fellow and one of the original developers of the mathematical foundation of FDS.}). For example, the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy is emitted as thermal radiation.
@@ -348,8 +386,20 @@ There is no formal process by which FDS is updated. Each developer works on vari
 \item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the entire suite of experiments. If the accuracy is only comparable to the previous version, then some other criteria must be satisfied.
 \item[Acceptance by the Fire Protection Community:] Especially in regard to fire-specific devices, like sprinklers and smoke detectors, the algorithms in FDS often are based on their acceptance among the practicing engineers.
 \end{description}
+\item [2. Analyze, evaluate, and implement the change:] Algorithms for complex changes are typically documented by revisions to the FDS or Smokeview Technical Reference Guide and specific test cases to verify the correct operation of the model changes are included in the FDS or Smokeview Verification and Validation Guides. Software implementation then follows the equations included in the relevant Technical Reference Guide. Additional details of the process, tracking, and testing of changes is included in the sections below.
+\item [3. Review and approval of the change:] Before accepting any change into the repository, verification and validation tests are run to ensure desired results. All changes to the software and documentation are automatically tracked in the FDS and Smokeview repositories.
+\item [4. Verification and Validation:] A suite of simple verification calculations are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations are run each night. Any changes to the results are automatically flagged and emailed to developers for review. Additional details of the process is included in the sections below.
+\item [5. Release of new versions:] NIST policy requires review and approval of technical reports (all the FDS/Smokeview documentation) and software (the FDS/Smokeview software released on the FDS website). Additional details of the review process is included in the sections below.
+\end{description}
 
+\section{Problem Reporting and Resolution}
 
+NIST has developed an automated reporting and resolution tracking website for use with the FDS model to facilitate tracking and cataloging of inquires, problems, and model enhancements / revisions. This is included as part of the FDS website at \newline
+\href{https://github.com/firemodels/fds/issues}{\textct{https://github.com/firemodels/fds/issues}} and \href{https://github.com/firemodels/smv/issues}{\textct{https://github.com/firemodels/smv/issues}}.
+
+\section{Software Change Implementation}
+
+Each developer works on various routines, and makes changes as warranted. Minor bugs are fixed without any communication (the developers are in different locations), but more significant changes are discussed via email or telephone calls. A suite of simple verification calculations (included in this document) are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations (also included here) are run routinely and always with each significant upgrade.
 
 
 \subsection{Creating a Change Request}
@@ -357,18 +407,64 @@ There is no formal process by which FDS is updated. Each developer works on vari
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service provided by GitHub. A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached. If the issue is opened by a user, it will be given a status of {\em New} until it is reviewed by a developer. This typically takes a few minutes to a few hours, depending on the time of day the issue is reported. If the issue is opened by a developer, the developer can immediately assign a status and an owner.
 
 
-
-
 \subsection{Committing Changes}
 
 Once a developer has addressed a change request, the modified files are committed to the FDS repository.  A description of the changes will be added to the change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.
 
-Changes to the FDS source code and supporting documentation are reviewed by other members of the team. There is no formal system with which changes are reviewed because the frequency of changes makes it impractical. As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
+
+
+\section{Software and Peer Reviews}
+
+
+As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
+
+\subsection{Reviews Prior to Software Release}
+
+Prior to final implementation of a new feature or significant change, a review of the proposed modification and documentation is conducted by other members of the development team.  This review includes review and concurrence of the software requirements and design specification as well as more detailed review of code changes as the complexity of the modification requires. Review and acceptance of the software requirements and design specification by interested project sponsors or users may be included as appropriate. Name and date of approval and/or review is noted electronically in the NIST review process.
+
+FDS is reviewed both internally and externally. All documents issued by the National Institute of Standards and Technology are formally reviewed internally by members of the staff. The theoretical basis of FDS is laid out in the present document, and is subject to internal review by staff members who are not active participants in the development of the model, but who are members of the Fire Research Division and are experts in the fields of fire and combustion. Externally, papers detailing various parts of FDS are regularly published in peer-reviewed journals and conference proceedings. In addition, FDS is used world-wide by fire protection engineering firms who review the technical details of the model related to their particular application. Some of these firms also publish in the open literature reports documenting internal efforts to validate the model for a particular use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+
+\subsection{Survey of the Relevant Fire and Combustion Literature}
+
+\label{Relevantdocs}
+
+FDS has two separate manuals -- the FDS Technical Reference Guide~\cite{FDS_Tech_Guide} and the FDS User's Guide~\cite{FDS_Users_Guide}. The Technical Reference Guide is broken into four volumes: (1)~Mathematical Model, (2)~Verification, (3)~Validation, and (4)~Configuration Management. Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide}. The FDS and Smokeview User Guides only describe the mechanics of using the computer programs. The Technical Reference Guides provides the theory, algorithm details, and verification and validation results.
+
+There are numerous sources that describe various parts of the model. The basic set of equations solved in FDS was formulated by Rehm and Baum in the {\em Journal of Research of the National Bureau of Standards}~\cite{Rehm:1}.  The basic hydrodynamic algorithm evolved at NIST through the 1980s and 1990s, incorporating fairly well-known numerical schemes that are documented in books by Anderson, Tannehill and Pletcher~\cite{Anderson:1}, Peyret and Taylor~\cite{Peyret:1}, and Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a good description of the large-eddy simulation technique and provides references to many current publications on the subject.  Numerical techniques appropriate for combustion systems are described by Oran and Boris~\cite{Oran:1}.  The eddy dissipation concept (EDC) combustion model is described in Poinsot and Veynante~\cite{Poinsot:TNC}. Basic heat transfer theory is provided by Holman~\cite{Holman:1} and Incropera~\cite{Incropera:1}. Thermal radiation theory is described in Siegel and Howell~\cite{Siegel:1}.
+
+Much of the current knowledge of fire science and engineering is found in the {\em SFPE Handbook of Fire Protection Engineering}~\cite{SFPE}. Popular textbooks in fire protection engineering include those by Drysdale~\cite{Drysdale:1} and Quintiere~\cite{Quintiere:2}. On-going research in fire and combustion is documented in several periodicals and conference proceedings. The International Association of Fire Safety Science (IAFSS) organizes a conference every three years, the proceedings of which are frequently referenced by fire researchers. Interscience Communications, a London-based publisher of several fire-related journals, hosts a conference known as Interflam roughly every three years in the United Kingdom. The Combustion Institute hosts an international symposium on combustion every two years, and in addition to the proceedings of this symposium, the organization publishes its own journal, {\em Combustion and Flame}. The papers appearing in the IAFSS conference proceedings, the Combustion Symposium proceedings, and {\em Combustion and Flame} are all peer-reviewed, while those appearing in the Interflam proceedings are selected based on the submission of a short abstract. Both the Society for Fire Protection Engineers (SFPE) and the National Fire Protection Association (NFPA) publish peer-reviewed technical journals entitled the {\em Journal of Fire Protection Engineering} and {\em Fire Technology}, respectively. Other often-cited, peer-reviewed technical journals include the {\em Fire Safety Journal}, {\em Fire and Materials}, {\em Combustion Science and Technology}, {\em Combustion Theory and Modeling} and the {\em Journal of Heat Transfer}.
+
+Research at NIST is documented in various ways beyond contributions made by staff to external journals and conferences. NIST publishes several forms of internal reports, technical notes, special publications, and its own journal called the {\em Journal of Research of NIST}. An internal report, referred to as a NISTIR (NIST Inter-agency Report), is a convenient means to disseminate information, especially when the quantity of data exceeds what could normally be accepted by a journal. Often parts of a NISTIR are published externally, with the NISTIR itself serving as the complete record of the work performed. Previous versions of the FDS Technical Reference Guide and User's Guide were published as NISTIRs. The current FDS and Smokeview manuals are being published as NIST Special Publications, distinguished from NISTIRs by the fact that they are permanently archived. Work performed by an outside person or organization working under a NIST grant or contract is published in the form of a NIST Grant/Contract Report (GCR). All work performed by the staff of the Fire Research Division at NIST beyond 1993 is permanently stored in electronic form and made freely available via the Internet.
 
 
 
 
-\section{Firebot: Automated Error Checking and Regression Testing}
+\subsection{Review of the Theoretical Basis of the Model}
+\label{JustAA}
+
+The technical approach and assumptions of the model have been presented in the peer-reviewed scientific literature and at technical conferences cited in the previous section. The major assumptions of the model, for example the large-eddy simulation technique and the combustion model, have undergone a roughly 40 year development and are now documented in popular introductory text books. More specific sub-models, like the sprinkler spray routine or the various pyrolysis models, have yet to be developed to this extent. As a consequence, all documents produced by NIST staff are required to go through an internal editorial review and approval process. This process is designed to ensure compliance with the technical requirements, policy, and editorial quality required by NIST. The technical review includes a critical evaluation of the technical content and methodology, statistical treatment of data, uncertainty analysis, use of appropriate reference data and units, and bibliographic references. The FDS and Smokeview manuals are first reviewed by a member of the Fire Research Division, then by the immediate supervisor of the author of the document, then by the chief of the Fire Research Division, and finally by a reader from outside the division. Both the immediate supervisor and the division
+chief are technical experts in the field. Once the document has been reviewed, it is then brought before the Editorial Review Board (ERB), a body of representatives from all the NIST laboratories. At least one reader is designated by the board for each document that it accepts for review. This last reader is selected based on technical competence and impartiality. The reader is usually from outside the division producing the document and is responsible for checking that the document conforms with NIST policy on units, uncertainty and scope. The reader does not need to be a technical expert in fire or combustion.
+
+The US Nuclear Regulatory Commission (US NRC) published a seven-volume report on its own verification and validation study of five different fire models used for nuclear power plant applications~\cite{NUREG_1824_Sup_1}. Two of the models are essentially a set of empirically-based correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which is the NIST-developed CFAST model. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+
+Besides formal internal and peer review, FDS is subjected to continuous scrutiny because it is available free of charge to the general public and is used internationally by those involved in fire safety design and post-fire reconstruction. The quality of the FDS and Smokeview User Guides is checked implicitly by the fact that the majority of model users do not require a formal FDS-specific training course, but are able to read the supporting documents, perform a few sample simulations, and then systematically build up a level of expertise appropriate for their applications. The developers receive daily feedback from users on the clarity of the documentation and add clarifications when needed. Before new versions of the model are released, there is a several month ``beta test'' period in which users test the new version using the updated documentation. This process is similar, although less formal, to that which most computer software programs undergo. Also, the source code for FDS is released publicly, and has been used at various universities world-wide, both in the classroom as a teaching tool as well as for research. As a result, flaws in the theoretical development and the computer program itself have been identified and corrected. As FDS continues to evolve, the user base will continue to serve as a means to evaluate the model. We consider this process as important to the development of FDS as the formal internal and external peer-review processes.
+
+\section{Model Testing}
+
+Individual testing of model algorithms are made by the developers during any revision of the model. Often, this testing forms the basis for any new standard test cases included with future model releases. System release testing of the model prior to release includes the following:
+
+\begin{itemize}
+\item Examination of results of test cases specific to any model modifications made as appropriate.  Comparison with analytic solutions to simplified problems is desirable when available.
+
+\item Examination of results of standard test cases included with the release version of the model. Any changes in the output from prior versions is explained (and documented in the software testing and validation results report) by modifications made to the model.
+
+\item For major new releases of the model, a complete suite of test cases should be compared to those from previous versions of the model.  At a minimum this includes the set of validation exercises described in U.S. Nuclear Regulatory Commission publication NUREG 1824 \cite{NUREG_1824, NUREG_1824_Sup_1}, but may include additional example cases or validation exercises as appropriate.
+
+\item For all changes to the model, an automated testing process is used that provides automatic error checking and collecting performance and accuracy statistics between FDS revisions. Results of this process for release version of the model are included in the Verification and Validation Guides for FDS \cite{FDS_Validation_Guide, FDS_Verification_Guide} and Smokeview \cite{Smokeview_Verification_Guide}.
+\end{itemize}
+
+
+\section{Firebot: Automated Software Quality Testing}
 
 The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
@@ -415,11 +511,6 @@ The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, 
 
 The decision to change versions of the software is made by consensus of the development team, usually after it is determined that enough changes have been made to warrant a new release. There is no formal process to determine when a new release is to be issued. However, once the decision is made, the new version is given a number, it is tested, and then posted to the official download site.
 
-\subsection{Version Number}
-
-New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS~6.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
-
-
 
 \subsection{Testing a New Release}
 
@@ -438,36 +529,33 @@ Following successful completion of the required baseline testing, a new version 
 
 
 
+\chapter{Software Risk Management}
 
-\chapter{Peer Review Process}
+The primary risk management tool for software developed and released by NIST is the official NIST review process for software, documents, and other products of NIST outlined above. Official approval is required prior to release of the model for general use. Additional processes to minimize risk are identified below.
 
-FDS is reviewed both internally and externally. All documents issued by the National Institute of Standards and Technology are formally reviewed internally by members of the staff. The theoretical basis of FDS is laid out in the present document, and is subject to internal review by staff members who are not active participants in the development of the model, but who are members of the Fire Research Division and are experts in the fields of fire and combustion. Externally, papers detailing various parts of FDS are regularly published in peer-reviewed journals and conference proceedings. In addition, FDS is used world-wide by fire protection engineering firms who review the technical details of the model related to their particular application. Some of these firms also publish in the open literature reports documenting internal efforts to validate the model for a particular use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
+\section{Media Control}
 
+Release versions of FDS and Smokeview are available exclusively on the FDS specific website maintained by NIST. This website is included in NIST's automated backup and recovery system for computer systems organization wide.
 
-\section{Survey of the Relevant Fire and Combustion Literature}
+As part of its model development, NIST maintains a web-based system for version control and history of both the FDS and Smokeview source code and of pre-release and release executables for the software.
 
-\label{Relevantdocs}
+These computer systems are available only to specified personnel, including the FDS project leader and project team members.
 
-FDS has two separate manuals -- the FDS Technical Reference Guide~\cite{FDS_Tech_Guide} and the FDS User's Guide~\cite{FDS_Users_Guide}. The Technical Reference Guide is broken into four volumes: (1)~Mathematical Model, (2)~Verification, (3)~Validation, and (4)~Configuration Management. Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide}. The FDS and Smokeview User Guides only describe the mechanics of using the computer programs. The Technical Reference Guides provides the theory, algorithm details, and verification and validation results.
+\section{Supplier Control}
 
-There are numerous sources that describe various parts of the model. The basic set of equations solved in FDS was formulated by Rehm and Baum in the {\em Journal of Research of the National Bureau of Standards}~\cite{Rehm:1}.  The basic hydrodynamic algorithm evolved at NIST through the 1980s and 1990s, incorporating fairly well-known numerical schemes that are documented in books by Anderson, Tannehill and Pletcher~\cite{Anderson:1}, Peyret and Taylor~\cite{Peyret:1}, and Ferziger and Peri\'{c}~\cite{Ferziger:1}. This last book provides a good description of the large-eddy simulation technique and provides references to many current publications on the subject.  Numerical techniques appropriate for combustion systems are described by Oran and Boris~\cite{Oran:1}.  The eddy dissipation concept (EDC) combustion model is described in Poinsot and Veynante~\cite{Poinsot:TNC}. Basic heat transfer theory is provided by Holman~\cite{Holman:1} and Incropera~\cite{Incropera:1}. Thermal radiation theory is described in Siegel and Howell~\cite{Siegel:1}.
+FDS does not include any commercial software libraries.
 
-Much of the current knowledge of fire science and engineering is found in the {\em SFPE Handbook of Fire Protection Engineering}~\cite{SFPE}. Popular textbooks in fire protection engineering include those by Drysdale~\cite{Drysdale:1} and Quintiere~\cite{Quintiere:2}. On-going research in fire and combustion is documented in several periodicals and conference proceedings. The International Association of Fire Safety Science (IAFSS) organizes a conference every three years, the proceedings of which are frequently referenced by fire researchers. Interscience Communications, a London-based publisher of several fire-related journals, hosts a conference known as Interflam roughly every three years in the United Kingdom. The Combustion Institute hosts an international symposium on combustion every two years, and in addition to the proceedings of this symposium, the organization publishes its own journal, {\em Combustion and Flame}. The papers appearing in the IAFSS conference proceedings, the Combustion Symposium proceedings, and {\em Combustion and Flame} are all peer-reviewed, while those appearing in the Interflam proceedings are selected based on the submission of a short abstract. Both the Society for Fire Protection Engineers (SFPE) and the National Fire Protection Association (NFPA) publish peer-reviewed technical journals entitled the {\em Journal of Fire Protection Engineering} and {\em Fire Technology}, respectively. Other often-cited, peer-reviewed technical journals include the {\em Fire Safety Journal}, {\em Fire and Materials}, {\em Combustion Science and Technology}, {\em Combustion Theory and Modeling} and the {\em Journal of Heat Transfer}.
+NIST currently uses Microsoft Visual Studio and Intel Fortran and C++ for development\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}.  Prior to any change to a different development system, a full test suite of test cases are compared to verify consistent operation of the model and model results.
 
-Research at NIST is documented in various ways beyond contributions made by staff to external journals and conferences. NIST publishes several forms of internal reports, technical notes, special publications, and its own journal called the {\em Journal of Research of NIST}. An internal report, referred to as a NISTIR (NIST Inter-agency Report), is a convenient means to disseminate information, especially when the quantity of data exceeds what could normally be accepted by a journal. Often parts of a NISTIR are published externally, with the NISTIR itself serving as the complete record of the work performed. Previous versions of the FDS Technical Reference Guide and User's Guide were published as NISTIRs. The current FDS and Smokeview manuals are being published as NIST Special Publications, distinguished from NISTIRs by the fact that they are permanently archived. Work performed by an outside person or organization working under a NIST grant or contract is published in the form of a NIST Grant/Contract Report (GCR). All work performed by the staff of the Fire Research Division at NIST beyond 1993 is permanently stored in electronic form and made freely available via the Internet.
+\section{Records Collection, Maintenance, and Retention}
 
+In addition to the identified configuration items included in the FDS/Smokeview repositories, all software, documentation, and SQA documents are retained by the FDS project leader, typically in electronic form. Software and documentation is also maintained and archived on the NIST FDS website as part of the available older versions of the model.
 
+NIST management approval is required prior to destruction of old or out-of-date records. Records are typically maintained for a minimum of 25 years.
 
+\section{Training}
 
-\section{Review of the Theoretical Basis of the Model}
-\label{JustAA}
-
-The technical approach and assumptions of the model have been presented in the peer-reviewed scientific literature and at technical conferences cited in the previous section. The major assumptions of the model, for example the large-eddy simulation technique and the combustion model, have undergone a roughly 40 year development and are now documented in popular introductory text books. More specific sub-models, like the sprinkler spray routine or the various pyrolysis models, have yet to be developed to this extent. As a consequence, all documents produced by NIST staff are required to go through an internal editorial review and approval process. This process is designed to ensure compliance with the technical requirements, policy, and editorial quality required by NIST. The technical review includes a critical evaluation of the technical content and methodology, statistical treatment of data, uncertainty analysis, use of appropriate reference data and units, and bibliographic references. The FDS and Smokeview manuals are first reviewed by a member of the Fire Research Division, then by the immediate supervisor of the author of the document, then by the chief of the Fire Research Division, and finally by a reader from outside the division. Both the immediate supervisor and the division
-chief are technical experts in the field. Once the document has been reviewed, it is then brought before the Editorial Review Board (ERB), a body of representatives from all the NIST laboratories. At least one reader is designated by the board for each document that it accepts for review. This last reader is selected based on technical competence and impartiality. The reader is usually from outside the division producing the document and is responsible for checking that the document conforms with NIST policy on units, uncertainty and scope. The reader does not need to be a technical expert in fire or combustion.
-
-The US Nuclear Regulatory Commission (US NRC) published a seven-volume report on its own verification and validation study of five different fire models used for nuclear power plant applications~\cite{NUREG_1824_Sup_1}. Two of the models are essentially a set of empirically-based correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which is the NIST-developed CFAST model. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
-
-Besides formal internal and peer review, FDS is subjected to continuous scrutiny because it is available free of charge to the general public and is used internationally by those involved in fire safety design and post-fire reconstruction. The quality of the FDS and Smokeview User Guides is checked implicitly by the fact that the majority of model users do not require a formal FDS-specific training course, but are able to read the supporting documents, perform a few sample simulations, and then systematically build up a level of expertise appropriate for their applications. The developers receive daily feedback from users on the clarity of the documentation and add clarifications when needed. Before new versions of the model are released, there is a several month ``beta test'' period in which users test the new version using the updated documentation. This process is similar, although less formal, to that which most computer software programs undergo. Also, the source code for FDS is released publicly, and has been used at various universities world-wide, both in the classroom as a teaching tool as well as for research. As a result, flaws in the theoretical development and the computer program itself have been identified and corrected. As FDS continues to evolve, the user base will continue to serve as a means to evaluate the model. We consider this process as important to the development of FDS as the formal internal and external peer-review processes.
+No specific training is identified for use of this plan.  Details of training requirements for use of the model included in the FDS user's guide is applicable to developers of the model as well.
 
 
 
