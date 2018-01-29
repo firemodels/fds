@@ -30,7 +30,7 @@
 \headerB{
 Fire Dynamics Simulator\\
 Technical Reference Guide\\
-Volume 4: Configuration Management\\
+Volume 4: Software Quality Assurance\\
 }
 
 \headerC{
@@ -60,7 +60,7 @@ Volume 4: Configuration Management\\
 \headerB{
 Fire Dynamics Simulator\\
 Technical Reference Guide\\
-Volume 4: Configuration Management\\
+Volume 4: Software Quality Assurance\\
 }
 
 \headerC{
@@ -325,7 +325,7 @@ The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ 
 
 \subsection{Project Repository}
 
-Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  
+Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
 
 Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is \href{https://github.com/firemodels}{\textct{https://github.com/firemodels}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
 
@@ -366,7 +366,7 @@ Official versions of the model released by NIST are identified with specific ver
 \end{lstlisting}
 
 New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.5.3 indicates that this is FDS 6, the sixth major release. The 5 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 3 indicates the third maintenance release of 6.5, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
- 
+
 
 
 \chapter{Software Requirements Identification, Design, Implementation, and Testing}
@@ -376,7 +376,7 @@ Changes are made to the FDS source code daily, and tracked via revision control 
 The software development process for FDS/Smokeview is intentionally simple. The process can be defined in five basic steps:
 
 \begin{description}
-\item [1. Identify and document the need for a change:] The need for minor changes to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model. 
+\item [1. Identify and document the need for a change:] The need for minor changes to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model.
 
     Significant changes to FDS/Smokeview, guided by available research road maps (see ) are made based on the following criteria, in no particular order:
 \begin{description}
