@@ -348,13 +348,7 @@ Additional details on the use of GitHub for the models are available on the wiki
 
 \subsection{Version Identification and Numbering}
 
-At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each official release of FDS is tagged with a specific version number (e.g., 6.5.3), there may be many commits of source code, documentation, or other files to the FDS repository before a new version is released.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the revision tag of the most recently committed source file. This is accomplished by using source file tagging. When FDS is compiled, the following lines in the main routine ({\ct main.f90}) are updated with the current repository information:
-\begin{lstlisting}
-CHARACTER(255), PARAMETER :: GREVISION='$Revision$'
-CHARACTER(255), PARAMETER :: GREVISION_DATE='$RevisionDate: unknown $'
-CHARACTER(255), PARAMETER :: GCOMPILE_DATE='$CompileDate: unknown $'
-\end{lstlisting}
-Upon compiling, these strings will be stored in the executable file. If the person who is compiling the code has changed the source files in any way but not committed them to the repository, the version tag will be appended with the word ``dirty'' to indicate that the code has been altered outside of the repository version control.
+At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
 
 Official versions of the model released by NIST are identified with specific version numbers tied to specific revisions in the repository and are identified on the download page for the model that can be compared to the version output from the model. For example, the following information is included on the FDS download website for FDS version 6.5.2
 
