@@ -18,7 +18,7 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
       read val
     fi
@@ -35,7 +35,7 @@ CP ()
   TOFILE=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the file $FROMFILE does not exist"
       read val
     fi
@@ -46,7 +46,7 @@ CP ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not copied to bundle"
       read val
     fi
@@ -63,7 +63,7 @@ UNTAR ()
   TODIR2=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the compressed file $FROMFILE does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the compressed file $FROMFILE does not exist"
       read val
     fi
@@ -77,7 +77,7 @@ UNTAR ()
     echo "$FROMFILE untar'd"
   else
     echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not untar'd to bundle"
       read val
     fi
@@ -94,7 +94,7 @@ CP2 ()
   TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errorlog
-    if [ "$FROM_PC" == "1" ]; then
+    if [ "$NOPAUSE" == "1" ]; then
       echo "***error: the file $FROMFILE does not exist"
       read val
     fi
@@ -105,7 +105,7 @@ CP2 ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not copied to bundle"
       read val
     fi
@@ -120,7 +120,7 @@ CPDIR ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
@@ -134,7 +134,7 @@ CPDIR ()
     echo "$FROMDIR copied"
   else
     echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
        echo "***error: the directory $FROMDIR not copied to bundle"
       read val
     fi
@@ -149,7 +149,7 @@ CPDIRFILES ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
@@ -163,7 +163,7 @@ CPDIRFILES ()
     echo "$FROMDIR copied"
   else
     echo "***error: unable to copy $FROMDIR" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: unable to copy $FROMDIR"
       read val
     fi
