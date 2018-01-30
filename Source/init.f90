@@ -2425,7 +2425,7 @@ WC%ONE_D%IIG    = IIG
 WC%ONE_D%JJG    = JJG
 WC%ONE_D%KKG    = KKG
 WC%ONE_D%RDN    = RDN
-WC%AW     = AW
+WC%AW           = AW
 WC%ONE_D%UW     = UW
 WC%ONE_D%UWS    = UW
 
