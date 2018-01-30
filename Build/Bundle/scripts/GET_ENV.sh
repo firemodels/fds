@@ -13,3 +13,11 @@ else
   fi
 fi
 
+if [ "$FDS_VERSION" != "" ]; then
+  export fds_version=$FDS_VERSION
+fi
+if [ "$SMV_VERSION" != "" ]; then
+  export smv_version=$SMV_VERSION
+fi
+../scripts/CHECK_VARS.sh
+

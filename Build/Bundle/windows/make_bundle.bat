@@ -4,7 +4,7 @@ set FDSEDITION=FDS6
 set SMVEDITION=SMV6
 
 set fdsversion=%FDSEDITION%
-set smvversion=$SMVEDITION%
+set smvversion=%SMVEDITION%
 
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64

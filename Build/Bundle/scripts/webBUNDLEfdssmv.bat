@@ -27,7 +27,7 @@ Title  Building FDS-Smokeview bundle for %platform%
 
 if "%platform%" == "windows" (
   set platform=64
-  call "%svn_root%\fds\Utilities\Scripts\BUNDLE_win_generic"
+  call "%svn_root%\fds\Build\Bundle\windows\make_bundle"
   goto eof
 )
 if "%platform%" == "linux" (

@@ -18,7 +18,7 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
       read val
     fi
@@ -35,7 +35,7 @@ CP ()
   TOFILE=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the file $FROMFILE does not exist"
       read val
     fi
@@ -46,7 +46,7 @@ CP ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not copied to bundle"
       read val
     fi
@@ -63,7 +63,7 @@ UNTAR ()
   TODIR2=$4
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the compressed file $FROMFILE does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the compressed file $FROMFILE does not exist"
       read val
     fi
@@ -77,7 +77,7 @@ UNTAR ()
     echo "$FROMFILE untar'd"
   else
     echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not untar'd to bundle"
       read val
     fi
@@ -94,7 +94,7 @@ CP2 ()
   TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errorlog
-    if [ "$FROM_PC" == "1" ]; then
+    if [ "$NOPAUSE" == "1" ]; then
       echo "***error: the file $FROMFILE does not exist"
       read val
     fi
@@ -105,7 +105,7 @@ CP2 ()
     echo "$FROMFILE copied"
   else
     echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: $FROMFILE not copied to bundle"
       read val
     fi
@@ -120,7 +120,7 @@ CPDIR ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
@@ -134,7 +134,7 @@ CPDIR ()
     echo "$FROMDIR copied"
   else
     echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
        echo "***error: the directory $FROMDIR not copied to bundle"
       read val
     fi
@@ -149,7 +149,7 @@ CPDIRFILES ()
   TODIR=$2
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
@@ -163,7 +163,7 @@ CPDIRFILES ()
     echo "$FROMDIR copied"
   else
     echo "***error: unable to copy $FROMDIR" >> $errlog
-    if [ "$FROM_PC" == "" ]; then
+    if [ "$NOPAUSE" == "" ]; then
       echo "***error: unable to copy $FROMDIR"
       read val
     fi
@@ -203,8 +203,6 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
-openmpidir=~/FDS_Guides
-
 if [ "$MPI_VERSION" == "INTEL" ]; then
   fdsmpidir=impi_intel$FDSOS
   fdsmpi=fds_impi_intel$FDSOS
@@ -229,7 +227,6 @@ hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
-mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
 fds_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 smv_bundle=$fds_smvroot/smv/for_bundle
@@ -317,20 +314,20 @@ CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
 if [ "$MPI_VERSION" != "INTEL" ]; then
-  CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+  CP $OPENMPI_DIR $openmpifile  $bundledir/bin $openmpifile
 fi
 
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
-CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Validation_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Verification_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Config_Management_Plan.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Validation_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
 if [ ! "$INTELBINDIR" == "" ]; then
@@ -405,6 +402,11 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
+
+mkdir -p $BUNDLE_DIR
+if [ -e $BUNDLE_DIR ]; then
+  cp $bundlebase.sh $BUNDLE_DIR/.
+fi
 
 cat $bundledir/bin/hash/*.sha1 >  $bundlebase.sha1
 hashfile $bundlebase.sh        >> $bundlebase.sha1
