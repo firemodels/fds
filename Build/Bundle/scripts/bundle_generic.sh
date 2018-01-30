@@ -203,8 +203,6 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
-openmpidir=~/FDS_Guides
-
 if [ "$MPI_VERSION" == "INTEL" ]; then
   fdsmpidir=impi_intel$FDSOS
   fdsmpi=fds_impi_intel$FDSOS
@@ -229,7 +227,6 @@ hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
-mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
 fds_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 smv_bundle=$fds_smvroot/smv/for_bundle
@@ -317,20 +314,20 @@ CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
 if [ "$MPI_VERSION" != "INTEL" ]; then
-  CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+  CP $OPENMPI_DIR $openmpifile  $bundledir/bin $openmpifile
 fi
 
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
-CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Validation_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Verification_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Config_Management_Plan.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Validation_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
 if [ ! "$INTELBINDIR" == "" ]; then
@@ -405,6 +402,11 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
+
+mkdir -p $BUNDLE_DIR
+if [ -e $BUNDLE_DIR ]; then
+  cp $bundlebase.sh $BUNDLE_DIR/.
+fi
 
 cat $bundledir/bin/hash/*.sha1 >  $bundlebase.sha1
 hashfile $bundlebase.sh        >> $bundlebase.sha1
