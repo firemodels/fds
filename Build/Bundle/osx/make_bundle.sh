@@ -3,7 +3,7 @@
 source ../scripts/GET_ENV.sh
 
 export fds_smvroot=$linux_svn_root
-export bundlebase=FDS_${fds_version}-SMV_${smv_version}_osx64
+export bundlebase=${fds_version}-${smv_version}_osx64
 export fdshost=$osx_hostname
 export smvhost=$osx_hostname
 export OSXBUNDLE=yes
