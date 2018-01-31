@@ -1244,29 +1244,30 @@ END SUBROUTINE CORIOLIS_FORCE
 
 SUBROUTINE VEGETATION_DRAG()
 
-   VEG_DRAG(0,:) = VEG_DRAG(1,:)
-   K=1
+DO K=1,MIN(8,KBAR)
+   VEG_DRAG(0,:,K) = VEG_DRAG(1,:,K)
    DO J=1,JBAR
       DO I=0,IBAR
          VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=2._EB*KRES(I,J,K)
-         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
+         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J,K)*VEG_UMAG*UU(I,J,K)
       ENDDO
    ENDDO
 
-   VEG_DRAG(:,0) = VEG_DRAG(:,1)
+   VEG_DRAG(:,0,K) = VEG_DRAG(:,1,K)
    DO J=0,JBAR
       DO I=1,IBAR
          VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
+         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J,K)*VEG_UMAG*VV(I,J,K)
       ENDDO
    ENDDO
 
    DO J=1,JBAR
       DO I=1,IBAR
          VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
+         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J,K)*VEG_UMAG*WW(I,J,K)
       ENDDO
    ENDDO
+ENDDO
 
 END SUBROUTINE VEGETATION_DRAG
 
