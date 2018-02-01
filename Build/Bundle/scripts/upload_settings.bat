@@ -2,8 +2,6 @@
 setlocal EnableDelayedExpansion
 set platform=%1
 
-set bashscript=env_params.sh
-
 :: batch file to install the FDS-SMV bundle on Windows, Linux or OSX systems
 
 :: setup environment variables (defining where repository resides etc) 
@@ -21,6 +19,11 @@ goto:eof
 :endif_envexist
 
 call %envfile%
+
+%svn_drive%
+cd %svn_root%\fds\Build\Bundle\scripts
+
+set bashscript=%svn_root%\fds\Build\Bundle\scripts\env_params.sh
 
 echo #!/bin/bash > %bashscript%
 
@@ -79,14 +82,14 @@ echo export osx_hostname=%osx_hostname% >> %bashscript%
 echo export osx_username=%osx_username% >> %bashscript%
 echo export osx_logon=%osx_logon% >> %bashscript%
 
-sed "s/^M$//" %bashscript% > FDS_SMV_ENVpc.sh
-
 if "%platform%" == "linux" (
-pscp FDS_SMV_ENVpc.sh %linux_hostname%:.
+  pscp FDS_SMV_ENVpc.sh %linux_hostname%:.
+  plink %linux_logon% %linux_svn_root%/fds/Build/Bundle/scripts/dos2unix.sh FDS_SMV_ENVpc.sh
 )
 
 if "%platform%" == "osx" (
-pscp FDS_SMV_ENVpc.sh %osx_hostname%:.
+  pscp FDS_SMV_ENVpc.sh %osx_hostname%:.
+  plink %osx_logon% %osx_svn_root%/fds/Build/Bundle/scripts/dos2unix.sh FDS_SMV_ENVpc.sh
 )
 
 erase %bashscript%
