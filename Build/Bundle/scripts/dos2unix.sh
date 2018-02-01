@@ -1,6 +1,5 @@
-#!/bin/bash
-infile=$1
+#! /bin/sh -e
+TMPFILE=/tmp/to_unix$$
 
-tempfile=/tmp/$infile.$$
-tr -d '\r' <  $infile > $tempfile
-mv $tempfile $infile
+tr -d '\015\032' < "$1" > $TMPFILE
+mv -f $TMPFILE "$1"
