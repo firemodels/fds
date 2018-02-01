@@ -2,5 +2,5 @@
 infile=$1
 
 tempfile=/tmp/$infile.$$
-sed -e 's/\r//g' $infile > $tempfile
+tr -d '\r' <  $infile > $tempfile
 mv $tempfile $infile
