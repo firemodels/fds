@@ -102,6 +102,47 @@ Download from official website
     $ ./configure FC=gfortran-7 CC=gcc-7 --prefix=/shared/openmpi_64 --enable-mpirun-prefix-by-default --enable-mpi-fortran --enable-static --disable-shared
     $ make -j 2
 
+Explain installation options
+
+    --prefix=<directory>
+      Install Open MPI into the base directory named <directory>.  Hence,
+      Open MPI will place its executables in <directory>/bin, its header
+      files in <directory>/include, its libraries in <directory>/lib, etc.
+
+    --disable-shared
+      By default, Open MPI and OpenSHMEM build shared libraries, and all
+      components are built as dynamic shared objects (DSOs). This switch
+      disables this default; it is really only useful when used with
+      --enable-static.  Specifically, this option does *not* imply
+      --enable-static; enabling static libraries and disabling shared
+      libraries are two independent options.
+
+    --enable-static
+      Build MPI and OpenSHMEM as static libraries, and statically link in
+      all components.  Note that this option does *not* imply
+      --disable-shared; enabling static libraries and disabling shared
+      libraries are two independent options.
+
+    --enable-mpi-fortran(=value)
+      By default, Open MPI will attempt to build all 3 Fortran bindings:
+      mpif.h, the "mpi" module, and the "mpi_f08" module.  The following
+      values are permitted:
+
+        all:        Synonym for "yes".
+        yes:        Attempt to build all 3 Fortran bindings; skip
+                    any binding that cannot be built (same as
+                    --enable-mpi-fortran).
+        mpifh:      Build mpif.h support.
+        usempi:     Build mpif.h and "mpi" module support.
+        usempif08:  Build mpif.h, "mpi" module, and "mpi_f08"
+                    module support.
+        none:       Synonym for "no".
+        no:         Do not build any MPI Fortran support (same as
+                    --disable-mpi-fortran).  This is mutually exclusive
+                    with building the OpenSHMEM Fortran interface.
+
+
+
 Reduce build time
 
     $ make -j 4
@@ -219,6 +260,72 @@ Run compiled FDS exectuable
 
      Hit Enter to Escape...
 
+
+## Explore required dependencies of `FDS` executable
+
+Use `ldd` tool to print shared libraries dependencies.
+
+
+    $ ldd fds_mpi_gnu_linux_64 
+        linux-vdso.so.1 =>  (0x00007ffc427ec000)
+        libgfortran.so.4 => /usr/lib/x86_64-linux-gnu/libgfortran.so.4 (0x00007f8ab015d000)
+        libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f8aafe57000)
+        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f8aafc53000)
+        librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f8aafa4b000)
+        libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f8aaf848000)
+        libgomp.so.1 => /usr/lib/x86_64-linux-gnu/libgomp.so.1 (0x00007f8aaf619000)
+        libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f8aaf402000)
+        libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f8aaf1e4000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8aaee1b000)
+        libquadmath.so.0 => /usr/lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007f8aaebdc000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f8ab0530000)
+
+Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
+
+    gottfried@gottfried-SVE14A2X1EH:~/repos/fds/Build/mpi_gnu_linux_64$ sudo apt-get install gfortran
+    ...   
+    The following additional packages will be installed:
+      gfortran-7 libgfortran-7-dev libgfortran4
+    Suggested packages:
+      gfortran-multilib gfortran-doc gfortran-7-multilib gfortran-7-doc
+      libgfortran4-dbg libcoarrays-dev
+    The following NEW packages will be installed:
+      gfortran gfortran-7 libgfortran-7-dev libgfortran4
+    0 upgraded, 4 newly installed, 0 to remove and 14 not upgraded.
+    Need to get 8.115 kB of archives.
+    After this operation, 30,0 MB of additional disk space will be used.
+    Do you want to continue? [Y/n] y
+    Get:1 http://de.archive.ubuntu.com/ubuntu artful/main amd64 libgfortran4 amd64 7.2.0-8ubuntu3 [493 kB]
+    Get:2 http://de.archive.ubuntu.com/ubuntu artful/main amd64 libgfortran-7-dev amd64 7.2.0-8ubuntu3 [530 kB]
+    Get:3 http://de.archive.ubuntu.com/ubuntu artful/main amd64 gfortran-7 amd64 7.2.0-8ubuntu3 [7.090 kB]
+    Get:4 http://de.archive.ubuntu.com/ubuntu artful/main amd64 gfortran amd64 4:7.2.0-1ubuntu1 [1.278 B]
+    Fetched 8.115 kB in 4s (1.679 kB/s)  
+    Selecting previously unselected package libgfortran4:amd64.
+    (Reading database ... 409697 files and directories currently installed.)
+    Preparing to unpack .../libgfortran4_7.2.0-8ubuntu3_amd64.deb ...
+    Unpacking libgfortran4:amd64 (7.2.0-8ubuntu3) ...
+    Selecting previously unselected package libgfortran-7-dev:amd64.
+    Preparing to unpack .../libgfortran-7-dev_7.2.0-8ubuntu3_amd64.deb ...
+    Unpacking libgfortran-7-dev:amd64 (7.2.0-8ubuntu3) ...
+    Selecting previously unselected package gfortran-7.
+    Preparing to unpack .../gfortran-7_7.2.0-8ubuntu3_amd64.deb ...
+    Unpacking gfortran-7 (7.2.0-8ubuntu3) ...
+    Selecting previously unselected package gfortran.
+    Preparing to unpack .../gfortran_4%3a7.2.0-1ubuntu1_amd64.deb ...
+    Unpacking gfortran (4:7.2.0-1ubuntu1) ...
+    Setting up libgfortran4:amd64 (7.2.0-8ubuntu3) ...
+    Processing triggers for libc-bin (2.26-0ubuntu2.1) ...
+    Setting up libgfortran-7-dev:amd64 (7.2.0-8ubuntu3) ...
+    Processing triggers for man-db (2.7.6.1-2) ...
+    Setting up gfortran-7 (7.2.0-8ubuntu3) ...
+    Setting up gfortran (4:7.2.0-1ubuntu1) ...
+    update-alternatives: using /usr/bin/gfortran to provide /usr/bin/f95 (f95) in auto mode
+    update-alternatives: using /usr/bin/gfortran to provide /usr/bin/f77 (f77) in auto mode
+
+
+## Deploy FDS/MPI to clusters
+
+- Provide OpenMPI 
 
 
 ## More on compilers
