@@ -83,13 +83,13 @@ echo export osx_username=%osx_username% >> %bashscript%
 echo export osx_logon=%osx_logon% >> %bashscript%
 
 if "%platform%" == "linux" (
-  pscp FDS_SMV_ENVpc.sh %linux_hostname%:.
+  pscp %bashscript% %linux_hostname%:FDS_SMV_ENVpc.sh
   plink %linux_logon% %linux_svn_root%/fds/Build/Bundle/scripts/dos2unix.sh FDS_SMV_ENVpc.sh
 )
 
 if "%platform%" == "osx" (
-  pscp FDS_SMV_ENVpc.sh %osx_hostname%:.
-  plink %osx_logon% %osx_svn_root%/fds/Build/Bundle/scripts/dos2unix.sh FDS_SMV_ENVpc.sh
+  pscp %bashscript% %osx_hostname%:FDS_SMV_ENVpc.sh
+  plink %osx_logon% %linux_svn_root%/fds/Build/Bundle/scripts/dos2unix.sh FDS_SMV_ENVpc.sh
 )
 
 erase %bashscript%
