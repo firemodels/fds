@@ -328,6 +328,15 @@ Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
 - Provide OpenMPI 
 
 
+## Anything about Open MPI
+
+- [Building Open MPI](https://www.open-mpi.org/faq/?category=building)
+- [Compiling MPI apps](https://www.open-mpi.org/faq/?category=mpi-apps)
+- [Running MPI jobs](https://www.open-mpi.org/faq/?category=running)
+  - [Prerequisites for running Open MPI job]( What pre-requisites are necessary for running an Open MPI job?)
+- [mpirun prefix](https://www.open-mpi.org/faq/?category=running#mpirun-prefix)
+
+
 ## More on compilers
 
 GNU Fortran 8.0
