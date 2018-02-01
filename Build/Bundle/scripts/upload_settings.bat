@@ -65,7 +65,7 @@ echo.  >> %bashscript%
 echo #  ---- Guide location ---- >> %bashscript%
 echo.  >> %bashscript%
 
-echo export GUIDE_DIR=%GUIDE_DIR% >> %bashscript%
+echo export GUIDE_DIR=$HOME/%GUIDE_DIR% >> %bashscript%
 
 :: ---------openmpi location----------------------
 
@@ -73,7 +73,7 @@ echo.  >> %bashscript%
 echo #  ---- openmpi location ---- >> %bashscript%
 echo.  >> %bashscript%
 
-echo export OPENMPI_DIR=%OPENMPI_DIR% >> %bashscript%
+echo export OPENMPI_DIR=$HOME/%OPENMPI_DIR% >> %bashscript%
 
 :: ---------bundle location----------------------
 
@@ -81,7 +81,7 @@ echo.  >> %bashscript%
 echo #  ---- bundle location ---- >> %bashscript%
 echo.  >> %bashscript%
 
-echo export BUNDLE_DIR=%BUNDLE_DIR% >> %bashscript%
+echo export BUNDLE_DIR=$HOME/%BUNDLE_DIR% >> %bashscript%
 
 :: ----------bot locations---------------------
 
