@@ -584,7 +584,7 @@ REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAM
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
             RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VS,KAPPA_S,KAPPA_2DX,RFLUX_UP,RFLUX_DOWN,DX_LOC
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,SUBIT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,IC2,III,JJJ,KKK
-LOGICAL :: CONT_MATL_PROP
+LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
 REAL(EB), PARAMETER :: DT_SUB_MIN_HT3D=1.E-9_EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL(),RVSP=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL(),OB2=>NULL()
@@ -1015,51 +1015,57 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ! Note: for 2D cylindrical KDTDX at X=0 remains zero after initialization
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IC = CELL_INDEX(I,J,K)
-            IF (.NOT.SOLID(IC)) CYCLE
-            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
-            IF (OB%MATL_INDEX>0) THEN
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
-            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
-               MS => SURFACE(OB%MATL_SURF_INDEX)
-               RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,MS%N_MATL) !/ RVSP(I,J,K)
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
-            ENDIF
+   IS_STABLE_DT_SUB = .FALSE.
+   TMP_UPDATE_LOOP: DO WHILE (.NOT.IS_STABLE_DT_SUB)
 
-            IF (TWO_D) THEN
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2) )
-            ELSE
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
-            ENDIF
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IC = CELL_INDEX(I,J,K)
+               IF (.NOT.SOLID(IC)) CYCLE
+               OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
+               IF (OB%MATL_INDEX>0) THEN
+                  CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+               ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                  MS => SURFACE(OB%MATL_SURF_INDEX)
+                  RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,MS%N_MATL) / RVSP(I,J,K)
+                  CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHOCBAR_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
-                                                                 (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
-                                                                 Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
+               IF (TWO_D) THEN
+                  VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+               ELSE
+                  VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+               ENDIF
 
+               TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/RHOCBAR_S * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                                  (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
+                                                                  (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
+                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
+
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
 
-   ! time step adjustment
+      ! time step adjustment
 
-   IF (DT_SUB*VN_HT3D < VN_MAX .OR. LOCK_TIME_STEP) THEN
-      TMP = TMP_NEW
-      IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
-      T_LOC = T_LOC + DT_SUB
-      SUBIT = SUBIT + 1
-      IF (.NOT.LOCK_TIME_STEP) DT_SUB = MAX( DT_SUB, VN_MIN / MAX(VN_HT3D,TWO_EPSILON_EB) )
-   ELSE
-      DT_SUB = 0.5_EB*(VN_MIN+VN_MAX) / MAX(VN_HT3D,TWO_EPSILON_EB)
-   ENDIF
-   IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
-      WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
-      STOP_STATUS = INSTABILITY_STOP
-      RETURN
-   ENDIF
+      IF (DT_SUB*VN_HT3D < VN_MAX .OR. LOCK_TIME_STEP) THEN
+         IS_STABLE_DT_SUB = .TRUE.
+         TMP = TMP_NEW
+         IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
+         T_LOC = T_LOC + DT_SUB
+         SUBIT = SUBIT + 1
+         IF (.NOT.LOCK_TIME_STEP) DT_SUB = MAX( DT_SUB, VN_MIN / MAX(VN_HT3D,TWO_EPSILON_EB) )
+      ELSE
+         DT_SUB = 0.5_EB*(VN_MIN+VN_MAX) / MAX(VN_HT3D,TWO_EPSILON_EB)
+      ENDIF
+      IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
+         WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
+         STOP_STATUS = INSTABILITY_STOP
+         RETURN
+      ENDIF
+
+   ENDDO TMP_UPDATE_LOOP
 
 ENDDO SUBSTEP_LOOP
 
@@ -1137,6 +1143,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                VC = DX(I)*DY(J)*DZ(K)
             ENDIF
 
+            ! update density
             IF (RVSP(I,J,K)<TWO_EPSILON_EB) THEN
                OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
                M_DOT_G_PPP_ADJUST = 0._EB
@@ -1151,7 +1158,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                               RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                               M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-               OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) - DT_SUB*M_DOT_S_PPP(1:MS%N_MATL)*RVSP(I,J,K)
+               OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) - DT_SUB * M_DOT_S_PPP(1:MS%N_MATL) * RVSP(I,J,K)
                Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * RVSP(I,J,K)
             ENDIF
 
