@@ -1033,9 +1033,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                ENDIF
 
                IF (TWO_D) THEN
-                  VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+                  VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2)/RVSP(I,J,K) )
                ELSE
-                  VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+                  VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2)/RVSP(I,J,K) )
                ENDIF
 
                TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/RHOCBAR_S * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
