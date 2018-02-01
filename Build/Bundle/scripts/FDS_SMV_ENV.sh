@@ -5,7 +5,7 @@
 export fds_version=6.6.0test 
 export smv_version=6.6.1test 
   
-#  ---- MPI library versions
+#  ---- MPI versions
   
 export linux_mpi_version=INTEL 
 export osx_mpi_version=3.0.0 
@@ -17,7 +17,7 @@ export linux_svn_root=FireModels_fork
 # ---------------------------------------
 # shouldn't have to change anything below here
 
-#  ---- guide location
+#  ---- Guide location
 
 export GUIDE_DIR=$HOME/.bundle/FDS_Guides
 
@@ -37,13 +37,13 @@ export firebothome=/home2/smokevis2/firebot
 export smokebotrepo=/home2/smokevis2/smokebot/FireModels_central 
 export smokebothome=/home2/smokevis2/smokebot 
   
-# ---- Linux hostnames
+# ---- Linux login info
   
 export linux_hostname=`hostname`
 export linux_username=`whoami`
 export linux_logon=$linux_username@$linux_hostname
   
-# ---- OSX hostnames
+# ---- OSX login info
   
 export osx_hostname=`hostname`
 export osx_username=`whoami`
