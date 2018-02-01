@@ -7,9 +7,9 @@ set fdsversion=%FDSEDITION%
 set smvversion=$SMVEDITION%
 
 set SVNROOT=%svn_root%
-set fdsdir=%svn_root%\fds\Build\intel_win_%platform%
-set fdsmpidir=%svn_root%\fds\Build\impi_intel_win_%platform%
-set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
+set fdsdir=%svn_root%\fds\Build\intel_win_64
+set fdsmpidir=%svn_root%\fds\Build\impi_intel_win_64
+set basename=FDS_%fds_version%-SMV_%smv_version%_win64
 
 set in_pdf=%userprofile%\FDS_Guides
 set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL17
@@ -70,7 +70,7 @@ mkdir %out_uninstall%
 mkdir %out_fdshash%
 mkdir %out_smvhash%
 
-set release_version=%FDSMAJORVERSION%_win_%platform%
+set release_version=%FDSMAJORVERSION%_win_64
 set release_version=
 
 echo.
@@ -80,19 +80,19 @@ echo.
 
 copy %in_for_bundle%\*.po                                                                        %out_bin%\.>Nul
 
-CALL :COPY  %fdsmpidir%\fds_impi_win_%platform%.exe                                              %out_bin%\fds.exe
-CALL :COPY  %svn_root%\fds\Utilities\fds2ascii\intel_win_%platform%\fds2ascii_win_%platform%.exe %out_bin%\fds2ascii.exe
-CALL :COPY  %svn_root%\smv\Build\background\intel_win_64\background.exe                          %out_bin%\background.exe
-CALL :COPY  %svn_root%\fds\Utilities\test_mpi\impi_intel_win\test_mpi.exe                        %out_bin%\test_mpi.exe
+CALL :COPY  %fdsmpidir%\fds_impi_win_64.exe                                  %out_bin%\fds.exe
+CALL :COPY  %svn_root%\fds\Utilities\fds2ascii\intel_win_64\fds2ascii_win_64.exe %out_bin%\fds2ascii.exe
+CALL :COPY  %svn_root%\smv\Build\background\intel_win_64\background.exe       %out_bin%\background.exe
+CALL :COPY  %svn_root%\fds\Utilities\test_mpi\impi_intel_win\test_mpi.exe     %out_bin%\test_mpi.exe
 
-CALL :COPY  %svn_root%\smv\Build\smokeview\intel_win_%platform%\smokeview_win_%platform%.exe     %out_smv%\smokeview.exe
-CALL :COPY  %svn_root%\smv\Build\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe     %out_smv%\smokediff.exe
-CALL :COPY  %svn_root%\smv\Build\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
-CALL :COPY  %svn_root%\smv\Build\dem2fds\intel_win_%platform%\dem2fds_win_%platform%.exe         %out_smv%\dem2fds.exe 
-CALL :COPY  %svn_root%\smv\Build\hashfile\intel_win_%platform%\hashfile_win_%platform%.exe       %out_smv%\hashfile.exe 
-CALL :COPY  %svn_root%\smv\Build\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
-CALL :COPY  %svn_root%\smv\Build\hashfile\intel_win_%platform%\hashfile_win_%platform%.exe       %out_smv%\hashfile.exe 
-CALL :COPY  %svn_root%\smv\scripts\jp2conv.bat                                                   %out_smv%\jp2conv.bat
+CALL :COPY  %svn_root%\smv\Build\smokeview\intel_win_64\smokeview_win_64.exe  %out_smv%\smokeview.exe
+CALL :COPY  %svn_root%\smv\Build\smokediff\intel_win_64\smokediff_win_64.exe  %out_smv%\smokediff.exe
+CALL :COPY  %svn_root%\smv\Build\smokezip\intel_win_64\smokezip_win_64.exe    %out_smv%\smokezip.exe 
+CALL :COPY  %svn_root%\smv\Build\dem2fds\intel_win_64\dem2fds_win_64.exe      %out_smv%\dem2fds.exe 
+CALL :COPY  %svn_root%\smv\Build\hashfile\intel_win_64\hashfile_win_64.exe    %out_smv%\hashfile.exe 
+CALL :COPY  %svn_root%\smv\Build\wind2fds\intel_win_64\wind2fds_win_64.exe    %out_smv%\wind2fds.exe 
+CALL :COPY  %svn_root%\smv\Build\hashfile\intel_win_64\hashfile_win_64.exe    %out_smv%\hashfile.exe 
+CALL :COPY  %svn_root%\smv\scripts\jp2conv.bat                                %out_smv%\jp2conv.bat
 
 set curdir=%CD%
 cd %out_bin%
