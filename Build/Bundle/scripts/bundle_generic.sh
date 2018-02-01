@@ -93,7 +93,7 @@ CP2 ()
   TODIR=$3
   TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
-    echo "***error: the file $FROMFILE does not exist" >> $errorlog
+    echo "***error: the file $FROMFILE does not exist" >> $errlog
     if [ "$NOPAUSE" == "1" ]; then
       echo "***error: the file $FROMFILE does not exist"
       read val
