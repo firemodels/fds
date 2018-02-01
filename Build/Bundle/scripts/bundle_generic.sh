@@ -18,8 +18,8 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
     if [ "$NOPAUSE" == "" ]; then
-      echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
       read val
     fi
   fi
@@ -33,10 +33,12 @@ CP ()
   FROMFILE=$2
   TODIR=$3
   TOFILE=$4
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errlog
+    echo "***error: the file $FROMFILE does not exist"
+    ERR="1"
     if [ "$NOPAUSE" == "" ]; then
-      echo "***error: the file $FROMFILE does not exist"
       read val
     fi
   else
@@ -45,10 +47,12 @@ CP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$NOPAUSE" == "" ]; then
+    if [ "ERR" == "" ]; then
+      echo "***error: $FROMFILE not copied to bundle" >> $errlog
       echo "***error: $FROMFILE not copied to bundle"
-      read val
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
     fi
   fi
 }
@@ -61,10 +65,12 @@ UNTAR ()
   FROMFILE=$2
   TODIR=$3
   TODIR2=$4
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the compressed file $FROMFILE does not exist" >> $errlog
+    echo "***error: the compressed file $FROMFILE does not exist"
+    ERR="1"
     if [ "$NOPAUSE" == "" ]; then
-      echo "***error: the compressed file $FROMFILE does not exist"
       read val
     fi
   else
@@ -76,10 +82,12 @@ UNTAR ()
   if [ -e $TODIR/$TODIR2 ]; then
     echo "$FROMFILE untar'd"
   else
-    echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
-    if [ "$NOPAUSE" == "" ]; then
+    if [ "$ERR" == "" ]; then
+      echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
       echo "***error: $FROMFILE not untar'd to bundle"
-      read val
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
     fi
   fi
 }
@@ -92,10 +100,12 @@ CP2 ()
   FROMFILE=$2
   TODIR=$3
   TOFILE=$FROMFILE
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist" >> $errlog
-    if [ "$NOPAUSE" == "1" ]; then
-      echo "***error: the file $FROMFILE does not exist"
+    echo "***error: the file $FROMFILE does not exist"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
       read val
     fi
   else
@@ -104,10 +114,12 @@ CP2 ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: $FROMFILE not copied to bundle" >> $errlog
-    if [ "$NOPAUSE" == "" ]; then
+    if [ "$ERR" == "" ]; then
+      echo "***error: $FROMFILE not copied to bundle" >> $errlog
       echo "***error: $FROMFILE not copied to bundle"
-      read val
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
     fi
   fi
 }
@@ -118,10 +130,12 @@ CPDIR ()
 {
   FROMDIR=$1
   TODIR=$2
+  ERR=
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
+    echo "***error: the directory $FROMDIR does not exist"
+    ERR="1"
     if [ "$NOPAUSE" == "" ]; then
-      echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
   else
@@ -133,10 +147,12 @@ CPDIR ()
   if [ -e $TODIR ]; then
     echo "$FROMDIR copied"
   else
-    echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
-    if [ "$NOPAUSE" == "" ]; then
-       echo "***error: the directory $FROMDIR not copied to bundle"
-      read val
+    if [ "$ERR" == "" ]; then
+      echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
+      echo "***error: the directory $FROMDIR not copied to bundle"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
     fi
   fi
 }
@@ -147,10 +163,12 @@ CPDIRFILES ()
 {
   FROMDIR=$1
   TODIR=$2
+  ERR=
   if [ ! -e $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
+    echo "***error: the directory $FROMDIR does not exist"
+    ERR="1"
     if [ "$NOPAUSE" == "" ]; then
-      echo "***error: the directory $FROMDIR does not exist"
       read val
     fi
   else
@@ -162,10 +180,12 @@ CPDIRFILES ()
   if [ -e $TODIR ]; then
     echo "$FROMDIR copied"
   else
-    echo "***error: unable to copy $FROMDIR" >> $errlog
-    if [ "$NOPAUSE" == "" ]; then
+    if [ "$ERR" == "" ]; then
+      echo "***error: unable to copy $FROMDIR" >> $errlog
       echo "***error: unable to copy $FROMDIR"
-      read val
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
     fi
   fi
 }
