@@ -5329,7 +5329,7 @@ An important consideration for the time integration of chemical reactions is the
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
 
-It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, {\ct TURBULENT\_DEPOSITION}, and {\ct GRAVITATIONAL\_SETTLING} on the {\ct MISC} line. {\ct GRAVITATIONAL\_SETTLING} controls the downward movement of aerosols in the gas phase, whereas {\ct GRAVITATIONAL\_DEPOSITION} controls the deposition of aerosols onto upward-facing surfaces due to gravity.  The deposition velocity at the wall can be output using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}.
+It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each surface deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}. All surface deposition can be disabled by the logical parameter {\ct DEPOSITION}. In the gas phase, aerosol transport is affected by gravity and temperature gradients. These effects can be selectively disabled with {\ct GRAVITATIONAL\_SETTLING} and {\ct THERMOPHORETIC\_SETTLING}. All the deposition parameters are on the {\ct MISC} line.  The deposition velocity at the wall can be output using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}. 
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -9116,9 +9116,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+{\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
-{\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9173,6 +9173,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TERRAIN\_IMAGE}                            & Character     & See Wildland Fire User's Guide                        &               &                   \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                        & Real Triplet  & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
+{\ct THERMOPHORETIC\_SETTLING}                  & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
