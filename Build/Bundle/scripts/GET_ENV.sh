@@ -1,5 +1,9 @@
 #!/bin/bash
 
+mkdir -p ~/.bundle/pubs
+mkdir -p ~/.bundle/BUNDLE
+mkdir -p ~/.bundle/OPENMPMI
+
 # this script is run from a script in Build/Bundle/linux or
 # Build/Bundle/osx
 
