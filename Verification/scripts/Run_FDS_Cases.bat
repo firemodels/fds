@@ -48,8 +48,8 @@ set BACKGROUNDEXE=background.exe
 ::set SH2BAT=%SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat
 set SH2BAT=sh2bat
 
-set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
-set FDSEXE=%SVNROOT%\fds\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set FDSBASE=fds_impi_win%size%%DEBUG%.exe
+set FDSEXE=%SVNROOT%\fds\Build\impi_intel_win%size%%DEBUG%\%FDSBASE%
 
 :: ---------- Ensure that various programs exists
 

@@ -31,3 +31,4 @@ cd UL_NFPRF;  ./Run_All.sh -y; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh -y; cd ..
 cd USN_Hangars;  ./Run_All.sh -y; cd ..
 cd VTT;  ./Run_All.sh -y; cd ..
+cd Waterloo_Methanol;  ./Run_All.sh -y; cd ..
