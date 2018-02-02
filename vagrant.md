@@ -109,6 +109,8 @@ Explain installation options
       Open MPI will place its executables in <directory>/bin, its header
       files in <directory>/include, its libraries in <directory>/lib, etc.
 
+
+
     --disable-shared
       By default, Open MPI and OpenSHMEM build shared libraries, and all
       components are built as dynamic shared objects (DSOs). This switch
@@ -140,6 +142,32 @@ Explain installation options
         no:         Do not build any MPI Fortran support (same as
                     --disable-mpi-fortran).  This is mutually exclusive
                     with building the OpenSHMEM Fortran interface.
+
+RUN-TIME SYSTEM SUPPORT
+
+Note that in both models, invoking mpirun via an absolute path name is equivalent to specifying the --prefix option with a <dir> value equivalent to the directory where mpirun resides, minus its last subdirectory. For example:
+
+    % /usr/local/bin/mpirun ...
+
+is equivalent to
+
+    % mpirun --prefix /usr/local
+
+    --enable-mpirun-prefix-by-default
+      This option forces the "mpirun" command to always behave as if
+      "--prefix $prefix" was present on the command line (where $prefix is
+      the value given to the --prefix option to configure).  This prevents
+      most rsh/ssh-based users from needing to modify their shell startup
+      files to set the PATH and/or LD_LIBRARY_PATH for Open MPI on remote
+      nodes.  Note, however, that such users may still desire to set PATH
+      -- perhaps even in their shell startup files -- so that executables
+      such as mpicc and mpirun can be found without needing to type long
+      path names.  --enable-orterun-prefix-by-default is a synonym for
+      this option.
+
+    --noprefix  
+      Disable the automatic --prefix behavior 
+
 
 
 
@@ -325,7 +353,15 @@ Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
 
 ## Deploy FDS/MPI to clusters
 
-- Provide OpenMPI 
+- Disable the automatic prefix behaviour to provide OpenMPI in a custom directory
+
+  $ /absolute/path/to/mpirun --noprefix mpi_app
+
+References
+- [mpirun - OpenMPI docs](https://www.open-mpi.org/doc/v3.0/man1/mpirun.1.php) 
+
+
+
 
 
 ## More on compilers
