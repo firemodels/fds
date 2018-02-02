@@ -1,17 +1,19 @@
 #!/bin/bash
 
-mkdir -p ~/.bundle/pubs
-mkdir -p ~/.bundle/BUNDLE
-mkdir -p ~/.bundle/OPENMPMI
+$BUNDLE_HOME=$HOME/.bundle
+
+mkdir -p $BUNDLE_HOME/pubs
+mkdir -p $BUNDLE_HOME/BUNDLE
+mkdir -p $BUNDLE_HOME/OPENMPMI
 
 # this script is run from a script in Build/Bundle/linux or
 # Build/Bundle/osx
 
-if [ -e ~/FDS_SMV_ENVpc.sh ]; then
-  source ~/FDS_SMV_ENVpc.sh
+if [ -e $BUNDLE_HOME/FDS_SMV_ENVpc.sh ]; then
+  source $BUNDLE_HOME/FDS_SMV_ENVpc.sh
 else
-  if [ -e ~/FDS_SMV_ENV.sh ]; then
-    source ~/FDS_SMV_ENV.sh
+  if [ -e $BUNDLE_HOME/FDS_SMV_ENV.sh ]; then
+    source $BUNDLE_HOME/FDS_SMV_ENV.sh
   else
     source ../scripts/FDS_SMV_ENV.sh
   fi
