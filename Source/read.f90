@@ -6018,8 +6018,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%VEG_LSET_ROS_FLANK   = VEG_LSET_ROS_FLANK !flank fire rate of spread
    SF%VEG_LSET_ROS_BACK    = VEG_LSET_ROS_BACK !back fire rate of spread
    SF%VEG_LSET_WIND_EXP    = VEG_LSET_WIND_EXP !exponent on wind cosine in ROS formula
-print '(A,1x,4ES12.4)','read: ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_ros_head,sf%veg_lset_ros_flank, &
-                                                              sf%veg_lset_ros_back,sf%veg_lset_wind_exp
    SF%VEG_LSET_SIGMA       = VEG_LSET_SIGMA * 0.01_EB !SAV for Farsite emulation in LSET, requires units of 1/cm
    SF%VEG_LSET_SURF_HEIGHT = VEG_LSET_SURF_HEIGHT !m, height of surface veg
    SF%VEG_LSET_BETA        = VEG_LSET_BETA
@@ -6027,7 +6025,7 @@ print '(A,1x,4ES12.4)','read: ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_ros_head
    SF%VEG_LSET_TAN2        = VEG_LSET_TAN2
    SF%VEG_LSET_PHIDEPTH    = VEG_LSET_PHIDEPTH !+/- extent in phi over which VEG_LSET_QCON is applied if not 
 !                                             using burnout method; otherwise burnout (which is the default)
-!                                             if used and burn time counter starts when phi >= -VEG_LSET_DEPTH
+!                                             is used and burn time counter starts when phi >= -VEG_LSET_DEPTH
    SF%VEG_LSET_BURNER                      = VEG_LSET_BURNER
    SF%VEG_LSET_BURNER_TIME_OFF             = VEG_LSET_BURNER_TIME_OFF
    SF%VEG_LSET_BURNER_TIME_ON              = VEG_LSET_BURNER_TIME_ON 
@@ -6052,7 +6050,7 @@ print '(A,1x,4ES12.4)','read: ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_ros_head
 
    SF%VEG_LSET_HEADWIDTH_DEPENDENCE = VEG_LSET_HEADWIDTH_DEPENDENCE
    SF%VEG_LSET_IGNITE_TIME = VEG_LSET_IGNITE_TIME
-   IF(SF%VEG_LSET_IGNITE_TIME > -1._EB) SF%VEG_LSET_SPREAD = .TRUE.
+!  IF(SF%VEG_LSET_IGNITE_TIME > -1._EB) SF%VEG_LSET_SPREAD = .TRUE.
    SF%VEG_LSET_QCON     = -VEG_LSET_QCON*1000._EB !convert from kW/m^2 to W/m^2
 
    ! Boundary Vegetation specific
@@ -6861,6 +6859,7 @@ VEG_NU_O2_CHAR             = 1.65_EB !Porterie
 VEG_CHAR_ENTHALPY_FRACTION = 0.5_EB !Porterie
 
 !Level set default values
+SF%VEG_LSET_SPREAD           = .FALSE.
 VEG_LSET_CROWN_FIRE_HEAD_ROS_MODEL = 'NONE'
 VEG_LSET_BURNER              = .FALSE.
 VEG_LSET_IGNITE_TIME         = 1.0E20_EB

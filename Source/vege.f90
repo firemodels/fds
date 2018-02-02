@@ -1294,13 +1294,8 @@ LSET_INIT_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
   ENDIF
 
 ! Wind field 
-IF (VEG_LEVEL_SET_COUPLED) THEN
   U_LS(IIG,JJG) = U(IIG,JJG,KKG)
   V_LS(IIG,JJG) = V(IIG,JJG,KKG)
-ELSE
-  U_LS(IIG,JJG) = 1._EB  !PLACEHOLDER, NEED TO ADD U0, V0 TO INPUT FILE
-  V_LS(IIG,JJG) = 0._EB
-ENDIF
 !WRITE(LU_OUTPUT,*)'veg: u,v_ls(i,j)',u_ls(iig,jjg),v_ls(iig,jjg)
 
   IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE LSET_INIT_WALL_CELL_LOOP
@@ -1319,8 +1314,8 @@ ENDIF
   ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
   ROS_BACKU(IIG,JJG) = SF%VEG_LSET_ROS_BACK
   WIND_EXP(IIG,JJG)  = SF%VEG_LSET_WIND_EXP
-print '(A,1x,4ES12.4)','vegeLS: ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_ros_head,sf%veg_lset_ros_flank, &
-                                                              sf%veg_lset_ros_back,sf%veg_lset_wind_exp
+!print '(A,1x,L2,4ES12.4)','vegeLS: LSET_SPREAD,ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_spread,sf%veg_lset_ros_head,sf%veg_lset_ros_flank, &
+!                                                              sf%veg_lset_ros_back,sf%veg_lset_wind_exp
   
 !If any surfaces uses tan^2 function for slope, tan^2 will be used throughout simulation
   IF (SF%VEG_LSET_TAN2) LSET_TAN2=.TRUE.
@@ -2178,6 +2173,7 @@ endif
 !                           ros_mag,sf%veg_lset_heat_of_combustion,total_fuel_load,  &
 !                           firebase_time,cfb_ls(iig,jjg),CRUZ_CROWN_PROB(IIG,JJG),sf%veg_lset_cruz_prob_crown
 !endif
+!print '(A,2x,2ES12.4)','----LS shf, fb_time_fctr =', shf,fb_time_fctr
         WC%VEG_LSET_SURFACE_HEATFLUX = -SHF*FB_TIME_FCTR
       ENDIF
 
@@ -3041,6 +3037,7 @@ IF (EVACUATION_ONLY(NM)) RETURN
 IF (.NOT. VEG_LEVEL_SET) RETURN
 
 CALL POINT_TO_MESH(NM)
+
 ! Set ghost cell values (based on THERMAL_BC case INTERPOLATED_BC in wall.f90
 
 WALL_CELL_LOOP_BC: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
