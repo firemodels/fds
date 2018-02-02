@@ -401,7 +401,7 @@ thus Kn is computed as~\cite{Sippola:1}
 where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
 
 For each aerosol species in the gas phase, a gravitational settling velocity is calculated
-and imposed on the convective term (in the z-direction) in the species transport
+and imposed on the convective term in the species transport
 equation~(Eq.~\ref{species}). This approach is similar to the drift flux model
 for smoke transport described in Hu et al.~\cite{Hu:1}. The gravitational settling velocity
 is also included in the total deposition velocity to deposit aerosols onto upward-facing flat surfaces,
@@ -426,6 +426,9 @@ $K_{\rm th}$ is the thermophoretic velocity coefficient and is calculated using 
 where $C_{\rm s}=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
 conductivity to the particle conductivity, $C_{\rm m}=1.14$ is the momentum accommodation
 coefficient, and $C_{\rm t}=2.18$ is the thermal accommodation coefficient.
+
+For each aerosol species in the gas phase, a thermophoretic velocity is calculated and imposed on the convective term in the species transport equation~(Eq.~\ref{species}). This approach follows the drift flux model
+for smoke transport described in Hu et al.~\cite{Hu:1}.
 
 \subsection{Turbulent Deposition}
 
