@@ -31,7 +31,7 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux64
+  set bundledir=%fds_version%-%smv_version%_linux64
   plink %linux_logon% %linux_svn_root%/fds/Build/Bundle/linux/make_bundle_fromweb.sh
 
   echo Downloading compressed archive to:
@@ -41,7 +41,7 @@ if "%platform%" == "linux" (
   goto eof
 )
 if "%platform%" == "osx" (
-  set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx64
+  set bundledir=%fds_version%-%smv_version%_osx64
   plink %osx_logon% %linux_svn_root%/fds/Build/Bundle/osx/make_bundle_fromweb.sh
 
   echo Downloading compressed archive to:
