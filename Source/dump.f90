@@ -8182,7 +8182,7 @@ FILE_LOOP: DO NF=1,N_BNDF
 
       PA => PATCH(IP)
 
-      PP  = 0._EB
+      PP  = REAL(OUTPUT_QUANTITY(-IND)%AMBIENT_VALUE,FB)
       PPN = 0._FB
       IBK = 0
 
@@ -8206,8 +8206,11 @@ FILE_LOOP: DO NF=1,N_BNDF
                   CASE(2) ; L=I ; N=K
                   CASE(3) ; L=I ; N=J
                END SELECT
-               PP(L,N) = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW),FB)
-               IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(IC)) IBK(L,N) = 1
+               IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. &
+                   WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. .NOT.SOLID(IC)) THEN
+                  IBK(L,N) = 1
+                  PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW),FB)
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
