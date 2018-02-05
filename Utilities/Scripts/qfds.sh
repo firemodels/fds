@@ -13,6 +13,67 @@
 # SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
 #                    ( used to kill jobs )
 
+# ---------------------------- stop_fds_if_requested ----------------------------------
+
+function stop_fds_if_requested {
+if [ "$OPENMPCASES" == "" ]; then
+  if [ "$STOPFDS" != "" ]; then
+   echo "stopping case: $in"
+   touch $stopfile
+   exit
+  fi
+
+  if [ "$STOPFDSMAXITER" != "" ]; then
+    echo "creating delayed stop file: $infile"
+    echo $STOPFDSMAXITER > $stopfile
+  fi
+
+  if [ "$stopjob" == "1" ]; then
+    echo "stopping case: $in"
+    touch $stopfile
+    exit
+  fi
+
+  if [ "$STOPFDSMAXITER" == "" ]; then
+    if [ -e $stopfile ]; then
+      rm $stopfile
+    fi
+  fi
+else
+  for i in `seq 1 $OPENMPCASES`; do
+    stopfile=${filebase[$i]}.stop
+    if [ "$STOPFDS" != "" ]; then
+      echo "stopping case: ${files[$i]}"
+      touch $stopfile
+    fi
+
+    if [ "$STOPFDSMAXITER" != "" ]; then
+      echo "creating delayed stop file: $stopfile"
+      echo $STOPFDSMAXITER > $stopfile
+    fi
+
+    if [ "$stopjob" == "1" ]; then
+      echo "stopping case: ${files[$i]}"
+      touch $stopfile
+    fi
+
+    if [ "$STOPFDSMAXITER" == "" ]; then
+      if [ "$STOPFDS" == "" ]; then
+        if [ -e $stopfile ]; then
+          rm $stopfile
+        fi
+      fi
+    fi
+  done
+  if [ "$STOPFDS" != "" ]; then
+    exit
+  fi
+  if [ "$stopjob" == "1" ]; then
+    exit
+  fi
+fi
+}
+
 # ---------------------------- usage ----------------------------------
 
 function usage {
@@ -49,6 +110,8 @@ function usage {
   echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
+  echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
+  echo "        where case is specified on the command line. N can be at most 9."
   echo " -r   - report bindings"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
@@ -122,6 +185,8 @@ DB=
 OUT2ERROR=
 stopjob=0
 MCA=
+OPENMPCASES=
+OPENMPTEST=
 if [ "$MPIRUN_MCA" != "" ]; then
   MCA=$MPIRUN_MCA
 fi
@@ -161,7 +226,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:f:hHiIm:MNn:o:p:q:rsStT:vw:' OPTION
+while getopts 'ACd:e:f:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -210,8 +275,28 @@ case $OPTION  in
   o)
    nopenmp_threads="$OPTARG"
    ;;
+  O)
+   OPENMPCASES="$OPTARG"
+   if [ $OPENMPCASES -gt 9 ]; then
+     OPENMPCASES=9
+   fi
+   nmpi_process=1
+   benchmark="yes"
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
+   ;;
   p)
    nmpi_processes="$OPTARG"
+   ;;
+  P)
+   OPENMPCASES="2"
+   OPENMPTEST="1"
+   benchmark="yes"
+   nmpi_process=1
+   if [ "$NCORES_COMPUTENODE" != "" ]; then
+     nmpi_processes_per_node="$NCORES_COMPUTENODE"
+   fi
    ;;
   q)
    queue="$OPTARG"
@@ -251,6 +336,27 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
+
+#*** define input file
+
+in=$1
+infile=${in%.*}
+
+if [ "$OPENMPCASES" == "" ]; then
+  files[1]=$in
+  filebase[1]=$infile
+  nthreads[1]=$nopenmp_threads
+else
+  for i in `seq 1 $OPENMPCASES`; do
+    nthreads[$i]=$i
+    if [[ "$OPENMPTEST" == "1" ]] && [[ "$i" == "2" ]]; then
+      nthreads[$i]=4
+    fi
+    arg=`echo ${nthreads[$i]} | tr 123456789 abcdefghi`
+    filebase[$i]=$in$arg
+    files[$i]=$in$arg.fds
+  done
+fi
 
 #*** parse options
 
@@ -345,13 +451,6 @@ if [ "$STARTUP" == "" ]; then
     MODULES=$CURRENT_LOADED_MODULES
   fi
 fi
-
-#*** define input file
-
-in=$1
-infile=${in%.*}
-
-TITLE="$infile"
 
 #*** define number of nodes
 
@@ -468,55 +567,51 @@ in_full_file=$fulldir/$in
 
 #*** make sure various files exist before running the case
 
-if ! [ -e $in_full_file ]; then
-  if [ "$showinput" == "0" ]; then
-    echo "The input file, $in_full_file, does not exist. Run aborted."
-    ABORTRUN=y
-  fi
-fi
-
-if [ $STOPFDS ]; then
- echo "stopping case: $in"
- touch $stopfile
- exit
-fi
-
-if [ "$exe" != "" ]; then
-  if ! [ -e "$exe" ]; then
+if [ "$OPENMPCASES" == "" ]; then
+  if ! [ -e $in_full_file ]; then
     if [ "$showinput" == "0" ]; then
-      echo "The program, $exe, does not exist. Run aborted."
+      echo "The input file, $in_full_file, does not exist. Run aborted."
       ABORTRUN=y
+    fi
+  fi
+else
+for i in `seq 1 $OPENMPCASES`; do
+  in_full_file=$fulldir/${files[$i]}
+  if ! [ -e $in_full_file ]; then
+    if [ "$showinput" == "0" ]; then
+      echo "The input file, $in_full_file, does not exist."
+      ABORTRUN=y
+    fi
+  fi
+done
+if [ "$ABORTRUN" == "y" ]; then
+  echo "Run aborted."
+fi
+fi
+
+if [ "$STOPFDS" == "" ]; then
+  if [ "$exe" != "" ]; then
+    if ! [ -e "$exe" ]; then
+      if [ "$showinput" == "0" ]; then
+        echo "The program, $exe, does not exist. Run aborted."
+        ABORTRUN=y
+      fi
+    fi
+  fi
+
+  if [ -e $outlog ]; then
+    echo "Removing log file: $outlog"
+    rm $outlog
+  fi
+
+  if [ "$ABORTRUN" == "y" ]; then
+    if [ "$showinput" == "0" ]; then
+      exit
     fi
   fi
 fi
 
-if [ -e $outlog ]; then
-  echo "Removing log file: $outlog"
-  rm $outlog
-fi
-
-if [ "$ABORTRUN" == "y" ]; then
-  if [ "$showinput" == "0" ]; then
-    exit
-  fi
-fi
-
-if [ "$STOPFDSMAXITER" != "" ]; then
-  echo "creating delayed stop file: $infile"
-  echo $STOPFDSMAXITER > $stopfile
-fi
-
-if [ "$stopjob" == "1" ]; then
-  echo "stopping case: $in"
-  touch $stopfile
-  exit
-fi
-
-if [ "$STOPFDSMAXITER" == "" ]; then
-  if [ -e $stopfile ]; then
-    rm $stopfile
-  fi
-fi
+stop_fds_if_requested
 
 #QSUB="qsub -k eo -q $queue"
 QSUB="qsub -q $queue"
@@ -612,9 +707,11 @@ module load $MODULES
 EOF
 fi
 
+if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 EOF
+fi
 
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
@@ -640,11 +737,39 @@ cat << EOF >> $scriptfile
 cd $fulldir
 echo
 echo \`date\`
+EOF
+
+if [ "$OPENMPCASES" == "" ]; then
+cat << EOF >> $scriptfile
 echo "    Input file: $in"
+EOF
+else
+cat << EOF >> $scriptfile
+echo "    Input files: "
+EOF
+for i in `seq 1 $OPENMPCASES`; do
+cat << EOF >> $scriptfile
+echo "       ${files[$i]}"
+EOF
+done
+fi
+cat << EOF >> $scriptfile
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
+EOF
+if [ "$OPENMPCASES" == "" ]; then
+cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+else
+for i in `seq 1 $OPENMPCASES`; do
+cat << EOF >> $scriptfile
+
+export OMP_NUM_THREADS=${nthreads[$i]}
+$MPIRUN $exe ${files[$i]} $OUT2ERROR
+EOF
+done
+fi
 if [ "$queue" == "none" ]; then
 cat << EOF >> $scriptfile
 rm -f $scriptfile
@@ -661,7 +786,14 @@ fi
 #*** output info to screen
 
 if [ "$queue" != "none" ]; then
+if [ "$OPENMPCASES" == "" ]; then
   echo "         Input file:$in"
+else
+  echo "         Input files:"
+for i in `seq 1 $OPENMPCASES`; do
+  echo "            ${files[$i]}"
+done
+fi
   echo "         Executable:$exe"
   if [ "$OPENMPI_PATH" != "" ]; then
     echo "            OpenMPI:$OPENMPI_PATH"

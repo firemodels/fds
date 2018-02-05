@@ -1107,14 +1107,14 @@ END SUBROUTINE BLOCK_CELL
 
 SUBROUTINE ASSIGN_HT3D_WALL_INDICES(NM)
 
-! For each cell with CELL_INDEX=IC in an HT3D solid obstruction, fill in the array MESHES(NM)%WALL_INDEX(IC,-3:3) such that:
-! WALL_INDEX(IC,-3) is the wall index of the bottom of the solid obstruction
-! WALL_INDEX(IC,-2) is the wall index of the back   of the solid obstruction
-! WALL_INDEX(IC,-1) is the wall index of the left   of the solid obstruction
-! WALL_INDEX(IC, 1) is the wall index of the right  of the solid obstruction
-! WALL_INDEX(IC, 2) is the wall index of the front  of the solid obstruction
-! WALL_INDEX(IC, 3) is the wall index of the top    of the solid obstruction
-! WALL_INDEX(IC, 0) is the wall index of the nearest surface of the solid obstruction
+! For each cell with CELL_INDEX=IC in an HT3D solid obstruction, fill in the array MESHES(NM)%WALL_INDEX_HT3D(IC,-3:3) such that:
+! WALL_INDEX_HT3D(IC,-3) is the wall index of the bottom of the solid obstruction
+! WALL_INDEX_HT3D(IC,-2) is the wall index of the back   of the solid obstruction
+! WALL_INDEX_HT3D(IC,-1) is the wall index of the left   of the solid obstruction
+! WALL_INDEX_HT3D(IC, 1) is the wall index of the right  of the solid obstruction
+! WALL_INDEX_HT3D(IC, 2) is the wall index of the front  of the solid obstruction
+! WALL_INDEX_HT3D(IC, 3) is the wall index of the top    of the solid obstruction
+! WALL_INDEX_HT3D(IC, 0) is the wall index of the nearest surface of the solid obstruction
 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,IC,II,JJ,KK,ICN,CELL_COUNT(-3:3)
@@ -1131,7 +1131,7 @@ OBST_LOOP: DO N=1,M%N_OBST
             I_LOOP: DO I=OB%I1+1,OB%I2
                IC = M%CELL_INDEX(I,J,K)
                IF (.NOT.M%SOLID(IC)) CYCLE I_LOOP
-               M%WALL_INDEX(IC,:) = 0
+               M%WALL_INDEX_HT3D(IC,:) = 0
                CELL_COUNT = 0
                CELL_COUNT(0) = 1000000
 
@@ -1139,7 +1139,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(II,J,K)
                   CELL_COUNT(1) = CELL_COUNT(1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,1) = M%WALL_INDEX(ICN,-1)
+                     M%WALL_INDEX_HT3D(IC,1) = M%WALL_INDEX(ICN,-1)
                      EXIT MARCH_RIGHT
                   ENDIF
                   IF (II==M%IBAR) CELL_COUNT(1) = 1000000
@@ -1149,7 +1149,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(II,J,K)
                   CELL_COUNT(-1) = CELL_COUNT(-1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-1) = M%WALL_INDEX(ICN,1)
+                     M%WALL_INDEX_HT3D(IC,-1) = M%WALL_INDEX(ICN,1)
                      EXIT MARCH_LEFT
                   ENDIF
                   IF (II==1) CELL_COUNT(-1) = 1000000
@@ -1159,7 +1159,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,JJ,K)
                   CELL_COUNT(2) = CELL_COUNT(2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,2) = M%WALL_INDEX(ICN,-2)
+                     M%WALL_INDEX_HT3D(IC,2) = M%WALL_INDEX(ICN,-2)
                      EXIT MARCH_FORWARD
                   ENDIF
                   IF (JJ==M%JBAR) CELL_COUNT(2) = 1000000
@@ -1169,7 +1169,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,JJ,K)
                   CELL_COUNT(-2) = CELL_COUNT(-2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-2) = M%WALL_INDEX(ICN,2)
+                     M%WALL_INDEX_HT3D(IC,-2) = M%WALL_INDEX(ICN,2)
                      EXIT MARCH_BACK
                   ENDIF
                   IF (JJ==1) CELL_COUNT(-2) = 1000000
@@ -1179,7 +1179,7 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,J,KK)
                   CELL_COUNT(3) = CELL_COUNT(3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,3) = M%WALL_INDEX(ICN,-3)
+                     M%WALL_INDEX_HT3D(IC,3) = M%WALL_INDEX(ICN,-3)
                      EXIT MARCH_UP
                   ENDIF
                   IF (KK==M%KBAR) CELL_COUNT(3) = 1000000
@@ -1189,13 +1189,13 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ICN = M%CELL_INDEX(I,J,KK)
                   CELL_COUNT(-3) = CELL_COUNT(-3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
-                     M%WALL_INDEX(IC,-3) = M%WALL_INDEX(ICN,3)
+                     M%WALL_INDEX_HT3D(IC,-3) = M%WALL_INDEX(ICN,3)
                      EXIT MARCH_DOWN
                   ENDIF
                   IF (KK==1) CELL_COUNT(-3) = 1000000
                ENDDO MARCH_DOWN
 
-               M%WALL_INDEX(IC,0) = M%WALL_INDEX(IC,MINLOC(CELL_COUNT,DIM=1)-4)
+               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1)-4)
 
             ENDDO I_LOOP
          ENDDO J_LOOP
@@ -2486,17 +2486,19 @@ K_OUT = DOT_PRODUCT(K_RSQMW_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)/DOT_PRODUCT(Z_IN,R
 END SUBROUTINE GET_CONDUCTIVITY
 
 
-SUBROUTINE GET_SOLID_CONDUCTIVITY(K_OUT,TMPG,OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_RHO_IN)
+SUBROUTINE GET_SOLID_CONDUCTIVITY(K_OUT,TMP_S,OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_RHO_IN,OPT_I_IN,OPT_J_IN,OPT_K_IN)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX
+INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_I_IN,OPT_J_IN,OPT_K_IN
 REAL(EB), INTENT(IN), OPTIONAL :: OPT_RHO_IN(1:N_MATL)
-REAL(EB), INTENT(IN) :: TMPG
+REAL(EB), INTENT(IN) :: TMP_S
 REAL(EB), INTENT(OUT) :: K_OUT
-INTEGER :: N,NR
+INTEGER :: N,NR,I_LOC,J_LOC,K_LOC
 REAL(EB) :: VOLSUM
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+
+!! K_OUT = 0.2_EB; RETURN ! PMMA debug
 
 K_OUT = 0._EB
 IF (PRESENT(OPT_MATL_INDEX)) THEN
@@ -2505,7 +2507,7 @@ IF (PRESENT(OPT_MATL_INDEX)) THEN
       K_OUT = ML%K_S
    ELSE
       NR = -NINT(ML%K_S)
-      K_OUT = EVALUATE_RAMP(TMPG,0._EB,NR)
+      K_OUT = EVALUATE_RAMP(TMP_S,0._EB,NR)
    ENDIF
 ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
    ! See FDS Tech Guide, Eqs. (7.22)-(7.25)
@@ -2520,26 +2522,39 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
          K_OUT = K_OUT + OPT_RHO_IN(N)*ML%K_S/ML%RHO_S
       ELSE
          NR = -NINT(ML%K_S)
-         K_OUT = K_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMPG,0._EB,NR)/ML%RHO_S
+         K_OUT = K_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMP_S,0._EB,NR)/ML%RHO_S
       ENDIF
    ENDDO
    IF (VOLSUM>TWO_EPSILON_EB) K_OUT = K_OUT/VOLSUM
 ENDIF
-IF (K_OUT<TWO_EPSILON_EB) K_OUT = 10000._EB
+IF (K_OUT<TWO_EPSILON_EB) THEN
+   IF (PRESENT(OPT_I_IN)) I_LOC = OPT_I_IN
+   IF (PRESENT(OPT_J_IN)) J_LOC = OPT_J_IN
+   IF (PRESENT(OPT_K_IN)) K_LOC = OPT_K_IN
+   ! ! debug
+   ! WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY K_OUT: ',K_OUT
+   ! WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY VOLSUM: ',VOLSUM
+   ! IF (PRESENT(OPT_I_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY I: ',I_LOC
+   ! IF (PRESENT(OPT_J_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY J: ',J_LOC
+   ! IF (PRESENT(OPT_K_IN)) WRITE(LU_ERR,*) 'GET_SOLID_CONDUCTIVITY K: ',K_LOC
+   K_OUT = 10000._EB
+ENDIF
 
 END SUBROUTINE GET_SOLID_CONDUCTIVITY
 
 
-SUBROUTINE GET_SOLID_RHOCBAR(RHOCBAR_OUT,TMPG,OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_RHO_IN)
+SUBROUTINE GET_SOLID_RHOCBAR(RHOCBAR_OUT,TMP_S,OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_RHO_IN)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX
 REAL(EB), INTENT(IN), OPTIONAL :: OPT_RHO_IN(1:N_MATL)
-REAL(EB), INTENT(IN) :: TMPG
+REAL(EB), INTENT(IN) :: TMP_S
 REAL(EB), INTENT(OUT) :: RHOCBAR_OUT
 INTEGER :: N,NR
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+
+!! RHOCBAR_OUT = 2420000._EB; RETURN ! PMMA debug
 
 RHOCBAR_OUT = 0._EB
 IF (PRESENT(OPT_MATL_INDEX)) THEN
@@ -2548,7 +2563,7 @@ IF (PRESENT(OPT_MATL_INDEX)) THEN
       RHOCBAR_OUT = ML%RHO_S*ML%C_S
    ELSE
       NR = -NINT(ML%C_S)
-      RHOCBAR_OUT = ML%RHO_S*EVALUATE_RAMP(TMPG,0._EB,NR)
+      RHOCBAR_OUT = ML%RHO_S*EVALUATE_RAMP(TMP_S,0._EB,NR)
    ENDIF
 ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
    ! See FDS Tech Guide, Eq. (7.24)
@@ -2560,13 +2575,37 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
          RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*ML%C_S
       ELSE
          NR = -NINT(ML%C_S)
-         RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMPG,0._EB,NR)
+         RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMP_S,0._EB,NR)
       ENDIF
    ENDDO
 ENDIF
 IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 0.001_EB
 
 END SUBROUTINE GET_SOLID_RHOCBAR
+
+
+SUBROUTINE GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_OUT,SURF_INDEX,RHO_IN)
+
+INTEGER, INTENT(IN), OPTIONAL :: SURF_INDEX
+REAL(EB), INTENT(IN), OPTIONAL :: RHO_IN(1:N_MATL)
+REAL(EB), INTENT(OUT) :: KAPPA_OUT
+INTEGER :: N
+REAL(EB) :: VOLSUM
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+
+KAPPA_OUT = 0._EB
+VOLSUM = 0._EB
+SF => SURFACE(SURF_INDEX)
+DO N=1,SF%N_MATL
+   IF (RHO_IN(N)<=TWO_EPSILON_EB) CYCLE
+   ML => MATERIAL(SF%MATL_INDEX(N))
+   VOLSUM = VOLSUM + RHO_IN(N)/ML%RHO_S
+   KAPPA_OUT = KAPPA_OUT + RHO_IN(N)*ML%KAPPA_S/ML%RHO_S
+ENDDO
+IF (VOLSUM>0._EB) KAPPA_OUT = KAPPA_OUT/VOLSUM
+
+END SUBROUTINE GET_SOLID_ABSORPTION_COEFFICIENT
 
 
 SUBROUTINE GET_VISCOSITY(Z_IN,MU_OUT,TMPG)
@@ -3267,7 +3306,6 @@ CALL GET_DATE(DATE)
 
 WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
-WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
 WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
 #ifdef COMPVER_PP

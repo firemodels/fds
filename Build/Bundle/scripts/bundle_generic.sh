@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# this script is called by BUNDLE_linux64.sh and BUNDLE_osx64.sh
+# this script is called by make_bundle.sh located in fds/Build/Bundle/linux or osx
 
 errlog=/tmp/errlog.$$
 
@@ -18,6 +18,10 @@ SCP ()
     echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE " >> $errlog
+    echo "***error: $TOFILE not copied to bundle from $HOST at $FROMDIR/$FROMFILE "
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   fi
 }
 
@@ -29,15 +33,27 @@ CP ()
   FROMFILE=$2
   TODIR=$3
   TOFILE=$4
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
-    echo "***error: the file $FROMFILE does not exist"
+    echo "***error: the file $FROMFILE was not found in $FROMDIR" >> $errlog
+    echo "***error: the file $FROMFILE was not found in $FROMDIR"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: $FROMFILE not copied to bundle" >> $errlog
+    if [ "ERR" == "" ]; then
+      echo "***error: $FROMFILE could not be copied to $DIR" >> $errlog
+      echo "***error: $FROMFILE could not be copied to $DIR"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
+    fi
   fi
 }
 
@@ -49,8 +65,14 @@ UNTAR ()
   FROMFILE=$2
   TODIR=$3
   TODIR2=$4
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
-    echo "***error: the compressed file $FROMFILE does not exist"
+    echo "***error: the file $FROMFILE was not found in $FROMDIR" >> $errlog
+    echo "***error: the file $FROMFILE was not found in $FROMDIR"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   else
     curdir=`pwd`
     cd $TODIR
@@ -60,7 +82,13 @@ UNTAR ()
   if [ -e $TODIR/$TODIR2 ]; then
     echo "$FROMFILE untar'd"
   else
-    echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
+    if [ "$ERR" == "" ]; then
+      echo "***error: $FROMFILE not untar'd to bundle" >> $errlog
+      echo "***error: $FROMFILE not untar'd to bundle"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
+    fi
   fi
 }
 
@@ -72,15 +100,27 @@ CP2 ()
   FROMFILE=$2
   TODIR=$3
   TOFILE=$FROMFILE
+  ERR=
   if [ ! -e $FROMDIR/$FROMFILE ]; then
-    echo "***error: the file $FROMFILE does not exist"
+    echo "***error: the file $FROMFILE was not found in $FROMDIR" >> $errlog
+    echo "***error: the file $FROMFILE was not found in $FROMDIR"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   else
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: $FROMFILE not copied to bundle" >> $errlog
+    if [ "$ERR" == "" ]; then
+      echo "***error: $FROMFILE could not be copied to $TODIR" >> $errlog
+      echo "***error: $FROMFILE could not be copied to $TODIR"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
+    fi
   fi
 }
 
@@ -90,8 +130,14 @@ CPDIR ()
 {
   FROMDIR=$1
   TODIR=$2
+  ERR=
   if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist" >> $errlog
     echo "***error: the directory $FROMDIR does not exist"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   else
     echo "*******************************"
     echo copying directory from $FROMDIR to $TODIR
@@ -101,7 +147,13 @@ CPDIR ()
   if [ -e $TODIR ]; then
     echo "$FROMDIR copied"
   else
-    echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
+    if [ "$ERR" == "" ]; then
+      echo "***error: the directory $FROMDIR could not copied to $TODIR" >> $errlog
+      echo "***error: the directory $FROMDIR could not copied to $TODIR"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
+    fi
   fi
 }
 
@@ -111,8 +163,14 @@ CPDIRFILES ()
 {
   FROMDIR=$1
   TODIR=$2
+  ERR=
   if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist" >> $errlog
     echo "***error: the directory $FROMDIR does not exist"
+    ERR="1"
+    if [ "$NOPAUSE" == "" ]; then
+      read val
+    fi
   else
     echo "*******************************"
     echo copying files from directory $FROMDIR to $TODIR
@@ -122,7 +180,13 @@ CPDIRFILES ()
   if [ -e $TODIR ]; then
     echo "$FROMDIR copied"
   else
-    echo "***error: unable to copy $FROMDIR" >> $errlog
+    if [ "$ERR" == "" ]; then
+      echo "***error: unable to copy $FROMDIR to $TODIR" >> $errlog
+      echo "***error: unable to copy $FROMDIR to $TODIR"
+      if [ "$NOPAUSE" == "" ]; then
+        read val
+      fi
+    fi
   fi
 }
 
@@ -159,8 +223,6 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
-openmpidir=~/FDS_Guides
-
 if [ "$MPI_VERSION" == "INTEL" ]; then
   fdsmpidir=impi_intel$FDSOS
   fdsmpi=fds_impi_intel$FDSOS
@@ -185,7 +247,6 @@ hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
 uploaddir=$fds_smvroot/fds/Utilities/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
-mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
 fds_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
 smv_bundle=$fds_smvroot/smv/for_bundle
@@ -273,51 +334,51 @@ CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
 CP $smv_bundle objects.svo   $bundledir/bin objects.svo
 
 if [ "$MPI_VERSION" != "INTEL" ]; then
-  CP $openmpidir $openmpifile  $bundledir/bin $openmpifile
+  CP $OPENMPI_DIR $openmpifile  $bundledir/bin $openmpifile
 fi
 
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
-CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Validation_Guide.pdf $bundledir/Documentation
-CP2 $mandir FDS_Verification_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Config_Management_Plan.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Validation_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
 if [ ! "$INTELBINDIR" == "" ]; then
-  if [ -d $HOME/$INTELBINDIR ]; then
+  if [ -d $INTELBINDIR ]; then
     if [ "$MPI_VERSION" == "INTEL" ]; then
     echo ""
     echo "--- copying Intel exe's ---"
     echo ""
-      CP $HOME/$INTELBINDIR mpiexec   $bundledir/bin mpiexec
-      CP $HOME/$INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
+      CP $INTELBINDIR mpiexec   $bundledir/bin mpiexec
+      CP $INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
     fi
   fi
 fi
 if [ "$INTELLIBDIR" != "" ]; then
-  if [ -d $HOME/$INTELLIBDIR ]; then
+  if [ -d $INTELLIBDIR ]; then
 
     echo ""
     echo "--- copying compiler run time libraries ---"
     echo ""
-    CP $HOME/$INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
-    CP $HOME/$INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
-    CP $HOME/$INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
+    CP $INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
+    CP $INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
+    CP $INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
 if [ "$OSLIBDIR" != "" ]; then
-  if [ -d $HOME/$OSLIBDIR ]; then
+  if [ -d $OSLIBDIR ]; then
 
     echo ""
     echo "--- copying miscellaneous run time libraries ---"
     echo ""
-    CPDIRFILES $HOME/$OSLIBDIR $bundledir/bin/LIB64
+    CPDIRFILES $OSLIBDIR $bundledir/bin/LIB64
   fi
 fi
 
@@ -361,6 +422,11 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
+
+mkdir -p $BUNDLE_DIR
+if [ -e $BUNDLE_DIR ]; then
+  cp $bundlebase.sh $BUNDLE_DIR/.
+fi
 
 cat $bundledir/bin/hash/*.sha1 >  $bundlebase.sha1
 hashfile $bundlebase.sh        >> $bundlebase.sha1

@@ -138,8 +138,8 @@ $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_x.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_y.fds
 $QFDS -p 2 -d Heat_Transfer ht3d_2mesh_z.fds
 $QFDS -d Heat_Transfer ht3d_sphere_25.fds
-$QFDS -d Heat_Transfer ht3d_sphere_50.fds
-$QFDS -p 8 -d Heat_Transfer ht3d_sphere_100.fds
+$QFDS -d Heat_Transfer ht3d_sphere_51.fds
+$QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
@@ -258,8 +258,9 @@ $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
-$QFDS -d Pyrolysis pyro3d_A_B.fds
-$QFDS -d Pyrolysis pyro3d_wood_char.fds
+# $QFDS -d Pyrolysis pyro3d_A_B.fds
+# $QFDS -d Pyrolysis pyro3d_wood_char.fds
+# $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
