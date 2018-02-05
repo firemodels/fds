@@ -31,7 +31,6 @@ CONTAINS
  
 
 SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
-!lksdfja;sldkjf
 !
 ! Issues:
 ! 1. Are SF%VEG_FUEL_FLUX_L and SF%VEG_MOIST_FLUX_L needed in linear degradation model?
