@@ -80,7 +80,8 @@ SUBROUTINE THERMAL_BC(T,NM)
 ! Note also that gas phase values are assigned here to be used for all subsequent BCs.
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,&
+                               GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR,GET_SOLID_ABSORPTION_COEFFICIENT
 USE COMPLEX_GEOMETRY, ONLY : CFACE_THERMAL_GASVARS
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_BC,DTMP,DT_BC_HT3D
@@ -581,13 +582,14 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
-            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,SUBIT,IIO,JJO,KKO,NOM,N_INT_CELLS
-LOGICAL :: CONT_MATL_PROP
+            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VS,KAPPA_S,KAPPA_2DX,RFLUX_UP,RFLUX_DOWN,DX_LOC
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,SUBIT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,IC2,III,JJJ,KKK
+LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
 REAL(EB), PARAMETER :: DT_SUB_MIN_HT3D=1.E-9_EB
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL()
-TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL(),RVSP=>NULL()
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL(),OB2=>NULL()
 TYPE(MESH_TYPE), POINTER :: OM=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: MS=>NULL()
 
 ! Initialize verification tests
 
@@ -604,13 +606,14 @@ KDTDY=>WORK2; KDTDY=0._EB
 KDTDZ=>WORK3; KDTDZ=0._EB
 TMP_NEW=>WORK4; TMP_NEW=TMP
 KP=>WORK5; KP=0._EB
+RVSP=>WORK6; RVSP = 1._EB
 
 DT_SUB = DT_BC_HT3D
 T_LOC = 0._EB
 SUBIT = 0
 
 SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
-   DT_SUB = MIN(DT_SUB,DT_BC_HT3D-T_LOC)
+   DT_SUB  = MIN(DT_SUB,DT_BC_HT3D-T_LOC)
    K_S_MAX = 0._EB
    VN_HT3D = 0._EB
 
@@ -623,7 +626,24 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             IF (OB%MATL_INDEX>0) THEN
                CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
             ELSEIF (OB%MATL_SURF_INDEX>0) THEN
-               RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(I,J,K,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)
+               MS => SURFACE(OB%MATL_SURF_INDEX)
+               IF (TWO_D) THEN
+                  VC = DX(I)*DZ(K)
+               ELSE
+                  VC = DX(I)*DY(J)*DZ(K)
+               ENDIF
+               VS = 0._EB
+               DO NN=1,MS%N_MATL
+                  ML => MATERIAL(MS%MATL_INDEX(NN))
+                  VS = VS + OB%RHO(I,J,K,NN)/ML%RHO_S
+               ENDDO
+               VS = VC*VS
+               IF (VS>TWO_EPSILON_EB) THEN
+                  RVSP(I,J,K) = VS/VC
+                  RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) / RVSP(I,J,K)
+               ELSE
+                  RHO_GET(1:MS%N_MATL) = 0._EB
+               ENDIF
                CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET,&
                   OPT_I_IN=I,OPT_J_IN=J,OPT_K_IN=K)
             ENDIF
@@ -710,7 +730,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                ! use linear average from inverse lever rule
                K_S = ( K_S_M*DX(I+1) + K_S_P*DX(I) )/( DX(I) + DX(I+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
-               KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+               !KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+               KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K)) * 2._EB/(DX(I+1)*RVSP(I+1,J,K)+DX(I)*RVSP(I,J,K))
             ELSE
                ! for discontinuous material properties maintain continuity of flux, C0 continuity of temperature
                ! (allow C1 discontinuity of temperature due to jump in thermal properties across interface)
@@ -756,7 +777,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                IF (CONT_MATL_PROP) THEN
                   K_S = ( K_S_M*DY(J+1) + K_S_P*DY(J) )/( DY(J) + DY(J+1) )
                   K_S_MAX = MAX(K_S_MAX,K_S)
-                  KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+                  !KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+                  KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K)) * 2._EB/(DY(J+1)*RVSP(I,J+1,K)+DY(J)*RVSP(I,J,K))
                ELSE
                   R_K_S = K_S_P/K_S_M * DY(J)/DY(J+1)
                   TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J+1,K))/(1._EB + R_K_S)
@@ -801,7 +823,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             IF (CONT_MATL_PROP) THEN
                K_S = ( K_S_M*DZ(K+1) + K_S_P*DZ(K) )/( DZ(K) + DZ(K+1) )
                K_S_MAX = MAX(K_S_MAX,K_S)
-               KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+               !KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+               KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K)) * 2._EB/(DZ(K+1)*RVSP(I,J,K+1)+DZ(K)*RVSP(I,J,K))
             ELSE
                R_K_S = K_S_P/K_S_M * DZ(K)/DZ(K+1)
                TMP_I = (TMP(I,J,K) + R_K_S*TMP(I,J,K+1))/(1._EB + R_K_S)
@@ -831,12 +854,47 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
       IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
       OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE HT3D_WALL_LOOP
 
-      IF (OB%MATL_INDEX>0) THEN
+      MATL_IF: IF (OB%MATL_INDEX>0) THEN
          CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_MATL_INDEX=OB%MATL_INDEX)
       ELSEIF (OB%MATL_SURF_INDEX>0) THEN
-         RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(II,JJ,KK,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)
+         MS => SURFACE(OB%MATL_SURF_INDEX)
+         IF (RVSP(II,JJ,KK)>TWO_EPSILON_EB) THEN
+            RHO_GET(1:MS%N_MATL) = OB%RHO(II,JJ,KK,1:MS%N_MATL) !/ RVSP(II,JJ,KK)
+         ELSE
+            RHO_GET(1:MS%N_MATL) = 0._EB
+         ENDIF
          CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
-      ENDIF
+         INTERNAL_RADIATION_IF: IF (MS%INTERNAL_RADIATION) THEN
+            CALL GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_S,OB%MATL_SURF_INDEX,RHO_GET)
+            ! solution inwards
+            RFLUX_UP = ONE_D%QRADIN + (1._EB-ONE_D%EMISSIVITY)*ONE_D%QRADOUT/(ONE_D%EMISSIVITY+1.0E-10_EB)
+            INTERNAL_RADIATION_LOOP: DO I=1,10 ! just testing this now
+               III=II
+               JJJ=JJ
+               KKK=KK
+               SELECT CASE(IOR)
+                  CASE( 1); III=IIG-I
+                  CASE(-1); III=IIG+I
+                  CASE( 2); JJJ=JJG-I
+                  CASE(-2); JJJ=JJG+I
+                  CASE( 3); KKK=KKG-I
+                  CASE(-3); KKK=KKG+I
+               END SELECT
+               IC2 = CELL_INDEX(III,JJJ,KKK);         IF (.NOT.SOLID(IC2)) CYCLE INTERNAL_RADIATION_LOOP
+               OB2 => OBSTRUCTION(OBST_INDEX_C(IC2)); IF (.NOT.OB2%HT3D  ) CYCLE INTERNAL_RADIATION_LOOP
+               SELECT CASE(ABS(IOR))
+                  CASE(1); DX_LOC=DX(III)
+                  CASE(2); DX_LOC=DY(JJJ)
+                  CASE(3); DX_LOC=DZ(KKK)
+               END SELECT
+               KAPPA_2DX = KAPPA_S*2._EB*DX_LOC
+               RFLUX_DOWN =  ( RFLUX_UP + KAPPA_2DX*SIGMA*TMP(III,JJJ,KKK)**4 ) / (1._EB + KAPPA_2DX)
+               Q_DOT_PPP_S(III,JJJ,KKK) = Q_DOT_PPP_S(III,JJJ,KKK) + (RFLUX_UP - RFLUX_DOWN)/DX_LOC
+               RFLUX_UP = RFLUX_DOWN
+            ENDDO INTERNAL_RADIATION_LOOP
+         ENDIF INTERNAL_RADIATION_IF
+
+      ENDIF MATL_IF
       K_S_MAX = MAX(K_S_MAX,K_S)
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
@@ -919,34 +977,36 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
             TMP_G = TMP(IIG,JJG,KKG)
             TMP_S = TMP(II,JJ,KK)
             TMP_F = WC%ONE_D%TMP_F
-            DTMP = TMP_G - TMP_F
-            WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX=IW)
-            HTC = WC%ONE_D%HEAT_TRANS_COEF
-
             SELECT CASE(ABS(IOR))
-               CASE( 1); RDN = RDX(II)
-               CASE( 2); RDN = RDY(JJ)
-               CASE( 3); RDN = RDZ(KK)
+               CASE( 1); RDN = RDX(II) / RVSP(II,JJ,KK)
+               CASE( 2); RDN = RDY(JJ) / RVSP(II,JJ,KK)
+               CASE( 3); RDN = RDZ(KK) / RVSP(II,JJ,KK)
             END SELECT
-            IF (RADIATION) THEN
-               TH_EST4 = 3._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**4
-               FO_EST3 = 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3
-               TMP_F = ( WC%ONE_D%QRADIN + TH_EST4 + HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
-                       (                   FO_EST3 + HTC       + 2._EB*K_S*RDN       )
-            ELSE
-               TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
-                       ( HTC       + 2._EB*K_S*RDN       )
-            ENDIF
+
+            TMP_F_LOOP: DO ADCOUNT=1,2
+               DTMP = TMP_G - TMP_F
+               WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX=IW)
+               HTC = WC%ONE_D%HEAT_TRANS_COEF
+               IF (RADIATION) THEN
+                  TH_EST4 = 3._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**4
+                  FO_EST3 = 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3
+                  TMP_F = ( WC%ONE_D%QRADIN + TH_EST4 + HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                          (                   FO_EST3 + HTC       + 2._EB*K_S*RDN       )
+               ELSE
+                  TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                          ( HTC       + 2._EB*K_S*RDN       )
+               ENDIF
+            ENDDO TMP_F_LOOP
             WC%ONE_D%TMP_F = TMP_F
             WC%ONE_D%QCONF = HTC*(TMP_G-TMP_F)
 
             SELECT CASE(IOR)
-               CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
-               CASE(-1); KDTDX(II-1,JJ,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
-               CASE( 2); KDTDY(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDY(JJ)
-               CASE(-2); KDTDY(II,JJ-1,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDY(JJ)
-               CASE( 3); KDTDZ(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDZ(KK)
-               CASE(-3); KDTDZ(II,JJ,KK-1) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
+               CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(TMP_F-TMP_S)*RDN
+               CASE(-1); KDTDX(II-1,JJ,KK) = K_S * 2._EB*(TMP_S-TMP_F)*RDN
+               CASE( 2); KDTDY(II,JJ,KK)   = K_S * 2._EB*(TMP_F-TMP_S)*RDN
+               CASE(-2); KDTDY(II,JJ-1,KK) = K_S * 2._EB*(TMP_S-TMP_F)*RDN
+               CASE( 3); KDTDZ(II,JJ,KK)   = K_S * 2._EB*(TMP_F-TMP_S)*RDN
+               CASE(-3); KDTDZ(II,JJ,KK-1) = K_S * 2._EB*(TMP_S-TMP_F)*RDN
             END SELECT
 
       END SELECT METHOD_OF_HEAT_TRANSFER
@@ -955,48 +1015,57 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
    ! Note: for 2D cylindrical KDTDX at X=0 remains zero after initialization
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IC = CELL_INDEX(I,J,K)
-            IF (.NOT.SOLID(IC)) CYCLE
-            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
-            IF (OB%MATL_INDEX>0) THEN
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
-            ELSEIF (OB%MATL_SURF_INDEX>0) THEN
-               RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(I,J,K,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)
-               CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
-            ENDIF
+   IS_STABLE_DT_SUB = .FALSE.
+   TMP_UPDATE_LOOP: DO WHILE (.NOT.IS_STABLE_DT_SUB)
 
-            IF (TWO_D) THEN
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2) )
-            ELSE
-               VN_HT3D = MAX(VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2) )
-            ENDIF
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IC = CELL_INDEX(I,J,K)
+               IF (.NOT.SOLID(IC)) CYCLE
+               OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
+               IF (OB%MATL_INDEX>0) THEN
+                  CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
+               ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                  MS => SURFACE(OB%MATL_SURF_INDEX)
+                  RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,MS%N_MATL) / RVSP(I,J,K)
+                  CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               ENDIF
 
-            TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/(RHOCBAR_S) * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
-                                                                 (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
-                                                                 (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
-                                                                 Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
+               IF (TWO_D) THEN
+                  VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+               ELSE
+                  VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/(RHOCBAR_S)*(RDX(I)**2 + RDY(J)**2 + RDZ(K)**2)/RVSP(I,J,K) )
+               ENDIF
 
+               TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/RHOCBAR_S * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                                  (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
+                                                                  (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
+                                                                  Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
+
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
 
-   ! time step adjustment
+      ! time step adjustment
 
-   IF (DT_SUB*VN_HT3D <= 1._EB .OR. LOCK_TIME_STEP) THEN
-      TMP = TMP_NEW
-      IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
-      T_LOC = T_LOC + DT_SUB
-      SUBIT = SUBIT + 1
-   ENDIF
-   IF (VN_HT3D > TWO_EPSILON_EB .AND. .NOT.LOCK_TIME_STEP) DT_SUB = 0.5_EB / VN_HT3D
-   IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
-      WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
-      STOP_STATUS = INSTABILITY_STOP
-      RETURN
-   ENDIF
+      IF (DT_SUB*VN_HT3D < VN_MAX .OR. LOCK_TIME_STEP) THEN
+         IS_STABLE_DT_SUB = .TRUE.
+         TMP = TMP_NEW
+         IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
+         T_LOC = T_LOC + DT_SUB
+         SUBIT = SUBIT + 1
+         IF (.NOT.LOCK_TIME_STEP) DT_SUB = MAX( DT_SUB, VN_MIN / MAX(VN_HT3D,TWO_EPSILON_EB) )
+      ELSE
+         DT_SUB = 0.5_EB*(VN_MIN+VN_MAX) / MAX(VN_HT3D,TWO_EPSILON_EB)
+      ENDIF
+      IF (DT_SUB < DT_SUB_MIN_HT3D .AND. (T+DT_SUB < (T_END-TWO_EPSILON_EB))) THEN
+         WRITE(LU_ERR,'(A)') 'HT3D Instability: DT_SUB < 1e-9 s'
+         STOP_STATUS = INSTABILITY_STOP
+         RETURN
+      ENDIF
+
+   ENDDO TMP_UPDATE_LOOP
 
 ENDDO SUBSTEP_LOOP
 
@@ -1008,18 +1077,19 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VS
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,TMP_S
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RVSP=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 TIME_FACTOR = DT_SUB/DT_BC_HT3D
+RVSP => WORK6
 
-OBST_LOOP: DO N=1,N_OBST
-   OB => OBSTRUCTION(N)
-   IF (.NOT.OB%PYRO3D) CYCLE OBST_LOOP
-
-   IF (T_LOC<TWO_EPSILON_EB) THEN
+INIT_IF: IF (T_LOC<TWO_EPSILON_EB) THEN
+   OBST_LOOP_1: DO N=1,N_OBST
+      OB => OBSTRUCTION(N)
+      IF (.NOT.OB%PYRO3D) CYCLE OBST_LOOP_1
       ! Set mass fluxes to 0
       DO K=OB%K1+1,OB%K2
          DO J=OB%J1+1,OB%J2
@@ -1035,7 +1105,12 @@ OBST_LOOP: DO N=1,N_OBST
             ENDDO I_LOOP
          ENDDO
       ENDDO
-   ENDIF
+   ENDDO OBST_LOOP_1
+ENDIF INIT_IF
+
+OBST_LOOP_2: DO N=1,N_OBST
+   OB => OBSTRUCTION(N)
+   IF (.NOT.OB%PYRO3D) CYCLE OBST_LOOP_2
 
    DO K=OB%K1+1,OB%K2
       DO J=OB%J1+1,OB%J2
@@ -1053,7 +1128,13 @@ OBST_LOOP: DO N=1,N_OBST
             JJG = WC%ONE_D%JJG
             KKG = WC%ONE_D%KKG
             IOR = WC%ONE_D%IOR
-            DEPTH = 1._EB
+            TMP_S = TMP(I,J,K)
+            SELECT CASE(ABS(IOR))
+               CASE(1); GEOM_FACTOR = DX(I)
+               CASE(2); GEOM_FACTOR = DY(J)
+               CASE(3); GEOM_FACTOR = DZ(K)
+            END SELECT
+            DEPTH = GEOM_FACTOR
 
             ! cell volume
             IF (TWO_D) THEN
@@ -1062,22 +1143,24 @@ OBST_LOOP: DO N=1,N_OBST
                VC = DX(I)*DY(J)*DZ(K)
             ENDIF
 
-            ! solid volume
-            VS = 0._EB
-            DO NN=1,MS%N_MATL
-               ML => MATERIAL(MS%MATL_INDEX(NN))
-               VS = VS + OB%RHO(I,J,K,NN)/ML%RHO_S
-            ENDDO
-            VS = VC*VS
+            ! update density
+            IF (RVSP(I,J,K)<TWO_EPSILON_EB) THEN
+               OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+               M_DOT_G_PPP_ADJUST = 0._EB
+               M_DOT_G_PPP_ACTUAL = 0._EB
+               M_DOT_S_PPP = 0._EB
+               Q_DOT_PPP_S(I,J,K) = 0._EB
+            ELSE
+               RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) / RVSP(I,J,K)
+               RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
 
-            RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) * VC / VS
-            RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
+               CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP_S,WC%ONE_D%TMP_F,&
+                              RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
+                              M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP(I,J,K),WC%ONE_D%TMP_F,&
-                           RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
-                           M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
-
-            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)) * VS / VC
+               OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) - DT_SUB * M_DOT_S_PPP(1:MS%N_MATL) * RVSP(I,J,K)
+               Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * RVSP(I,J,K)
+            ENDIF
 
             IF (OB%CONSUMABLE) THEN
                OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
@@ -1087,22 +1170,15 @@ OBST_LOOP: DO N=1,N_OBST
                ENDIF
             ENDIF
 
-            ! simple model (no transport): pyrolyzed mass is ejected via nearest wall cell
+            ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
 
-            SELECT CASE(ABS(IOR))
-               CASE(1); GEOM_FACTOR = DX(I)
-               CASE(2); GEOM_FACTOR = DY(J)
-               CASE(3); GEOM_FACTOR = DZ(K)
-            END SELECT
             DO NS = 1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
+               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
             ENDDO
             DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
             ENDDO
-
-            ! to-do: mass transport
 
             ! If the fuel or water massflux is non-zero, set the ignition time
 
@@ -1113,7 +1189,7 @@ OBST_LOOP: DO N=1,N_OBST
          ENDDO I_LOOP_2
       ENDDO
    ENDDO
-ENDDO OBST_LOOP
+ENDDO OBST_LOOP_2
 
 END SUBROUTINE SOLID_PYROLYSIS_3D
 
@@ -2465,7 +2541,7 @@ REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES)
 REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
                                        M_DOT_S_PPP(MAX_MATERIALS)
 INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
-INTEGER :: N,NN,NNN,J,NS,SMIX_PTR
+INTEGER :: N,NN,J,NS,SMIX_PTR
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
@@ -2610,7 +2686,10 @@ ENDIF
 
 !print '(A,1x,1I3,1ES12.4)','N,RHO_S(N)-',n,rho_s(n)
       RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*RHO_DOT )  ! Tech Guide: rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
-!print '(A,1x,1I3,1ES12.4)','N,RHO_S(N)+',n,rho_s(n)
+      DO NN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
+         ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
+         RHO_S(NN) = RHO_S(NN) + ML%NU_RESIDUE(MATL_INDEX(NN),J)*DT_BC*RHO_DOT
+      ENDDO
       Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%H_R(J)  ! Tech Guide: q_dot_s,c'''
       DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
          M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
@@ -2618,18 +2697,7 @@ ENDIF
          M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
 !print '(A,1x,1I3,3ES12.4)','NS,ADJUST_BURN_RATE,NU_GAS,RHO_DOT',ns,ml%adjust_burn_rate(ns,j),ml%nu_gas(ns,j),rho_dot
       ENDDO
-      DO NN=1,ML%N_RESIDUE(J)
-         IF (ML%NU_RESIDUE(NN,J)>0._EB) THEN
-            DO NNN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
-               ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
-               IF (ML%RESIDUE_MATL_INDEX(NN,J)==MATL_INDEX(NNN)) RHO_S(NNN) = RHO_S(NNN) + ML%NU_RESIDUE(NN,J)*DT_BC*RHO_DOT
-!print '(A,1x,2I3,1ES12.4)','ML%RESIDUE_MATL_INDEX(NN,J),MATL_INDEX(NNN),ML%NU_RESIDUE(NN,J)', &
-!                            ML%RESIDUE_MATL_INDEX(NN,J),MATL_INDEX(NNN),ML%NU_RESIDUE(NN,J)
-            ENDDO
-         ENDIF
       ENDDO
-!print '(A,1x,1I3)','N_TRACKED_SPECIES',n_tracked_species
-!print '(A)','---------------------------------------------'
 
    ENDDO REACTION_LOOP
 

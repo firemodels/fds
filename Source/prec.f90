@@ -42,6 +42,10 @@ INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20
 
 INTEGER, PARAMETER :: LABEL_LENGTH=60, MESSAGE_LENGTH=200
 
+! Hardwired length of output quantities
+
+INTEGER, PARAMETER :: N_OUTPUT_QUANTITIES=550
+
 ! Special numbers
 ! Numbers such as the largest number that is < 1 in 8-byte accuracy (ALMOST_ONE) are defined here
 
