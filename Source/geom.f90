@@ -19559,25 +19559,25 @@ ENDDO MESH_LOOP_1
 
 
 ! Now add local column location to Faces data structures:
-MESH_LOOP_2 : DO NM=1,NMESHES
+MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
-   IF (PROCESS(NM)/=MYID) CYCLE
+   CALL POINT_TO_MESH(NM)
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
-   IHI_FACE = MESHES(NM)%IBAR      ! High mesh boundary face index.
+   IHI_FACE = IBAR                 ! High mesh boundary face index.
    ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
    IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.
 
    ! Y direction bounds:
    JLO_FACE = 0                    ! Low mesh boundary face index.
-   JHI_FACE = MESHES(NM)%JBAR      ! High mesh boundary face index.
+   JHI_FACE = JBAR                 ! High mesh boundary face index.
    JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
    JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.
 
    ! Z direction bounds:
    KLO_FACE = 0                    ! Low mesh boundary face index.
-   KHI_FACE = MESHES(NM)%KBAR      ! High mesh boundary face index.
+   KHI_FACE = KBAR                 ! High mesh boundary face index.
    KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
    KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.
 
@@ -19589,13 +19589,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF((IW > 0) .AND. .NOT.(WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                               WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
 
-      I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I+FCELL-1,J,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I+FCELL  ,J,K,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19606,13 +19606,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF ( I == ILO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
       IF ( I == IHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
 
-      MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%JD(1:2,1:2) = 0
+      IBM_REGFACE_IAXIS_Z(IFACE)%JD(1:2,1:2) = 0
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_Z(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_Z(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
+                   IBM_REGFACE_IAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -19629,13 +19629,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF((IW > 0) .AND. .NOT.(WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                               WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
 
-      I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I,J+FCELL-1,K,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J+FCELL  ,K,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19646,13 +19646,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF ( J == JLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
       IF ( J == JHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
 
-      MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%JD(1:2,1:2) = 0
+      IBM_REGFACE_JAXIS_Z(IFACE)%JD(1:2,1:2) = 0
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_Z(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_Z(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
+                   IBM_REGFACE_JAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -19669,13 +19669,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF((IW > 0) .AND. .NOT.(WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                               WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
 
-      I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
-      J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
-      K  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
+      I  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
+      J  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
+      K  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
-      IND(HIGH_IND) = MESHES(NM)%CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
+      IND(LOW_IND)  = CCVAR(I,J,K+FCELL-1,IBM_UNKZ)
+      IND(HIGH_IND) = CCVAR(I,J,K+FCELL  ,IBM_UNKZ)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19686,13 +19686,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF ( K == KLO_FACE )  LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
       IF ( K == KHI_FACE )  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
 
-      MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%JD(1:2,1:2) = 0
+      IBM_REGFACE_KAXIS_Z(IFACE)%JD(1:2,1:2) = 0
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_Z(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_Z(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
+                   IBM_REGFACE_KAXIS_Z(IFACE)%JD(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -19708,14 +19708,14 @@ MESH_LOOP_2 : DO NM=1,NMESHES
       IF((IW > 0) .AND. .NOT.(WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                               WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
 
-      I      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
-      J      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
-      K      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
+      I      = IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
+      J      = IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
+      K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
+      X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
 
       ! Unknowns on related cells:
-      IND(LOW_IND)  = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
-      IND(HIGH_IND) = MESHES(NM)%IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
+      IND(LOW_IND)  = IBM_RCFACE_Z(IFACE)%UNK(LOW_IND)
+      IND(HIGH_IND) = IBM_RCFACE_Z(IFACE)%UNK(HIGH_IND)
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
       IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19736,13 +19736,13 @@ MESH_LOOP_2 : DO NM=1,NMESHES
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
       ENDSELECT
 
-      MESHES(NM)%IBM_RCFACE_Z(IFACE)%JD(1:2,1:2) = 0
+      IBM_RCFACE_Z(IFACE)%JD(1:2,1:2) = 0
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
             NII = NNZ_D_MAT_Z(IND_LOC(LOCROW))
             DO ILOC=1,NII
                IF ( IND(IIND) == JD_MAT_Z(ILOC,IND_LOC(LOCROW)) ) THEN
-                   MESHES(NM)%IBM_RCFACE_Z(IFACE)%JD(LOCROW,IIND) = ILOC
+                   IBM_RCFACE_Z(IFACE)%JD(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
             ENDDO
@@ -19754,15 +19754,15 @@ MESH_LOOP_2 : DO NM=1,NMESHES
    ! Now Gasphase CUT_FACES:
    DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
 
-      IF ( MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
       IW = CUT_FACE(ICF)%IWC
       IF((IW > 0) .AND. .NOT.(WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
                               WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
 
-      I = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
-      J = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
-      K = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
-      X1AXIS = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS+1)
+      I = CUT_FACE(ICF)%IJK(IAXIS)
+      J = CUT_FACE(ICF)%IJK(JAXIS)
+      K = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
@@ -19780,12 +19780,12 @@ MESH_LOOP_2 : DO NM=1,NMESHES
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
       ENDSELECT
 
-      MESHES(NM)%CUT_FACE(ICF)%JDZ(:,:,:) = 0
-      DO IFACE=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
+      CUT_FACE(ICF)%JDZ(:,:,:) = 0
+      DO IFACE=1,CUT_FACE(ICF)%NFACE
 
          !% Unknowns on related cells:
-         IND(LOW_IND)  = MESHES(NM)%CUT_FACE(ICF)%UNKZ(LOW_IND,IFACE)
-         IND(HIGH_IND) = MESHES(NM)%CUT_FACE(ICF)%UNKZ(HIGH_IND,IFACE)
+         IND(LOW_IND)  = CUT_FACE(ICF)%UNKZ(LOW_IND,IFACE)
+         IND(HIGH_IND) = CUT_FACE(ICF)%UNKZ(HIGH_IND,IFACE)
 
          IND_LOC(LOW_IND) = IND(LOW_IND) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
          IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKZ_IND(NM_START)
@@ -19795,7 +19795,7 @@ MESH_LOOP_2 : DO NM=1,NMESHES
                NII = NNZ_D_MAT_Z(IND_LOC(LOCROW))
                DO ILOC=1,NII
                   IF ( IND(IIND) == JD_MAT_Z(ILOC,IND_LOC(LOCROW)) ) THEN
-                      MESHES(NM)%CUT_FACE(ICF)%JDZ(LOCROW,IIND,IFACE) = ILOC
+                      CUT_FACE(ICF)%JDZ(LOCROW,IIND,IFACE) = ILOC
                       EXIT
                   ENDIF
                ENDDO
