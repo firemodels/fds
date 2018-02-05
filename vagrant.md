@@ -92,15 +92,16 @@ Verify Fortran installation
 ## Compile OpenMPI 3.X
 
 Download from official website
-    wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz
+
+    $ wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz
 
 
-
+Extract source archive and run `configure` script
 
     $ gunzip -c openmpi-3.0.0.tar.gz | tar xf -
     $ cd openmpi-3.0.0/
     $ ./configure FC=gfortran-7 CC=gcc-7 --prefix=/shared/openmpi_64 --enable-mpirun-prefix-by-default --enable-mpi-fortran --enable-static --disable-shared
-    $ make -j 2
+    $ make -j 4
 
 Explain installation options
 
@@ -140,6 +141,32 @@ Explain installation options
         no:         Do not build any MPI Fortran support (same as
                     --disable-mpi-fortran).  This is mutually exclusive
                     with building the OpenSHMEM Fortran interface.
+
+**RUN-TIME SYSTEM SUPPORT**
+
+Note that in both models, invoking mpirun via an absolute path name is equivalent to specifying the --prefix option with a <dir> value equivalent to the directory where mpirun resides, minus its last subdirectory. For example:
+
+    % /usr/local/bin/mpirun ...
+
+is equivalent to
+
+    % mpirun --prefix /usr/local
+
+    --enable-mpirun-prefix-by-default
+      This option forces the "mpirun" command to always behave as if
+      "--prefix $prefix" was present on the command line (where $prefix is
+      the value given to the --prefix option to configure).  This prevents
+      most rsh/ssh-based users from needing to modify their shell startup
+      files to set the PATH and/or LD_LIBRARY_PATH for Open MPI on remote
+      nodes.  Note, however, that such users may still desire to set PATH
+      -- perhaps even in their shell startup files -- so that executables
+      such as mpicc and mpirun can be found without needing to type long
+      path names.  --enable-orterun-prefix-by-default is a synonym for
+      this option.
+
+    --noprefix  
+      Disable the automatic --prefix behavior 
+
 
 
 
@@ -198,6 +225,22 @@ Links
 
 - [Building Open MPI](https://www.open-mpi.org/faq/?category=building#easy-build)
 - [FAQ - Building Open MPI](https://www.open-mpi.org/faq/?category=building#vpath-parallel-build)
+
+**Required `mpirun` dependencies** 
+
+output of `ldd` when built with flag `enable_static`:
+
+
+  vagrant@vagrant-ubuntu-trusty-64:~$ ldd /vagrant/openmpi_64/bin/mpirun
+    linux-vdso.so.1 =>  (0x00007ffd371dc000)
+    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f85ccd2c000)
+    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f85ccb28000)
+    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f85cc920000)
+    libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f85cc71d000)
+    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f85cc354000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f85ccf4a000)
+
+
 
 ## Compile FDS sources
 
@@ -325,14 +368,28 @@ Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
 
 ## Deploy FDS/MPI to clusters
 
-- Provide OpenMPI 
+Disable the automatic prefix behaviour to provide OpenMPI in a custom directory
+
+  $ /absolute/path/to/mpirun --noprefix mpi_app
+
+References
+- [mpirun - OpenMPI docs](https://www.open-mpi.org/doc/v3.0/man1/mpirun.1.php) 
+
+
+## More on Open MPI
+
+- [Mailing lists](http://www.open-mpi.de/community/lists/ompi.php)
+- [How to install Open MPI](http://www.simunano.com/2015/07/how-to-install-openmpi.html)
 
 
 ## More on compilers
 
-GNU Fortran 8.0
-- https://www.scivision.co/install-latest-gfortran-on-ubuntu/
+AutoTools
+- [The magic behind configure, make, make install](https://robots.thoughtbot.com/the-magic-behind-configure-make-make-install)
 
+GNU Fortran 8.0
+- [Install latest gfortran on Ubuntu](https://www.scivision.co/install-latest-gfortran-on-ubuntu/)
+- [Creating shared and static library with GNU compiler](http://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/GCC/create-libraries/index)
 
 ## Continuous integration as a service
 

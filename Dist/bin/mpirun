@@ -1,0 +1,41 @@
+#!/bin/bash
+
+export MPI_ROOT=$HOME/work/shared/Dist/openmpi
+export LD_LIBRARY_PATH=$HOME/work/shared/Dist/lib
+
+# SET DEFAULTS
+export NP="${NP-${RESCALE_CORES_PER_SLOT}}"
+export MACHINEFILE="${MACHINEFILE-$HOME/hosts}"
+
+export HAS_NP=0
+export HAS_MACHINEFILE=0
+
+NEW_ARGS=()
+
+for arg in $@ ; do
+if [[ "${arg}" == "-np" ]] ; then
+export HAS_NP=1
+elif [[ "${arg}" == "-machinefile" ]] ; then
+export HAS_MACHINEFILE=1
+fi
+done
+
+if [[ "${HAS_NP}" -eq "0" ]] ; then
+echo "Using default -np setting (${NP})"
+NEW_ARGS+=("-np")
+NEW_ARGS+=("${NP}")
+fi
+
+if [[ "${HAS_MACHINEFILE}" -eq "0" ]] ; then
+echo "Using default -machinefile setting (${MACHINEFILE})"
+NEW_ARGS+=("-machinefile")
+NEW_ARGS+=("${MACHINEFILE}")
+fi
+
+for arg in "$@" ; do
+NEW_ARGS+=("${arg}")
+done
+
+export PATH=$PATH:${MPI_ROOT}/bin
+
+${MPI_ROOT}/bin/orterun "${NEW_ARGS[@]}"
