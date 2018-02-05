@@ -2697,7 +2697,6 @@ ENDIF
          M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
 !print '(A,1x,1I3,3ES12.4)','NS,ADJUST_BURN_RATE,NU_GAS,RHO_DOT',ns,ml%adjust_burn_rate(ns,j),ml%nu_gas(ns,j),rho_dot
       ENDDO
-      ENDDO
 
    ENDDO REACTION_LOOP
 
