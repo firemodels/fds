@@ -8924,8 +8924,9 @@ CONTAINS
              CASE (+2)
                 IF (MESHES(NM)%YF <= EMESH_EXITS(N)%XB(4)+TINY) CYCLE NEND_LOOP_1
              END SELECT
-             N_OBST = N_OBST + 1
-             EMESH_EXITS(N)%I_OBST = N_OBST
+             N_OBST_DIM = N_OBST_DIM + 1
+             N_OBST_O   = N_OBST_O   + 1
+             EMESH_EXITS(N)%I_OBST = N_OBST_O
              EVACUATION_OBST = .TRUE.
           END IF
        END DO NEND_LOOP_1
@@ -8951,8 +8952,9 @@ CONTAINS
              EMESH_STAIRS(N)%XB_CORE(3) = MESHES(NM)%Y(J1)
              EMESH_STAIRS(N)%XB_CORE(4) = MESHES(NM)%Y(J2)
 
-             N_OBST = N_OBST + 1
-             EMESH_STAIRS(N)%I_OBST = N_OBST
+             N_OBST_DIM = N_OBST_DIM + 1
+             N_OBST_O   = N_OBST_O   + 1
+             EMESH_STAIRS(N)%I_OBST = N_OBST_O
              EVACUATION_OBST = .TRUE.
           END IF
        END DO NSTRS_LOOP_1
