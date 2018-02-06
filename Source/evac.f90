@@ -15823,7 +15823,7 @@ CONTAINS
     END IF
 
     ! Only those doors are possible which are in the same main evac mesh.
-    K_ave_Door        = 0.0_EB
+    K_ave_door        = 0.0000001_EB*ABS(FED_DOOR_CRIT)
     FED_max_Door      = 0.0_EB
     Is_Known_Door     = .FALSE.
     Is_Visible_Door   = .FALSE.
@@ -16152,10 +16152,7 @@ CONTAINS
           PP_see_door = PP_see_door .OR. (PP_see_doorXB .AND. PP_correct_side)
              
           FED_max_Door(i) = max_fed
-          K_ave_Door(i) = ave_K
-          IF (FED_DOOR_CRIT < TWO_EPSILON_EB) THEN
-             K_ave_door(i) = MAX(K_ave_Door(i),0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
-          END IF
+          K_ave_Door(i) = MAX(ave_K,0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
 
           ! Note: a DOOR is not counted as visible door, if it does not have an
           ! EXIT_SIGN, unless it is already been a target door for this agent/group.
