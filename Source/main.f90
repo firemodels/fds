@@ -95,8 +95,6 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = CURRENT_TIME()
 
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') 'FDS 6.6.0'
-
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found
@@ -472,7 +470,8 @@ MAIN_LOOP: DO
    ! Check for program stops
 
    INQUIRE(FILE=FN_STOP,EXIST=EX)
-   IF ((EX.OR.STOPFDS>=0) .AND. ICYC>=STOP_AT_ITER) THEN
+   IF (EX .AND. ICYC>=STOP_AT_ITER) THEN
+      IF (VERBOSE) WRITE(LU_ERR,'(A,I5)') ' STOP file detected, MPI Process =',MYID
       STOP_STATUS = USER_STOP
       DIAGNOSTICS = .TRUE.
    ENDIF

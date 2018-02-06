@@ -8,6 +8,8 @@
 ! MPI:
 #define MPI_ENABLED
 ! Debug:
+!#define DEBUG_SET_CUTCELLS /* Debug cut-cell definition algorithm. */
+!#define DEBUG_IBM_INTERPOLATION /* Debug IBM interpolation and forcing scheme. */
 !#define DEBUG_MATVEC_DATA /* Debug cut-cell region indexing, construction of regular, rc faces for scalars, etc. */
 
 
@@ -267,7 +269,7 @@ REAL(EB), POINTER, DIMENSION(:) :: X1FACEP,X2FACEP,X3FACEP,  &
                    X2CELLP,X3CELLP ! X1CELLP,DX1FACEP,DX2FACEP,DX3FACEP,DX1CELLP,DX2CELLP,DX3CELLP not used.
 
 ! x2 Intersection data containers:
-INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 512
+INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 1024
 INTEGER,  SAVE :: IBM_N_CRS
 REAL(EB), SAVE :: IBM_SVAR_CRS(IBM_MAXCROSS_X2)
 INTEGER,  SAVE :: IBM_IS_CRS(IBM_MAXCROSS_X2)
@@ -416,9 +418,9 @@ PUBLIC :: ADD_INPLACE_NNZ_H_BYMESH,ADD_INPLACE_NNZ_H_WHLDOM,&
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
-          INIT_CUTCELL_DATA, &
+          INIT_CUTCELL_DATA,INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_OBB_AABB,INTERSECT_SPHERE_AABB, &
           LINEARFIELDS_INTERP_TEST,MASS_CONSERVE_INIT,NUMBER_UNKH_CUTCELLS,POTENTIAL_FLOW_INIT,&
-          READ_GEOM,&
+          READ_GEOM,ROTATION_MATRIX, &
           SET_CCIBM_MATVEC_DATA,SET_DOMAINDIFFLX_3D,SET_DOMAINADVFLX_3D, &
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D, &
           WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA, &
@@ -1786,7 +1788,6 @@ IF (PERIODIC_TEST == 105) THEN ! Cut-cell definition timings test.
     ENDDO
     WRITE_SET_CUTCELLS_TIMINGS = .TRUE.
     COMPUTE_CUTCELLS_ONLY =.TRUE.
-    STOP_STATUS = SETUP_ONLY_STOP
 ENDIF
 
 ! Write out SET_CUTCELLS_3D loop time:
@@ -1838,8 +1839,10 @@ IF (WRITE_SET_CUTCELLS_TIMINGS) THEN
    ENDIF
 ENDIF
 
-IF (COMPUTE_CUTCELLS_ONLY) RETURN
-
+IF (COMPUTE_CUTCELLS_ONLY) THEN
+   STOP_STATUS = SETUP_ONLY_STOP
+   RETURN
+ENDIF
 CALL GET_CRTCFCC_INTERPOLATION_STENCILS ! Computes interpolation stencils for face and cell centers.
 CALL SET_CFACES_ONE_D_RDN               ! Set inverse DXN for CFACES.
 CALL SET_CCIBM_MATVEC_DATA              ! Defines data for discretization matrix-vectors.
@@ -8506,6 +8509,8 @@ MESH_LOOP : DO NM=1,NMESHES
             IF ( (CUT_CELL(ICC)%RHOS(JCC)<RHOMIN) .OR. &
                  (CUT_CELL(ICC)%RHOS(JCC)>RHOMAX) ) THEN
                WRITE(LU_ERR,*) 'GET_RHOZZ_CCIMPREG_3D CC Pred:',ICC,JCC,CUT_CELL(ICC)%VOLUME(JCC)
+               WRITE(LU_ERR,*) 'CELL Location=',X(CUT_CELL(ICC)%IJK(IAXIS)),Y(CUT_CELL(ICC)%IJK(JAXIS)),&
+                                                Z(CUT_CELL(ICC)%IJK(KAXIS))
                WRITE(LU_ERR,*) 'RHOP,MIN,MAX=',CUT_CELL(ICC)%RHOS(JCC),RHOMIN,RHOMAX
             ENDIF
 
@@ -10265,6 +10270,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = U_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE IAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,U_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10354,6 +10368,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = V_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE JAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,V_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10444,6 +10467,15 @@ IF (FORCE_GAS_FACE) THEN
                   ENDDO
                ENDIF
                CUT_FACE(ICF)%VELINT(IFACE) = W_INT
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE KAXIS=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,W_INT
+                  DO IPT=1,5
+                     WRITE(LU_ERR,*) IPT,CUT_FACE(ICF)%INTCOEF_CFCEN(IPT,IFACE),VAL(IPT)
+                  ENDDO
+                  PAUSE
+               ENDIF
+#endif
             ENDDO
 
             ! Now Momentum flux computation:
@@ -10517,7 +10549,15 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = U_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL IAXIS=',MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,U_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          U_IBM = U_INT
          IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
@@ -10550,7 +10590,15 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = V_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL JAXIS=',MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,V_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          V_IBM = V_INT
          IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
@@ -10583,7 +10631,16 @@ IF (FORCE_GAS_FACE) THEN
             ENDDO
          ENDIF
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = W_INT
-
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE_VEL KAXIS=',PREDICTOR,MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,W_INT
+            DO IPT=1,5
+               WRITE(LU_ERR,*) IPT,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(IPT),VAL(IPT),&
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN(IPT),MESHES(NM)%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(IPT)
+            ENDDO
+            PAUSE
+         ENDIF
+#endif
          ! Compute Forcing:
          W_IBM = W_INT
          IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
@@ -12311,6 +12368,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ALLOCATE( IJKFACE(ILO_FACE:IHI_FACE,JLO_FACE:JHI_FACE,KLO_FACE:KHI_FACE,IAXIS:KAXIS) )
    IJKFACE(:,:,:,:) = 0
 
+   ! Regular Faces thar are boundary of cut-cells:
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
       NCELL = CUT_CELL(ICC)%NCELL
       IJK(IAXIS:KAXIS) = CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
@@ -12393,7 +12451,9 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       END SELECT
 
       ! Now search in ix2 +- 1, ix3 +- 1:
-      DO IX1=X1LO_FACE,X1HI_FACE
+      ! The loop is separated in internal and boundary faces to the block, such that faces next to cut-faces laying on
+      ! external domain boundaries are not forced (except PERIODIC boundaries):
+      DO IX1=X1LO_FACE+1,X1HI_FACE-1
          DO IX2=X2LO_CELL,X2HI_CELL
             DO IX3=X3LO_CELL,X3HI_CELL
 
@@ -12423,6 +12483,39 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDDO
       ENDDO
+
+      ! Then external wall cells:
+      DO IX1=X1LO_FACE,X1HI_FACE,(X1HI_FACE-X1LO_FACE) ! This sets the loop to run over X1LO_FACE and X1HI_FACE values.
+         DO IX2=X2LO_CELL,X2HI_CELL
+            DO IX3=X3LO_CELL,X3HI_CELL
+
+               ! Faces indexes:
+               INDXI1(IAXIS:KAXIS) = (/ IX1, IX2, IX3 /)
+               INDI = INDXI1(XIAXIS)
+               INDJ = INDXI1(XJAXIS)
+               INDK = INDXI1(XKAXIS)
+
+               IF ( FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) /= IBM_GASPHASE ) CYCLE
+               IF ( FCVAR(INDI,INDJ,INDK,IBM_FFNF,X1AXIS) == IBM_CUTCFE )   CYCLE
+
+               DO ADDX=1,4
+                  ADDX2 = ADDVEC(1,ADDX)
+                  ADDX3 = ADDVEC(2,ADDX)
+
+                  ! FIRST CARTESIAN FACE:
+                  INDXI1(IAXIS:KAXIS) = (/ IX1, IX2+ADDX2, IX3+ADDX3 /)
+                  INFACE = INDXI1(XIAXIS)
+                  JNFACE = INDXI1(XJAXIS)
+                  KNFACE = INDXI1(XKAXIS)
+                  IF( FCVAR(INFACE,JNFACE,KNFACE,IBM_FGSC,X1AXIS) == IBM_CUTCFE ) THEN
+                     IJKFACE(INDI,INDJ,INDK,X1AXIS) = 1
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+
    ENDDO
    ENDIF ! DO_GASNXT_CUTFACE
 
@@ -23524,6 +23617,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CFACE_INDEX_LOCAL = 0
    DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
       IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+
       DO IFACE=1,CUT_FACE(ICF)%NFACE
          ! Option, we'll see if it is required: Cycle Areas less than GEOMEPS^2, insignificantly small.
          ! IF(CUT_FACE(ICF)%AREA(IFACE) < GEOMEPS*GEOMEPS) CYCLE
@@ -23765,6 +23859,11 @@ LOGICAL,  SAVE :: FIRST_CALL=.TRUE.
 INTEGER,  SAVE :: N_VERTS_TOT, N_FACES_TOT
 
 REAL(EB) :: TNOW
+
+#ifdef DEBUG_SET_CUTCELLS
+INTEGER :: INOD
+CHARACTER(100) :: BIPL_FILE
+#endif
 
 TNOW = CURRENT_TIME()
 
@@ -24680,22 +24779,28 @@ DO ISEG=1,BODINT_PLANE%NSEGS
 
 ENDDO
 
+#ifdef DEBUG_SET_CUTCELLS
 ! Write out:
-! print*, "Up to END of GET_BODINT_PLANE=",X1AXIS,X1PLN
-! print*, "NNODS=",BODINT_PLANE%NNODS
-! DO INOD=1,BODINT_PLANE%NNODS
-!    write(*,'(I3,A,3F16.12)') INOD,", ",BODINT_PLANE%XYZ(IAXIS:KAXIS,INOD)
-! END DO
-! print*, "NSEGS=",BODINT_PLANE%NSEGS
-! DO ISEG=1,BODINT_PLANE%NSEGS
-!    print*, " ",ISEG,BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
-! END DO
-! print*, "NSGLS=",BODINT_PLANE%NSGLS
-! DO ISGL=1,BODINT_PLANE%NSGLS
-!    print*, " ",ISGL,BODINT_PLANE%SGLS(NOD1,ISGL)
-! END DO
-! print*, "NTRIS=",BODINT_PLANE%NTRIS
-! pause
+WRITE(BIPL_FILE,'(A,A,I3.3,A)') TRIM(CHID),'_BODINT_PLANE_',MYID,'.csv'
+OPEN(333,FILE=TRIM(BIPL_FILE),STATUS='UNKNOWN')
+WRITE(333,*) 'X1AXIS,X2AXIS,X3AXIS,X1PLN,GEOMEPS'
+WRITE(333,*) X1AXIS,X2AXIS,X3AXIS,X1PLN,GEOMEPS
+WRITE(333,*) 'NNODS, NSEGS, NSGLS, NTRIS'
+WRITE(333,*) BODINT_PLANE%NNODS,BODINT_PLANE%NSEGS,BODINT_PLANE%NSGLS,BODINT_PLANE%NTRIS
+DO INOD=1,BODINT_PLANE%NNODS
+   WRITE(333,*) BODINT_PLANE%XYZ(IAXIS:KAXIS,INOD)
+END DO
+DO ISEG=1,BODINT_PLANE%NSEGS
+   WRITE(333,*) BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+END DO
+DO ISGL=1,BODINT_PLANE%NSGLS
+   WRITE(333,*) BODINT_PLANE%SGLS(NOD1,ISGL)
+END DO
+DO ITRI=1,BODINT_PLANE%NTRIS
+   WRITE(333,*) BODINT_PLANE%TRIS(NOD1:NOD3,ITRI)
+ENDDO
+CLOSE(333)
+#endif /* DEBUG_SET_CUTCELLS */
 
 T_CC_USED(GET_BODINT_PLANE_TIME_INDEX) = T_CC_USED(GET_BODINT_PLANE_TIME_INDEX) + CURRENT_TIME() - TNOW
 
@@ -25018,6 +25123,11 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
          WRITE(LU_ERR,*) "IBM_N_CRS=",IBM_N_CRS,", IDCR=",IDCR
          WRITE(LU_ERR,*) ICRS,"IND_LEFT=",IND_LEFT,", IND_RIGHT=",IND_RIGHT
          WRITE(LU_ERR,*) "IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)",IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS)
+         ! DO IAUX=1,IBM_N_CRS
+         !    WRITE(LU_ERR,*) IAUX,CRS_NUM(IBM_N_CRS),IND_LEFT,IND_RIGHT,IBM_SVAR_CRS(IND_CRS(LOW_IND,IAUX)+1)
+         ! ENDDO
+         ! WRITE(LU_ERR,*) ' '
+         ! PAUSE
       ENDIF
       LEFT_MEDIA = IBM_IS_CRS2_AUX(HIGH_IND,IBM_N_CRS_AUX)
 
@@ -28858,11 +28968,11 @@ DO K=KLO,KHI
          ! Drop if outcell1 & outcell2
          IF (OUTCELL1 .AND. OUTCELL2) THEN
             IF ( (FSID_XYZ(LOW_IND ,IAXIS) == IBM_SOLID) .AND. &
-                (FSID_XYZ(HIGH_IND,IAXIS) == IBM_SOLID) .AND. &
-                (FSID_XYZ(LOW_IND ,JAXIS) == IBM_SOLID) .AND. &
-                (FSID_XYZ(HIGH_IND,JAXIS) == IBM_SOLID) .AND. &
-                (FSID_XYZ(LOW_IND ,KAXIS) == IBM_SOLID) .AND. &
-                (FSID_XYZ(HIGH_IND,KAXIS) == IBM_SOLID) ) THEN
+                 (FSID_XYZ(HIGH_IND,IAXIS) == IBM_SOLID) .AND. &
+                 (FSID_XYZ(LOW_IND ,JAXIS) == IBM_SOLID) .AND. &
+                 (FSID_XYZ(HIGH_IND,JAXIS) == IBM_SOLID) .AND. &
+                 (FSID_XYZ(LOW_IND ,KAXIS) == IBM_SOLID) .AND. &
+                 (FSID_XYZ(HIGH_IND,KAXIS) == IBM_SOLID) ) THEN
                MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) = IBM_SOLID
             ENDIF
             CYCLE
@@ -29435,6 +29545,7 @@ DO K=KLO,KHI
 
                ! Plot cell and cut-faces if there is no convergence:
                IF ( CTR > NSEG_FACE**3 ) THEN
+                      ! WRITE(LU_ERR,*) 'Cartesian Face:',BNDINT_FLAG,MESHES(NM)%CCVAR(I,J,K,IBM_CGSC),IBM_CUTCFE,I,J,K
                       ! WRITE(LU_ERR,*) NSEG_LEFT,NSEG_FACE,NSEG
                       ! DO IDUM=1,NVERT
                       !    WRITE(LU_ERR,*) 'VERT=',IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
@@ -29451,6 +29562,15 @@ DO K=KLO,KHI
                       ! ENDDO
                       WRITE(LU_ERR,*) "Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,",BNDINT_FLAG,I,J,K,NCUTFACE,&
                       MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE
+                      ! WRITE(LU_ERR,*) ' '
+                      ! WRITE(LU_ERR,*) NVERT,NSEG
+                      ! DO IDUM=1,NVERT
+                      !    WRITE(LU_ERR,*) XYZVERT(IAXIS:KAXIS,IDUM)
+                      ! ENDDO
+                      ! WRITE(LU_ERR,*) ' '
+                      ! DO IDUM=1,NSEG
+                      !    WRITE(LU_ERR,*) SEG_CELL(NOD1:NOD2+1,IDUM),SEG_CELL(4:6,IDUM)
+                      ! ENDDO
                       ! PAUSE
                ENDIF
 
@@ -31140,6 +31260,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       IF (N_FACES==0) THEN
          N_FACES = 4*N_VOLUS
+         IF(ALLOCATED(IS_EXTERNAL)) DEALLOCATE(IS_EXTERNAL)
          ALLOCATE(IS_EXTERNAL(0:N_FACES-1),STAT=IZERO)
          CALL ChkMemErr('READ_GEOM','IS_EXTERNAL',IZERO)
 
@@ -34587,6 +34708,245 @@ ENDDO
 
 RETURN
 END FUNCTION POLYGON_CENTROID
+
+! ---------------------------- INTERSECT_SPHERE_AABB ----------------------------------------
+
+! Algorithm from Schneider and Eberly, p. 644
+! Intersection of Sphere and Axis-Aligned Bounding Box
+
+LOGICAL FUNCTION INTERSECT_SPHERE_AABB(X0,RADIUS,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X0(3),RADIUS,XB(6)
+REAL(EB) :: DIST_SQUARED
+
+INTERSECT_SPHERE_AABB=.TRUE.
+
+! Compute distance in each direction, summing as we go
+DIST_SQUARED = 0._EB
+IF (X0(1)<XB(1)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(1)-XB(1))**2
+ELSEIF (X0(1)>XB(2)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(1)-XB(2))**2
+ENDIF
+IF (X0(2)<XB(3)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(2)-XB(3))**2
+ELSEIF (X0(2)>XB(4)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(2)-XB(4))**2
+ENDIF
+IF (X0(3)<XB(5)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(3)-XB(5))**2
+ELSEIF (X0(3)>XB(6)) THEN
+   DIST_SQUARED = DIST_SQUARED + (X0(3)-XB(6))**2
+ENDIF
+
+! Compare squared distance to radius squared
+IF (DIST_SQUARED > (RADIUS*RADIUS-TWO_EPSILON_EB)) INTERSECT_SPHERE_AABB=.FALSE.
+
+RETURN
+END FUNCTION INTERSECT_SPHERE_AABB
+
+! ---------------------------- INTERSECT_CYLINDER_AABB ----------------------------------------
+
+! Intersection of Cylinder and Axis-Aligned Bounding Box
+!
+! Cylinder is represented by:
+!   X_IN   = bottom-center of cylinder (X,Y,Z) in grid reference frame
+!   H      = length of cylinder
+!   RADIUS = radius of cylinder
+!   AX_VEC = unit vector pointing along cylinder axis (which leads to ROT_MAT using ROTATION_MATRIX)
+!
+! The basic algorithm is:
+!   1. rotate the cylinder into a frame where the axis points in the vertical direction (+zbar in new frame)
+!   2. find the vertex point locations of AABB in this new frame
+!   3. test each vertex location against the end caps of cylinder
+!   4. test each vertex against radius of cylinder
+
+LOGICAL FUNCTION INTERSECT_CYLINDER_AABB(X_IN,H,RADIUS,ROTMAT,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,R2,DIST_SQUARED
+INTEGER :: II,JJ,KK
+
+INTERSECT_CYLINDER_AABB=.FALSE.
+
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+Z0 = X(3)                ! lower cap in new reference frame
+ZH = X(3) + H            ! upper cap in new reference frame
+
+! transform vertices and test against end caps, then radius
+R2 = RADIUS*RADIUS
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROTMAT,V)
+         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+            ! vertex is within end-cap range, now test against radius
+            ! in new frame the distance from vertex to cylinder axis only requires the 1st and 2nd vector components
+            DUX = U(1:2) - X(1:2)
+            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+            IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
+               INTERSECT_CYLINDER_AABB = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_CYLINDER_AABB
+
+! ---------------------------- ROTATION_MATRIX ----------------------------------------
+
+SUBROUTINE ROTATION_MATRIX(R_OUT,A_IN,THETA)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: R_OUT(3,3)
+REAL(EB), INTENT(IN) :: A_IN(3),THETA
+REAL(EB) :: A(3),C,DENOM,V(3),A1(3),A2(3),A3(3),B1(3),B2(3),B3(3),R_THETA(3,3)
+
+! initialize 2D rotation matrix
+! this is a counterclockwise rotation
+R_THETA = 0._EB
+R_THETA(1,1) = COS(THETA*PI/180._EB);  R_THETA(1,2) = SIN(THETA*PI/180._EB)
+R_THETA(2,1) = -SIN(THETA*PI/180._EB); R_THETA(2,2) = COS(THETA*PI/180._EB)
+R_THETA(3,3) = 1._EB
+
+! initialize R_OUT as 2D rotation matrix
+R_OUT = R_THETA
+
+! normalize input vector
+DENOM = SQRT(DOT_PRODUCT(A_IN,A_IN))
+IF (DENOM<TWO_EPSILON_EB) RETURN
+A = A_IN/DENOM
+
+! orthonormal basis in new system
+B1 = (/1._EB,0._EB,0._EB/)
+B2 = (/0._EB,1._EB,0._EB/)
+B3 = (/0._EB,0._EB,1._EB/)
+
+CALL CROSS_PRODUCT(V,A,B3)
+C = DOT_PRODUCT(A,B3)
+
+IF (DOT_PRODUCT(V,V)<TWO_EPSILON_EB) THEN
+   ! if cross product has zero length, there are two possibilities:
+   !   1. vectors are aligned in same direction, no rotation required
+   !   2. vectors are aligned in opposite direction, 180 degree rotation
+   IF (C>0._EB) THEN
+      RETURN
+   ELSE
+      R_OUT = -R_OUT
+      RETURN
+   ENDIF
+ENDIF
+
+! find orthnormal basis for A=A3 in old system
+
+A3 = A
+CALL CROSS_PRODUCT(A2,B3,A3)
+CALL CROSS_PRODUCT(A1,A2,A3)
+
+! rotation matrix (direction cosines), Pope (2000), Eq. (A.11)
+
+R_OUT(1,1) = DOT_PRODUCT(A1,B1); R_OUT(1,2) = DOT_PRODUCT(A1,B2); R_OUT(1,3) = DOT_PRODUCT(A1,B3)
+R_OUT(2,1) = DOT_PRODUCT(A2,B1); R_OUT(2,2) = DOT_PRODUCT(A2,B2); R_OUT(2,3) = DOT_PRODUCT(A2,B3)
+R_OUT(3,1) = DOT_PRODUCT(A3,B1); R_OUT(3,2) = DOT_PRODUCT(A3,B2); R_OUT(3,3) = DOT_PRODUCT(A3,B3)
+
+R_OUT = MATMUL(R_OUT,R_THETA)
+
+! ! test
+! print *,R_OUT(1,:)
+! print *,R_OUT(2,:)
+! print *,R_OUT(3,:)
+! print *,MATMUL(R_OUT,A) ! result should be B3
+! stop
+
+END SUBROUTINE ROTATION_MATRIX
+
+! ---------------------------- INTERSECT_CONE_AABB ----------------------------------------
+
+! This routine basically follows the INTERSECT_CYLINDER_AABB algorithm, with radius = R(Z)
+
+LOGICAL FUNCTION INTERSECT_CONE_AABB(X_IN,H,RADIUS,ROTMAT,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,DIST_SQUARED,R_Z
+INTEGER :: II,JJ,KK
+
+INTERSECT_CONE_AABB=.FALSE.
+
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+Z0 = X(3)                ! lower cap in new reference frame
+ZH = X(3) + H            ! upper cap in new reference frame
+
+! transform vertices and test against end caps, then radius
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROTMAT,V)
+         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+            ! vertex is within end-cap range, now test against radius
+            ! in new frame the distance from vertex to CONE axis only requires the 1st and 2nd vector components
+            DUX = U(1:2) - X(1:2)
+            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+            R_Z = RADIUS*(1._EB-(U(3)-Z0)/H)
+            IF (DIST_SQUARED < R_Z*R_Z+TWO_EPSILON_EB) THEN
+               INTERSECT_CONE_AABB = .TRUE.
+               RETURN
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_CONE_AABB
+
+! ---------------------------- INTERSECT_OBB_AABB ----------------------------------------
+
+! Intersect an Oriented Bounding Box (OBB) with an Axis-Aligned Bounding Box (AABB)
+! First, rotate AABB into OBB frame.
+! Then test each vertex.
+
+LOGICAL FUNCTION INTERSECT_OBB_AABB(X_IN,L,W,H,ROTMAT,XB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: X_IN(3),L,W,H,ROTMAT(3,3),XB(6)
+REAL(EB) :: X(3),U(3),V(3),X0,XL,Y0,YW,Z0,ZH
+INTEGER :: II,JJ,KK
+
+INTERSECT_OBB_AABB=.FALSE.
+
+X  = MATMUL(ROTMAT,X_IN) ! transform center
+X0 = X(1) - 0.5_EB*L - TWO_EPSILON_EB
+XL = X(1) + 0.5_EB*L + TWO_EPSILON_EB
+Y0 = X(2) - 0.5_EB*W - TWO_EPSILON_EB
+YW = X(2) + 0.5_EB*W + TWO_EPSILON_EB
+Z0 = X(3) - 0.5_EB*H - TWO_EPSILON_EB
+ZH = X(3) + 0.5_EB*H + TWO_EPSILON_EB
+
+! transform and test vertices (probably a more efficient way, but just to get going...)
+DO KK=5,6
+   DO JJ=3,4
+      DO II=1,2
+         V = (/XB(II),XB(JJ),XB(KK)/)
+         U = MATMUL(ROTMAT,V)
+         IF (U(1)>X0 .AND. U(1)<XL .AND. U(2)>Y0 .AND. U(2)<YW .AND. U(3)>Z0 .AND. U(3)<ZH) THEN
+            INTERSECT_OBB_AABB=.TRUE.
+            RETURN
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION INTERSECT_OBB_AABB
 
 ! ! ---------------------------- TRIANGLE_ON_CELL_SURF ----------------------------------------
 !
