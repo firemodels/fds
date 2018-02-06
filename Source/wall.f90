@@ -1030,10 +1030,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                      CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_NEW(I,J,K),OPT_MATL_INDEX=OB%MATL_INDEX)
                   ELSEIF (OB%MATL_SURF_INDEX>0) THEN
                      MS => SURFACE(OB%MATL_SURF_INDEX)
-                     RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,MS%N_MATL)
+                     RHO_GET(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
                      CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_NEW(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
                   ENDIF
-
                   IF (TWO_D) THEN
                      VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/RHOCBAR_S*( RDX(I)**2 + RDZ(K)**2 ) )
                   ELSE
@@ -1080,7 +1079,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR,OBST_INDEX !,NR
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,MDOTPPP_C_S
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RVSP=>NULL()
 REAL(EB), PARAMETER :: SOLID_VOLUME_THRESHOLD=0.1_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
@@ -1155,22 +1154,10 @@ OBST_LOOP_2: DO N=1,N_OBST
                            RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = MAX(0._EB, OB%RHO(I,J,K,1:MS%N_MATL) - DT_SUB * M_DOT_S_PPP(1:MS%N_MATL) * RVSP(I,J,K) )
+            OB%RHO(I,J,K,1:MS%N_MATL) = MAX(0._EB, OB%RHO(I,J,K,1:MS%N_MATL) &
+                                                   + (RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL)) * RVSP(I,J,K) )
 
-            ! test term
-            MDOTPPP_C_S = 0._EB
-            ! DO NN=1,SF%N_MATL
-            !    IF (M_DOT_S_PPP(NN)<TWO_EPSILON_EB) CYCLE
-            !    ML => MATERIAL(MS%MATL_INDEX(NN))
-            !    IF (ML%C_S>0._EB) THEN
-            !       MDOTPPP_C_S = MDOTPPP_C_S + M_DOT_S_PPP(NN)*ML%C_S
-            !    ELSE
-            !       NR = -NINT(ML%C_S)
-            !       MDOTPPP_C_S = MDOTPPP_C_S + M_DOT_S_PPP(NN)*EVALUATE_RAMP(TMP_S,0._EB,NR)
-            !    ENDIF
-            ! ENDDO
-
-            Q_DOT_PPP_S(I,J,K) = ( Q_DOT_PPP_S(I,J,K) + MDOTPPP_C_S*TMP_S ) * RVSP(I,J,K)
+            Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * RVSP(I,J,K)
 
             IF (OB%CONSUMABLE) THEN
                OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
