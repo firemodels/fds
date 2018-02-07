@@ -8,9 +8,11 @@
 \label{combustionsection}
 The combustion model determines the mean chemical mass production rate of species $\alpha$ per unit volume, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in the species transport equation, Eq.~(\ref{species}).  In general, $\dot{m}^{\prime\prime\prime}_{\alpha}$ requires a closure model because the flame thickness is on the order of one millimeter while the grid spacing is typically on the order of tens of centimeters.  This chapter describes a turbulent batch reactor model for $\dot{m}^{\prime\prime\prime}_{\alpha}$ capable of handling a range of mixing conditions and chemical kinetics.  In the non-premixed, fast chemistry limit, which is valid for the vast majority of FDS applications, the reactor model reduces to a simple ``mixed is burnt'' approximation called the Eddy Dissipation Concept (EDC) \cite{Magnussen:1,Poinsot:TNC}.
 
-The combustion model also determines the heat release rate for per unit volume, $\dot{q}^{\prime\prime\prime}$, which is a quantity of fundamental importance in fire physics and typically the largest contribution to the velocity divergence, Eq.~(\ref{eqn_fdsD1}).  Once $\dot{m}^{\prime\prime\prime}_{\alpha}$ has been determined, the heat release rate follows by summing the mass production rates for each species times their respective heats of formation.  Details are discussed below in Section \ref{sec:hrr}.
+The combustion model also determines the heat release rate per unit volume, $\dot{q}^{\prime\prime\prime}$, which is a quantity of fundamental importance in fire physics and typically the largest contribution to the velocity divergence, Eq.~(\ref{eqn_fdsD1}).  Once $\dot{m}^{\prime\prime\prime}_{\alpha}$ has been determined, the heat release rate follows by summing the mass production rates for each species times their respective heats of formation.  Details are discussed below in Section \ref{sec:hrr}.
 
-Before discussing the combustion model, we first discuss of our \emph{lumped species} approach (Section \ref{sec:lumpedspecies}), which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  In other words, we reduce the number of transport equations we need to solve, which significantly increases the speed of the code.  Our basic mixing-controlled, fast chemistry combustion model is presented in Section \ref{sec:fastchemistry}, followed by details on computing the heat release rate and a simple model for thermal extinction. The model for the mixing time scale (needed in both EDC and the general reactor model) is discussed in Section \ref{sec:reac_time_scale}. In Section \ref{sec:batchreactormodel}, we begin the discussion of our generalized combustion model which is designed to handle both fast and slow chemistry and a range of mixing conditions.  For fire, this method holds promise for improved prediction of carbon monoxide and soot. Each computational cell is treated as a partially-stirred batch reactor with a characteristic mixing time.  Once reactants are mixed, the reaction rate depends on kinetics.  Section \ref{sec:reac_time_integration} discusses available kinetic mechanisms within FDS, from infinitely fast chemistry (default) to Arrhenius rate laws and reversible reactions.
+Before discussing the combustion model, we first discuss of our \emph{lumped species} approach (Section~\ref{sec:lumpedspecies}), which reduces the computational burden of the full chemical system by combining species into groups that transport and react together.  In other words, we reduce the number of transport equations we need to solve, which significantly increases the speed of the computation.
+
+In Section~\ref{sec:batchreactormodel}, we begin the discussion of our generalized combustion model which is designed to handle both fast and slow chemistry and a range of mixing conditions.  For fire, this method holds the promise for improved prediction of carbon monoxide and soot. Each computational cell is treated as a partially-stirred batch reactor with a characteristic mixing time.  Once reactants are mixed, the available reaction mechanisms range from infinitely fast chemistry to Arrhenius rate laws and reversible reactions. Our basic mixing-controlled, fast chemistry combustion model is presented in Section~\ref{sec:fastchemistry}. Section~\ref{extinction} discusses several options for modeling extinction.
 
 \section{Lumped Species Approach}
 \label{sec:lumpedspecies}
@@ -125,90 +127,11 @@ The remaining coefficients come from an atom balance.
 \clearpage
 
 \section{Turbulent Combustion}
+\label{sec:batchreactormodel}
 
-\subsection{Mixing-Controlled Fast Chemistry (Default)}
-\label{sec:fastchemistry}
+Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex reactions---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
 
-For the vast majority of FDS applications the ``mixed is burnt'' assumption is adequate to model the reaction system and the mean chemical source term for Fuel is modeled using the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager~\cite{Magnussen:1,Poinsot:TNC}:
-\begin{equation}
-\label{eq:edc}
-\dot{m}_{\si{F}}^{\prime\prime\prime} = -\rho \frac{\min(Z_{\si{F}}, Z_{\si{A}}/s)}{\tau_{\rm mix}}
-\end{equation}
-Here, $Z_{\si{F}}$ and $Z_{\si{A}}$ are the lumped mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.  The quantity $\tau_{\rm mix}$ is a time scale for mixing which must be modeled (see Section \ref{sec:reac_time_scale}).  The EDC model therefore states that the rate of fuel consumption is proportional to both the local limiting reactant concentration and the local rate of mixing. As we will see below, the EDC model is a limiting case of a generalized partially-stirred batch reactor model in which all the reactants are initially unmixed and the rate of chemical kinetics is infinite.
-
-
-\subsection{Heat Release Rate}
-\label{sec:hrr}
-
-The heat release per unit volume is found by summing the species mass production rates times the respective heats of formation:
-\begin{equation}\label{eq:vol_heat_gen}
-\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}^0
-\end{equation}
-
-
-\subsection{Extinction}
-\label{extinction}
-
-Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
-
-A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
-
-FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
-
-\paragraph{Basic Extinction Model}
-\begin{enumerate}
-\item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
-\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture (denote with a hat) are defined as follows (take 1 kg as a basis):
-\begin{align}
-\label{eq:dzf} \hat{Z}_{\rm F}^0 &= Z_{\rm F}^0  && \mbox{(stoichiometric Fuel + excess Fuel)} \\
-\label{eq:dza} \hat{Z}_{\rm A}^0 &= s \, \min(Z_{\rm F}^0,Z_{\rm A}^0/s) && \mbox{(stoichiometric Air)}
-\end{align}
-The reactant mixture value for the product diluents (denoted as ``P'' but may include extra inert agents such as argon or water vapor from droplet evaporation) is defined such that the following ratio holds:
-\begin{align}
-\label{eq:dzp} \frac{\hat{Z}_{\rm P}^0}{Z_{\rm P}^0} &= \frac{\hat{Z}_{\rm A}^0}{Z_{\rm A}^0}
-\end{align}
-The effect of Eq.~(\ref{eq:dzp}) is that excess fuel acts as a diluent, but excess air does \emph{not}.  Hence, a large computational cell which is mostly air with a small amount of fuel (and no additional diluents) is likely to burn, whereas a cell which is mostly fuel with very little air will not burn.
-
-Let $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ denote the species mass fractions \emph{after} reaction. The post-reaction mixture does not contain Air but does contain the excess Fuel and diluents from the pre-reaction mixture as well as stoichiometric products of combustion:
-\begin{align}
-\label{eq:dzfbar} \hat{Z}_{\rm F} &= Z_{\rm F} \\
-\label{eq:dzabar} \hat{Z}_{\rm A} &= 0 \\
-\label{eq:dzpbar} \hat{Z}_{\rm P} &= \hat{Z}_{\rm P}^0 + (Z_{\rm P} - Z_{\rm P}^0)
-\end{align}
-
-Once the local pre- and post-reaction mixtures have been determined, the extinction criterion is given by
-\begin{align}
-\label{eq:extinction}
-\hat{Z}_{\rm F}^0 \, h_{\rm F}(T) + \hat{Z}_{\rm A}^0 \, h_{\rm A}(T) + \hat{Z}_{\rm P}^0 \, h_{\rm P}(T) <
-\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
-\end{align}
-where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy.  Therefore, the left-hand-side includes the combustion heat release.  If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature.
-
-\end{enumerate}
-
-%The limiting flame temperature extinction algorithm is outlined below.
-%
-%\begin{enumerate}
-%\item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
-%\be
-%\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
-%\ee
-%If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
-%\item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
-%\item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
-%
-%\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
-%Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
-%\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
-%\item Combustion is allowed if
-%
-%\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
-%\item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
-%\end{enumerate}
-
-\paragraph{Alternative Extinction Models}
-
-In addition to the extinction model described above, there is the option to select a simpler extinction model based on the limiting oxygen concentration or a model for two-step chemistry (CO production). Details of these models are discussed in Appendix \ref{o2_based_model}.
+To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a {\em turbulent batch reactor}. At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, is discussed in Section~\ref{sec:reac_time_scale}. The mixing/reacting evolution equation and its numerical solution are described in Sections~\ref{sec:subgrid_evironment}~and~\ref{sec:reac_time_integration}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast (Section~\ref{sec:fastchemistry}) or governed by an Arrhenius rate law (Section~\ref{Reaction_Rate_Model}).
 
 
 \subsection{Reaction Time Scale Model}
@@ -244,66 +167,11 @@ The mathematical details of the submodels are as follows:
 where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Section \ref{section:turbulent_viscosity}).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
-\subsection{Turbulent Batch Reactor Model}
-\label{sec:batchreactormodel}
 
-Modeling chemical reactions in turbulent flow is mathematically challenging because the length and time scales associated with the reactions may be orders of magnitude below what can be spatially and temporally resolved by the simulation.  When the fuel and oxidizer are initially unmixed (diffusion flame) and the kinetics are fast compared with mixing, the simple Eddy Dissipation Concept (EDC) model \cite{Magnussen:1,Poinsot:TNC} is sufficient.  However, for more complex reactions---such as carbon monoxide and soot formation---where reaction and mixing time scales may overlap, we require a more generalized approach.
-
-To this end, we have developed a simple mixing environment method to close the mean chemical source term, $\dot{m}^{\prime\prime\prime}_{\alpha}$, in Eq.~(\ref{species}).  For pure diffusion flames our method is similar to EDC, but the method is not limited to diffusion flames.  Each computational cell is thought of as a turbulent batch reactor (TBR). At the start of a time step, each cell has an initial concentration of species (reactants, products, inerts) that exist with some degree of mixing. By default, each cell is completely unmixed at the start of a time step (corresponding to a diffusion flame). Generally, the rate of mixing is dominated by turbulence. The mixing time, $\tau_{\rm mix}$, was discussed in Section \ref{sec:reac_time_scale}. Once mixed, species can react based on specified kinetic parameters---reactions may be infinitely fast or governed by an Arrhenius rate law (Section \ref{Reaction_Rate_Model}).
-
-At the start of the integration of the reactor model, the species transport equations have been solved and we know the mean cell concentrations of all reactants in our chemical system.  In this section, for simplicity we will work in terms of primitive species mass fractions.
-
-\subsection{A Simple Subgrid Mixing Environment}
+\subsection{Time Integration for Mixing and Reaction}
 \label{sec:subgrid_evironment}
 
-The cell mean mass fraction of $\alpha$, a function of time, is denoted $\widetilde{Y}_\alpha(t)$. The local concentration at any point within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}^0 \equiv \widetilde{Y}_{\alpha}(0)$.  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
-\begin{equation}
-\label{eq:pdf}
-f(\psi_\alpha;t) = w_1 \delta(0-\psi_\alpha) + w_2 \delta(1-\psi_\alpha) + w_3 \delta(\hat{Y}_\alpha[t] - \psi_\alpha)
-\end{equation}
-where $\delta(x)$ is the Dirac delta function.  In other words, if we look at a specific point, the mass fraction of species $\alpha$ may only be 0, 1, or equal to the mixed zone value, $\hat{Y}_\alpha$ (see Fig.~\ref{fig_subgrid_environment}).  The weights $w_i$ must satisfy integral constraints on the cell: $\int f(\psi_\alpha;t) \d \psi_\alpha = 1$, $\int f(\psi_\alpha;t) \psi_\alpha \d \psi_\alpha = \widetilde{Y}_\alpha(t)$.
-
-\begin{figure}
-\begin{center}
-\begin{tikzpicture}[scale=0.75]
-\begin{axis}[
-    width=0.95\linewidth,
-    axis equal image,
-    enlargelimits=false,
-    axis x line=none,
-    axis y line=none,
-    colorbar,
-    point meta min=0, point meta max=1,
-    colormap={whiteblack}{gray(0cm)=(0); gray(1cm)=(1)},
-    colorbar style={
-        title=Mass Fraction,
-        at={(1.05,0.01)}, % Coordinate system relative to the main axis. (1,1) is upper right corner of main axis.
-        anchor=south west,
-        height=.98*\pgfkeysvalueof{/pgfplots/parent axis height}, % Scale the colorbar relative to the main axis
-        /pgf/number format/.cd, % Change the key directory to /pgf/number format
-        fixed, fixed zerofill, precision=1,
-        /tikz/.cd  % Change back to the normal key directory
-    }
-    	]
-	\addplot graphics [xmin=-2.10, xmax=-0.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_b}
-	node [above,white] at (30,15) {\Large(a)};
-	\addplot graphics [xmin= 0.10, xmax= 2.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_a}
-	node [above,white] at (250,15) {\Large(b)};
-\end{axis}
-\end{tikzpicture}
-\end{center}
-\caption[Idealized subgrid environment for batch reactor model]{Subgrid environment at an instant in time in a hypothetical computational cell (batch reactor). (a) Well-resolved scalar field, highly unmixed, after turbulent transport. (b) Idealized subgrid environment: the local mass fraction is either 0, 1, or equal to a mixed mean.  In the present model, the gray region is called the ``mixed reactor zone'' and evolves in time (in volume and composition) during the integration of the batch reactor.}
-\label{fig_subgrid_environment}
-\end{figure}
-
-
-For convenience, we define the \emph{unmixed fraction}, $\zeta(t)$, as the fraction of mass within the cell existing as either 0 or 1.  To satisfy the integral constraints, the PDF weights are set to
-\begin{align}
-w_1 &= \zeta \, (1 - \widetilde{Y}_\alpha^0) \\
-w_2 &= \zeta \, \widetilde{Y}_\alpha^0 \\
-w_3 &= 1-\zeta
-\end{align}
-As shown in Appendix~\ref{app:unmixed_fraction}, the unmixed fraction evolves by the following simple ODE
+Let the cell mean mass fraction of species $\alpha$ be denoted as $\widetilde{Y}_\alpha(t)$. Assume that any small parcel of gas within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of species $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}^0 \equiv \widetilde{Y}_{\alpha}(0)$. For convenience, we define $\zeta(t)$ as the unmixed fraction of mass within the cell. As shown in Appendix~\ref{app:unmixed_fraction}, the unmixed fraction evolves by the following simple ordinary differential equation (ODE):
 \begin{equation}
 \label{eq:zeta}
 \frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}}
@@ -313,11 +181,7 @@ with the solution
 \label{eq:zeta_soln}
 \zeta(t) = \zeta_0 \,{\rm e}^{-t/\tau_{\rm mix}}
 \end{equation}
-The initial condition $\zeta_0$ may be specified, modeled algebraically, or taken from the update of a passive scalar transport equation.  Currently, FDS takes $\zeta_0=1$ as default for LES mode (diffusion flame) and $\zeta_0=0$ as default for DNS (it is assumed that the mixing time scale is well-resolved).
-
-
-\subsection{Mean Chemical Source Term}
-\label{source_term}
+The initial condition, $\zeta_0$, may be specified, modeled algebraically, or taken from the update of a passive scalar transport equation.  Currently, FDS takes $\zeta_0=1$ as default, an appropriate assumption for a turbulent diffusion flame.
 
 At any point in time, the composition of the computational cell may be determined by combining the unmixed and mixed portions:
 \begin{equation}
@@ -330,86 +194,64 @@ Differentiating (\ref{eq:final_comp}) in time and using (\ref{eq:zeta}) we see t
 \dot{m}^{\prime\prime\prime}_{\alpha} = \rho \frac{\mbox{d}\widetilde{Y}_{\alpha}}{\mbox{d}t}
 = \rho \left[ \frac{\zeta}{\tau_{\rm{mix}}} (\hat{Y}_\alpha - \widetilde{Y}_{\alpha}^0)  + (1-\zeta) \frac{\mbox{d}\hat{Y}_\alpha}{\mbox{d}t} \right]
 \end{equation}
-Note that the unmixed fraction is comparable to the \emph{complement} of the fraction of ``reacting fine structures'' in other EDC formulations \cite{Chen:1,Panjwani:2010}, but in our model this fraction evolves in time.  A comparison between our model and that of Panjwani et al.~\cite{Panjwani:2010} is developed further in Appendix~\ref{app:eddy_dissipation_concept}.
+Note that the unmixed fraction is comparable to the \emph{complement} of the fraction of ``reacting fine structures'' in other EDC formulations \cite{Chen:1,Panjwani:2010}, but in our model this fraction evolves in time.  A comparison between our model and that of Panjwani et al.~\cite{Panjwani:2010} is developed further in Appendix~\ref{app:eddy_dissipation_concept}. An alternate derivation of (\ref{eq:final_comp}) and (\ref{mass_prod_rate}) in terms of moments of the transport equation for the PDF is given in Appendix~\ref{app:pdf_transport}.  This derivation highlights that the implicit mixing model is a variant of the {\em interaction by exchange with the mean} or IEM model~\cite{Dopazo:1974}, which we refer to as the {\em interaction by exchange with the mixed mean} or IEMM.
 
-An alternate derivation of (\ref{eq:final_comp}) and (\ref{mass_prod_rate}) in terms of moments of the transport equation for the PDF (\ref{eq:pdf}) is given in Appendix~\ref{app:pdf_transport}.  This derivation highlights that the implicit mixing model is a \emph{variant of} the `interaction by exchange with the mean' or IEM model \cite{Dopazo:1974}, which we refer to as the `interaction by exchange with the mixed mean' or IEMM.
-
-\subsection{Evolution of the Composition in the Mixed Reactor Zone}
-
-Since (\ref{mass_prod_rate}) was obtained by differentiating (\ref{eq:final_comp}) and we are ultimately interested in integrating over an LES times step $\Delta t$ to obtain the final cell composition, it turns out to be easier and more accurate to simply work in terms of (\ref{eq:final_comp}). Thus, the problem is reduced to finding a solution for $\hat{Y}_{\alpha}(t)$, since the solution $\zeta(t)$ is known from (\ref{eq:zeta_soln}).
-
-The composition in the mixed reactor zone changes by two processes: mixing (mass is transferred from the unmixed zone to the mixed zone) and chemical reaction. As a consequence of the time splitting scheme, the total mass within the reactor (computational cell) is constant over a time step.  We denote this mass by $\rho V_{\rm c}$, where $\rho$ is the initial cell mass density and $V_{\rm c}$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given (\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
+Rather than work with the evolution equation (\ref{mass_prod_rate}) for the cell mean mass fraction, $\widetilde{Y}_\alpha(t)$, it is more convenient to work with an analogous equation for the mass fraction within the mixed reactor zone, $\hat{Y}_\alpha(t)$. This equivalent evolution equation is derived as follows. It is assumed that the total mass within the grid cell is constant over a time step. The composition in the mixed reactor zone changes by two processes: mixing (mass is transferred from the unmixed zone to the mixed zone) and chemical reaction. We denote this mass by $\rho V_{\rm c}$, where $\rho$ is the initial cell mass density and $V_{\rm c}$ is the cell volume.  The unmixed mass is denoted $U(t)$ and the mixed mass is denoted $M(t)$.  Given (\ref{eq:zeta_soln}), the following equations describe the cell mass evolution:
 \begin{align}
-\label{eq:mixunmix_1} \rho V_{\rm c} &= U(t) + M(t) \\
-\label{eq:mixunmix_2} U(t) &= \zeta(t)\,\rho V_{\rm c} \\
+\label{eq:mixunmix_1} \rho V_{\rm c} &= U(t) + M(t) \\[0.1in]
+\label{eq:mixunmix_2} U(t) &= \zeta(t)\,\rho V_{\rm c} \\[0.1in]
 \label{eq:mixunmix_3} M(t) &= (1-\zeta(t))\,\rho V_{\rm c}
 \end{align}
-
-Within the mixed reactor zone, let $m_\alpha(t)$ denote the mass of species $\alpha$.  The mass fraction of $\alpha$ in the mixed zone may then be written as
+Within the mixed reactor zone, let $\hat{m}_\alpha(t)$ denote the mass of species $\alpha$.  The mass fraction of $\alpha$ in the mixed zone may then be written as
 \begin{equation}
 \label{eq:mass_fraction_mixed}
-\hat{Y}_{\alpha}(t)\equiv\frac{m_{\alpha}(t)}{M(t)}
+\hat{Y}_{\alpha}(t)\equiv\frac{\hat{m}_{\alpha}(t)}{M(t)}
 \end{equation}
-This concentration is important because Arrhenius rate laws are based on the mixed composition only.
-
-The ODE governing the mixed species mass is
+This concentration is important because Arrhenius rate laws are based on the mixed composition only. The ODE governing the mixed species mass is
 \begin{align}
 \label{eq:mixmass}
-\frac{\d m_{\alpha}}{\d t} &= \hat{Y}_\alpha \frac{\d M}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
-&= - \widetilde{Y}_{\alpha}^0 \frac{\d U}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\
+\frac{\d \hat{m}_{\alpha}}{\d t} &= \hat{Y}_\alpha \frac{\d M}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\[0.1in]
+&= - \widetilde{Y}_{\alpha}^0 \frac{\d U}{\d t} + M \frac{\d \hat{Y}_\alpha}{\d t} \notag\\[0.1in]
 &= \rho V_{\rm c} \left[ \frac{\zeta \, \widetilde{Y}_{\alpha}^0 }{\tau_{\rm mix}} + (1-\zeta) \frac{\d \hat{Y}_\alpha}{\d t} \right]
 \end{align}
 The first term  on the RHS accounts for mixing.  The second term represents chemical kinetics. Note that in the second step we have utilized the fact that the unmixed composition remains constant (at the initial cell mean) throughout the time step. The third step follows from (\ref{eq:zeta}), (\ref{eq:mixunmix_2}), and (\ref{eq:mixunmix_3}).
 
-\subsection{Time Integration for Mixing and Reaction}
+\subsection{Numerical Solution via Time-Splitting}
 \label{sec:reac_time_integration}
 
 In this section, we discuss the numerical solution of (\ref{eq:mixmass}). Let $\Delta t^k$ represent the $k$th sub-time step in the integration (less than or equal to the LES time step $\delta t$); $t^k=0$ at the start of the reactor integration.  The integration is time split such that \emph{mixing is done first, followed by reaction}. A simple explicit update of (\ref{eq:mixmass}) over the sub-time interval $t^k$ to $t^k + \Delta t^k$ is given by
 \begin{align}
-\label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) - [ \zeta(t^k+\Delta t^k) - \zeta(t^k) ] \, \widetilde{Y}_{\alpha}^0 \, \rho V_{\rm c} \\
-\label{eq:ystar}  \hat{Y}_\alpha^* &= m_\alpha^*/M^* \\
+\label{eq:dmdt_1} \hat{m}_\alpha^* &= \hat{m}_{\alpha}(t^k) - [ \zeta(t^k+\Delta t^k) - \zeta(t^k) ] \, \widetilde{Y}_{\alpha}^0 \, \rho V_{\rm c} \\[0.1in]
+\label{eq:ystar}  \hat{Y}_\alpha^* &= \hat{m}_\alpha^*/M^* \\[0.1in]
 \label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^*
 \end{align}
-The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$).
+The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$). At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass to obtain the final cell composition.
 
-The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in (\ref{eq:dmdt_2}) depends on the complexity of the reaction system.  Below we first discuss the simplest case of infinitely fast chemistry.  Then we discuss finite-rate chemistry.
+The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in (\ref{eq:dmdt_2}) depends on the complexity of the reaction system. In the next section, we first discuss the simplest case of infinitely fast chemistry.  Then we discuss finite-rate chemistry.
 
-At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass in (\ref{eq:final_comp}) to obtain the final cell composition.
 
-%\subsection{Time Integration of Chemical Reactions}
-%\label{sec:reac_time_integration}
-%
-%In this section, we discuss the numerical solution of Eq.~(\ref{eq:mixmass}).  The solution $m_\alpha(t)$ is then used together with $M(t)$ in Eq.~(\ref{eq:mass_fraction_mixed}) to determine the evolution of the mass fraction in the mixed zone of the reactor, $\hat{Y}_\alpha(t)$.
-%
-%Let $\Delta t^k$ represent the $k$th sub-time step in the integration (not necessarily equal to the FDS time step $\delta t$); $t^k=0$ at the start of the reactor integration.  The integration is time split such that \emph{mixing is done first, followed by reaction}. A simple explicit update of Eq.~(\ref{eq:mixmass}) over the sub-time interval $t^k$ to $t^k + \Delta t^k$ is given by
-%\begin{align}
-%\label{eq:dmdt_1} m_\alpha^* &= m_{\alpha}(t^k) + [ \zeta(t^k) - \zeta(t^k+\Delta t^k) ] \, \rho V \, \overline{Y}_{\alpha,0}  \\
-%\label{eq:dmdt_2} m_\alpha(t^k + \Delta t^k) &= m_{\alpha}^* + M(t^k + \Delta t^k) \, \Delta \hat{Y}_\alpha^*
-%\end{align}
-%The superscript $^*$ indicates the post-mixing, pre-reaction value.  The first step, Eq.~(\ref{eq:dmdt_1}), is an analytical solution for the mixing step (second term in Eq.~(\ref{eq:mixmass})) over the subinterval, obtained using Eqs.~(\ref{eq:mixingstep}), (\ref{eq:mixunmix_2}), and (\ref{eq:zeta_soln}).  The unmixed fractions $\zeta(t^k)$ and $\zeta(t^k + \Delta t^k)$ are obtained from Eq.~(\ref{eq:zeta_soln}). The mixing time scale $\tau_{\rm mix}$ needed in Eq.~(\ref{eq:zeta_soln}) is computed once per FDS time step and held constant during the reactor integration. The mixed mass, $M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using Eq.~(\ref{eq:mixunmix_3}). For a single step, mixing-controlled reaction, we take only one sub-step and $\Delta t = \delta t$.  This is discussed in more detail below.
-%
-%The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in Eq.~(\ref{eq:dmdt_2}) depends on the complexity of the reaction system.  Below we first discuss the simplest (default) case of a single step, mixing-controlled (infinitely fast) reaction.  Then we discuss multiple fast reactions.  And finally, finite-rate chemistry.
-%
-%Once the mixed zone mass has been updated, the mixed zone mass fractions are computed by
-%\begin{equation}
-%\label{eq:mixed_mass_fraction_sub}
-%\hat{Y}_\alpha(t^k + \Delta t^k) = \frac{m_\alpha(t^k + \Delta t^k)}{M(t^k + \Delta t^k)}
-%\end{equation}
-%At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass in Eq.~(\ref{eq:final_comp}) to obtain the final cell composition.
 
-\subsection{Infinitely Fast Chemistry (Default)}
-
-%In practice, for fast chemistry $E$ and $n$ in Eq.~(\ref{eq:finite_rate_fin}) are set to zero, which removes the temperature dependence from the rate expression. The species exponents, $a_{\alpha}$, in Eqs.~(\ref{eq:aprime}) and (\ref{eq:finite_rate_fin}) are also set to zero to remove concentration dependence. Finally, the pre-exponential factor, $A^{\prime}$, is set to $1 \times 10^{16}$. As a result, $\mbox{d}\hat{Y}_{\rm F}/\mbox{d}t$ becomes sufficiently large such that the fuel in the mixed zone can be stoichiometrically consumed in a single time step, effectively making the rate infinite.
+\subsection{Infinitely Fast Chemistry}
+\label{sec:fastchemistry}
 
 \subsubsection{Single Reaction}
+
 For a single reaction, the change in fuel is based on the limiting reactant \cite{Poinsot:TNC}:
 \begin{equation}\label{eq:stoich_fuel_single}
 \Delta \hat{Y}_{\rm F} = -\min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 The minimum is taken in Eq.~(\ref{eq:stoich_fuel_single}) to ensure that the reactant species mass fractions remain realizable.
 
+This approach is used for the vast majority of large-scale fire applications---the so-called ``mixed is burnt'' assumption, where the mean chemical source term for the Fuel, F, is modeled using the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager~\cite{Magnussen:1,Poinsot:TNC}:
+\begin{equation}
+\label{eq:edc}
+\dot{m}_{\si{F}}^{\prime\prime\prime} = -\rho \frac{\min(Y_{\si{F}}, Y_{\si{A}}/s)}{\tau_{\rm mix}}
+\end{equation}
+Here, $Y_{\si{F}}$ and $Y_{\si{A}}$ are the cell mean mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.
+
 \subsubsection{Multiple Reactions}
 For multiple reactions with infinitely fast chemistry, the reaction rate is treated as a second-order (assuming two reactants) Arrhenius reaction with zero activation energy.  The Arrhenius constant is set to a large value.  Further discussion of the time integration for these cases is given in Appendix \ref{chemistry_integration}.
+
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
@@ -479,6 +321,85 @@ Using the change in fuel concentration for each of the $i$ reactions, the change
 \begin{equation}\label{eq:change_alpha}
 \Delta \hat{Y}_{\alpha} = \sum_i \,\left(\frac{\nu_{\alpha,i} \,W_{\alpha}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i}
 \end{equation}
+
+
+
+\subsection{Heat Release Rate}
+\label{sec:hrr}
+
+The heat release per unit volume is found by summing the species mass production rates times the respective heats of formation:
+\begin{equation}\label{eq:vol_heat_gen}
+\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}^0  \quad ; \quad  \dot{m}_\alpha''' = \frac{\nu_{\alpha} \,W_{\alpha}}{\nu_{{\rm F}} \,W_{{\rm F}}} \dot{m}_{\rm F}'''
+\end{equation}
+
+
+
+
+\clearpage
+
+\section{Extinction}
+\label{extinction}
+
+Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
+
+A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
+
+FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
+
+\paragraph{Basic Extinction Model}
+\begin{enumerate}
+\item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
+\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture (denote with a hat) are defined as follows (take 1 kg as a basis):
+\begin{align}
+\label{eq:dzf} \hat{Z}_{\rm F}^0 &= Z_{\rm F}^0  && \mbox{(stoichiometric Fuel + excess Fuel)} \\
+\label{eq:dza} \hat{Z}_{\rm A}^0 &= s \, \min(Z_{\rm F}^0,Z_{\rm A}^0/s) && \mbox{(stoichiometric Air)}
+\end{align}
+The reactant mixture value for the product diluents (denoted as ``P'' but may include extra inert agents such as argon or water vapor from droplet evaporation) is defined such that the following ratio holds:
+\begin{align}
+\label{eq:dzp} \frac{\hat{Z}_{\rm P}^0}{Z_{\rm P}^0} &= \frac{\hat{Z}_{\rm A}^0}{Z_{\rm A}^0}
+\end{align}
+The effect of Eq.~(\ref{eq:dzp}) is that excess fuel acts as a diluent, but excess air does \emph{not}.  Hence, a large computational cell which is mostly air with a small amount of fuel (and no additional diluents) is likely to burn, whereas a cell which is mostly fuel with very little air will not burn.
+
+Let $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ denote the species mass fractions \emph{after} reaction. The post-reaction mixture does not contain Air but does contain the excess Fuel and diluents from the pre-reaction mixture as well as stoichiometric products of combustion:
+\begin{align}
+\label{eq:dzfbar} \hat{Z}_{\rm F} &= Z_{\rm F} \\
+\label{eq:dzabar} \hat{Z}_{\rm A} &= 0 \\
+\label{eq:dzpbar} \hat{Z}_{\rm P} &= \hat{Z}_{\rm P}^0 + (Z_{\rm P} - Z_{\rm P}^0)
+\end{align}
+
+Once the local pre- and post-reaction mixtures have been determined, the extinction criterion is given by
+\begin{align}
+\label{eq:extinction}
+\hat{Z}_{\rm F}^0 \, h_{\rm F}(T) + \hat{Z}_{\rm A}^0 \, h_{\rm A}(T) + \hat{Z}_{\rm P}^0 \, h_{\rm P}(T) <
+\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
+\end{align}
+where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy.  Therefore, the left-hand-side includes the combustion heat release.  If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature.
+
+\end{enumerate}
+
+%The limiting flame temperature extinction algorithm is outlined below.
+%
+%\begin{enumerate}
+%\item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
+%\be
+%\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
+%\ee
+%If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
+%\item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
+%\item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
+%
+%\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
+%Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
+%\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
+%\item Combustion is allowed if
+%
+%\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
+%\item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
+%\end{enumerate}
+
+\paragraph{Alternative Extinction Models}
+
+In addition to the extinction model described above, there is the option to select a simpler extinction model based on the limiting oxygen concentration or a model for two-step chemistry (CO production). Details of these models are discussed in Appendix~\ref{alternative_extinction_models}.
 
 
 
