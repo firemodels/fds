@@ -2687,12 +2687,13 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
       DO NN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
          ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
          RHO_S(NN) = RHO_S(NN) + ML%NU_RESIDUE(MATL_INDEX(NN),J)*DT_BC*RHO_DOT
+         M_DOT_S_PPP(NN) = M_DOT_S_PPP(NN) + ML%NU_RESIDUE(MATL_INDEX(NN),J)*RHO_DOT  ! (m_dot_alpha')'''
       ENDDO
       Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%H_R(J)  ! Tech Guide: q_dot_s,c'''
+      M_DOT_S_PPP(N) = M_DOT_S_PPP(N) - RHO_DOT  ! m_dot_alpha''' = -rho_s(0) * sum_beta r_alpha,beta
       DO NS=1,N_TRACKED_SPECIES  ! Tech Guide: m_dot_gamma'''
          M_DOT_G_PPP_ADJUST(NS) = M_DOT_G_PPP_ADJUST(NS) + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*RHO_DOT
          M_DOT_G_PPP_ACTUAL(NS) = M_DOT_G_PPP_ACTUAL(NS) + ML%NU_GAS(NS,J)*RHO_DOT
-         M_DOT_S_PPP(N)         = M_DOT_S_PPP(N)         + ML%NU_GAS(NS,J)*RHO_DOT
       ENDDO
 
    ENDDO REACTION_LOOP
