@@ -732,6 +732,7 @@ performed by RADCAL when necessary. If the temperature sought is out of the
 tabulated data range, then the data at the nearest temperature are used.
 
 \chapter{Alternative Extinction Models}
+\label{alternative_extinction_models}
 
 \section{A Simple Model of Flame Extinction}
 \label{o2_based_model}
@@ -772,13 +773,13 @@ temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb})
 \be
    \hat{Y}_{\OTWO,lim} = \frac{ \overline{c_p} (T_f-T_m) }{\Delta H/r_\OTWO}
 \ee
-If $\hat{Y}_{\OTWO} < \hat{Y}_{\OTWO,lim}$ then combustion is not allowed and  $\Delta \hat{Y}_{F}$ is set to 0.
+If $\hat{Y}_{\OTWO} < \hat{Y}_{\OTWO,\lim}$ then combustion is not allowed and  $\Delta \hat{Y}_{F}$ is set to 0.
 
 As an example, the critical adiabatic flame temperature can be assumed to have a constant value of approximately 1700~K for hydrocarbon diffusion flames, as suggested by Beyler \cite{SFPE:Beyler}. The combustion products can have an average specific heat of \SI{1.2}{kJ/(kg.K)} which is a value similar to that of nitrogen, the primary component of the products. Then, the relationship between the limiting oxygen mass fraction and the bulk temperature of a control volume is given by:
 \be
-   \hat{Y}_{\OTWO,lim} = \frac{ \overline{c_p} (T_{CFT}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{13100}  \label{extinction_model}
+   \hat{Y}_{\OTWO,\lim} = \frac{ \overline{c_p} (T_{\rm CFT}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{13100}  \label{extinction_model}
 \ee
-For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction would evaluate to $\hat{Y}_{\OTWO,lim}=0.13$.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration at extinction of flames by dilution of air with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction would evaluate to $\hat{Y}_{\OTWO,\lim}=0.13$.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration at extinction of flames by dilution of air with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
 \section{A Two-Step Chemistry Flame Extinction Model}
 \label{co_based_model}
@@ -827,11 +828,11 @@ In Eq.~(\ref{eq:A4}), $A$ represents the time updated value of the species conce
 
 In addition to increasing the order of the error in the numerical scheme, Richardson extrapolation also provides an estimate of the error value. This estimate is calculated via a Taylor expansion:
 \begin{equation}\label{eq:error}
-error \approx \frac{1}{15}\left(\frac{4\,A_4-A_2}{3} - \frac{4\,A_2-A_1}{3}\right)
+\hbox{error} \approx \frac{1}{15}\left(\frac{4\,A_4-A_2}{3} - \frac{4\,A_2-A_1}{3}\right)
 \end{equation}
-The time step ($\Delta t_{new}$) required to maintain the specified/acceptable error ($err\_tol$) can be calculated by using the local error ($error$), the current time step ($\Delta t$), and the order of error within the numerical integration scheme, in this case fourth-order:
+The time step ($\Delta t_{\rm new}$) required to maintain the specified/acceptable error ($\rm err\_tol$) can be calculated by using the local error (error), the current time step ($\Delta t$), and the order of error within the numerical integration scheme, in this case fourth-order:
 \begin{equation}\label{eq:dt_new}
-\Delta t_{new}=\Delta t \left(\frac{err\_tol}{error}\right)^{1/4}
+\Delta t_{\rm new}=\Delta t \left(\frac{\rm err\_tol}{\rm error}\right)^{1/4}
 \end{equation}
 Equation (\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required.
 
@@ -873,17 +874,63 @@ The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which
 \chapter{The Unmixed Fraction}
 \label{app:unmixed_fraction}
 
-In Sec.~\ref{sec:subgrid_evironment}, ``A Simple Subgrid Mixing Environment'', we present the evolution equation for an important variable, the unmixed fraction, $\zeta$, in the batch reactor model for turbulent combustion.  This appendix shows the development of that equation.
+In Sec.~\ref{sec:subgrid_evironment} we present the evolution equation for an important variable, the unmixed fraction, $\zeta$, in the batch reactor model for turbulent combustion.  This appendix explains the development of that equation.
 
 \subsection*{Moments of the PDF Transport Equation}
 \label{app:pdf_transport}
 
+The cell mean mass fraction of species $\alpha$ is denoted $\widetilde{Y}_\alpha(t)$. A fluid parcel at any point within the cell exists in one of two states: completely unmixed or completely mixed.  Let $\hat{Y}_\alpha(t)$ denote the mass fraction of $\alpha$ in the mixed reactor zone, initially equal to the cell mean, $\hat{Y}_\alpha(0) = \widetilde{Y}_{\alpha}^0 \equiv \widetilde{Y}_{\alpha}(0)$.  With $\psi_\alpha \in [0,1]$ representing the sample space for the composition, the subgrid probability density function (PDF) may be written as
+\begin{equation}
+\label{eq:pdf}
+f(\psi_\alpha;t) = w_1 \delta(0-\psi_\alpha) + w_2 \delta(1-\psi_\alpha) + w_3 \delta(\hat{Y}_\alpha[t] - \psi_\alpha)
+\end{equation}
+where $\delta(x)$ is the Dirac delta function.  In other words, if we look at a specific point, the mass fraction of species $\alpha$ may only be 0, 1, or equal to the mixed zone value, $\hat{Y}_\alpha$ (see Fig.~\ref{fig_subgrid_environment}).  The weights $w_i$ must satisfy integral constraints on the cell: $\int f(\psi_\alpha;t) \d \psi_\alpha = 1$, $\int f(\psi_\alpha;t) \psi_\alpha \d \psi_\alpha = \widetilde{Y}_\alpha(t)$.
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[scale=0.75]
+\begin{axis}[
+    width=0.95\linewidth,
+    axis equal image,
+    enlargelimits=false,
+    axis x line=none,
+    axis y line=none,
+    colorbar,
+    point meta min=0, point meta max=1,
+    colormap={whiteblack}{gray(0cm)=(0); gray(1cm)=(1)},
+    colorbar style={
+        title=Mass Fraction,
+        at={(1.05,0.01)}, % Coordinate system relative to the main axis. (1,1) is upper right corner of main axis.
+        anchor=south west,
+        height=.98*\pgfkeysvalueof{/pgfplots/parent axis height}, % Scale the colorbar relative to the main axis
+        /pgf/number format/.cd, % Change the key directory to /pgf/number format
+        fixed, fixed zerofill, precision=1,
+        /tikz/.cd  % Change back to the normal key directory
+    }
+    	]
+	\addplot graphics [xmin=-2.10, xmax=-0.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_b}
+	node [above,white] at (30,15) {\Large(a)};
+	\addplot graphics [xmin= 0.10, xmax= 2.1, ymin=-1, ymax=1] {FIGURES/transport_vs_mixing_0461_a}
+	node [above,white] at (250,15) {\Large(b)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\caption[Idealized subgrid environment for batch reactor model]{Subgrid environment at an instant in time in a hypothetical computational cell (batch reactor). (a) Well-resolved scalar field, highly unmixed, after turbulent transport. (b) Idealized subgrid environment: the local mass fraction is either 0, 1, or equal to a mixed mean.  In the present model, the gray region is called the ``mixed reactor zone'' and evolves in time (in volume and composition) during the integration of the batch reactor.}
+\label{fig_subgrid_environment}
+\end{figure}
+
+For convenience, we define the \emph{unmixed fraction}, $\zeta(t)$, as the fraction of mass within the cell existing as either 0 or 1.  To satisfy the integral constraints, the PDF weights are set to
+\begin{align}
+w_1 &= \zeta \, (1 - \widetilde{Y}_\alpha^0) \\
+w_2 &= \zeta \, \widetilde{Y}_\alpha^0 \\
+w_3 &= 1-\zeta
+\end{align}
 As discussed by Pope \cite{Pope:2000}, the PDF (\ref{eq:pdf}) evolves by the Fokker-Planck equation:
 \begin{equation}
 \label{eq:fokker-planck}
 \frac{\partial f}{\partial t} = -\frac{\partial}{\partial \psi_\alpha} \left(f \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle \right) \,\mbox{.}
 \end{equation}
-The term on the right in angled brackets is a conditional mean.  Here it is modeled using a variant of IEM \cite{Dopazo:1974} which we call `interaction by exchange with the mixed mean' or IEMM.  When including chemical reaction, the conditional mean is modeled by
+The term on the right in angled brackets is a conditional mean.  Here it is modeled using a variant of IEM \cite{Dopazo:1974} which we call {\em interaction by exchange with the mixed mean} or IEMM.  When including chemical reaction, the conditional mean is modeled by
 \begin{equation}
 \label{eq:iem2}
 \left\langle \left. \frac{\partial Y_\alpha}{\partial t} \right| \psi_\alpha \right\rangle = \frac{1}{\tau_{\si{mix}}}(\hat{Y}_\alpha - \psi_\alpha) + \frac{\d \hat{Y}_\alpha}{\d t} \,\mbox{.}
@@ -926,10 +973,13 @@ Comparing (\ref{eq:diff_comp}) with (\ref{eq:first_moment}) we see that during t
 \end{equation}
 Note that while (\ref{mass_prod_rate}) invokes (\ref{eq:zeta_ode}) in its derivation, (\ref{eq:first_moment}) does not---it is an independent derivation that relies on the choice of mixing model, in this case a variant of IEM as shown in (\ref{eq:iem2}).
 
+
+
 \chapter{Limiting Behavior of the Turbulent Batch Reactor Model}
 \label{app:eddy_dissipation_concept}
+\label{source_term}
 
-In Sec.~\ref{source_term}, we state that our turbulent batch reactor model, Eq.~(\ref{mass_prod_rate}), is equivalent to other approaches to modeling turbulent combustion under certain limiting conditions.  These limiting cases are discussed below.
+The turbulent batch reactor model, Eq.~(\ref{mass_prod_rate}), is equivalent to other approaches to modeling turbulent combustion under certain limiting conditions.  These limiting cases are discussed below.
 
 \section{Burke-Schumann Solution}
 
