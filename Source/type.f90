@@ -529,7 +529,7 @@ END TYPE IBM_EXIMFACE_TYPE
 ! Velocity regular faces connected to cut-cell interpolation type:
 INTEGER, PARAMETER :: MAX_RCVEL_NCFACE = 5
 TYPE IBM_RCVEL_TYPE
-   INTEGER :: NCFACE
+   INTEGER :: NCFACE, IWC=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
    INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)            ::    IJK_CARTCEN ! [ I J K ]
