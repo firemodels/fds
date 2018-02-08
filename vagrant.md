@@ -404,6 +404,11 @@ GNU Fortran 8.0
 - [Install latest gfortran on Ubuntu](https://www.scivision.co/install-latest-gfortran-on-ubuntu/)
 - [Creating shared and static library with GNU compiler](http://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/GCC/create-libraries/index)
 
+## More on shared libraries
+
+- ldconfig vs. LD_LIBRARY_PATH
+- TLDP.org on Shared Libraries
+
 ## Continuous integration as a service
 
 Build FDS on Linux
