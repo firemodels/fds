@@ -315,21 +315,22 @@ The Arrhenius rate law has a first-order dependence on the concentration of M.  
 
 For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed and the change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
 
-\subsection{Change in Species Compositions}
-
-Using the change in fuel concentration for each of the $i$ reactions, the change in each species $\alpha$ is given by
-\begin{equation}\label{eq:change_alpha}
-\Delta \hat{Y}_{\alpha} = \sum_i \,\left(\frac{\nu_{\alpha,i} \,W_{\alpha}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i}
-\end{equation}
-
-
 
 \subsection{Heat Release Rate}
 \label{sec:hrr}
 
-The heat release per unit volume is found by summing the species mass production rates times the respective heats of formation:
+At the end of the LES/DNS time step, $\delta t$, the mixed reactor zone mass fraction of species alpha is computed using the change in fuel concentration for each of the $N_{\rm r}$ reactions:
+\begin{equation}\label{eq:change_alpha}
+\hat{Y}_\alpha(\delta t) = \widetilde{Y}_\alpha^0 + \sum_{i=1}^{N_{\rm r}} \,\left(\frac{\nu_{\alpha,i} \,W_{\alpha}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i}
+\end{equation}
+The new cell mean mass fraction is found be evaluating Eq.~(\ref{eq:final_comp}) at the end of the time step:
+\begin{equation}
+\label{eq:final_comp2}
+\widetilde{Y}_{\alpha}(\delta t)= \zeta(\delta t) \, \widetilde{Y}_{\alpha}^0 + (1-\zeta(\delta t)) \, \hat{Y}_{\alpha}(\delta t)
+\end{equation}
+The heat release per unit volume is then found by summing the species mass production rates times the respective heats of formation:
 \begin{equation}\label{eq:vol_heat_gen}
-\dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}^0  \quad ; \quad  \dot{m}_\alpha''' = \frac{\nu_{\alpha} \,W_{\alpha}}{\nu_{{\rm F}} \,W_{{\rm F}}} \dot{m}_{\rm F}'''
+\dot{q}''' = \rho  \sum_{\alpha} \left( \widetilde{Y}_{\alpha}(\delta t)-\widetilde{Y}_{\alpha}^0 \right) \, \Delta h_{{\rm f},\alpha}^0  
 \end{equation}
 
 
