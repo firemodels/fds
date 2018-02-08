@@ -388,18 +388,19 @@ The gravitational settling velocity is given by~\cite{Davies_Charles}
 u_{\rm g} = g m_{\rm a} \frac{\text{Cn}}{6 \pi \, \chi_{\rm d} \, \mu \, r_{\rm a}}
 \ee
 where $m_{\rm a}$ is the particle mass, $\chi_{\rm d}$ is a shape factor, $\mu$ is the dynamic viscosity of air,
-$r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Cunningham:1}
+$r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Davies_Charles}
 \be
-\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
+\text{Cn} = 1 + 1.257 \; \text{Kn} + 0.4 \; \text{Kn} \; \mathrm{e}^{-1.1/\text{Kn}}
 \ee
 where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
-to the particle radius. The mean free path of a gas is proportional to its temperature,
-thus Kn is computed as~\cite{Sippola:1}
+to the particle radius. Kn is computed as~\cite{Sippola:1}
 \be
-\text{Kn} = \frac{\lambda}{r_{\rm a}} \frac{T_{\rm g}}{T_\infty}
+\text{Kn} = \frac{\lambda}{r_{\rm a}}
 \ee
-where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
-
+where $\lambda$ is the mean free path of gas molecules which is computed as~\cite{(Jennings_S_G} 
+\be
+\lambda = \mu_g \; \sqrt {\frac {\pi}{2 \; p \; \rho_g} }
+\ee
 For each aerosol species in the gas phase, a gravitational settling velocity is calculated
 and imposed on the convective term in the species transport
 equation~(Eq.~\ref{species}). This approach is similar to the drift flux model
