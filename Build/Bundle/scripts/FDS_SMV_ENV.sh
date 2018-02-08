@@ -2,8 +2,8 @@
   
 # ---- FDS and smokeview versions
 
-export fds_version=6.6.0test 
-export smv_version=6.6.1test 
+export fds_version=FDS6.6.0
+export smv_version=SMV6.6.2
   
 #  ---- MPI versions
   
