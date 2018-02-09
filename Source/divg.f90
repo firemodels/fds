@@ -1442,9 +1442,9 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
          WC=>WALL(IW)
          WC%ONE_D%PRESSURE_ZONE = 0
          WC%ONE_D%UW = 0._EB
-         WC%U_TAU = 0._EB
+         WC%ONE_D%U_TAU = 0._EB
          WC%ONE_D%RHO_F = RHO_0(1)
-         WC%Y_PLUS = 1._EB
+         WC%ONE_D%Y_PLUS = 1._EB
          WC%ONE_D%RHO_D_F = 0.1_EB ! Do not initialize to zero to avoid divide by zero in the first time step
          II  = WC%ONE_D%II
          JJ  = WC%ONE_D%JJ
