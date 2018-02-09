@@ -438,12 +438,14 @@ CONTAINS
 
 SUBROUTINE CFACE_THERMAL_GASVARS(ICF,ONE_D)
 
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY
+
 INTEGER, INTENT(IN) :: ICF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(INOUT), POINTER :: ONE_D
 
 ! Local Variables:
 INTEGER :: IND1, IND2, ICC, JCC, I ,J ,K, IFACE, IFC2, IFACE2, NFCELL, ICCF, X1AXIS, LOWHIGH, ILH, IBOD, IWSEL
-REAL(EB):: PREDFCT,U_CAVG(IAXIS:KAXIS),AREA_TANG(IAXIS:KAXIS),AF,VELN,NVEC(IAXIS:KAXIS)
+REAL(EB):: PREDFCT,U_CAVG(IAXIS:KAXIS),AREA_TANG(IAXIS:KAXIS),AF,VELN,NVEC(IAXIS:KAXIS),K_G
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 
 IF (PREDICTOR) THEN
@@ -484,6 +486,11 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
 
    ! Viscosity, Use MU from bearing cartesian cell:
    ONE_D%MU_G = MU(I,J,K)
+
+   ! Gas conductivity:
+   K_G = ONE_D%MU_G*CPOPR
+   IF(DNS) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
+   ONE_D%K_G = K_G
 
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
    ! This can be optimized by moving the computaiton of U_CAVG out, before call to WALL_BC.
