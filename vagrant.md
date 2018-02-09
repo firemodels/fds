@@ -382,6 +382,19 @@ References
 - [How to install Open MPI](http://www.simunano.com/2015/07/how-to-install-openmpi.html)
 
 
+## Anything about Open MPI
+
+- [Building Open MPI](https://www.open-mpi.org/faq/?category=building)
+  - [Can I re-locate my Open MPI installation without re-configuring/re-compiling/re-installing from source?](https://www.open-mpi.org/faq/?category=building#installdirs)
+- [Compiling MPI apps](https://www.open-mpi.org/faq/?category=mpi-apps)
+- [Running MPI jobs](https://www.open-mpi.org/faq/?category=running)
+  - [Prerequisites for running Open MPI job](https://www.open-mpi.org/faq/?category=running#run-prereqs)
+  - [What if I can't modify my PATH and/or LD_LIBRARY_PATH?](https://www.open-mpi.org/faq/?category=running#mpirun-prefix)
+  - [How can I diagnose problems when running across multiple hosts?](https://www.open-mpi.org/faq/?category=running#diagnose-multi-host-problems)
+
+Blogs
+- [Open MPI and the MPI-3 MPI_T interface](https://blogs.cisco.com/performance/open-mpi-and-the-mpi-3-mpi_t-interface)
+
 ## More on compilers
 
 AutoTools
