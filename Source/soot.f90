@@ -239,14 +239,14 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
                W2 = 0._EB
          END SELECT
          VEL_W = SQRT(U2+V2+W2)
-         TAU_PLUS = TAU_PLUS_C/MUGAS**2*WC%U_TAU**2*RHOG
+         TAU_PLUS = TAU_PLUS_C/MUGAS**2*WC%ONE_D%U_TAU**2*RHOG
          IF (TAU_PLUS < 0.2_EB) THEN ! Diffusion regime
             D_SOLID = K_BOLTZMANN*TGAS*CUNNINGHAM(KN)/(3._EB*PI*MUGAS*SM%MEAN_DIAMETER)
-            U_TURB = WC%U_TAU * 0.086_EB*(MUGAS/RHOG/D_SOLID)**(-0.7_EB)
+            U_TURB = WC%ONE_D%U_TAU * 0.086_EB*(MUGAS/RHOG/D_SOLID)**(-0.7_EB)
          ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.9_EB) THEN ! Diffusion-impaction regime
-            U_TURB = WC%U_TAU * 3.5E-4_EB * TAU_PLUS**2
+            U_TURB = WC%ONE_D%U_TAU * 3.5E-4_EB * TAU_PLUS**2
          ELSE ! Inertia regime
-            U_TURB = WC%U_TAU * 0.17_EB
+            U_TURB = WC%ONE_D%U_TAU * 0.17_EB
          ENDIF
       ENDIF
       WC%V_DEP = MAX(0._EB,U_THERM+U_TURB+U_GRAV)

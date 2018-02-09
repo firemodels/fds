@@ -2466,9 +2466,9 @@ IF (EVACUATION_ONLY(NM)) WC%ONE_D%UW = 0._EB
 ! Assign internal values of temp, density, and mass fraction
 
 WC%ONE_D%RHO_F = M%RHO(IIG,JJG,KKG)
-WC%U_TAU = 0._EB
-WC%Y_PLUS = 1._EB
-WC%Z_STAR = 1._EB
+WC%ONE_D%U_TAU = 0._EB
+WC%ONE_D%Y_PLUS = 1._EB
+WC%ONE_D%Z_STAR = 1._EB
 WC%ONE_D%RHO_D_F = 0._EB
 WC%ONE_D%RHO_D_DZDN_F = 0._EB
 
