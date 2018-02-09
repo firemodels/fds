@@ -391,6 +391,11 @@ GNU Fortran 8.0
 - [Install latest gfortran on Ubuntu](https://www.scivision.co/install-latest-gfortran-on-ubuntu/)
 - [Creating shared and static library with GNU compiler](http://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/GCC/create-libraries/index)
 
+## More on Intel MKL
+
+- [Verbose Mode Supported in Intel® MKL](https://software.intel.com/en-us/articles/verbose-mode-supported-in-intel-mkl-112)
+- [Intel® Math Kernel Library Link Line Advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
+
 ## More on shared libraries
 
 - ldconfig vs. LD_LIBRARY_PATH
