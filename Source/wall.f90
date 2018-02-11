@@ -2673,13 +2673,13 @@ ENDIF
 
 !rm -> Impose maximum bound on pyrolysis generated fuel vapor creation kg/s/m^3 
 !if (n==1) print '(A,1x,1I3,3ES12.4)','N,RHO_S(N),DT_BC,RHO_S0*REACTION_RATE',n,rho_s(n),dt_bc,rho_s0*reaction_rate
-!           IF (N==1) THEN
-!             MLRMX = 0.35_EB*DX(IIG)*DY(JJG)*DZ(KKG)/(LP%PWT*PI*SF%LENGTH*SF%THICKNESS**2)
-!             MLRMX = (1.0_EB - ML%NU_RESIDUE(1,J))*MLRMX
-!             RHO_DOT = MIN(RHO_S0*REACTION_RATE,MLRMX)
+           IF (N==1) THEN
+             MLRMX = 0.35_EB*DX(IIG)*DY(JJG)*DZ(KKG)/(LP%PWT*PI*SF%LENGTH*SF%THICKNESS**2)
+             MLRMX = (1.0_EB - ML%NU_RESIDUE(1,J))*MLRMX
+             RHO_DOT = MIN(RHO_S0*REACTION_RATE,MLRMX)
 !print '(A,1x,1I3,1ES12.4)','N,MLRMX',n,mlrmx
-!             RHO_DOT  = MIN(RHO_DOT , RHO_S(N)/DT_BC)
-!           ENDIF
+             RHO_DOT  = MIN(RHO_DOT , RHO_S(N)/DT_BC)
+           ENDIF
 !rm <-
 
       END SELECT

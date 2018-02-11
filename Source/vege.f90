@@ -30,14 +30,14 @@ REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH
 CONTAINS
  
 
-SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
+SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,NM)
 !
 ! Issues:
 ! 1. Are SF%VEG_FUEL_FLUX_L and SF%VEG_MOIST_FLUX_L needed in linear degradation model?
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG,GET_MASS_FRACTION,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_CONDUCTIVITY
 REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES)
 REAL(EB) :: DT_BC,RDT_BC
-REAL(EB), INTENT(IN) :: DT,T
+REAL(EB), INTENT(IN) ::T
 INTEGER, INTENT(IN) :: NM
 INTEGER  ::  IW
 INTEGER  ::  I,IIG,JJG,KKG,KGRID,KLOC
@@ -62,7 +62,7 @@ REAL(EB) :: C_DRAG,CM,CN,NUSS_HILPERT_CYL_FORCEDCONV,NUSS_MORGAN_CYL_FREECONV,HC
             LENGTH_SCALE,RAYLEIGH_NUM,ZGRIDCELL,ZGRIDCELL0
 !LOGICAL  :: H_VERT_CYLINDER_LAMINAR,H_CYLINDER_RE
 
-INTEGER  :: IC,II,IOR,JJ,KK,IW_CELL
+!INTEGER  :: IC,II,IOR,JJ,KK,IW_CELL
 
 TYPE (WALL_TYPE),    POINTER :: WC =>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF =>NULL()
@@ -78,12 +78,7 @@ TMP_BOIL     = 373._EB
 TMP_CHAR_MAX = 1300._EB
 CP_ASH       = 800._EB !J/kg/K specific heat of ash
 CP_H2O       = 4190._EB !J/kg/K specific heat of water
-!H_VAP_H2O    = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
-!H_PYR_VEG = SF !J/kg Morvan
-!H_PYR_VEG = 2640000._EB !J/kg Drysdale,Doug Fir
-!RH_PYR_VEG = 1._EB/H_PYR_VEG
 DT_BC     = T - VEG_CLOCK_BC
-!DT_BC     = MESHES(NM)%DT
 RDT_BC    = 1.0_EB/DT_BC
 
 IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
@@ -140,11 +135,11 @@ VEG_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
   VEG_DRAG(IIG,JJG,:) = 0.0_EB
   IF (WC%VEG_HEIGHT > 0.0_EB) THEN
-if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3ES12.3)','vege: SF%VEG_HEIGHT,WC%VEG_HEIGHT,SF%VEG_DRAG_INI', &
-                                                             SF%VEG_HEIGHT,WC%VEG_HEIGHT,SF%VEG_DRAG_INI
+!if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3ES12.3)','vege: SF%VEG_HEIGHT,WC%VEG_HEIGHT,SF%VEG_DRAG_INI', &
+!                                                             SF%VEG_HEIGHT,WC%VEG_HEIGHT,SF%VEG_DRAG_INI
     DO KGRID=0,8
       KLOC = KKG + KGRID
-if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3I3,1ES12.4)','vege: KGRID,KKG,KLOC,Z(KLOC)',kgrid,kkg,kloc,z(kloc)
+!if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3I3,1ES12.4)','vege: KGRID,KKG,KLOC,Z(KLOC)',kgrid,kkg,kloc,z(kloc)
       IF (Z(KLOC) <= WC%VEG_HEIGHT) THEN !grid cell filled with veg
         TMP_G = TMP(IIG,JJG,KLOC)
         RHO_GAS  = RHO(IIG,JJG,KLOC)
@@ -155,7 +150,7 @@ if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3I3,1ES12.4)','vege: KGRID,K
         RE_VEG_PART = 4._EB*RHO_GAS*SQRT(U2 + V2 + W(IIG,JJG,KLOC)**2)/SF%VEG_SV/MU_GAS !for cylinder particle
         C_DRAG = 0.0_EB
         IF (RE_VEG_PART > 0.0_EB) C_DRAG = DRAG(RE_VEG_PART,2) !2 is for cylinder, 1 is for sphere
-if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1ES12.4)','vege:filled cell C_DRAG',c_drag
+!if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1ES12.4)','vege:filled cell C_DRAG',c_drag
         VEG_DRAG(IIG,JJG,KLOC)= C_DRAG*SF%VEG_DRAG_INI
 
       ENDIF
@@ -171,11 +166,11 @@ if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1ES12.4)','vege:filled cell C_D
         C_DRAG = 0.0_EB
         IF (RE_VEG_PART > 0.0_EB) C_DRAG = DRAG(RE_VEG_PART,2) !2 is for cylinder, 1 is for sphere
         VEG_DRAG(IIG,JJG,KLOC)= C_DRAG*SF%VEG_DRAG_INI*(WC%VEG_HEIGHT-Z(KLOC-1))/(Z(KLOC)-Z(KLOC-1))
-if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3ES12.4)','vege:unfilled cell Re,C_DRAG,volfrac',re_veg_part,c_drag, &
-                                                        (WC%VEG_HEIGHT-Z(KLOC-1))/(Z(KLOC)-Z(KLOC-1))
+!if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,3ES12.4)','vege:unfilled cell Re,C_DRAG,volfrac',re_veg_part,c_drag, &
+!                                                       (WC%VEG_HEIGHT-Z(KLOC-1))/(Z(KLOC)-Z(KLOC-1))
                                       
       ENDIF
-if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,1I3,1ES12.4)','vege:K,VEG_DRAG(KLOC)',kgrid,veg_drag(iig,jjg,kloc)
+!if (nm==1 .and. iig==10 .and. jjg==10) print '(A,1x,1I3,1ES12.4)','vege:K,VEG_DRAG(KLOC)',kgrid,veg_drag(iig,jjg,kloc)
 
     ENDDO
 
@@ -1314,8 +1309,8 @@ LSET_INIT_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
   ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
   ROS_BACKU(IIG,JJG) = SF%VEG_LSET_ROS_BACK
   WIND_EXP(IIG,JJG)  = SF%VEG_LSET_WIND_EXP
-!print '(A,1x,L2,4ES12.4)','vegeLS: LSET_SPREAD,ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_spread,sf%veg_lset_ros_head,sf%veg_lset_ros_flank, &
-!                                                              sf%veg_lset_ros_back,sf%veg_lset_wind_exp
+!print '(A,1x,L2,4ES12.4)','vegeLS: LSET_SPREAD,ROS:HEAD,FLANK,BACK,WIND_EXP',sf%veg_lset_spread,sf%veg_lset_ros_head, &
+!                           sf%veg_lset_ros_flank,sf%veg_lset_ros_back,sf%veg_lset_wind_exp
   
 !If any surfaces uses tan^2 function for slope, tan^2 will be used throughout simulation
   IF (SF%VEG_LSET_TAN2) LSET_TAN2=.TRUE.
@@ -1338,7 +1333,7 @@ LSET_INIT_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CALL ROTH_SLOPE_COEFF(NM,IIG,JJG,SF%VEG_LSET_BETA)
 !---- Wind, combined wind & slope, and midflame windspeed factors
        CALL ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,IIG,JJG,KKG,SF%VEG_LSET_BETA,SF%VEG_LSET_SURF_HEIGHT,            &
-          SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS,SF%VEG_LSET_CROWN_VEG, &
+          SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS, &
           SF%VEG_LSET_WAF_UNSHELTERED,SF%VEG_LSET_WAF_SHELTERED)
     ENDIF
 
@@ -1413,7 +1408,8 @@ SUBROUTINE ROTH_SLOPE_COEFF(NM,I,J,VEG_BETA)
 !
 INTEGER, INTENT(IN) :: I,J,NM
 REAL(EB), INTENT(IN) :: VEG_BETA
-REAL(EB) :: DZT_DUM,DZT_MAG2
+REAL(EB) :: DZT_DUM
+!REAL(EB) :: DZT_MAG2
 
 CALL POINT_TO_MESH(NM)
 
@@ -1435,7 +1431,7 @@ PHI_S(I,J) = SQRT(PHI_S_X(I,J)**2 + PHI_S_Y(I,J)**2) !used in LS paper
 END SUBROUTINE ROTH_SLOPE_COEFF
 
 !************************************************************************************************
-SUBROUTINE ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,I,J,K,VEG_BETA,SURF_VEG_HT,CANOPY_VEG_HT,VEG_SIGMA,ZEROWINDSLOPE_ROS,CROWN_VEG, &
+SUBROUTINE ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,I,J,K,VEG_BETA,SURF_VEG_HT,CANOPY_VEG_HT,VEG_SIGMA,ZEROWINDSLOPE_ROS, &
                                            WAF_UNSHELTERED,WAF_SHELTERED)
 !************************************************************************************************
 !
@@ -1445,7 +1441,6 @@ SUBROUTINE ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,I,J,K,VEG_BETA,SURF_VEG_HT,CANOPY_
 ! formula to obtain the magnitude of the local surface head fire ROS. Top of vegetation is assumed
 ! to be at the bottom of the computational doamin.
 
-LOGICAL,  INTENT(IN) :: CROWN_VEG
 INTEGER,  INTENT(IN) :: I,J,K,NM
 REAL(EB), INTENT(IN) :: CANOPY_VEG_HT,SURF_VEG_HT,VEG_BETA,VEG_SIGMA,WAF_UNSHELTERED,WAF_SHELTERED,  &
                         ZEROWINDSLOPE_ROS
@@ -1865,7 +1860,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_HEAT
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT,T_CFD
 INTEGER :: J_FLANK,I,II,IIG,IOR,IPC,IW,J,JJ,JJG,KK,KKG
-INTEGER :: IDUM,JDUM,KGRID
+INTEGER :: IDUM,JDUM
 !LOGICAL :: IGNITION = .FALSE.
 REAL(EB) :: BURNTIME,BT,FB_TIME_FCTR,FLI,HEAD_WIDTH_FCTR,GRIDCELL_FRACTION,GRIDCELL_TIME, &
             IGNITION_WIDTH_Y,RFIREBASE_TIME,RGRIDCELL_TIME,ROS_FLANK1,ROS_MAG,SHF,TE_TIME_FACTOR,TIME_LS_LAST, &
@@ -2020,7 +2015,7 @@ DO WHILE (TIME_LS < T_FINAL)
   IF (SF%VEG_LSET_CROWN_FIRE_HEAD_ROS_MODEL=='CRUZ' .AND. VEG_LEVEL_SET_UNCOUPLED) THEN
 
     CALL ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,IIG,JJG,KKG,SF%VEG_LSET_BETA,SF%VEG_LSET_SURF_HEIGHT,            &
-      SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS,SF%VEG_LSET_CROWN_VEG, &
+      SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS, &
       SF%VEG_LSET_WAF_UNSHELTERED,SF%VEG_LSET_WAF_SHELTERED)
 
     DPHIDX = PHI_LS(IIG,JJG) - PHI_LS(IIG-1,JJG)
@@ -2061,7 +2056,7 @@ DO WHILE (TIME_LS < T_FINAL)
 !---Ellipse assumption with Rothermel head fire ROS (== FARSITE)
       IF (SF%VEG_LSET_SURFACE_FIRE_HEAD_ROS_MODEL=='ROTHERMEL' .AND. .NOT. SF%VEG_LSET_BURNER) THEN 
         CALL ROTH_WINDANDSLOPE_COEFF_HEADROS(NM,IIG,JJG,KKG,SF%VEG_LSET_BETA,SF%VEG_LSET_SURF_HEIGHT,            &
-           SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS,SF%VEG_LSET_CROWN_VEG, &
+           SF%VEG_LSET_CANOPY_HEIGHT,SF%VEG_LSET_SIGMA,SF%VEG_LSET_ROTH_ZEROWINDSLOPE_ROS, &
            SF%VEG_LSET_WAF_UNSHELTERED,SF%VEG_LSET_WAF_SHELTERED)
       ENDIF
 
@@ -3025,7 +3020,8 @@ SUBROUTINE LEVEL_SET_BC(NM)
 ! interpolation. Follows what's done for RHO in subroutine THERMAL_BC for INTERPOLATED_BC (in wall.f90)
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: II,IIG,IIO,IOR,IW,JJ,JJO,JJG,KK,KKG,KKO,NOM
+INTEGER :: II,IIG,IIO,IOR,IW,JJ,JJO,JJG,KK,KKG,NOM
+!INTEGER :: KKO
 REAL(EB) :: ARO,LSET_PHI_F,LSET_PHI_V
 REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_LSET_PHI =>NULL()
 TYPE (WALL_TYPE),     POINTER :: WC =>NULL()
@@ -3123,8 +3119,8 @@ SUBROUTINE LEVEL_SET_DT(DT,NM)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(INOUT) :: DT
-!INTEGER :: NM
-REAL(EB) :: DT_CHECK_LS,PHI_CHECK_LS
+REAL(EB) :: PHI_CHECK_LS
+!REAL(EB) :: DT_CHECK_LS
 
 !IF (EVACUATION_ONLY(NM)) RETURN
 IF (.NOT. VEG_LEVEL_SET) RETURN
