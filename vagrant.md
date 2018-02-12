@@ -410,6 +410,7 @@ References
 
 Blogs
 - [Open MPI and the MPI-3 MPI_T interface](https://blogs.cisco.com/performance/open-mpi-and-the-mpi-3-mpi_t-interface)
+- [Architecture of Open Source applications - Open MPI](http://www.aosabook.org/en/openmpi.html)
 
 ## More on compilers
 
