@@ -5312,6 +5312,8 @@ This type of reaction is specified by adding {\ct THIRD\_BODY=.TRUE.} to the {\c
 \subsection{Special Topic: Chemical Time Integration}
 \label{info:chem_integration}
 
+The set of ordinary differential equations (ODEs) for the combustion reactions are solved over the course of a time step using one of a variety of solvers. The solver is specified via the character string {\ct ODE\_SOLVER} on the {\ct COMB} line. The chosen solver governs all reactions. If all reactions are fast, i.e. occur instantaneously following the mixing process, then the default solver is {\ct 'EXPLICIT EULER'}. If any of the reactions are finite-rate, then the default solver is {\ct 'RK2 RICHARDSON'}, a second-order Runge-Kutta scheme with Richardson extrapolation. Two other schemes are available---{\ct 'RK2'} and {\ct 'RK3'}, second and third-order Runge-Kutta schemes without Richardson extrapolation.
+
 An important consideration for the time integration of chemical reactions is the number of iterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry, the number of iterations is 1. For finite rate chemical reactions, the number of iterations can vary between 1 and the lesser of\linebreak[4] {\ct MAX\_CHEMISTRY\_SUBSTEPS} (default 20) and that needed to satisfy the error tolerance of the ODE solver,\linebreak[4] {\ct RICHARDSON\_ERROR\_TOLERANCE}. If the maximum value is reached, you can increase the number of iterations or decrease the error tolerance constraint of the integrator. You may also just fix the number of iterations by setting {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}. Its default value is -1, meaning that the number of time steps is determined by the ODE solver. These various numerical parameters are all set on the {\ct COMB} line, and they pertain to all reactions.
 
 If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]{\ct CHECK\_REALIZABILITY} to be {\ct .TRUE.} on the {\ct COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
@@ -8618,8 +8620,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
+{\ct ODE\_SOLVER}                               & Character     & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
+%{\ct TAU\_CHEM}                                 & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
+%{\ct TAU\_FLAME}                                & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}        \\ \hline
 %{\ct TRANSPORT\_UNMIXED\_FRACTION}              & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 %{\ct TRANSPORT\_ZETA\_SCHEME}                   & Integer       & Section~\ref{}                                        &               & 1                    \\ \hline
@@ -9608,8 +9613,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}    \\ \hline
-%{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
-%{\ct TAU\_FLAME}                          & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
