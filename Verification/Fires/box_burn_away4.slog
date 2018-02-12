@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_box_burn_away4(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Fires/box_burn_away4.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Fires/box_burn_away4.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Fires
+echo
+echo `date`
+echo "    Input file: box_burn_away4.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 box_burn_away4.fds 
+#qsub -q batch /tmp/script.77274.6aRQCn

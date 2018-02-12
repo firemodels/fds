@@ -1,0 +1,46 @@
+#!/bin/bash
+#PBS -N FB_openmp_test64(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks/openmp_test64.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks/openmp_test64.log
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=999:0:0
+cd /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks
+echo
+echo `date`
+echo "    Input files: "
+echo "       openmp_test64a.fds"
+echo "       openmp_test64b.fds"
+echo "       openmp_test64c.fds"
+echo "       openmp_test64d.fds"
+echo "       openmp_test64e.fds"
+echo "       openmp_test64f.fds"
+echo "       openmp_test64g.fds"
+echo "       openmp_test64h.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+
+export OMP_NUM_THREADS=1
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64a.fds 
+
+export OMP_NUM_THREADS=2
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64b.fds 
+
+export OMP_NUM_THREADS=3
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64c.fds 
+
+export OMP_NUM_THREADS=4
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64d.fds 
+
+export OMP_NUM_THREADS=5
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64e.fds 
+
+export OMP_NUM_THREADS=6
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64f.fds 
+
+export OMP_NUM_THREADS=7
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64g.fds 
+
+export OMP_NUM_THREADS=8
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test64h.fds 
+#qsub -q batch /tmp/script.3740.ztjdKq

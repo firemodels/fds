@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_jet_fan(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Flowfields/jet_fan.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Flowfields/jet_fan.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Flowfields
+echo
+echo `date`
+echo "    Input file: jet_fan.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 jet_fan.fds 
+#qsub -q batch /tmp/script.78340.EGmfHt

@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_saad_CC_implicit_512_cfl_p25(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry/saad_CC_implicit_512_cfl_p25.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry/saad_CC_implicit_512_cfl_p25.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry
+echo
+echo `date`
+echo "    Input file: saad_CC_implicit_512_cfl_p25.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 saad_CC_implicit_512_cfl_p25.fds 
+#qsub -q batch /tmp/script.4291.wz6Jox

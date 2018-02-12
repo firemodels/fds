@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_sphere_helium_conserve_3meshes(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry/sphere_helium_conserve_3meshes.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry/sphere_helium_conserve_3meshes.log
+#PBS -l nodes=3:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Complex_Geometry
+echo
+echo `date`
+echo "    Input file: sphere_helium_conserve_3meshes.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings    -np 3 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 sphere_helium_conserve_3meshes.fds 
+#qsub -q batch /tmp/script.4123.KWwWNU

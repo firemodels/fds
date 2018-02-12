@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_gas_filling(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Flowfields/gas_filling.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Flowfields/gas_filling.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Flowfields
+echo
+echo `date`
+echo "    Input file: gas_filling.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 gas_filling.fds 
+#qsub -q batch /tmp/script.78046.cGMmFl

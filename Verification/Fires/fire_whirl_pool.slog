@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_fire_whirl_pool(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Fires/fire_whirl_pool.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Fires/fire_whirl_pool.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Fires
+echo
+echo `date`
+echo "    Input file: fire_whirl_pool.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 fire_whirl_pool.fds 
+#qsub -q batch /tmp/script.77444.RUCalY
