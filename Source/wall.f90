@@ -1077,7 +1077,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER_3D
 SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
-INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,IOR,OBST_INDEX !,NR
+INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
             RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RVSP=>NULL()
@@ -1154,74 +1154,57 @@ OBST_LOOP_2: DO N=1,N_OBST
                            RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = MAX(0._EB, OB%RHO(I,J,K,1:MS%N_MATL) &
-                                                   + (RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL)) * RVSP(I,J,K) )
+            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + DT_SUB * M_DOT_S_PPP(1:MS%N_MATL) * RVSP(I,J,K)
 
             Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * RVSP(I,J,K)
 
-            IF (OB%CONSUMABLE) THEN
-               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
-               ! if local cell mass becomes too small, put the mass in the adjacent cell and remove local cell
-               IF (RVSP(I,J,K)<SOLID_VOLUME_THRESHOLD) THEN
-                  SELECT CASE(IOR)
-                     CASE (1)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I-1,J,K))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I-1)*DY(J)*DZ(K)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I-1,J,K,1:MS%N_MATL) = OB2%RHO(I-1,J,K,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                     CASE (-1)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I+1,J,K))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I+1)*DY(J)*DZ(K)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I+1,J,K,1:MS%N_MATL) = OB2%RHO(I+1,J,K,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                     CASE (2)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I,J-1,K))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I)*DY(J-1)*DZ(K)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I,J-1,K,1:MS%N_MATL) = OB2%RHO(I,J-1,K,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                     CASE (-2)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I,J+1,K))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I)*DY(J+1)*DZ(K)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I,J+1,K,1:MS%N_MATL) = OB2%RHO(I,J+1,K,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                     CASE (3)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I,J,K-1))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I)*DY(J)*DZ(K-1)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I,J,K-1,1:MS%N_MATL) = OB2%RHO(I,J,K-1,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                     CASE (-3)
-                        OBST_INDEX = OBST_INDEX_C(CELL_INDEX(I,J,K+1))
-                        IF (OBST_INDEX>0) THEN
-                           VC2 = DX(I)*DY(J)*DZ(K+1)
-                           OB2 => OBSTRUCTION(OBST_INDEX)
-                           OB2%RHO(I,J,K+1,1:MS%N_MATL) = OB2%RHO(I,J,K+1,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                        ENDIF
-                  END SELECT
-                  OB%MASS=0._EB
-                  OB%HT3D=.FALSE.
-                  OB%PYRO3D=.FALSE.
-               ENDIF
-            ENDIF
-
             ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
 
-            DO NS = 1,N_TRACKED_SPECIES
+            DO NS=1,N_TRACKED_SPECIES
                WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
                WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
             ENDDO
             DO NN=1,SF%N_MATL
                WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
             ENDDO
+
+            CONSUMABLE_IF: IF (OB%CONSUMABLE) THEN
+               ! if local cell mass becomes too small, put the mass in the adjacent cell and remove local cell
+               THRESHOLD_IF: IF (RVSP(I,J,K)<SOLID_VOLUME_THRESHOLD) THEN
+                  II2 = I
+                  JJ2 = J
+                  KK2 = K
+                  SELECT CASE(IOR)
+                     CASE ( 1); II2=I-1
+                     CASE (-1); II2=I+1
+                     CASE ( 2); JJ2=J-1
+                     CASE (-2); JJ2=J+1
+                     CASE ( 3); KK2=K-1
+                     CASE (-3); KK2=K+1
+                  END SELECT
+                  OBST_INDEX = OBST_INDEX_C(CELL_INDEX(II2,JJ2,KK2))
+                  IF (OBST_INDEX>0) THEN
+                     IF (TWO_D) THEN
+                        VC2 = DX(II2)*DZ(KK2)
+                     ELSE
+                        VC2 = DX(II2)*DY(JJ2)*DZ(KK2)
+                     ENDIF
+                     OB2 => OBSTRUCTION(OBST_INDEX)
+                     OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
+                  ENDIF
+                  RVSP(I,J,K) = 0._EB
+                  OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+                  OB%HT3D   = .FALSE.
+                  OB%PYRO3D = .FALSE.
+                  ! recompute solid volume ratio of accepting cell
+                  RVSP(II2,JJ2,KK2) = 0._EB
+                  DO NN=1,MS%N_MATL
+                     ML => MATERIAL(MS%MATL_INDEX(NN))
+                     RVSP(II2,JJ2,KK2) = RVSP(II2,JJ2,KK2) + OB2%RHO(II2,JJ2,KK2,NN)/ML%RHO_S
+                  ENDDO
+               ENDIF THRESHOLD_IF
+               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
+            ENDIF CONSUMABLE_IF
 
             ! If the fuel or water massflux is non-zero, set the ignition time
 
