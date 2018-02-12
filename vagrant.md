@@ -2,12 +2,37 @@
 
 This tutorial should help the advanced users who are interested in compiling the FDS source code with all capabilities, using the latest GNU Fortran (7.2) distribution, OpenMPI and linking to Intel Performance libraries. This will provide a locally built FDS with all capabilites found in the bundle.
 
-FDS GitHub Wiki
+Inspired by Wiki page on GitHub
 - [Compiling FDS with GNU Fortran, OpenMPI and Intel Performance Libraries in Ubuntu Linux](https://github.com/firemodels/fds/wiki/Compiling-FDS-with-GNU-Fortran,-OpenMPI-and-Intel-Performance-Libraries-in-Ubuntu-Linux)
 
-## Spin vagrant box running Ubuntu 14.04.5 LTS (Trusty Tar)
+The basic idea is to create a build environment to compile FDS source code in an automated way - reproducible, version controlled and fast.
+Vagrant can provide this to every developer. A file `Vagrantfile` to create and provision a virtual machine is now added to the source code repository in top-level folder.
+
+## Why vagrant
+
+If you are a developer, Vagrant will isolate dependencies and their configuration within a single disposable, consistent environment, without sacrificing any of the tools you are used to working with (editors, browsers, debuggers, etc.). Once you or someone else creates a single `Vagrantfile`, you just need to vagrant up and everything is installed and configured for you to work. Other members of your team create their development environments from the same configuration, so whether you are working on Linux, Mac OS X, or Windows, all your team members are running code in the same environment, against the same dependencies, all configured the same way. Say goodbye to "works on my machine" bugs.
+The Vagrantfile is meant to be committed to version control with your project, if you use version control. This way, every person working with that project can benefit from Vagrant without any upfront work.
+
+## Install Vagrant 
+
+
+1. [Download Vagrant](https://www.vagrantup.com/downloads.html)
+2. Verify installation
+
+
+        $ vagrant --version
+        Vagrant 1.9.8
+
+
+## Spin up Vagrant box running Ubuntu 14.04.5 LTS (Trusty Tar)
 
     $ vagrant up
+
+When the box is up and running, we connect to Vagrant machine via SSH
+
+    $ vagrant ssh
+
+
 
     $ lsb_release -a
     No LSB modules are available.
@@ -17,7 +42,7 @@ FDS GitHub Wiki
     Codename:	trusty
 
 
-## Install package build-essential
+## Install basic compiler environment
 
     $ sudo apt-get install build-essential
 
@@ -103,7 +128,7 @@ Extract source archive and run `configure` script
     $ ./configure FC=gfortran-7 CC=gcc-7 --prefix=/shared/openmpi_64 --enable-mpirun-prefix-by-default --enable-mpi-fortran --enable-static --disable-shared
     $ make -j 4
 
-Explain installation options
+Explain `./configure` flags
 
     --prefix=<directory>
       Install Open MPI into the base directory named <directory>.  Hence,
@@ -142,16 +167,6 @@ Explain installation options
                     --disable-mpi-fortran).  This is mutually exclusive
                     with building the OpenSHMEM Fortran interface.
 
-**RUN-TIME SYSTEM SUPPORT**
-
-Note that in both models, invoking mpirun via an absolute path name is equivalent to specifying the --prefix option with a <dir> value equivalent to the directory where mpirun resides, minus its last subdirectory. For example:
-
-    % /usr/local/bin/mpirun ...
-
-is equivalent to
-
-    % mpirun --prefix /usr/local
-
     --enable-mpirun-prefix-by-default
       This option forces the "mpirun" command to always behave as if
       "--prefix $prefix" was present on the command line (where $prefix is
@@ -168,9 +183,22 @@ is equivalent to
       Disable the automatic --prefix behavior 
 
 
+**RUN-TIME SYSTEM SUPPORT**
+
+Note that in both models, invoking mpirun via an absolute path name is equivalent to specifying the `--prefix` option with a value equivalent to the directory where mpirun resides, minus its last subdirectory. For example:
 
 
-Reduce build time
+    % /usr/local/bin/mpirun ...
+
+is equivalent to
+
+    % mpirun --prefix /usr/local
+
+
+
+
+
+**Reduce build time**
 
     $ make -j 4
 
@@ -182,7 +210,7 @@ Why this works? Explain `make` argument `j`
               Specifies  the  number  of  jobs  (commands) to run simultaneously.  If there is more than one -j option, the last one is effective.  If the -j option is given without an
               argument, make will not limit the number of jobs that can run simultaneously.
 
-Open MPI teams comment on this
+Open MPI teams comment on parallel builds
 
 >Some versions of make support parallel builds. The example above shows GNU make's "-j" option, which specifies how many compile processes may be executing any any given time. We, the Open MPI Team, have found that doubling or quadrupling the number of processors in a machine can significantly speed up an Open MPI compile (since compiles tend to be much more IO bound than CPU bound).
 
@@ -195,22 +223,11 @@ Open MPI teams comment on this
     Libraries have been installed in:
        /shared/openmpi_64/lib
 
-    If you ever happen to want to link against installed libraries
-    in a given directory, LIBDIR, you must either use libtool, and
-    specify the full pathname of the library, or use the '-LLIBDIR'
-    flag during linking and do at least one of the following:
-       - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
-         during execution
-       - add LIBDIR to the 'LD_RUN_PATH' environment variable
-         during linking
-       - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
-       - have your system administrator add LIBDIR to '/etc/ld.so.conf'
-
-    See any operating system documentation about shared libraries for
-    more information, such as the ld(1) and ld.so(8) manual pages.
+    ...
 
     vagrant@vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ which mpirun
     /shared/openmpi_64/bin/mpirun
+
     vagrant@vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ mpirun
     --------------------------------------------------------------------------
     mpirun could not find anything to do.
@@ -230,15 +247,14 @@ Links
 
 output of `ldd` when built with flag `enable_static`:
 
-
-  vagrant@vagrant-ubuntu-trusty-64:~$ ldd /vagrant/openmpi_64/bin/mpirun
-    linux-vdso.so.1 =>  (0x00007ffd371dc000)
-    libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f85ccd2c000)
-    libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f85ccb28000)
-    librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f85cc920000)
-    libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f85cc71d000)
-    libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f85cc354000)
-    /lib64/ld-linux-x86-64.so.2 (0x00007f85ccf4a000)
+      vagrant@vagrant-ubuntu-trusty-64:~$ ldd /vagrant/openmpi_64/bin/mpirun
+        linux-vdso.so.1 =>  (0x00007ffd371dc000)
+        libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f85ccd2c000)
+        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f85ccb28000)
+        librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f85cc920000)
+        libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007f85cc71d000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f85cc354000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f85ccf4a000)
 
 
 
@@ -256,7 +272,7 @@ Go to your updated repo for FDS, you should be able to build the mpi_gnu_linux_6
     $ cd Build/mpi_gnu_linux_64
     $ ./make_fds.sh
 
-Run compiled FDS exectuable
+## Run FDS in SMP/OpenMP mode
 
     vagrant@vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ ./fds_mpi_gnu_linux_64
 
@@ -280,9 +296,9 @@ Run compiled FDS exectuable
      Hit Enter to Escape...
 
 
-## Run FDS as MPI application
+## Run FDS in MPI mode
 
-    $ /shared/openmpi_64/bin/mpirun -quiet /vagrant/Build/mpi_gnu_linux_64/fds_mpi_gnu_linux_64
+    vagrant@vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ /shared/openmpi_64/bin/mpirun ./fds_mpi_gnu_linux_64
 
      Fire Dynamics Simulator
 
@@ -295,6 +311,30 @@ Run compiled FDS exectuable
 
      MPI Enabled;    Number of MPI Processes:       2
      OpenMP Enabled; Number of OpenMP Threads:      1
+
+     MPI version: 3.1
+     MPI library version: Open MPI v3.0.0, package: Open MPI vagrant@vagrant-ubuntu-trusty-64 Distribution, ident: 3.0.0, repo rev: v3.0.0, Sep 12, 2017
+
+     Consult FDS Users Guide Chapter, Running FDS, for further instructions.
+
+     Hit Enter to Escape...
+
+## Run FDS in MPI/OpenMP hybrid mode
+
+    $ export OMP_NUM_THREADS=2
+    vagrant-ubuntu-trusty-64:/vagrant/Build/mpi_gnu_linux_64$ /shared/openmpi_64/bin/mpirun ./fds_mpi_gnu_linux_64
+
+     Fire Dynamics Simulator
+
+     Current Date     : November 22, 2017  13:44:27
+     Version          : FDS 6.6.0
+     Revision         : -
+     Revision Date    :
+     Compiler         : unknown
+     Compilation Date : Nov 22, 2017  12:05:17
+
+     MPI Enabled;    Number of MPI Processes:       2
+     OpenMP Enabled; Number of OpenMP Threads:      2
 
      MPI version: 3.1
      MPI library version: Open MPI v3.0.0, package: Open MPI vagrant@vagrant-ubuntu-trusty-64 Distribution, ident: 3.0.0, repo rev: v3.0.0, Sep 12, 2017
@@ -323,7 +363,7 @@ Use `ldd` tool to print shared libraries dependencies.
         libquadmath.so.0 => /usr/lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007f8aaebdc000)
         /lib64/ld-linux-x86-64.so.2 (0x00007f8ab0530000)
 
-Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
+Given the dependency of `libgfortran.so.4` a user might install package `libgfortran`.
 
     gottfried@gottfried-SVE14A2X1EH:~/repos/fds/Build/mpi_gnu_linux_64$ sudo apt-get install gfortran
     ...   
@@ -335,31 +375,7 @@ Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
     The following NEW packages will be installed:
       gfortran gfortran-7 libgfortran-7-dev libgfortran4
     0 upgraded, 4 newly installed, 0 to remove and 14 not upgraded.
-    Need to get 8.115 kB of archives.
-    After this operation, 30,0 MB of additional disk space will be used.
-    Do you want to continue? [Y/n] y
-    Get:1 http://de.archive.ubuntu.com/ubuntu artful/main amd64 libgfortran4 amd64 7.2.0-8ubuntu3 [493 kB]
-    Get:2 http://de.archive.ubuntu.com/ubuntu artful/main amd64 libgfortran-7-dev amd64 7.2.0-8ubuntu3 [530 kB]
-    Get:3 http://de.archive.ubuntu.com/ubuntu artful/main amd64 gfortran-7 amd64 7.2.0-8ubuntu3 [7.090 kB]
-    Get:4 http://de.archive.ubuntu.com/ubuntu artful/main amd64 gfortran amd64 4:7.2.0-1ubuntu1 [1.278 B]
-    Fetched 8.115 kB in 4s (1.679 kB/s)  
-    Selecting previously unselected package libgfortran4:amd64.
-    (Reading database ... 409697 files and directories currently installed.)
-    Preparing to unpack .../libgfortran4_7.2.0-8ubuntu3_amd64.deb ...
-    Unpacking libgfortran4:amd64 (7.2.0-8ubuntu3) ...
-    Selecting previously unselected package libgfortran-7-dev:amd64.
-    Preparing to unpack .../libgfortran-7-dev_7.2.0-8ubuntu3_amd64.deb ...
-    Unpacking libgfortran-7-dev:amd64 (7.2.0-8ubuntu3) ...
-    Selecting previously unselected package gfortran-7.
-    Preparing to unpack .../gfortran-7_7.2.0-8ubuntu3_amd64.deb ...
-    Unpacking gfortran-7 (7.2.0-8ubuntu3) ...
-    Selecting previously unselected package gfortran.
-    Preparing to unpack .../gfortran_4%3a7.2.0-1ubuntu1_amd64.deb ...
-    Unpacking gfortran (4:7.2.0-1ubuntu1) ...
-    Setting up libgfortran4:amd64 (7.2.0-8ubuntu3) ...
-    Processing triggers for libc-bin (2.26-0ubuntu2.1) ...
-    Setting up libgfortran-7-dev:amd64 (7.2.0-8ubuntu3) ...
-    Processing triggers for man-db (2.7.6.1-2) ...
+    ...
     Setting up gfortran-7 (7.2.0-8ubuntu3) ...
     Setting up gfortran (4:7.2.0-1ubuntu1) ...
     update-alternatives: using /usr/bin/gfortran to provide /usr/bin/f95 (f95) in auto mode
@@ -368,9 +384,9 @@ Given the dependency of `libgfortran.so.4` a user might install `libgfortran`.
 
 ## Deploy FDS/MPI to clusters
 
-Disable the automatic prefix behaviour to provide OpenMPI in a custom directory
+Relocatable installation
 
-  $ /absolute/path/to/mpirun --noprefix mpi_app
+    $ env OPAL_PREFIX=/$HOME/program/mpi/ompi
 
 References
 - [mpirun - OpenMPI docs](https://www.open-mpi.org/doc/v3.0/man1/mpirun.1.php) 
@@ -429,7 +445,10 @@ Travis CI
 ## Useful tooling
 
 Michael Hirsch
-- https://www.scivision.co/install-linuxbrew/
+- [Brew for Linux](https://www.scivision.co/install-linuxbrew/)
+- [Install GCC, GFortran, CMake and Make on Windows ](https://www.scivision.co/windows-gcc-gfortran-cmake-make-install/)
+- [Windows Subsystem for Linux](https://www.scivision.co/install-windows-subsystem-for-linux/)
+- [X11 desktop apps for WSL](https://www.scivision.co/x11-gui-windows-subsystem-for-linux/)
 
 Fortran building system
 - https://github.com/szaghi/FoBiS
