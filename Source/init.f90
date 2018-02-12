@@ -2489,14 +2489,14 @@ WC%SURF_INDEX = SURF_INDEX_NEW
 WC%OBST_INDEX = OBST_INDEX
 WC%BOUNDARY_TYPE = BOUNDARY_TYPE
 
-WC%XW     = XW
-WC%YW     = YW
-WC%ZW     = ZW
+WC%X = XW
+WC%Y = YW
+WC%Z = ZW
 WC%ONE_D%IIG    = IIG
 WC%ONE_D%JJG    = JJG
 WC%ONE_D%KKG    = KKG
 WC%ONE_D%RDN    = RDN
-WC%AW           = AW
+WC%ONE_D%AREA   = AW
 WC%ONE_D%UW     = UW
 WC%ONE_D%UWS    = UW
 
@@ -2537,9 +2537,9 @@ IF (EVACUATION_ONLY(NM)) WC%ONE_D%UW = 0._EB
 ! Assign internal values of temp, density, and mass fraction
 
 WC%ONE_D%RHO_F = M%RHO(IIG,JJG,KKG)
-WC%U_TAU = 0._EB
-WC%Y_PLUS = 1._EB
-WC%Z_STAR = 1._EB
+WC%ONE_D%U_TAU = 0._EB
+WC%ONE_D%Y_PLUS = 1._EB
+WC%ONE_D%Z_STAR = 1._EB
 WC%ONE_D%RHO_D_F = 0._EB
 WC%ONE_D%RHO_D_DZDN_F = 0._EB
 
@@ -2556,7 +2556,7 @@ IF (OBST_INDEX>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    WC%ONE_D%AREA_ADJUST = OBX%INPUT_AREA(ABS(IOR))/OBX%FDS_AREA(ABS(IOR))
    IF (WC%ONE_D%AREA_ADJUST<=TWO_EPSILON_EB) WC%ONE_D%AREA_ADJUST = 1._EB
    IF (OBX%MASS>1.E5_EB) THEN
-      OBX%MASS = SF%SURFACE_DENSITY*WC%AW*WC%ONE_D%AREA_ADJUST
+      OBX%MASS = SF%SURFACE_DENSITY*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
       IF (OBX%BULK_DENSITY>0._EB) OBX%MASS = OBX%BULK_DENSITY*(OBX%X2-OBX%X1)*(OBX%Y2-OBX%Y1)*(OBX%Z2-OBX%Z1)/OBX%VOLUME_ADJUST
    ENDIF
 ENDIF
@@ -2734,7 +2734,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
    ! Check if fire spreads radially over this vent
 
    IF (VT%FIRE_SPREAD_RATE>0._EB) THEN
-      DIST = SQRT((WC%XW-VT%X0)**2 + (WC%YW-VT%Y0)**2 + (WC%ZW-VT%Z0)**2)
+      DIST = SQRT((WC%X-VT%X0)**2 + (WC%Y-VT%Y0)**2 + (WC%Z-VT%Z0)**2)
       T_ACTIVATE = TT + DIST/VT%FIRE_SPREAD_RATE
    ENDIF
 
@@ -2756,7 +2756,7 @@ ENDIF PROCESS_VENT
 ! Check if fire spreads radially over this surface type
 
 IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
-   DIST = SQRT((WC%XW-SF%XYZ(1))**2 +(WC%YW-SF%XYZ(2))**2 +(WC%ZW-SF%XYZ(3))**2)
+   DIST = SQRT((WC%X-SF%XYZ(1))**2 +(WC%Y-SF%XYZ(2))**2 +(WC%Z-SF%XYZ(3))**2)
    T_ACTIVATE = TT + DIST/SF%FIRE_SPREAD_RATE
 ENDIF
 
@@ -3115,8 +3115,8 @@ VENT_LOOP: DO N=1,N_VENT
 
             IF (ACTIVATE_VENT) THEN
                IF (VT%FIRE_SPREAD_RATE>0._EB) THEN
-                  WALL(IW)%ONE_D%T_IGN = T + SQRT((WALL(IW)%XW-VT%X0)**2 +(WALL(IW)%YW-VT%Y0)**2 +&
-                                              (WALL(IW)%ZW-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
+                  WALL(IW)%ONE_D%T_IGN = T + SQRT((WALL(IW)%X-VT%X0)**2 +(WALL(IW)%Y-VT%Y0)**2 +&
+                                              (WALL(IW)%Z-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
                ELSE
                   WALL(IW)%ONE_D%T_IGN = T
                ENDIF

@@ -1,0 +1,46 @@
+#!/bin/bash
+#PBS -N FB_openmp_test128(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks/openmp_test128.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks/openmp_test128.log
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=999:0:0
+cd /Users/ruddy/WFDStoFDS/Verification/Timing_Benchmarks
+echo
+echo `date`
+echo "    Input files: "
+echo "       openmp_test128a.fds"
+echo "       openmp_test128b.fds"
+echo "       openmp_test128c.fds"
+echo "       openmp_test128d.fds"
+echo "       openmp_test128e.fds"
+echo "       openmp_test128f.fds"
+echo "       openmp_test128g.fds"
+echo "       openmp_test128h.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+
+export OMP_NUM_THREADS=1
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128a.fds 
+
+export OMP_NUM_THREADS=2
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128b.fds 
+
+export OMP_NUM_THREADS=3
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128c.fds 
+
+export OMP_NUM_THREADS=4
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128d.fds 
+
+export OMP_NUM_THREADS=5
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128e.fds 
+
+export OMP_NUM_THREADS=6
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128f.fds 
+
+export OMP_NUM_THREADS=7
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128g.fds 
+
+export OMP_NUM_THREADS=8
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 openmp_test128h.fds 
+#qsub -q batch /tmp/script.3826.IL74x9

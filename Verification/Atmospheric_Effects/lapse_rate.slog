@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_lapse_rate(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Atmospheric_Effects/lapse_rate.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Atmospheric_Effects/lapse_rate.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Atmospheric_Effects
+echo
+echo `date`
+echo "    Input file: lapse_rate.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 lapse_rate.fds 
+#qsub -q batch /tmp/script.3997.qMPj2S

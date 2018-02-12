@@ -1,6 +1,6 @@
 #!/bin/bash
 
-$BUNDLE_HOME=$HOME/.bundle
+BUNDLE_HOME=$HOME/.bundle
 
 mkdir -p $BUNDLE_HOME/pubs
 mkdir -p $BUNDLE_HOME/BUNDLE

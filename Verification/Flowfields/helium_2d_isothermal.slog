@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N FB_helium_2d_isothermal(MPI)
+#PBS -W umask=0022
+#PBS -e /Users/ruddy/WFDStoFDS/Verification/Flowfields/helium_2d_isothermal.err
+#PBS -o /Users/ruddy/WFDStoFDS/Verification/Flowfields/helium_2d_isothermal.log
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=999:0:0
+export OMP_NUM_THREADS=1
+cd /Users/ruddy/WFDStoFDS/Verification/Flowfields
+echo
+echo `date`
+echo "    Input file: helium_2d_isothermal.fds"
+echo "     Directory: `pwd`"
+echo "          Host: `hostname`"
+mpirun --report-bindings --map-by node:PE=1  -np 1 /Users/ruddy/WFDStoFDS/Build/mpi_intel_osx_64/fds_mpi_intel_osx_64 helium_2d_isothermal.fds 
+#qsub -q batch /tmp/script.78172.lz06UH

@@ -365,10 +365,6 @@ LOGICAL :: DO_IMPLICIT_CCREGION=.TRUE.
 LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
 LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 
-INTEGER, PARAMETER :: GLMAT_BYMESH = 1 ! Apply matrix-vector Solver by mesh.
-INTEGER, PARAMETER :: GLMAT_WHLDOM = 2 ! Apply matrix-vector Solver on the whole domain.
-INTEGER :: GLMAT_SETUP_FLAG = GLMAT_WHLDOM ! Default for now.
-
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
 REAL(EB) :: CCVOL_LINK=0.15_EB
