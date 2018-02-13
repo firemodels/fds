@@ -4759,7 +4759,7 @@ Using the species  {\ct SPRINKLER WATER VAPOR} for the sprinklers would allow yo
 
 A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost. It is expensive to solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase reaction as a surrogate for all potential fuels.
 
-Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model. 
+Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
 
 There are two groups of parameters that govern combustion. The first, called the {\ct COMB} namelist group, contains parameters that pertain to any and all reactions. Specific parameters about a particular reaction are specified using the {\ct REAC} namelist group. There can only be one {\ct COMB} line, but multiple {\ct REAC} lines if there are multiple reactions. If you are modeling a fire, you {\em must} specify the fuel and basic stoichiometry using a {\ct REAC} line. You need not specify a {\ct COMB} line unless you want to modify mainly numerical parameters.
 
@@ -4903,16 +4903,16 @@ If the reaction is under defined, FDS will return an error at the start of the c
 
 \label{info:turbulent_combustion}
 
-Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of
-fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
-a given mesh cell at a given time step. Each computational cell can be thought of as a batch reactor where only the mixed composition can react. The variable, $\zeta(t)$, denotes the unmixed fraction, ranging from zero to one and governed by the equation:
+Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within a given mesh cell at a given time step. Each computational cell can be thought of as a batch reactor where only the mixed composition can react. The variable, $\zeta(t)$, denotes the unmixed fraction, ranging from zero to one and governed by the equation:
 \begin{equation}
 \frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{\rm mix}}
 \label{eq:edc_mix}
 \end{equation}
 Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct COMB} line.
 
-Note that the {\ct MIXTURE FRACTION} output quantity applies the Burke-Schumann solution (see \cite{Turns:1996}) to map species composition to mixture fraction (i.e., mixture fraction is not a primitive flow variable but rather is calculated from the local fuel and product mass fractions).  This requires simple chemistry with a reaction of the type $\si{F} + \si{A} \rightarrow \si {P}$ with infinitely fast mixing and infinitely fast chemistry.  Therefore, you must set {\ct INITIAL\_UNMIXED\_FRACTION=0} to output {\ct MIXTURE FRACTION}.
+The mixing time, $\tau_{\rm mix}$, is a function of the the level of turbulence in the neighborhood of the point of interest. However, you may override the calculation of $\tau_{\rm mix}$ by setting a {\ct FIXED\_MIX\_TIME} (s) on the {\ct COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound {\ct TAU\_CHEM} and/or an upper bound {\ct TAU\_FLAME} on the {\ct COMB} line.
+
+Unlike earlier versions, FDS no longer uses the mixture fraction approach for combustion modeling. However, the {\ct 'MIXTURE FRACTION'} output quantity applies the Burke-Schumann solution~\cite{Turns:1996} to map species composition to mixture fraction (i.e., mixture fraction is not a primitive flow variable but rather is calculated from the local fuel and product mass fractions).  This requires simple chemistry with a reaction of the type $\si{F} + \si{A} \rightarrow \si {P}$ with infinitely fast mixing and infinitely fast chemistry.  Therefore, you must set {\ct INITIAL\_UNMIXED\_FRACTION=0} to output {\ct 'MIXTURE FRACTION'}.
 
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
@@ -5395,29 +5395,18 @@ If soot deposition is being computed, the soot present on surfaces can undergo o
 
 \chapter{Radiation}
 
-For most FDS simulations, thermal radiation transport is computed by default and you need not set any
-parameters to make this happen. However, there are situations where it is important to be aware of
-issues related to the radiative transport solver.
+For most FDS simulations, thermal radiation transport is computed by default and you need not set any parameters to make this happen. However, there are situations where it is important to be aware of issues related to the radiative transport solver.
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
 \label{info:RADI}
 
-{\ct RADI} is the namelist group that contains all of the parameters related to the radiation solver. There can be only one
-{\ct RADI} line in the input file. It is possible to turn off the radiation transport
-solver (saving roughly 20 \% in CPU time) by adding the statement
-{\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning
-is taking place and radiation is turned off, then the total heat
-release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
-an input on the {\ct REAC} line. This radiated energy completely
-disappears from the calculation. For fire scenarios it is not recommended that you turn off the
-radiation transport. This feature is used mainly for diagnostic purposes or when the changes in
-temperature are relatively small.
+{\ct RADI} is the namelist group that contains all of the parameters related to the radiation solver. There can be only one {\ct RADI} line in the input file. It is possible to turn off the radiation transport solver (saving roughly 20 \% in CPU time) by adding the statement {\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning is taking place and radiation is turned off, then the total heat release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is an input on the {\ct REAC} or {\ct COMB} line. This radiated energy completely disappears from the calculation. For fire scenarios it is not recommended that you turn off the radiation transport. This feature is used mainly for diagnostic purposes or when the changes in temperature are relatively small.
 
 \subsection{Radiative Fraction}
 \label{info:CHI_R}
 \label{ramp_chi_r}
 
-The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
+The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
 
 \begin{table}[!ht]
 \caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
@@ -8616,6 +8605,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
 %{\ct COMPUTE\_ZETA\_SOURCE\_TERM}               & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
+{\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 %{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
@@ -8623,8 +8613,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct ODE\_SOLVER}                               & Character     & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
-%{\ct TAU\_CHEM}                                 & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
-%{\ct TAU\_FLAME}                                & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
+{\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
+{\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}        \\ \hline
 %{\ct TRANSPORT\_UNMIXED\_FRACTION}              & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 %{\ct TRANSPORT\_ZETA\_SCHEME}                   & Integer       & Section~\ref{}                                        &               & 1                    \\ \hline
@@ -9581,38 +9571,36 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct A}                                   & Real        & Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             & $^\circ$C         &     \\ \hline
-{\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
-{\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}    \\ \hline
-{\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
-{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427    \\ \hline
-{\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
-{\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100    \\ \hline
-{\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &          \\ \hline
-%{\ct FIXED\_MIX\_TIME}                    & Real        & Section~\ref{??}                          &  s                &      \\ \hline
-{\ct FORMULA}                             & Character   & Section~\ref{info:simple_chemistry}       &                   &  \\ \hline
-{\ct FUEL}                                & Character   & Section~\ref{info:simple_chemistry}       &                   &   \\ \hline
-{\ct FUEL\_RADCAL\_ID}                    & Character   & Section~\ref{info:simple_chemistry}       &                   &       \\ \hline
-{\ct H}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}                & Real        & Section~\ref{info:heat_of_combustion}     & kJ/kg             &         \\ \hline
-{\ct ID}                                  & Character   & Section~\ref{info:simple_chemistry}       &                   &   \\ \hline
-{\ct IDEAL}                               & Logical     & Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}    \\ \hline
-{\ct N}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
-{\ct NU(:)}                               & Real Array  & Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct N\_S(:)}                             & Real Array  & Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
-%{\ct ODE\_SOLVER}                         & Character   & Section~\ref??}                           &                   &       \\ \hline
-{\ct RADIATIVE\_FRACTION}                  & Real       & Section~\ref{info:CHI_R}                   &                   &                \\ \hline
-{\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                   &                   &                \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
-{\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
-{\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0    \\ \hline
-{\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
-{\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
-{\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}    \\ \hline
+{\ct A}                                   & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             & $^\circ$C         &                   \\ \hline
+{\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
+{\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0                 \\ \hline
+{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427              \\ \hline
+{\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &                   \\ \hline
+{\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100             \\ \hline
+{\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &                   \\ \hline
+{\ct FORMULA}                             & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct FUEL}                                & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct FUEL\_RADCAL\_ID}                    & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct H}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}                & Real        & Section~\ref{info:heat_of_combustion}     & kJ/kg             &                   \\ \hline
+{\ct ID}                                  & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct IDEAL}                               & Logical     & Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}     \\ \hline
+{\ct N}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct NU(:)}                               & Real Array  & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct N\_S(:)}                             & Real Array  & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
+{\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
+{\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1               \\ \hline
+{\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0               \\ \hline
+{\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
