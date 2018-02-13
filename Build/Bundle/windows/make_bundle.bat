@@ -9,7 +9,7 @@ set smvversion=%SMVEDITION%
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64
 set fdsmpidir=%svn_root%\fds\Build\impi_intel_win_64
-set basename=FDS_%fds_version%-SMV_%smv_version%_win64
+set basename=%fds_version%-%smv_version%_win64
 
 set in_pdf=%userprofile%\.bundle\pubs
 set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL17

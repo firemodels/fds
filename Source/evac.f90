@@ -9807,12 +9807,12 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW )%YW-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW )%X                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%Y-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
-                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%X-0.5_EB*DX(II+1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%Y                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9858,12 +9858,12 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW )%YW-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW )%X                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%Y-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
-                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%X+0.5_EB*DX(II-1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%Y                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9909,12 +9909,12 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW )%YW+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW )%X                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%Y+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
-                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%X-0.5_EB*DX(II+1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%Y                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9960,12 +9960,12 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW )%YW+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW )%X                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%Y+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
-                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%X+0.5_EB*DX(II-1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%Y                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -15553,7 +15553,7 @@ CONTAINS
           SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_mx = M%WALL(IW)%XW
+          d_mx = M%WALL(IW)%X
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
@@ -15602,7 +15602,7 @@ CONTAINS
           SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_px = M%WALL(IW)%XW
+          d_px = M%WALL(IW)%X
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
@@ -15651,7 +15651,7 @@ CONTAINS
           SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_my = M%WALL(IW)%YW
+          d_my = M%WALL(IW)%Y
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
@@ -15700,7 +15700,7 @@ CONTAINS
           SURF_INDEX = M%WALL(IW)%SURF_INDEX  ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_py = M%WALL(IW)%YW
+          d_py = M%WALL(IW)%Y
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
@@ -15823,7 +15823,7 @@ CONTAINS
     END IF
 
     ! Only those doors are possible which are in the same main evac mesh.
-    K_ave_Door        = 0.0_EB
+    K_ave_door        = 0.0000001_EB*ABS(FED_DOOR_CRIT)
     FED_max_Door      = 0.0_EB
     Is_Known_Door     = .FALSE.
     Is_Visible_Door   = .FALSE.
@@ -16152,10 +16152,7 @@ CONTAINS
           PP_see_door = PP_see_door .OR. (PP_see_doorXB .AND. PP_correct_side)
              
           FED_max_Door(i) = max_fed
-          K_ave_Door(i) = ave_K
-          IF (FED_DOOR_CRIT < TWO_EPSILON_EB) THEN
-             K_ave_door(i) = MAX(K_ave_Door(i),0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
-          END IF
+          K_ave_Door(i) = MAX(ave_K,0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
 
           ! Note: a DOOR is not counted as visible door, if it does not have an
           ! EXIT_SIGN, unless it is already been a target door for this agent/group.
