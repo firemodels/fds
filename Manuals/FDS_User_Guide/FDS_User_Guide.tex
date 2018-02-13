@@ -368,7 +368,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  & {\ct PARTICLE\_VELOCITY}                    & Section~\ref{info:sprinklers}           \\ \hline
 {\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
 {\ct RADI}    & {\ct CH4\_BANDS}                    &              & Eliminated                                  &                                         \\ \hline
-{\ct RADI}    & {\ct RADIATIVE\_FRACTION}           &  {\ct REAC}  & {\ct RADIATIVE\_FRACTION} & Section ~\ref{info:CHI_R}   \\ \hline
+{\ct RADI}    & {\ct RADIATIVE\_FRACTION}           &  {\ct REAC}  & {\ct RADIATIVE\_FRACTION}                   & Section ~\ref{info:CHI_R}               \\ \hline
 {\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  & {\ct A}                                     & Section~\ref{info:finite}               \\ \hline
 {\ct REAC}    & {\ct ID}                            &  {\ct REAC}  & {\ct FUEL}                                  & Section~\ref{info:simple_chemistry}     \\ \hline
 {\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  & {\ct MASS\_EXTINCTION\_COEFFICIENT}         & Section~\ref{info:visibility}           \\ \hline
@@ -393,7 +393,7 @@ Listed below are suggested ways to decrease CPU time, but these options should b
 
 \begin{enumerate}
 \item The improved turbulence model in FDS 6 has been found to produce comparable results to older versions of FDS using slightly less refined numerical grids. Section~\ref{info:Mesh_Resolution} introduces a dimensionless parameter, $D^*/\dx$, that indicates the number of grid cells of dimension $\dx$ that span the characteristic width of the fire, $D^*$. A grid resolution study should be performed to determine the loss of accuracy caused by a reduced value of $D^*/\dx$.
-\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line together with {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'}  or {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
+\item One reason for the increased CPU cost of FDS~6 is the more precise treatment of gas species properties. Previous versions of FDS assumed that the specific heat of a gas species is solely dependent on its molecular weight, and that the ratio of specific heats, $c_p/c_v$, is equal to 1.4, a value appropriate for a diatomic gas like nitrogen, N$_2$. Section~\ref{info:Enthalpy} provides more details. FDS~6 now assumes that gas species are temperature-dependent, and this assumption increases the cost of the calculation in a number of different routines, in particular the calculation of the divergence. If you set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line together with {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'}  or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line, you can once again assume that the gas species are all diatomic. For scenarios where the overall compartment temperature does not approach flashover conditions, this assumption might be appropriate.
 \item In situations where you are simulating a relatively small fire in a relatively large space and you are not interested in heat fluxes to surrounding structures, it might be reasonable to turn off the radiation transport calculation by setting {\ct RADIATION} equal to {\ct .FALSE.} on the {\ct RADI} line. FDS will still assume that a fixed fraction of the fire's energy is radiated away, only now the energy is simply removed from the calculation.
 \item In situations where the heat transfer conditions are stationary or change only gradually, you can reduce the cost of the radiation solution by reducing the temporal resolution. More details in Section~\ref{info:RADI_Resolution}. A sensitivity study should be performed to determine the loss of accuracy.
 \end{enumerate}
@@ -882,6 +882,7 @@ table containing all of the keywords for each group.
 Group Name  & Namelist Group Description& Reference Section & Parameter Table  \\ \hline
 {\ct BNDF}  & Boundary File Output         & \ref{info:BNDF} & \ref{tbl:BNDF}  \\ \hline
 {\ct CLIP}  & Clipping Parameters          & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
+{\ct COMB}  & Combustion Parameters        & \ref{info:COMB} & \ref{tbl:COMB}  \\ \hline
 {\ct CSVF}  & Velocity Input File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
 {\ct DEVC}  & Device Parameters            & \ref{info:DEVC} & \ref{tbl:DEVC}  \\ \hline
@@ -4619,7 +4620,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
 The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
@@ -4754,19 +4755,13 @@ Using the species  {\ct SPRINKLER WATER VAPOR} for the sprinklers would allow yo
 
 \label{chap:combustion}
 \label{info:REAC}
+\label{info:COMB}
 
-A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former
-refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there
-can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost.
-It is expensive to
-solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by
-FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase
-reaction as a surrogate for all potential fuels.
+A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost. It is expensive to solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase reaction as a surrogate for all potential fuels.
 
-Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence
-the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not
-practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more
-commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
+Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model. 
+
+There are two groups of parameters that govern combustion. The first, called the {\ct COMB} namelist group, contains parameters that pertain to any and all reactions. Specific parameters about a particular reaction are specified using the {\ct REAC} namelist group. There can only be one {\ct COMB} line, but multiple {\ct REAC} lines if there are multiple reactions. If you are modeling a fire, you {\em must} specify the fuel and basic stoichiometry using a {\ct REAC} line. You need not specify a {\ct COMB} line unless you want to modify mainly numerical parameters.
 
 
 \section{Single-Step, Mixing-Controlled Combustion}
@@ -4915,21 +4910,18 @@ a given mesh cell at a given time step. Each computational cell can be thought o
 \frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{\rm mix}}
 \label{eq:edc_mix}
 \end{equation}
-Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct MISC} line.
+Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter {\ct INITIAL\_UNMIXED\_FRACTION} on the {\ct COMB} line.
 
 Note that the {\ct MIXTURE FRACTION} output quantity applies the Burke-Schumann solution (see \cite{Turns:1996}) to map species composition to mixture fraction (i.e., mixture fraction is not a primitive flow variable but rather is calculated from the local fuel and product mass fractions).  This requires simple chemistry with a reaction of the type $\si{F} + \si{A} \rightarrow \si {P}$ with infinitely fast mixing and infinitely fast chemistry.  Therefore, you must set {\ct INITIAL\_UNMIXED\_FRACTION=0} to output {\ct MIXTURE FRACTION}.
 
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
 \subsection{Special Topic: Flame Extinction}
-
 \label{info:extinction}
 
-Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a compartment is challenging because
-the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple
-suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works.
+Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a compartment is challenging because the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The default {\ct EXTINCTION\_MODEL} is called {\ct 'EXTINCTION 2'}. Alternative models are under development and when ready will be specified on the {\ct COMB} line.
 
-The only parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
+For the default extinction model, the only parameter you can control is the \linebreak[4]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
 
 If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
@@ -5188,7 +5180,7 @@ Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass fl
 \caption[HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case]{HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case.}
 \label{fig:hrr_two_fuels}
 \end{figure}
-Note that when using multiple chemical reactions, you must set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
+Note that when using multiple chemical reactions, you must set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
 
 \subsection{Special Topic: Using the {\ct EQUATION} input parameter}
 \label{info:EQUATION}
@@ -5320,7 +5312,11 @@ This type of reaction is specified by adding {\ct THIRD\_BODY=.TRUE.} to the {\c
 \subsection{Special Topic: Chemical Time Integration}
 \label{info:chem_integration}
 
-An important consideration for the time integration of chemical reactions is the number of iterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry, the number of iterations is 1. For finite rate chemical reactions, the number of iterations can vary between 1 and the lesser of\linebreak[4] {\ct MAX\_CHEMISTRY\_ITERATIONS} and that needed to satisfy the error tolerance of the ODE solver,\linebreak[4] {\ct RICHARDSON\_ERROR\_TOLERANCE}. If the maximum value is reached, the user can increase the number of iterations or decrease the error tolerance constraint of the integrator. You may also just fix the number of iterations by setting {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}. Its default value is -1, meaning that the number of time steps is determined by the ODE solver.
+The set of ordinary differential equations (ODEs) for the combustion reactions are solved over the course of a time step using one of a variety of solvers. The solver is specified via the character string {\ct ODE\_SOLVER} on the {\ct COMB} line. The chosen solver governs all reactions. If all reactions are fast, i.e. occur instantaneously following the mixing process, then the default solver is {\ct 'EXPLICIT EULER'}. If any of the reactions are finite-rate, then the default solver is {\ct 'RK2 RICHARDSON'}, a fourth-order scheme generated from three second-order Runge-Kutta steps with Richardson extrapolation (the third step provides a means of error control; details are provided in the of the FDS Tech Guide \cite{FDS_Math_Guide}). Two other schemes are available---{\ct 'RK2'} and {\ct 'RK3'}, second and third-order Runge-Kutta schemes without Richardson extrapolation.
+
+An important consideration for the time integration of chemical reactions is the number of iterations the ODE solver takes for a given FDS time step. For infinitely fast chemistry, the number of iterations is 1. For finite rate chemical reactions, the number of iterations can vary between 1 and the lesser of\linebreak[4] {\ct MAX\_CHEMISTRY\_SUBSTEPS} (default 20) and that needed to satisfy the error tolerance of the ODE solver,\linebreak[4] {\ct RICHARDSON\_ERROR\_TOLERANCE}. If the maximum value is reached, you can increase the number of iterations or decrease the error tolerance constraint of the integrator. You may also just fix the number of iterations by setting {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}. Its default value is -1, meaning that the number of time steps is determined by the ODE solver. These various numerical parameters are all set on the {\ct COMB} line, and they pertain to all reactions.
+
+If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]{\ct CHECK\_REALIZABILITY} to be {\ct .TRUE.} on the {\ct COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
 
 %\paragraph{Remark}
 %A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
@@ -5329,7 +5325,7 @@ An important consideration for the time integration of chemical reactions is the
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
 
-It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each surface deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}. All surface deposition can be disabled by the logical parameter {\ct DEPOSITION}. In the gas phase, aerosol transport is affected by gravity and temperature gradients. These effects can be selectively disabled with {\ct GRAVITATIONAL\_SETTLING} and {\ct THERMOPHORETIC\_SETTLING}. All the deposition parameters are on the {\ct MISC} line.  The deposition velocity at the wall can be output using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}. 
+It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each surface deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}. All surface deposition can be disabled by the logical parameter {\ct DEPOSITION}. In the gas phase, aerosol transport is affected by gravity and temperature gradients. These effects can be selectively disabled with {\ct GRAVITATIONAL\_SETTLING} and {\ct THERMOPHORETIC\_SETTLING}. All the deposition parameters are on the {\ct MISC} line.  The deposition velocity at the wall can be output using the solid phase output {\ct QUANTITY} called {\ct 'DEPOSITION VELOCITY'}.
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -7449,23 +7445,23 @@ There are various output quantities related to heat flux.
 
 \begin{labeling}{SPACE}
 
-\item[\ct 'NET HEAT FLUX'] 
+\item[\ct 'NET HEAT FLUX']
 \hspace{1in} \newline The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
 where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
 
-\item[\ct 'RADIATIVE HEAT FLUX']  
+\item[\ct 'RADIATIVE HEAT FLUX']
 \hspace{1in} \newline This is the radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
 
 \item[\ct 'CONVECTIVE HEAT FLUX']
 \hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s})$.
 
-\item[\ct 'INCIDENT HEAT FLUX'] 
+\item[\ct 'INCIDENT HEAT FLUX']
 \hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
 
-\item[\ct 'GAUGE HEAT FLUX'] 
+\item[\ct 'GAUGE HEAT FLUX']
 \hspace{1in} \newline This quantity simulates a measurement made with a cold water heat flux gauge:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
@@ -7477,21 +7473,21 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
 
-\item[\ct 'RADIOMETER'] 
+\item[\ct 'RADIOMETER']
 \hspace{1in} \newline Similar to a heat flux gauge, this quantity measures only the radiative heat flux:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
 The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
 
-\item[\ct 'RADIATIVE HEAT FLUX GAS'] 
+\item[\ct 'RADIATIVE HEAT FLUX GAS']
 \hspace{1in} \newline All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
 &DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
 \end{lstlisting}
 Note that the parameter {\ct STATISTICS} is not appropriate for this quantity. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
 
-\item[\ct 'RADIANCE'] 
+\item[\ct 'RADIANCE']
 \hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
@@ -8603,6 +8599,42 @@ properties be specified as well. Simply prescribing as many properties as possib
 \vspace{\baselineskip}
 
 
+\section{\texorpdfstring{{\tt COMB}}{COMB} (General Combustion Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[General combustion parameters ({\ct COMB} namelist group)]{For more information see Chapter~\ref{info:COMB}.}
+\label{tbl:COMB} \\
+\hline
+\multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
+\hline \hline
+\endhead
+{\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
+%{\ct COMPUTE\_ZETA\_SOURCE\_TERM}               & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
+{\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
+%{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
+{\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
+{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
+{\ct ODE\_SOLVER}                               & Character     & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
+{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
+{\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
+%{\ct TAU\_CHEM}                                 & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
+%{\ct TAU\_FLAME}                                & Real          & Section~\ref{??}                                      &               & 1.E-10               \\ \hline
+%{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}        \\ \hline
+%{\ct TRANSPORT\_UNMIXED\_FRACTION}              & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
+%{\ct TRANSPORT\_ZETA\_SCHEME}                   & Integer       & Section~\ref{}                                        &               & 1                    \\ \hline
+%{\ct WD\_PROPS}                                 & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
+
+
+
 \section{\texorpdfstring{{\tt CSVF}}{CSVF} (Comma Separated Velocity Files)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9111,7 +9143,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
 {\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_REALIZABILITY}                      & Logical       & Strict check of ZZ>0 \& SUM(ZZ)=1                     &               & {\ct .FALSE.}     \\ \hline
 %{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
@@ -9135,12 +9166,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HVAC\_PRES\_RELAX}                         & Real          & Section ~\ref{info:HVAC}                              &               & 0.5               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
-{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
-{\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:chem_integration}                   &               &  1000             \\ \hline
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                              &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
-{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
@@ -9160,14 +9188,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
-{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-3           \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                         &               & {\ct .FALSE.}      \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
-{\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}      \\ \hline
-%{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}     \\ \hline
 %{\ct TENSOR\_DIFFUSIVITY}                       & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 %{\ct TERRAIN\_IMAGE}                            & Character     & See Wildland Fire User's Guide                        &               &                   \\ \hline
@@ -9188,8 +9213,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
-
-
 
 
 \vspace{\baselineskip}
@@ -9590,8 +9613,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                   &                   &     \\ \hline
 {\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}    \\ \hline
-%{\ct TAU\_CHEM}                           & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
-%{\ct TAU\_FLAME}                          & Real        & Section~\ref{??}                          &                   & 1.E-10   \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}

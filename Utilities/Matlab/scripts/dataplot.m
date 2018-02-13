@@ -129,7 +129,7 @@ for i=2:n_plots
         itest = ismember(i,drange);
     else
         itest = strcmp(parameters(dataname_col),dstring);
-        if itest
+        if any(itest)
             drange_index = drange_index + 1;
             drange(drange_index) = i;
         end
@@ -144,7 +144,7 @@ for i=2:n_plots
     % Check to see if f line has been activated in configuration file
     ftest = strcmp(parameters(strcmp(headers,'switch_id')),'f'); % used for multiple lines on same plot
 
-    if itest && (dtest || otest || ftest)
+    if any(itest) && (dtest || otest || ftest)
 
         if ~ftest
             if exist('K')
