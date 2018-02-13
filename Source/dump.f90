@@ -457,6 +457,10 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO N=1,N_BNDF
       LU_BNDF(N,NM) = GET_FILE_NUMBER()
+      IF(CC_IBM) THEN
+         LU_BNDF_GEOM(N,NM) = GET_FILE_NUMBER()
+         LU_BNDG(N,NM) = GET_FILE_NUMBER()
+      ENDIF
       IF (NMESHES>1) THEN
          WRITE(FN_BNDF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
          IF (CC_IBM) THEN

@@ -624,7 +624,7 @@ MAIN_LOOP: DO
    CALL MESH_EXCHANGE(3)
 
    ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-   IF (CC_IBM) CALL CCIBM_END_STEP(DIAGNOSTICS)
+   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -763,7 +763,7 @@ MAIN_LOOP: DO
    ENDIF
 
    ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
-   IF (CC_IBM) CALL CCIBM_END_STEP(DIAGNOSTICS)
+   IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
 
