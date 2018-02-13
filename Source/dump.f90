@@ -1386,7 +1386,6 @@ ENDIF
 ! Record the version and endian-ness in .smv file
 
 WRITE(LU_SMV,'(/A)') 'FDSVERSION'
-WRITE(LU_SMV,'(A)') TRIM(VERSION_STRING)
 WRITE(LU_SMV,'(A)') TRIM(GITHASH_PP)
 
 ! Write out the GIT number and revision date to a file
@@ -2750,10 +2749,9 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
    DO NR=1,ML%N_REACTIONS
       WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
-      DO NN=1,ML%N_RESIDUE(NR)
-         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
-                               '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN,NR)),', Material Index: ', &
-                                                        ML%RESIDUE_MATL_INDEX(NN,NR),', Yield: ',ML%NU_RESIDUE(NN,NR)
+      DO NN=1,N_MATL
+         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
+                               '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
       ENDDO
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
       DO NS = 1,N_TRACKED_SPECIES
@@ -5347,9 +5345,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   SURF_INDEX = WC%SURF_INDEX
                   IF (DV%IOR/=0 .AND. DV%IOR/=WC%ONE_D%IOR) CYCLE WALL_CELL_LOOP
                   IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE WALL_CELL_LOOP
-                  IF (WC%XW<DV%X1-0.5_EB*DX(WC%ONE_D%II)-MICRON .OR. WC%XW>DV%X2+0.5_EB*DX(WC%ONE_D%II)+MICRON .OR. &
-                      WC%YW<DV%Y1-0.5_EB*DY(WC%ONE_D%JJ)-MICRON .OR. WC%YW>DV%Y2+0.5_EB*DY(WC%ONE_D%JJ)+MICRON .OR. &
-                      WC%ZW<DV%Z1-0.5_EB*DZ(WC%ONE_D%KK)-MICRON .OR. WC%ZW>DV%Z2+0.5_EB*DZ(WC%ONE_D%KK)+MICRON) CYCLE WALL_CELL_LOOP
+                  IF (WC%X<DV%X1-0.5_EB*DX(WC%ONE_D%II)-MICRON .OR. WC%X>DV%X2+0.5_EB*DX(WC%ONE_D%II)+MICRON .OR. &
+                      WC%Y<DV%Y1-0.5_EB*DY(WC%ONE_D%JJ)-MICRON .OR. WC%Y>DV%Y2+0.5_EB*DY(WC%ONE_D%JJ)+MICRON .OR. &
+                      WC%Z<DV%Z1-0.5_EB*DZ(WC%ONE_D%KK)-MICRON .OR. WC%Z>DV%Z2+0.5_EB*DZ(WC%ONE_D%KK)+MICRON) CYCLE WALL_CELL_LOOP
                   NOT_FOUND = .FALSE.
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
                   SELECT CASE(DV%STATISTICS)
@@ -5364,16 +5362,16 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         STAT_COUNT = STAT_COUNT + 1
                      CASE('SURFACE INTEGRAL')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + VALUE*WC%AW
+                           STAT_VALUE = STAT_VALUE + VALUE*WC%ONE_D%AREA
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + WC%AW
+                           STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA
                   END SELECT
                ENDDO WALL_CELL_LOOP
 
          END SELECT SOLID_STATS_SELECT
 
-      CASE(1:299,500:505) OUTPUT_INDEX_SELECT ! gas phase
+      CASE(1:299,500:N_OUTPUT_QUANTITIES) OUTPUT_INDEX_SELECT ! gas phase
 
          GAS_STATS_SELECT: SELECT CASE(DV%STATISTICS)
 
@@ -5774,7 +5772,7 @@ REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,MW,XHAT,ZHAT,BBF,RHO2,TMPUP,TMPLOW,ZINT,RHO_S
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
-           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM,NRM
+           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 REAL :: CPUTIME
@@ -6848,17 +6846,6 @@ IND_SELECT: SELECT CASE(IND)
                ! check original material layer
                GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,NN)
                RETURN
-            ELSE
-               ! check reaction residual material (don't this is right yet)
-               ML => MATERIAL(SF%MATL_INDEX(NN))
-               DO NR=1,ML%N_REACTIONS
-                  DO NRM=1,ML%N_RESIDUE(NR)
-                     IF (SF%RESIDUE_INDEX(NN,NRM,NR)==MATL_INDEX) THEN
-                        GAS_PHASE_OUTPUT_RES = OB%RHO(II,JJ,KK,MATL_INDEX)
-                        RETURN
-                     ENDIF
-                  ENDDO
-               ENDDO
             ENDIF MATL_INDEX_IF
          ENDDO
          GAS_PHASE_OUTPUT_RES = RHO_S
@@ -7159,10 +7146,10 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT / VOLSUM
 
    CASE(35) ! VISCOUS WALL UNITS (distance from the wall expressed in nondimensional viscous units)
-      SOLID_PHASE_OUTPUT = WC%Y_PLUS
+      SOLID_PHASE_OUTPUT = WC%ONE_D%Y_PLUS
 
    CASE(36) ! FRICTION VELOCITY
-      SOLID_PHASE_OUTPUT = WC%U_TAU
+      SOLID_PHASE_OUTPUT = WC%ONE_D%U_TAU
 
    CASE(37) ! VELOCITY ERROR
       SOLID_PHASE_OUTPUT = WC%VEL_ERR_NEW
@@ -7264,7 +7251,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                END SELECT
                SELECT CASE(INDX)
                   CASE(50,51,52) ! VOLUME FLOW WALL (+,-)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%AW
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + UN*WC%ONE_D%AREA
                   CASE(53,54,55) ! MASS FLOW WALL (+,-)
                      IF (Z_INDEX > 0) THEN
                         Y_SPECIES = ONE_D%ZZ_F(Z_INDEX)
@@ -7274,11 +7261,11 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                      ELSE
                         Y_SPECIES = 1._EB
                      ENDIF
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + Y_SPECIES*ONE_D%RHO_F*UN*WC%AW
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + Y_SPECIES*ONE_D%RHO_F*UN*WC%ONE_D%AREA
                   CASE(56,57,58) ! HEAT FLOW WALL (+,-)
                      ZZ_GET(1:N_TRACKED_SPECIES) = ONE_D%ZZ_F(1:N_TRACKED_SPECIES)
                      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,ONE_D%TMP_F)
-                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%RHO_F*H_S*UN*WC%AW*0.001_EB
+                     SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%RHO_F*H_S*UN*WC%ONE_D%AREA*0.001_EB
                END SELECT
             ENDDO DV_I_LOOP
          ENDDO DV_J_LOOP
@@ -7349,7 +7336,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = TMP_BAR - TMPM
 
    CASE(63) ! THERMAL WALL UNITS
-      SOLID_PHASE_OUTPUT = WC%Z_STAR
+      SOLID_PHASE_OUTPUT = WC%ONE_D%Z_STAR
 
    CASE(64) ! MASS FLUX WALL
       IIG = ONE_D%IIG
@@ -8034,9 +8021,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          H_S_J_ALPHA = H_S_J_ALPHA + 2._EB*H_S_ALPHA*WC%ONE_D%RHO_D_F(N)*(ZZ(IIG,JJG,KKG,N)-WC%ONE_D%ZZ_F(N))*WC%ONE_D%RDN
       ENDDO
    ENDIF
-   Q_DOT(3,NM) = Q_DOT(3,NM) - U_N*WC%ONE_D%RHO_F*H_S*WC%AW
-   Q_DOT(4,NM) = Q_DOT(4,NM) - WC%ONE_D%QCONF*WC%AW
-   Q_DOT(5,NM) = Q_DOT(5,NM) - H_S_J_ALPHA*WC%AW
+   Q_DOT(3,NM) = Q_DOT(3,NM) - U_N*WC%ONE_D%RHO_F*H_S*WC%ONE_D%AREA
+   Q_DOT(4,NM) = Q_DOT(4,NM) - WC%ONE_D%QCONF*WC%ONE_D%AREA
+   Q_DOT(5,NM) = Q_DOT(5,NM) - H_S_J_ALPHA*WC%ONE_D%AREA
 ENDDO WALL_LOOP
 
 ! Determine mass loss rate of fuel, M_DOT(1,NM), and total, M_DOT(3,NM), from solid wall cells and then add it to the MLR of the
@@ -8052,8 +8039,8 @@ WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP2
    IF (I_FUEL>0) &
-   M_DOT(1,NM) = M_DOT(1,NM) +     WC%ONE_D%MASSFLUX_SPEC(I_FUEL)*WC%AW*WC%ONE_D%AREA_ADJUST
-   M_DOT(3,NM) = M_DOT(3,NM) + SUM(WC%ONE_D%MASSFLUX_SPEC)       *WC%AW*WC%ONE_D%AREA_ADJUST
+   M_DOT(1,NM) = M_DOT(1,NM) +     WC%ONE_D%MASSFLUX_SPEC(I_FUEL)*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
+   M_DOT(3,NM) = M_DOT(3,NM) + SUM(WC%ONE_D%MASSFLUX_SPEC)       *WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
 ENDDO WALL_LOOP2
 
 Q_DOT_SUM(:,NM) = Q_DOT_SUM(:,NM) + DT*Q_DOT(:,NM)
@@ -8195,7 +8182,7 @@ FILE_LOOP: DO NF=1,N_BNDF
 
       PA => PATCH(IP)
 
-      PP  = 0._EB
+      PP  = REAL(OUTPUT_QUANTITY(-IND)%AMBIENT_VALUE,FB)
       PPN = 0._FB
       IBK = 0
 
@@ -8219,8 +8206,11 @@ FILE_LOOP: DO NF=1,N_BNDF
                   CASE(2) ; L=I ; N=K
                   CASE(3) ; L=I ; N=J
                END SELECT
-               PP(L,N) = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW),FB)
-               IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. .NOT.SOLID(IC)) IBK(L,N) = 1
+               IF (WALL(IW)%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. &
+                   WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .AND. .NOT.SOLID(IC)) THEN
+                  IBK(L,N) = 1
+                  PP(L,N)  = REAL(SOLID_PHASE_OUTPUT(NM,IND,BF%Y_INDEX,BF%Z_INDEX,BF%PART_INDEX,OPT_WALL_INDEX=IW),FB)
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
