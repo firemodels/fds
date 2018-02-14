@@ -6,9 +6,11 @@ addons:
     packages:
     - gfortran-7
     - gcc-7
-language: cpp
+language: generic
 install:
   - ./install-ompi.sh
 script:
-  - cd Build/mpi_gnu_linux_64
+  - export LD_LIBRARY_PATH=/opt/openmpi-3.0.0/lib:$LD_LIBRARY_PATH
+  - export PATH=/opt/openmpi-3.0.0/bin:$PATH
+  - cd Build/mpi_gnu_linux_64_db
   - ./make_fds.sh
