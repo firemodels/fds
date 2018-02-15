@@ -1147,29 +1147,40 @@ OBST_LOOP_2: DO N=1,N_OBST
             ENDIF
 
             ! update density
-            RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) / RVSP(I,J,K)
+            RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
             RHO_OUT(1:MS%N_MATL) = RHO_IN(1:MS%N_MATL)
 
             CALL PYROLYSIS(MS%N_MATL,MS%MATL_INDEX,OB%MATL_SURF_INDEX,IIG,JJG,KKG,TMP_S,WC%ONE_D%TMP_F,&
                            RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + DT_SUB * M_DOT_S_PPP(1:MS%N_MATL) * RVSP(I,J,K)
-
-            Q_DOT_PPP_S(I,J,K) = Q_DOT_PPP_S(I,J,K) * RVSP(I,J,K)
+            ! these are equivalent
+            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + DT_SUB * M_DOT_S_PPP(1:MS%N_MATL)
+            !OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL))
 
             ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
 
             DO NS=1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
+               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
             ENDDO
             DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR*RVSP(I,J,K)
+               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
             ENDDO
+
+            ! If the fuel or water massflux is non-zero, set the ignition time
+
+            IF (WC%ONE_D%T_IGN > T) THEN
+               IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+            ENDIF
 
             CONSUMABLE_IF: IF (OB%CONSUMABLE) THEN
                ! if local cell mass becomes too small, put the mass in the adjacent cell and remove local cell
+               RVSP(I,J,K) = 0._EB
+               DO NN=1,MS%N_MATL
+                  ML => MATERIAL(MS%MATL_INDEX(NN))
+                  RVSP(I,J,K) = RVSP(I,J,K) + OB%RHO(I,J,K,NN)/ML%RHO_S
+               ENDDO
                THRESHOLD_IF: IF (RVSP(I,J,K)<SOLID_VOLUME_THRESHOLD) THEN
                   II2 = I
                   JJ2 = J
@@ -1183,7 +1194,8 @@ OBST_LOOP_2: DO N=1,N_OBST
                      CASE (-3); KK2=K+1
                   END SELECT
                   OBST_INDEX = OBST_INDEX_C(CELL_INDEX(II2,JJ2,KK2))
-                  IF (OBST_INDEX>0) THEN
+                  OB2_IF: IF (OBST_INDEX>0) THEN
+                     ! if there is an accepting cell exists, transfer mass and do not call pyrolysis
                      IF (TWO_D) THEN
                         VC2 = DX(II2)*DZ(KK2)
                      ELSE
@@ -1191,26 +1203,21 @@ OBST_LOOP_2: DO N=1,N_OBST
                      ENDIF
                      OB2 => OBSTRUCTION(OBST_INDEX)
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                  ENDIF
-                  RVSP(I,J,K) = 0._EB
-                  OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
-                  OB%HT3D   = .FALSE.
-                  OB%PYRO3D = .FALSE.
-                  ! recompute solid volume ratio of accepting cell
-                  RVSP(II2,JJ2,KK2) = 0._EB
-                  DO NN=1,MS%N_MATL
-                     ML => MATERIAL(MS%MATL_INDEX(NN))
-                     RVSP(II2,JJ2,KK2) = RVSP(II2,JJ2,KK2) + OB2%RHO(II2,JJ2,KK2,NN)/ML%RHO_S
-                  ENDDO
+                     RVSP(I,J,K) = 0._EB
+                     OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+                     OB%HT3D   = .FALSE.
+                     OB%PYRO3D = .FALSE.
+                  ELSE OB2_IF
+                     ! VS/VC is small, but there are no more cells to accept the mass
+                     IF (RVSP(I,J,K)<1.E-10_EB) THEN
+                        OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+                        OB%HT3D   = .FALSE.
+                        OB%PYRO3D = .FALSE.
+                     ENDIF
+                  ENDIF OB2_IF
                ENDIF THRESHOLD_IF
                OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
             ENDIF CONSUMABLE_IF
-
-            ! If the fuel or water massflux is non-zero, set the ignition time
-
-            IF (WC%ONE_D%T_IGN > T) THEN
-               IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
-            ENDIF
 
          ENDDO I_LOOP_2
       ENDDO
