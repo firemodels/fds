@@ -364,7 +364,7 @@ LOGICAL, PARAMETER :: FORCE_GAS_FACE      = .TRUE.
 LOGICAL, PARAMETER :: INTERP_TO_CARTFACE  = .FALSE. ! If True => direct interpolation to cut-face
                                                     ! Cartesian Centroid in forcing, if False => flux average.
 LOGICAL, PARAMETER :: FORCE_REGC_FACE     = .TRUE.
-LOGICAL, SAVE ::      FORCE_REGC_FACE_NXT = .TRUE.
+LOGICAL, SAVE ::      FORCE_REGC_FACE_NXT = .FALSE. ! Do not Force Regular Faces next to cut-faces.
 
 LOGICAL, SAVE :: CC_INJECT_RHO0 = .FALSE. ! .TRUE.: inject RHO0 and use Boundary W velocity for cut-cell centroid.
                                           ! .FALSE.: Interpolate RHO0 and W velocity to cut-cell centroid.
@@ -411,8 +411,9 @@ REAL(EB):: VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_L
 
 PRIVATE
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,&
-          CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_RHO0W_INTERP, &
-          CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
+          CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
+          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_NO_FLUX, &
+          CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CFACE_THERMAL_GASVARS,CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
           TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CC_IROW,GET_CC_UNKH,GET_CUTCELL_FH,GET_CUTCELL_HP, &
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
@@ -2026,6 +2027,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 
 ENDDO MESH_LOOP_2
+DEALLOCATE(DXN_UNKZ_LOC, VOL_UNKZ_LOC, IJK_UNKZ_LOC)
 
 RETURN
 END SUBROUTINE SET_CFACES_ONE_D_RDN
@@ -2049,6 +2051,7 @@ IF(PREDICTOR) CODE = 3
 IF(CORRECTOR) CODE = 6
 CALL MESH_CC_EXCHANGE(CODE,.TRUE.)
 #ifdef DEBUG_CCREGION_SCALAR_TRANSPORT
+IF (PREDICTOR) CALL CCIBM_CHECK_DIVERGENCE(T,DT,.TRUE.)
 IF (CORRECTOR) CALL CCIBM_CHECK_DIVERGENCE(T,DT,.FALSE.)
 #else
 IF (CORRECTOR .AND. DIAGNOSTICS) CALL CCIBM_CHECK_DIVERGENCE(T,DT,.FALSE.)
@@ -9754,7 +9757,7 @@ SUBROUTINE CCIBM_VELOCITY_CUTFACES
 
 
 ! Local Variables:
-INTEGER  :: NM,ICC,ICF,I,J,K,X1AXIS,NFACE,INDADD,INDF,JCC,IFC,IFACE,IFACE2
+INTEGER  :: NM,ICC,ICF,I,J,K,X1AXIS,NFACE,INDADD,INDF,JCC,IFC,IFACE,IFACE2,CFACE_IND
 REAL(EB) :: AREATOT, VEL_CART, FLX_FCT, FSCU
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 
@@ -9880,6 +9883,8 @@ MESH_LOOP : DO NM=1,NMESHES
                       IF (CUT_CELL(ICC)%FACE_LIST(1,IFACE) == IBM_FTYPE_CFINB) THEN
                          IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
                          CUT_FACE(ICF)%VEL( IFACE2) = 1._EB/AREATOT*FSCU ! +ve into the solid
+                         CFACE_IND=CUT_FACE(ICF)%CFACE_INDEX( IFACE2)
+                         CFACE(CFACE_IND)%VEL_ERR_NEW=CUT_FACE(ICF)%VEL( IFACE2) - 0._EB ! Assumes zero veloc of solid.
                       ENDIF
                    ENDDO IFC_LOOP2
                 ENDDO
@@ -10022,9 +10027,7 @@ INTEGER :: IPT
 IF (CC_ZEROIBM_VELO) CC_INTERPOLATE_H=.FALSE.
 
 ! Interpolate H in cut-cells:
-MESH_LOOP : DO NM=1,NMESHES
-
-   IF (PROCESS(NM)/=MYID) CYCLE
+MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
@@ -10168,16 +10171,16 @@ MESH_LOOP : DO NM=1,NMESHES
    ENDDO ICC_LOOP
 
    ! Finally set HP to zero inside immersed solids:
-   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-      DO K=0,KBP1
-        DO J=0,JBP1
-           DO I=0,IBP1
-              IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
-              HP(I,J,K) = 0._EB
-           ENDDO
+   !IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+   DO K=0,KBP1
+     DO J=0,JBP1
+        DO I=0,IBP1
+           IF (MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) /= IBM_SOLID) CYCLE
+           HP(I,J,K) = 0._EB
         ENDDO
-      ENDDO
-   ENDIF
+     ENDDO
+   ENDDO
+   !ENDIF
 
    ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
    IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
@@ -10736,69 +10739,174 @@ ENDIF ! FORCE_GAS_FACE
 
 
 ! For Mesh NM, force solid faces:
-IF (FORCE_SOLID_FACE) THEN
-
-   ! Force U velocities in IBM_SOLID faces to zero
-   U_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID ) THEN
-               IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-               IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                    ! and solid Cartesian faces.
-            ENDIF
-
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force V velocities in IBM_SOLID faces to zero
-   V_IBM = 0._EB ! Body doesn't move.
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) == IBM_SOLID ) THEN
-               IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-               IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                    ! and solid Cartesian faces.
-            ENDIF
-
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Force W velocities in IBM_SOLID faces to zero
-   W_IBM = 0._EB ! Body doesn't move.
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-
-            IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID ) THEN
-               IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-               IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-               IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                    ! and solid Cartesian faces.
-            ENDIF
-
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF
-
-
+IF (FORCE_SOLID_FACE) CALL CCIBM_NO_FLUX(DT,NM,.FALSE.)
 
 RETURN
 END SUBROUTINE CCIBM_VELOCITY_FLUX
 
+! ------------------------------- CCIBM_NO_FLUX ---------------------------------
+
+SUBROUTINE CCIBM_NO_FLUX(DT,NM,PRESSURE_ITERATION)
+
+! Force to zero velocities on faces of type IBM_SOLID.
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: DT
+LOGICAL,  INTENT(IN) :: PRESSURE_ITERATION
+
+! Local Variables:
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
+REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT
+INTEGER :: I,J,K
+
+! This is the CCIBM forcing routine for momentum eqns.
+
+IF ( FREEZE_VELOCITY ) RETURN
+IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11) RETURN
+
+IF(PRESSURE_ITERATION) CALL POINT_TO_MESH(NM)
+
+IF (PRESSURE_ITERATION) THEN
+   IF (PREDICTOR) HP => H  ! Current substep H
+   IF (CORRECTOR) HP => HS ! Current Substep H
+ELSE
+   IF (PREDICTOR) HP => HS ! Previous substep H
+   IF (CORRECTOR) HP => H  ! Previous substep H
+ENDIF
+
+! Force U velocities in IBM_SOLID faces to zero
+U_IBM = 0._EB ! Body doesn't move.
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID ) THEN
+            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
+                                                                 ! and solid Cartesian faces.
+         ENDIF
+
+      ENDDO
+   ENDDO
+ENDDO
+
+! Force V velocities in IBM_SOLID faces to zero
+V_IBM = 0._EB ! Body doesn't move.
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) == IBM_SOLID ) THEN
+            IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+            IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+            FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
+                                                                 ! and solid Cartesian faces.
+         ENDIF
+
+      ENDDO
+   ENDDO
+ENDDO
+
+! Force W velocities in IBM_SOLID faces to zero
+W_IBM = 0._EB ! Body doesn't move.
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID ) THEN
+            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
+                                                                 ! and solid Cartesian faces.
+         ENDIF
+
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+
+END SUBROUTINE CCIBM_NO_FLUX
+
+! ------------------------- CCIBM_COMPUTE_VELOCITY_ERROR -------------------------
+
+SUBROUTINE CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM)
+
+! Compute velocity error on faces of type IBM_SOLID.
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: DT
+
+! Local Variables:
+INTEGER :: I,J,K
+REAL(EB):: UN_NEW, UN_NEW_OTHER, VELOCITY_ERROR
+
+IF (.NOT. PRES_ON_WHOLE_DOMAIN) RETURN ! No error in IBM_SOLID faces, solver used in Cartesian unstructured.
+
+CALL POINT_TO_MESH(NM)
+
+UN_NEW_OTHER = 0._EB ! Body doesn't move.
+
+! Compute U velocity errors in IBM_SOLID faces:
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) UN_NEW = U(I,J,K)   - DT*(FVX(I,J,K) + RDXN(I)  *(H(I+1,J,K)-H(I,J,K)))
+         IF (CORRECTOR) UN_NEW = 0.5_EB*(U(I,J,K)+US(I,J,K)  - DT*(FVX(I,J,K) + RDXN(I)  *(HS(I+1,J,K)-HS(I,J,K))))
+         VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
+         IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
+            VELOCITY_ERROR_MAX_LOC(1,NM) = I
+            VELOCITY_ERROR_MAX_LOC(2,NM) = J
+            VELOCITY_ERROR_MAX_LOC(3,NM) = K
+            VELOCITY_ERROR_MAX(NM)       = ABS(VELOCITY_ERROR)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute V velocity errors in IBM_SOLID faces:
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) UN_NEW = V(I,J,K)   - DT*(FVY(I,J,K) + RDYN(J)  *(H(I,J+1,K)-H(I,J,K)))
+         IF (CORRECTOR) UN_NEW = 0.5_EB*(V(I,J,K)+VS(I,J,K)  - DT*(FVY(I,J,K) + RDYN(J)  *(HS(I,J+1,K)-HS(I,J,K))))
+         VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
+         IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
+            VELOCITY_ERROR_MAX_LOC(1,NM) = I
+            VELOCITY_ERROR_MAX_LOC(2,NM) = J
+            VELOCITY_ERROR_MAX_LOC(3,NM) = K
+            VELOCITY_ERROR_MAX(NM)       = ABS(VELOCITY_ERROR)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute W velocity errors in IBM_SOLID faces:
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) UN_NEW = W(I,J,K)   - DT*(FVZ(I,J,K) + RDZN(K)  *(H(I,J,K+1)-H(I,J,K)))
+         IF (CORRECTOR) UN_NEW = 0.5_EB*(W(I,J,K)+WS(I,J,K)  - DT*(FVZ(I,J,K) + RDZN(K)  *(HS(I,J,K+1)-HS(I,J,K))))
+         VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
+         IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
+            VELOCITY_ERROR_MAX_LOC(1,NM) = I
+            VELOCITY_ERROR_MAX_LOC(2,NM) = J
+            VELOCITY_ERROR_MAX_LOC(3,NM) = K
+            VELOCITY_ERROR_MAX(NM)       = ABS(VELOCITY_ERROR)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE CCIBM_COMPUTE_VELOCITY_ERROR
 
 ! ------------------------------- GET_BOUND_VEL ---------------------------------
 
@@ -11154,6 +11262,7 @@ ENDIF
 
 
 IF (MYID==0) THEN
+   WRITE(LU_ERR,*) ' '
    WRITE(LU_ERR,*) "N Step    =",ICYC," T, DT=",T,DT
    NMV(1)=MINLOC(DIVMNX(LOW_IND ,1:NMESHES),DIM=1)
    WRITE(LU_ERR,*) "Div Min   =",NMV(1),DIVMNX(LOW_IND ,NMV(1)),IJKMNX(IAXIS:KAXIS,LOW_IND ,NMV(1)),&
@@ -11171,12 +11280,11 @@ IF (MYID==0) THEN
    NMV(1)=MAXLOC(DIVVOLMNX(HIGH_IND ,1:NMESHES),DIM=1)
    WRITE(LU_ERR,*) "DivVol Max=",NMV(1),DIVVOLMNX(HIGH_IND,NMV(1)),DIVVOLIJKMNX(IAXIS:KAXIS,HIGH_IND,NMV(1)),&
    DIVVOLICJCMNX(1:2,HIGH_IND,NMV(1))
-   WRITE(LU_ERR,*) ' '
 ENDIF
 
 ! DeAllocate div Containers
 DEALLOCATE( RESMAXV, DIVMNX, DIVVOLMNX )
-DEALLOCATE( IJKRM, IJKMNX, DIVVOLIJKMNX, DIVVOLICJCMNX )
+DEALLOCATE( IJKRM, IJKMNX, DIVVOLIJKMNX, DIVVOLICJCMNX, RESVOLMX, RESICJCMX )
 
 RETURN
 END SUBROUTINE  CCIBM_CHECK_DIVERGENCE
@@ -23686,6 +23794,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%Y = CUT_FACE(ICF)%XYZCEN(JAXIS,IFACE)
          MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%Z = CUT_FACE(ICF)%XYZCEN(KAXIS,IFACE)
          MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%AREA= CUT_FACE(ICF)%AREA(IFACE)
+         MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%VEL_ERR_NEW=CUT_FACE(ICF)%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
 
          ! Normal to cut-face:
          IBOD =CUT_FACE(ICF)%BODTRI(1,IFACE)
