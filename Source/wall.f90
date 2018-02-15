@@ -188,7 +188,6 @@ IF (.NOT.INITIALIZATION_PHASE .AND. SOLID_HT3D .AND. CORRECTOR) THEN
 ENDIF
 ! *********************************************************************
 
-
 CONTAINS
 
 
@@ -1154,9 +1153,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                            RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DEPTH,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            ! these are equivalent
-            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + DT_SUB * M_DOT_S_PPP(1:MS%N_MATL)
-            !OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + (RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL))
+            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL)
 
             ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
 
@@ -1194,30 +1191,28 @@ OBST_LOOP_2: DO N=1,N_OBST
                      CASE (-3); KK2=K+1
                   END SELECT
                   OBST_INDEX = OBST_INDEX_C(CELL_INDEX(II2,JJ2,KK2))
-                  OB2_IF: IF (OBST_INDEX>0) THEN
-                     ! if there is an accepting cell exists, transfer mass and do not call pyrolysis
+                  OB2 => OBSTRUCTION(OBST_INDEX)
+                  OB2_IF: IF (OB2%PYRO3D) THEN
+                     ! if an accepting cell exists, transfer mass
                      IF (TWO_D) THEN
                         VC2 = DX(II2)*DZ(KK2)
                      ELSE
                         VC2 = DX(II2)*DY(JJ2)*DZ(KK2)
                      ENDIF
-                     OB2 => OBSTRUCTION(OBST_INDEX)
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
-                     RVSP(I,J,K) = 0._EB
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
-                     OB%HT3D   = .FALSE.
-                     OB%PYRO3D = .FALSE.
-                  ELSE OB2_IF
-                     ! VS/VC is small, but there are no more cells to accept the mass
-                     IF (RVSP(I,J,K)<1.E-10_EB) THEN
-                        OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
-                        OB%HT3D   = .FALSE.
-                        OB%PYRO3D = .FALSE.
-                     ENDIF
+                  ELSEIF (RVSP(I,J,K)<1.E-10_EB) THEN OB2_IF
+                     ! VS/VC is small, but there are no more cells to accept the mass, clip the mass
+                     OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
                   ENDIF OB2_IF
                ENDIF THRESHOLD_IF
-               OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
             ENDIF CONSUMABLE_IF
+
+            OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
+            IF (OB%MASS<TWO_EPSILON_EB) THEN
+               OB%HT3D   = .FALSE.
+               OB%PYRO3D = .FALSE.
+            ENDIF
 
          ENDDO I_LOOP_2
       ENDDO
@@ -1498,6 +1493,7 @@ USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, BOX_MULLER
 REAL(EB) :: UN,DD,MFT,TSI,ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,MPUA_SUM,RHO_F_PREVIOUS,RN1,RN2,TWOMFT
 INTEGER :: N,ITER
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 
 ! Special cases for N_TRACKED_SPECIES==1
 
@@ -1637,9 +1633,10 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
          ! Add total consumed mass to various summing arrays
 
-         CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN
+         CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK .AND. .NOT.SF%THERMALLY_THICK_HT3D) THEN
+            OB => OBSTRUCTION(WC%OBST_INDEX)
             DO N=1,N_TRACKED_SPECIES
-               OBSTRUCTION(WC%OBST_INDEX)%MASS = OBSTRUCTION(WC%OBST_INDEX)%MASS - ONE_D%MASSFLUX_SPEC(N)*DT*ONE_D%AREA
+               OB%MASS = OB%MASS - ONE_D%MASSFLUX_SPEC(N)*DT*ONE_D%AREA
             ENDDO
          ENDIF CONSUME_MASS
 
