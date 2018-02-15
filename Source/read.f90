@@ -4024,6 +4024,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
    ENDDO
 
+   IF (RN%FUEL_SMIX_INDEX < 0) THEN
+         WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel species ',TRIM(RN%FUEL),' not found.'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
    ! Find AIR index
 
    GET_AIR_INDEX_LOOP: DO NS = 1,N_TRACKED_SPECIES
