@@ -581,10 +581,10 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
-            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,KAPPA_S,KAPPA_2DX,RFLUX_UP,RFLUX_DOWN,DX_LOC,VSRVC_LOC
+            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,KAPPA_S,KAPPA_2DX,RFLUX_UP,RFLUX_DOWN,DX_LOC,VSRVC_LOC,RDS,KDTDN_S
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,IC2,III,JJJ,KKK,ITER
 LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
-INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1
+INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1,SURFACE_HEAT_FLUX_MODEL=0
 REAL(EB), PARAMETER :: DT_SUB_MIN_HT3D=1.E-9_EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL(),&
                                        VSRVC_X=>NULL(),VSRVC_Y=>NULL(),VSRVC_Z=>NULL(),VSRVC=>NULL()
@@ -660,9 +660,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                            VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
                         CASE(1)
                            VSRVC_X(I,J,K) = VSRVC(I,J,K)
+                           VSRVC_Y(I,J,K) = 1._EB
+                           VSRVC_Z(I,J,K) = 1._EB
                         CASE(2)
+                           VSRVC_X(I,J,K) = 1._EB
                            VSRVC_Y(I,J,K) = VSRVC(I,J,K)
+                           VSRVC_Z(I,J,K) = 1._EB
                         CASE(3)
+                           VSRVC_X(I,J,K) = 1._EB
+                           VSRVC_Y(I,J,K) = 1._EB
                            VSRVC_Z(I,J,K) = VSRVC(I,J,K)
                      END SELECT
                   ENDIF
@@ -999,13 +1005,13 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   TMP_G = TMP_NEW(IIG,JJG,KKG)
                   TMP_S = TMP_NEW(II,JJ,KK)
                   TMP_F = WC%ONE_D%TMP_F
-                  SELECT CASE(ABS(IOR))
-                     CASE( 1); RDN = RDX(II) / VSRVC_X(II,JJ,KK)
-                     CASE( 2); RDN = RDY(JJ) / VSRVC_Y(II,JJ,KK)
-                     CASE( 3); RDN = RDZ(KK) / VSRVC_Z(II,JJ,KK)
-                  END SELECT
-
-                  TMP_F_LOOP: DO ADCOUNT=1,2
+                  RDS = 0._EB
+                  TMP_F_LOOP: DO ADCOUNT=1,3
+                     SELECT CASE(ABS(IOR))
+                        CASE( 1); RDN = MAX( RDS, RDX(II)/VSRVC_X(II,JJ,KK) )
+                        CASE( 2); RDN = MAX( RDS, RDY(JJ)/VSRVC_Y(II,JJ,KK) )
+                        CASE( 3); RDN = MAX( RDS, RDZ(KK)/VSRVC_Z(II,JJ,KK) )
+                     END SELECT
                      DTMP = TMP_G - TMP_F
                      WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX=IW)
                      HTC = WC%ONE_D%HEAT_TRANS_COEF
@@ -1018,6 +1024,22 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
                                 ( HTC       + 2._EB*K_S*RDN       )
                      ENDIF
+                     IF (OB%MATL_INDEX>0) THEN
+                        CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_S,OPT_MATL_INDEX=OB%MATL_INDEX)
+                     ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                        CALL GET_SOLID_RHOCBAR(RHOCBAR_S,TMP_S,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+                     ENDIF
+                     SELECT CASE(SURFACE_HEAT_FLUX_MODEL)
+                        CASE DEFAULT
+                           RDS = 0._EB
+                        CASE(1)
+                           ! experimental wall model, generally gives smaller length scale than 1D pyro model
+                           KDTDN_S = ABS(K_S*2._EB*(TMP_F-TMP_S)*RDN)
+                           RDS = 0.5_EB * ( KDTDN_S / (K_S/RHOCBAR_S)**3 / SUM(RHO_GET(1:MS%N_MATL)) )**ONTH
+                        CASE(2)
+                           ! FDS Tech Guide (M.3), gives same length scale as 1D pyrolysis model
+                           RDS = SQRT(K_S/RHOCBAR_S)
+                     END SELECT
                   ENDDO TMP_F_LOOP
                   WC%ONE_D%TMP_F = TMP_F
                   WC%ONE_D%QCONF = HTC*(TMP_G-TMP_F)
@@ -1097,7 +1119,7 @@ REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
             RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC
-REAL(EB), PARAMETER :: SOLID_VOLUME_THRESHOLD=0.1_EB
+REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -1188,13 +1210,14 @@ OBST_LOOP_2: DO N=1,N_OBST
             ENDIF
 
             CONSUMABLE_IF: IF (OB%CONSUMABLE) THEN
-               ! if local cell mass becomes too small, put the mass in the adjacent cell and remove local cell
+               ! recompute solid volume ratio, VS/VC, for cell (I,J,K)
                VSRVC_LOC = 0._EB
                DO NN=1,MS%N_MATL
                   ML => MATERIAL(MS%MATL_INDEX(NN))
                   VSRVC_LOC = VSRVC_LOC + OB%RHO(I,J,K,NN)/ML%RHO_S
                ENDDO
-               THRESHOLD_IF: IF (VSRVC_LOC<SOLID_VOLUME_THRESHOLD) THEN
+               ! if local cell volume becomes too small, put the mass in the adjacent cell and remove local cell
+               THRESHOLD_IF: IF (VSRVC_LOC<SOLID_VOLUME_MERGE_THRESHOLD) THEN
                   II2 = I
                   JJ2 = J
                   KK2 = K
@@ -1217,7 +1240,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                      ENDIF
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
-                  ELSEIF (VSRVC_LOC<1.E-10_EB) THEN OB2_IF
+                  ELSEIF (VSRVC_LOC<SOLID_VOLUME_CLIP_THRESHOLD) THEN OB2_IF
                      ! VS/VC is small, but there are no more cells to accept the mass, clip the mass
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
                   ENDIF OB2_IF
