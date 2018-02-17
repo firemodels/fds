@@ -278,9 +278,9 @@ The VTT experiments consisted of liquid fuel pan fires positioned in the middle 
 \subsection{Waterloo Methanol Pool Fire Experiment}
 \label{Waterloo_Methanol_Plume_Temps}
 
-Figure~\ref{Water_Methanol_Plume_Temp_CL} displays the centerline profile of measured and predicted mean temperatures above a 30~cm diameter methanol pool fire. These measurements were conducted by Hamins and Lock~\cite{Hamins:TN1928} at NIST, along with an additional radial profile of mean temperature at a height of 60~cm. All of the other measurements on the following pages were conducted by Weckman at the University of Waterloo~\cite{Weckman:CF1996}.
+Figure~\ref{Water_Methanol_Plume_Temp_CL} displays the centerline profile of measured and predicted mean temperatures above a 30~cm diameter methanol pool fire. These measurements were conducted by Hamins and Lock~\cite{Hamins:TN1928} at NIST, along with radial profiles at 40~cm, 50~cm, and 60~cm. All of the other measurements on the following pages were conducted by Weckman at the University of Waterloo~\cite{Weckman:CF1996}.
 
-Figures~\ref{Water_Methanol_Plume_Temp_1} through \ref{Water_Methanol_Plume_Temp_3} display radial profiles of measured and predicted mean (left hand plots) and root mean square (right hand plots) temperatures. The root mean square of the temperature is given by
+Figures~\ref{Water_Methanol_Plume_Temp_1} through \ref{Water_Methanol_Plume_Temp_4} display radial profiles of measured and predicted mean (left hand plots) and root mean square (right hand plots) temperatures. The root mean square of the temperature is given by
 \be
    \left( \overline{T'T'} \right)^{1/2} = \sqrt{ \frac{ \sum_{i=1}^n (T_i-\overline{T})^2 }{n-1} }
 \ee
@@ -296,7 +296,7 @@ The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_CL} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_CL}
 \caption[Waterloo Methanol, centerline profile of mean temperature, 2~cm to 60~cm above the burner]
 {Waterloo Methanol, centerline profile of mean temperature, 2~cm to 60~cm above the burner.}
 \label{Water_Methanol_Plume_Temp_CL}
@@ -342,11 +342,24 @@ The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_20_cm} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_30_cm} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_30_cm} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_60_cm}}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_40_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_40_cm} 
 \end{tabular*}
-\caption[Waterloo Methanol, radial profiles of mean and rms temperature, 18~cm to 30~cm above the burner]
-{Waterloo Methanol, radial profiles of mean (left) and rms (right) temperature, 18~cm to 30~cm above the burner. The measurement at 60~cm was performed by Hamins and Lock~\cite{Hamins:TN1928}.}
+\caption[Waterloo Methanol, radial profiles of mean and rms temperature, 18~cm to 40~cm above the burner]
+{Waterloo Methanol, radial profiles of mean (left) and rms (right) temperature, 18~cm to 40~cm above the burner. The measurement at 40~cm was performed by Hamins and Lock~\cite{Hamins:TN1928}.}
 \label{Water_Methanol_Plume_Temp_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_50_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_50_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_60_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_60_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial profiles of mean and rms temperature, 50~cm to 60~cm above the burner]
+{Waterloo Methanol, radial profiles of mean (left) and rms (right) temperature, 50~cm to 60~cm above the burner. The measurements were performed by Hamins and Lock~\cite{Hamins:TN1928}.}
+\label{Water_Methanol_Plume_Temp_4}
 \end{figure}
 
 
