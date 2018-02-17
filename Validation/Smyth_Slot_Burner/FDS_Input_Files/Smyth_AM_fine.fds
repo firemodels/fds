@@ -29,7 +29,7 @@
       FUEL = 'METHANE'
       SPEC_ID_NU='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU= -1,-1.5,1,2
-      CRITICAL_FLAME_TEMPERATURE=867./
+      /
 
 ! A in R2 is tuned to match Smyth CO data
 
