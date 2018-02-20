@@ -584,7 +584,7 @@ REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAM
             RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,KAPPA_S,KAPPA_2DX,RFLUX_UP,RFLUX_DOWN,DX_LOC,VSRVC_LOC,RDS,KDTDN_S
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,IC2,III,JJJ,KKK,ITER
 LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
-INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1,SURFACE_HEAT_FLUX_MODEL=0
+INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1,SURFACE_HEAT_FLUX_MODEL=1
 REAL(EB), PARAMETER :: DT_SUB_MIN_HT3D=1.E-9_EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL(),TMP_NEW=>NULL(),KP=>NULL(),&
                                        VSRVC_X=>NULL(),VSRVC_Y=>NULL(),VSRVC_Z=>NULL(),VSRVC=>NULL()
@@ -1033,12 +1033,12 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         CASE DEFAULT
                            RDS = 0._EB
                         CASE(1)
+                           ! FDS Tech Guide (M.3), gives same length scale as 1D pyrolysis model
+                           RDS = SQRT(RHOCBAR_S/K_S)
+                        CASE(2)
                            ! experimental wall model, generally gives smaller length scale than 1D pyro model
                            KDTDN_S = ABS(K_S*2._EB*(TMP_F-TMP_S)*RDN)
                            RDS = 0.5_EB * ( KDTDN_S / (K_S/RHOCBAR_S)**3 / SUM(RHO_GET(1:MS%N_MATL)) )**ONTH
-                        CASE(2)
-                           ! FDS Tech Guide (M.3), gives same length scale as 1D pyrolysis model
-                           RDS = SQRT(K_S/RHOCBAR_S)
                      END SELECT
                   ENDDO TMP_F_LOOP
                   WC%ONE_D%TMP_F = TMP_F
