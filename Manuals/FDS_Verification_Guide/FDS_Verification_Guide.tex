@@ -3004,17 +3004,17 @@ A simple two-step reaction scheme for a clean-burning fuel like methanol can be 
 \label{methanol_step1}
 \mathrm{CH_3OH + O_2} &\rightarrow \mathrm{CO + 2 \, H_2O} \\
 \label{methanol_step2}
-\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} 
+\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}
 \end{align}
 \end{subequations}
 where the first reaction is infinitely fast and the second is not. Suppose the second reaction proceeds according to the evolution equation:
-\be 
+\be
    \frac{\d [{\rm CO}]}{\d t} = -1\times 10^{10} \, [{\rm CO}] \, [{\rm O_2}]
 \ee
 where $[{\rm CO}]$ is the concentration of CO in units of mol/cm$^3$. To test the scheme, a sealed, adiabatic cube 1~m on a side is filled with nitrogen, fuel gas, and oxygen with initial volume fractions of 0.89, 0.05, and 0.06. Because the rates are independent of temperature, the reaction proceeds immediately assuming that the gases are thoroughly mixed via the parameter {\ct INITIAL\_UNMIXED\_FRACTION=0}. Figure~\ref{fig:reactionrate_fast_slow} shows the fuel volume fraction very quickly dropping to zero, leaving some oxygen which then reacts relatively slowly with CO to form CO$_2$. The effective combined reaction is:
 \be
 \label{methanol_combined}
-\mathrm{5 \, CH_3OH + 6 \, O_2} \rightarrow \mathrm{2 \, CO_2 + 3 \, CO + 10 \, H_2O} 
+\mathrm{5 \, CH_3OH + 6 \, O_2} \rightarrow \mathrm{2 \, CO_2 + 3 \, CO + 10 \, H_2O}
 \ee
 The {\ct 'EXPLICIT EULER'} integration scheme is used with an initial gas phase time step of $1\times 10^{-6}$~s. The final volume fractions of CO$_2$ and CO are expected to be $2/104 \approx 0.0192$ and $3/104 \approx 0.0288$, respectively.
 
@@ -4394,6 +4394,18 @@ This chapter contains verification cases that test all aspects of particles, dro
 \section{Particle and Droplet Drag}
 
 The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between solid particles or liquid droplets and air. Details of the FDS integration scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
+
+\subsection{Dragless Particle (\texorpdfstring{\textct{cannon\_ball}}{cannon\_ball})}
+\label{cannon_ball}
+
+This simple case tests the particle transport scheme in the absence of drag. A 1~cm diameter sphere is shot from ground level with an initial velocity of $(u_0,v_0,w_0)=(10,10,10)$~m/s. The ball is expected to fall back to the ground in $t=2\, w_0/g\approx 2.04$~s at which time it will have travelled a horizontal distance of $d=t \sqrt{u_0^2+v_0^2}\approx 28.86$~m. The grid has a resolution of 1~m, and the default time step is 0.5~s. Thus, the particle trajectory is computed via only 5 calls to particle transport routine. However, the integration is performed using sub-steps such that the particle cannot cross farther than a single grid cell in a sub-step. This ensures an accurate computation of the trajectory, as shown in Fig.~\ref{cannon_ball_fig}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cannon_ball}
+\caption[The {\ct cannon\_ball} case]{Horizontal distance travelled by a dragless sphere as a function of time.}
+\label{cannon_ball_fig}
+\end{figure}
 
 
 \subsection{Particles Swept Up in a Free Stream (\texorpdfstring{\textct{fluid\_part\_mom}}{fluid\_part\_mom})}
