@@ -20,6 +20,7 @@ export INDIR=Current_Results
 JOB_PREFIX=
 export STOPFDSMAXITER=
 DV=
+INTEL=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -28,6 +29,7 @@ echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
 echo "-h - display this message"
+echo "-I - run with Intel MPI"
 echo "-j job_prefix - specify job prefix"
 echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
@@ -54,6 +56,9 @@ case $OPTION in
   j)
    JOBPREFIX="-j $OPTARG"
    ;;
+  I)
+   INTEL="-I"
+   ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
@@ -78,7 +83,7 @@ case $OPTION in
 esac
 done
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV "
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV $INTEL"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
