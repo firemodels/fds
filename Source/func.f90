@@ -272,10 +272,13 @@ SELECT CASE (STATISTICS)
       IF (QUANTITY=='FED') I=1
    CASE ('MASS')
       UNITS = 'kg'
+      I=1
    CASE ('VOLUME')
       UNITS = 'm3'
+      I=1
    CASE ('AREA','SURFACE AREA')
       UNITS = 'm2'
+      I=1
    CASE DEFAULT
       RETURN
 END SELECT
