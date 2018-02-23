@@ -1934,6 +1934,7 @@ V0                  = 0._EB     ! m/s
 W0                  = 0._EB     ! m/s
 Z_0                 = 0.03_EB   ! m
 Z_REF               = 2._EB     ! m
+USE_ATMOSPHERIC_INTERPOLATION = .FALSE.
 
 ! Initial read of the WIND line
 
