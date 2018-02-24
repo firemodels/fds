@@ -439,9 +439,9 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
       CALL RCALLOC
 
-      ! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
+      ! Set the Mean Beam Length to 10 cm unless the user desires otherwise
 
-      IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
+      IF (PATH_LENGTH < 0._EB) PATH_LENGTH = 0.1_EB
       ALLOCATE(SEGMENT_LENGTH_M(1))
       ALLOCATE(TOTAL_PRESSURE_ATM(1))
       ALLOCATE(TEMP_GAS(1))
