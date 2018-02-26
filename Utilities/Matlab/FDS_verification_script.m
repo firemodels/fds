@@ -100,7 +100,7 @@ disp('hvac_mass_transport...');           hvac_mass_transport
 disp('vegetation...');                    vegetation
 disp('radiation_gas_panel...');           radiation_gas_panel
 disp('particle_size_distribution...');    particle_size_distribution
-disp('mass_blance...');                   mass_balance
+disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
 
