@@ -102,6 +102,8 @@ function usage {
   echo "Other options:"
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
+  echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
@@ -226,7 +228,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:f:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
+while getopts 'ACd:e:Ef:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -240,6 +242,9 @@ case $OPTION  in
    ;;
   e)
    exe="$OPTARG"
+   ;;
+  E)
+   TCP=1
    ;;
   f)
    FDSROOT="$OPTARG"
@@ -341,6 +346,12 @@ shift $(($OPTIND-1))
 
 in=$1
 infile=${in%.*}
+
+if [[ "$TCP" != "" ]] && [[ "$use_intel_mpi" == "" ]]; then
+  echo "***error: -The E option for specifying tcp transport is only available"
+  echo "          with Intel the compiled versions of fds"
+  exit
+fi
 
 if [ "$OPENMPCASES" == "" ]; then
   files[1]=$in
@@ -716,6 +727,12 @@ fi
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
 export I_MPI_DEBUG=5
+EOF
+fi
+
+if [ "$TCP" != "" ]; then
+  cat << EOF >> $scriptfile
+export I_MPI_FABRICS=shm:tcp
 EOF
 fi
 
