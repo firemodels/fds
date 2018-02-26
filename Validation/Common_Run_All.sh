@@ -21,6 +21,7 @@ JOB_PREFIX=
 export STOPFDSMAXITER=
 DV=
 INTEL=
+TCP=
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -44,11 +45,14 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bhIj:m:o:q:suxy' OPTION
+while getopts 'bEhIj:m:o:q:suxy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
+   ;;
+  E)
+   TCP="-E "
    ;;
   h)
   usage;
@@ -89,6 +93,7 @@ if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
 fi
 DEBUG="$DEBUG $JOBPREFIX"
+DEBUG="$DEBUG $TCP"
 
 ##############################################################
 
