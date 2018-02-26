@@ -3386,7 +3386,7 @@ Alternatively, add {\ct CONVERT\_VOLUME\_TO\_MASS=.TRUE.} for velocity boundarie
 \begin{equation}
 \dot{m}_\alpha^{\prime\prime} = \rho Z_\alpha u = \frac{p_\infty \overline{W}}{R T} Z_\alpha \frac{\dot{Q}}{A}
 \end{equation}
-where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is the velocity normal to the surface, $p_\infty$ is the ambient pressure, $\overline{W}$ is the mixture molecular weight, $R$ is the ideal gas constant, $T$ is the surface temperature, $\dot{Q}$ is the volume flow rate, and $A$ is the area of the vent.
+where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is the velocity normal to the surface, $p_\infty$ is the ambient pressure, $\overline{W}$ is the mixture molecular weight, $R$ is the ideal gas constant, $T$ is the surface temperature, $\dot{Q}$ is the volume flow rate, and $A$ is the area of the vent.  Note that using {\ct CONVERT\_VOLUME\_TO\_MASS=.TRUE.} converts the {\ct SURF} into a mass flux boundary condition and so velocity profiles may not be applied.
 
 \subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -9354,7 +9354,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}                   & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^4$  \\ \hline
+{\ct SURFACE\_TENSION}                   & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^{-2}$  \\ \hline
 {\ct SURF\_ID}                           & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
@@ -9989,6 +9989,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
+%{\ct USE_ATMOSPHERIC_INTERPOLATION}             & Logical       & Flux match TMP for atmospheric flows          &               & {\ct .FALSE.}      \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
 {\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
 \end{longtable}
