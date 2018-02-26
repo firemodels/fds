@@ -2206,6 +2206,77 @@ Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST
 
 Note also that if a {\ct COLOR} is specified on a line that includes a {\ct MULT\_ID}, this color will be applied to all replicates of the object. However, you can set {\ct COLOR='RAINBOW'} which will instruct FDS to randomly choose a color for each replicate object.
 
+Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I\_LOWER\_SKIP} and {\ct I\_UPPER\_SKIP}, etc.  The $i$ from the equation above is skipped within this interval.  As an example of how this may be useful, consider the multi-mesh case below with refinement of the interior meshes.  The resulting mesh arrangement is shown in Fig.~\ref{fig:multmeshrefine}.
+
+\begin{lstlisting}
+&MULT ID='interior fine mesh array',
+      DX=1.0,I_LOWER=1,I_UPPER=2,
+      DZ=1.0,K_LOWER=1,K_UPPER=2 /
+
+&MULT ID='exterior coarse mesh array',
+      DX=1.0,I_LOWER=0,I_LOWER_SKIP=1,I_UPPER_SKIP=2,I_UPPER=3,
+      DZ=1.0,K_LOWER=0,K_LOWER_SKIP=1,K_UPPER_SKIP=2,K_UPPER=3 /
+
+&MESH IJK=8,1,8, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='interior fine mesh array' /
+&MESH IJK=4,1,4, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='exterior coarse mesh array' /
+\end{lstlisting}
+
+\begin{figure}[p]
+\centering
+
+\begin{picture}(345,320)(0,0)
+\setlength{\unitlength}{0.015in}
+
+\newsavebox{\mymesh}
+\savebox{\mymesh}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,20)(0,20){4}{\line(1,0){80}}
+\multiput(20, 0)(20,0){4}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(80,80){ }}
+\end{picture} }
+
+\newsavebox{\mymeshrefine}
+\savebox{\mymeshrefine}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,10)(0,10){8}{\line(1,0){80}}
+\multiput(10, 0)(10,0){8}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(80,80){ }}
+\end{picture} }
+
+% coarse exterior meshes
+\put(  0,0){\usebox{\mymesh}}
+\put( 80,0){\usebox{\mymesh}}
+\put(160,0){\usebox{\mymesh}}
+\put(240,0){\usebox{\mymesh}}
+
+\put(  0,80){\usebox{\mymesh}}
+\put(240,80){\usebox{\mymesh}}
+
+\put(  0,160){\usebox{\mymesh}}
+\put(240,160){\usebox{\mymesh}}
+
+\put(  0,240){\usebox{\mymesh}}
+\put( 80,240){\usebox{\mymesh}}
+\put(160,240){\usebox{\mymesh}}
+\put(240,240){\usebox{\mymesh}}
+
+% refined interior meshes
+\put( 80, 80){\usebox{\mymeshrefine}}
+\put( 80,160){\usebox{\mymeshrefine}}
+\put(160, 80){\usebox{\mymeshrefine}}
+\put(160,160){\usebox{\mymeshrefine}}
+
+\end{picture}
+
+\caption[Using {\ct MULT} for mesh refinement]{Using {\ct MULT} for mesh refinement.}
+\label{fig:multmeshrefine}
+
+\end{figure}
+
 
 \chapter{Fire and Thermal Boundary Conditions}
 
@@ -9284,13 +9355,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DZ0}            & Real             & Translation in the $z$ direction            & m  & 0.                         \\ \hline
 {\ct ID }            & Character        & Identification tag                          &    &                            \\ \hline
 {\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct I\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $x$ direction &    &                            \\ \hline
 {\ct I\_UPPER}       & Integer          & Upper array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct I\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $x$ direction   &    &                            \\ \hline
 {\ct J\_LOWER}       & Integer          & Lower array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct J\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $y$ direction &    &                            \\ \hline
 {\ct J\_UPPER}       & Integer          & Upper array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct J\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $y$ direction   &    &                            \\ \hline
 {\ct K\_LOWER}       & Integer          & Lower array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct K\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $z$ direction &    &                            \\ \hline
 {\ct K\_UPPER}       & Integer          & Upper array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct K\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $z$ direction   &    &                            \\ \hline
 {\ct N\_LOWER}       & Integer          & Lower sequence bound                        &    & 0                          \\ \hline
+{\ct N\_LOWER\_SKIP} & Integer          & Lower sequence bound begin skip             &    &                            \\ \hline
 {\ct N\_UPPER}       & Integer          & Upper sequence bound                        &    & 0                          \\ \hline
+{\ct N\_UPPER\_SKIP} & Integer          & Upper sequence bound end skip               &    &                            \\ \hline
 \end{longtable}
 
 
