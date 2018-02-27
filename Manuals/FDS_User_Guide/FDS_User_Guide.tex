@@ -2221,8 +2221,12 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 &MESH IJK=4,1,4, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='exterior coarse mesh array' /
 \end{lstlisting}
 
-\begin{figure}[p]
+\vskip2\baselineskip
+
+\begin{figure}[h!]
 \centering
+
+\resizebox{0.6\textwidth}{!}{
 
 \begin{picture}(345,320)(0,0)
 \setlength{\unitlength}{0.015in}
@@ -2271,6 +2275,8 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \put(160,160){\usebox{\mymeshrefine}}
 
 \end{picture}
+
+}
 
 \caption[Using {\ct MULT} for mesh refinement]{Using {\ct MULT} for mesh refinement.}
 \label{fig:multmeshrefine}
