@@ -2206,6 +2206,77 @@ Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST
 
 Note also that if a {\ct COLOR} is specified on a line that includes a {\ct MULT\_ID}, this color will be applied to all replicates of the object. However, you can set {\ct COLOR='RAINBOW'} which will instruct FDS to randomly choose a color for each replicate object.
 
+Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I\_LOWER\_SKIP} and {\ct I\_UPPER\_SKIP}, etc.  The $i$ from the equation above is skipped within this interval.  As an example of how this may be useful, consider the multi-mesh case below with refinement of the interior meshes.  The resulting mesh arrangement is shown in Fig.~\ref{fig:multmeshrefine}.
+
+\begin{lstlisting}
+&MULT ID='interior fine mesh array',
+      DX=1.0,I_LOWER=1,I_UPPER=2,
+      DZ=1.0,K_LOWER=1,K_UPPER=2 /
+
+&MULT ID='exterior coarse mesh array',
+      DX=1.0,I_LOWER=0,I_LOWER_SKIP=1,I_UPPER_SKIP=2,I_UPPER=3,
+      DZ=1.0,K_LOWER=0,K_LOWER_SKIP=1,K_UPPER_SKIP=2,K_UPPER=3 /
+
+&MESH IJK=8,1,8, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='interior fine mesh array' /
+&MESH IJK=4,1,4, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='exterior coarse mesh array' /
+\end{lstlisting}
+
+\begin{figure}[p]
+\centering
+
+\begin{picture}(345,320)(0,0)
+\setlength{\unitlength}{0.015in}
+
+\newsavebox{\mymesh}
+\savebox{\mymesh}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,20)(0,20){4}{\line(1,0){80}}
+\multiput(20, 0)(20,0){4}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(80,80){ }}
+\end{picture} }
+
+\newsavebox{\mymeshrefine}
+\savebox{\mymeshrefine}{
+\begin{picture}(0,0)
+\thinlines
+\multiput( 0,10)(0,10){8}{\line(1,0){80}}
+\multiput(10, 0)(10,0){8}{\line(0,1){80}}
+\thicklines
+\put(0,0){\framebox(80,80){ }}
+\end{picture} }
+
+% coarse exterior meshes
+\put(  0,0){\usebox{\mymesh}}
+\put( 80,0){\usebox{\mymesh}}
+\put(160,0){\usebox{\mymesh}}
+\put(240,0){\usebox{\mymesh}}
+
+\put(  0,80){\usebox{\mymesh}}
+\put(240,80){\usebox{\mymesh}}
+
+\put(  0,160){\usebox{\mymesh}}
+\put(240,160){\usebox{\mymesh}}
+
+\put(  0,240){\usebox{\mymesh}}
+\put( 80,240){\usebox{\mymesh}}
+\put(160,240){\usebox{\mymesh}}
+\put(240,240){\usebox{\mymesh}}
+
+% refined interior meshes
+\put( 80, 80){\usebox{\mymeshrefine}}
+\put( 80,160){\usebox{\mymeshrefine}}
+\put(160, 80){\usebox{\mymeshrefine}}
+\put(160,160){\usebox{\mymeshrefine}}
+
+\end{picture}
+
+\caption[Using {\ct MULT} for mesh refinement]{Using {\ct MULT} for mesh refinement.}
+\label{fig:multmeshrefine}
+
+\end{figure}
+
 
 \chapter{Fire and Thermal Boundary Conditions}
 
@@ -3386,7 +3457,7 @@ Alternatively, add {\ct CONVERT\_VOLUME\_TO\_MASS=.TRUE.} for velocity boundarie
 \begin{equation}
 \dot{m}_\alpha^{\prime\prime} = \rho Z_\alpha u = \frac{p_\infty \overline{W}}{R T} Z_\alpha \frac{\dot{Q}}{A}
 \end{equation}
-where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is the velocity normal to the surface, $p_\infty$ is the ambient pressure, $\overline{W}$ is the mixture molecular weight, $R$ is the ideal gas constant, $T$ is the surface temperature, $\dot{Q}$ is the volume flow rate, and $A$ is the area of the vent.
+where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is the velocity normal to the surface, $p_\infty$ is the ambient pressure, $\overline{W}$ is the mixture molecular weight, $R$ is the ideal gas constant, $T$ is the surface temperature, $\dot{Q}$ is the volume flow rate, and $A$ is the area of the vent.  Note that using {\ct CONVERT\_VOLUME\_TO\_MASS=.TRUE.} converts the {\ct SURF} into a mass flux boundary condition and so velocity profiles may not be applied.
 
 \subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -4757,7 +4828,7 @@ Using the species  {\ct SPRINKLER WATER VAPOR} for the sprinklers would allow yo
 \label{info:REAC}
 \label{info:COMB}
 
-A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost. It is expensive to solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase reaction as a surrogate for all potential fuels.
+A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there can be multiple solid or liquid combustibles in an FDS fire simulation, in the default simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost. It is expensive to solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase reaction as a surrogate for all potential fuels.
 
 Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
 
@@ -4955,13 +5026,18 @@ Since by default the AIT is 0 K, it is possible to get spurious reignition of un
 where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.  On the {\ct REAC} line you are telling FDS to use AIT = 627 \si{\degreeCelsius} throughout the domain.  Then the {\ct INIT} line takes precedence over the {\ct REAC} line within the specified region.
 
 
+\newpage
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
 
 The ``simple chemistry'' parameters described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
-the stoichiometry of the reaction. The easiest way to explain this is by way of example. Consider a single reaction involving methane. When you specify the {\ct REAC} line to be:
+the stoichiometry of the reaction. 
+
+\subsection{Balancing the Atoms}
+
+Consider a single reaction involving methane. When you specify the {\ct REAC} line to be:
 
 \begin{lstlisting}
 &REAC FUEL='METHANE' /
@@ -5009,7 +5085,6 @@ The reaction stoichiometry is specified using the stoichiometric coefficients, {
 
 
 \subsection{Complex Fuel Molecules}
-
 \label{info:Complex_Fuel}
 
 \paragraph{Simple Chemistry Compatible Fuels}
@@ -5079,14 +5154,60 @@ Since this is not a simple chemistry problem, either the enthalpy of formation o
 \end{lstlisting}
 Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
-
 \begin{figure}[ht]
 \centering \includegraphics[height=2.2in]{SCRIPT_FIGURES/pvc_combustion_spec}
 \caption[Results of the {\ct pvc\_combustion} test case]{Product species mass fractions for model PVC example.}
 \label{pvc_combustion}
 \end{figure}
 
-\subsection{Multiple Chemical Reactions}
+
+\subsection{Multiple Fast Reactions}
+\label{info:priority}
+
+For large-scale fire simulations, the numerical grid is usually too coarse to resolve detailed, finite-rate flame chemistry. However, you may still specify a combustion scheme that consists of multiple fast reactions. For example, consider this three step scheme that describes the formation of CO and soot as intermediate species in the combustion of propane:
+\begin{eqnarray}
+\label{eq:PVC_reac2}
+\mathrm{C_3H_8} + \mathrm{3 \, O_2} &\longrightarrow& \mathrm{2 \, CO +  4 \, H_2O + C} \\
+\mathrm{CO} + \mathrm{0.5 \, O_2} &\longrightarrow& \mathrm{CO_2} \\
+\mathrm{C} + \mathrm{O_2} &\longrightarrow& \mathrm{CO_2}
+\end{eqnarray}
+In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and then the CO and soot are converted to CO$_2$ if there is available oxygen. All the reactions are ``fast'' relative to the mixing time of the reactants within a grid cell, but the second and third reactions are assumed to occur more slowly than the first. By default, FDS forces all fast reactions to occur instantaneously and simultaneously. However, if you want to specify that the reactions occur serially, use the parameter {\ct PRIORITY} as in the following set of input lines:
+\begin{lstlisting}
+&SPEC ID='NITROGEN',          BACKGROUND=.TRUE. /
+&SPEC ID='PROPANE',           MASS_FRACTION_0=0.0 /
+&SPEC ID='OXYGEN',            MASS_FRACTION_0=0.23 /
+&SPEC ID='WATER VAPOR',       MASS_FRACTION_0=0.0 /
+&SPEC ID='CARBON MONOXIDE',   MASS_FRACTION_0=0.0 /
+&SPEC ID='CARBON DIOXIDE',    MASS_FRACTION_0=0.0 /
+&SPEC ID='SOOT', FORMULA='C', MASS_FRACTION_0=0.0 /
+
+&REAC ID='R1'
+      FUEL='PROPANE'
+      SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT'
+      SOOT_H_FRACTION=0.
+      NU=-1,-3,2,4,1
+      CRITICAL_FLAME_TEMPERATURE=1447.
+      AUTO_IGNITION_TEMPERATURE=450. /
+&REAC ID='R2'
+      FUEL='CARBON MONOXIDE'
+      SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      NU=-1,-0.5,1
+      AUTO_IGNITION_TEMPERATURE=609.
+      PRIORITY=2 /
+&REAC ID='R3'
+      FUEL='SOOT'
+      SPEC_ID_NU='SOOT','OXYGEN','CARBON DIOXIDE'
+      NU=-1,-1,1
+      AUTO_IGNITION_TEMPERATURE=609.
+      PRIORITY=2 /
+\end{lstlisting}
+By specifying {\ct PRIORITY=2} for reactions {\ct R2} and {\ct R3}, you are assuming that the first reaction, {\ct R1}, occurs first, followed by {\ct R2} and {\ct R3}. This sequence allows for the build-up of soot and CO in compartments that are oxygen starved.
+
+Notice in this reaction scheme that a {\ct CRITICAL\_FLAME\_TEMPERATURE} is applied to the first reaction but not the second and third because the default extinction model is only applied to the first of multiple fast reactions. For more information on extinction, see Section~\ref{info:extinction}.
+
+
+
+\subsection{Multiple Fuels}
 \label{info:multi-reac}
 \label{energy_budget_adiabatic_two_fuels}
 
@@ -5204,7 +5325,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 
 
 
-
+\newpage
 
 \section{Finite Rate Combustion}
 \label{info:finite}
@@ -5318,9 +5439,9 @@ An important consideration for the time integration of chemical reactions is the
 
 If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]{\ct CHECK\_REALIZABILITY} to be {\ct .TRUE.} on the {\ct COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
 
-%\paragraph{Remark}
-%A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
 
+
+\newpage
 
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
@@ -9234,13 +9355,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DZ0}            & Real             & Translation in the $z$ direction            & m  & 0.                         \\ \hline
 {\ct ID }            & Character        & Identification tag                          &    &                            \\ \hline
 {\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct I\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $x$ direction &    &                            \\ \hline
 {\ct I\_UPPER}       & Integer          & Upper array bound, $x$ direction            &    & 0                          \\ \hline
+{\ct I\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $x$ direction   &    &                            \\ \hline
 {\ct J\_LOWER}       & Integer          & Lower array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct J\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $y$ direction &    &                            \\ \hline
 {\ct J\_UPPER}       & Integer          & Upper array bound, $y$ direction            &    & 0                          \\ \hline
+{\ct J\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $y$ direction   &    &                            \\ \hline
 {\ct K\_LOWER}       & Integer          & Lower array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct K\_LOWER\_SKIP} & Integer          & Lower array bound begin skip, $z$ direction &    &                            \\ \hline
 {\ct K\_UPPER}       & Integer          & Upper array bound, $z$ direction            &    & 0                          \\ \hline
+{\ct K\_UPPER\_SKIP} & Integer          & Upper array bound end skip, $z$ direction   &    &                            \\ \hline
 {\ct N\_LOWER}       & Integer          & Lower sequence bound                        &    & 0                          \\ \hline
+{\ct N\_LOWER\_SKIP} & Integer          & Lower sequence bound begin skip             &    &                            \\ \hline
 {\ct N\_UPPER}       & Integer          & Upper sequence bound                        &    & 0                          \\ \hline
+{\ct N\_UPPER\_SKIP} & Integer          & Upper sequence bound end skip               &    &                            \\ \hline
 \end{longtable}
 
 
@@ -9354,7 +9483,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}                   & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^4$  \\ \hline
+{\ct SURFACE\_TENSION}                   & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^{-2}$  \\ \hline
 {\ct SURF\_ID}                           & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct TURBULENT\_DISPERSION}              & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
@@ -9595,6 +9724,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_S(:)}                             & Real Array  & Section~\ref{info:finite}                 &                   &                   \\ \hline
 {\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct PRIORITY}                            & Integer     & Section~\ref{info:priority}               &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
@@ -9989,6 +10119,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
+%{\ct USE_ATMOSPHERIC_INTERPOLATION}             & Logical       & Flux match TMP for atmospheric flows          &               & {\ct .FALSE.}      \\ \hline
 {\ct Z\_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
 {\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
 \end{longtable}
