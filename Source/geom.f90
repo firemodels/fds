@@ -30877,7 +30877,7 @@ USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 
 ! input &GEOM lines
 
-CHARACTER(LABEL_LENGTH) :: ID,SURF_ID, MATL_ID
+CHARACTER(LABEL_LENGTH) :: ID, MATL_ID
 CHARACTER(LABEL_LENGTH) :: BNDC_FILENAME, GEOC_FILENAME
 CHARACTER(LABEL_LENGTH) :: TEXTURE_MAPPING
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE, BUFFER
@@ -30888,8 +30888,8 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: DAZIM, DELEV
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSCALE, DXYZ0, DXYZ
 
 INTEGER :: MAX_SURF_IDS=0
-CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_IDV
-INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_IDV_IND
+CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND
 
 INTEGER :: MAX_ZVALS=0
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS
@@ -30910,7 +30910,7 @@ REAL(EB) :: SPHERE_ORIGIN(3), SPHERE_RADIUS
 REAL(EB) :: TEXTURE_ORIGIN(3), TEXTURE_SCALE(2)
 LOGICAL :: AUTO_TEXTURE
 REAL(EB) :: XB(6), DX
-INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS, N_SURF_IDV
+INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS, N_SURF_ID
 INTEGER :: MATL_INDEX
 INTEGER :: IOS,IZERO,N, I, J, K, IJ, NSUB_GEOMS, GEOM_INDEX
 INTEGER :: I1, I2, I3, I4, I5, I6, I7, I8
@@ -30951,7 +30951,7 @@ NAMELIST /GEOM/ AUTO_TEXTURE, AZIM, AZIM_DOT, COMPONENT_ONLY, CUTCELLS, DAZIM, D
                 SPHERE_ORIGIN, SPHERE_RADIUS, SPHERE_TYPE, SURF_ID,  &
                 TEXTURE_MAPPING, TEXTURE_ORIGIN, TEXTURE_SCALE, &
                 VERTS, VOLUS, XB, XYZ0, XYZ, XYZ_DOT, ZMIN, ZVALS, &
-                BNDC_FILENAME, GEOC_FILENAME, SURF_IDV, SURF_INDEX_PER_FACE
+                BNDC_FILENAME, GEOC_FILENAME
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -31052,21 +31052,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ! count FACES
 
    N_FACES=0
-   IF (SURF_INDEX_PER_FACE) THEN
-      DO I = 1, MAX_FACES
-         IF (ANY(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
-         N_FACES = N_FACES+1
-      ENDDO
-      ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
+   DO I = 1, MAX_FACES
+      IF (ANY(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
+      N_FACES = N_FACES+1
+   ENDDO
+   ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
+   IF(N_FACES > 0) THEN
       IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
       DO I = 1, N_FACES
          FACES(3*(I-1)+1:3*(I-1)+3) = FACES(4*(I-1)+1:4*(I-1)+3)
          SURFS(I)                   = FACES(4*(I-1)+4)
-      ENDDO
-   ELSE
-      DO I = 1, MAX_FACES
-         IF (ANY(FACES(3*I-2:3*I)==0)) EXIT
-         N_FACES = N_FACES+1
       ENDDO
    ENDIF
    TFACES(1:6*MAX_FACES) = -1.0_EB
@@ -31389,52 +31384,41 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%N_FACES_BASE = N_FACES
    G%N_VERTS_BASE = N_VERTS
 
-   ! Check if SURF_ID has been defined:
-   IF (SURF_ID=='null') THEN
-      SURF_ID = SURFACE(DEFAULT_SURF_INDEX)%ID
+   ! Check if SURF_ID(1) has been defined:
+   N_SURF_ID = 0
+   IF (TRIM(SURF_ID(1))=='null') THEN
+      SURF_INDEX_PER_FACE = .FALSE.
       HAVE_SURF = .FALSE.
+      ALLOCATE(G%SURF_ID(1)); G%SURF_ID(1) = 'null'
    ELSE
-      ! Check SURF_ID is in list of SURFS
-      IN_LIST = .FALSE.
-      DO J = 0, N_SURF
-         IF (TRIM(SURF_ID)/=TRIM(SURFACE(J)%ID)) CYCLE
-         IN_LIST = .TRUE.
-         EXIT
-      ENDDO
-      IF(.NOT.IN_LIST) THEN
-         WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the surface ID ',TRIM(SURF_ID),' is not defined.'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
-   ENDIF
-   G%SURF_ID = SURF_ID
-   G%HAVE_SURF = HAVE_SURF
-
-   ! Check if SURF_IDV has been defined:
-   N_SURF_IDV = 0
-   IF (SURF_INDEX_PER_FACE) THEN
-      ! How many SURF_IDV entries are different than Null, where in SURFACE they belong:
+      SURF_INDEX_PER_FACE = .TRUE.
+      ! Check that elements of the list of SURF_IDs are in list of SURFS:
+      ! How many SURF_ID entries are different than Null, where in SURFACE they belong:
       DO I = 1, MAX_SURF_IDS
-         IF( SURF_IDV(I)=='null' ) EXIT ! First 'null'
-         N_SURF_IDV = N_SURF_IDV + 1
+         IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
+         N_SURF_ID = N_SURF_ID + 1
       ENDDO
+      ALLOCATE(G%SURF_ID(1:N_SURF_ID)); G%SURF_ID(1:N_SURF_ID) = SURF_ID(1:N_SURF_ID)
+
       ! Now find correspondence with SURFACE(N)%ID:
-      IF (ALLOCATED(SURF_IDV_IND)) DEALLOCATE(SURF_IDV_IND); ALLOCATE(SURF_IDV_IND(N_SURF_IDV))
-      DO I = 1, N_SURF_IDV
+      IF (ALLOCATED(SURF_ID_IND)) DEALLOCATE(SURF_ID_IND); ALLOCATE(SURF_ID_IND(N_SURF_ID))
+      DO I = 1, N_SURF_ID
           ! Get Surf Index:
           IN_LIST = .FALSE.
           DO J = 0, N_SURF
-             IF (TRIM(SURF_IDV(I))/=TRIM(SURFACE(J)%ID)) CYCLE
-             SURF_IDV_IND(I)=J
+             IF (TRIM(SURF_ID(I))/=TRIM(SURFACE(J)%ID)) CYCLE
+             SURF_ID_IND(I)=J
              IN_LIST = .TRUE.
              EXIT
           ENDDO
           IF(.NOT.IN_LIST) THEN
              WRITE(MESSAGE,'(A,I4,3A)') &
-             'ERROR: problem with GEOM, the surface IDV(',I,') =',TRIM(SURF_IDV(I)),' is not defined.'
+             'ERROR: problem with GEOM, the surface IDV(',I,') =',TRIM(SURF_ID(I)),' is not defined.'
              CALL SHUTDOWN(MESSAGE)
           ENDIF
       ENDDO
    ENDIF
+   G%HAVE_SURF = HAVE_SURF
 
    IF (MATL_ID=='null') THEN
       HAVE_MATL = .FALSE.
@@ -31556,7 +31540,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             CALL REORDER_VERTS(FACES(12*I+10:12*I+12))
          ENDDO
 
-      ! find faces that match
+         ! find faces that match
 
          SORT_FACES=2
          IF (GEOM_TYPE == 2) SORT_FACES = 3 ! Case of sphere.
@@ -31606,7 +31590,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDDO
          ENDIF
 
-      ! create new FACES index array keeping only external faces
+         ! create new FACES index array keeping only external faces
 
          N_FACES_TEMP = N_FACES
          N_FACES=0
@@ -31650,6 +31634,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ENDDO
          ENDIF
          CALL COMPUTE_TEXTURES(VERTS,FACES,TFACES,MAX_VERTS,MAX_FACES,N_FACES)
+
+         ! Surf IDs for generated GEOM:
+         IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
+         IF(SURF_INDEX_PER_FACE) THEN
+            SURFS(:) = 1 ! All external faces point to only entry SURF_ID(1).
+         ELSE
+            SURFS(:) = 0 ! All external faces point to default surf ID.
+         ENDIF
       ENDIF
    ENDIF
 
@@ -31671,11 +31663,23 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       IF (SURF_INDEX_PER_FACE) THEN
          DO I=1,N_FACES
-            G%SURFS(I) = SURF_IDV_IND(SURFS(I))
+            IF ( SURFS(I) <= 0 ) THEN
+               G%SURFS(I) = DEFAULT_SURF_INDEX    ! If local SURF ID index <= 0, use default surf ID.
+            ELSE
+               G%SURFS(I) = SURF_ID_IND(SURFS(I))
+            ENDIF
          ENDDO
-         DEALLOCATE(SURF_IDV_IND)
+         DEALLOCATE(SURF_ID_IND)
       ELSE
-         G%SURFS(1:N_FACES) = GET_SURF_INDEX(SURF_ID)
+         !If any of surfs is greater than zero throw an error:
+         DO I=1,N_FACES
+            IF ( SURFS(I) <= 0 ) CYCLE
+            WRITE(MESSAGE,'(A,I4,3A)') &
+            'ERROR: problem with GEOM, surface ID not defined, but surf ID index of FACE ',I,' is > 0.'
+            CALL SHUTDOWN(MESSAGE)
+            EXIT
+         ENDDO
+         G%SURFS(1:N_FACES) = DEFAULT_SURF_INDEX
       ENDIF
    ENDIF
 
@@ -32036,7 +32040,7 @@ CALL ChkMemErr('ALLOCATE_BUFFERS','DAZIM',IZERO)
 ALLOCATE(DELEV(MAX_IDS),STAT=IZERO)
 CALL ChkMemErr('ALLOCATE_BUFFERS','DELEV',IZERO)
 
-ALLOCATE(SURF_IDV(MAX_SURF_IDS),STAT=IZERO)
+ALLOCATE(SURF_ID(MAX_SURF_IDS),STAT=IZERO)
 CALL ChkMemErr('ALLOCATE_BUFFERS','SURF_IDV',IZERO)
 
 ALLOCATE(ZVALS(MAX_ZVALS),STAT=IZERO)
@@ -32066,8 +32070,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    ZMIN=ZS_MIN
    COMPONENT_ONLY=DEFAULT_COMPONENT_ONLY(N)
    ID = 'geom'
-   SURF_ID = 'null'
-   SURF_IDV(:)= 'null'
+   SURF_ID(:)= 'null'
    MATL_ID = 'null'
    HAVE_SURF = .TRUE.
    HAVE_MATL = .TRUE.
@@ -32112,7 +32115,6 @@ SUBROUTINE SET_GEOM_DEFAULTS
    N_LONG=-1
    SPHERE_TYPE=-1
    GEOM_TYPE = 0
-   SURF_INDEX_PER_FACE = .FALSE.
 END SUBROUTINE SET_GEOM_DEFAULTS
 
 ! ---------------------------- EXTRUDE_SPHERE ----------------------------------------
@@ -33109,7 +33111,7 @@ ENDDO
 G%N_VERTS = IVERT
 G%N_FACES = IFACE
 G%N_VOLUS = IVOLUS
-IF (IFACE>0 .AND. G%HAVE_SURF) G%SURFS(1:G%N_FACES) = GET_SURF_INDEX(G%SURF_ID)
+IF (IFACE>0 .AND. G%HAVE_SURF) G%SURFS(1:G%N_FACES) = GET_SURF_INDEX(G%SURF_ID(1))
 IF (IVOLUS>0 .AND. G%HAVE_MATL) G%MATLS(1:G%N_VOLUS) = GET_MATL_INDEX(G%MATL_ID)
 IF (IVERT>0) G%VERTS(1:3*G%N_VERTS) = G%VERTS_BASE(1:3*G%N_VERTS)
 

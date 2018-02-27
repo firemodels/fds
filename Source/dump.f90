@@ -1549,11 +1549,11 @@ IF (N_GEOMETRY>0) THEN
    DO I = 1, N_GEOMETRY
       GEOMI=>GEOMETRY(I)
 
-      IF (GEOMI%SURF_ID .EQ. 'null') THEN
+      IF (TRIM(GEOMI%SURF_ID(1)) .EQ. 'null') THEN
          WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X))')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN
       ELSE
          WRITE(LU_SMV,'(1X,A,1X,3(E13.6,1X),A,1X,A)')TRIM(GEOMI%TEXTURE_MAPPING), GEOMI%TEXTURE_ORIGIN,'%',&
-                                                     TRIM(GEOMI%SURF_ID)
+                                                     TRIM(GEOMI%SURF_ID(1))
       ENDIF
    END DO
 ENDIF
