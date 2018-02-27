@@ -223,12 +223,15 @@ smokediff=smokediff$FDSOS
 backgrounddir=intel$FDSOS
 background=background
 
+DB=_db
 if [ "$MPI_VERSION" == "INTEL" ]; then
   fdsmpidir=impi_intel$FDSOS
   fdsmpi=fds_impi_intel$FDSOS
+  fdsmpidirdb=impi_intel$FDSOS$DB
+  fdsmpidb=fds_impi_intel$FDSOS$DB
 else
-  fdsmpidir=mpi_intel$FDSOS
-  fdsmpi=fds_mpi_intel$FDSOS
+  fdsmpidirdb=mpi_intel$FDSOS$DB
+  fdsmpidb=fds_mpi_intel$FDSOS$DB
 fi
 
 fds2asciidir=intel$FDSOS
@@ -304,6 +307,9 @@ CPDIR $texturedir $bundledir/bin
 # FDS 
 
 SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin fds
+if [ "$fds_debug"== "1"]; then
+  SCP $fdshost $fdsroot/$fdsmpidirdb      $fdsmpidb  $bundledir/bin fds_db
+fi
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin fds2ascii
 
 CURDIR=`pwd`
