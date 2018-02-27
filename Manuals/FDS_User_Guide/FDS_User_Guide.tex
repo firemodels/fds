@@ -5033,7 +5033,7 @@ where the {\ct XB} specifies a region at the base of the burner where AIT is set
 
 The ``simple chemistry'' parameters described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
-the stoichiometry of the reaction. 
+the stoichiometry of the reaction.
 
 \subsection{Balancing the Atoms}
 
@@ -5166,7 +5166,7 @@ Note that the sign of {\ct NU} corresponds to whether that species is consumed (
 
 For large-scale fire simulations, the numerical grid is usually too coarse to resolve detailed, finite-rate flame chemistry. However, you may still specify a combustion scheme that consists of multiple fast reactions. For example, consider this three step scheme that describes the formation of CO and soot as intermediate species in the combustion of propane:
 \begin{eqnarray}
-\label{eq:PVC_reac2}
+\label{eq:propane_3step}
 \mathrm{C_3H_8} + \mathrm{3 \, O_2} &\longrightarrow& \mathrm{2 \, CO +  4 \, H_2O + C} \\
 \mathrm{CO} + \mathrm{0.5 \, O_2} &\longrightarrow& \mathrm{CO_2} \\
 \mathrm{C} + \mathrm{O_2} &\longrightarrow& \mathrm{CO_2}
