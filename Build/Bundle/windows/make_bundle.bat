@@ -9,6 +9,7 @@ set smvversion=%SMVEDITION%
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64
 set fdsmpidir=%svn_root%\fds\Build\impi_intel_win_64
+set fdsmpidirdb=%svn_root%\fds\Build\impi_intel_win_64_db
 set basename=%fds_version%-%smv_version%_win64
 
 set in_pdf=%userprofile%\.bundle\pubs
@@ -78,9 +79,12 @@ echo --- filling distribution directory ---
 echo.
 
 
-copy %in_for_bundle%\*.po                                                                        %out_bin%\.>Nul
+copy %in_for_bundle%\*.po                                                     %out_bin%\.>Nul
 
-CALL :COPY  %fdsmpidir%\fds_impi_win_64.exe                                  %out_bin%\fds.exe
+if %fds_debug% == 1 (
+  CALL :COPY  %fdsmpidirdb%\fds_impi_win_64_db.exe                            %out_bin%\fds_db.exe
+)
+CALL :COPY  %fdsmpidir%\fds_impi_win_64.exe                                   %out_bin%\fds.exe
 CALL :COPY  %svn_root%\fds\Utilities\fds2ascii\intel_win_64\fds2ascii_win_64.exe %out_bin%\fds2ascii.exe
 CALL :COPY  %svn_root%\smv\Build\background\intel_win_64\background.exe       %out_bin%\background.exe
 CALL :COPY  %svn_root%\fds\Utilities\test_mpi\impi_intel_win\test_mpi.exe     %out_bin%\test_mpi.exe
