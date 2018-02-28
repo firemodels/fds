@@ -28,15 +28,14 @@ fi
 if [ "$BACKGROUND_LOAD" == "" ]; then
   export BACKGROUND_LOAD=75
 fi
-if [ "$JOBPREFIX" == "" ]; then
-  export JOBPREFIX=FB_
-fi
 REGULAR=1
 BENCHMARK=1
 OOPT=
 POPT=
 INTEL=
 INTEL2=
+GEOMCASES=
+WAIT=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -46,6 +45,7 @@ echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
+echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-J - use Intel MPI version of FDS"
@@ -63,7 +63,26 @@ echo "-s - stop FDS runs"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
+echo "-W - wait for cases to complete before returning"
 exit
+}
+
+wait_cases_end()
+{
+   if [[ "$QUEUE" == "none" ]]
+   then
+     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} cases to complete."
+        sleep 15
+     done
+   else
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} cases to complete."
+        sleep 15
+     done
+   fi
 }
 
 cd ..
@@ -72,23 +91,28 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:dD:hj:JL:m:o:q:r:RsS:w:' OPTION
+while getopts 'bB:c:dD:ghj:JL:m:o:q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
    BENCHMARK=1
+   GEOMCASES=
    REGULAR=
-   ;;
-  R)
-   BENCHMARK=
-   REGULAR=1
    ;;
   d)
    DEBUG=_db
    SINGLE="1"
    ;;
+  g)
+   BENCHMARK=
+   GEOMCASES=1
+   REGULAR=
+   ;;
   h)
    usage;
+   ;;
+  j)
+   JOBPREFIX="$OPTARG"
    ;;
   J)
    INTEL=i
@@ -106,14 +130,27 @@ case $OPTION in
   r)
    resource_manager="$OPTARG"
    ;;
+  R)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=1
+   ;;
   s)
    export STOPFDS=1
    ;;
   w)
    walltime="-w $OPTARG"
    ;;
+  W)
+   WAIT="1"
+   ;;
 esac
 done
+
+if [ "$JOBPREFIX" == "" ]; then
+  JOBPREFIX=FB_
+fi
+export JOBPREFIX
 
 size=_64
 
@@ -165,5 +202,14 @@ cd ..
 if [ "$REGULAR" == "1" ]; then
   ./FDS_Cases.sh
   echo FDS non-benchmark cases submitted
+fi
+cd $CURDIR
+cd ..
+if [ "$GEOMCASES" == "1" ]; then
+  ./GEOM_Cases.sh
+  echo FDS geometry cases submitted
+fi
+if [ "$WAIT" == "1" ]; then
+  wait_cases_end
 fi
 cd $CURDIR

@@ -1882,8 +1882,6 @@ It is a good idea to inspect the geometry by running either a setup job
 
 
 
-
-
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:VENT}
 
@@ -2174,7 +2172,7 @@ This has the effect of making an array of obstructions according to the followin
 In situations where the position of the obstruction needs shifting prior to the multiplication, use the parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 
 \begin{figure}[t]
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/pyramid}
+\includegraphics[width=\textwidth,trim={0 2in 0 1in},clip]{SCRIPT_FIGURES/pyramid}
 \caption[An example of the multiplier function]{An example of the multiplier function.}
 \label{fig:mult}
 \end{figure}
@@ -2206,6 +2204,9 @@ Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct OBST
 
 Note also that if a {\ct COLOR} is specified on a line that includes a {\ct MULT\_ID}, this color will be applied to all replicates of the object. However, you can set {\ct COLOR='RAINBOW'} which will instruct FDS to randomly choose a color for each replicate object.
 
+\subsection{Special Topic: Using {\ct MULT} for Mesh Refinement}
+\label{info:multmeshrefine}
+
 Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I\_LOWER\_SKIP} and {\ct I\_UPPER\_SKIP}, etc.  The $i$ from the equation above is skipped within this interval.  As an example of how this may be useful, consider the multi-mesh case below with refinement of the interior meshes.  The resulting mesh arrangement is shown in Fig.~\ref{fig:multmeshrefine}.
 
 \begin{lstlisting}
@@ -2221,8 +2222,12 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 &MESH IJK=4,1,4, XB=0.0,1.0,-0.5,0.5,0.0,1.0, MULT_ID='exterior coarse mesh array' /
 \end{lstlisting}
 
-\begin{figure}[p]
+\vskip2\baselineskip
+
+\begin{figure}[h!]
 \centering
+
+\resizebox{0.6\textwidth}{!}{
 
 \begin{picture}(345,320)(0,0)
 \setlength{\unitlength}{0.015in}
@@ -2272,9 +2277,37 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 
 \end{picture}
 
+}
+
 \caption[Using {\ct MULT} for mesh refinement]{Using {\ct MULT} for mesh refinement.}
 \label{fig:multmeshrefine}
 
+\end{figure}
+
+
+\subsection{Special Topic: Using {\ct MULT} to make shapes out of obstructions}
+\label{info:multobst}
+
+Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
+
+The first step is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required.  The available {\ct SHAPE}s and their parameters are listed in Table X.  An example of a sphere is given below.  By default, the center of the sphere is at (0,0,0), so only the {\ct RADIUS} is required.  If the {\ct RADIUS} is larger than the half-width the {\ct OBST} array, this is not a problem, but the end result will not be a sphere.  If the {\ct RADIUS} is smaller than the half-width, this is also permissible, but it is inefficient.
+
+\begin{lstlisting}
+&MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
+&SURF ID='shape', COLOR='ORANGE'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='SPHERE'
+      RADIUS=0.1/
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_sphere}
+\caption[Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_sphere}
 \end{figure}
 
 
@@ -5033,7 +5066,7 @@ where the {\ct XB} specifies a region at the base of the burner where AIT is set
 
 The ``simple chemistry'' parameters described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
-the stoichiometry of the reaction. 
+the stoichiometry of the reaction.
 
 \subsection{Balancing the Atoms}
 
@@ -5166,7 +5199,7 @@ Note that the sign of {\ct NU} corresponds to whether that species is consumed (
 
 For large-scale fire simulations, the numerical grid is usually too coarse to resolve detailed, finite-rate flame chemistry. However, you may still specify a combustion scheme that consists of multiple fast reactions. For example, consider this three step scheme that describes the formation of CO and soot as intermediate species in the combustion of propane:
 \begin{eqnarray}
-\label{eq:PVC_reac2}
+\label{eq:propane_3step}
 \mathrm{C_3H_8} + \mathrm{3 \, O_2} &\longrightarrow& \mathrm{2 \, CO +  4 \, H_2O + C} \\
 \mathrm{CO} + \mathrm{0.5 \, O_2} &\longrightarrow& \mathrm{CO_2} \\
 \mathrm{C} + \mathrm{O_2} &\longrightarrow& \mathrm{CO_2}

@@ -10,13 +10,13 @@
 
 &GEOM ID='geom1',
         VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-        FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
+        FACES=1,2,3,1,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
 
 
 &GEOM ID='geom2',
         VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-        FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
+        FACES=1,2,3,1,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
 
 &GEOM ID='geom3',
         VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-        FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
+        FACES=1,2,3,1,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/

@@ -28,6 +28,7 @@ $RUNSMV -d HVAC leak_test_2
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_11
 # $RUNSMV -d Immersed_Boundary_Method tri_cube_cut_cell_test_12
 $RUNSMV -d Miscellaneous pyramid
+$RUNSMV -d Miscellaneous obst_sphere
 $RUNSMV -d NS_Analytical_Solution ns2d_64
 $RUNSMV -d Pressure_Effects pressure_boundary
 $RUNSMV -d Pressure_Solver dancing_eddies_tight

@@ -21,11 +21,11 @@ esac
 done
 shift $(($OPTIND-1))
 
-cd ../../../smv/Verification/scripts
-./Run_SMV_Cases.sh -g  -w -j GM_ $QUEUE
+cd ../../../fds/Verification/scripts
+#./Run_FDS_Cases.sh -J -j GM_ -g  -W $QUEUE
 
 cd $CURDIR
-cd ../../../smv/Verification/scripts
-./Make_SMV_Pictures.sh -g
+cd ../../../fds/Verification/scripts
+./Make_FDS_Pictures.sh -g
 cd $CURDIR
 
