@@ -3,6 +3,8 @@
 set curdir=%CD%
 set DEBUG=
 set rundebug=0
+set rungeom=0
+set runfds=1
 set size=_64
 
 set stopscript=0
@@ -24,6 +26,7 @@ cd %BASEDIR%\scripts
 set SCRIPT_DIR="%CD%"
 cd %BASEDIR%
 set TIME_FILE="%BASEDIR%\fds_case_times.txt"
+set waitfile="%BASEDIR%\waitfile.txt"
 
 ::*** uncomment following two lines to use OpenMP
 
@@ -61,9 +64,17 @@ set "bg=%BACKGROUNDEXE% -u 60 -m 70 -d 5 "
 set FDS=%bg%%FDSEXE%
 
 echo.
-echo Creating FDS verification case list
-cd %BASEDIR%
-%SH2BAT% FDS_Cases.sh FDS_Cases.bat
+echo Creating verification case list
+
+if "%runfds%" == "1" (
+  cd %BASEDIR%
+  %SH2BAT% FDS_Cases.sh FDS_Cases.bat
+)
+
+if "%rungeom%" == "1" (
+  cd %BASEDIR%
+  %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
+)
 
 if "%rundebug%" == "1" (
   SET QFDS=%RUNFDS_M%
@@ -75,22 +86,38 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-cd %BASEDIR%
-call FDS_Cases.bat
+if "%runfds%" == "1" (
+  cd %BASEDIR%
+  call FDS_Cases.bat
+)
+if "%rungeom%" == "1" (
+  cd %BASEDIR%
+  call GEOM_Cases.bat
+)
 
-echo.
-echo Running FDS cases
-echo.
-
-echo "FDS test cases begin" >> %TIME_FILE%
+echo "test cases begin" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 
-cd %BASEDIR%
-call FDS_Cases.bat
+if "%runfds%" == "1" (
+echo.
+echo Running FDS cases
+echo.
+  cd %BASEDIR%
+  call FDS_Cases.bat
+)
+
+if "%rungeom%" == "1" (
+echo.
+echo Running geometry cases
+echo.
+  cd %BASEDIR%
+  call GEOM_Cases.bat
+)
+
 call :wait_until_finished
 
 goto eof
@@ -106,6 +133,7 @@ echo Number of cases running - %numexe%
 if %numexe% == 0 goto finished
 Timeout /t 30 >nul 
 goto loop1
+erase %waitfile%
 
 :finished
 exit /b
@@ -133,6 +161,11 @@ exit /b
    set stopscript=1
    exit /b
  )
+ if /I "%1" EQU "-geom" (
+   set valid=1
+   set rungeom=1
+   set runfds=0
+ )
  if /I "%1" EQU "-debug" (
    set valid=1
    set rundebug=1
@@ -155,6 +188,7 @@ exit /b
 echo Run_FDS_Cases [options]
 echo. 
 echo -help  - display this message
+echo -geom  - run geometry cases
 echo -debug - run cases using debug version of FDS
 exit /b
 
