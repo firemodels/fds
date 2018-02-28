@@ -32,15 +32,12 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
-echo QUEUE=$QUEUE
 
 if [ "$QUEUE" != "" ]; then
   QUEUE="-q $QUEUE"
 fi
-echo QUEUE=$QUEUE
 
 cd ../../../fds/Verification/scripts
-echo "./Run_FDS_Cases.sh $INTEL -j GM_ -g  -W $QUEUE"
 ./Run_FDS_Cases.sh $INTEL -j GM_ -g  -W $QUEUE
 
 cd $CURDIR
