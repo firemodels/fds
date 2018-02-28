@@ -8,20 +8,11 @@
 #& MULT ID='mesh', DZ=3, K_UPPER=1 /
 
 # 6 MESHES:
-&MESH IJK=64,32,32, XB=-2.0,2.0,-2.0,0.0,0.0,2.0, MULT_ID='mesh' /
+&MESH IJK=32,16,16, XB=-2.0,2.0,-2.0,0.0,0.0,2.0, MULT_ID='mesh' /
 &MULT ID='mesh', DY=2, DZ=2, J_UPPER=1, K_UPPER=2 /
 
 &TIME T_END=5.0 /
-&MISC DNS=.FALSE.,
-      NOISE=.FALSE.,
-      STRATIFICATION=.FALSE.,
-      PROJECTION=.TRUE.,
-      BAROCLINIC=.FALSE.,
-      CFL_VELOCITY_NORM=1,
-      CC_IBM=.TRUE.,
-      DO_IMPLICIT_CCREGION=.TRUE.,
-      CCVOL_LINK=0.01 /
-
+&MISC STRATIFICATION=.FALSE., PROJECTION=.TRUE., BAROCLINIC=.FALSE., CC_IBM=.TRUE. /
 &PRES SOLVER='GLMAT' /
 &RADI RADIATION=.FALSE. /
 
@@ -40,6 +31,9 @@
 &MATL ID='SPHERE', DENSITY=100, CONDUCTIVITY=1, SPECIFIC_HEAT=1 /
 
 # Export Parameters:
+# ------ ----------
+# Export to SMV Slice Menu Item : Cartesian Grid slices:
+# ------ -- --- ----- ---- ----   --------- ---- ------
 &SLCF PBY=0, QUANTITY='VELOCITY',      VECTOR=.TRUE.        /
 &SLCF PBY=0, QUANTITY='TEMPERATURE',   CELL_CENTERED=.TRUE. /
 &SLCF PBY=0, QUANTITY='DIVERGENCE',    CELL_CENTERED=.TRUE. /
@@ -51,11 +45,27 @@
 &SLCF PBY=0, QUANTITY='MASS FRACTION', CELL_CENTERED=.TRUE.,
                                        SPEC_ID='PROPANE'    /
 &SLCF PBY=0, QUANTITY='HRRPUV',        CELL_CENTERED=.TRUE. /
+
+
+# Current export SMV to Boundary Menu Item :
+# ------- ------ --- -- -------- ---- ----
+
+# Cartesian plane INCLUDE_GEOM slices (boundary triangle format):
 &SLCF PBY=0, QUANTITY='MASS FRACTION', FACE_CENTERED=.TRUE.,
                                        SPEC_ID='PROPANE',    SLICETYPE='INCLUDE_GEOM'    /
 &SLCF PBY=0, QUANTITY='DIVERGENCE',    FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM'    /
 &SLCF PBY=0, QUANTITY='TEMPERATURE',   FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM'    /
 &SLCF PBY=0, QUANTITY='HRRPUV',        FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM'    /
+
+# Boundary colormap in &GEOM surface:
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDE QUANTITY='WALL TEMPERATURE' /
+
+# 3D Boundary slices in cut-cell and EXIM region boundary:
+&SLCF QUANTITY='TEMPERATURE',   FACE_CENTERED=.TRUE., SLICETYPE='EXIMBND_FACES'    /
+&SLCF QUANTITY='TEMPERATURE',   FACE_CENTERED=.TRUE., SLICETYPE='CUT_CELLS'    /
+
+
 
 # Geometries:
 &OBST XB=-.5,.5,-.5,.5,0.2,.4, SURF_IDS='BURNER','INERT','INERT' /
