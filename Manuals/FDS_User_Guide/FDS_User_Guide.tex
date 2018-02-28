@@ -2290,7 +2290,24 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 
 Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
 
-The first step is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required.  The available {\ct SHAPE}s and their parameters are listed in Table X.  An example of a sphere is given below.  By default, the center of the sphere is at (0,0,0), so only the {\ct RADIUS} is required.  If the {\ct RADIUS} is larger than the half-width the {\ct OBST} array, this is not a problem, but the end result will not be a sphere.  If the {\ct RADIUS} is smaller than the half-width, this is also permissible, but it is inefficient.
+With regard to the {\ct SURF\_ID}, 
+
+The first step in carving out the shape is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
+
+\begin{table}[ht]
+\caption[{\ct OBST SHAPE} parameters]{{\ct OBST SHAPE} parameters.}
+\label{tab:obst_shape}
+\centering
+\begin{tabular}{|ll|}
+\hline
+{\ct SHAPE} \hfill   & Parameters (default values in Table~\ref{tbl:OBST})    \hfill    \\ \hline
+{\ct 'SPHERE'}       & {\ct XYZ}, {\ct RADIUS}                                  \\
+{\ct 'CYLINDER'}     & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
+{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\ \hline
+\end{tabular}
+\end{table}
+
+An example of a sphere is given below.  By default, the center of the sphere is at (0,0,0), so only the {\ct RADIUS} is required.  If the {\ct RADIUS} is larger than the half-width the {\ct OBST} array, this is not a problem, but the end result will not be a sphere.  If the {\ct RADIUS} is smaller than the half-width, this is also permissible, but it is inefficient.
 
 \begin{lstlisting}
 &MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
@@ -2309,6 +2326,51 @@ The first step is to create a {\ct MULT} line that defines the replication of th
 \caption[Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_sphere}
 \end{figure}
+
+To create a cylinder we need a height and orientation in addition to the radius.  The position of the center of the bottom face of the cylinder {\ct XYZ} defaults to (0,0,0).  An example of a vertically oriented (default) cylinder is shown below in Fig.~\ref{fig:obst_cylinder}.  Note that the magnitude of the orientation vector is not important; the vector is only used to specify the direction.
+
+\begin{lstlisting}
+&SURF ID='shape', COLOR='DARK GRAY'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='CYLINDER'
+      RADIUS=0.05
+      HEIGHT=0.2
+      XYZ=0,0,-0.1
+      ORIENTATION=0,0,1/
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cylinder}
+\caption[Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_cylinder}
+\end{figure}
+
+A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig X.
+
+\begin{lstlisting}
+&SURF ID='shape', COLOR='FOREST GREEN'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='CONE'
+      RADIUS=0.05
+      HEIGHT=0.2
+      XYZ=0,0,-0.1
+      ORIENTATION=0,0,1/
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cone}
+\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_cone}
+\end{figure}
+
 
 
 \chapter{Fire and Thermal Boundary Conditions}
@@ -9433,17 +9495,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct DEVC\_ID }           & Character           & Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct EVACUATION}          & Logical             & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.} \\ \hline
+{\ct HEIGHT}              & Real                & Section~\ref{info:multobst}               & m         &               \\ \hline
 {\ct HT3D}                & Logical             & Section~\ref{info:ht3d}                   &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                 & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct MESH\_ID}            & Character           & Reference~\cite{FDS_Evac_Users_Guide}     &           &               \\ \hline
 {\ct MULT\_ID }           & Character           & Section~\ref{info:MULT}                   &           &               \\ \hline
 %{\ct NOTERRAIN}           & Logical             & See Wildland Fire User's Guide            &           & {\ct .FALSE.} \\ \hline
+{\ct ORIENTATION}         & Real Triplet        & Section~\ref{info:multobst}               & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}             & Logical             & Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
 {\ct OVERLAY}             & Logical             & Section~\ref{info:OBST_Basics}            &           & {\ct .TRUE.}  \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
 {\ct PROP\_ID}            & Character           & Reference~\cite{Smokeview_Users_Guide}    &           &               \\ \hline
+{\ct RADIUS}              & Real                & Section~\ref{info:multobst}               & m         &               \\ \hline
 {\ct REMOVABLE}           & Logical             & Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
 {\ct RGB(3)}              & Integer Triplet     & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct SHAPE}               & Character           & Section~\ref{info:multobst}               &           &               \\ \hline
 {\ct SURF\_ID}            & Character           & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}        & Character Sextuplet & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SURF\_IDS(3)}        & Character Triplet   & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
@@ -9451,6 +9517,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THICKEN}             & Logical             & Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
 {\ct TRANSPARENCY}        & Real                & Section~\ref{info:OBST_Basics}            &           &  1            \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & Section~\ref{info:OBST_Basics}            & m         &               \\ \hline
+{\ct XYZ(3) }             & Real Triplet        & Section~\ref{info:multobst}               & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
 
