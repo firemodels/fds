@@ -307,7 +307,7 @@ CPDIR $texturedir $bundledir/bin
 # FDS 
 
 SCP $fdshost $fdsroot/$fdsmpidir          $fdsmpi    $bundledir/bin fds
-if [ "$fds_debug"== "1"]; then
+if [ "$fds_debug" == "1" ]; then
   SCP $fdshost $fdsroot/$fdsmpidirdb      $fdsmpidb  $bundledir/bin fds_db
 fi
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin fds2ascii
