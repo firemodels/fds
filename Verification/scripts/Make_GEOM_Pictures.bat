@@ -25,10 +25,10 @@ set SVNROOT=%CD%
 cd %BASEDIR%
 set RUNSMV=call "%SVNROOT%\smv\Verification\scripts\runsmv.bat"
 
-call %SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat FDS_Pictures.sh FDS_Pictures.bat
+call %SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat GEOM_Pictures.sh GEOM_Pictures.bat
 
-call FDS_Pictures.bat
+call GEOM_Pictures.bat
 
 cd %BASEDIR%
-erase FDS_Pictures.bat
+erase GEOM_Pictures.bat
 cd %curdir%
