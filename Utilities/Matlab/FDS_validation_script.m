@@ -41,6 +41,7 @@ fm_datacenter_scatter
 LNG_Dispersion
 LNG_wind_profiles
 FM_Vertical_Wall_Flames
+umd_line_burner_process
 
 % Dataplot and scatplot options
 
@@ -89,7 +90,6 @@ christifire
 pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
-umd_line_burner_3
 mccaffrey_plume
 
 display('validation scripts completed successfully!')
