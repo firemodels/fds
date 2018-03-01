@@ -2547,7 +2547,7 @@ For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {
 \end{lstlisting}
 Notice that with temperature-dependent quantities, the {\ct RAMP} parameter {\ct T} means Temperature, and {\ct F} is the value of either the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the {\ct MATL} line, but rather the {\ct RAMP} names.
 
-The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface.
+The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface. Note that you can only apply materials with an {\ct ABSORPTION\_COEFFICIENT} to planar surfaces, not cylinders or spheres.
 
 
 
@@ -3686,7 +3686,7 @@ where:
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
-\item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
+\item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} blows from the second node to the first. {\ct REVERSE} has no effect on {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} as a duct input. If {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} is specified for a duct and the reverse flow direction is needed, change the sign of the input to negative.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If {\ct ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in {\ct LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting {\ct ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving {\ct ROUGHNESS} unset.
 \item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
 \end{description}
@@ -5704,9 +5704,7 @@ The radiation solver is called before the start of the calculation to establish 
 \section{Radiative Absorption and Scattering}
 \label{info:RADI_RADCAL_Absorption}
 
-By default FDS employs a gray gas model for the radiation absorption coefficient, a function
-of gas composition and temperature, which are
-tabulated in a look-up table using the routines found in RadCal. You can output the absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
+By default FDS employs a gray gas model for the radiation absorption coefficient, a function of gas composition and temperature, which are tabulated in a look-up table using the routines found in RadCal. You can output the absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
 
 \subsection{RadCal Considerations}
 

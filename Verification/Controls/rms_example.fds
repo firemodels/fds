@@ -1,0 +1,26 @@
+This test takes the function u(t)=tanh(t) and adds uniformly distributed random noise. Taking the rms of the function
+ought to return the standard deviation of the uniform distribution over the unit interval, which is sqrt(1/12).
+
+&HEAD CHID='rms_example', TITLE='Demonstration of math control functions and RMS stats' /
+
+&MESH IJK=3,3,3, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=20., DT=0.01 /
+
+&DEVC ID='rn',    QUANTITY='RANDOM NUMBER', XYZ=0,0,0 /
+&DEVC ID='t',     QUANTITY='TIME', XYZ=0,0,0 /
+&DEVC ID='u',     QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s' /
+&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s', STATISTICS='RMS', STATISTICS_START=5. /
+
+&CTRL ID='exp(t)',  FUNCTION_TYPE='EXP',      INPUT_ID='t' /
+&CTRL ID='-t',      FUNCTION_TYPE='MULTIPLY', INPUT_ID='t','CONSTANT', CONSTANT=-1. /
+&CTRL ID='exp(-t)', FUNCTION_TYPE='EXP',      INPUT_ID='-t' /
+&CTRL ID='num',     FUNCTION_TYPE='SUBTRACT', INPUT_ID='exp(t)','exp(-t)' /
+&CTRL ID='den',     FUNCTION_TYPE='SUM',      INPUT_ID='exp(t)','exp(-t)' /
+&CTRL ID='tanh',    FUNCTION_TYPE='DIVIDE',   INPUT_ID='num','den' /
+&CTRL ID='rn2',     FUNCTION_TYPE='SUBTRACT', INPUT_ID='rn','CONSTANT', CONSTANT=0.5 /
+&CTRL ID='sum',     FUNCTION_TYPE='SUM',      INPUT_ID='tanh','rn2' /
+
+&TAIL /
+
+
