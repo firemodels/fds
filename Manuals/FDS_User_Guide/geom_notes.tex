@@ -61,8 +61,14 @@ A simple form of the {\ct \&GEOM}\ namelist defining an unstructured solid is gi
 \begin{verbatim}
 &GEOM ID='UNSTRUCTURED_SOLID',
       SURF_ID='FIRE','INERT',
-      VERTS=-1.0,-1.0,0.0, 1.0,-1.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0,
-      FACES=1,3,2, 2,  1,4,3, 1,  3,4,2, 1,  2,4,1, 0,  
+      VERTS= -1.0, -1.0,  0.0, 
+              1.0, -1.0,  0.0, 
+              0.0,  1.0,  0.0, 
+              0.0,  0.0,  1.0,
+      FACES= 1,3,2, 2,  
+             1,4,3, 1,  
+             3,4,2, 1,  
+             2,4,1, 0,  
 /
 \end{verbatim}
 
@@ -78,9 +84,12 @@ the outside of the solid. Observed from the outside, the vertices of each triang
 to have a counter-clockwise winding order, so that their order rotates counter-clockwise around the
 triangle's center and the face normal vector is oriented according to the right-hand rule.
 
-The boundary condition index $(b)$ ranges from 0 to the number of boundary condition {\ct IDs} found in
-the {\ct SURF\_ID} parameter. A value greater than 0 designates which {\ct SURF} line (Section~\ref{info:SURF})
-to apply at the selected face. A value equal to 0 applies the default boundary condition to the selected face.
+The boundary condition index $b$ ranges from 0 to the number of boundary condition {\ct IDs} found in
+the {\ct SURF\_ID} parameter. A value greater than 0 designates, through the {\ct SURF\_ID} list, which  
+{\ct SURF} line (Section~\ref{info:SURF}) to apply at the selected face. This index $b$ is always defined locally to the
+{\ct GEOM SURF\_ID} surface list. A value equal to 0 applies the \textit{default} boundary condition to the selected face.
+Therefore, in the above example, the first face has an index $b=2$ which corresponds to the {\ct 'INERT'} surf ID, the 
+second and third faces have $b=1$ and are of type {\ct 'FIRE'}, and the fourth will be of \textit{default} surface ID.
 
 \subsection{Triangulated surfaces quality}
 
@@ -149,7 +158,7 @@ A {\ct \&GEOM}\ namelist defining a 2D terrain elevation is given by
 /
 \end{verbatim}
 
-\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_min, x_max, y_min)$ and $(y_max)$
+\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{min}, x_{max}, y_{min})$ and $(y_{max})$
 where elevation data is defined with {\ct ZVALS}.
 {\ct IJK}\ specifies how many vertices occur in this region along each dimension.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
@@ -179,92 +188,92 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 
 \textbf{FIXME}: from here unmodified text
 
-\subsection{Defining Surfaces}
+%\subsection{Defining Surfaces}
+%
+%\subsubsection{General Surfaces}
+%
+%Unstructured geometric surfaces are defined using the {\ct \&GEOM}\ namelist.
+%These surfaces consist of a collection of triangular faces where each face consists of three vertices.
+%A simple form of the {\ct \&GEOM}\ namelist defining one triangular face is given by
+%
+%\begin{verbatim}
+%&GEOM ID='triangle'
+%      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,
+%      FACES=1,2,3
+%/
+%\end{verbatim}
+%
+%\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
+%{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
+%face. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
+%
+%One may also define particular kinds of geometric objects,  blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
+%and a 2D surface using {\ct ZVALS}.
+%FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
+%
+%\subsubsection{Blocks}
+%A {\ct \&GEOM}\ namelist defining a block is given by
+%
+%\begin{verbatim}
+%&GEOM ID='block'
+%      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+%\end{verbatim}
+%
+%\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
+%The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
+%A block may be discretized into many parts by
+%specifying the {\ct IJK} parameter.  For example, {\ct IJK=8,6,4} would split the block
+%into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
+%the $z$ dimension. By default, blocks are discretized
+%so that the block faces are consistent in size with the grid resolution.
+%
+%\subsubsection{Spheres}
+%A {\ct \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
+%
+%\begin{verbatim}
+%&GEOM ID='sphere'
+%      SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
+%\end{verbatim}
+%
+%\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
+%One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
+%
+%\subsubsection{2D Surfaces}
+%A {\ct \&GEOM}\ namelist defining a 2D surface is given by
+%
+%\begin{verbatim}
+%&GEOM ID='terrain'
+%      IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
+%\end{verbatim}
+%
+%\noindent where {\ct XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\ct ZVALS}.
+%{\ct IJK}\ specifies how many vertices occur in this region along each dimension in this region.
+%In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
+%The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
+%The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
+%The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
+%Similarly, the last row contains
+%{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
+%There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
+%As with the blocks and spheres, FDS uses the information
+%provided by these keywords to construct
+%vertices and triangular faces.
 
-\subsubsection{General Surfaces}
-
-Unstructured geometric surfaces are defined using the {\ct \&GEOM}\ namelist.
-These surfaces consist of a collection of triangular faces where each face consists of three vertices.
-A simple form of the {\ct \&GEOM}\ namelist defining one triangular face is given by
-
-\begin{verbatim}
-&GEOM ID='triangle'
-      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,
-      FACES=1,2,3
-/
-\end{verbatim}
-
-\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
-{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
-face. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
-
-One may also define particular kinds of geometric objects,  blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
-and a 2D surface using {\ct ZVALS}.
-FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
-
-\subsubsection{Blocks}
-A {\ct \&GEOM}\ namelist defining a block is given by
-
-\begin{verbatim}
-&GEOM ID='block'
-      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-\end{verbatim}
-
-\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
-The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
-A block may be discretized into many parts by
-specifying the {\ct IJK} parameter.  For example, {\ct IJK=8,6,4} would split the block
-into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
-the $z$ dimension. By default, blocks are discretized
-so that the block faces are consistent in size with the grid resolution.
-
-\subsubsection{Spheres}
-A {\ct \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
-
-\begin{verbatim}
-&GEOM ID='sphere'
-      SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
-\end{verbatim}
-
-\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
-One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
-
-\subsubsection{2D Surfaces}
-A {\ct \&GEOM}\ namelist defining a 2D surface is given by
-
-\begin{verbatim}
-&GEOM ID='terrain'
-      IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
-\end{verbatim}
-
-\noindent where {\ct XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\ct ZVALS}.
-{\ct IJK}\ specifies how many vertices occur in this region along each dimension in this region.
-In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
-The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
-The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
-The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
-Similarly, the last row contains
-{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
-There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
-As with the blocks and spheres, FDS uses the information
-provided by these keywords to construct
-vertices and triangular faces.
-
-\subsection{Defining Solids}
-Unstructured geometric solids are also defined using the {\ct \&GEOM}\ namelist.
-These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
-A simple form of the {\ct \&GEOM}\ namelist defining one tetrahedron is given by
-
-\begin{verbatim}
-&GEOM ID='tetrahedron'
-      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,  1.0,1.0,1.0,
-      VOLUS=1,2,3,4
-/
-\end{verbatim}
-
-\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
-{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
-tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
+%\subsection{Defining Solids}
+%Unstructured geometric solids are also defined using the {\ct \&GEOM}\ namelist.
+%These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
+%A simple form of the {\ct \&GEOM}\ namelist defining one tetrahedron is given by
+%
+%\begin{verbatim}
+%&GEOM ID='tetrahedron'
+%      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,  1.0,1.0,1.0,
+%      VOLUS=1,2,3,4
+%/
+%\end{verbatim}
+%
+%\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
+%{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
+%tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
 
 
 \subsection{Transforming Objects}
@@ -341,20 +350,20 @@ DXYZ(1,3) would specify the translation along the x direction for the third obje
 The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
 It will not appear by itself in the FDS model.
 
-\subsection{Dynamic Objects}
-An object's position and orientation may change with time.
-These changes are specified using various keywords that end with {\ct \_DOT}.
-See Table \ref{tbl:GEOM} for a complete list of these keywords.
-In the following example, {\ct AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
-Similarly, the position may be changed by using {\ct XYZ\_DOT}.
-For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
-{\small
-\begin{verbatim}
-&GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
-\end{verbatim}
-}
-
-\vspace{\baselineskip}
+%\subsection{Dynamic Objects}
+%An object's position and orientation may change with time.
+%These changes are specified using various keywords that end with {\ct \_DOT}.
+%See Table \ref{tbl:GEOM} for a complete list of these keywords.
+%In the following example, {\ct AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
+%Similarly, the position may be changed by using {\ct XYZ\_DOT}.
+%For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
+%{\small
+%\begin{verbatim}
+%&GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
+%\end{verbatim}
+%}
+%
+%\vspace{\baselineskip}
 
 \section{\texorpdfstring{{\ct GEOM}}{GEOM} (Unstructured Geometry Parameters)}
 
@@ -371,7 +380,6 @@ For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 \hline \hline
 \endhead
 {\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
 {\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
@@ -379,12 +387,10 @@ For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
 {\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
 {\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
@@ -392,7 +398,6 @@ For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
-{\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
 {\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &  1                       \\ \hline
@@ -405,8 +410,16 @@ For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in 
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XYZ\_DOT}     & Real Triplet           & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
 {\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
+
+
+% Related to moving geometry:
+%{\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
+%{\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
+%{\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
+%{\ct SCALE\_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
+%{\ct XYZ\_DOT}     & Real Triplet           & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
+
 
 \end{longtable}
 
@@ -578,10 +591,24 @@ ENDIF
 \item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (color indices for isosurface files.
 \end{itemize}
 
-\section{Some Geometry Implementation Notes}
-The notes written in this section are intended to provide details for various computational geometric algorithms as implemented in FDS and Smokeview.
+
+
+
+
+
+
+
+
+\section{Computational Geometry Technical Notes:}
+
+The notes written in this section are intended to provide details for various computational algorithms as implemented in FDS and Smokeview.
+
+
 
 \subsection{Geometry Properties}
+
+
+
 \subsubsection{Triangle,Polygon}
 Consider the triangle with vertices $v_1$,$v_2$ and $v_3$ as illustrated in Figure \ref{figure:triangle_setup}.
 
@@ -805,13 +832,88 @@ Figure \ref{figure:facelist}.
 \subsection{Boxes}
 \subsection{2D Surfaces}
 
-\section{Examples}
+
+\clearpage
+
+\section{Cut Cell Immersed Boundary Method (CCIBM) Technical Notes}
+
+\paragraph{Abstract} In this chapter, we discuss implementation of a hybrid cutcell direct-forcing immersed boundary method (CIBM) to handle complex geometry in the Fire Dynamics Simulator (FDS).  Particular attention is paid to the challenges associated with thin (zero thickness) obstructions in variable density flows with heat and mass transfer.  The triangular facet is chosen as the basic element for construction of complex geometry.  Reasons behind this choice are discussed.  A linked-list data structure for the facets is presented.  One-sided differencing and methods for overcoming numerical diffusion issues are discussed.  Verification cases for momentum, heat, and mass transport are presented.
+
+\subsection{Introduction}
+
+The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immersed boundary method (IBM) to handle flow obstructions.  Generally, obstructions are restricted to conform to the underlying Cartesian mesh, leading to stair-step approximations to curvilinear geometries (see Fig.~\ref{fig:circle}).
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\begin{tikzpicture}
+\draw[line width=1mm,fill=lightgray] (1.8,1.8) circle [radius=1.5];
+\draw[help lines] (0,0) grid (5,5);
+\draw[ultra thick,->] (2.66,4.5) -- (3.33,4.5);
+\draw[ultra thick,->] (2.66,3.5) -- (3.33,3.5);
+\draw[ultra thick,->] (3.66,4.5) -- (4.33,4.5);
+\draw[ultra thick,->] (3.66,3.5) -- (4.33,3.5);
+\draw[thick] (2.665,3.0255) -- (3.335,3.9745);
+\draw[fill] (3.335,3.9745) circle [radius=0.1];
+\end{tikzpicture}
+\hspace{1cm}&\hspace{1cm}
+\begin{tikzpicture}
+\draw[line width=1mm,fill=lightgray] (1,0) to (1,1) to (0,1) to (0,2) to (1,2) to (1,3) to (3,3) to (3,1) to (2,1) to (2,0) to (.95,0);
+\draw[help lines] (0,0) grid (5,5);
+\end{tikzpicture}
+\end{tabular}
+\caption{(Left) Desired geometry (circle). (Right) FDS representation---a cell is solid if more than half its volume is occupied by the desired geometry.}
+\label{fig:circle}
+\end{center}
+\end{figure}
+
+
+There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun:temp}.
+In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
+
+In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun:temp}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
+
+More elaborate schemes exist to obtain the velocity near the surface \cite{Balaras:temp,Choi:temp,McDermott:temp}.  But the emphasis here is on the implementation of a scheme to transport heat and mass near thin obstructions (an issue yet to be addressed in the literature).  Therefore, Fadlun's simple interpolation method is sufficient for momentum.   In 2D, complex surfaces are constructed from a series of connected line segments. In 3D, surfaces are constructed from triangular facets.  Our goal is to minimize numerical diffusion across thin obstructions arbitrarily oriented relative to the Cartesian mesh.  The cause of this diffusion is discussed in more detail below.
+
+In the following sections, we first discuss the linked-list data structure used to connect the surface elements to the grid, similar to the wall cell type used in the basic FDS scheme.  Next, we illustrate the momentum scheme for both simple and complex flow geometries.  We then discuss the unique issues faced by the FDS flow solver for simulating variable density flows with thin obstructions not aligned with the mesh.  Hopefully, we can develop a scheme that handles these problems!
+
+\subsection{Data Structure}
+
+\subsubsection{Block Geometry}
+
+In the basic FDS method, a wall cell (WC) is one face of a gas phase cell.  A WC derived type stores the indices of the gas phase cell\footnote{Here I am not getting into the difference between wall cell and 1D in-depth derived types.  When I say WC, in most cases I mean precisely {\ct WC\%ONE\_D}.}.  It also stores face values of density, species mass fraction, and temperature, and the wall-normal cell dimension used to construct gradients.  The relevant variables in the code are:
+
+\begin{table}[h!]
+\begin{tabular}{ll}
+{\ct WC\%IIG, WC\%JJG, WC\%KKG} & gas phase cell indices \\
+{\ct WC\%UW}                    & wall-normal velocity component \\
+{\ct WC\%RHO\_F}                & gas phase mass density at the wall \\
+{\ct WC\%ZZ\_F}                 & lumped species mass fraction at the wall \\
+{\ct WC\%TMP\_F}                & temperature at the wall \\
+{\ct WC\%DN}                    & wall-normal cell dimension \\
+{\ct WC\%IOR}                   & orientation from wall to cell center
+\end{tabular}
+\end{table}
+
+The face values serve as Dirichlet boundary conditions.  If Neumann boundary conditions are needed, they are constructed from a one-sided difference.  For example, the temperature gradient at the wall is obtained from
+\begin{equation}
+\frac{\partial T}{\partial n} \approx \frac{T_g - T_f}{\delta n/2}
+\end{equation}
+
+\subsubsection{Complex Geometry}
+
+
+
+
+
+
+\section{Verification Tests}
+
 This section describes some of the test cases used to verify that FDS and Smokeview are computing
 and visualizing unstructured geometric objects correctly.  This section will be used as source material for adding
 more details to the various guides on how to setup unstructured geometries for use with FDS. (i.e. this section
 is not intended to be included verbatim in the FDS User Guide).
 
-\newcommand{\geominput}[1]{{\scriptsize\verbatiminput{../../Verification/Immersed_Boundary_Method/#1}}}
 \newcommand{\figheightD}{2.75in}
 
 \subsection{geom\_simple.fds}
@@ -1320,82 +1422,6 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 % \caption{Boundary file data visualized on a moving sphere.  Case: geom\_sphere2\_fire.fds}
 %\label{fig:geom_sphere2_fire}
 %\end{figure}
-
-\clearpage
-
-\section{Cutcell Immersed Boundary Method (CIBM)}
-
-\paragraph{Abstract} In this chapter, we discuss implementation of a hybrid cutcell direct-forcing immersed boundary method (CIBM) to handle complex geometry in the Fire Dynamics Simulator (FDS).  Particular attention is paid to the challenges associated with thin (zero thickness) obstructions in variable density flows with heat and mass transfer.  The triangular facet is chosen as the basic element for construction of complex geometry.  Reasons behind this choice are discussed.  A linked-list data structure for the facets is presented.  One-sided differencing and methods for overcoming numerical diffusion issues are discussed.  Verification cases for momentum, heat, and mass transport are presented.
-
-\subsection{Introduction}
-
-The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immersed boundary method (IBM) to handle flow obstructions.  Generally, obstructions are restricted to conform to the underlying Cartesian mesh, leading to stair-step approximations to curvilinear geometries (see Fig.~\ref{fig:circle}).
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{cc}
-\begin{tikzpicture}
-\draw[line width=1mm,fill=lightgray] (1.8,1.8) circle [radius=1.5];
-\draw[help lines] (0,0) grid (5,5);
-\draw[ultra thick,->] (2.66,4.5) -- (3.33,4.5);
-\draw[ultra thick,->] (2.66,3.5) -- (3.33,3.5);
-\draw[ultra thick,->] (3.66,4.5) -- (4.33,4.5);
-\draw[ultra thick,->] (3.66,3.5) -- (4.33,3.5);
-\draw[thick] (2.665,3.0255) -- (3.335,3.9745);
-\draw[fill] (3.335,3.9745) circle [radius=0.1];
-\end{tikzpicture}
-\hspace{1cm}&\hspace{1cm}
-\begin{tikzpicture}
-\draw[line width=1mm,fill=lightgray] (1,0) to (1,1) to (0,1) to (0,2) to (1,2) to (1,3) to (3,3) to (3,1) to (2,1) to (2,0) to (.95,0);
-\draw[help lines] (0,0) grid (5,5);
-\end{tikzpicture}
-\end{tabular}
-\caption{(Left) Desired geometry (circle). (Right) FDS representation---a cell is solid if more than half its volume is occupied by the desired geometry.}
-\label{fig:circle}
-\end{center}
-\end{figure}
-
-
-There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun:temp}.
-In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
-
-In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun:temp}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
-
-More elaborate schemes exist to obtain the velocity near the surface \cite{Balaras:temp,Choi:temp,McDermott:temp}.  But the emphasis here is on the implementation of a scheme to transport heat and mass near thin obstructions (an issue yet to be addressed in the literature).  Therefore, Fadlun's simple interpolation method is sufficient for momentum.   In 2D, complex surfaces are constructed from a series of connected line segments. In 3D, surfaces are constructed from triangular facets.  Our goal is to minimize numerical diffusion across thin obstructions arbitrarily oriented relative to the Cartesian mesh.  The cause of this diffusion is discussed in more detail below.
-
-In the following sections, we first discuss the linked-list data structure used to connect the surface elements to the grid, similar to the wall cell type used in the basic FDS scheme.  Next, we illustrate the momentum scheme for both simple and complex flow geometries.  We then discuss the unique issues faced by the FDS flow solver for simulating variable density flows with thin obstructions not aligned with the mesh.  Hopefully, we can develop a scheme that handles these problems!
-
-\subsection{Data Structure}
-
-\subsubsection{Block Geometry}
-
-In the basic FDS method, a wall cell (WC) is one face of a gas phase cell.  A WC derived type stores the indices of the gas phase cell\footnote{Here I am not getting into the difference between wall cell and 1D in-depth derived types.  When I say WC, in most cases I mean precisely {\ct WC\%ONE\_D}.}.  It also stores face values of density, species mass fraction, and temperature, and the wall-normal cell dimension used to construct gradients.  The relevant variables in the code are:
-
-\begin{table}[h!]
-\begin{tabular}{ll}
-{\ct WC\%IIG, WC\%JJG, WC\%KKG} & gas phase cell indices \\
-{\ct WC\%UW}                    & wall-normal velocity component \\
-{\ct WC\%RHO\_F}                & gas phase mass density at the wall \\
-{\ct WC\%ZZ\_F}                 & lumped species mass fraction at the wall \\
-{\ct WC\%TMP\_F}                & temperature at the wall \\
-{\ct WC\%DN}                    & wall-normal cell dimension \\
-{\ct WC\%IOR}                   & orientation from wall to cell center
-\end{tabular}
-\end{table}
-
-The face values serve as Dirichlet boundary conditions.  If Neumann boundary conditions are needed, they are constructed from a one-sided difference.  For example, the temperature gradient at the wall is obtained from
-\begin{equation}
-\frac{\partial T}{\partial n} \approx \frac{T_g - T_f}{\delta n/2}
-\end{equation}
-
-\subsubsection{Complex Geometry}
-
-
-
-
-
-
-\section{Verification Tests}
 
 
 \subsection{Cut-cell definition around immersed cone: split cells, piercing and alignment}
