@@ -11,6 +11,28 @@
 
 \vspace{1.0in}
 
+% To compile geom_notes:
+%
+% 1. Make sure you updated your repo and compiled the latest produciton version of fds.
+%
+% 2. Go to fds/Manuals/FDS_User_Guide/
+%
+% 3. Type:
+%
+% [mnv@burn FDS_User_Guide]$ ./make_geom_figures.sh -J
+%
+% The -J is for the case where you compiled the target in fds/Build/impi_intel_linux_64 (ifort + intel mpi). If you don't use this flag, 
+% it assumes running with the target in fds/Build/mpi_intel_linux_64 (ifort + openmpi).
+% This script runs all the cases necessary to make smokeview figures, runs smokeview in batch mode and makes these figs. They are saved in 
+% fds/Manuals/FDS_User_Guide/SCRIPT_FIGURES.
+%
+% 4. Use your latex editor to compile geom_notes.tex or type:
+% 
+% [mnv@burn FDS_User_Guide]$ ./make_geom_notes.sh
+%
+% You should get the geom_notes.pdf in the same directory.
+
+
 \chapter{Building the Model (FIXME UG Chapter 7)}
 
 \textbf{FIXME}: [EG] in the following paragraph modifications are \underline{underlined}
@@ -44,9 +66,9 @@ A simple form of the {\ct \&GEOM}\ namelist defining an unstructured solid is gi
 /
 \end{verbatim}
 
-\noindent where {\ct ID}\ specifies the solid name, in this case {\ct UNSTRUCTURED_SOLID},
+\noindent where {\ct ID}\ specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
 {\ct VERTS}\ specifies the $(x_1,y_1,z_1, \quad x_2,y_2,z_2, \quad ...)$ coordinates of the vertices,
-and {\ct FACES}\ specifies a list of triangular faces and the {\ct SURF_ID}\ that should be
+and {\ct FACES}\ specifies a list of triangular faces and the {\ct SURF\_ID}\ that should be
 assigned to each of them.
 
 A triangular face is defined by 3 vertex indices and one boundary condition index: $(v_1,v_2,v_3,b)$.
@@ -57,7 +79,7 @@ to have a counter-clockwise winding order, so that their order rotates counter-c
 triangle's center and the face normal vector is oriented according to the right-hand rule.
 
 The boundary condition index $(b)$ ranges from 0 to the number of boundary condition {\ct IDs} found in
-the {\ct SURF_ID} parameter. A value greater than 0 designates which {\ct SURF} line (Section~\ref{info:SURF})
+the {\ct SURF\_ID} parameter. A value greater than 0 designates which {\ct SURF} line (Section~\ref{info:SURF})
 to apply at the selected face. A value equal to 0 applies the default boundary condition to the selected face.
 
 \subsection{Triangulated surfaces quality}
