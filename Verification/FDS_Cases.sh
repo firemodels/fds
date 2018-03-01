@@ -53,6 +53,7 @@ $QFDS -d Controls cycle_test.fds
 $QFDS -d Controls device_test.fds
 $QFDS -d Controls hrr_freeze.fds
 $QFDS -d Controls rms_cov_corr.fds
+$QFDS -d Controls rms_example.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -d Detectors beam_detector.fds
