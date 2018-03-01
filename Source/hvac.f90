@@ -1101,7 +1101,14 @@ ITER_LOOP: DO
          DO NS = 1,N_TRACKED_SPECIES
             ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
             !*** CHECK THIS
-            IF (STRATIFICATION .AND. .NOT. DN%VENT) ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+            IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+               IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                  DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               ELSE
+                  DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               ENDIF
+               ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+            ENDIF
          ENDDO
       ENDIF
 
