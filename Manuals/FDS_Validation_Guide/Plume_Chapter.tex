@@ -185,6 +185,34 @@ pool fires~\cite{Sjostrom:AST}. Gas, plate, and steel surface temperature measur
 
 \clearpage
 
+
+\subsection{UMD Line Burner}
+\label{UMD_Line_Burner_plumes}
+
+In this section, we present thermocouple temperature measurements and computational results for the UMD Line Burner.  Experimental details may be found in White et al.~\cite{White:2015}. FDS simulations are performed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the fuel slot in the line burner. Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} shows measured and computational results for mean thermocouple temperature across the width of the burner at two heights, $z$, above the burner surface. Fig.~\ref{UMD_Line_Burner_temp_slcf} shows a slice of gas temperature for the case with methane fuel and 18 vol.~\% O$_2$ in the coflow stream (nitrogen dilution).  The purpose of the image is to provide a qualitative result for the flame.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_TC_z_p125} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_TC_z_p250}
+\end{tabular*}
+\caption[UMD\_Line\_Burner temperature profiles]
+{Measured and computed mean thermocouple temperature profiles at 18 vol \% O$_2$.}
+\label{UMD_Line_Burner_methane_O2_p18_TC}
+\end{figure}
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\hspace{0.25in}\includegraphics[height=4in]{FIGURES/UMD_Line_Burner/methane_dx_p625cm_front} &
+\includegraphics[height=4in]{FIGURES/UMD_Line_Burner/methane_dx_p625cm_side}\hspace{0.25in}
+\end{tabular*}
+\caption[UMD\_Line\_Burner temperature contours]
+{UMD Line Burner temperature contours, front (left) and side (right) views for the $\delta x = 0.625$ cm case.  Fuel (natural gas in this case) enters through the red surface.  The air with nitrogen dilution (to 18 vol.~\% O$_2$ in this case) enters through the blue surface.  The white ceramic flame holder is seen surrounding the red burner surface. The right side view corresponds to the profiles shown in Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} through the center of the burner at different heights $z$ from the red burner surface.  Within the slice plane blue represents 20 \si{\degree}C, red 1500 \si{\degree}C. }
+\label{UMD_Line_Burner_temp_slcf}
+\end{figure}
+
+\clearpage
+
 \subsection{USN High Bay Hangar Experiments}
 
 \label{USN_Plume}
@@ -343,7 +371,7 @@ The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_30_cm} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_30_cm} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Temperature_40_cm} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_40_cm} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Temperature_40_cm}
 \end{tabular*}
 \caption[Waterloo Methanol, radial profiles of mean and rms temperature, 18~cm to 40~cm above the burner]
 {Waterloo Methanol, radial profiles of mean (left) and rms (right) temperature, 18~cm to 40~cm above the burner. The measurement at 40~cm was performed by Hamins and Lock~\cite{Hamins:TN1928}.}
@@ -432,7 +460,9 @@ The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
 \clearpage
 
 
-\section{Heskestad's Flame Height Correlation}
+\section{Flame Height}
+
+\subsection{Heskestad's Flame Height Correlation}
 
 Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by
 \be
@@ -515,6 +545,24 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \caption[Predicted HRR as a function of height above the burner]{Predicted HRR as a function of height above the burner compared to measurements.}
 \label{Flame_Structure}
 \end{figure}
+
+\clearpage
+
+\subsection{UMD Line Burner}
+\label{UMD_Line_Burner_flame_height}
+
+In this section, we present flame height measurements and computational results for the UMD Line Burner.  Experimental details may be found in White et al.~\cite{White:2015}. FDS simulations are performed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the fuel slot in the line burner.  Fig.~\ref{UMD_Line_Burner_Lf} shows measured and predicted flame heights of the methane and propane fires as a function of oxygen concentration. For FDS, the flame height is taken as the distance above the burner where 98~\% of the fuel gas is consumed, on average.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_flame_height} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_flame_height}
+\end{tabular*}
+\caption[UMD\_Line\_Burner flame height]
+{Measured and predicted mean flame heights for the methane and propane UMD Line Burner experiments.}
+\label{UMD_Line_Burner_Lf}
+\end{figure}
+
 
 
 
@@ -794,34 +842,7 @@ The discrepancy at the centerline for mixture fraction and vertical velocity may
 \end{figure}
 
 
-\clearpage
 
-\section{UMD Line Burner}
-\label{UMD_Line_Burner_plumes}
-
-In this section, we present thermocouple temperature measurements and computational results for the UMD Line Burner.  Experimental details may be found in White et al.~\cite{White:2015}. FDS simulations are performed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the fuel slot in the line burner.  The radiant fraction is measured to be $\chi_{\si{r}} = 0.18$ for the 18 vol.~\% O$_2$ coflow.  We use this value in the simulations.
-
-Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} shows measured and computational results for mean thermocouple temperature across the width of the burner at two heights, $z$, above the burner surface. Fig.~\ref{UMD_Line_Burner_temp_slcf} shows a slice of gas temperature for the case with methane fuel and 18 vol.~\% O$_2$ in the coflow stream (nitrogen dilution).  The purpose of the image is to provide a qualitative result for the flame.
-
-\begin{figure}[h]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_TC_z_p125} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_TC_z_p250}
-\end{tabular*}
-\caption[UMD\_Line\_Burner temperature profiles]
-{Measured and computed mean thermocouple temperature profiles at 18 vol \% O$_2$.}
-\label{UMD_Line_Burner_methane_O2_p18_TC}
-\end{figure}
-
-\begin{figure}[h]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\hspace{0.25in}\includegraphics[height=4in]{FIGURES/UMD_Line_Burner/methane_dx_p625cm_front} &
-\includegraphics[height=4in]{FIGURES/UMD_Line_Burner/methane_dx_p625cm_side}\hspace{0.25in}
-\end{tabular*}
-\caption[UMD\_Line\_Burner temperature contours]
-{UMD Line Burner temperature contours, front (left) and side (right) views for the $\delta x = 0.625$ cm case.  Fuel (natural gas in this case) enters through the red surface.  The air with nitrogen dilution (to 18 vol.~\% O$_2$ in this case) enters through the blue surface.  The white ceramic flame holder is seen surrounding the red burner surface. The right side view corresponds to the profiles shown in Fig.~\ref{UMD_Line_Burner_methane_O2_p18_TC} through the center of the burner at different heights $z$ from the red burner surface.  Within the slice plane blue represents 20 \si{\degree}C, red 1500 \si{\degree}C. }
-\label{UMD_Line_Burner_temp_slcf}
-\end{figure}
 
 
 \clearpage

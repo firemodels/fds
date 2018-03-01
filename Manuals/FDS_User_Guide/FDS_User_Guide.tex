@@ -2290,7 +2290,7 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 
 Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
 
-With regard to the {\ct SURF\_ID}, 
+With regard to the {\ct SURF\_ID},
 
 The first step in carving out the shape is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
 
@@ -2547,7 +2547,7 @@ For any solid material, specify its thermal {\ct CONDUCTIVITY} (\si{W/(m.K)}), {
 \end{lstlisting}
 Notice that with temperature-dependent quantities, the {\ct RAMP} parameter {\ct T} means Temperature, and {\ct F} is the value of either the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the {\ct MATL} line, but rather the {\ct RAMP} names.
 
-The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface.
+The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface. Note that you can only apply materials with an {\ct ABSORPTION\_COEFFICIENT} to planar surfaces, not cylinders or spheres.
 
 
 
@@ -3686,7 +3686,7 @@ where:
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
-\item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
+\item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} blows from the second node to the first. {\ct REVERSE} has no effect on {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} as a duct input. If {\ct VOLUME\_FLOW} or {\ct MASS\_FLOW} is specified for a duct and the reverse flow direction is needed, change the sign of the input to negative.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If {\ct ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in {\ct LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting {\ct ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving {\ct ROUGHNESS} unset.
 \item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
 \end{description}
@@ -5704,9 +5704,7 @@ The radiation solver is called before the start of the calculation to establish 
 \section{Radiative Absorption and Scattering}
 \label{info:RADI_RADCAL_Absorption}
 
-By default FDS employs a gray gas model for the radiation absorption coefficient, a function
-of gas composition and temperature, which are
-tabulated in a look-up table using the routines found in RadCal. You can output the absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
+By default FDS employs a gray gas model for the radiation absorption coefficient, a function of gas composition and temperature, which are tabulated in a look-up table using the routines found in RadCal. You can output the absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
 
 \subsection{RadCal Considerations}
 
@@ -7274,7 +7272,7 @@ Sometimes it is convenient to calculate a steady-state profile. For example, the
 \begin{lstlisting}
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20 /
 \end{lstlisting}
-In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
+In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the time interval between {\ct T\_DEVC\_LINE\_END} minus {\ct DT\_DEVC\_LINE} and {\ct T\_DEVC\_LINE\_END}. Both {\ct T\_DEVC\_LINE\_END} and {\ct DT\_DEVC\_LINE} are specified on the {\ct DUMP} line. The default value of the former is {\ct T\_END} and the latter is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_DEVC\_LINE\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over a time interval of duration {\ct DT\_DEVC\_LINE}.
 
 A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
 
@@ -8629,12 +8627,12 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
-{\ct ADA}$^2$                                   & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADA\_Z}$^1$                                & Average Droplet (cross sectional) Area            & m$^2$/m$^3$    & D,I,P,S      \\ \hline
-{\ct ADD}$^2$                                   & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADD\_Z}$^1$                                & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
-{\ct ADT}$^2$                                   & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct ADT\_Z}$^1$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADA}$^2$                                   & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADA\_Z}$^1$                                & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
+{\ct ADD}$^2$                                   & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
+{\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 {\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
@@ -8680,6 +8678,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                    &                & D            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -9031,6 +9030,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
+{\ct T\_DEVC\_LINE\_END}            & Real         & Section~\ref{info:line_file}           &  s        & {\ct T\_END}                   \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline

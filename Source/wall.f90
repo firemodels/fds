@@ -1152,7 +1152,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,RHOCBAR,RHOCBAR2
 REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
@@ -1266,13 +1266,21 @@ OBST_LOOP_2: DO N=1,N_OBST
                   OBST_INDEX = OBST_INDEX_C(CELL_INDEX(II2,JJ2,KK2))
                   OB2 => OBSTRUCTION(OBST_INDEX)
                   OB2_IF: IF (OB2%PYRO3D) THEN
-                     ! if an accepting cell exists, transfer mass
+                     ! if an accepting cell exists, transfer energy and mass
                      IF (TWO_D) THEN
                         VC2 = DX(II2)*DZ(KK2)
                      ELSE
                         VC2 = DX(II2)*DY(JJ2)*DZ(KK2)
                      ENDIF
+                     ! get rho*c for each cell before merge
+                     RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
+                     CALL GET_SOLID_RHOCBAR(RHOCBAR,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     RHO_IN(1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL)
+                     CALL GET_SOLID_RHOCBAR(RHOCBAR2,TMP(II2,JJ2,KK2),OPT_SURF_INDEX=OB2%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     ! transfer mass
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
+                     ! compute new cell temperature
+                     TMP(II2,JJ2,KK2) = (VC*RHOCBAR*TMP(I,J,K)+VC2*RHOCBAR2*TMP(II2,JJ2,KK2))/(VC*RHOCBAR+VC2*RHOCBAR2)
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
                   ELSEIF (VSRVC_LOC<SOLID_VOLUME_CLIP_THRESHOLD) THEN OB2_IF
                      ! VS/VC is small, but there are no more cells to accept the mass, clip the mass
@@ -2479,7 +2487,7 @@ IF (SF%SPECIFIED_HEAT_SOURCE) THEN
    ENDDO
 ENDIF
 
-! Calculate internal radiation
+! Calculate internal radiation for Cartesian geometry only
 
 IF (SF%INTERNAL_RADIATION) THEN
    KAPPA_S = 0._EB
@@ -2491,27 +2499,20 @@ IF (SF%INTERNAL_RADIATION) THEN
          VOLSUM = VOLSUM + ONE_D%RHO(I,N)/ML%RHO_S
          KAPPA_S(I) = KAPPA_S(I) + ONE_D%RHO(I,N)*ML%KAPPA_S/ML%RHO_S
       ENDDO
-      IF (VOLSUM>0._EB) KAPPA_S(I) = 2._EB*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa or 2*r*dr*kappa
-   ENDDO
-   DO I=0,NWP
-      IF (SF%GEOMETRY==SURF_CYLINDRICAL) THEN
-         R_S(I) = SF%INNER_RADIUS+SF%THICKNESS-SF%X_S(I)
-      ELSE
-         R_S(I) = 1._EB
-      ENDIF
+      IF (VOLSUM>0._EB) KAPPA_S(I) = 2._EB*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa
    ENDDO
    ! solution inwards
    RFLUX_UP = ONE_D%QRADIN + (1._EB-ONE_D%EMISSIVITY)*ONE_D%QRADOUT/(ONE_D%EMISSIVITY+1.0E-10_EB)
    DO I=1,NWP
-      RFLUX_DOWN =  ( R_S(I-1)*RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (R_S(I) + KAPPA_S(I))
-      Q_S(I) = Q_S(I) + (R_S(I-1)*RFLUX_UP - R_S(I)*RFLUX_DOWN)*RDX_S(I)
+      RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+      Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
       RFLUX_UP = RFLUX_DOWN
    ENDDO
    ! solution outwards
    RFLUX_UP = QRADINB + (1._EB-E_WALLB)*RFLUX_UP
    DO I=NWP,1,-1
-      RFLUX_DOWN =  ( R_S(I)*RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (R_S(I-1) + KAPPA_S(I))
-      Q_S(I) = Q_S(I) + (R_S(I)*RFLUX_UP - R_S(I-1)*RFLUX_DOWN)*RDX_S(I)
+      RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+      Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
       RFLUX_UP = RFLUX_DOWN
    ENDDO
    ONE_D%QRADOUT = ONE_D%EMISSIVITY*RFLUX_DOWN

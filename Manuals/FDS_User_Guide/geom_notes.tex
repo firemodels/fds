@@ -9,13 +9,180 @@
 \begin{document}
 \bibliographystyle{unsrt}
 
-
 \vspace{1.0in}
-\section{Unstructured Geometry: The \texorpdfstring{{\ct GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
+
+% To compile geom_notes:
+%
+% 1. Make sure you updated your repo and compiled the latest produciton version of fds.
+%
+% 2. Go to fds/Manuals/FDS_User_Guide/
+%
+% 3. Type:
+%
+% [mnv@burn FDS_User_Guide]$ ./make_geom_figures.sh -J
+%
+% The -J is for the case where you compiled the target in fds/Build/impi_intel_linux_64 (ifort + intel mpi). If you don't use this flag, 
+% it assumes running with the target in fds/Build/mpi_intel_linux_64 (ifort + openmpi).
+% This script runs all the cases necessary to make smokeview figures, runs smokeview in batch mode and makes these figs. They are saved in 
+% fds/Manuals/FDS_User_Guide/SCRIPT_FIGURES.
+%
+% 4. Use your latex editor to compile geom_notes.tex or type:
+% 
+% [mnv@burn FDS_User_Guide]$ ./make_geom_notes.sh
+%
+% You should get the geom_notes.pdf in the same directory.
+
+
+\chapter{Building the Model (FIXME UG Chapter 7)}
+
+\textbf{FIXME}: [EG] in the following paragraph modifications are \underline{underlined}
+
+A considerable amount of work in setting up a calculation lies in specifying the geometry of the space to
+be modeled and applying boundary conditions to the solid surfaces. The geometry is described in terms of
+\underline{solids} that can heat up, burn, conduct heat, etc.; and vents from which air or fuel can be
+either injected into, or drawn from, the flow domain. A boundary condition needs to be assigned to each
+\underline{solid surface} and vent describing its thermal properties. A fire is just one type of boundary condition.
+This chapter describes how to build the model.
+
+\textbf{FIXME}: the following text is written following the structure of the {\ct OBST} namelist section
+
+\section{Creating Unstructured Solids: The \texorpdfstring{{\ct GEOM}}{GEOM} Namelist Group (Table \ref{tbl:GEOM})}
 \label{info:GEOM}
+
+The namelist {\ct GEOM}\ describes one or more unstructured closed geometric surfaces that enclose solid portions
+of the fluid domain. These surfaces consist of a collection of triangular faces, where each face is built
+from three vertices. The user can assign a specific boundary condition to each of the faces.
+
+\subsection{Basics}
+\label{info:GEOM_Basics}
+
+A simple form of the {\ct \&GEOM}\ namelist defining an unstructured solid is given by
+
+\begin{verbatim}
+&GEOM ID='UNSTRUCTURED_SOLID',
+      SURF_ID='FIRE','INERT',
+      VERTS=-1.0,-1.0,0.0, 1.0,-1.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0,
+      FACES=1,3,2, 2,  1,4,3, 1,  3,4,2, 1,  2,4,1, 0,  
+/
+\end{verbatim}
+
+\noindent where {\ct ID}\ specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
+{\ct VERTS}\ specifies the $(x_1,y_1,z_1, \quad x_2,y_2,z_2, \quad ...)$ coordinates of the vertices,
+and {\ct FACES}\ specifies a list of triangular faces and the {\ct SURF\_ID}\ that should be
+assigned to each of them.
+
+A triangular face is defined by 3 vertex indices and one boundary condition index: $(v_1,v_2,v_3,b)$.
+Each vertex index $(v_i)$ ranges from 1 to the number of vertices found in the {\ct VERTS} parameter.
+The order of the 3 vertex indices in the face defines which side of the triangle is considered facing
+the outside of the solid. Observed from the outside, the vertices of each triangle should always appear
+to have a counter-clockwise winding order, so that their order rotates counter-clockwise around the
+triangle's center and the face normal vector is oriented according to the right-hand rule.
+
+The boundary condition index $(b)$ ranges from 0 to the number of boundary condition {\ct IDs} found in
+the {\ct SURF\_ID} parameter. A value greater than 0 designates which {\ct SURF} line (Section~\ref{info:SURF})
+to apply at the selected face. A value equal to 0 applies the default boundary condition to the selected face.
+
+\subsection{Triangulated surfaces quality}
+
+In order for FDS to correctly detect the solid portion of the volume from the rest of the fluid domain,
+some tests are performed at start on the quality of the triangulated surfaces.
+
+First of all, no \textit{degenerate geometry} is allowed.
+In a collection of vertices and faces of a {\ct \&GEOM}\ namelist:
+
+\begin{itemize}
+\item each vertex must be unique and shared by edges,
+\item each edge connecting face vertices must be shared by two faces and have a non-zero length,
+\item each face cannot intersect the others and must have a non-zero area.
+\end{itemize}
+
+Furthermore the {\ct \&GEOM}\ namelist shall represent \textit{closed}, \textit{manifold}, \textit{orientable} surfaces.
+The surfaces may define one or more distinct volumes, that do not need to be \textit{connected}.
+
+\textbf{FIXME}: [EG] insert a picture of well behaved surfaces that define non-connected spaces, with normals displayed
+
+A triangulated surface is said to be a \textit{manifold} and \textit{closed} if each edge is shared by exactly two faces.
+A manifold mesh is \textit{orientable} if the vertex orderings for the faces can be chosen so that adjacent faces
+have consistent normals. For example a Möbius strip is open and non-orientable.
+
+\textbf{FIXME}: [EG] insert a picture of various common types of flaws in triangulated surfaces.
+
+\subsection{Self-generated geometries}
+
+The {\ct \&GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
+and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
+
+\subsubsection{Blocks}
+A {\ct GEOM}\ namelist defining a block is given by
+
+\begin{verbatim}
+&GEOM ID='block'
+      XB=0.0,1.0,0.0,1.0,0.0,1.0
+/
+\end{verbatim}
+
+\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
+The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
+A block may be refined into many parts by specifying the {\ct IJK} parameter.
+For example, {\ct IJK=8,6,4} would split the block into 8 parts along the $x$ dimension,
+6 parts along the $y$ dimension and 4 parts along the $z$ dimension.
+By default, blocks are discretized so that the block faces are consistent in size with the grid resolution.
+
+\subsubsection{Spheres}
+A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
+
+\begin{verbatim}
+&GEOM ID='sphere'
+      SPHERE_ORIGIN=0.0,0.0,0.0, SPHERE_RADIUS=1.0
+/
+\end{verbatim}
+
+\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
+One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times the sphere is split.
+
+\subsubsection{2D Terrain elevations}
+A {\ct \&GEOM}\ namelist defining a 2D terrain elevation is given by
+
+\begin{verbatim}
+&GEOM ID='terrain',
+      IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax, ZVALS=...
+/
+\end{verbatim}
+
+\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_min, x_max, y_min)$ and $(y_max)$
+where elevation data is defined with {\ct ZVALS}.
+{\ct IJK}\ specifies how many vertices occur in this region along each dimension.
+In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
+The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
+The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
+The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
+Similarly, the last row contains
+{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
+There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
+As with the blocks and spheres, FDS uses the information provided by these keywords to construct
+vertices and triangular faces.
+
+\subsection{Generating complex geometries}
+
+\textbf{FIXME}: [EG] Useful?
+
+{\ct \&GEOM}\ namelists for complex geometries can be automatically generated using third-party pre-processors
+provided by the FDS-SMV community. The links to this tools can be found at the project home page at https://pages.nist.gov/fds-smv/
+
+The FDS/Smokeview distribution includes an example Python script that transforms a Wavefront .OBJ file,
+an open file format supported by many 3D graphics applications, into {\ct \&GEOM}\ namelists.
+
+
+
+
+
+
+\textbf{FIXME}: from here unmodified text
+
 \subsection{Defining Surfaces}
 
 \subsubsection{General Surfaces}
+
 Unstructured geometric surfaces are defined using the {\ct \&GEOM}\ namelist.
 These surfaces consist of a collection of triangular faces where each face consists of three vertices.
 A simple form of the {\ct \&GEOM}\ namelist defining one triangular face is given by
@@ -806,14 +973,14 @@ the size and location of the sphere.  This discretization technique results in e
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1a}&
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1b}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1a}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1b}\\
  LEVEL=0&LEVEL=1\\
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1c}&
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1d}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1c}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1d}\\
  LEVEL=2&LEVEL=3\\
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1e}&
- \includegraphics[width=2.1in]{SCRIPT_FIGURES/geom_sphere1f}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1e}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere1f}\\
  LEVEL=4&LEVEL=5\\
   \end{tabular}
 \end{center}
@@ -828,14 +995,14 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3a}&
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3b}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3a}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3b}\\
  N\_LAT=3,N\_LONG=6&N\_LAT=6,N\_LONG=12\\
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3c}&
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3d}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3c}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3d}\\
  N\_LAT=12,N\_LONG=24&N\_LAT=24,N\_LONG=48\\
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3e}&
- \includegraphics[width=2.3in]{SCRIPT_FIGURES/geom_sphere3f}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3e}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_sphere3f}\\
  N\_LAT=48,N\_LONG=96&N\_LAT=96,N\_LONG=192\\
   \end{tabular}
 \end{center}
@@ -940,10 +1107,10 @@ is applied to the object using spherical coordinates.
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture3a}&
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture3b}\\
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture4a}&
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_texture4b}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_texture3a}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_texture3b}\\
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_texture4a}&
+ \includegraphics[width=3.5in]{SCRIPT_FIGURES/geom_texture4b}\\
  lat/long discretization&recursive discretization
   \end{tabular}
 \end{center}

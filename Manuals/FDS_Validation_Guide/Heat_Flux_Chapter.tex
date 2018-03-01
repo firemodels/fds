@@ -1373,13 +1373,9 @@ There were a variety of heat flux gauges installed in the test compartment. Most
 
 \subsection{UMD Line Burner}
 
-In the UMD line burner experiments, radiative heat flux was measured at a distance of 1 m normal to the flame sheet.  In the FDS calculations the domain is extended to encompass the heat flux measurement location; two devices are placed at the 1 m distance on either side of the flame as shown in Fig.~\ref{fig_umd_integrated_intensity}.  These cases are run with a relatively large number of radiation solid angles, 700, to ensure no ray effects from the discrete ordinates method.  Fig.~\ref{fig_umd_integrated_intensity} also shows a slice contour of integrated radiation intensity to confirm the pattern is smooth.
+In the UMD line burner experiments, radiative heat flux was measured at a distance of 1~m normal to the flame sheet.  In the FDS calculations the domain is extended to encompass the heat flux measurement location; two devices are placed at the 1~m distance on either side of the flame as shown in Fig.~\ref{fig_umd_integrated_intensity}. This figure also shows a slice contour of integrated radiation intensity to confirm the pattern is smooth.
 
-The calculations are setup to run for one minute of real time with a ramp on the input radiative fraction tied to the oxygen concentration in the nitrogen coflow (blue region of the image).  The radiative fraction versus oxygen volume fraction is provided by White et al.~\cite{White:2015}.  Fig.~\ref{fig_umd_chi_r_check} shows the verification check for the input radiative fraction for both the methane and propane cases.
-
-FDS does not use a simple local radiative emission scheme.  Instead, a correction is applied to the emission term to ensure the global radiative fraction is achieved for the plume.  It is therefore important to double check that the correct global radiative fraction is indeed achieved by the flow solver.  To this end, in Fig.~\ref{fig_umd_global_chi_r} we plot the global radiative fraction taken from the output to the {\ct \_hrr} file.
-
-With these verification checks in place, we are now in a position to examine the simulated target heat flux at 1 m from the flame.  Fig.~\ref{fig_umd_heat_flux} shows the measured and computed heat flux for the methane and propane cases.
+The radiative fraction and radiative heat flux as functions of oxygen volume fraction in the coflow have been measured by White~et~al.~\cite{White:2015}.  FDS does not employ a specified radiative fraction in these simulations. Rather it uses a three step reaction mechanism that produces CO and soot in the first step and the oxidation of these species in the second and third. The source of thermal radiation is the CO, CO$_2$, water vapor, and soot in the flame, as calculated by RadCal. Figure~\ref{fig_umd_chi_r} displays the measured and predicted global radiative fraction and heat flux.
 
 \begin{figure}[h!]
 \centering
@@ -1390,29 +1386,13 @@ With these verification checks in place, we are now in a position to examine the
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_Chi_r_ramp_check} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_Chi_r_ramp_check}
-\end{tabular*}
-\caption{UMD Line Burner radiative fraction input ramp check.}
-\label{fig_umd_chi_r_check}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_global_Chi_R} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_global_Chi_R}
-\end{tabular*}
-\caption{UMD Line Burner global radiative.}
-\label{fig_umd_global_chi_r}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_rad_heat_flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_Chi_r} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_rad_heat_flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_Chi_r} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_rad_heat_flux}
 \end{tabular*}
-\caption{UMD Line Burner N2 dilution radiative heat flux to target.}
-\label{fig_umd_heat_flux}
+\caption[UMD Line Burner radiative fraction and radiative heat flux]{The plots on the left compare measured and predicted radiative fraction, and the plots on the right compare measured and predicted heat flux to a target 1~m away from the flame.}
+\label{fig_umd_chi_r}
 \end{figure}
 
 \clearpage
@@ -1442,7 +1422,7 @@ Hamins~et~al.~\cite{Hamins:CST1994} made measurements of the radiative and total
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Rad_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Heat_Flux} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Heat_Flux}
 \end{tabular*}
 \caption[Waterloo Methanol, radial profile of radiative and total heat flux to the fuel surface]
 {Waterloo Methanol, radial profile of radiative (left) and total (right) heat flux to the fuel surface.}
