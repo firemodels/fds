@@ -2487,7 +2487,7 @@ IF (SF%SPECIFIED_HEAT_SOURCE) THEN
    ENDDO
 ENDIF
 
-! Calculate internal radiation
+! Calculate internal radiation for Cartesian geometry only
 
 IF (SF%INTERNAL_RADIATION) THEN
    KAPPA_S = 0._EB
@@ -2499,27 +2499,20 @@ IF (SF%INTERNAL_RADIATION) THEN
          VOLSUM = VOLSUM + ONE_D%RHO(I,N)/ML%RHO_S
          KAPPA_S(I) = KAPPA_S(I) + ONE_D%RHO(I,N)*ML%KAPPA_S/ML%RHO_S
       ENDDO
-      IF (VOLSUM>0._EB) KAPPA_S(I) = 2._EB*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa or 2*r*dr*kappa
-   ENDDO
-   DO I=0,NWP
-      IF (SF%GEOMETRY==SURF_CYLINDRICAL) THEN
-         R_S(I) = SF%INNER_RADIUS+SF%THICKNESS-SF%X_S(I)
-      ELSE
-         R_S(I) = 1._EB
-      ENDIF
+      IF (VOLSUM>0._EB) KAPPA_S(I) = 2._EB*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa
    ENDDO
    ! solution inwards
    RFLUX_UP = ONE_D%QRADIN + (1._EB-ONE_D%EMISSIVITY)*ONE_D%QRADOUT/(ONE_D%EMISSIVITY+1.0E-10_EB)
    DO I=1,NWP
-      RFLUX_DOWN =  ( R_S(I-1)*RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (R_S(I) + KAPPA_S(I))
-      Q_S(I) = Q_S(I) + (R_S(I-1)*RFLUX_UP - R_S(I)*RFLUX_DOWN)*RDX_S(I)
+      RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+      Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
       RFLUX_UP = RFLUX_DOWN
    ENDDO
    ! solution outwards
    RFLUX_UP = QRADINB + (1._EB-E_WALLB)*RFLUX_UP
    DO I=NWP,1,-1
-      RFLUX_DOWN =  ( R_S(I)*RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (R_S(I-1) + KAPPA_S(I))
-      Q_S(I) = Q_S(I) + (R_S(I)*RFLUX_UP - R_S(I-1)*RFLUX_DOWN)*RDX_S(I)
+      RFLUX_DOWN =  ( RFLUX_UP + KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+      Q_S(I) = Q_S(I) + (RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
       RFLUX_UP = RFLUX_DOWN
    ENDDO
    ONE_D%QRADOUT = ONE_D%EMISSIVITY*RFLUX_DOWN
