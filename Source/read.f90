@@ -6890,6 +6890,14 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDDO
    ENDDO
 
+   ! Internal radiation only allowed for Cartesian geometry
+
+   IF (SF%INTERNAL_RADIATION .AND. SF%GEOMETRY/=SURF_CARTESIAN) THEN
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),&
+                               ' is not Cartesian and cannot have a material with an ABSORPTION_COEFFICIENT'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
    ! In case of internal radiation, do not allow zero-emissivity
 
    IF (SF%INTERNAL_RADIATION) THEN
