@@ -1152,7 +1152,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX
 REAL(EB) :: DEPTH,M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,RHOCBAR,RHOCBAR2
 REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL(),MS=>NULL()
@@ -1266,13 +1266,21 @@ OBST_LOOP_2: DO N=1,N_OBST
                   OBST_INDEX = OBST_INDEX_C(CELL_INDEX(II2,JJ2,KK2))
                   OB2 => OBSTRUCTION(OBST_INDEX)
                   OB2_IF: IF (OB2%PYRO3D) THEN
-                     ! if an accepting cell exists, transfer mass
+                     ! if an accepting cell exists, transfer energy and mass
                      IF (TWO_D) THEN
                         VC2 = DX(II2)*DZ(KK2)
                      ELSE
                         VC2 = DX(II2)*DY(JJ2)*DZ(KK2)
                      ENDIF
+                     ! get rho*c for each cell before merge
+                     RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
+                     CALL GET_SOLID_RHOCBAR(RHOCBAR,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     RHO_IN(1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL)
+                     CALL GET_SOLID_RHOCBAR(RHOCBAR2,TMP(II2,JJ2,KK2),OPT_SURF_INDEX=OB2%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     ! transfer mass
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
+                     ! compute new cell temperature
+                     TMP(II2,JJ2,KK2) = (VC*RHOCBAR*TMP(I,J,K)+VC2*RHOCBAR2*TMP(II2,JJ2,KK2))/(VC*RHOCBAR+VC2*RHOCBAR2)
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
                   ELSEIF (VSRVC_LOC<SOLID_VOLUME_CLIP_THRESHOLD) THEN OB2_IF
                      ! VS/VC is small, but there are no more cells to accept the mass, clip the mass
