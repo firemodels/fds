@@ -20,8 +20,13 @@ export INDIR=Current_Results
 JOB_PREFIX=
 export STOPFDSMAXITER=
 DV=
-INTEL=
 TCP=
+
+INTEL="-I"
+# the mac doesn't have Intel MPI
+if [ "`uname`" == "Darwin" ] ; then
+  INTEL=
+fi
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -45,7 +50,7 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bEhIj:m:o:q:suxy' OPTION
+while getopts 'bEhIj:m:o:Oq:suxy' OPTION
 do
 case $OPTION in
   b)
@@ -68,6 +73,9 @@ case $OPTION in
    ;;
   o)
    INDIR="$OPTARG"
+   ;;
+  O)
+   INTEL=
    ;;
   q)
    QUEUE="$OPTARG"
