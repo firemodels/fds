@@ -11,4 +11,7 @@ $QFDS $DEBUG -p 24 -n 12 $QUEUE -d $INDIR propane_dx_1p25cm.fds
 $QFDS $DEBUG -p 164 -n 12 $QUEUE -d $INDIR methane_dx_p625cm.fds
 $QFDS $DEBUG -p 164 -n 12 $QUEUE -d $INDIR propane_dx_p625cm.fds
 
+$QFDS $DEBUG -p 204 -n 12 $QUEUE -d $INDIR methane_dx_p3125cm.fds
+$QFDS $DEBUG -p 204 -n 12 $QUEUE -d $INDIR propane_dx_p3125cm.fds
+
 echo FDS cases submitted
