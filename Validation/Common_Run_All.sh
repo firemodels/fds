@@ -29,6 +29,21 @@ if [ "`uname`" == "Darwin" ] ; then
   INTEL=
 fi
 
+function get_full_path {
+  filepath=$1
+
+  if [[ $filepath == /* ]]; then
+    full_filepath=$filepath
+  else
+    dir_filepath=$(dirname  "${filepath}")
+    filename_filepath=$(basename  "${filepath}")
+    curdir=`pwd`
+    cd $dir_filepath
+    full_filepath=`pwd`/$filename_filepath
+    cd $curdir
+  fi
+}
+
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
 echo "Runs FDS validation set"
