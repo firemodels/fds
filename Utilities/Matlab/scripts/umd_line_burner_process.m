@@ -18,11 +18,11 @@ Lf_dt  = 10;
 outdir = '../../../out/UMD_Line_Burner/FDS_Output_Files/';
 
 fuel_name    = {'methane','propane'};
-res_name     = {'1p25cm','p625cm'};
+res_name     = {'1p25cm','p625cm','p3125cm'};
 
 for i_fuel=1:2;
 
-   for fds_resolution=1:2;
+   for fds_resolution=1:3;
 
       DEV = importdata([outdir,fuel_name{i_fuel},'_dx_',res_name{fds_resolution},'_devc.csv'],',',2);
       HRR = importdata([outdir,fuel_name{i_fuel},'_dx_',res_name{fds_resolution},'_hrr.csv'],',',2);
