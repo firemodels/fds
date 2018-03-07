@@ -46,7 +46,7 @@ echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
-echo "-e exe - run using exe (full path to fds)."
+echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
@@ -68,6 +68,21 @@ echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 echo "-W - wait for cases to complete before returning"
 exit
+}
+
+function get_full_path {
+  filepath=$1
+
+  if [[ $filepath == /* ]]; then
+    full_filepath=$filepath
+  else
+    dir_filepath=$(dirname  "${filepath}")
+    filename_filepath=$(basename  "${filepath}")
+    curdir=`pwd`
+    cd $dir_filepath
+    full_filepath=`pwd`/$filename_filepath
+    cd $curdir
+  fi
 }
 
 wait_cases_end()
@@ -176,7 +191,8 @@ fi
 if [ "$EXE" == "" ]; then
   export FDSMPI=$SVNROOT/fds/Build/${INTEL}mpi_intel_$PLATFORM$DEBUG/fds_${INTEL}mpi_intel_$PLATFORM$DEBUG
 else
-  export FDSMPI=$EXE
+  get_full_path $EXE
+  export FDSMPI=$full_filepath
 fi
 
 export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"

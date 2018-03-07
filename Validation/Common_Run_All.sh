@@ -76,7 +76,7 @@ case $OPTION in
    DEBUG="-b $OPENMP"
    ;;
   e)
-   EXE="-e $OPTARG"
+   EXE="$OPTARG"
    INTEL=
    DV=
    DEBUG=
@@ -121,6 +121,11 @@ case $OPTION in
    ;;   
 esac
 done
+
+if [ "$EXE" != "" ]; then
+  get_full_path $EXE
+  EXE="-e $full_filepath"
+fi
 
 export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV $INTEL $EXE"
 
