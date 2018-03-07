@@ -21,6 +21,7 @@ JOB_PREFIX=
 export STOPFDSMAXITER=
 DV=
 TCP=
+EXE=
 
 INTEL="-I"
 # the mac doesn't have Intel MPI
@@ -28,18 +29,36 @@ if [ "`uname`" == "Darwin" ] ; then
   INTEL=
 fi
 
+function get_full_path {
+  filepath=$1
+
+  if [[ $filepath == /* ]]; then
+    full_filepath=$filepath
+  else
+    dir_filepath=$(dirname  "${filepath}")
+    filename_filepath=$(basename  "${filepath}")
+    curdir=`pwd`
+    cd $dir_filepath
+    full_filepath=`pwd`/$filename_filepath
+    cd $curdir
+  fi
+}
+
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
 echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
+echo "-e exe - run using exe (full path to fds)."
+echo "      Note: environment must be defined to use this executable"
 echo "-h - display this message"
-echo "-I - run with Intel MPI"
+echo "-I - run with Intel MPI version of fds"
 echo "-j job_prefix - specify job prefix"
 echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
+echo "-O - run with Open MPI version of fds"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "-s - stop FDS runs"
@@ -50,11 +69,17 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bEhIj:m:o:Oq:suxy' OPTION
+while getopts 'be:EhIj:m:o:Oq:suxy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
+   ;;
+  e)
+   EXE="$OPTARG"
+   INTEL=
+   DV=
+   DEBUG=
    ;;
   E)
    TCP="-E "
@@ -67,6 +92,7 @@ case $OPTION in
    ;;
   I)
    INTEL="-I"
+   EXE=
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
@@ -76,6 +102,7 @@ case $OPTION in
    ;;
   O)
    INTEL=
+   EXE=
    ;;
   q)
    QUEUE="$OPTARG"
@@ -95,7 +122,12 @@ case $OPTION in
 esac
 done
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV $INTEL"
+if [ "$EXE" != "" ]; then
+  get_full_path $EXE
+  EXE="-e $full_filepath"
+fi
+
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"

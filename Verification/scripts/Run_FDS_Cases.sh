@@ -36,6 +36,7 @@ INTEL=
 INTEL2=
 GEOMCASES=
 WAIT=
+EXE=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -45,6 +46,8 @@ echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
+echo "-e exe - run using exe"
+echo "      Note: environment must be defined to use this executable"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
@@ -65,6 +68,21 @@ echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 echo "-W - wait for cases to complete before returning"
 exit
+}
+
+function get_full_path {
+  filepath=$1
+
+  if [[ $filepath == /* ]]; then
+    full_filepath=$filepath
+  else
+    dir_filepath=$(dirname  "${filepath}")
+    filename_filepath=$(basename  "${filepath}")
+    curdir=`pwd`
+    cd $dir_filepath
+    full_filepath=`pwd`/$filename_filepath
+    cd $curdir
+  fi
 }
 
 wait_cases_end()
@@ -91,7 +109,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:dD:ghj:JL:m:o:q:r:RsS:w:W' OPTION
+while getopts 'bB:c:de:D:ghj:JL:m:o:q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
@@ -102,6 +120,9 @@ case $OPTION in
   d)
    DEBUG=_db
    SINGLE="1"
+   ;;
+  e)
+   EXE="$OPTARG"
    ;;
   g)
    BENCHMARK=
@@ -167,8 +188,13 @@ if [ "$POPT" != "" ]; then
   POPT="-O $POPT"
 fi
 
-export FDS=$SVNROOT/fds/Build/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export FDSMPI=$SVNROOT/fds/Build/${INTEL}mpi_intel_$PLATFORM$DEBUG/fds_${INTEL}mpi_intel_$PLATFORM$DEBUG
+if [ "$EXE" == "" ]; then
+  export FDSMPI=$SVNROOT/fds/Build/${INTEL}mpi_intel_$PLATFORM$DEBUG/fds_${INTEL}mpi_intel_$PLATFORM$DEBUG
+else
+  get_full_path $EXE
+  export FDSMPI=$full_filepath
+fi
+
 export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then
