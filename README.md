@@ -12,3 +12,5 @@ For more information, including a link to our discussion forum, please visit the
 Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/firebot_status.html).
 
 Pull requests welcome!
+
+Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/CONTRIBUTING.md) to the FDS project.
