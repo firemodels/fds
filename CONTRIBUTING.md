@@ -1,3 +1,7 @@
+## Introduction
+
+This page provides a starting point for getting involved with the FDS and Smokeview project.  Both novice and experienced developers are also encouraged to review our [Developer Commit Guidelines](https://github.com/firemodels/fds/wiki/Developer-Commit-Guidelines) for details about source code conventions, etc.
+
 ## How Can I Best Contribute to FDS?
 
 Historically, FDS development has been the result of the efforts of a small number of people.  With the move towards web based tools for version control and user support, it has become much easier for outside parties to have an opportunity to contribute to FDS.  We, the developers, recognize that this path is a bit of a tightrope.  We never had as much time and resources as we would like for development and user support, so the aid of the user community could be a great benefit.  On the other side is the historical recognition that very few people and organizations are willing or able to work within the existing framework to make a long term concerted effort towards development.  The result is incomplete algorithms which are not validated, too limited in their application, unworkable within the overall FDS framework, or unmaintainable by the core development team. As a result, these efforts never make their way into FDS.  This is of course a frustration both to the developers and to the organization/individual that expended the effort.  The goal of this document is to discuss ways in which interested users can make contributions to the development of FDS that are of lasting value.
