@@ -945,7 +945,6 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   END SELECT
 
                CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
-
                   SELECT CASE(IOR)
                      CASE( 1); KDTDX(II,JJ,KK)   = -SF%NET_HEAT_FLUX*WC%ONE_D%AREA_ADJUST
                      CASE(-1); KDTDX(II-1,JJ,KK) =  SF%NET_HEAT_FLUX*WC%ONE_D%AREA_ADJUST
@@ -984,11 +983,11 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX=IW)
                         HTC = WC%ONE_D%HEAT_TRANS_COEF
                         IF (RADIATION) THEN
-                           QEXTRA = WC%ONE_D%HEAT_TRANS_COEF*DTMP + WC%ONE_D%QRADIN - WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**4 - QNET
-                           FDERIV = -WC%ONE_D%HEAT_TRANS_COEF - 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**3
+                           QEXTRA = HTC*DTMP + WC%ONE_D%QRADIN - WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**4 - QNET
+                           FDERIV = -HTC - 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**3
                         ELSE
-                           QEXTRA = WC%ONE_D%HEAT_TRANS_COEF*DTMP - QNET
-                           FDERIV = -WC%ONE_D%HEAT_TRANS_COEF
+                           QEXTRA = HTC*DTMP - QNET
+                           FDERIV = -HTC
                         ENDIF
                         IF (ABS(FDERIV) > TWO_EPSILON_EB) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
                         IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 1.E-4_EB .OR. ADCOUNT > 20) THEN
