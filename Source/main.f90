@@ -242,7 +242,7 @@ IF (GLMAT_SOLVER) THEN
    CALL STOP_CHECK(1)
    CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
    CALL GLMAT_SOLVER_SETUP_H(2)
-   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,) -> HS.
+   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS.
    CALL GLMAT_SOLVER_SETUP_H(3)
 ENDIF
 

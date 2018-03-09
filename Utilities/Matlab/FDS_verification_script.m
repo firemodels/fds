@@ -88,6 +88,7 @@ disp('fan_curve...');                     fan_curve
 disp('mesh_transformation...');           mesh_transformation
 disp('synthetic_eddy_method...');         synthetic_eddy_method
 disp('shunn_mms_error...');               shunn_mms_error
+disp('shunn_cc_mms_error...');            shunn_cc_mms_error
 disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('rms_cov_corr...');                  rms_cov_corr
 disp('hot_layer_collapse...');            hot_layer_collapse

@@ -3356,9 +3356,9 @@ CALL VD2D_MMS_INIT
 ! initialize flow fields
 
 CALL POINT_TO_MESH(NM)
-U = UF_MMS
+U = UF_MMS; US = UF_MMS
 V = 0._EB
-W = WF_MMS
+W = WF_MMS; WS = WF_MMS
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
