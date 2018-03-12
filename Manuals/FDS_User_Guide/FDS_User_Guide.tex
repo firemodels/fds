@@ -6917,6 +6917,8 @@ specified instead.
 {\ct SIN}                       & The sine of the {\ct INPUT} \\ \hline
 {\ct ACOS}                       & The arccosine of the {\ct INPUT} \\ \hline
 {\ct ASIN}                       & The arcsine of the {\ct INPUT} \\ \hline
+{\ct MAX}                        & Maximum value of the {\ct INPUT}s \\ \hline
+{\ct MIN}                        & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control function \\ \hline
 \end{tabular}
 \end{center}
@@ -7046,7 +7048,7 @@ Experiment with these combinations using a simple case before trying a case to m
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
 
-The control functions that perform simple math operations ({\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, and  {\ct POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Section~\ref{info:basic_control} for an explanation of {\ct TRIP\_DIRECTION}).
+The control functions that perform simple math operations ({\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, {\ct POWER}, etc.) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Section~\ref{info:basic_control} for an explanation of {\ct TRIP\_DIRECTION}).
 
 \begin{lstlisting}
 &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
