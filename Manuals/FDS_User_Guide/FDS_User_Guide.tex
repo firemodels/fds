@@ -6399,6 +6399,19 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 \label{e_coef_fig}
 \end{figure}
 
+\section{Special Topic: Particle verification test features}
+\label{info:part-verification}
+
+\subsection{Recycling or periodic particles}
+\label{info:periodic-particles}
+
+If periodic boundaries are being used, the particles by default will cease to exist when passing through a periodic boundary. Setting {\ct PERIODIC\_X=.TRUE.} on the {\ct PART} line will allow particles to pass through one side of the domain and emerge from the other in the $x$ direction. {\ct PERIODIC\_Y=.TRUE.} and {\ct PERIODIC\_Z=.TRUE.} allow the same for the $y$ and $z$ directions, respectively.
+
+\subsection{Extra precision in {\ct .PRT} files}
+\label{info:eb-part-file}
+
+Setting {\ct EB\_PART\_FILE=.TRUE.} on the {\ct DUMP} line will change the {\ct .PRT} file to use 8-byte precision instead of 4-byte (the default). Smokeview will not run with 8-byte {\ct .PRT} files. The higher precision is necessary for verification testing of particles. The {\ct .PRT} files can be read in Matlab with the {\ct read\_prt5.m} script in the {\ct Utilities/Matlab/scripts/} directory of the FDS project.
+
 
 
 
@@ -6911,14 +6924,14 @@ specified instead.
 {\ct MULTIPLY}                    & Multiplies the outputs of the {\ct INPUT}s \\ \hline
 {\ct DIVIDE}                      & Divides the first {\ct INPUT} by the second \\ \hline
 {\ct POWER}                       & The first {\ct INPUT} to the power of the second \\ \hline
-{\ct EXP}                       & The exponential of the {\ct INPUT} \\ \hline
-{\ct LOG}                       & The natural logarithm of the {\ct INPUT} \\ \hline
-{\ct COS}                       & The cosine of the {\ct INPUT} \\ \hline
-{\ct SIN}                       & The sine of the {\ct INPUT} \\ \hline
-{\ct ACOS}                       & The arccosine of the {\ct INPUT} \\ \hline
-{\ct ASIN}                       & The arcsine of the {\ct INPUT} \\ \hline
-{\ct MAX}                        & Maximum value of the {\ct INPUT}s \\ \hline
-{\ct MIN}                        & Minimum value of the {\ct INPUT}s \\ \hline
+{\ct EXP}                         & The exponential of the {\ct INPUT} \\ \hline
+{\ct LOG}                         & The natural logarithm of the {\ct INPUT} \\ \hline
+{\ct COS}                         & The cosine of the {\ct INPUT} \\ \hline
+{\ct SIN}                         & The sine of the {\ct INPUT} \\ \hline
+{\ct ACOS}                        & The arccosine of the {\ct INPUT} \\ \hline
+{\ct ASIN}                        & The arcsine of the {\ct INPUT} \\ \hline
+{\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
+{\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control function \\ \hline
 \end{tabular}
 \end{center}
@@ -9021,7 +9034,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{info:eb-part-file}        &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 1000000                        \\ \hline
@@ -9578,6 +9591,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MONODISPERSE}                       & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 6             \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct PERIODIC\_X}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
+{\ct PERIODIC\_Y}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
+{\ct PERIODIC\_Z}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array      & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real            & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct PROP\_ID}                           & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
