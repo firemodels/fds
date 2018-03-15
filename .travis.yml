@@ -14,4 +14,3 @@ script:
   - export PATH=/opt/openmpi-3.0.0/bin:$PATH
   - cd Build/mpi_gnu_linux_64
   - ./make_fds.sh
-  - ./fds_mpi_gnu_linux_64
