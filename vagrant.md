@@ -16,23 +16,36 @@ The Vagrantfile is meant to be committed to version control with your project, i
 ## Install Vagrant 
 
 
-1. [Download Vagrant](https://www.vagrantup.com/downloads.html)
-2. Verify installation
+- [Download Vagrant]
+(https://www.vagrantup.com/downloads.html)
+    - Please download the proper package for your operating system and architecture. 
+- Verify installation
 
-
-        $ vagrant --version
-        Vagrant 1.9.8
+```bash
+$ vagrant --version
+Vagrant 1.9.8
+```
 
 
 ## Spin up Vagrant box running Ubuntu 14.04.5 LTS (Trusty Tar)
 
     $ vagrant up
 
-When the box is up and running, we connect to Vagrant machine via SSH
+## Connect to Vagrant box
 
     $ vagrant ssh
 
+## Run FDS on host
 
+    $ ./Build/mpi_gnu_linux_64/fds_mpi_gnu_linux_64 case.fds 
+
+
+
+## Connect to Vagrant machine
+
+When the box is up and running, we connect to Vagrant machine via SSH
+
+    $ vagrant ssh
 
     $ lsb_release -a
     No LSB modules are available.
@@ -363,7 +376,7 @@ Use `ldd` tool to print shared libraries dependencies.
         libquadmath.so.0 => /usr/lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007f8aaebdc000)
         /lib64/ld-linux-x86-64.so.2 (0x00007f8ab0530000)
 
-Given the dependency of `libgfortran.so.4` a user might install package `libgfortran`.
+Given the dependency of `libgfortran.so.4` a potential end user might install apt package `libgfortran4` to provide a .
 
     gottfried@gottfried-SVE14A2X1EH:~/repos/fds/Build/mpi_gnu_linux_64$ sudo apt-get install gfortran
     ...   
@@ -381,6 +394,10 @@ Given the dependency of `libgfortran.so.4` a user might install package `libgfor
     update-alternatives: using /usr/bin/gfortran to provide /usr/bin/f95 (f95) in auto mode
     update-alternatives: using /usr/bin/gfortran to provide /usr/bin/f77 (f77) in auto mode
 
+
+Since default [Runtime library for GNU Fortran applications](https://packages.ubuntu.com/trusty/libgfortran3) on Ubuntu 14.04 is `libgfortran3` an installation of `libgfortran4` is required to run the a self-compiled version of `FDS`.
+
+    $ sudo apt-get install libgfortran4
 
 ## Deploy FDS/MPI to clusters
 
