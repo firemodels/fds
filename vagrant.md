@@ -72,6 +72,20 @@ Run FDS in your home directory
 
     $ /vagrant/Build/mpi_gnu_linux_64/fds_mpi_gnu_linux_64 case.fds 
 
+
+## Teardown Vagrant box
+
+How do we clean up our devlopment environment? This will remove all traces of the virtual machine from your system.
+
+    $ vagrant destroy
+
+Or if something goes wrong, just teardown your box and start from scratch with
+
+    $ vagrant destroy
+    $ vagrant up
+
+More help on commands to suspend, halt or destroy Vagrant boxes is available on [Vagrant Docs](https://vagrantup.com/intro/getting-started/teardown.html)     
+
 ## Support for `GLMAT` pressure solver
 
 To use `GLMAT` pressure solver in your models FDS must be compiled with Intel MKL library. Support for automated setup of Intel MKL in this build environment was added just recently.
@@ -90,8 +104,54 @@ Inside Vagrant box
     $ rm -rf *.mod *.o
     $ ./make_fds.sh
 
-
 >It is possible that you need to delete existing `.mod` and `.o` files in build directory compiled without linking to MKL library.
+
+Verify working Intel MKL environment
+
+> watch out for `DWITH_MKL` flags in compiler and linker commands
+
+```bash
+vagrant@vagrant:/vagrant/Build/mpi_gnu_linux_64$ ./make_fds.sh 
+Building mpi_gnu_linux_64
+mpifort -m64 -O2 -ffpe-summary=none -cpp -DGITHASH_PP=\"FDS6.6.0-1082-gc728915-master\" -DGITDATE_PP=\""Thu Mar 15 16:33:47 2018 +0100\"" -DBUILDDATE_PP=\""Mar 15, 2018  16:56:09\"" -DCOMPVER_PP=\"unknown\" -DWITH_MKL -I/opt/intel/compilers_and_libraries_2017.5.239/linux/mkl/include -fopenmp -o fds_mpi_gnu_linux_64 prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o read.o wall.o fire.o divg.o velo.o pres.o init.o main.o -Wl,--start-group /opt/intel/compilers_and_libraries_2017.5.239/linux/mkl/lib/intel64/libmkl_gf_lp64.a /opt/intel/compilers_and_libraries_2017.5.239/linux/mkl/lib/intel64/libmkl_gnu_thread.a /opt/intel/compilers_and_libraries_2017.5.239/linux/mkl/lib/intel64/libmkl_core.a /opt/intel/compilers_and_libraries_2017.5.239/linux/mkl/lib/intel64/libmkl_blacs_openmpi_lp64.a -Wl,--end-group -lgomp -lpthread -lm -ldl
+
+``` 
+
+
+
+
+Run FDS case with GLMAT solver
+
+```bash
+$ /vagrant/Build/mpi_gnu_linux_64/fds_mpi_gnu_linux_64 /vagrant/Verification/Pressure_Solver/simple_glmat.fds 
+  
+ Using GLMAT as pressure solver. List of H unknown numbers per proc:
+ MYID=       0, NUNKH_LOCAL=    2100
+
+ Fire Dynamics Simulator
+
+ Current Date     : March 15, 2018  16:57:47
+ Revision         : FDS6.6.0-1079-g91c42d3-master
+ Revision Date    : Wed Feb 14 16:02:36 2018 +0100
+ Compiler         : unknown
+ Compilation Date : Mar 15, 2018  14:43:09
+
+ MPI Enabled;    Number of MPI Processes:       1
+ OpenMP Enabled; Number of OpenMP Threads:      4
+
+ MPI version: 3.1
+ MPI library version: Open MPI v3.0.0, package: Open MPI root@vagrant Distribution, ident: 3.0.0, repo rev: v3.0.0, Sep 12, 2017
+
+ Job TITLE        : Compart_Test
+ Job ID string    : glmat
+
+ Time Step:      1, Simulation Time:      0.16 s
+ Time Step:      2, Simulation Time:      0.32 s
+ Time Step:      3, Simulation Time:      0.47 s
+ Time Step:      4, Simulation Time:      0.63 s
+ Time Step:      5, Simulation Time:      0.79 s
+```
+
 
 
  
