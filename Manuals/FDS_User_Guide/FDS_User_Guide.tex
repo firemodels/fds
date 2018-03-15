@@ -1995,6 +1995,8 @@ For additional information related to periodic boundaries and the pressure solve
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
+Note that, by default, particles are not recycled at periodic boundaries.  See Section~\ref{info:periodic-particles} if periodic particles are desired.
+
 \subsubsection{Circular Vents}
 \label{sec:circvents}
 \label{circular_burner}
@@ -2233,7 +2235,7 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \begin{figure}[h!]
 \centering
 
-\resizebox{0.6\textwidth}{!}{
+\resizebox{0.5\textwidth}{!}{
 
 \begin{picture}(345,320)(0,0)
 \setlength{\unitlength}{0.015in}
@@ -2328,7 +2330,7 @@ An example of a sphere is given below.  By default, the center of the sphere is 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_sphere}
+\includegraphics[width=.7\textwidth,trim={0 0.5in 0 0.5in},clip]{SCRIPT_FIGURES/obst_sphere}
 \caption[Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_sphere}
 \end{figure}
@@ -2350,7 +2352,7 @@ To create a cylinder we need a height and orientation in addition to the radius.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cylinder}
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cylinder}
 \caption[Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_cylinder}
 \end{figure}
@@ -2372,7 +2374,7 @@ A cone needs basically the same input parameters as a cylinder.  The position of
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cone}
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cone}
 \caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_cone}
 \end{figure}
@@ -5991,7 +5993,10 @@ By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to p
 
 For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
 
+\subsubsection{Particles with Periodic Boundary Conditions}
+\label{info:periodic-particles}
 
+By default, particles are not recycled at a periodic boundary. To recycle the particles in the $x$-direction, set {\ct PERIODIC\_X=.TRUE.} on the {\ct PART} line. Set {\ct PERIODIC\_Y=.TRUE.} and {\ct PERIODIC\_Z=.TRUE.} for the $y$- and $z$-directions, respectively.
 
 
 \subsection{Drag}
@@ -6372,8 +6377,6 @@ A useful sample case to demonstrate various features of droplet motion on solid 
 \end{figure}
 
 
-
-
 \subsection{Reduction of the Burning Rate}
 \label{e_coefficient}
 
@@ -6398,21 +6401,6 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 \caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
 \label{e_coef_fig}
 \end{figure}
-
-\section{Special Topic: Particle verification test features}
-\label{info:part-verification}
-
-\subsection{Recycling or periodic particles}
-\label{info:periodic-particles}
-
-If periodic boundaries are being used, the particles by default will cease to exist when passing through a periodic boundary. Setting {\ct PERIODIC\_X=.TRUE.} on the {\ct PART} line will allow particles to pass through one side of the domain and emerge from the other in the $x$ direction. {\ct PERIODIC\_Y=.TRUE.} and {\ct PERIODIC\_Z=.TRUE.} allow the same for the $y$ and $z$ directions, respectively.
-
-\subsection{Extra precision in {\ct .PRT} files}
-\label{info:eb-part-file}
-
-Setting {\ct EB\_PART\_FILE=.TRUE.} on the {\ct DUMP} line will change the {\ct .PRT} file to use 8-byte precision instead of 4-byte (the default). Smokeview will not run with 8-byte {\ct .PRT} files. The higher precision is necessary for verification testing of particles. The {\ct .PRT} files can be read in Matlab with the {\ct read\_prt5.m} script in the {\ct Utilities/Matlab/scripts/} directory of the FDS project.
-
-
 
 
 
@@ -9035,7 +9023,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{info:eb-part-file}        &           & {\ct .FALSE.}                  \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 1000000                        \\ \hline
@@ -10558,7 +10546,7 @@ Endian-ness of the file. The Endian-ness has to do with the particular way real 
 The version number is used to distinguish new versus old file formats.
 The parameter {\ct N\_PART} is not the number of particles, but rather the number of
 particle classes corresponding to the {\ct PART} namelist groups in the input file.
-Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals:
+Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals (by default):
 
 \begin{lstlisting}
 WRITE(LUPF) REAL(T,FB)  ! Write out the time T as a 4 byte real
@@ -10573,6 +10561,10 @@ The particle ``tag'' is used by Smokeview to keep track of individual particles 
 streamlines. It is also useful when parsing the file. The quantity data, {\ct QP(I,NN)}, is used by Smokeview to color
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
 several different quantities.
+
+\subsubsection*{Increased Precision of Particle File}
+
+Note that if {\ct EB\_PART\_FILE=.TRUE.} is set on the {\ct DUMP} line then the {\ct .prt} file will be written with 8 byte reals instead of 4 byte reals.  This may be useful for development of verification cases, but it renders the {\ct .prt} files unreadable by Smokeview.
 
 \section{Profile Files}
 \label{out:PROF}
