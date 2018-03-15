@@ -1,6 +1,6 @@
 # FDS-SMV Discussion Group Policy Statement
 
-This Discussion Group and associated pages have been created to enable open scientific and technical communication. While this group was established and is managed by the development team at NIST, we intend for this to be an open forum for multi-directional communication between all involved in the community, and not just between users and developers.  NIST participants will reply when it is appropriate for them to do so, and may limit their participation in some topics when it is not.  For example, NIST will not provide advice or comment on any matter that is or may be the subject of a legal proceeding. 
+The [FDS and Smokeview (FDS-SMV) Discussion Group](https://groups.google.com/forum/?fromgroups#!forum/fds-smv) and associated pages, such as the GitHub [Issues] page, have been created to enable open scientific and technical communication. While this group was established and is managed by the development team at NIST, we intend for this to be an open forum for multi-directional communication between all involved in the community, and not just between users and developers.  NIST participants will reply when it is appropriate for them to do so, and may limit their participation in some topics when it is not.  For example, NIST will not provide advice or comment on any matter that is or may be the subject of a legal proceeding. 
 
 To further these objectives, the Discussion Group operates according to the following policies:
 
