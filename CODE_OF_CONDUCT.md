@@ -1,6 +1,6 @@
 # FDS-SMV Discussion Group Policy Statement
 
-This Discussion Group and associated pages have been created to enable open scientific and technical communication. While this group was established and is managed by the development team at NIST, we intend for this to be an open forum for multi-directional communication between all involved in the community, and not just between users and developers.  NIST participants will reply when it is appropriate for them to do so, and may limit their participation in some topics when it is not.  For example, NIST will not provide advice or comment on any matter that is or may be the subject of a legal proceeding. 
+The [FDS and Smokeview (FDS-SMV) Discussion Group](https://groups.google.com/forum/?fromgroups#!forum/fds-smv) and associated pages, such as [Issues](https://github.com/firemodels/fds/issues), have been created to enable open scientific and technical communication. While this group was established and is managed by the development team at NIST, we intend for this to be an open forum for multi-directional communication between all involved in the community, and not just between users and developers.  NIST participants will reply when it is appropriate for them to do so, and may limit their participation in some topics when it is not.  For example, NIST will not provide advice or comment on any matter that is or may be the subject of a legal proceeding. 
 
 To further these objectives, the Discussion Group operates according to the following policies:
 
@@ -20,3 +20,5 @@ Employees at the National Institute of Standards and Technology and the VTT Tech
 ## Discussion Group Posts
 
 Posts from registered members are unmoderated and published directly to the public forum. Posts are immediately emailed to all members who elect the email delivery option.  However, all posts are reviewed by FDS-SMV Group Managers and any post that violates the policies herein may be taken down without notice.  Participants must also comply with applicable policies, regulations, and laws of their own locality. Posts are expected to show respect and consideration to others. The Group Owners and Managers will delete posts which obviously infringe upon copyrights or which are clearly off-topic or not relevant to technical discussions such as Spam, personal attacks, political statements, religious statements, cursing or other foul language, pornographic information or statements based on race, age, creed, color, sex, handicap, or sexual orientation.  Information provided by a NIST employee is subject to applicable laws and policies.
+
+Discussion Group members are encouraged to read this article on [Effective Posting](https://github.com/firemodels/fds/wiki/Effective-Posting).

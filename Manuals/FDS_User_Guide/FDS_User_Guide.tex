@@ -1995,6 +1995,8 @@ For additional information related to periodic boundaries and the pressure solve
 
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
+Note that, by default, particles are not recycled at periodic boundaries.  See Section~\ref{info:periodic-particles} if periodic particles are desired.
+
 \subsubsection{Circular Vents}
 \label{sec:circvents}
 \label{circular_burner}
@@ -2233,7 +2235,7 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \begin{figure}[h!]
 \centering
 
-\resizebox{0.6\textwidth}{!}{
+\resizebox{0.5\textwidth}{!}{
 
 \begin{picture}(345,320)(0,0)
 \setlength{\unitlength}{0.015in}
@@ -2328,7 +2330,7 @@ An example of a sphere is given below.  By default, the center of the sphere is 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_sphere}
+\includegraphics[width=.7\textwidth,trim={0 0.5in 0 0.5in},clip]{SCRIPT_FIGURES/obst_sphere}
 \caption[Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} sphere using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_sphere}
 \end{figure}
@@ -2350,7 +2352,7 @@ To create a cylinder we need a height and orientation in addition to the radius.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cylinder}
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cylinder}
 \caption[Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cylinder using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_cylinder}
 \end{figure}
@@ -2372,7 +2374,7 @@ A cone needs basically the same input parameters as a cylinder.  The position of
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.75\textwidth,trim={0 1in 0 1in},clip]{SCRIPT_FIGURES/obst_cone}
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cone}
 \caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_cone}
 \end{figure}
@@ -4097,7 +4099,7 @@ The local leakage approach is intended to represent leakage through a specific c
 \end{lstlisting}
 This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}.
 
-Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add add {\ct LEAK\_ENTHALPY=.TRUE.} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=.FALSE.}
+Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=.TRUE.} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=.FALSE.}
 
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
@@ -5312,7 +5314,7 @@ Notice in this reaction scheme that a {\ct CRITICAL\_FLAME\_TEMPERATURE} is appl
 \label{info:multi-reac}
 \label{energy_budget_adiabatic_two_fuels}
 
-There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
+There may be times when your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
 1\,\underbrace{\mathrm{(C_{25}H_{42}O_{6}N_{2})}}_\text{Fuel} + 27.234364\,\underbrace{\mathrm{(O_2 + 3.76 \; N_2})}_\text{Air} \longrightarrow \\
 1\,\underbrace{\mathrm{(19.791134\; CO_2 + 0.166587 \; CO + 20.719873 \; H_2O + 5.602533\; C_{0.9}H_{0.1} + 103.40121 \; N_2)}}_\text{Products\_1}
@@ -5849,7 +5851,7 @@ Note that FDS will adjust the liquid enthalpy so that the following relationship
 \label{info:fuel_droplets}
 \label{spray_burner}
 
-If the liquid droplets burn, the {\ct SPEC\_ID} on the {\ct PART} line should designate the {\ct FUEL} on the {\ct REAC} line. Depending on the combustion model, you may not need to create a separate {\ct SPEC} line. Fuel droplets will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line. The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}. The {\ct HEAT\_OF\_COMBUSTION} can be specified on the {\ct PART} line, or the {\ct REAC} line, or it will be calculated automatically by FDS. If it is specified on the {\ct PART} line, the burning rate will be adjusted to account for the difference between the heats of combustion of this particular droplet and the other fuels in the model. If the you let FDS calculate the heat of combustion automatically, run the model for a few time steps and look for the ``Heat of Combustion'' listed in the {\ct CHID.out} file. Use this value to specify the flow rate from the nozzle to achieve your desired heat release rate.
+If the liquid droplets burn, the {\ct SPEC\_ID} on the {\ct PART} line should designate the {\ct FUEL} on the {\ct REAC} line. Depending on the combustion model, you may not need to create a separate {\ct SPEC} line. Fuel droplets will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line. The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}. The {\ct HEAT\_OF\_COMBUSTION} can be specified on the {\ct PART} line, or the {\ct REAC} line, or it will be calculated automatically by FDS. If it is specified on the {\ct PART} line, the burning rate will be adjusted to account for the difference between the heats of combustion of this particular droplet and the other fuels in the model. If you let FDS calculate the heat of combustion automatically, run the model for a few time steps and look for the ``Heat of Combustion'' listed in the {\ct CHID.out} file. Use this value to specify the flow rate from the nozzle to achieve your desired heat release rate.
 
 If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Table~\ref{tab:gasspecies} and the column labelled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
 
@@ -5991,7 +5993,10 @@ By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to p
 
 For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
 
+\subsubsection{Particles with Periodic Boundary Conditions}
+\label{info:periodic-particles}
 
+By default, particles are not recycled at a periodic boundary. To recycle the particles in the $x$-direction, set {\ct PERIODIC\_X=.TRUE.} on the {\ct PART} line. Set {\ct PERIODIC\_Y=.TRUE.} and {\ct PERIODIC\_Z=.TRUE.} for the $y$- and $z$-directions, respectively.
 
 
 \subsection{Drag}
@@ -6372,8 +6377,6 @@ A useful sample case to demonstrate various features of droplet motion on solid 
 \end{figure}
 
 
-
-
 \subsection{Reduction of the Burning Rate}
 \label{e_coefficient}
 
@@ -6398,8 +6401,6 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 \caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
 \label{e_coef_fig}
 \end{figure}
-
-
 
 
 
@@ -6911,12 +6912,14 @@ specified instead.
 {\ct MULTIPLY}                    & Multiplies the outputs of the {\ct INPUT}s \\ \hline
 {\ct DIVIDE}                      & Divides the first {\ct INPUT} by the second \\ \hline
 {\ct POWER}                       & The first {\ct INPUT} to the power of the second \\ \hline
-{\ct EXP}                       & The exponential of the {\ct INPUT} \\ \hline
-{\ct LOG}                       & The natural logarithm of the {\ct INPUT} \\ \hline
-{\ct COS}                       & The cosine of the {\ct INPUT} \\ \hline
-{\ct SIN}                       & The sine of the {\ct INPUT} \\ \hline
-{\ct ACOS}                       & The arccosine of the {\ct INPUT} \\ \hline
-{\ct ASIN}                       & The arcsine of the {\ct INPUT} \\ \hline
+{\ct EXP}                         & The exponential of the {\ct INPUT} \\ \hline
+{\ct LOG}                         & The natural logarithm of the {\ct INPUT} \\ \hline
+{\ct COS}                         & The cosine of the {\ct INPUT} \\ \hline
+{\ct SIN}                         & The sine of the {\ct INPUT} \\ \hline
+{\ct ACOS}                        & The arccosine of the {\ct INPUT} \\ \hline
+{\ct ASIN}                        & The arcsine of the {\ct INPUT} \\ \hline
+{\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
+{\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control function \\ \hline
 \end{tabular}
 \end{center}
@@ -7046,7 +7049,7 @@ Experiment with these combinations using a simple case before trying a case to m
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
 
-The control functions that perform simple math operations ({\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, and  {\ct POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Section~\ref{info:basic_control} for an explanation of {\ct TRIP\_DIRECTION}).
+The control functions that perform simple math operations ({\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, {\ct POWER}, etc.) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Section~\ref{info:basic_control} for an explanation of {\ct TRIP\_DIRECTION}).
 
 \begin{lstlisting}
 &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
@@ -8639,16 +8642,17 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
 {\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
-{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
+{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
 {\ct CELL INDEX K}                              & Mesh cell index in z                              &                & D,S          \\ \hline
 {\ct CELL REYNOLDS NUMBER}                      & Section \ref{info:meshquality}                    &                & D,I,P,S      \\ \hline
-{\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
-{\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
-{\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
+{\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,P,S      \\ \hline
+{\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,P,S      \\ \hline
+{\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,P,S      \\ \hline
 {\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
@@ -8684,7 +8688,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                    &                & D            \\ \hline
+{\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -9019,7 +9023,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 1000000                        \\ \hline
@@ -9576,6 +9580,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MONODISPERSE}                       & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 6             \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct PERIODIC\_X}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
+{\ct PERIODIC\_Y}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
+{\ct PERIODIC\_Z}                        & Logical         & Section~\ref{info:periodic-particles}   &           & {\ct .FALSE.} \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array      & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real            & Section~\ref{info:porous_media}         &           &               \\ \hline
 {\ct PROP\_ID}                           & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
@@ -10539,7 +10546,7 @@ Endian-ness of the file. The Endian-ness has to do with the particular way real 
 The version number is used to distinguish new versus old file formats.
 The parameter {\ct N\_PART} is not the number of particles, but rather the number of
 particle classes corresponding to the {\ct PART} namelist groups in the input file.
-Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals:
+Every {\ct DT\_PART} seconds the coordinates of the particles and droplets are output as 4 byte reals (by default):
 
 \begin{lstlisting}
 WRITE(LUPF) REAL(T,FB)  ! Write out the time T as a 4 byte real
@@ -10554,6 +10561,10 @@ The particle ``tag'' is used by Smokeview to keep track of individual particles 
 streamlines. It is also useful when parsing the file. The quantity data, {\ct QP(I,NN)}, is used by Smokeview to color
 the particles and droplets. Note that it is now possible with the new format to color the particles and droplets with
 several different quantities.
+
+\subsubsection*{Increased Precision of Particle File}
+
+Note that if {\ct EB\_PART\_FILE=.TRUE.} is set on the {\ct DUMP} line then the {\ct .prt} file will be written with 8 byte reals instead of 4 byte reals.  This may be useful for development of verification cases, but it renders the {\ct .prt} files unreadable by Smokeview.
 
 \section{Profile Files}
 \label{out:PROF}
