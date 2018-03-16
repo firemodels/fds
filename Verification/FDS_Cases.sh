@@ -2,10 +2,12 @@
 
 # add -A to any case that you wish to be a part of the benchmark timing suite
 
+$QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
+
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
-
+$QFDS -p 8 -d Atmospheric_Effects wind_example.fds
 
 $QFDS -d Complex_Geometry geom_simple.fds
 $QFDS -d Complex_Geometry geom_azim.fds
@@ -14,16 +16,16 @@ $QFDS -d Complex_Geometry geom_scale.fds
 $QFDS -d Complex_Geometry geom_obst.fds
 $QFDS -d Complex_Geometry geom_sphere1a.fds
 $QFDS -d Complex_Geometry geom_sphere1c.fds
-$QFDS -d Complex_Geometry geom_sphere1e.fds  
-$QFDS -d Complex_Geometry geom_sphere2.fds   
-$QFDS -d Complex_Geometry geom_sphere3b.fds  
-$QFDS -d Complex_Geometry geom_sphere3d.fds  
+$QFDS -d Complex_Geometry geom_sphere1e.fds
+$QFDS -d Complex_Geometry geom_sphere2.fds
+$QFDS -d Complex_Geometry geom_sphere3b.fds
+$QFDS -d Complex_Geometry geom_sphere3d.fds
 $QFDS -d Complex_Geometry geom_sphere3f.fds
-$QFDS -d Complex_Geometry geom_sphere1b.fds  
-$QFDS -d Complex_Geometry geom_sphere1d.fds  
-$QFDS -d Complex_Geometry geom_sphere1f.fds  
-$QFDS -d Complex_Geometry geom_sphere3a.fds  
-$QFDS -d Complex_Geometry geom_sphere3c.fds  
+$QFDS -d Complex_Geometry geom_sphere1b.fds
+$QFDS -d Complex_Geometry geom_sphere1d.fds
+$QFDS -d Complex_Geometry geom_sphere1f.fds
+$QFDS -d Complex_Geometry geom_sphere3a.fds
+$QFDS -d Complex_Geometry geom_sphere3c.fds
 $QFDS -d Complex_Geometry geom_sphere3e.fds
 $QFDS -d Complex_Geometry geom_terrain.fds
 $QFDS -d Complex_Geometry geom_texture.fds
@@ -33,7 +35,6 @@ $QFDS -d Complex_Geometry geom_texture3b.fds
 $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
 $QFDS -d Complex_Geometry geom_arch.fds
-
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
@@ -43,31 +44,26 @@ $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
 $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p0625.fds
-
 $QFDS -d Complex_Geometry shunn3_32_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_cen.fds
-
 $QFDS -d Complex_Geometry shunn3_32_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
-
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_cen.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_cen.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_cen.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_cen.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_cen.fds
-
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
 $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
-
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
@@ -94,6 +90,7 @@ $QFDS -d Energy_Budget energy_budget_solid.fds
 
 #$QFDS -d Evacuation evac_smv_testcase0.fds
 #$QFDS -d Evacuation evac_smv_testcase2.fds
+#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
 
 $QFDS -d Extinction extinction.fds
 
@@ -112,6 +109,7 @@ $QFDS -d Fires tmp_lower_limit_simple.fds
 $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
 $QFDS -d Fires fire_const_gamma.fds
+$QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
@@ -150,6 +148,11 @@ $QFDS -d Flowfields realizable_mass_fractions.fds
 $QFDS -d Flowfields mean_forcing_hole.fds
 $QFDS -d Flowfields mass_flux_wall_yindex.fds
 $QFDS -d Flowfields mass_flux_wall_zindex.fds
+$QFDS -p 4 -d Flowfields parabolic_profile.fds
+$QFDS -p 5 -d Flowfields simple_duct.fds
+$QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
+$QFDS -p 8 -d Flowfields volume_flow_1.fds
+$QFDS -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
@@ -193,6 +196,7 @@ $QFDS -d Heat_Transfer ht3d_sphere_25.fds
 $QFDS -d Heat_Transfer ht3d_sphere_51.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
+$QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -251,8 +255,17 @@ $QFDS -d Pressure_Effects pressure_boundary.fds
 $QFDS -d Pressure_Effects pressure_rise.fds
 $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
+$QFDS -p 2 -d Pressure_Effects zone_shape.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
+$QFDS -p 5 -d Pressure_Solver hallways.fds
+$QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -499,7 +512,6 @@ $QFDS -d Scalar_Analytical_Solution pulsating_FL4_16.fds
 $QFDS -d Scalar_Analytical_Solution pulsating_FL4_32.fds
 $QFDS -d Scalar_Analytical_Solution pulsating_FL4_64.fds
 $QFDS -d Scalar_Analytical_Solution pulsating_FL4_128.fds
-
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL0_16.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL0_32.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL0_64.fds
@@ -516,27 +528,28 @@ $QFDS -d Scalar_Analytical_Solution compression_wave_FL5_16.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL5_32.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL5_64.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL5_128.fds
-
 $QFDS -d Scalar_Analytical_Solution move_slug.fds
 $QFDS -d Scalar_Analytical_Solution move_slug_fl1.fds
-
 $QFDS -d Scalar_Analytical_Solution shunn3_32.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_64.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_128.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_512.fds
-
 $QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_1.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p5.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p0625.fds
-
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_1.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p5.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
 
 $QFDS -o 1 -d Thread_Check race_test_1.fds
 $QFDS -o 4 -d Thread_Check race_test_4.fds
@@ -558,10 +571,6 @@ $QFDS -d Turbulence wale_64.fds
 $QFDS -d Turbulence yplus_8.fds
 $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
-# $QFDS -d Turbulence heated_channel_Pr_0p10_32.fds
-# $QFDS -d Turbulence heated_channel_Pr_0p71_32.fds
-# $QFDS -d Turbulence heated_channel_Pr_1p00_32.fds
-# $QFDS -d Turbulence heated_channel_Pr_2p00_32.fds
 $QFDS -d Turbulence ribbed_channel_20.fds
 $QFDS -d Turbulence ribbed_channel_40.fds
 $QFDS -d Turbulence ribbed_channel_80.fds
@@ -585,39 +594,6 @@ $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 $QFDS -d WUI vegetation_drag_1.fds
 $QFDS -d WUI vegetation_drag_2.fds
-
-$QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
-
-$QFDS -p 8 -d Atmospheric_Effects wind_example.fds
-
-#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
-
-$QFDS -p 8 -d Fires circular_burner.fds
-
-$QFDS -p 4 -d Flowfields parabolic_profile.fds
-$QFDS -p 5 -d Flowfields simple_duct.fds
-$QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
-$QFDS -p 8 -d Flowfields volume_flow_1.fds
-$QFDS -p 8 -d Flowfields volume_flow_2.fds
-
-$QFDS -p 4 -d Heat_Transfer back_wall_test.fds
-
-$QFDS -p 2 -d Pressure_Effects zone_shape.fds
-
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
-$QFDS -p 5 -d Pressure_Solver hallways.fds
-$QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
-
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
 
 $QFDS -p 4 -d WRF wrf_time_ramp.fds
 $QFDS -p 4 -d WRF wrf_prof_ramp.fds
