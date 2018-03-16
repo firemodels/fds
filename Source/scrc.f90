@@ -34,18 +34,18 @@ PUBLIC SCARC_TIMINGS                           !> Call of time measurements for 
 !> Note: For input parameters in character format corresponding INTEGER type-parameters will
 !> Be introduced later to simplify inquiries
 !> ------------------------------------------------------------------------------------------------
-PUBLIC SCARC_METHOD                            !> Selected ScaRC method (Krylov/Multigrid/MKL)
-PUBLIC SCARC_DISCRETIZATION                    !> Selected ScaRC discretization type (structured/unstructured)
-PUBLIC SCARC_TWOLEVEL                          !> Predefined ScaRC case
+PUBLIC SCARC_METHOD                            !> ScaRC method 
+PUBLIC SCARC_DISCRETIZATION                    !> ScaRC discretization type 
+PUBLIC SCARC_TWOLEVEL                          !> Type of Twolevel-Krylov-method 
 
-PUBLIC SCARC_DEBUG                             !> Debug a lot of different stuff
-PUBLIC SCARC_VERBOSE                           !> Verbose convergence information
-PUBLIC SCARC_CSV                               !> Plot CSV-information about iteration parameters
+PUBLIC SCARC_DEBUG                             !> Level for plotting debug information 
+PUBLIC SCARC_VERBOSE                           !> Level for plotting verbose information 
+PUBLIC SCARC_CSV                               !> Level for plotting csv information 
 
 PUBLIC SCARC_RESIDUAL                          !> Residual of iterative solver
 PUBLIC SCARC_ITERATIONS                        !> Number of iterations
 PUBLIC SCARC_CAPPA                             !> Convergence rate
-PUBLIC SCARC_ACCURACY                          !> Chosen accuracy type (relative/absolute)
+PUBLIC SCARC_ACCURACY                          !> Chosen accuracy type 
 
 PUBLIC SCARC_KRYLOV                            !> Type of Krylov method
 PUBLIC SCARC_KRYLOV_ITERATIONS                 !> Maximum number of iterations for Krylov method
@@ -57,7 +57,7 @@ PUBLIC SCARC_MULTIGRID_LEVEL                   !> Multigrid level
 PUBLIC SCARC_MULTIGRID_ITERATIONS              !> Maximum number of iterations for multigrid method
 PUBLIC SCARC_MULTIGRID_INTERPOL                !> Interpolation method for multigrid (AMG only)
 PUBLIC SCARC_MULTIGRID_ACCURACY                !> Requested accuracy for multigrid method
-PUBLIC SCARC_MULTIGRID_CYCLE                   !> Type of multigrid cycle (V/W/F)
+PUBLIC SCARC_MULTIGRID_CYCLE                   !> Type of multigrid cycle 
 PUBLIC SCARC_MULTIGRID_COARSENING              !> Coarsening method for multigrid (AMG only)
 
 PUBLIC SCARC_SMOOTH                            !> Smoother for multigrid method
@@ -81,10 +81,8 @@ PUBLIC SCARC_COARSE_LEVEL                      !> Coarse grid level
 !> ------------------------------------------------------------------------------------------------
 !> General definitions
 CHARACTER(40) :: SCARC_METHOD   = 'KRYLOV'                  !> Requested solver method (KRYLOV/MULTIGRID)
-CHARACTER(40) :: SCARC_TWOLEVEL = 'NONE'                    !> Type of two-level method
-
-!> Type of discretization
-CHARACTER(40) :: SCARC_DISCRETIZATION   = 'STRUCTURED'      !> Discretization of whole domain or with OBSTs 
+CHARACTER(40) :: SCARC_TWOLEVEL = 'NONE'                    !> Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
+CHARACTER(40) :: SCARC_DISCRETIZATION   = 'STRUCTURED'      !> Type of discretization (STRUCTURED/UNSTRUCTURED)
 
 !> General iteration parameters
 INTEGER       :: SCARC_ITERATIONS           =  0            !> Number of iterations of selected ScaRC solver
@@ -99,13 +97,13 @@ CHARACTER(1)  :: SCARC_MULTIGRID_CYCLE      = 'V'           !> Cycling type  (F/
 INTEGER       :: SCARC_MULTIGRID_LEVEL      = -1            !> User defined number of MG-levels (optionally, otherwise maximum)
 INTEGER       :: SCARC_MULTIGRID_ITERATIONS = 100           !> Max number of iterations
 REAL (EB)     :: SCARC_MULTIGRID_ACCURACY   = 1.E-8_EB      !> Requested accuracy for convergence
-CHARACTER(40) :: SCARC_MULTIGRID_INTERPOL   = 'CONSTANT'    !> Interpolation strategy 
+CHARACTER(40) :: SCARC_MULTIGRID_INTERPOL   = 'CONSTANT'    !> Interpolation strategy (CONSTANT/BILINEAR)
 
 !> Parameters for Krylov-type methods
 CHARACTER(40) :: SCARC_KRYLOV            = 'CG'             !> Type of Krylov-method (CG/BICG)
 INTEGER       :: SCARC_KRYLOV_ITERATIONS = 500              !> Max number of iterations
 REAL (EB)     :: SCARC_KRYLOV_ACCURACY   = 1.E-8_EB         !> Requested accuracy for convergence
-CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'CONSTANT'       !> Interpolation type (only for two-level variants)
+CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'CONSTANT'       !> twolevel-interpolation (CONSTANT/BILINEAR)
 
 !> Parameters for smoothing method (used in multigrids-methods)
 CHARACTER(40) :: SCARC_SMOOTH            = 'SSOR'           !> Smoother for MG (JACOBI/SSOR)
@@ -120,7 +118,7 @@ REAL (EB)     :: SCARC_PRECON_ACCURACY   = 1.E-12_EB        !> Requested accurac
 REAL (EB)     :: SCARC_PRECON_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
 
 !> Parameters for coarse grid method
-CHARACTER(40) :: SCARC_COARSE            = 'DIRECT'         !> Coarse grid solver (iterative CG-solver/direct MKL-solver)
+CHARACTER(40) :: SCARC_COARSE            = 'ITERATIVE'      !> Type of coarse grid solver (ITERATIVE/DIRECT)
 INTEGER       :: SCARC_COARSE_ITERATIONS = 100              !> Max number of iterations for iterative solver
 REAL (EB)     :: SCARC_COARSE_ACCURACY   = 1.E-14_EB        !> Requested accuracy for iterative solver
 REAL (EB)     :: SCARC_COARSE_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
@@ -128,7 +126,7 @@ INTEGER       :: SCARC_COARSE_LEVEL      =  1               !> Coarse grid level
 
 !> Parameter for MKL solver
 CHARACTER(40) :: SCARC_MKL       = 'GLOBAL'                 !> Type of MKL solver (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_solver)
-CHARACTER(40) :: SCARC_MKL_MTYPE = 'SYMMETRIC'              !> Type of MKL solver (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_solver)
+CHARACTER(40) :: SCARC_MKL_MTYPE = 'SYMMETRIC'              !> Type of MKL matrix (SYMMETRIC/UNSYMMETRIC)
 
 !> Debugging parameters
 CHARACTER(40) :: SCARC_DEBUG   = 'NONE'                     !> Debugging level (NONE/LESS/MUCH)
@@ -1418,7 +1416,6 @@ SELECT_LEVEL_TYPE: SELECT CASE (NTYPE)
          ELSE
             NLEVEL_MAX  = NLEVEL
          ENDIF
-WRITE(*,*) 'Choosing ', NLEVEL_MAX,' as coarse grid level'
       ENDIF
 
    !> use user specified number of grid levels
@@ -4128,7 +4125,6 @@ ENDIF
 NAV = L%NCS*NSTENCIL 
 NAC = L%NCS*NSTENCIL 
 NAR = L%NCS + 1
-WRITE(*,*) 'ALLOCATING MATRIX A for mesh ', NM,' on LEVEL ', NL, NAV, NAC, NAR, NSTENCIL
 CALL SCARC_ALLOCATE_MATRIX(A, NAV, NAC, NAR, NSTENCIL, NSCARC_INIT_ZERO, 'A')
 
 #ifdef WITH_MKL
