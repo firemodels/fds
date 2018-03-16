@@ -2,11 +2,11 @@
 set CURDIR=%CD%
 
 cd ..\..\Verification\scripts
-call Run_SMV_cases.bat -geom
+call Run_FDS_cases.bat -geom
 cd %CURDIR%
 
 cd ..\..\Verification\scripts
-call Make_SMV_pictures.bat -geom
+call Make_GEOM_pictures.bat
 cd %CURDIR%
 pause
 

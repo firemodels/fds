@@ -139,7 +139,9 @@ To this end, we have developed a simple mixing environment method to close the m
 
 In this section we provide an expression for the mixing time based on the local state of the flow field.  The basic idea behind the model we propose here is to consider the three physical processes of diffusion, subgrid-scale (SGS) advection, and buoyant acceleration and to take the fastest of these processes (locally) as the controlling flow time scale~\cite{McDermott:2011}.
 
-It is important to consider the behavior of an SGS model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.  First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which, though usually small, is finite. At a slightly larger scale, we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two-thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
+It is important to consider the behavior of an SGS model as the LES filter width (cell size) varies. The mixing times for diffusion, SGS advection, and buoyant acceleration scale differently with filter width and if we look to the limits of the filter scales an interesting picture emerges.  Referring to Fig.~\ref{fig_reaction_time_scale}, let us move from left to right along the horizontal axis following the thick black line which represents our time scale model for a hypothetical flow condition.
+
+First, notice that the reaction time scale must be greater than or equal to the chemical time scale, $\tau_{\rm chem}$, which is of the order of the traversal time of the flame thickness, $\tau_{\rm chem} \sim \delta/s_{\rm L}$, where $\delta=D_{\rm F}/s_{\rm L}$, $D_{\rm F}$ is the diffusivity of the fuel, and $s_{\rm L}$ is the flame speed. At a slightly larger scale, we expect the mixing time to vary as the square of the filter width because the mixing is controlled by molecular diffusion.  In this regime, denoted $\tau_{\rm d}$, the numerical solution is a DNS and this scaling law is valid while $\Delta$ is less than the Kolmogorov scale, $\eta$, the length scale of the smallest turbulent eddies (for this discussion we assume the Schmidt number (Sc) is of order unity). For a sufficiently high Reynolds number flow (such that an inertial subrange exists), as the filter width increases beyond the Kolmogorov scale we encounter a regime, marked $\tau_{\rm u}$, where turbulent advection controls the rate of mixing and the mixing time varies as the two-thirds power of the filter width \cite{Pope:2000}.  This is the regime where most LES submodels are valid (It is important to appreciate that fire differs from turbulent combustion in that the assumption of locally high Re is frequently invalid).
 
 Now, let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.  Finally, note that the flame height presents a limit to the reaction time scale, here denoted $\tau_{\rm flame}$, since all fuel must be consumed within a single cell.
 
@@ -341,66 +343,30 @@ The heat release per unit volume is then found by summing the species mass produ
 \section{Extinction}
 \label{extinction}
 
-Subgrid-scale modeling of gas phase suppression and extinction is still an area of active research in the combustion community. The physical mechanisms underlying these phenomena are complex, and even simplified models still rely on an accurate prediction of the flame temperature and local strain rate, neither of which is readily available in an LES calculation.
+A limitation of the default mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local temperature, reactant concentration, or strain rate. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
 
-A limitation of the mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local conditions for temperature, dilution, or strain. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
-
-FDS uses simple empirical rules---which ignore strain---to predict local extinction within a certain grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that time step.
-
-\paragraph{Basic Extinction Model}
+FDS uses simple empirical rules---which ignore strain---to predict local extinction within a given grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step.
 \begin{enumerate}
-\item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source.
-\item If the potential combustion heat release from a \emph{local pocket of stoichiometric fuel-air-product (hereafter ``reactant'') mixture} cannot raise the temperature of that mixture above an empirically determined critical flame temperature, $T_{\rm CFT}$, then combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The local mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning of the combustion time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). Based on the limiting reactant, the masses in the local reactant mixture (denote with a hat) are defined as follows (take 1 kg as a basis):
-\begin{align}
-\label{eq:dzf} \hat{Z}_{\rm F}^0 &= Z_{\rm F}^0  && \mbox{(stoichiometric Fuel + excess Fuel)} \\
-\label{eq:dza} \hat{Z}_{\rm A}^0 &= s \, \min(Z_{\rm F}^0,Z_{\rm A}^0/s) && \mbox{(stoichiometric Air)}
-\end{align}
-The reactant mixture value for the product diluents (denoted as ``P'' but may include extra inert agents such as argon or water vapor from droplet evaporation) is defined such that the following ratio holds:
-\begin{align}
-\label{eq:dzp} \frac{\hat{Z}_{\rm P}^0}{Z_{\rm P}^0} &= \frac{\hat{Z}_{\rm A}^0}{Z_{\rm A}^0}
-\end{align}
-The effect of Eq.~(\ref{eq:dzp}) is that excess fuel acts as a diluent, but excess air does \emph{not}.  Hence, a large computational cell which is mostly air with a small amount of fuel (and no additional diluents) is likely to burn, whereas a cell which is mostly fuel with very little air will not burn.
-
-Let $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$ denote the species mass fractions \emph{after} reaction. The post-reaction mixture does not contain Air but does contain the excess Fuel and diluents from the pre-reaction mixture as well as stoichiometric products of combustion:
-\begin{align}
-\label{eq:dzfbar} \hat{Z}_{\rm F} &= Z_{\rm F} \\
-\label{eq:dzabar} \hat{Z}_{\rm A} &= 0 \\
-\label{eq:dzpbar} \hat{Z}_{\rm P} &= \hat{Z}_{\rm P}^0 + (Z_{\rm P} - Z_{\rm P}^0)
-\end{align}
-
-Once the local pre- and post-reaction mixtures have been determined, the extinction criterion is given by
+\item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source when using the default combustion model because fuel and oxygen burn on contact.
+\item If the potential heat release from the reactants cannot raise the temperature of the cell above an empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning and the end of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
+\be
+   \label{eq:dza} 
+   \tilde{\phi} \equiv  \min \left( \, 1 \, , \, \frac{s \, Z_{\rm F}^0}{Z_{\rm A}^0} \, \right) = \frac{Z_{\rm A}^0-Z_{\rm A}}{Z_{\rm A}^0}
+\ee
+where $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). The extinction criterion is given by:
 \begin{align}
 \label{eq:extinction}
-\hat{Z}_{\rm F}^0 \, h_{\rm F}(T) + \hat{Z}_{\rm A}^0 \, h_{\rm A}(T) + \hat{Z}_{\rm P}^0 \, h_{\rm P}(T) <
-\hat{Z}_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \hat{Z}_{\rm P} \, h_{\rm P}(T_{\rm CFT})
+Z_{\rm F}^0 \, h_{\rm F}(T) + \tilde{\phi} \, Z_{\rm A}^0 \, h_{\rm A}(T) + \tilde{\phi} \, Z_{\rm P}^0 \, h_{\rm P}(T) <
+Z_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \left[ (\tilde{\phi}-1) \, Z_{\rm P}^0 + Z_{\rm P} \right] \, h_{\rm P}(T_{\rm CFT})
 \end{align}
-where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy.  Therefore, the left-hand-side includes the combustion heat release.  If the inequality Eq.~(\ref{eq:extinction}) is true, then combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature.
-
+where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy; thus, the left-hand-side includes the combustion heat release.  If the inequality (\ref{eq:extinction}) holds, combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature. The extinction criterion assumes that excess fuel acts as a diluent, but excess air and a proportional amount of products do \emph{not}. Hence, a large computational cell which is mostly air with a small amount of fuel is likely to burn, whereas a cell which is mostly fuel with little air will not. To achieve this, a fraction of the total mass of the grid cell equal to $(1-\tilde{\phi}) (Z_{\rm A}^0+Z_{\rm P}^0)$ has been removed from the calculation of the enthalpy of the left and right hand sides of the inequality (\ref{eq:extinction}).
 \end{enumerate}
+These extinction criteria can be applied to multiple reaction schemes. An AIT can be specified for each individual reaction, and if the cell temperature exceeds any, all reactions are allowed to proceed. The critical flame temperature criterion is applied to the entire reaction scheme. In other words, the individual reactions are allowed to occur, and the enthalpy inequality (\ref{eq:extinction}) is applied to the initial and final species mass fractions. If insufficient energy has been released, all reactions are suppressed and the species mass fractions are returned to their original values at the start of the time step.
 
-%The limiting flame temperature extinction algorithm is outlined below.
-%
-%\begin{enumerate}
-%\item Search over all reactant species to find the limiting lumped species and express that species in terms of the reaction's fuel:
-%\be
-%\Delta \hat{Y}_{F} = - \min \left( \hat{Y}_F, \hat{Y}_{\alpha} \,\frac{\nu_{F}\,W_{F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
-%\ee
-%If fuel is the limiting reactant then $\Delta \hat{Y}_{F}$ is the local fuel mass fraction. If the oxidizer is the limiting reactant then $\Delta \hat{Y}_{F}$ is the mass fraction of fuel in stoichiometric proportion to oxidizer mass fraction.
-%\item Store $\Delta \hat{Y}_{F}$, remove that amount of fuel from the local gas, and renormalize the mass fractions to account for the removal of fuel.
-%\item Search over all the updated non-fuel reactant species in the gas to determine the limiting reactant.  This defines how much air is required to burn the fuel:
-%
-%\be \Delta \hat{Y}_{air} = \min \left(\frac{\Delta \hat{Y}_{F} W_{\alpha} \nu_{\alpha}}{Z_{\alpha} W_F} \right); \quad \mbox{for all non fuel reactants, $\alpha$, in reaction $n$} \ee
-%Note: $\Delta \hat{Y}_{air}$ is in stoichiometric proportion to $\Delta \hat{Y}_{F}$.
-%\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature (LFT).
-%\item Combustion is allowed if
-%
-%\be \Delta \hat{Y}_{air} h_{air}(T)+\Delta \hat{Y}_{F} \left( h_F(T)+\Delta h_{c,F} \right) > \Delta \hat{Y}_{air} h_{air}(T_{LFT})+ \Delta \hat{Y}_{F} h_F(T_{LFT}) \ee
-%\item If combustion is not allowed, $\Delta \hat{Y}_{F}$ is set to 0.
-%\end{enumerate}
 
-\paragraph{Alternative Extinction Models}
+\paragraph{Alternative Extinction Model}
 
-In addition to the extinction model described above, there is the option to select a simpler extinction model based on the limiting oxygen concentration or a model for two-step chemistry (CO production). Details of these models are discussed in Appendix~\ref{alternative_extinction_models}.
+In addition to the extinction model described above, there is the option to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix~\ref{alternative_extinction_models}.
 
 
 

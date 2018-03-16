@@ -30,6 +30,7 @@ echo #!/bin/bash > %bashscript%
 call :title2bash # ---- FDS and smokeview version ----
 call :dos2bash fds_version %fds_version%
 call :dos2bash smv_version %smv_version%
+call :dos2bash fds_debug   %fds_debug%
 
 call :title2bash #  ---- MPI version ----
 call :dos2bash linux_mpi_version %linux_mpi_version%

@@ -3004,17 +3004,17 @@ A simple two-step reaction scheme for a clean-burning fuel like methanol can be 
 \label{methanol_step1}
 \mathrm{CH_3OH + O_2} &\rightarrow \mathrm{CO + 2 \, H_2O} \\
 \label{methanol_step2}
-\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} 
+\mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2}
 \end{align}
 \end{subequations}
 where the first reaction is infinitely fast and the second is not. Suppose the second reaction proceeds according to the evolution equation:
-\be 
+\be
    \frac{\d [{\rm CO}]}{\d t} = -1\times 10^{10} \, [{\rm CO}] \, [{\rm O_2}]
 \ee
 where $[{\rm CO}]$ is the concentration of CO in units of mol/cm$^3$. To test the scheme, a sealed, adiabatic cube 1~m on a side is filled with nitrogen, fuel gas, and oxygen with initial volume fractions of 0.89, 0.05, and 0.06. Because the rates are independent of temperature, the reaction proceeds immediately assuming that the gases are thoroughly mixed via the parameter {\ct INITIAL\_UNMIXED\_FRACTION=0}. Figure~\ref{fig:reactionrate_fast_slow} shows the fuel volume fraction very quickly dropping to zero, leaving some oxygen which then reacts relatively slowly with CO to form CO$_2$. The effective combined reaction is:
 \be
 \label{methanol_combined}
-\mathrm{5 \, CH_3OH + 6 \, O_2} \rightarrow \mathrm{2 \, CO_2 + 3 \, CO + 10 \, H_2O} 
+\mathrm{5 \, CH_3OH + 6 \, O_2} \rightarrow \mathrm{2 \, CO_2 + 3 \, CO + 10 \, H_2O}
 \ee
 The {\ct 'EXPLICIT EULER'} integration scheme is used with an initial gas phase time step of $1\times 10^{-6}$~s. The final volume fractions of CO$_2$ and CO are expected to be $2/104 \approx 0.0192$ and $3/104 \approx 0.0288$, respectively.
 
@@ -4395,6 +4395,18 @@ This chapter contains verification cases that test all aspects of particles, dro
 
 The cases in this section test accuracy, stability, and momentum conservation for the general case of momentum transfer between solid particles or liquid droplets and air. Details of the FDS integration scheme are given in the Technical Reference Guide~\cite{FDS_Tech_Guide}.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
 
+\subsection{Dragless Particle (\texorpdfstring{\textct{cannon\_ball}}{cannon\_ball})}
+\label{cannon_ball}
+
+This simple case tests the particle transport scheme in the absence of drag. A 1~cm diameter sphere is shot from ground level with an initial velocity of $(u_0,v_0,w_0)=(10,10,10)$~m/s. The ball is expected to fall back to the ground in $t=2\, w_0/g\approx 2.04$~s at which time it will have travelled a horizontal distance of $d=t \sqrt{u_0^2+v_0^2}\approx 28.86$~m. The grid has a resolution of 1~m, and the default time step is 0.5~s. Thus, the particle trajectory is computed via only 5 calls to particle transport routine. However, the integration is performed using sub-steps such that the particle cannot cross farther than a single grid cell in a sub-step. This ensures an accurate computation of the trajectory, as shown in Fig.~\ref{cannon_ball_fig}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cannon_ball}
+\caption[The {\ct cannon\_ball} case]{Horizontal distance travelled by a dragless sphere as a function of time.}
+\label{cannon_ball_fig}
+\end{figure}
+
 
 \subsection{Particles Swept Up in a Free Stream (\texorpdfstring{\textct{fluid\_part\_mom}}{fluid\_part\_mom})}
 
@@ -5214,13 +5226,15 @@ h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\
 
 \chapter{Outputs}
 
-\section{Statistical Quantities (\texorpdfstring{\textct{rms\_cov\_corr}}{rms\_cov\_corr})}
+\section{Statistical Quantities}
+
+\subsection{RMS, Co-Variance, and Cross-Correlation (\texorpdfstring{\textct{rms\_cov\_corr}}{rms\_cov\_corr})}
 
 FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line {\ct DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.
 
 Computation of the these quantities by their typical statistical definition would require having the entire time history for the velocities.  This is obviously not possible during run-time.  Instead FDS computes the values using logarithmic averaging and a user-defined averaging window.  One would expect, once steady-state conditions are reached, that the FDS predicted values should approach the analytic values.  Results are shown in Fig.~\ref{rms_cov_corr_plots}.  In each figure the red line represents the value computed using the entire time history after steady-state is reached.  As seen, the FDS predicted values approach the analytic values.
 
-\begin{figure}[h!]
+\begin{figure}[p]
 \centering
 \begin{tabular}{l}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_cov_corr_rms}\\
@@ -5231,7 +5245,43 @@ Computation of the these quantities by their typical statistical definition woul
 \label{rms_cov_corr_plots}
 \end{figure}
 
+\FloatBarrier
 
+\subsection{RMS as a Running Average (\texorpdfstring{\textct{rms\_example}}{rms\_example})}
+\label{rms_example}
+
+In this example, we want to compute the mean and rms of a hypothetical velocity time series 
+\be
+   u(t) = \tanh(t) + {\cal U}(-0.5,0.5)
+\ee
+where ${\cal U}(-0.5,0.5)$ is a uniformly distributed random variable. The expected RMS of the time series beyond its initial transient is equal to the standard deviation of the uniform distribution over the unit interval, $\sigma=\sqrt{1/12}\approx 0.2887$. The expected mean is 1. This exercise is as much a check of the intrinsic random number generator in Fortran as it is the computation within FDS. Figure~\ref{rms_example_plot} displays the result. 
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_example}
+\caption[Sample case \textct{rms\_example}]{Output of the \textct{rms\_example} test case in which the mean and RMS of the time series is compared to expected values.}
+\label{rms_example_plot}
+\end{figure}
+Note that this example is also a useful demonstration of how to use the math functions within FDS. Although there is not a tanh function included, it can be constructed from the expression:
+\be
+   \tanh(t) = \frac{{\rm e}^t - {\rm e}^{-t}}{{\rm e}^t + {\rm e}^{-t}}
+\ee 
+using the base functions as shown below.
+\begin{lstlisting}
+&DEVC ID='rn',    QUANTITY='RANDOM NUMBER', XYZ=0,0,0 /
+&DEVC ID='t',     QUANTITY='TIME', XYZ=0,0,0 /
+&DEVC ID='u',     QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s' /
+&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s', 
+      STATISTICS='RMS', STATISTICS_START=5. /
+
+&CTRL ID='exp(t)',  FUNCTION_TYPE='EXP',      INPUT_ID='t' /
+&CTRL ID='-t',      FUNCTION_TYPE='MULTIPLY', INPUT_ID='t','CONSTANT', CONSTANT=-1. /
+&CTRL ID='exp(-t)', FUNCTION_TYPE='EXP',      INPUT_ID='-t' /
+&CTRL ID='num',     FUNCTION_TYPE='SUBTRACT', INPUT_ID='exp(t)','exp(-t)' /
+&CTRL ID='den',     FUNCTION_TYPE='SUM',      INPUT_ID='exp(t)','exp(-t)' /
+&CTRL ID='tanh',    FUNCTION_TYPE='DIVIDE',   INPUT_ID='num','den' /
+&CTRL ID='rn2',     FUNCTION_TYPE='SUBTRACT', INPUT_ID='rn','CONSTANT', CONSTANT=0.5 /
+&CTRL ID='sum',     FUNCTION_TYPE='SUM',      INPUT_ID='tanh','rn2' /
+\end{lstlisting}
 
 
 

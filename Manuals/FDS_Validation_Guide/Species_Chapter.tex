@@ -311,9 +311,7 @@ WTC experiments. There was only one measurement of each made near the ceiling of
 \subsection{UMD Line Burner}
 \label{UMD_Line_Burner_species}
 
-Oxygen concentration measurements were made across the coflow section of the burner.  Fig.~\ref{UMD_Line_Burner_methane_O2_p18_O2} shows mean volume fraction O$_2$ profiles for two heights, $z$, above the burner surface for the experiment with nitrogen dilution of the coflowing air to 18 vol.~\% O$_2$ with methane as fuel.  Notice that the O$_2$ level at the outer edge of the burner is the ambient value of 21 vol.~\%.  Further experimental details may be found in White et al.~\cite{White:2015}.
-
-FDS simulations are peformed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the line burner (see Fig.~\ref{fig:umd_line_burner_plan_view}).  Note that White et al.~\cite{White:2015} report measured global radiant fraction of $\chi_{\si{r}} = 0.18$ for 18 vol.~\% O$_2$ level with methane fuel.  We use this value in the simulations.  Also, because these simulations are well-resolved and we are interested in convergence of the numerical solution, we employ the CHARM flux limiter for scalar transport.  Second-order interpolated boundaries are used at mesh interfaces.  The domain decompositions, in order of increasing grid resolution, use 8, 16, and 128 meshes, respectively.
+Oxygen concentration measurements were made across the coflow section of the burner.  Fig.~\ref{UMD_Line_Burner_methane_O2_p18_O2} shows mean volume fraction O$_2$ profiles for two heights, $z$, above the burner surface for the experiment with nitrogen dilution of the coflowing air to 18 vol.~\% O$_2$ with methane as fuel.  Notice that the O$_2$ level at the outer edge of the burner is the ambient value of 21 vol.~\%.  Further experimental details may be found in White et al.~\cite{White:2015}. FDS simulations are performed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the line burner (see Fig.~\ref{fig:umd_line_burner_plan_view}).
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -321,7 +319,7 @@ FDS simulations are peformed at three grid resolutions corresponding to $W/\delt
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_O2_z_p250}
 \end{tabular*}
 \caption[UMD\_Line\_Burner oxygen concentration profiles]
-{Measured and computed mean oxygen concentration profiles at 18 vol \% O$_2$.}
+{Measured and predicted mean oxygen concentration profiles at 18 vol \% O$_2$.}
 \label{UMD_Line_Burner_methane_O2_p18_O2}
 \end{figure}
 
@@ -527,8 +525,9 @@ Predicting the concentration of products of incomplete combustion is challenging
 
 
 \subsection{Smyth Slot Burner Experiment}
+\label{Smyth_Reactions}
 
-A two-step CO production model (a modified version of the mechanism by Andersen et al.~\cite{AndersenJ:1}) is used to simulate a methane/air slot burner diffusion flame.  A 2D DNS calculation is run at two different grid resolutions: $\delta x = 0.250 \;\si{mm}$ and $\delta x = 0.125 \;\si{mm}$.  In our modified mechanism the hydrocarbon/oxygen reaction to CO is assumed to be infinitely fast (mixed is burnt) to avoid complications of modeling ignition.  The reversible CO to CO$_2$ reaction is modeled with Arrhenius kinetics.  As discussed by Westbrook and Dryer~\cite{Westbrook:1}, the kinetics constants for the reduced CO mechanisms may be model dependent.  Here, the Arrhenius constant for the forward CO to CO$_2$ reaction is tuned to match the Smyth experimental data.  These same model parameters are then also used in the NIST Reduced Scale Enclosure LES without modification (see Section \ref{sec:NIST_RSE_1994}).  Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner. Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
+Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -635,6 +634,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 
 
 \subsection{NIST Reduced-Scale Enclosure (RSE) Experiments, 2007}
+\label{sec:NIST_RSE_2007}
 
 In the simulations of the NIST RSE Experiments, it is assumed that the combustion can be simplified to two fast reactions, the first converting fuel to CO and soot, and the second converting CO to CO$_2$. The stoichiometry for the first reaction is given here:
 \begin{eqnarray*}
@@ -815,6 +815,7 @@ Species and temperature measurements were made in the front and rear of the comp
 \clearpage
 
 \subsection{NIST Full-Scale Enclosure (FSE) Experiments, 2008}
+\label{sec:NIST_FSE_2008}
 
 The FSE experiments~\cite{Lock:1} were selected to assess CO production capability in under-ventilated compartment fires over a range of fuels types and fire sizes in a full-scale ISO 9705 enclosure. The 30 experiments (of which 27 were selected) featured 7 different fuels: heptane, natural gas, nylon, propylene, isopropanol, styrene, and toluene. Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Compartment ventilation was varied from a full 80~cm door opening to 40~cm, 20~cm, and 10~cm openings. The fuel sources in the experiments were either pool fires or spray burners, both of which were modeled. The fuel flow rates were specified in the experiments even though the fuel did not always burn.
 
@@ -1182,8 +1183,9 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \clearpage
 
 \subsection{Waterloo Methanol Pool Fire}
+\label{sec:Waterloo_Methanol}
 
-Hamins and Lock~\cite{Hamins:TN1928} made product species concentration measurements along the centerline above a 30.5~cm diameter methanol pool fire originally studied by Weckman at the University of Waterloo~\cite{Weckman:CF1996}. 
+Hamins and Lock~\cite{Hamins:TN1928} made product species concentration measurements along the centerline above a 30.5~cm diameter methanol pool fire originally studied by Weckman at the University of Waterloo~\cite{Weckman:CF1996}.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

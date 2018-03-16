@@ -23,7 +23,7 @@ cd ..\..
 set SVNROOT=%CD%
 
 cd %BASEDIR%
-set RUNSMV=call "%BASEDIR%\scripts\runsmv.bat"
+set RUNSMV=call "%SVNROOT%\smv\Verification\scripts\runsmv.bat"
 
 call %SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat FDS_Pictures.sh FDS_Pictures.bat
 

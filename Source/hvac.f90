@@ -252,7 +252,7 @@ DO NN=1,N_HVAC_READ
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'DUCT',DU%RAMP_INDEX)
          IF (RAMP_LOSS /= 'null') CALL GET_RAMP_INDEX(RAMP_LOSS,'DUCT',DU%RAMP_LOSS_INDEX)
          IF (HVAC_MASS_TRANSPORT) THEN
-            IF (N_CELLS > 0) THEN 
+            IF (N_CELLS > 0) THEN
                DU%N_CELLS = N_CELLS
             ELSE
                IF (DU%LENGTH <=0.1) THEN ! If duct is less than 10 cm, adopt two cells, else default to 10 cm cells
@@ -367,7 +367,7 @@ DO NN=1,N_HVAC_READ
          IF (TAU_FAN < 0._EB) FAN(I_FAN)%SPIN_INDEX = TSQR_RAMP
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'FAN',FAN(I_FAN)%RAMP_INDEX)
          IF(( (MAX_FLOW<1.E6_EB .OR. MAX_PRESSURE<1.E6_EB) .AND. (VOLUME_FLOW<1.E6_EB .OR. RAMP_ID/='null')))THEN !.OR. &
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),& 
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -861,12 +861,7 @@ LOGICAL, SAVE :: INITIALIZED_HVAC_MASS_TRANSPORT
 LOGICAL, INTENT(IN):: FIRST_PASS
 TYPE(NETWORK_TYPE), POINTER:: NE=>NULL()
 
-! Sets time step, using user input DT_HVAC
-IF (DT_HVAC>0._EB) THEN
-   DT_HV = MAX(DT_HVAC,DT)
-ELSE
-   DT_HV = DT
-ENDIF
+DT_HV = DT
 
 IF (CORRECTOR) THEN
    DUCT%VEL(OLD) = DUCT%VEL(NEW)
@@ -1101,7 +1096,14 @@ ITER_LOOP: DO
          DO NS = 1,N_TRACKED_SPECIES
             ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
             !*** CHECK THIS
-            IF (STRATIFICATION .AND. .NOT. DN%VENT) ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+            IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+               IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                  DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               ELSE
+                  DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               ENDIF
+               ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+            ENDIF
          ENDDO
       ENDIF
 
@@ -1269,6 +1271,7 @@ DO ND = 1, NE%N_DUCTS
          HEAD = HEAD + (GVEC(1)*XYZ(1)+GVEC(2)*XYZ(2)+GVEC(3)*XYZ(3))*DU%RHO_D
     !  ENDIF
    ENDIF
+
    RHS(ARRAYLOC) = DU%VEL(OLD)+DT_HV/DU%LENGTH*((HEAD+SUM(DU%DP_FAN)*0.5_EB)/DU%RHO_D - &
                    0.125_EB*DU%TOTAL_LOSS*ABS(DU%VEL(GUESS)+DU%VEL(OLD))*DU%VEL(OLD))
 ENDDO
@@ -1472,37 +1475,68 @@ WALL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       SELECT CASE (IOR)
          CASE (1)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + X(II-1)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
          CASE(-1)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + X(II)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
          CASE (2)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + Y(JJ-1)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
          CASE(-2)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + Y(JJ)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
          CASE (3)
-            P_AVE = 0.5_EB*(PBARP(KK-1,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK,WC%ONE_D%PRESSURE_ZONE))
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK-1)*AREA
          CASE (-3)
-            P_AVE = 0.5_EB*(PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK+1,WC%ONE_D%PRESSURE_ZONE))
             NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
             NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
             NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK)*AREA
       END SELECT
-      NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
+      IF (HVAC_LOCAL_PRESSURE) THEN
+         SELECT CASE (IOR)
+            CASE DEFAULT
+               P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
+            CASE (3)
+               P_AVE = 0.5_EB*(PBARP(KK-1,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK,WC%ONE_D%PRESSURE_ZONE))
+            CASE (-3)
+               P_AVE = 0.5_EB*(PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK+1,WC%ONE_D%PRESSURE_ZONE))
+         END SELECT
+         NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
+      ELSE
+         SELECT CASE (IOR)
+            CASE (1)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(UP(II-1,JJ,KK)+WC%ONE_D%UW)**2)*AREA
+            CASE(-1)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(UP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+            CASE (2)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(VP(II,JJ-1,KK)+WC%ONE_D%UW)**2)*AREA
+            CASE(-2)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(VP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+            CASE (3)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(WP(II,JJ,KK-1)+WC%ONE_D%UW)**2)*AREA
+            CASE (-3)
+               NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
+                                          0.5_EB*(WP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+         END SELECT
+      ENDIF
    ELSE ZONE_LEAK_IF
       IF (ALL(SF%LEAK_PATH/=WC%ONE_D%PRESSURE_ZONE)) CYCLE WALL_LOOP
       IF (SF%LEAK_PATH(1) == WC%ONE_D%PRESSURE_ZONE) THEN
@@ -2714,7 +2748,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       DU_UPDATE_LOOP: DO NC = 1,DU%N_CELLS
          DU%RHO_C(NC) = SUM(RHOZZ_C(NC,1:N_TRACKED_SPECIES))
          DU%ZZ_C(NC,:) = RHOZZ_C(NC,:)/DU%RHO_C(NC)
-         CPT_C(NC) = RHOCPT_C(NC)/DU%RHO_C(NC) 
+         CPT_C(NC) = RHOCPT_C(NC)/DU%RHO_C(NC)
          ZZ_GET = DU%ZZ_C(NC,:) ! Single dimension to be used with GET_AVERAGE_...
          TGUESS = DU%TMP_C(NC)
          ITCOUNT = 0
@@ -2754,5 +2788,3 @@ ENDDO DUCT_LOOP
 END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 
 END MODULE HVAC_ROUTINES
-
-

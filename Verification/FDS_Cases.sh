@@ -6,6 +6,34 @@ $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
 
+
+$QFDS -d Complex_Geometry geom_simple.fds
+$QFDS -d Complex_Geometry geom_azim.fds
+$QFDS -d Complex_Geometry geom_elev.fds
+$QFDS -d Complex_Geometry geom_scale.fds
+$QFDS -d Complex_Geometry geom_obst.fds
+$QFDS -d Complex_Geometry geom_sphere1a.fds
+$QFDS -d Complex_Geometry geom_sphere1c.fds
+$QFDS -d Complex_Geometry geom_sphere1e.fds  
+$QFDS -d Complex_Geometry geom_sphere2.fds   
+$QFDS -d Complex_Geometry geom_sphere3b.fds  
+$QFDS -d Complex_Geometry geom_sphere3d.fds  
+$QFDS -d Complex_Geometry geom_sphere3f.fds
+$QFDS -d Complex_Geometry geom_sphere1b.fds  
+$QFDS -d Complex_Geometry geom_sphere1d.fds  
+$QFDS -d Complex_Geometry geom_sphere1f.fds  
+$QFDS -d Complex_Geometry geom_sphere3a.fds  
+$QFDS -d Complex_Geometry geom_sphere3c.fds  
+$QFDS -d Complex_Geometry geom_sphere3e.fds
+$QFDS -d Complex_Geometry geom_terrain.fds
+$QFDS -d Complex_Geometry geom_texture.fds
+$QFDS -d Complex_Geometry geom_texture2.fds
+$QFDS -d Complex_Geometry geom_texture3a.fds
+$QFDS -d Complex_Geometry geom_texture3b.fds
+$QFDS -d Complex_Geometry geom_texture4a.fds
+$QFDS -d Complex_Geometry geom_texture4b.fds
+$QFDS -d Complex_Geometry geom_arch.fds
+
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
@@ -16,6 +44,29 @@ $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p0625.fds
 
+$QFDS -d Complex_Geometry shunn3_32_cc_exp_cen.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_exp_cen.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_exp_cen.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_exp_cen.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_exp_cen.fds
+
+$QFDS -d Complex_Geometry shunn3_32_cc_exp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
+
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_cen.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_cen.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_cen.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_cen.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_cen.fds
+
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
+$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
 
 $QFDS -d Controls activate_vents.fds
@@ -26,6 +77,7 @@ $QFDS -d Controls cycle_test.fds
 $QFDS -d Controls device_test.fds
 $QFDS -d Controls hrr_freeze.fds
 $QFDS -d Controls rms_cov_corr.fds
+$QFDS -d Controls rms_example.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -d Detectors beam_detector.fds
@@ -395,6 +447,7 @@ $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_2.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
+$QFDS -d Sprinklers_and_Sprays cannon_ball.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds

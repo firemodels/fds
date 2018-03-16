@@ -88,18 +88,20 @@ disp('fan_curve...');                     fan_curve
 disp('mesh_transformation...');           mesh_transformation
 disp('synthetic_eddy_method...');         synthetic_eddy_method
 disp('shunn_mms_error...');               shunn_mms_error
+disp('shunn_cc_mms_error...');            shunn_cc_mms_error
 disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('rms_cov_corr...');                  rms_cov_corr
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('radiating_polygon...');             radiating_polygon
 disp('saad_mms_temporal_error...');       saad_mms_temporal_error
+disp('saad_cc_mms_temporal_error...');    saad_cc_mms_temporal_error
 disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
 disp('vegetation...');                    vegetation
 disp('radiation_gas_panel...');           radiation_gas_panel
 disp('particle_size_distribution...');    particle_size_distribution
-disp('mass_blance...');                   mass_balance
+disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
 
