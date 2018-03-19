@@ -8183,27 +8183,6 @@ free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 \noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
-\subsection{Near-Wall Grid Resolution}
-\label{info:yplus}
-
-Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
-
-\begin{lstlisting}
-&BNDF QUANTITY='VISCOUS WALL UNITS' /
-\end{lstlisting}
-
-\noindent
-The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the maximum between the local viscous length scale, $\delta_\nu$ \cite{Pope:2000} or the sand grain roughness, $s$, for rough walls:
-\be
-y^+ = \frac{\delta n/2}{\max(\delta_\nu,s)} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
-\ee
-where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_{\rm w}$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
-\begin{lstlisting}
-&DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
-\end{lstlisting}
-
-\noindent Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
-
 
 \subsection{Dry Volume and Mass Fractions}
 \label{info:dry}
@@ -8414,6 +8393,28 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 \begin{lstlisting}
 &SLCF PBY=0, QUANTITY='CELL REYNOLDS NUMBER' /
 \end{lstlisting}
+
+\subsubsection{Near-Wall Grid Resolution}
+\label{info:yplus}
+
+Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
+
+\begin{lstlisting}
+&BNDF QUANTITY='VISCOUS WALL UNITS' /
+\end{lstlisting}
+
+\noindent
+The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the maximum between the local viscous length scale, $\delta_\nu$ \cite{Pope:2000} or the sand grain roughness, $s$, for rough walls:
+\be
+y^+ = \frac{\delta n/2}{\max(\delta_\nu,s)} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
+\ee
+where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_{\rm w}$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
+\begin{lstlisting}
+&DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
+\end{lstlisting}
+
+\noindent Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
+
 
 \subsection{Extinction}
 \label{info:extinct_out}
