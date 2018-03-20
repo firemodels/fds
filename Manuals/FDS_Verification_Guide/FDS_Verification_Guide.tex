@@ -4382,9 +4382,20 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 \end{table}
 
 
+\section{Three-Dimensional Pyrolysis (PYRO3D) (Beta)}
+\label{sec:pyro3d}
 
+\subsection{Residual Mass Conversion}
+\label{pyro3d_A_B}
 
+This is a simple test of mass conversion using the PYRO3D routines (see Fig.~\ref{fig:pyro3d_A_B}).  A block of Material A with a density of 100 \si{kg/m^3} is converted to Material B with a lower density of 50 \si{kg/m^3}.  Here we do not account for the gas phase pyrolyzate that would make up the mass difference (in other words, this case is not meant to conserve mass after conversion).  The goal of the test case is to ensure that the output quantities for both individual materials, identified using {\ct MATL\_ID}, and the total solid densities are correct.  This case was also the working example used to integrate the material properties to the 3D solid obstructions via the {\ct SURF} line.  Hence, that machinery is also being exercised within the code.
 
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_A_B}
+\caption[PYRO3D mass conversion (the {\ct pyro3d\_A\_B} case)]{Simple conversion of mass with 3D solid heat transfer and pyrolysis.}
+\label{fig:pyro3d_A_B}
+\end{figure}
 
 
 \chapter{Lagrangian Particles}
