@@ -3814,12 +3814,12 @@ IF (SMOKE3D_CO2.AND.CO2_INDEX>0) THEN
 ELSE
    HAVE_CO2 = .FALSE.
 ENDIF
+
 ! the case will always have temperature but it is only output to a .s3d file
 ! if the CO2 smoke option is active (set on the &MISC line with SMOKE3D_CO2=.TRUE. )
 HAVE_TEMP = SMOKE3D_CO2
 
-
-! Write out hrrpuv, soot, temperature and co2 data files (if they exist)
+! Write out soot, hrrpuv, temperature and co2 data files (if they exist)
 
 DATA_FILE_LOOP: DO DATA_FILE_TYPE=1,4
 
@@ -3842,7 +3842,7 @@ DATA_FILE_LOOP: DO DATA_FILE_TYPE=1,4
       CASE(3) ! temperature
          DO K=0,KBP1
             DO J=0,JBP1
-               DO I=0,IBP1 ! need to make the following general
+               DO I=0,IBP1 ! need to make the following line general
                   FF(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,5,0,0,0,0,0,0,0,0,0,T,DT,NM)
                ENDDO
             ENDDO
