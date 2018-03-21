@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration3d_scarc',TITLE='Default-ScaRC for 3D-cube with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration3d_uscarc_cg',TITLE='Unstructured ScaRC-CG for 3D-cube with obstruction on 8 meshes' /
 
 &MESH IJK=16,16,16, XB=0.0,0.40,0.0,0.40,0.0,0.40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.40, DY=0.40, DZ=0.40, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
@@ -7,9 +7,9 @@
       DNS   = .TRUE. /
 
 &PRES SOLVER                   = 'SCARC'
-      SCARC_DISCRETIZATION     = 'STRUCTURED'
+      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
       SCARC_METHOD             = 'KRYLOV'
-      SCARC_PRECON             = 'SSOR'   /
+      SCARC_PRECON             = 'PARDISO'    /     Note: possible other preconditioner is SSOR, but not FFT
 
 &SPEC ID='BACKGROUND'
       BACKGROUND=.TRUE./
