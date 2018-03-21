@@ -42,11 +42,13 @@ INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                            
 INTEGER, PARAMETER :: NODE1=1,NODE2=2,LINEAR_INTERPOLATION=-1                               ! Duct mass transport interpolation
 INTEGER, PARAMETER :: HVAC_BOUNDARY=42
 INTEGER :: MINT_SPECIES=20
+INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1
 
 ! Species components of the lumped species
 
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,&
            H2_INDEX=0,SOOT_INDEX=0,OTHER_INDEX=0                            ! Lumped Species Sub-species
+REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB
 
 ! Species components used in FED calculations
 
