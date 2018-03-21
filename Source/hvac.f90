@@ -2763,7 +2763,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
                DCPDT = CP2 - CP
             ENDIF
             DU%TMP_C(NC) = TGUESS + ( CPT_C(NC) - CP * TGUESS ) / ( CP + TGUESS * DCPDT )
-       IF (ABS(DU%TMP_C(NC) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
+            IF (ABS(DU%TMP_C(NC) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
             IF ((DU%TMP_C(NC) - TGUESS)/DU%TMP_C(NC) < 0.0005_EB) EXIT CP_LOOP
             IF (ITCOUNT > 10) THEN
                DU%TMP_C(NC) = 0.5_EB*(DU%TMP_C(NC)+TGUESS)
