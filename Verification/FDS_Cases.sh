@@ -262,10 +262,29 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
+$QFDS -d Pressure_Solver pressure_iteration2d_1mesh.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cg_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cggmg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_gmg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_twolevel.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uscarc_cg.fds
+$QFDS -d Pressure_Solver pressure_iteration3d_1mesh.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cg_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cggmg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_gmg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_twolevel.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc_cg.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds

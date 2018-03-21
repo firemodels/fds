@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration2d_scarc_gmgc',TITLE='Tight ScaRC-GMG with constant interpolation for 2D-square with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration2d_uscarc_cg',TITLE='Unstructured ScaRC-CG for 2D-square with obstruction on 8 meshes' /
 
 &MESH IJK=8,1,16, XB=0.0,0.2,-0.01,0.01,0.0,0.4, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
@@ -6,24 +6,12 @@
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
 
-&PRES SOLVER = 'SCARC'
-      SCARC_DISCRETIZATION    = 'STRUCTURED'
-      SCARC_ACCURACY          = 'ABSOLUTE'
-      SCARC_DEBUG             = 'NONE'
-      SCARC_METHOD            = 'MULTIGRID'
-      SCARC_MULTIGRID         = 'GEOMETRIC'
-      SCARC_MULTIGRID_ACCURACY= 1e-08
-      SCARC_MULTIGRID_CYCLE   = 'V'
-      SCARC_MULTIGRID_LEVEL   =  3
-      SCARC_MULTIGRID_INTERPOL= 'CONSTANT'
-      SCARC_COARSE            = 'ITERATIVE'
-      SCARC_SMOOTH            = 'SSOR'
-      SCARC_SMOOTH_OMEGA      =  0.8E+0
-      SCARC_SMOOTH_ITERATIONS =   2
-      VELOCITY_TOLERANCE      = 0.00001
-      MAX_PRESSURE_ITERATIONS = 1000 /
+&PRES SOLVER                   = 'SCARC'
+      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
+      SCARC_METHOD             = 'KRYLOV'
+      SCARC_PRECON             = 'PARDISO'    /     Note: possible other preconditioner is SSOR, but not FFT
 
-&TIME T_END=1.0, DT=0.002 /
+&TIME T_END=0.5, DT=0.002 /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /
@@ -36,9 +24,9 @@
 
 &OBST XB=0.3,0.5,-0.01,0.01,0.3,0.5, COLOR='BLUE' /
 
-&SLCF PBY=0.0,QUANTITY='VELOCITY',VECTOR=.TRUE. /
-&SLCF PBY=0.0,QUANTITY='PRESSURE' /
-&SLCF PBY=0.0,QUANTITY='H' /
+ SLCF PBY=0.0,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+ SLCF PBY=0.0,QUANTITY='PRESSURE' /
+ SLCF PBY=0.0,QUANTITY='H' /
 
 &DEVC XYZ=0.64,0.00,0.41, QUANTITY='U-VELOCITY',ID='u-vel'    /
 &DEVC XYZ=0.64,0.00,0.41, QUANTITY='W-VELOCITY',ID='w-vel'    /
