@@ -4397,6 +4397,17 @@ This is a simple test of mass conversion using the PYRO3D routines (see Fig.~\re
 \label{fig:pyro3d_A_B}
 \end{figure}
 
+\subsection{Char Formation}
+\label{pyro3d_wood_char}
+
+This case is a simple mass conservation test for pyrolysis of wood into char and gas.  A small block of wood, 0.08 m on a side, is heated externally at 50 \si{kW/m^2} from the top.  Gas phase combustion is suppressed.  The pyrolysis stoichiometry splits the wood to equal parts by mass of char and gas.  In Fig.~\ref{fig:pyro3d_wood_char}, you can see that the pine wood mass goes to zero, the char ends up with half the original wood mass, and the pyrolyzate gas production is equal to the char production.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_wood_char}
+\caption[PYRO3D char formation (the {\ct pyro3d\_wood\_char} case)]{Conversion of wood to char and pyrolyzate gas with 3D solid heat transfer and pyrolysis.}
+\label{fig:pyro3d_wood_char}
+\end{figure}
 
 \chapter{Lagrangian Particles}
 
