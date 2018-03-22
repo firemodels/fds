@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration2d_scarc_cggmg',TITLE='Krylov-ScaRC with preconditioning by Geometric Multigrid for 2D-square with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration2d_scarc_cggmg',TITLE='ScaRC-CG with GMG-preconditioning for 2D-square with obstruction on 8 meshes' /
 
 &MESH IJK=8,1,16, XB=0.0,0.2,-0.01,0.01,0.0,0.4, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
@@ -7,14 +7,13 @@
       DNS   = .TRUE./
 
 &PRES SOLVER                     = 'SCARC'
-      SCARC_DISCRETIZATION       = 'STRUCTURED'
       SCARC_METHOD               = 'KRYLOV'
       SCARC_PRECON               = 'MULTIGRID'
       SCARC_MULTIGRID_LEVEL      =   3
       SCARC_MULTIGRID_ITERATIONS =   2
       SCARC_SMOOTH_ITERATIONS    =   5        /
 
-&TIME T_END=1.0, DT=0.002 /
+&TIME T_END=0.5, DT=0.002 /
 
 &SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
 &SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /

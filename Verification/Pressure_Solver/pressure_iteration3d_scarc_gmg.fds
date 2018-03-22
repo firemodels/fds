@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration3d_scarc_gmg',TITLE='Geometric Multigrid-ScaRC for 3D-cube with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration3d_scarc_gmg',TITLE='ScaRC-GMG for 3D-cube with obstruction on 8 meshes' /
 
 &MESH IJK=16,16,16, XB=0.0,0.40,0.0,0.40,0.0,0.40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.40, DY=0.40, DZ=0.40, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
@@ -7,7 +7,6 @@
       DNS   = .TRUE. /
 
 &PRES SOLVER                  = 'SCARC'
-      SCARC_DISCRETIZATION    = 'STRUCTURED'
       SCARC_METHOD            = 'MULTIGRID'
       SCARC_MULTIGRID_LEVEL   =   3
       SCARC_SMOOTH_ITERATIONS =   5           /
