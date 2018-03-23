@@ -991,10 +991,10 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         ENDIF
                         IF (ABS(FDERIV) > TWO_EPSILON_EB) TMP_OTHER = TMP_OTHER - QEXTRA / FDERIV
                         IF (ABS(TMP_OTHER - TMP_F) / TMP_F < 1.E-4_EB .OR. ADCOUNT > 20) THEN
-                           TMP_F = MIN(TMPMAX,TMP_OTHER)
+                           TMP_F = MAX(TMPMIN,MIN(TMPMAX,TMP_OTHER))
                            EXIT ADLOOP
                         ELSE
-                           TMP_F = MIN(TMPMAX,TMP_OTHER)
+                           TMP_F = MAX(TMPMIN,MIN(TMPMAX,TMP_OTHER))
                            CYCLE ADLOOP
                         ENDIF
                      ENDDO ADLOOP

@@ -1,4 +1,4 @@
-!&HEAD CHID='pressure_iteration3d_scarc_cggmg',TITLE='Geometric Multigrid-ScaRC for 3D-cube with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration3d_scarc_cggmg',TITLE='ScaRC-GMG for 3D-cube with obstruction on 8 meshes' /
 
 &MESH IJK=16,16,16, XB=0.0,0.40,0.0,0.40,0.0,0.40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.40, DY=0.40, DZ=0.40, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
@@ -7,7 +7,6 @@
       DNS   = .TRUE. /
 
 &PRES SOLVER                     = 'SCARC'
-      SCARC_DISCRETIZATION       = 'STRUCTURED'
       SCARC_METHOD               = 'KRYLOV'
       SCARC_PRECON               = 'MULTIGRID'
       SCARC_MULTIGRID_LEVEL      =   3
@@ -35,12 +34,12 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
- SLCF PBX=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
- SLCF PBX=0.4,QUANTITY='H' /
- SLCF PBY=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
- SLCF PBY=0.4,QUANTITY='H' /
- SLCF PBZ=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
- SLCF PBZ=0.4,QUANTITY='H' /
+&SLCF PBX=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBX=0.4,QUANTITY='H' /
+&SLCF PBY=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBY=0.4,QUANTITY='H' /
+&SLCF PBZ=0.4,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBZ=0.4,QUANTITY='H' /
 
 &DEVC XYZ=0.64,0.00,0.41, QUANTITY='U-VELOCITY',ID='u-vel'    /
 &DEVC XYZ=0.64,0.00,0.41, QUANTITY='V-VELOCITY',ID='v-vel'    /
