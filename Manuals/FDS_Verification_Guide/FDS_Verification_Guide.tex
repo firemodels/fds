@@ -4403,10 +4403,10 @@ This is a simple test of mass conversion using the PYRO3D routines (see Fig.~\re
 This case is a simple mass conservation test for pyrolysis of wood into char and gas.  A small block of wood, 0.08 m on a side, is heated externally at 50 \si{kW/m^2} from the top.  Gas phase combustion is suppressed.  The pyrolysis stoichiometry splits the wood to equal parts by mass of char and gas.  In Fig.~\ref{fig:pyro3d_wood_char}, you can see that the pine wood mass goes to zero, the char ends up with half the original wood mass, and the pyrolyzate gas production is equal to the char production.
 
 \begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_wood_char}
-\caption[PYRO3D char formation (the {\ct pyro3d\_wood\_char} case)]{Conversion of wood to char and pyrolyzate gas with 3D solid heat transfer and pyrolysis.}
-\label{fig:pyro3d_wood_char}
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_wood_char}
+	\caption[PYRO3D char formation (the {\ct pyro3d\_wood\_char} case)]{Conversion of wood to char and pyrolyzate gas with 3D solid heat transfer and pyrolysis.}
+	\label{fig:pyro3d_wood_char}
 \end{figure}
 
 \chapter{Lagrangian Particles}
@@ -5073,8 +5073,21 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
+\subsection{Leak Pressure Exponent (\texorpdfstring{\textct{HVAC\_leak\_exponent}}{HVAC\_leak\_exponent})}
+\label{leak_exponent}
 
+In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
+This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_leak_exponent}
+	\caption[The \textct{HVAC\_leak\_exponent} case]{Velocities through leakage with varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}}
+	\label{leak_exponent_fig}
+\end{figure}
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
