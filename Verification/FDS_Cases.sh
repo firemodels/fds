@@ -229,6 +229,7 @@ $QFDS -d HVAC HVAC_tee_loss_1.fds
 $QFDS -d HVAC HVAC_tee_loss_2.fds
 $QFDS -d HVAC leak_test_2.fds
 $QFDS -d HVAC leak_test.fds
+$QFDS -d HVAC HVAC_leak_exponent.fds
 
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
