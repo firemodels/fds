@@ -6702,9 +6702,9 @@ Suppose, however, that you want to define your own ``smoke'' and that you want t
 &PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
 
-&DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
+&DUMP SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{lstlisting}
-The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It will merely serve as a surrogate for smoke. Note also that if you specify explicitly a smoke surrogate, you should set {\ct SOOT\_YIELD=0} on the {\ct REAC} line to prevent FDS from including smoke as a component of the combustion product lumped species.
+The same smoke detector model is used that was described above, but now, the species {\ct 'MY SMOKE'} is used in the algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It will merely serve as a surrogate for smoke.
 
 
 
@@ -7440,13 +7440,10 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
 
-When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in
-describing the attenuation of visible light by the specified gas species.
-
-An alternative to {\ct SOOT} mass fraction can be specified via {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line. If the specified quantity requires the additional specification of a particular species, use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
+When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
-&DUMP SMOKE3D_QUANTITY='MASS FRACTION', SMOKE3D_SPEC_ID='MY SMOKE' /
+&DUMP SMOKE3D_SPEC_ID='MY SMOKE' /
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
@@ -9409,7 +9406,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
-{\ct NO\_RAMPS}                                 & Logical       & If {\ct .TRUE.}, turns off all ramps                  &               & {\ct .FALSE.}     \\ \hline
+{\ct NO\_RAMPS}                                 & Logical       & Turn off all ramps                                    &               & {\ct .FALSE.}     \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
@@ -10600,13 +10597,12 @@ After the time {\ct T}, the number of node points is given and then the node coo
 WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
                 .
                 .
-WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
-WRITE(LU_SMOKE3D)TIME
-WRITE(LU_SMOKE3D)NCHARS_IN,NCHARS_OUT
-IF (NCHARS_OUT > 0)WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
+WRITE(LU_SMOKE3D_SIZE,*) TIME,NCHARS_IN,NCHARS_OUT
+WRITE(LU_SMOKE3D) TIME
+WRITE(LU_SMOKE3D) NCHARS_IN,NCHARS_OUT
+IF (NCHARS_OUT > 0) WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
 \end{lstlisting}
-The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine whether the computer creating the 3-D smoke file and the computer viewing the 3-D smoke file use the same or different byte swap (endian) conventions for storing floating point numbers.  The opacity data is converted from 4 byte floating point numbers to one byte integers then compressed using
-run-length encoding (RLE). The compressed data is contained in {\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
+The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine whether the computer creating the 3-D smoke file and the computer viewing the 3-D smoke file use the same or different byte swap (endian) conventions for storing floating point numbers.  The opacity data is converted from 4 byte floating point numbers to one byte integers then compressed using run-length encoding (RLE). The compressed data is contained in {\ct BUFFER\_OUT}.  Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
 
 
 
