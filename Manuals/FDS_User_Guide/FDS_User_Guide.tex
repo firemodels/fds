@@ -1700,7 +1700,7 @@ The superscript $k$ indicates that this equation is solved multiple times, and $
 \be
   \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
 \ee
-drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size. 
+drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size.
 
 If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
@@ -5071,6 +5071,20 @@ the measured value of the heat release rate includes the effects of any CO or so
 Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
 
 If the reaction is under defined, FDS will return an error at the start of the calculation.
+
+
+\subsection{Special Topic: Two-Step Simple Chemistry}
+\label{info:two-step_simple_chemistry}
+
+The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes the CO and Soot to form CO$_2$ in the second step:
+\begin{eqnarray}
+  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\rightarrow& \underbrace{ \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
+   \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\rightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
+\end{eqnarray}
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest. 
+
+The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot are closer to the true physics of fire. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means may depend on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar, Intermediate Products. 
+
 
 
 \subsection{Special Topic: Turbulent Combustion}
@@ -8835,10 +8849,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 %{\ct COMPUTE\_ZETA\_SOURCE\_TERM}               & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
+{\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
 %{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
+{\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS}           & Integer       & Section~\ref{info:two-step_simple_chemistry}          &               & 1                    \\ \hline
 {\ct ODE\_SOLVER}                               & Character     & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
