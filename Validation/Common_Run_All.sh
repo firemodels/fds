@@ -101,7 +101,7 @@ case $OPTION in
    INDIR="$OPTARG"
    ;;
   O)
-   INTEL=
+   INTEL="-L"
    EXE=
    ;;
   q)
