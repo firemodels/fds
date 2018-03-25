@@ -233,7 +233,7 @@ if [ "$BACKGROUND_LOAD" == "" ]; then
    BACKGROUND_LOAD=75
 fi
 
-commandline=`echo $* | sed 's/-V//'`
+commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
