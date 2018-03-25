@@ -120,6 +120,7 @@ function usage {
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
+  echo " -V   - output qfds command line (expand any bash variables that may be presente)"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -193,6 +194,7 @@ if [ "$MPIRUN_MCA" != "" ]; then
   MCA=$MPIRUN_MCA
 fi
 
+ECHO=
 nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
@@ -228,7 +230,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:Ef:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
+while getopts 'ACd:e:Ef:hHiIm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -334,6 +336,9 @@ case $OPTION  in
    ;;
   v)
    showinput=1
+   ;;
+  V)
+   ECHO=echo
    ;;
   w)
    walltime="$OPTARG"
