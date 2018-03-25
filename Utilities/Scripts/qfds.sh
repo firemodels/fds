@@ -200,12 +200,17 @@ nopenmp_threads=1
 use_installed=
 use_debug=
 use_devel=
-use_intel_mpi=
+use_intel_mpi=1
+nosocket="1"
+# the mac doesn't have Intel MPI
+if [ "`uname`" == "Darwin" ]; then
+  use_intel_mpi=
+  nosocket=
+fi
 dir=.
 benchmark=no
 showinput=0
 REPORT_BINDINGS="--report-bindings"
-nosocket=
 exe=
 STARTUP=
 if [ "$QFDS_STARTUP" != "" ]; then
@@ -228,7 +233,7 @@ fi
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:Ef:hHiIm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
+while getopts 'ACd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -264,6 +269,10 @@ case $OPTION  in
   I)
    use_intel_mpi=1
    nosocket="1"
+   ;;
+  L)
+   use_intel_mpi=
+   nosocket=
    ;;
   M)
    MCA="--mca plm_rsh_agent /usr/bin/ssh "
