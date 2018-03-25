@@ -22,6 +22,8 @@ export STOPFDSMAXITER=
 DV=
 TCP=
 EXE=
+showcommandline=
+showscript=
 
 INTEL="-I"
 # the mac doesn't have Intel MPI
@@ -63,13 +65,15 @@ echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "-s - stop FDS runs"
 echo "-u - use development version of FDS"
+echo "-v - show script run by qfds.sh for each validation case"
+echo "-V - show qfds.sh command line for each validation case"
 echo "-x - do not copy FDS input files"
 echo "-y - overwrite existing files"
 exit
 }
 
 DEBUG=$OPENMP
-while getopts 'be:EhIj:m:o:Oq:suxy' OPTION
+while getopts 'be:EhIj:m:o:Oq:suvVxy' OPTION
 do
 case $OPTION in
   b)
@@ -113,6 +117,12 @@ case $OPTION in
   u)
   DV="-u"
    ;;
+  V)
+  showcommandline="-V"
+   ;;
+  v)
+  showscript="-v"
+   ;;
   x)
    export DONOTCOPY=1
    ;;   
@@ -127,7 +137,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $showcommandline $showscript $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"

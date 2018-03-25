@@ -120,6 +120,7 @@ function usage {
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
+  echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
   exit
@@ -177,6 +178,7 @@ fi
 
 #*** set default parameter values
 
+showcommandline=
 OMPPLACES=$OMP_PLACES
 OMPPROCBIND=$OMP_PROCBIND
 HELP=
@@ -231,9 +233,11 @@ if [ "$BACKGROUND_LOAD" == "" ]; then
    BACKGROUND_LOAD=75
 fi
 
+commandline=`echo $* | sed 's/-V//'`
+
 #*** read in parameters from command line
 
-while getopts 'ACd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vw:' OPTION
+while getopts 'ACd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -344,12 +348,20 @@ case $OPTION  in
   v)
    showinput=1
    ;;
+  V)
+   showcommandline=1
+   ;;
   w)
    walltime="$OPTARG"
    ;;
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$showcommandline" == "1" ]; then
+  echo $0 $commandline
+  exit
+fi
 
 #*** define input file
 
@@ -683,6 +695,7 @@ scriptfile=`mktemp /tmp/script.$$.XXXXXX`
 
 cat << EOF > $scriptfile
 #!/bin/bash
+# $0 $commandline
 EOF
 
 if [ "$queue" != "none" ]; then
@@ -806,6 +819,7 @@ fi
 
 if [ "$showinput" == "1" ]; then
   cat $scriptfile
+  echo
   exit
 fi
 
