@@ -229,6 +229,7 @@ $QFDS -d HVAC HVAC_tee_loss_1.fds
 $QFDS -d HVAC HVAC_tee_loss_2.fds
 $QFDS -d HVAC leak_test_2.fds
 $QFDS -d HVAC leak_test.fds
+$QFDS -d HVAC HVAC_leak_exponent.fds
 
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
@@ -265,6 +266,7 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_uscarc_cg.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 $QFDS -d Pressure_Solver pressure_iteration2d_1mesh.fds
