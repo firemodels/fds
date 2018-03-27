@@ -265,6 +265,7 @@ FN_GIT = TRIM(CHID)//'_git.txt'
 ! Smokeview File
 
 FN_SMV = TRIM(CHID)//'.smv'
+LU_INFO  = GET_FILE_NUMBER()
 
 ! Diagnostic Output File
 
@@ -1319,7 +1320,6 @@ CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 CHARACTER(33) :: TEMPCHAR
 INTEGER :: TYPE_INDICATOR
 TYPE(GEOMETRY_TYPE), POINTER :: GEOMI=>NULL()
-INTEGER :: LU_INFO
 
 ! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
 
@@ -1340,13 +1340,13 @@ IF (SET_UP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this onl
 
 ! initialize the slice info file
 
-OPEN(NEWUNIT=LU_INFO,FILE=TRIM(CHID)//'.sinfo',FORM='FORMATTED',STATUS='REPLACE')
+OPEN(UNIT=LU_INFO,FILE=TRIM(CHID)//'.sinfo',FORM='FORMATTED',STATUS='REPLACE')
 WRITE(LU_INFO,'(A)') ' '
 CLOSE(LU_INFO)
 
 ! initialize the boundary info file
 
-OPEN(NEWUNIT=LU_INFO,FILE=TRIM(CHID)//'.binfo',FORM='FORMATTED',STATUS='REPLACE')
+OPEN(UNIT=LU_INFO,FILE=TRIM(CHID)//'.binfo',FORM='FORMATTED',STATUS='REPLACE')
 WRITE(LU_INFO,'(A)') ' '
 CLOSE(LU_INFO)
 
