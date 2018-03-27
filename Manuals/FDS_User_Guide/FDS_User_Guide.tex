@@ -5075,15 +5075,35 @@ If the reaction is under defined, FDS will return an error at the start of the c
 
 \subsection{Special Topic: Two-Step Simple Chemistry}
 \label{info:two-step_simple_chemistry}
+\label{propane_flame_2reac}
 
 The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes the CO and Soot to form CO$_2$ in the second step:
 \begin{eqnarray}
-  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\rightarrow& \underbrace{ \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
-   \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\rightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
+  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
+   \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
 \end{eqnarray}
-By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest. 
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
 
-The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot are closer to the true physics of fire. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means may depend on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar, Intermediate Products. 
+The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot play an important role in the flame chemistry and radiative emission. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means depends on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar variable referred to as ``Intermediate Products.''
+
+A simple demonstration of two-step simple chemistry is given by the example cases in the {\ct Species} folder: {\ct propane\_flame\_2reac.fds} and {\ct propane\_flame\_2reac\_simple.fds}. Both cases employ the same two-step reaction scheme:
+\begin{eqnarray}
+   \mathrm{C_3H_8} + 3 \; \mathrm{O_2} & \longrightarrow & 2 \; \mathrm{CO} + \mathrm{C} + 4 \; \mathrm{H_2O} \\
+   2 \; \mathrm{CO} + \mathrm{C} + 4 \; \mathrm{H_2O} + 2 \; \mathrm{O_2} & \longrightarrow & 3 \; \mathrm{CO_2} + 4 \; \mathrm{H_2O}
+\end{eqnarray}
+The simple version of the input file specifies the combustion parameters as follows:
+\begin{lstlisting}
+&COMB ..., N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.6667 /
+&REAC FUEL='PROPANE', SOOT_YIELD=0., CO_YIELD=0., SOOT_H_FRACTION=0. /
+\end{lstlisting}
+For simplicity in setting up the complex form of the input file, the post-flame Soot (C) and CO yields are set to zero. Within the flame envelop, Soot and CO are to be generated following the specified \linebreak[4]{\ct FUEL\_C\_TO\_CO\_FRACTION} by which 2 of the 3 carbon atoms in the fuel molecule make up CO, and 1 carbon atom forms Soot with no additional hydrogen ({\ct SOOT\_H\_FRACTION=0}). To check that the two formulations are the same, Fig.~\ref{fig:propane_flame_2reac} displays the heat release and radiative heat release rates for the first few seconds of simulation.
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/propane_flame_2reac}
+\end{center}
+\caption[Results of the {\ct propane\_flame\_2reac} test cases]{Demonstration that the simplified form of the two-step simple chemistry input parameters are equivalent to a more complex form.}
+\label{fig:propane_flame_2reac}
+\end{figure}
 
 
 

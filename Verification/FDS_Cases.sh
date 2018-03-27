@@ -440,6 +440,8 @@ $QFDS -d Species methane_flame_primitive_2.fds
 $QFDS -d Species methane_flame_lumped.fds
 $QFDS -d Species methane_flame_lumped_fuel.fds
 $QFDS -d Species methane_flame_lumped_ox.fds
+$QFDS -d Species propane_flame_2reac.fds
+$QFDS -d Species propane_flame_2reac_simple.fds
 $QFDS -d Species propane_flame_deposition.fds
 $QFDS -d Species propane_flame_deposition_none.fds
 $QFDS -d Species propane_flame_deposition_gravitational.fds
