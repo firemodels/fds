@@ -1028,17 +1028,23 @@ IGNITION_WIDTH_Y = 1
 J_FLANK          = 1
 ROS_FLANK1       = 0._EB
 
-IF (VEG_LEVEL_SET_COUPLED) THEN
+! LS_NEW ->
+!IF (VEG_LEVEL_SET_COUPLED) THEN
+! LS_NEW <-
  DT_LS   = DT
  TIME_LS = T_CFD
  T_FINAL = TIME_LS + DT_LS
-ENDIF
+! LS_NEW ->
+!ENDIF
+! LS_NEW <-
 !WRITE(LU_OUTPUT,*)'vege: dt_ls,time_ls,t_final',dt_ls,time_ls,t_final
 !
 !-- Time step solution using second order Runge-Kutta -----------------------
 !
 
-DO WHILE (TIME_LS < T_FINAL)
+! LS_NEW ->
+!DO WHILE (TIME_LS < T_FINAL)
+! LS_NEW <-
 
 !
 !-- Find flank-to-flank distance at base of fire assume symmetry about ymid and
@@ -1102,17 +1108,19 @@ DO WHILE (TIME_LS < T_FINAL)
 
  TIME_LS_LAST = TIME_LS
 
-!----------------- Output time steps with increasing step (as in FDS)-------------------------
-IF ( (TIME_LS<=10.0_EB) .OR. (SUMTIME > 100.0_EB) ) THEN
- SUMTIME = 0._EB
- WRITE(LU_OUTPUT,*)'vege:LS:-------------------------------------'
- WRITE(LU_OUTPUT,*)'vege:LS:time_ls',time_ls
- WRITE(LU_OUTPUT,*)'vege:ls:dt',dt_ls
-!WRITE(LU_OUTPUT,*)'vege:LS:HW,ros_h',head_width(nx_ls/2,ny_ls/2),ros_head(nx_ls/2,ny_ls/2)
-!WRITE(LU_OUTPUT,*)'vege:LS:ros_f',ros_flank(nx_ls/2,ny_ls/2)
- WRITE(LU_OUTPUT,*)'vege:LS:max_ros for time stepping',dyn_sr_max
-ENDIF
-!------------------------------------------------------------------------------------------------
+! LS_NEW ->
+!!----------------- Output time steps with increasing step (as in FDS)-------------------------
+!IF ( (TIME_LS<=10.0_EB) .OR. (SUMTIME > 100.0_EB) ) THEN
+! SUMTIME = 0._EB
+! WRITE(LU_OUTPUT,*)'vege:LS:-------------------------------------'
+! WRITE(LU_OUTPUT,*)'vege:LS:time_ls',time_ls
+! WRITE(LU_OUTPUT,*)'vege:ls:dt',dt_ls
+!!WRITE(LU_OUTPUT,*)'vege:LS:HW,ros_h',head_width(nx_ls/2,ny_ls/2),ros_head(nx_ls/2,ny_ls/2)
+!!WRITE(LU_OUTPUT,*)'vege:LS:ros_f',ros_flank(nx_ls/2,ny_ls/2)
+! WRITE(LU_OUTPUT,*)'vege:LS:max_ros for time stepping',dyn_sr_max
+!ENDIF
+!!------------------------------------------------------------------------------------------------
+! LS_NEW <-
 
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
   WC  => WALL(IW)
@@ -1264,41 +1272,42 @@ PHI_TEMP = PHI_LS
  CALL LEVEL_SET_ADVECT_FLUX
  PHI_LS = PHI_LS - 0.5_EB*DT_LS*(FLUX0_LS + FLUX1_LS)
 
-
-IF (VEG_LEVEL_SET_UNCOUPLED) THEN
-
-!-- Variable Time Step for simulations uncoupled from the CFD computation
-
- PHI_CHECK = MAXVAL(ABS(PHI_LS - PHI_TEMP)) !Find max change in phi
-
- !write(*,*)"Phi check ",phi_check
- !write(*,*)"dt_coef",dt_coef
-
- IF (IGNITION) THEN
-     ! If any phi values change by more than 0.5, or all change less
-     ! than 0.1 (both values are arbitrary), during one time step,
-     ! then adjust time step accordingly.
-
-     IF (PHI_CHECK > 0.5_EB) THEN
-         ! Cut time step in half and cycle the do-while loop
-         DT_COEF = 0.5_EB * DT_COEF
-         DT_LS = DT_COEF * MIN(DX_LS,DY_LS)/DYN_SR_MAX
-         DT_LS = MIN(DT_LS,100._EB)
-         PHI_LS = PHI_TEMP ! Exchange for previous phi and cycle
-         WRITE(*,*)"Halving time step."
-         CYCLE
-     ENDIF
-
-     ! Increase time step by 1/4 if changes are small
-     IF (PHI_CHECK < 0.1_EB) DT_COEF = DT_COEF * 1.25_EB
-
-     ! Dynamic Spread Rate Max
-     DYN_SR_MAX = MAX(DYN_SR_MAX,0.01_EB) ! dyn_sr_max must be g.t. zero
-     DT_LS = DT_COEF * MIN(DX_LS,DY_LS)/DYN_SR_MAX
-     DT_LS = MIN(DT_LS,100._EB)
-
- ENDIF
-ENDIF
+! LS_NEW ->
+!IF (VEG_LEVEL_SET_UNCOUPLED) THEN
+!
+!!-- Variable Time Step for simulations uncoupled from the CFD computation
+!
+! PHI_CHECK = MAXVAL(ABS(PHI_LS - PHI_TEMP)) !Find max change in phi
+!
+! !write(*,*)"Phi check ",phi_check
+! !write(*,*)"dt_coef",dt_coef
+!
+! IF (IGNITION) THEN
+!     ! If any phi values change by more than 0.5, or all change less
+!     ! than 0.1 (both values are arbitrary), during one time step,
+!     ! then adjust time step accordingly.
+!
+!     IF (PHI_CHECK > 0.5_EB) THEN
+!         ! Cut time step in half and cycle the do-while loop
+!         DT_COEF = 0.5_EB * DT_COEF
+!         DT_LS = DT_COEF * MIN(DX_LS,DY_LS)/DYN_SR_MAX
+!         DT_LS = MIN(DT_LS,100._EB)
+!         PHI_LS = PHI_TEMP ! Exchange for previous phi and cycle
+!         WRITE(*,*)"Halving time step."
+!         CYCLE
+!     ENDIF
+!
+!     ! Increase time step by 1/4 if changes are small
+!     IF (PHI_CHECK < 0.1_EB) DT_COEF = DT_COEF * 1.25_EB
+!
+!     ! Dynamic Spread Rate Max
+!     DYN_SR_MAX = MAX(DYN_SR_MAX,0.01_EB) ! dyn_sr_max must be g.t. zero
+!     DT_LS = DT_COEF * MIN(DX_LS,DY_LS)/DYN_SR_MAX
+!     DT_LS = MIN(DT_LS,100._EB)
+!
+! ENDIF
+!ENDIF
+! LS_NEW <-
 
  ! **********************************************************
 
@@ -1316,7 +1325,10 @@ ENDIF
  SUM_T_SLCF = SUM_T_SLCF + DT_LS
 
  !--- Output slice file for smokeview
- IF (SUM_T_SLCF >= DT_OUTPUT) THEN
+! LS_NEW ->
+!IF (SUM_T_SLCF >= DT_OUTPUT) THEN
+ IF (SUM_T_SLCF >= DT_OUTPUT .AND. .NOT. RK2_PREDICTOR_LS) THEN
+! LS_NEW <-
   SUM_T_SLCF = 0._EB
   PHI_OUT = REAL(PHI_LS,FB)
   TIME_LS_OUT = REAL(TIME_LS,FB)
@@ -1325,70 +1337,30 @@ ENDIF
   WRITE(LU_SLCF_LS) ((-PHI_OUT(I,J),I=1,NX_LS),J=1,NY_LS)
  ENDIF
 !
-ENDDO !While loop
+! LS_NEW ->
+!ENDDO !While loop
+! LS_NEW <-
 
+! LS_NEW ->
 ! ******  Write arrays to file **************
-IF (VEG_LEVEL_SET_UNCOUPLED) THEN
- CALL CPU_TIME(CPUTIME)
- LS_T_END = CPUTIME
- WRITE(LU_OUTPUT,*)'Uncoupled Level Set CPU Time: ',LS_T_END - LS_T_BEG
+!IF (VEG_LEVEL_SET_UNCOUPLED) THEN
+! CALL CPU_TIME(CPUTIME)
+! LS_T_END = CPUTIME
+! WRITE(LU_OUTPUT,*)'Uncoupled Level Set CPU Time: ',LS_T_END - LS_T_BEG
+!!
+! LU_TOA_LS = GET_FILE_NUMBER()
+! OPEN(LU_TOA_LS,FILE='time_of_arrival.toa',STATUS='REPLACE')
+! WRITE(LU_TOA_LS,'(I5)') NX_LS,NY_LS
+! WRITE(LU_TOA_LS,'(F7.2)') XS,XF,YS,YF
+!!Write across row (TOA(1,1), TOA(1,2), ...) to match Farsite output
+! WRITE(LU_TOA_LS,'(F7.2)') ((TOA(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
+! CLOSE(LU_TOA_LS)
 !
- LU_TOA_LS = GET_FILE_NUMBER()
- OPEN(LU_TOA_LS,FILE='time_of_arrival.toa',STATUS='REPLACE')
- WRITE(LU_TOA_LS,'(I5)') NX_LS,NY_LS
- WRITE(LU_TOA_LS,'(F7.2)') XS,XF,YS,YF
-!Write across row (TOA(1,1), TOA(1,2), ...) to match Farsite output
- WRITE(LU_TOA_LS,'(F7.2)') ((TOA(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
- CLOSE(LU_TOA_LS)
-
-! Diagnostics at end of run
-!OPEN(9998,FILE='Phi_S.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((PHI_S(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='Phi_W.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((PHI_W(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='alt.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F10.5)') ((ZT(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='DZTDX.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((DZTDX(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='DZTDY.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((DZTDY(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='Theta_Ellipse.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((Theta_Elps(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-
-!OPEN(9998,FILE='UMF.txt',STATUS='REPLACE')
-!WRITE(9998,'(I5)') NX_LS,NY_LS
-!WRITE(9998,'(F7.2)') XS,XF,YS,YF
-!WRITE(9998,'(F7.2)') ((UMF(IDUM,JDUM),JDUM=1,NY_LS),IDUM=1,NX_LS)
-!CLOSE(9998)
-! ************************************************************
-
-CLOSE(LU_SLCF_LS)
-CLOSE(LU_TOA_LS)
-
-ENDIF
+!CLOSE(LU_SLCF_LS)
+!CLOSE(LU_TOA_LS)
+!
+!ENDIF
+! LS_NEW <-
 
 END SUBROUTINE LEVEL_SET_FIRESPREAD
 
