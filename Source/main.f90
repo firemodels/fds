@@ -220,7 +220,10 @@ CALL STOP_CHECK(1)
 
 ! Initialize ScaRC solver
 
-IF (PRES_METHOD == 'SCARC') CALL SCARC_SETUP
+IF (PRES_METHOD == 'SCARC') THEN
+   CALL SCARC_SETUP
+   CALL STOP_CHECK(1)
+ENDIF
 
 ! Initialize turb arrays
 
