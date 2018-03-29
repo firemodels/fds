@@ -1649,7 +1649,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       LP%RE  = RHO_G*QREL*2._EB*R_D/MU_AIR
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
 
-      ! Drag reduction model for liquid and solid droplets
+      ! Drag reduction model for liquid droplets and solid particles
 
       WAKE_VEL=1.0_EB
       DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
