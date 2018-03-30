@@ -1402,6 +1402,10 @@ MESH_LOOP: DO NM=1,NMESHES
    M%ZC(0)      = M%ZS - 0.5_EB*M%DZ(0)
    M%ZC(M%KBP1) = M%ZF + 0.5_EB*M%DZ(M%KBP1)
 
+   ! Set default value for USE_ATMOSPHERIC_INTERPOLATION, may be overwritten by user on WIND line
+
+   IF (STRATIFICATION .AND. ANY(M%DZ>1.999_EB)) USE_ATMOSPHERIC_INTERPOLATION=.TRUE.
+
    ! Set up arrays that will return coordinate positions
 
    NIPX   = 500*M%IBAR
@@ -1934,7 +1938,6 @@ V0                  = 0._EB     ! m/s
 W0                  = 0._EB     ! m/s
 Z_0                 = 0.03_EB   ! m
 Z_REF               = 2._EB     ! m
-USE_ATMOSPHERIC_INTERPOLATION = .FALSE.
 
 ! Initial read of the WIND line
 
