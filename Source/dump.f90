@@ -3029,9 +3029,7 @@ ENDIF WRITE_SCARC
 
 GLMAT_IF : IF(TRIM(PRES_METHOD)=='GLMAT') THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' GlMat Information'
-#ifdef WITH_PARDISO
-   WRITE(LU_OUTPUT,'(3X,A)') 'Global Pressure solver       : Intel MKL Pardiso'
-#elif WITH_CLUSTER_SPARSE_SOLVER
+#ifdef WITH_MKL
    WRITE(LU_OUTPUT,'(3X,A)') 'Global Pressure solver       : Intel MKL Cluster Sparse Solver'
 #endif
 ENDIF GLMAT_IF
