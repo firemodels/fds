@@ -231,7 +231,7 @@ A similar expression is obtained when viewing the interpolation from Mesh 2.
 
 Note that this interpolation may be thought of as a central difference for the temperature gradient.  The corresponding density variation is nonlinear.  The mass fluxes computed by the flux limiter scheme described above still match at the refined mesh interface and therefore do not require adjustment.
 
-This special treatment of the ghost cell density may be accessed in the source code by searching on the logical flag {\ct ATMOSPHERIC\_INTERPOLATION}.  By default, the procedure is invoked at vertical mesh refinement boundaries only if {\ct STRATIFICATION=.TRUE.} and if the vertical cell spacing {\ct DZ} on any mesh exceeds 2 m.  For smaller grid spacing, the spurious temperature affect is not noticeable, and it is deemed more appropriate to keep the temperature variation consistent with the flux limited interface density.  Setting the developer logical flag {\ct USE\_ATMOSPHERIC\_INTERPOLATION} on the {\ct WIND} line overrides the default behavior.
+This special treatment of the ghost cell density may be accessed in the source code by searching on the logical flag {\ct ATMOSPHERIC\_INTERPOLATION}.  By default, the procedure is invoked at vertical mesh refinement boundaries only if {\ct STRATIFICATION=.TRUE.} and if the vertical cell spacing {\ct DZ} on any mesh exceeds 2 m.  For smaller grid spacing the spurious temperature effect is not noticeable and it is deemed more appropriate to keep the temperature variation consistent with the flux limited interface density.  Setting the developer logical flag {\ct USE\_ATMOSPHERIC\_INTERPOLATION} on the {\ct WIND} line overrides the default behavior.
 
 \begin{figure}[h!]
 
