@@ -124,9 +124,11 @@ REAL (EB)     :: SCARC_COARSE_ACCURACY   = 1.E-14_EB        !> Requested accurac
 REAL (EB)     :: SCARC_COARSE_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
 INTEGER       :: SCARC_COARSE_LEVEL      =  1               !> Coarse grid level for twolevel-Krylov method (default minimum level)
 
+#ifdef WITH_MKL
 !> Parameter for MKL solver
 CHARACTER(40) :: SCARC_MKL       = 'GLOBAL'                 !> Type of MKL solver (LOCAL->Pardiso/GLOBAL->Cluster_Sparse_solver)
 CHARACTER(40) :: SCARC_MKL_MTYPE = 'SYMMETRIC'              !> Type of MKL matrix (SYMMETRIC/UNSYMMETRIC)
+#endif
 
 !> Debugging parameters
 CHARACTER(40) :: SCARC_DEBUG   = 'NONE'                     !> Debugging level (NONE/LESS/MUCH)
@@ -804,7 +806,7 @@ REAL(EB) :: XS, XF, YS, YF, ZS, ZF                                    !> x-, y- 
 TYPE (OSCARC_TYPE)       , ALLOCATABLE, DIMENSION(:)   :: OSCARC      !> ScaRC type on other mesh
 TYPE (SCARC_LEVEL_TYPE)  , ALLOCATABLE, DIMENSION(:)   :: LEVEL       !> of level related information
 TYPE (SCARC_SYSTEM_TYPE) , ALLOCATABLE, DIMENSION(:)   :: SYSTEM      !> system matrices (Poisson/Transfer/AMG)
-TYPE (SCARC_CYCLING_TYPE), ALLOCATABLE, DIMENSION(:)   :: CYCLING     !> geometric multigrid 
+TYPE (SCARC_CYCLING_TYPE), ALLOCATABLE, DIMENSION(:)   :: CYCLING     !> cycling information for  multigrid (V/W/F)
 TYPE (SCARC_FFT_TYPE)    , ALLOCATABLE, DIMENSION(:)   :: FFT         !> FFT preconditioner
 TYPE (SCARC_SCOPE_TYPE)  , ALLOCATABLE, DIMENSION(:,:) :: SCOPE       !> different scopes for solution vector
 #ifdef WITH_MKL
@@ -817,10 +819,20 @@ END TYPE SCARC_TYPE
 !> Basic ScaRC type, different solver types and stack of used solvers
 !> --------------------------------------------------------------------------------------------
 TYPE (SCARC_TYPE), SAVE, DIMENSION(:), ALLOCATABLE, TARGET :: SCARC
-TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: MAIN_KRYLOV, MAIN_MULTIGRID, MAIN_CLUSTER
-TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: COARSE_KRYLOV, COARSE_CLUSTER, COARSE_PARDISO
-TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: PRECON_JACOBI, PRECON_SSOR, PRECON_FFT, PRECON_PARDISO, PRECON_CLUSTER, PRECON_MULTIGRID
-TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: SMOOTH_JACOBI, SMOOTH_SSOR, SMOOTH_FFT, SMOOTH_PARDISO, SMOOTH_CLUSTER
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: MAIN_KRYLOV, MAIN_MULTIGRID
+#ifdef WITH_MKL
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: MAIN_LUDECOMP
+#endif
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: COARSE_KRYLOV
+#ifdef WITH_MKL
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: COARSE_CLUSTER, COARSE_PARDISO
+#endif
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: PRECON_JACOBI, PRECON_SSOR, PRECON_FFT, PRECON_MULTIGRID
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: SMOOTH_JACOBI, SMOOTH_SSOR, SMOOTH_FFT
+#ifdef WITH_MKL
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: PRECON_PARDISO, PRECON_CLUSTER
+TYPE (SCARC_SOLVER_TYPE) , SAVE, TARGET :: SMOOTH_PARDISO, SMOOTH_CLUSTER
+#endif
 TYPE (SCARC_STACK_TYPE)  , SAVE, DIMENSION(:), ALLOCATABLE :: STACK
 TYPE (SCARC_TIME_TYPE)   , SAVE, DIMENSION(:), ALLOCATABLE :: TSETUP, TSUM, TSTEP
 TYPE (SCARC_MESSAGE_TYPE), SAVE :: MSG
@@ -835,23 +847,23 @@ REAL(EB):: TNOW
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SETUP_MESSAGING                !> setup messaging/debugging mechanisms
-CALL SCARC_SETUP_TIMING                   !> setup time measurment for different parts of code
+CALL SCARC_SETUP_MESSAGING                                                 !> setup messaging/debugging mechanisms
+CALL SCARC_SETUP_TIMING                                                    !> setup time measurment for different parts of code
 
-CALL SCARC_PARSE_INPUT                    !> parse input parameters for ScaRC
+CALL SCARC_PARSE_INPUT           ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> parse input parameters for ScaRC
 
-CALL SCARC_SETUP_LEVELS                   !> setup different grid levels
-CALL SCARC_SETUP_TYPES                    !> setup basic ScaRC-types for all used grid levels
-CALL SCARC_SETUP_MESHES                   !> setup mesh information
-CALL SCARC_SETUP_DISCRETIZATION           !> setup discretization information
-CALL SCARC_SETUP_INTERFACES               !> setup structures related to mesh interfaces
-CALL SCARC_SETUP_GLOBALS                  !> setup global variables on fine level
-CALL SCARC_SETUP_WALLS                    !> setup information along neighboring walls
-CALL SCARC_SETUP_EXCHANGE                 !> setup information for data exchange
-CALL SCARC_SETUP_SYSTEM                   !> setup linear system of equations
-CALL SCARC_SETUP_AMG                      !> setup algebraic coarsening if requested (AMG only)
-CALL SCARC_SETUP_METHODS                  !> setup types and parameters for all needed solvers
-CALL SCARC_SETUP_VECTORS                  !> setup vectors for all needed solvers
+CALL SCARC_SETUP_LEVELS          ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup different grid levels
+CALL SCARC_SETUP_TYPES           ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup basic ScaRC-types for all used grid levels
+CALL SCARC_SETUP_MESHES          ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup mesh information
+CALL SCARC_SETUP_DISCRETIZATION  ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup discretization information
+CALL SCARC_SETUP_INTERFACES      ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup structures related to mesh interfaces
+CALL SCARC_SETUP_GLOBALS         ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup global variables on fine level
+CALL SCARC_SETUP_WALLS           ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup information along neighboring walls
+CALL SCARC_SETUP_EXCHANGE        ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup information for data exchange
+CALL SCARC_SETUP_SYSTEM          ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup linear system of equations
+CALL SCARC_SETUP_AMG             ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup algebraic coarsening if requested (AMG only)
+CALL SCARC_SETUP_METHODS         ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup types and parameters for all needed solvers
+CALL SCARC_SETUP_VECTORS         ; IF (STOP_STATUS==SETUP_STOP) RETURN     !> setup vectors for all needed solvers
 
 TSETUP(MYID+1)%OVERALL = TSETUP(MYID+1)%OVERALL + CURRENT_TIME() - TNOW
 END SUBROUTINE SCARC_SETUP
@@ -943,14 +955,17 @@ INTEGER, INTENT(IN) :: NPARAM
 
 IF (TRIM(CPARAM) /= 'NONE') THEN
    WRITE(MSG%TEXT,'(5A)') TRIM(MSG%HISTORY(MSG%NCURRENT)),' : ', TRIM(CTEXT), ' : ',TRIM(CPARAM)
-   CALL SHUTDOWN(MSG%TEXT); RETURN
+   IF (MYID == 0) WRITE(LU_ERR,'(/A,A,A,A,A,A)') TRIM(CTEXT),' : ',TRIM(CPARAM),' (CHID: ',TRIM(CHID),')'
 ELSE IF (NPARAM /= -999) THEN
    WRITE(MSG%TEXT,'(4A, I8)') TRIM(MSG%HISTORY(MSG%NCURRENT)), ' : ',TRIM(CTEXT), ' : ',NPARAM
-   CALL SHUTDOWN(MSG%TEXT); RETURN
+   IF (MYID == 0) WRITE(LU_ERR,'(/A,A,I8,A,A,A)') TRIM(CTEXT),' : ',NPARAM,' (CHID: ',TRIM(CHID),')'
 ELSE 
    WRITE(MSG%TEXT,'(3A)') TRIM(MSG%HISTORY(MSG%NCURRENT)), ' : ',TRIM(CTEXT)
-   CALL SHUTDOWN(MSG%TEXT); RETURN
+   IF (MYID == 0) WRITE(LU_ERR,'(/A,A,A,A)') TRIM(CTEXT),' (CHID: ',TRIM(CHID),')'
 ENDIF
+
+STOP_STATUS = SETUP_STOP
+RETURN
 
 END SUBROUTINE SCARC_SHUTDOWN
 
@@ -958,11 +973,15 @@ END SUBROUTINE SCARC_SHUTDOWN
 !> Determine types of input parameters
 !> ----------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_PARSE_INPUT
+CHARACTER(80) :: MKL_ERROR_PARDISO, MKL_ERROR_CLUSTER
 
 CALL SCARC_ENTER_ROUTINE('SCARC_PARSE_INPUT')
 
 ITERATE_PRESSURE = .TRUE.  ! Although there is no need to do pressure iterations to drive down velocity error
                            ! leave it .TRUE. to write out velocity error diagnostics.
+
+MKL_ERROR_PARDISO = 'Error: MKL Library compile flag not defined, Pardiso solver not available'
+MKL_ERROR_CLUSTER = 'Error: MKL Library compile flag not defined, Cluster_Sparse_Solver not available'
 
 !> 
 !> ------------- set type of discretization
@@ -1037,26 +1056,37 @@ SELECT CASE (TRIM(SCARC_METHOD))
                   TYPE_SMOOTH = NSCARC_RELAX_JACOBI
                CASE ('SSOR')
                   TYPE_SMOOTH = NSCARC_RELAX_SSOR
-               CASE ('PARDISO')
-                  TYPE_SMOOTH = NSCARC_RELAX_PARDISO
-               CASE ('CLUSTER')
-                  TYPE_SMOOTH = NSCARC_RELAX_CLUSTER
                CASE ('FFT')
                   TYPE_PRECON = NSCARC_RELAX_FFT
+               CASE ('PARDISO')
+#ifdef WITH_MKL
+                  TYPE_SMOOTH = NSCARC_RELAX_PARDISO
+#else
+                  CALL SCARC_SHUTDOWN(MKL_ERROR_PARDISO, 'NONE', -999)
+#endif
+
+               CASE ('CLUSTER')
+#ifdef WITH_MKL
+                  TYPE_SMOOTH = NSCARC_RELAX_CLUSTER
+#else
+                  CALL SCARC_SHUTDOWN(MKL_ERROR_CLUSTER, 'NONE', -999)
+#endif
             END SELECT
          CASE ('FFT')
             TYPE_PRECON = NSCARC_RELAX_FFT
-#ifdef WITH_MKL
          CASE ('PARDISO')
+#ifdef WITH_MKL
             TYPE_PRECON   = NSCARC_RELAX_PARDISO
-            TYPE_LUDECOMP  = NSCARC_MKL_LOCAL
+            TYPE_LUDECOMP = NSCARC_MKL_LOCAL
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_PARDISO, 'NONE', -999)
+#endif
          CASE ('CLUSTER')
-            !IF (N_MPI_PROCESSES > 1) THEN
-               TYPE_PRECON = NSCARC_RELAX_CLUSTER
-            !ELSE     
-            !   TYPE_PRECON = NSCARC_RELAX_PARDISO           ! in case of only 1 process, use Pardiso solver
-            !ENDIF
+#ifdef WITH_MKL
+            TYPE_PRECON   = NSCARC_RELAX_CLUSTER
             TYPE_LUDECOMP = NSCARC_MKL_GLOBAL
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_CLUSTER, 'NONE', -999)
 #endif
          CASE DEFAULT
             CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_PRECON, -999)
@@ -1084,11 +1114,17 @@ SELECT CASE (TRIM(SCARC_METHOD))
             TYPE_SMOOTH = NSCARC_RELAX_SSOR
          CASE ('FFT')
             TYPE_SMOOTH = NSCARC_RELAX_FFT
-#ifdef WITH_MKL
          CASE ('PARDISO')
+#ifdef WITH_MKL
             TYPE_SMOOTH = NSCARC_RELAX_PARDISO
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_PARDISO, 'NONE', -999)
+#endif
          CASE ('CLUSTER')
+#ifdef WITH_MKL
             TYPE_SMOOTH = NSCARC_RELAX_CLUSTER
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_CLUSTER, 'NONE', -999)
 #endif
          CASE DEFAULT
             CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_SMOOTH, -999)
@@ -1102,14 +1138,17 @@ SELECT CASE (TRIM(SCARC_METHOD))
       !> set type of MKL method (global/local)
       SELECT CASE (TRIM(SCARC_MKL))                      !Achtung, hier noch nacharbeiten!
          CASE ('GLOBAL')
+#ifdef WITH_MKL
             TYPE_LUDECOMP = NSCARC_MKL_GLOBAL
-            !IF (N_MPI_PROCESSES > 1) THEN
-               TYPE_LUDECOMP = NSCARC_MKL_GLOBAL
-            !ELSE
-            !   TYPE_LUDECOMP = NSCARC_MKL_LOCAL
-            !ENDIF
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_CLUSTER, 'NONE', -999)
+#endif
          CASE ('LOCAL')
+#ifdef WITH_MKL
             TYPE_LUDECOMP = NSCARC_MKL_LOCAL
+#else
+            CALL SCARC_SHUTDOWN(MKL_ERROR_PARDISO, 'NONE', -999)
+#endif
          CASE DEFAULT
             CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_MKL, -999)
       END SELECT
@@ -1195,8 +1234,12 @@ SELECT CASE (TRIM(SCARC_COARSE))
       TYPE_COARSE = NSCARC_COARSE_ITERATIVE
       TYPE_KRYLOV = NSCARC_KRYLOV_CG
    CASE ('DIRECT')
+#ifdef WITH_MKL
       TYPE_COARSE   = NSCARC_COARSE_DIRECT
       TYPE_LUDECOMP = NSCARC_MKL_COARSE
+#else
+      CALL SCARC_SHUTDOWN(MKL_ERROR_CLUSTER, 'NONE', -999)
+#endif
    CASE DEFAULT
       CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_COARSE, -999)
 END SELECT
@@ -5061,7 +5104,7 @@ SELECT_METHOD: SELECT CASE (TRIM(SCARC_METHOD))
    CASE ('MKL')
 
       NSTACK = NSCARC_STACK_ROOT
-      STACK(NSTACK)%SOLVER => MAIN_CLUSTER
+      STACK(NSTACK)%SOLVER => MAIN_LUDECOMP
       CALL SCARC_SETUP_LUDECOMP(NSCARC_SOLVER_MAIN, NSCARC_SCOPE_ONE, NSTACK, NLEVEL_MIN, NLEVEL_MIN)
 
       SELECT_MKL: SELECT CASE (TYPE_LUDECOMP)
@@ -5300,6 +5343,8 @@ CALL SCARC_LEAVE_ROUTINE()
 
 END SUBROUTINE SCARC_SETUP_COARSESOLVER
 
+
+#ifdef WITH_MKL
 !> ----------------------------------------------------------------------------------------------------
 !> Allocate and initialize vectors for MKL-methods
 !> ----------------------------------------------------------------------------------------------------
@@ -5333,6 +5378,7 @@ TYP%TYPE_NLMAX  = NLMAX
 CALL SCARC_SETUP_POINTERS(.TRUE.,.TRUE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,.TRUE., NSTACK)
 
 END SUBROUTINE SCARC_SETUP_LUDECOMP
+#endif
 
 !> ----------------------------------------------------------------------------------------------------
 !> Allocate and initialize vectors for Krylov method
@@ -5366,6 +5412,7 @@ SELECT CASE(TYPE_PRECON)
       CON%NIT   =  SCARC_PRECON_ITERATIONS
       !CON%OMEGA =  SCARC_PRECON_OMEGA
       CON%OMEGA = 1.0_EB
+#ifdef WITH_MKL
    CASE (NSCARC_RELAX_PARDISO)
       SOL%CNAME = 'SCARC_PRECON_PARDISO'
       CON%EPS   =  SCARC_PRECON_ACCURACY             
@@ -5377,6 +5424,7 @@ SELECT CASE(TYPE_PRECON)
       CON%EPS   =  SCARC_PRECON_ACCURACY            
       CON%NIT   = 1
       CON%OMEGA = 1.0_EB
+#endif
    CASE DEFAULT                                 
       CALL SCARC_SHUTDOWN('Error with input parameter ', 'NONE', TYPE_PRECON)
 END SELECT
@@ -5436,10 +5484,12 @@ SELECT CASE(TYPE_SMOOTH)
       SOL%CNAME = 'SCARC_SMOOTH_SSOR'
    CASE (NSCARC_RELAX_FFT)
       SOL%CNAME = 'SCARC_SMOOTH_FFT'
+#ifdef WITH_MKL
    CASE (NSCARC_RELAX_PARDISO)
       SOL%CNAME = 'SCARC_SMOOTH_PARDISO'
    CASE (NSCARC_RELAX_CLUSTER)
       SOL%CNAME = 'SCARC_SMOOTH_CLUSTER'
+#endif
    CASE DEFAULT                                               !> No other choices possible
       CALL SCARC_SHUTDOWN('Error with input parameter ', 'NONE', TYPE_SMOOTH)
 END SELECT
@@ -8940,7 +8990,7 @@ CALL SCARC_ENTER_ROUTINE('SCARC_MATVEC_PRODUCT')
 !> overlapped values of adjacent neighbor
 !>
 TYPE_VECTOR = NVECTOR1
-IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
+CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NL)
 
 !> 
 !> Perform global matrix-vector product:
@@ -9199,9 +9249,10 @@ INTEGER  :: NM, I, J, K, IC, ICOL!, IROW, JCOL
 REAL(EB) :: AUX, OMEGA_SSOR=1.5_EB
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (SCARC_LEVEL_TYPE) , POINTER :: L
-TYPE (SCARC_MATRIX_TYPE), POINTER :: A, AS
+TYPE (SCARC_MATRIX_TYPE), POINTER :: A
 TYPE (SCARC_FFT_TYPE)   , POINTER :: FFT
 #ifdef WITH_MKL
+TYPE (SCARC_MATRIX_TYPE), POINTER :: AS
 TYPE (SCARC_MKL_TYPE), POINTER :: MKL
 #endif
 
@@ -9390,10 +9441,10 @@ TSUM(MYID+1)%PRECON =TSUM(MYID+1)%PRECON+CURRENT_TIME()-TNOW
 END SUBROUTINE SCARC_BLOCK_SOLVER
 
 
+#ifdef WITH_MKL
 !> ------------------------------------------------------------------------------------------------
 !> Perform global Pardiso-method based on MKL
 !> ------------------------------------------------------------------------------------------------
-#ifdef WITH_MKL
 SUBROUTINE SCARC_METHOD_CLUSTER(NSTACK, NPARENT, NLEVEL)
 INTEGER, INTENT(IN) :: NSTACK, NPARENT, NLEVEL
 INTEGER ::  NM, NL
@@ -9446,10 +9497,10 @@ END SUBROUTINE SCARC_METHOD_CLUSTER
 #endif
 
 
+#ifdef WITH_MKL
 !> ------------------------------------------------------------------------------------------------
 !> Perform global Pardiso-method based on MKL
 !> ------------------------------------------------------------------------------------------------
-#ifdef WITH_MKL
 SUBROUTINE SCARC_METHOD_PARDISO(NSTACK, NPARENT, NLEVEL)
 INTEGER, INTENT(IN) :: NSTACK, NPARENT, NLEVEL
 INTEGER ::  NM, NL !, IP, IC
@@ -10126,12 +10177,16 @@ SMOOTH_LOOP: DO ITE=1, NIT
 
    CALL SCARC_INCREASE_ITERATION_COUNTS(ITE)
 
+#ifdef WITH_MKL
    IF (TYPE_SMOOTH == NSCARC_RELAX_PARDISO .OR. TYPE_SMOOTH == NSCARC_RELAX_CLUSTER) THEN
       CALL SCARC_VECTOR_COPY(D, Z, 1.0_EB, NL)
       CALL SCARC_BLOCK_SOLVER (Z, D, NS, NP, NL)                        !>  D := PRECON (D)
    ELSE
       CALL SCARC_BLOCK_SOLVER (D, D, NS, NP, NL)                        !>  D := PRECON (D)
    ENDIF
+#else
+   CALL SCARC_BLOCK_SOLVER (D, D, NS, NP, NL)                           !>  D := PRECON (D)
+#endif
 
    CALL SCARC_VECTOR_SUM      (D, X, OMEGA, 1.0_EB, NL)                 !>  X := OMEGA*D + X
    CALL SCARC_MATVEC_PRODUCT  (X, D, NL)                                !>  D := A*X
