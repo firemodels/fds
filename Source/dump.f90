@@ -2998,7 +2998,7 @@ ENDIF WRITE_RADIATION
 
 ! Write out SCARC info
 
-WRITE_SCARC: IF (TRIM(PRES_METHOD)=='SCARC'.OR.TRIM(PRES_METHOD)=='USCARC') THEN
+WRITE_SCARC: IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
    WRITE(LU_OUTPUT,'(//1X,A,A/)')     TRIM(PRES_METHOD), ' Information'
    WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Discretization        ', TRIM(SCARC_DISCRETIZATION)
    WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Global solver         ', TRIM(SCARC_METHOD)
@@ -3426,7 +3426,7 @@ IF (ITERATE_PRESSURE) THEN
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
-IF (TRIM(PRES_METHOD)=='SCARC'.OR.TRIM(PRES_METHOD)=='USCARC') THEN
+IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
    WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
                                               ', residual ',SCARC_RESIDUAL,&
                                               ', convergence rate  ',SCARC_CAPPA
