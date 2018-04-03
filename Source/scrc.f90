@@ -5810,7 +5810,6 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       MKL%MSGLVL =  0       ! print statistical information
       MKL%MTYPE  = -2       ! Matrix type real non-symmetric
       
-WRITE(*,*) 'TYPE_PRECISION =', TYPE_PRECISION, ': IPARM(28)=',MKL%IPARM(28)
       ! perform only reordering and symbolic factorization
       MKL%PHASE = 11
       CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, L%NCS, AS%VAL, AS%ROW, AS%COL, &
