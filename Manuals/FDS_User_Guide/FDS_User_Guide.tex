@@ -8063,9 +8063,7 @@ coordinate parameters, {\ct XB}, all of which must be contained within the same 
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example,
-heat release rate per unit volume is an appropriate output quantity. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
 
 \subsubsection{Mass Integral}
 

@@ -240,7 +240,7 @@ ID = IC + L
 IS = 12 + 4*L
 
 
-IF (PRES_METHOD /= 'SCARC') THEN
+IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
 
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
@@ -6809,7 +6809,7 @@ ID = IC + L
 IS = 9 + 4*L
 
 
-IF (PRES_METHOD /= 'SCARC') THEN
+IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
 
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 

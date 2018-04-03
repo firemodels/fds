@@ -45,7 +45,8 @@ PUBLIC SCARC_CSV                               !> Level for plotting csv informa
 PUBLIC SCARC_RESIDUAL                          !> Residual of iterative solver
 PUBLIC SCARC_ITERATIONS                        !> Number of iterations
 PUBLIC SCARC_CAPPA                             !> Convergence rate
-PUBLIC SCARC_ACCURACY                          !> Chosen accuracy type 
+PUBLIC SCARC_ACCURACY                          !> Chosen accuracy type (relative/absolute)
+PUBLIC SCARC_PRECISION                         !> Single/double precision for preconditioning or LU-decomposition
 
 PUBLIC SCARC_KRYLOV                            !> Type of Krylov method
 PUBLIC SCARC_KRYLOV_ITERATIONS                 !> Maximum number of iterations for Krylov method
@@ -76,11 +77,12 @@ PUBLIC SCARC_COARSE_ACCURACY                   !> Requested accuracy for coarse 
 PUBLIC SCARC_COARSE_OMEGA                      !> Relaxation parameter for coarse grid solver 
 PUBLIC SCARC_COARSE_LEVEL                      !> Coarse grid level
 
+
 !> ------------------------------------------------------------------------------------------------
 !> Miscellaneous declarations 
 !> ------------------------------------------------------------------------------------------------
 !> General definitions
-CHARACTER(40) :: SCARC_METHOD   = 'KRYLOV'                  !> Requested solver method (KRYLOV/MULTIGRID)
+CHARACTER(40) :: SCARC_METHOD   = 'NONE'                    !> Requested solver method (KRYLOV/MULTIGRID)
 CHARACTER(40) :: SCARC_TWOLEVEL = 'NONE'                    !> Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
 CHARACTER(40) :: SCARC_DISCRETIZATION   = 'STRUCTURED'      !> Type of discretization (STRUCTURED/UNSTRUCTURED)
 
@@ -89,6 +91,7 @@ INTEGER       :: SCARC_ITERATIONS           =  0            !> Number of iterati
 REAL (EB)     :: SCARC_RESIDUAL             =  0.0_EB       !> Residual of global selected solver
 REAL (EB)     :: SCARC_CAPPA                =  0.0_EB       !> Convergence rate of selected ScarC solver
 CHARACTER(40) :: SCARC_ACCURACY             = 'ABSOLUTE'    !> Accuracy type (ABSOLUTE/RELATIVE)
+CHARACTER(6)  :: SCARC_PRECISION            = 'DOUBLE'      !> Single/double precision for preconditioning or LU-decomposition
 
 !> Parameters for multigrid-type methods
 CHARACTER(40) :: SCARC_MULTIGRID            = 'GEOMETRIC'   !> Type of MG-method (GEOMETRIC/ALGEBRAIC)
@@ -112,7 +115,7 @@ REAL (EB)     :: SCARC_SMOOTH_ACCURACY   = 1.E-10_EB        !> Requested accurac
 REAL (EB)     :: SCARC_SMOOTH_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
 
 !> Parameters for preconditioning method (used in Krylov-methods)
-CHARACTER(40) :: SCARC_PRECON            = 'FFT'            !> Preconditioner for CG/BICG (JACOBI/SSOR/FFT/PARDISO/MG)
+CHARACTER(40) :: SCARC_PRECON                               !> Preconditioner for CG/BICG (JACOBI/SSOR/FFT/PARDISO/MG)
 INTEGER       :: SCARC_PRECON_ITERATIONS = 100              !> Max number of iterations
 REAL (EB)     :: SCARC_PRECON_ACCURACY   = 1.E-12_EB        !> Requested accuracy for convergence
 REAL (EB)     :: SCARC_PRECON_OMEGA      = 0.80E+0_EB       !> Relaxation parameter
@@ -301,6 +304,9 @@ INTEGER, PARAMETER :: NSCARC_MATRIX_SYSTEM           =  1, &    !> exchange subd
 INTEGER, PARAMETER :: NSCARC_ACCURACY_ABSOLUTE       =  1, &    !> absolute accuracy must be reached
                       NSCARC_ACCURACY_RELATIVE       =  2       !> relative accuracy must be reached
 
+INTEGER, PARAMETER :: NSCARC_PRECISION_SINGLE        =  1, &    !> single precision for preconditioning or LU-decomposition
+                      NSCARC_PRECISION_DOUBLE        =  2       !> double precision for preconditioning or LU-decomposition
+
 REAL(EB), PARAMETER:: NSCARC_MEASURE_NONE            =  0.0_EB, &
                       NSCARC_MEASURE_ONE             =  1.0_EB, &  !> coarse-grid cell
                       NSCARC_MEASURE_COARSE          =  6.0_EB, &  !> coarse-grid cell
@@ -432,6 +438,7 @@ INTEGER :: TYPE_LUDECOMP    = NSCARC_UNDEFINED_INT         !> Type of MKL method
 INTEGER :: TYPE_COARSENING  = NSCARC_UNDEFINED_INT         !> Type of coarsening algorithm for AMG
 INTEGER :: TYPE_RELAX       = NSCARC_UNDEFINED_INT         !> Type of preconditioner for iterative solver
 INTEGER :: TYPE_PRECON      = NSCARC_UNDEFINED_INT         !> Type of preconditioner for iterative solver
+INTEGER :: TYPE_PRECISION   = NSCARC_UNDEFINED_INT         !> Type of preconditioner for iterative solver
 INTEGER :: TYPE_SMOOTH      = NSCARC_UNDEFINED_INT         !> Type of smoother for multigrid method
 INTEGER :: TYPE_DEBUG       = NSCARC_UNDEFINED_INT         !> Type of debugging level
 INTEGER :: TYPE_VERBOSE     = NSCARC_UNDEFINED_INT         !> Type of verbose level
@@ -714,17 +721,18 @@ END TYPE SCARC_POINTERS_TYPE
 !> Store parameter types of different solvers
 !> --------------------------------------------------------------------------------------------
 TYPE SCARC_TYPES_TYPE
-INTEGER :: TYPE_METHOD   = NSCARC_UNDEFINED_INT     !> type of current solver
-INTEGER :: TYPE_SOLVER   = NSCARC_UNDEFINED_INT     !> type of current solver
-INTEGER :: TYPE_PARENT   = NSCARC_UNDEFINED_INT     !> parent (calling) solver
-INTEGER :: TYPE_SCOPE    = NSCARC_UNDEFINED_INT     !> scope for working vectors
-INTEGER :: TYPE_NLMIN    = NSCARC_UNDEFINED_INT     !> minimum level for that solver
-INTEGER :: TYPE_NLMAX    = NSCARC_UNDEFINED_INT     !> maximum level for that solver
-INTEGER :: TYPE_RELAX    = NSCARC_UNDEFINED_INT     !> relaxation method
-INTEGER :: TYPE_TWOLEVEL = NSCARC_UNDEFINED_INT     !> schwarz method?
-INTEGER :: TYPE_INTERPOL = NSCARC_UNDEFINED_INT     !> interpolation type
-INTEGER :: TYPE_ACCURACY = NSCARC_UNDEFINED_INT     !> accuracy requirements 
-INTEGER :: TYPE_CYCLING  = NSCARC_UNDEFINED_INT     !> multigrid cycle
+INTEGER :: TYPE_METHOD    = NSCARC_UNDEFINED_INT    !> type of current solver
+INTEGER :: TYPE_SOLVER    = NSCARC_UNDEFINED_INT    !> type of current solver
+INTEGER :: TYPE_PARENT    = NSCARC_UNDEFINED_INT    !> parent (calling) solver
+INTEGER :: TYPE_SCOPE     = NSCARC_UNDEFINED_INT    !> scope for working vectors
+INTEGER :: TYPE_NLMIN     = NSCARC_UNDEFINED_INT    !> minimum level for that solver
+INTEGER :: TYPE_NLMAX     = NSCARC_UNDEFINED_INT    !> maximum level for that solver
+INTEGER :: TYPE_RELAX     = NSCARC_UNDEFINED_INT    !> relaxation method
+INTEGER :: TYPE_TWOLEVEL  = NSCARC_UNDEFINED_INT    !> schwarz method?
+INTEGER :: TYPE_INTERPOL  = NSCARC_UNDEFINED_INT    !> interpolation type
+INTEGER :: TYPE_ACCURACY  = NSCARC_UNDEFINED_INT    !> accuracy requirements 
+INTEGER :: TYPE_PRECISION = NSCARC_UNDEFINED_INT    !> precision type for preconditioning or LU-decomposition
+INTEGER :: TYPE_CYCLING   = NSCARC_UNDEFINED_INT    !> multigrid cycle
 END TYPE SCARC_TYPES_TYPE
 
 !> --------------------------------------------------------------------------------------------
@@ -973,15 +981,16 @@ END SUBROUTINE SCARC_SHUTDOWN
 !> Determine types of input parameters
 !> ----------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_PARSE_INPUT
-CHARACTER(80) :: MKL_ERROR_PARDISO, MKL_ERROR_CLUSTER
+CHARACTER(80) :: MKL_ERROR_PARDISO, MKL_ERROR_CLUSTER, FFT_ERROR_UNSTRUCTURED
 
 CALL SCARC_ENTER_ROUTINE('SCARC_PARSE_INPUT')
 
 ITERATE_PRESSURE = .TRUE.  ! Although there is no need to do pressure iterations to drive down velocity error
                            ! leave it .TRUE. to write out velocity error diagnostics.
 
-MKL_ERROR_PARDISO = 'Error: MKL Library compile flag not defined, Pardiso solver not available'
-MKL_ERROR_CLUSTER = 'Error: MKL Library compile flag not defined, Cluster_Sparse_Solver not available'
+MKL_ERROR_PARDISO      = 'Error: MKL Library compile flag not defined, Pardiso solver not available'
+MKL_ERROR_CLUSTER      = 'Error: MKL Library compile flag not defined, Cluster_Sparse_Solver not available'
+FFT_ERROR_UNSTRUCTURED = 'Error: FFT-preconditioning only possible for structured discretization '
 
 !> 
 !> ------------- set type of discretization
@@ -1057,6 +1066,8 @@ SELECT CASE (TRIM(SCARC_METHOD))
                CASE ('SSOR')
                   TYPE_SMOOTH = NSCARC_RELAX_SSOR
                CASE ('FFT')
+                  IF (TYPE_DISCRET == NSCARC_DISCRET_UNSTRUCTURED) &
+                     CALL SCARC_SHUTDOWN(FFT_ERROR_UNSTRUCTURED, 'NONE', -999)
                   TYPE_PRECON = NSCARC_RELAX_FFT
                CASE ('PARDISO')
 #ifdef WITH_MKL
@@ -1073,6 +1084,8 @@ SELECT CASE (TRIM(SCARC_METHOD))
 #endif
             END SELECT
          CASE ('FFT')
+            IF (TYPE_DISCRET == NSCARC_DISCRET_UNSTRUCTURED) &
+               CALL SCARC_SHUTDOWN(FFT_ERROR_UNSTRUCTURED, 'NONE', -999)
             TYPE_PRECON = NSCARC_RELAX_FFT
          CASE ('PARDISO')
 #ifdef WITH_MKL
@@ -1113,6 +1126,8 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('SSOR')
             TYPE_SMOOTH = NSCARC_RELAX_SSOR
          CASE ('FFT')
+            IF (TYPE_DISCRET == NSCARC_DISCRET_UNSTRUCTURED) &
+               CALL SCARC_SHUTDOWN(FFT_ERROR_UNSTRUCTURED, 'NONE', -999)
             TYPE_SMOOTH = NSCARC_RELAX_FFT
          CASE ('PARDISO')
 #ifdef WITH_MKL
@@ -1254,6 +1269,18 @@ SELECT CASE (TRIM(SCARC_ACCURACY))
       TYPE_ACCURACY = NSCARC_ACCURACY_RELATIVE
    CASE DEFAULT
       CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_ACCURACY, -999)
+END SELECT
+
+!> 
+!> set type of precision for preconditioner (SINGLE/DOUBLE)
+!> 
+SELECT CASE (TRIM(SCARC_PRECISION))
+   CASE ('SINGLE')
+      TYPE_PRECISION = NSCARC_PRECISION_SINGLE
+   CASE ('DOUBLE')
+      TYPE_PRECISION = NSCARC_PRECISION_DOUBLE
+   CASE DEFAULT
+      CALL SCARC_SHUTDOWN('Error with input parameter ', SCARC_PRECISION, -999)
 END SELECT
 
 !> 
@@ -5219,13 +5246,14 @@ CON => SOL%CONVREQS
 TYP => SOL%TYPES
 
 !> Preset types for Krylov method
-TYP%TYPE_METHOD   = NSCARC_METHOD_KRYLOV
-TYP%TYPE_SOLVER   = NSOLVER
-TYP%TYPE_SCOPE    = NSCOPE
-TYP%TYPE_NLMIN    = NLMIN
-TYP%TYPE_NLMAX    = NLMAX
-TYP%TYPE_INTERPOL = TYPE_INTERPOL
-TYP%TYPE_ACCURACY = TYPE_ACCURACY
+TYP%TYPE_METHOD    = NSCARC_METHOD_KRYLOV
+TYP%TYPE_SOLVER    = NSOLVER
+TYP%TYPE_SCOPE     = NSCOPE
+TYP%TYPE_NLMIN     = NLMIN
+TYP%TYPE_NLMAX     = NLMAX
+TYP%TYPE_INTERPOL  = TYPE_INTERPOL
+TYP%TYPE_ACCURACY  = TYPE_ACCURACY
+TYP%TYPE_PRECISION = TYPE_PRECISION
 
 !> Preset iteration parameters for Krylov method
 SELECT CASE(NSOLVER)
@@ -5278,15 +5306,16 @@ CON => SOL%CONVREQS
 TYP => SOL%TYPES
 
 !> Preset types for Multigrid method
-TYP%TYPE_METHOD   = NSCARC_METHOD_MULTIGRID
-TYP%TYPE_SOLVER   = NSOLVER
-TYP%TYPE_SCOPE    = NSCOPE 
-TYP%TYPE_NLMIN    = NLMIN
-TYP%TYPE_NLMAX    = NLMAX
-TYP%TYPE_RELAX    = TYPE_SMOOTH
-TYP%TYPE_INTERPOL = TYPE_INTERPOL
-TYP%TYPE_ACCURACY = TYPE_ACCURACY
-TYP%TYPE_CYCLING  = TYPE_CYCLING
+TYP%TYPE_METHOD    = NSCARC_METHOD_MULTIGRID
+TYP%TYPE_SOLVER    = NSOLVER
+TYP%TYPE_SCOPE     = NSCOPE 
+TYP%TYPE_NLMIN     = NLMIN
+TYP%TYPE_NLMAX     = NLMAX
+TYP%TYPE_RELAX     = TYPE_SMOOTH
+TYP%TYPE_INTERPOL  = TYPE_INTERPOL
+TYP%TYPE_ACCURACY  = TYPE_ACCURACY
+TYP%TYPE_CYCLING   = TYPE_CYCLING
+TYP%TYPE_PRECISION = TYPE_PRECISION
 
 SELECT CASE(NSOLVER)
    CASE (NSCARC_SOLVER_MAIN)                                  !> Used as main solver 
@@ -5368,11 +5397,12 @@ END SELECT
 TYP => SOL%TYPES
 
 !> Preset types for LU-decomposition method
-TYP%TYPE_METHOD = NSCARC_METHOD_LUDECOMP
-TYP%TYPE_SOLVER = NSOLVER
-TYP%TYPE_SCOPE  = NSCOPE
-TYP%TYPE_NLMIN  = NLMIN
-TYP%TYPE_NLMAX  = NLMAX
+TYP%TYPE_METHOD    = NSCARC_METHOD_LUDECOMP
+TYP%TYPE_SOLVER    = NSOLVER
+TYP%TYPE_SCOPE     = NSCOPE
+TYP%TYPE_NLMIN     = NLMIN
+TYP%TYPE_NLMAX     = NLMAX
+TYP%TYPE_PRECISION = TYPE_PRECISION
 
 !> Point to solution vectors (in corresponding scope)
 CALL SCARC_SETUP_POINTERS(.TRUE.,.TRUE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,.FALSE.,.TRUE., NSTACK)
@@ -5442,13 +5472,14 @@ ELSE
 ENDIF
 
 !> Preset types for preconditioner
-TYP%TYPE_SOLVER   = TYPC%TYPE_SOLVER 
-TYP%TYPE_SCOPE    = TYPC%TYPE_SCOPE 
-TYP%TYPE_NLMIN    = TYPC%TYPE_NLMIN 
-TYP%TYPE_NLMAX    = TYPC%TYPE_NLMAX 
-TYP%TYPE_RELAX    = TYPC%TYPE_RELAX 
-TYP%TYPE_INTERPOL = TYPC%TYPE_INTERPOL
-TYP%TYPE_ACCURACY = TYPC%TYPE_ACCURACY
+TYP%TYPE_SOLVER    = TYPC%TYPE_SOLVER 
+TYP%TYPE_SCOPE     = TYPC%TYPE_SCOPE 
+TYP%TYPE_NLMIN     = TYPC%TYPE_NLMIN 
+TYP%TYPE_NLMAX     = TYPC%TYPE_NLMAX 
+TYP%TYPE_RELAX     = TYPC%TYPE_RELAX 
+TYP%TYPE_INTERPOL  = TYPC%TYPE_INTERPOL
+TYP%TYPE_ACCURACY  = TYPC%TYPE_ACCURACY
+TYP%TYPE_PRECISION = TYPC%TYPE_PRECISION
 
 !> Preset pointers for preconditioner
 PTR%X = PTRC%X                                    !> use same pointers as calling Krylov-solver
@@ -5512,13 +5543,14 @@ ELSE
 ENDIF
 
 !> Preset types for preconditioner
-TYP%TYPE_SOLVER   = NSCARC_SOLVER_SMOOTH
-TYP%TYPE_SCOPE    = TYPC%TYPE_SCOPE 
-TYP%TYPE_NLMIN    = TYPC%TYPE_NLMIN  
-TYP%TYPE_NLMAX    = TYPC%TYPE_NLMAX  
-TYP%TYPE_RELAX    = TYPC%TYPE_RELAX  
-TYP%TYPE_INTERPOL = TYPC%TYPE_INTERPOL
-TYP%TYPE_ACCURACY = TYPC%TYPE_ACCURACY
+TYP%TYPE_SOLVER    = NSCARC_SOLVER_SMOOTH
+TYP%TYPE_SCOPE     = TYPC%TYPE_SCOPE 
+TYP%TYPE_NLMIN     = TYPC%TYPE_NLMIN  
+TYP%TYPE_NLMAX     = TYPC%TYPE_NLMAX  
+TYP%TYPE_RELAX     = TYPC%TYPE_RELAX  
+TYP%TYPE_INTERPOL  = TYPC%TYPE_INTERPOL
+TYP%TYPE_ACCURACY  = TYPC%TYPE_ACCURACY
+TYP%TYPE_PRECISION = TYPC%TYPE_PRECISION
 
 PTR%X = PTRC%X                                    !> use same pointers as calling Krylov-solver
 PTR%F = PTRC%F
@@ -5662,6 +5694,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
       
       !> Define corresponding parameters
+      !> Note: IPARM-vectory is allocate from 1:64, not from 0:63
       MKL%NRHS   =  1         ! one right hand side
       MKL%MAXFCT =  1         ! one matrix
       MKL%MNUM   =  1         ! number of matrix to be factorized
@@ -5673,27 +5706,6 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ELSE
          MKL%MTYPE  = 11         ! Matrix type real and non-symmetric
       ENDIF
-      
-      ! Define control parameter vector iparm:
-      !MKL%IPARM(1) = 1   ! no solver default
-      !MKL%IPARM(2) = 3   ! Parallel fill-in reordering from METIS
-      !MKL%IPARM(4) = 0   ! no iterative-direct algorithm
-      !MKL%IPARM(5) = 0   ! no user fill-in reducing permutation
-      !MKL%IPARM(6) = 2   ! =0 solution on the first n components of x
-      !MKL%IPARM(8) = 2   ! numbers of iterative refinement steps
-      !MKL%IPARM(10) = 13 ! perturb the pivot elements with 1E-13
-      !MKL%IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS  !>!>! was 1
-      !MKL%IPARM(13) = 1  ! maximum weighted matching algorithm is switched-off
-      !               !(default for symmetric). Try iparm(13) = 1 in case of inappropriate accuracy
-      !MKL%IPARM(14) = 0  ! Output: number of perturbed pivots
-      !MKL%IPARM(18) = 0 !-1 ! Output: number of nonzeros in the factor LU
-      !MKL%IPARM(19) = 0 !-1 ! Output: Mflops for LU factorization
-      !MKL%IPARM(20) = 0  ! Output: Numbers of CG Iterations
-      !MKL%IPARM(21) = 1  ! 1x1 diagonal pivoting for symmetric indefinite matrices.
-      !MKL%IPARM(24) = 0
-      !MKL%IPARM(27) = 1 ! Check matrix
-      !MKL%IPARM(37) = 0 ! CSR-format
-      !MKL%IPARM(40) = 2 ! Matrix, solution and rhs provided in distributed assembled matrix input format.
       
       MKL%IPARM(1)  =  1      ! supply own parameters
       MKL%IPARM(2)  =  3      ! supply own parameters
@@ -5711,11 +5723,12 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       MKL%IPARM(21) =  1      ! Bunch-Kaufman pivoting which is default in case of IPARM(0)=0
       MKL%IPARM(24) =  0      ! Bunch-Kaufman pivoting which is default in case of IPARM(0)=0
       MKL%IPARM(27) =  1      ! use matrix checker
-      MKL%IPARM(40) = 2       ! provide matrix in distributed format
-      MKL%IPARM(41) = L%CELL%NC_OFFSET(NM) + 1                  ! first global cell number for mesh NM
+      IF (TYPE_PRECISION == NSCARC_PRECISION_SINGLE) MKL%IPARM(28)=1
+      MKL%IPARM(40) = 2                                             ! provide matrix in distributed format
+      MKL%IPARM(41) = L%CELL%NC_OFFSET(NM) + 1                      ! first global cell number for mesh NM
       MKL%IPARM(42) = L%CELL%NC_OFFSET(NM) + L%CELL%NC_LOCAL(NM)    ! last global cell number for mesh NM
-      !MKL%IPARM(39) = 2                                    ! provide matrix in distributed format
-      !MKL%IPARM(40) = L%CELL%NC_OFFSET(NM)+1                   ! first global cell number for mesh NM
+      !MKL%IPARM(39) = 2                                            ! provide matrix in distributed format
+      !MKL%IPARM(40) = L%CELL%NC_OFFSET(NM)+1                       ! first global cell number for mesh NM
       !MKL%IPARM(41) = L%CELL%NC_OFFSET(NM)+L%CELL%NC_LOCAL(NM)     ! last global cell number for mesh NM
       
       
@@ -5771,33 +5784,14 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDIF
       
-      !> Define corresponding parameters
+      !> Define corresponding parameters 
+      !> Note: IPARM-vectory is allocate from 1:64, not from 0:63
       MKL%NRHS   = 1
       MKL%MAXFCT = 1
       MKL%MNUM   = 1
       
-      !MKL%IPARM(1) = 1   ! no solver default
-      !MKL%IPARM(2) = 2   ! fill-in reordering from METIS
-      !MKL%IPARM(4) = 0   ! no iterative-direct algorithm
-      !MKL%IPARM(5) = 0   ! no user fill-in reducing permutation
-      !MKL%IPARM(6) = 2   ! =0 solution on the first n components of x
-      !MKL%IPARM(8) = 2   ! numbers of iterative refinement steps
-      !MKL%IPARM(10) = 13 ! perturb the pivot elements with 1E-13
-      !MKL%IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS  !>!>! was 1
-      !MKL%IPARM(13) = 1  ! maximum weighted matching algorithm is switched-off
-      !                  !(default for symmetric). Try iparm(13) = 1 in case of inappropriate accuracy
-      !MKL%IPARM(14) = 0  ! Output: number of perturbed pivots
-      !MKL%IPARM(18) = 0  !-1 ! Output: number of nonzeros in the factor LU
-      !MKL%IPARM(19) = 0  !-1 ! Output: Mflops for LU factorization
-      !MKL%IPARM(20) = 0  ! Output: Numbers of CG Iterations
-      !MKL%IPARM(21) = 1  ! 1x1 diagonal pivoting for symmetric indefinite matrices.
-      !MKL%IPARM(24) = 0
-      !MKL%IPARM(27) = 1  ! Check matrix
-      !MKL%IPARM(37) = 0  ! Matrix, solution and rhs provided in distributed assembled matrix input format.  ???
-      !MKL%IPARM(40) = 2  ! Matrix, solution and rhs provided in distributed assembled matrix input format.   ???
-      
       MKL%IPARM(1)  =  1      ! no solver default
-      MKL%IPARM(2)  =  2      ! nested dissection algorithm
+      MKL%IPARM(2)  =  3      ! parallel (OpenMP) version of the nested dissection algorithm
       MKL%IPARM(4)  =  0      ! factorization computed as required by phase
       MKL%IPARM(5)  =  0      ! user permutation ignored
       MKL%IPARM(6)  =  0      ! write solution on x
@@ -5809,6 +5803,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       MKL%IPARM(19) = -1      ! Output: number of floating points operations
       MKL%IPARM(20) =  1      ! Output: Numbers of CG Iterations
       MKL%IPARM(27) =  1      ! use matrix checker
+      IF (TYPE_PRECISION == NSCARC_PRECISION_SINGLE) MKL%IPARM(28)=1
       MKL%IPARM(37) =  0      ! matrix storage in CSR-format
       
       MKL%ERROR  =  0       ! initialize error flag
