@@ -301,9 +301,10 @@ SELECT CASE(IPS)
 
 END SELECT
 
-! In case of ScaRC-, UScaRC-or GLMAT-method leave routine
+! In case of ScaRC-method leave routine
 
-IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'SCARC' .OR. PRES_METHOD == 'USCARC') RETURN
+IF (PRES_METHOD == 'SCARC') RETURN
+IF (PRES_METHOD == 'GLMAT') RETURN
 
 ! Call the Poisson solver
 
@@ -2291,7 +2292,11 @@ ALLOCATE(IPARM(64)); IPARM(:) = 0
 IPARM(1) = 1   ! no solver default
 ! Pardiso: IPARM(2) = 2   ! fill-in reordering from METIS
 #ifdef WITH_MKL
-IPARM(2) = 3   ! Parallel fill-in reordering from METIS
+IF (N_MPI_PROCESSES > 4) THEN ! Typical number of computing cores inside one chip.
+   IPARM(2) =10   ! 10 = MPI Parallel fill-in reordering from METIS. If 3 = OpenMP parallel reordering in Master Node.
+ELSE              ! Note IPARM(2)=10 has a bug which has been fixed from Intel MKL 2018 update 2 onwards.
+   IPARM(2) = 3
+ENDIF
 #endif
 IPARM(4) = 0   ! no iterative-direct algorithm
 IPARM(5) = 0   ! no user fill-in reducing permutation
