@@ -1675,7 +1675,7 @@ ELSE TRUE_PROJECTION
 
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
 
-   NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
+   NO_SCARC_IF: IF (PRES_METHOD /='SCARC'.AND.PRES_METHOD/='USCARC') THEN
       DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (EXTERNAL_WALL(IW)%NOM==0) CYCLE
          IIG = WALL(IW)%ONE_D%IIG
