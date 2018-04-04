@@ -3,10 +3,7 @@
 &MULT ID='mesh',DX=0.075,I_UPPER=3 /
 &MESH IJK=75,1,40, XB=0.0,0.075,-0.001,0.001,-0.02,0.020, MULT_ID='mesh' /
 
-&PRES SOLVER                  = 'SCARC'
-      SCARC_DISCRETIZATION    = 'STRUCTURED'
-      SCARC_METHOD            = 'KRYLOV'
-      SCARC_PRECON            = 'FFT'     /
+&PRES SOLVER = 'SCARC' /
 
 &TIME T_END=2.0 /
 

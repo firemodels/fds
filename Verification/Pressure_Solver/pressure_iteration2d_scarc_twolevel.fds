@@ -6,11 +6,9 @@
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
 
-&PRES SOLVER                  = 'SCARC'
-      SCARC_METHOD            = 'KRYLOV'
-      SCARC_TWOLEVEL          = 'ADDITIVE'
-      SCARC_PRECON            = 'FFT'
-      SCARC_COARSE_LEVEL      =  2         /
+&PRES SOLVER             = 'SCARC'
+      SCARC_TWOLEVEL     = 'ADDITIVE'
+      SCARC_COARSE_LEVEL =  2         /
 
 &TIME T_END=0.5, DT=0.002 /
 

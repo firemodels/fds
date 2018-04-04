@@ -6,11 +6,9 @@
 &MISC NOISE = .FALSE.
       DNS   = .TRUE. /
 
-&PRES SOLVER                  = 'SCARC'
-      SCARC_METHOD            = 'KRYLOV'
-      SCARC_TWOLEVEL          = 'ADDITIVE'
-      SCARC_PRECON            = 'FFT'
-      SCARC_COARSE_LEVEL      =  2         /           Note: Other possible preconditioners are SSOR or PARDISO
+&PRES SOLVER             = 'SCARC'
+      SCARC_TWOLEVEL     = 'ADDITIVE'
+      SCARC_COARSE_LEVEL =  2         /           
 
 &SPEC ID='BACKGROUND'
       BACKGROUND=.TRUE./
