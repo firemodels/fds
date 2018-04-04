@@ -54,16 +54,16 @@ $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
