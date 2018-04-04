@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration2d_uscarc_cg',TITLE='Unstructured ScaRC-CG for 2D-square with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration2d_scarc_tight',TITLE='Tight ScaRC-CG for 2D-square with obstruction on 8 meshes' /
 
 &MESH IJK=8,1,16, XB=0.0,0.2,-0.01,0.01,0.0,0.4, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
@@ -6,10 +6,9 @@
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
 
-&PRES SOLVER                   = 'SCARC'
-      SCARC_DISCRETIZATION     = 'UNSTRUCTURED'
-      SCARC_METHOD             = 'KRYLOV'
-      SCARC_PRECON             = 'PARDISO'    /     Note: possible other preconditioner is SSOR, but not FFT
+&PRES SOLVER                  = 'SCARC'
+      VELOCITY_TOLERANCE      = 0.00001
+      MAX_PRESSURE_ITERATIONS = 1000    /    
 
 &TIME T_END=0.5, DT=0.002 /
 
