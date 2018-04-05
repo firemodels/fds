@@ -1178,6 +1178,7 @@ OBST_LOOP_2: DO N=1,N_OBST
             KKG = WC%ONE_D%KKG
             IOR = WC%ONE_D%IOR
             TMP_S = TMP(I,J,K)
+
             SELECT CASE(ABS(IOR))
                CASE(1); GEOM_FACTOR = DX(I)
                CASE(2); GEOM_FACTOR = DY(J)
@@ -1199,7 +1200,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                            RHO_OUT(1:MS%N_MATL),MS%LAYER_DENSITY(1),DUMMY,DT_SUB,&
                            M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_PPP_S(I,J,K))
 
-            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL)-RHO_IN(1:MS%N_MATL)
+            OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)
 
             ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
 
