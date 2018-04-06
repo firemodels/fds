@@ -1,4 +1,4 @@
-&HEAD CHID='Beyler_Hood_ethanol_108_lr',TITLE='Beyler Hood Test 108 17.23 kW ethanol, 22.6 cm burner, 4 cm seperation'/
+&HEAD CHID='Beyler_Hood_ethanol_108_lr',TITLE='Beyler Hood Test 108 17.32 kW ethanol, 22.6 cm burner, 4 cm seperation'/
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=36,36,24/
 &TIME T_END=275./
 &DUMP NFRAMES=275/

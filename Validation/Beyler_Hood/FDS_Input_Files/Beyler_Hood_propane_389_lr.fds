@@ -1,4 +1,4 @@
-&HEAD CHID='Beyler_Hood_propane_389_lr',TITLE='Beyler Hood Test 138 18.25 kW PROPANE, 19.5 cm burner, 0 cm seperation'/
+&HEAD CHID='Beyler_Hood_propane_389_lr',TITLE='Beyler Hood Test 389 18.25 kW PROPANE, 19.5 cm burner, 0 cm seperation'/
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=36,36,24/
 &TIME T_END=250./
 &DUMP NFRAMES=250/

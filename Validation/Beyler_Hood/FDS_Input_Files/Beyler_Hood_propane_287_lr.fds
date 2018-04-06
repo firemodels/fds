@@ -1,4 +1,4 @@
-&HEAD CHID='Beyler_Hood_propane_287_lr',TITLE='Beyler Hood Test 287 7.92 kW propane, 19 cm burner, 0 cm seperation'/
+&HEAD CHID='Beyler_Hood_propane_287_lr',TITLE='Beyler Hood Test 287 7.92 kW propane, 19 cm burner, 5 cm seperation'/
 &MESH XB=-0.54,0.54,-0.54,0.54,-0.24,0.48,IJK=36,36,24/
 &TIME T_END=350./
 &DUMP NFRAMES=350/
@@ -26,15 +26,15 @@
 
 !Burner pedestal
 
-&OBST XB = -0.12,-0.09,-0.09, 0.09,-0.24, 0.00,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
-&OBST XB = -0.09, 0.09,-0.12, 0.12,-0.24, 0.00,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
-&OBST XB =  0.12, 0.09,-0.09, 0.09,-0.24, 0.00,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
+&OBST XB = -0.12,-0.09,-0.09, 0.09,-0.24, 0.05,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
+&OBST XB = -0.09, 0.09,-0.12, 0.12,-0.24, 0.05,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
+&OBST XB =  0.12, 0.09,-0.09, 0.09,-0.24, 0.05,SURF_ID='INERT',PERMIT_HOLE=.FALSE./
 
 !19 cm Gas Burner
 
-&VENT XB = -0.09,-0.06,-0.06,0.06, 0.00, 0.00, SURF_ID='FIRE'/
-&VENT XB = -0.06, 0.06,-0.09,0.09, 0.00, 0.00, SURF_ID='FIRE'/
-&VENT XB =  0.09, 0.06,-0.06,0.06, 0.00, 0.00, SURF_ID='FIRE'/
+&VENT XB = -0.09,-0.06,-0.06,0.06, 0.05, 0.05, SURF_ID='FIRE'/
+&VENT XB = -0.06, 0.06,-0.09,0.09, 0.05, 0.05, SURF_ID='FIRE'/
+&VENT XB =  0.09, 0.06,-0.06,0.06, 0.05, 0.05, SURF_ID='FIRE'/
 
 !22.6 cm Liquid Burner
 
