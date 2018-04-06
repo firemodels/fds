@@ -7490,18 +7490,14 @@ SELECT CASE(TRIM(SOLVER))
    CASE('USCARC')
       PRES_METHOD = 'USCARC'
       SCARC_DISCRETIZATION = 'UNSTRUCTURED'
-      IF (SCARC_METHOD == 'NONE') THEN
-         SCARC_METHOD = 'KRYLOV'                          ! Use Krylov with PARDISO-preconditioning as default for USCARC 
-         SCARC_PRECON = 'PARDISO'                         ! when SOLVER is USCARC and SCARC_METHOD is not defined
-      ENDIF
+      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'    ! Use Krylov as default solver for USCARC 
+      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'PARDISO'   ! Use PARDISO as default preconditioner for USCARC 
 
    CASE('SCARC')
       PRES_METHOD = 'SCARC'
       SCARC_DISCRETIZATION = 'STRUCTURED'
-      IF (SCARC_METHOD == 'NONE') THEN
-         SCARC_METHOD = 'KRYLOV'                          ! Use Krylov with FFT-preconditioning as default for SCARC 
-         SCARC_PRECON = 'FFT'                             ! when SOLVER is SCARC and SCARC_METHOD is not defined
-      ENDIF
+      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'    ! Use Krylov default solver for SCARC 
+      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'FFT'       ! Use FFT as default preconditioner for SCARC
 
    CASE('GLMAT')
       PRES_METHOD = 'GLMAT'
