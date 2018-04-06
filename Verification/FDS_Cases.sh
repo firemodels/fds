@@ -54,16 +54,16 @@ $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
@@ -100,6 +100,7 @@ $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
+$QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires couch.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
@@ -340,7 +341,6 @@ $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
-$QFDS -d Pyrolysis pyro3d_A_B.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 

@@ -3004,11 +3004,7 @@ WRITE_SCARC: IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC'
    WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Global solver         ', TRIM(SCARC_METHOD)
    SELECT CASE(TRIM(SCARC_METHOD))
       CASE('KRYLOV')
-         IF (TRIM(SCARC_PRECON)=='MG') THEN
-            WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Preconditioner        ', TRIM(SCARC_SMOOTH)
-         ELSE
-            WRITE(LU_OUTPUT,'(3X,A20,A12)') 'Preconditioner        ', TRIM(SCARC_PRECON)
-         ENDIF
+         WRITE(LU_OUTPUT,'(3X,A20,A12)')   'Preconditioner        ', TRIM(SCARC_PRECON)
          WRITE(LU_OUTPUT,'(3X,A20,I12)')   'Max iterations        ', SCARC_KRYLOV_ITERATIONS
          WRITE(LU_OUTPUT,'(3X,A20,E12.2)') 'Stopping accuracy     ', SCARC_KRYLOV_ACCURACY
       CASE('MULTIGRID')
