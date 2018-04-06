@@ -9048,10 +9048,11 @@ MNUMZ   = 1
 
 ! Define CLUSTER_SPARSE_SOLVER control parameter vector iparmz:
 IPARMZ(1) = 1   ! no solver default
-! PARDISO:
-! IPARMZ(2) = 2   ! fill-in reordering from METIS
-! CLUSTER_SPARSE_SOLVER:
-IPARMZ(2) = 3   ! Parallel fill-in reordering from METIS
+IF (N_MPI_PROCESSES > 4) THEN ! Typical number of computing cores inside one chip.
+   IPARMZ(2) =10  ! 10 = MPI Parallel fill-in reordering from METIS. If 3 = OpenMP parallel reordering in Master Node.
+ELSE              ! Note IPARM(2)=10 has a bug which has been fixed from Intel MKL 2018 update 2 onwards.
+   IPARMZ(2) = 3
+ENDIF
 IPARMZ(4) = 0   ! no iterative-direct algorithm
 IPARMZ(5) = 0   ! no user fill-in reducing permutation
 IPARMZ(6) = 0   ! =0 solution on the first n components of x
