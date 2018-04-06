@@ -7114,28 +7114,88 @@ INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ICF
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,IROW,ICC,JCC,ISIDE,IW
 REAL(EB):: AF,KFACE(2,2),F_LOC(2),CIJP,CIJM,VELC,ALPHAP1,AM_P1,AP_P1
 REAL(EB), POINTER, DIMENSION(:,:,:)  :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:)::  ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:)  :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:):: ZZP=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+INTEGER :: IIG,JJG,KKG,IOR
+REAL(EB) :: UN
 
 ! Mesh Loop:
 MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
+   UU=>WORK1
+   VV=>WORK2
+   WW=>WORK3
+
    IF (PREDICTOR) THEN
       ZZP  => ZZ
       RHOP => RHO
-      UP   => U
-      VP   => V
-      WP   => W
+      UU   = U
+      VV   = V
+      WW   = W
       PRFCT= 1._EB
+      WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP
+
    ELSE
       ZZP  => ZZS
       RHOP => RHOS
-      UP   => US
-      VP   => VS
-      WP   => WS
+      UU   = US
+      VV   = VS
+      WW   = WS
       PRFCT= 0._EB
+      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP_2
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP_2
    ENDIF
+
+   ! The use of UU, VV, WW is to maintain the divergence consistent in cells next to INTERPOLATED_BOUNDARY faces, when
+   ! The solver being used is the default POISSON solver (i.e. use normal velocities with velocity error).
+   UP => UU
+   VP => VV
+   WP => WW
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -18980,6 +19040,12 @@ REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_
 LOGICAL, PARAMETER :: ALL_GODUNOV = .FALSE. ! If false uses centered interpolation for diffusion velocity.
 REAL(EB),PARAMETER :: DO_ADV = 1._EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:)  :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+INTEGER :: IIG,JJG,KKG,IOR
+REAL(EB) :: UN
+
 
 LOGICAL :: END_OF_STEP_RHO, DIFF_FROM_DIVG
 
@@ -19003,6 +19069,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
+   UU=>WORK1
+   VV=>WORK2
+   WW=>WORK3
+
    IF (PREDICTOR) THEN
       IF (END_OF_STEP_RHO) THEN
          RHOP => RHOS
@@ -19011,9 +19081,31 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          RHOP => RHO
          PRFCT= 1._EB
       ENDIF
-      UP   => U
-      VP   => V
-      WP   => W
+      UU   = U
+      VV   = V
+      WW   = W
+      WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP
    ELSE
       IF (END_OF_STEP_RHO) THEN
          RHOP => RHO
@@ -19022,10 +19114,38 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          RHOP => RHOS
          PRFCT= 0._EB
       ENDIF
-      UP   => US
-      VP   => VS
-      WP   => WS
+      UU   = US
+      VV   = VS
+      WW   = WS
+      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP_2
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP_2
    ENDIF
+
+   ! The use of UU, VV, WW is to maintain the divergence consistent in cells next to INTERPOLATED_BOUNDARY faces, when
+   ! The solver being used is the default POISSON solver (i.e. use normal velocities with velocity error).
+   UP => UU
+   VP => VV
+   WP => WW
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
