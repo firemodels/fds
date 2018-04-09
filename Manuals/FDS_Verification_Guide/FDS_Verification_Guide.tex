@@ -4411,7 +4411,17 @@ This case is a replicate of the {\ct box\_burn\_away1} case used as verification
 	\label{fig:box_burn_away1_pyro3d_vs_pyro1d}
 \end{figure}
 
+\subsection{Thickness (\texorpdfstring{\textct{pyro3d\_vs\_pyro1d}}{pyro3d\_vs\_pyro1d})}
+\label{pyro3d_vs_pyro1d}
 
+This case compares mass loss rates and material thickness for pyrolysis of black PMMA between the 1D pyrolysis solver without burn away and the 3D solver with burn away.  In-depth radiation absorption is not considered.  The problem is set up with insulating sides for each column of material.  So, the 3D solver is effectively solving a 1D problem, and the results should very similar. The material is heated from the top with an external flux of 50 \si{kW/m^2}.  The material thickness is 0.01 m.  The grid resolution of the 3D solver is set to be equivalent to the node spacing for the 1D solver, $\delta z = 2.8571 \times 10^4 \;\si{m}$.  The key difference between the solvers is that in the 1D solver the top face of the {\ct OBST} does not move, instead the material {\ct THICKNESS} changes and shrinks from the bottom up.  Conversely, in the 3D solver, cells burn away as their mass goes to zero.  If the material mass of a given cell goes below a threshold, the mass is shifted to a neighboring cell before the cell is burned away.  The final cell burns down to a numerical threshold mass before that mass is finally clipped for numerical reasons.  We still track the local solid volume within a cell, and this ratio times the cell size gives a measure of the material thickness for the 3D solver.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d}
+	\caption[PYRO3D vs.~PYRO1D material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
+	\label{fig:pyro3d_vs_pyro1d}
+\end{figure}
 
 \chapter{Lagrangian Particles}
 
