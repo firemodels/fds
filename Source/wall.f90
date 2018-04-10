@@ -1145,12 +1145,22 @@ INIT_IF: IF (T_LOC<TWO_EPSILON_EB) THEN
             I_LOOP: DO I=OB%I1+1,OB%I2
                IC = CELL_INDEX(I,J,K)
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP
-               WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
-               IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE I_LOOP
-               SF=>SURFACE(WC%SURF_INDEX)
-               WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-               WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-               WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+               IOR_SELECT: SELECT CASE(OB%PYRO3D_IOR)
+                  CASE DEFAULT
+                     WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
+                     SF=>SURFACE(WC%SURF_INDEX)
+                     WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+                     WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+                     WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                  CASE(0)
+                     DO IOR=-3,3
+                        WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
+                        SF=>SURFACE(WC%SURF_INDEX)
+                        WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+                        WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+                        WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                     ENDDO
+               END SELECT IOR_SELECT
             ENDDO I_LOOP
          ENDDO
       ENDDO
