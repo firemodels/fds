@@ -7,7 +7,6 @@
       DNS   = .TRUE./
 
 &PRES SOLVER                     = 'SCARC'
-      SCARC_METHOD               = 'KRYLOV'
       SCARC_PRECON               = 'MULTIGRID'
       SCARC_MULTIGRID_LEVEL      =   3
       SCARC_MULTIGRID_ITERATIONS =   2

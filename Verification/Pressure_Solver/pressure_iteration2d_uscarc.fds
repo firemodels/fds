@@ -1,4 +1,4 @@
-&HEAD CHID='pressure_iteration2d_scarc_twolevel',TITLE='ScaRC-CG with additive coarse grid for 2D-square with obstruction on 8 meshes' /
+&HEAD CHID='pressure_iteration2d_uscarc',TITLE='Unstructured ScaRC-CG for 2D-square with obstruction on 8 meshes' /
 
 &MESH IJK=8,1,16, XB=0.0,0.2,-0.01,0.01,0.0,0.4, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
@@ -6,9 +6,7 @@
 &MISC NOISE = .FALSE. 
       DNS   = .TRUE./
 
-&PRES SOLVER             = 'SCARC'
-      SCARC_TWOLEVEL     = 'ADDITIVE'
-      SCARC_COARSE_LEVEL =  2         /
+&PRES SOLVER = 'USCARC'   /
 
 &TIME T_END=0.5, DT=0.002 /
 

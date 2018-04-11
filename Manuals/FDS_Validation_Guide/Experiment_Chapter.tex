@@ -43,7 +43,58 @@ A common validation experiment for CFD codes involves flow through a channel wit
 \section{Beyler Hood Experiments}
 \label{Beyler_Hood_Description}
 
-Craig Beyler performed a large number of experiments involving a variety of fuels, fire sizes, burner diameters, and burner distances beneath a hood~\cite{Beyler:Hood}.  The hood consisted of concentric cylinders separated by an air gap.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood.  Based on the published measurement uncertainties, species errors are estimated at 6~\%.  148 tests were performed with measurements made in the exhaust duct.  The fuels in those tests were as follows: 16 acetone, 11 ethanol, 13 isopropanol, 18 methanol, 51 propane, 28 propylene, and 11 toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 tests spanning the equivalence ratio range for each fuel was simulated for validation (5, 5, 5, 5, 15, 7, and 5 respectively for the fuels mentioned above).
+Craig Beyler performed small-scale fire experiments where a gas burner was positioned at various heights underneath a closed, cylindrical hood, 100~cm in diameter and 48~cm in height~\cite{Beyler:Hood}.  The hood consisted of two concentric cylinders separated by an air gap, as shown in Fig.~\ref{Beyler_Hood_Sketch}.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood. The reported relative standard uncertainty of the measured gas species mass fractions was 6~\%. The fuels consisted of acetone, ethanol, isopropanol, methanol, propane, propylene, and toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 of the original 148 experiments spanning the equivalence ratio range for each fuel were simulated for validation, see Table~\ref{beyler_sum}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{FIGURES/Beyler_Hood/Beyler_Hood}
+\caption[Sketch of Beyler Hood cross section]{Sketch of Beyler Hood cross section.}
+\label{Beyler_Hood_Sketch}
+\end{figure}
+
+\begin{table}[!ht]
+\centering
+\caption[Summary of simulated Beyler Hood experiments]{Summary of simulated Beyler Hood experiments. A negative value of Separation Distance indicates the burner top is below the lower rim of the hood.}
+\label{beyler_sum}
+\begin{tabular}{|c|c|c|c|c||c|c|c|c|c|}
+\hline
+Exp.   & Fuel          & HRR      & Burner           & Sep.           &  Exp.   & Fuel          & HRR      & Burner           & Sep.            \\
+No.    & Gas           & (kW)     & (cm)             & Dist. (cm)     &  No.    & Gas           & (kW)     & (cm)             & Dist. (cm)      \\ \hline \hline
+117    & Acetone       & 18.0     & 22.6             & -12            &  232    & Propane       & 13.5     & 19.5             & -5              \\ \hline
+119    & Acetone       & 16.4     & 22.6             & -1             &  257    & Propane       & 8.2      & 19.5             & -15             \\ \hline
+122    & Acetone       & 16.4     & 22.6             & 4              &  287    & Propane       & 7.9      & 19.5             & 5               \\ \hline
+142    & Acetone       & 12.1     & 22.6             & 4              &  303    & Propane       & 18.3     & 19.5             & 5               \\ \hline
+145    & Acetone       & 12.7     & 22.6             & 4              &  307    & Propane       & 21.4     & 19.5             & 5               \\ \hline
+106    & Ethanol       & 17.3     & 22.6             & -9             &  318    & Propane       & 18.3     & 19.5             & -20             \\ \hline
+107    & Ethanol       & 21.3     & 22.6             & -4             &  322    & Propane       & 21.4     & 19.5             & -20             \\ \hline
+108    & Ethanol       & 17.3     & 22.6             & 4              &  334    & Propane       & 21.4     & 19.5             & -15             \\ \hline
+110    & Ethanol       & 13.5     & 22.6             & 4              &  355    & Propane       & 18.3     & 19.5             & 0               \\ \hline
+115    & Ethanol       & 13.5     & 22.6             & 4              &  359    & Propane       & 21.4     & 19.5             & 0               \\ \hline
+130    & Isopropanol   & 12.4     & 22.6             & 4              &  371    & Propane       & 21.4     & 19.5             & -5              \\ \hline
+132    & Isopropanol   & 12.4     & 22.6             & 4              &  389    & Propane       & 18.3     & 19.5             & 0               \\ \hline
+133    & Isopropanol   & 12.4     & 22.6             & 4              &  429    & Propane       & 28.1     & 19.5             & -10             \\ \hline
+136    & Isopropanol   & 12.4     & 22.6             & -1             &  433    & Propane       & 31.5     & 19.5             & -10             \\ \hline
+141    & Isopropanol   & 12.4     & 22.6             & 4              &  445    & Propane       & 31.5     & 19.5             & -15             \\ \hline
+942    & Methanol      & 11.0     & 22.6             & 0              &  780    & Propylene     & 7.5      & 19.5             & -10             \\ \hline
+943    & Methanol      & 11.0     & 22.6             & 0              &  805    & Propylene     & 7.5      & 19.5             & -10             \\ \hline
+945    & Methanol      & 11.0     & 22.6             & -5             &  859    & Propylene     & 31.4     & 19.5             & -10             \\ \hline
+947    & Methanol      & 11.0     & 22.6             & 0              &  870    & Propylene     & 19.0     & 19.5             & -2              \\ \hline
+951    & Methanol      & 9.8      & 22.6             & 0              &  882    & Propylene     & 19.1     & 19.5             & -10             \\ \hline
+160    & Toluene       & 11.5     & 22.6             & -6             &  886    & Propylene     & 19.1     & 19.5             & -5              \\ \hline
+162    & Toluene       & 11.5     & 22.6             & -1             &  910    & Propylene     & 31.4     & 19.5             & -11             \\ \hline 
+165    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
+166    & Toluene       & 11.5     & 22.6             & 5              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
+170    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+Simulations of the Beyler Hood experiments are performed at 3~cm resolution within a fairly simple facsimile of the actual hood. The boundary conditions are set to adiabatic to allow for a relatively quick ramp up to steady-state conditions. 
+
+The two-step simple chemistry combustion scheme is applied, where an infinitely fast reaction converts the fuel to CO, soot, and water vapor, followed sequentially by a second fast reaction that converts the soot and CO to CO$_2$. Some of the soot and CO does not convert to CO$_2$, based on post-flame yields listed by Tewarson~\cite{SFPE:Tewarson}.
+
+A minimum auto-ignition temperature is specified for each fuel~\cite{SFPE:Beyler} to prevent the fuel vapor from igniting at the layer interface. This restriction is relaxed in the grid cells just above the burner surface to allow for ignition without a secondary heat source. In addition, a critical flame temperature of 500~$^\circ$C is applied in all cases to account for local flame extinction. The grid is too coarse to support the actual values, and the chosen value is a placeholder until a better flame extinction model is developed.
 
 
 \section{Bittern Sprinkler Experiments}

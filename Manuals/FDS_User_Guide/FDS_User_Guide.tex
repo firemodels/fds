@@ -2725,9 +2725,6 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \subsection{Solid Heat Transfer 3D (Beta)}
 \label{info:ht3d}
 
-{\bf NOTE: {\ct HT3D} is not currently hooked up to the pyrolysis model.}
-\vskip0.5\baselineskip
-
 The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
 
 The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick. The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces you will need to use {\ct SURF\_IDS} or {\ct SURF\_ID6}.
@@ -2744,7 +2741,7 @@ An {\ct OBST} with {\ct HT3D} may cross {\ct MESH} boundaries.  If the {\ct OBST
 
 {\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements.
 
-  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
+Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
 \begin{equation}
 \label{eq:vnht3d}
 \delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
@@ -2764,9 +2761,45 @@ You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} l
 &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
 
+\subsection{Solid Pyrolysis 3D (Beta)}
+\label{info:pyro3d}
 
+The pyrolysis models to be described below may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, the user sets {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
+\begin{lstlisting}
+&SURF ID='PMMA SLAB 3D'
+      MATL_ID='BLACKPMMA 3D'
+      EXTERNAL_FLUX=50
+      HT3D=T
+      BURN_AWAY=T /
+\end{lstlisting}
+Since the 3D pyrolysis model does not have an internal ``thickness'' that shrinks from the bottom up, it is usually necessary to add {\ct BURN\_AWAY=T}.
 
+Like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  By default, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell.  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  For example,
+\begin{lstlisting}
+&OBST XB=..., HT3D=T, PYRO3D_IOR=3, BULK_DENSITY=1100.,
+      SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
+\end{lstlisting}
 
+\subsubsection*{Useful Outputs}
+
+With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions).  The solid cell temperatures can be viewed using the gas phase output
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+\end{lstlisting}
+
+With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid volume to gas phase cell volume ratio
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', CELL_CENTERED=T / total material density (omit MATL_ID)
+&SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', MATL_ID='CHAR', CELL_CENTERED=T /
+&SLCF PBY=..., QUANTITY='SOLID CELL VOLUME RATIO', CELL_CENTERED=T /
+\end{lstlisting}
+
+To output the volumetric heat source term [\si{kW/m^3}] in the 3D heat transfer equation use
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='SOLID CELL Q_S', CELL_CENTERED=T /
+\end{lstlisting}
+
+All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
 \section{Simple Pyrolysis Models}
 
@@ -2797,10 +2830,6 @@ in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and dow
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
-
-
-
-
 
 
 
@@ -5077,12 +5106,14 @@ If the reaction is under defined, FDS will return an error at the start of the c
 \label{info:two-step_simple_chemistry}
 \label{propane_flame_2reac}
 
-The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes the CO and Soot to form CO$_2$ in the second step:
+The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
 \begin{eqnarray}
-  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
+  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \; \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
    \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
 \end{eqnarray}
-By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
+
+Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
 
 The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot play an important role in the flame chemistry and radiative emission. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means depends on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar variable referred to as ``Intermediate Products.''
 
@@ -8604,6 +8635,9 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL DENSITY}                        & Section~\ref{info:pyro3d}                     & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL Q\_S}                           & Section~\ref{info:pyro3d}                     & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL VOLUME RATIO}                   & Section~\ref{info:pyro3d}                     & m$^3$/m$^3$    & D,I,P,S      \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
 {\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
 {\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)} & D            \\ \hline
@@ -8865,6 +8899,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
+{\ct FUEL\_H\_TO\_H2\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  0                   \\ \hline
 %{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline

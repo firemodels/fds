@@ -301,10 +301,9 @@ SELECT CASE(IPS)
 
 END SELECT
 
-! In case of ScaRC-method leave routine
+! In case of ScaRC-, UScaRC-or GLMAT-method leave routine
 
-IF (PRES_METHOD == 'SCARC') RETURN
-IF (PRES_METHOD == 'GLMAT') RETURN
+IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'SCARC' .OR. PRES_METHOD == 'USCARC') RETURN
 
 ! Call the Poisson solver
 
