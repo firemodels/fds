@@ -188,7 +188,7 @@ Three-dimensional heat conduction may be implemented in FDS by setting {\ct HT3D
 
 The governing equation solved in {\ct HT3D} is
 \begin{equation}
-  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
+  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right) + \dot{q}_{\rm s}'''
   \label{eq:3dheat}
 \end{equation}
 Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation. (That is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired.)
@@ -213,13 +213,30 @@ For two-way coupling between the gas and solid phase (implemented by setting {\c
 To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$ using Eq.~(\ref{T_taylor}), and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
 \begin{equation}
 \label{eq:discflux}
-( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
+( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta}
 \end{equation}
 which leads to our final result for the boundary temperature
 \begin{equation}
 \label{eq:tmpwall}
-T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
+T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\rm w}^n)^4 + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta }{ 4 \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta}
 \end{equation}
+
+\subsubsection*{Surface Heat Flux Internal Wall Model}
+
+In Eqs.~(\ref{eq:discflux}) and (\ref{eq:tmpwall}), the conductive heat flux into the wall is presumed to be resolved by a length scale, $\delta$.  In the 3D heat transfer model this length scale is \emph{not} taken to be the 3D cell spacing normal to the wall.  Instead, an internal wall model is employed.  To be consistent with the resolution of the 1D heat conduction model, the thermal penetration depth is taken to be (see also Eq.~(\ref{eq:dx1dcond})),
+\begin{equation}
+\label{eq:pendepth}
+\delta = \sqrt{\frac{ \tau \; k_{\rm s}}{\rho_{\rm s} c_{\rm s}}}
+\end{equation}
+where $\tau$ is a somewhat arbitrary time scale set to unity.
+
+%% alternate model that does not rely on arbitrary time scale
+%\begin{equation}
+%\label{eq:pendepth2}
+%\delta = \left( \frac{\rho_{\rm s} \alpha_{\rm s}^3}{\dot{q}_w^{\prime\prime}} \right)^{1/3}
+%\end{equation}
+%where $\alpha_{\rm s} = k_{\rm s}/( \rho_{\rm s} c_{\rm s} )$.
+
 
 \newpage
 \section{Pyrolysis Models}
