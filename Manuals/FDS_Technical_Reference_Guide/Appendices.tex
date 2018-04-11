@@ -383,7 +383,7 @@ and returns two alternative mean absorption coefficients for each spectral band,
 \begin{equation}
 \kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
-\displaystyle\sum_i 100\bar{\kappa}_i(\la,T) \, P_i \; \d \la}
+\displaystyle\sum_i 100 \, \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
 \end{equation}
 where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
 The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$
@@ -400,7 +400,7 @@ The second coefficient is the so-called {\em path mean} or {\em effective} absor
    \int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
        \left[\left(1-{\rm e}^{-\kappa_{{\rm e},n}(T)\, L}\right) \, T^4 + {\rm e}^{-\kappa_{{\rm e},n}(T) \, L} \, T_{\rm rad}^4\right]
 \ee
-where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is five times the characteristic cell size of the simulation, limited by a maximum value of 10~m. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{{\rm e},n}$. The value $\kappa_{{\rm e},n}(T_{\rm rad})$ is therefore interpolated from the neighbouring temperatures.
+where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is 10~cm. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{{\rm e},n}$. The value $\kappa_{{\rm e},n}(T_{\rm rad})$ is therefore interpolated from the neighboring temperatures.
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
@@ -413,7 +413,6 @@ If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within 
  \la = c/\nu \: \: \rm{and} \: \: \om = \nu /c
 \ee
 where $c$ is the speed of light in a vacuum. The wavelength, $\la$, represents the distance traveled by the wave during one cycle, assuming it travels at the speed of light in a vacuum. Its units are commonly expressed in ${\rm \mu m}$. Wavenumber, $\om$, is the reciprocal of the wavelength. It represents the number of cycles per unit length. In most infrared spectroscopic work, it is expressed in units of ${\rm cm^{-1}}$. This is the unit used in the sections below. One can  easily switch from wavenumber in units of ${\rm cm^{-1}}$ to wavelength in units of ${\rm \mu m}$ using the relation
-
 \be
   \la \; {\rm \mu m}  \; = 10000/\om \; \; {\rm cm^{-1}}
 \ee
@@ -425,7 +424,6 @@ I_{\rm b,\la}(T) \d \la = -I_{\rm b,\om}(T)\d \om
 \ee
 the negative sign is introduced because $\om$ is the reciprocal of $\la$.
 Since $\la$ = 1/$\om$, it comes
-
 \be
 \dfrac{\d \la}{\d \om} = -\dfrac{1}{\om^2}
 \ee
@@ -587,7 +585,7 @@ Propylene has only one plane of symmetry and belongs to the point group $C_s$ \c
     \hline
    \end{tabular}
 \end{table}
-Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all Propylene absorbing bands. All the propylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1003~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propylene with a total pressure of 1~atm using the Goody model.
+Band~3 corresponds to the stretching of $\rm CH$ and is the strongest of all propylene absorbing bands. All the propylene IR spectral absorption data were obtained from high resolution FTIR experiments with temperatures varying from 296~K to 1003~K~\cite{Wakatsuki:2005}. The spectral absorption coefficients were obtained by fitting the experimental spectral transmissivity of a homogeneous column of isothermal propylene with a total pressure of 1~atm using the Goody model.
 
 \subsubsection{Propane: $\rm C_3H_8$}
 
