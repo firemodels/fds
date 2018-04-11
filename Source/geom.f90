@@ -23560,7 +23560,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ELSEIF(PERIODIC_TEST==7) THEN
       IBM_CUTCELLS_FOUND_MESH =  (NXB+1) * (NYB+1) * (NZB+1) / 4
    ELSE
-      IBM_CUTCELLS_FOUND_MESH = 28 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
+      IBM_CUTCELLS_FOUND_MESH = 50 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
    ENDIF
 
    ! Here we have to allocate the size of MESHES(NM)%EDGE_CROSS:
@@ -31339,7 +31339,6 @@ REAL(EB) :: VOLUME
 REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
 LOGICAL :: HAVE_SURF, HAVE_MATL, IN_LIST
 INTEGER :: SORT_FACES
-INTEGER :: FIRST_FACE_INDEX
 REAL(EB) :: TXMIN, TXMAX, TYMIN, TYMAX, TX, TY
 
 LOGICAL COMPONENT_ONLY
@@ -31781,11 +31780,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ENDIF
    G%NSUB_GEOMS=NSUB_GEOMS
 
-   ! remove duplicate vertices
-
-   FIRST_FACE_INDEX=1
-   CALL REMOVE_DUPLICATE_VERTS(N_VERTS,N_FACES,N_VOLUS,MAX_VERTS,MAX_FACES,MAX_VOLUS,FIRST_FACE_INDEX,VERTS,FACES,VOLUS)
-
    ! wrap up
 
    G%ID = ID
@@ -31887,14 +31881,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%MATLS',IZERO)
       MATL_INDEX = GET_MATL_INDEX(MATL_ID)
-      IF (MATL_INDEX==0) THEN
-         IF (TRIM(MATL_ID)=='null') THEN
-           WRITE(MESSAGE,'(A)') 'ERROR: problem with GEOM, the material keyword, MATL_ID, is not defined.'
-         ELSE
-           WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material ',TRIM(MATL_ID),' is not defined.'
-         ENDIF
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+      ! The following constraint is removed for the time being. When Tetrahedrons are actually used for heat transfer
+      ! and pyrolysis this will be needed.
+      !IF (MATL_INDEX==0) THEN
+      !   IF (TRIM(MATL_ID)=='null') THEN
+      !     WRITE(MESSAGE,'(A)') 'ERROR: problem with GEOM, the material keyword, MATL_ID, is not defined.'
+      !   ELSE
+      !     WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material ',TRIM(MATL_ID),' is not defined.'
+      !   ENDIF
+      !   CALL SHUTDOWN(MESSAGE)
+      !ENDIF
       G%MATLS(1:N_VOLUS) = MATL_INDEX
 
       ! construct an array of external faces
