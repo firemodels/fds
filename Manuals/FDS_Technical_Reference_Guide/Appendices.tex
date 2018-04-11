@@ -1652,7 +1652,8 @@ In cylindrical and spherical coordinates, the equation becomes:
 \end{equation}
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. Since for $I=0$, the Cartesian formulation is recovered, from this point on we will consider the general form of the equation~(\ref{heat_cond_cyl2}). The indexing system used for the discretization of the equations is shown in Fig.~\ref{fig_solid_nodes}. The discretization scheme is the same regardless of whether the coordinate system is Cartesian, cylindrical, or spherical. The size of the cell nearest the boundary is set by default to be
 \be
-   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_c \, c_s}}
+\label{eq:dx1dcond}
+   x_1-x_0 = \sqrt{\frac{ \dt_0 \; k_s}{\rho_s \, c_s}}
 \ee
 where $\dt_0$ is a somewhat arbitrary time scale set to 1. In other words, the Fourier number based on the cell size is assumed of order unity. The user has flexibility in changing both the initial cell size and the degree of stretching.
 
