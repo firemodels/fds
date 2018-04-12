@@ -6069,6 +6069,22 @@ By default, particles are not recycled at a periodic boundary. To recycle the pa
 
 For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}.  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
+%\vspace{\baselineskip}
+%\begin{table}[ht]
+%\begin{center}
+%\caption{Drag laws available in FDS}
+%\label{tbl:draglaws}
+%\begin{tabular}{|c|c|c|}
+%\hline
+%{\ct DRAG\_LAW}    & Equation               & Section                    \\ \hline
+%default (sphere)   & \ref{not documented?}  & \ref{not documented?}      \\ \hline
+%{\ct CYLINDER}     & \ref{not documented?}  & \ref{not documented?}      \\ \hline
+%{\ct POROUS MEDIA} & \ref{eqn_porous_media} & \ref{info:porous_media}    \\ \hline
+%{\ct SCREEN}       & \ref{eqn_screen}       & \ref{info:particle_screen} \\ \hline
+%\end{tabular}
+%\end{center}
+%\end{table}
+
 \subsection{Splitting Particles}
 \label{info:particle_split}
 
@@ -6231,6 +6247,7 @@ These lines are a model of aluminum foam. The basic geometry of the foam ligamen
 
 The {\ct PART} line provides information about the particles. The {\ct DRAG\_LAW} indicates a special empirical model for the porous media. This model states that the pressure drop through the media is given by
 \be
+   \label{eqn_porous_media}
    \Delta p =  \delta \, \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
 where $\delta$ is the thickness of the foam block in the flow direction, $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
@@ -6254,6 +6271,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 \end{lstlisting}
 The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen is equal to 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
 \be
+   \label{eqn_screen}
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
 where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by
