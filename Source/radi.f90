@@ -68,6 +68,9 @@ CALL ChkMemErr('RADI','DLN',IZERO)
 ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
 
+! For the time being shutdown if CC_IBM and RADIATION are .TRUE.:
+IF (CC_IBM) CALL SHUTDOWN('ERROR: Currently RADIATION should be set to .FALSE. when having &GEOMs.')
+
 ! Determine mean direction normals and sweeping orders
 ! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
 
