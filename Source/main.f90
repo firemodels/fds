@@ -239,16 +239,6 @@ IF (CC_IBM) THEN
    CALL STOP_CHECK(1)
 ENDIF
 
-! Initialize GLMat solver for H:
-IF (GLMAT_SOLVER) THEN
-   CALL GLMAT_SOLVER_SETUP_H(1)
-   CALL STOP_CHECK(1)
-   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
-   CALL GLMAT_SOLVER_SETUP_H(2)
-   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS.
-   CALL GLMAT_SOLVER_SETUP_H(3)
-ENDIF
-
 ! Initialize the flow field with random noise to eliminate false symmetries
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -357,6 +347,15 @@ ENDIF
 ! Initialize output files containing global data (Master Node Only)
 
 IF (MYID==0) CALL INITIALIZE_GLOBAL_DUMPS(T,DT)
+! Initialize GLMat solver for H:
+IF (GLMAT_SOLVER) THEN
+   CALL GLMAT_SOLVER_SETUP_H(1)
+   CALL STOP_CHECK(1)
+   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
+   CALL GLMAT_SOLVER_SETUP_H(2)
+   CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS.
+   CALL GLMAT_SOLVER_SETUP_H(3)
+ENDIF
 CALL INIT_EVAC_DUMPS
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 

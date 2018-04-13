@@ -25,44 +25,24 @@ MODULE MKL_PARDISO
   USE MKL_PARDISO_PRIVATE
   INTERFACE PARDISO
      SUBROUTINE PARDISO_D( PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, PERM, NRHS, IPARM, MSGLVL, B, X, ERROR )
-     USE MKL_PARDISO_PRIVATE
-     TYPE(MKL_PARDISO_HANDLE), INTENT(INOUT) :: PT(*)
-     INTEGER,          INTENT(IN)    :: MAXFCT
-     INTEGER,          INTENT(IN)    :: MNUM
-     INTEGER,          INTENT(IN)    :: MTYPE
-     INTEGER,          INTENT(IN)    :: PHASE
-     INTEGER,          INTENT(IN)    :: N
-     INTEGER,          INTENT(IN)    :: IA(*)
-     INTEGER,          INTENT(IN)    :: JA(*)
-     INTEGER,          INTENT(INOUT) :: PERM(*)
-     INTEGER,          INTENT(IN)    :: NRHS
-     INTEGER,          INTENT(INOUT) :: IPARM(*)
-     INTEGER,          INTENT(IN)    :: MSGLVL
-     INTEGER,          INTENT(OUT)   :: ERROR
-     REAL(KIND=8),     INTENT(IN)    :: A(*)
-     REAL(KIND=8),     INTENT(INOUT) :: B(*)
-     REAL(KIND=8),     INTENT(OUT)   :: X(*)
+       USE MKL_PARDISO_PRIVATE
+       TYPE(MKL_PARDISO_HANDLE), INTENT(INOUT) :: PT(*)
+       INTEGER,          INTENT(IN)    :: MAXFCT
+       INTEGER,          INTENT(IN)    :: MNUM
+       INTEGER,          INTENT(IN)    :: MTYPE
+       INTEGER,          INTENT(IN)    :: PHASE
+       INTEGER,          INTENT(IN)    :: N
+       INTEGER,          INTENT(IN)    :: IA(*)
+       INTEGER,          INTENT(IN)    :: JA(*)
+       INTEGER,          INTENT(INOUT) :: PERM(*)
+       INTEGER,          INTENT(IN)    :: NRHS
+       INTEGER,          INTENT(INOUT) :: IPARM(*)
+       INTEGER,          INTENT(IN)    :: MSGLVL
+       INTEGER,          INTENT(OUT)   :: ERROR
+       REAL(KIND=8),     INTENT(IN)    :: A(*)
+       REAL(KIND=8),     INTENT(INOUT) :: B(*)
+       REAL(KIND=8),     INTENT(OUT)   :: X(*)
      END SUBROUTINE PARDISO_D
-
-     SUBROUTINE PARDISO_D_2D( PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, PERM, NRHS, IPARM, MSGLVL, B, X, ERROR )
-     USE MKL_PARDISO_PRIVATE
-     TYPE(MKL_PARDISO_HANDLE), INTENT(INOUT) :: PT(*)
-     INTEGER,          INTENT(IN)    :: MAXFCT
-     INTEGER,          INTENT(IN)    :: MNUM
-     INTEGER,          INTENT(IN)    :: MTYPE
-     INTEGER,          INTENT(IN)    :: PHASE
-     INTEGER,          INTENT(IN)    :: N
-     INTEGER,          INTENT(IN)    :: IA(*)
-     INTEGER,          INTENT(IN)    :: JA(*)
-     INTEGER,          INTENT(INOUT) :: PERM(*)
-     INTEGER,          INTENT(IN)    :: NRHS
-     INTEGER,          INTENT(INOUT) :: IPARM(*)
-     INTEGER,          INTENT(IN)    :: MSGLVL
-     INTEGER,          INTENT(OUT)   :: ERROR
-     REAL(KIND=8),     INTENT(IN)    :: A(*)
-     REAL(KIND=8),     INTENT(INOUT) :: B(N,*)
-     REAL(KIND=8),     INTENT(OUT)   :: X(N,*)
-     END SUBROUTINE PARDISO_D_2D
 
      SUBROUTINE PARDISO_S( PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, PERM, NRHS, IPARM, MSGLVL, B, X, ERROR )
        USE MKL_PARDISO_PRIVATE
@@ -84,6 +64,45 @@ MODULE MKL_PARDISO
        REAL(KIND=4),     INTENT(OUT)   :: X(*)
      END SUBROUTINE PARDISO_S
 
+     SUBROUTINE PARDISO_D_2D( PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, PERM, NRHS, IPARM, MSGLVL, B, X, ERROR )
+       USE MKL_PARDISO_PRIVATE
+       TYPE(MKL_PARDISO_HANDLE), INTENT(INOUT) :: PT(*)
+       INTEGER,          INTENT(IN)    :: MAXFCT
+       INTEGER,          INTENT(IN)    :: MNUM
+       INTEGER,          INTENT(IN)    :: MTYPE
+       INTEGER,          INTENT(IN)    :: PHASE
+       INTEGER,          INTENT(IN)    :: N
+       INTEGER,          INTENT(IN)    :: IA(*)
+       INTEGER,          INTENT(IN)    :: JA(*)
+       INTEGER,          INTENT(INOUT) :: PERM(*)
+       INTEGER,          INTENT(IN)    :: NRHS
+       INTEGER,          INTENT(INOUT) :: IPARM(*)
+       INTEGER,          INTENT(IN)    :: MSGLVL
+       INTEGER,          INTENT(OUT)   :: ERROR
+       REAL(KIND=8),     INTENT(IN)    :: A(*)
+       REAL(KIND=8),     INTENT(INOUT) :: B(N,*)
+       REAL(KIND=8),     INTENT(OUT)   :: X(N,*)
+     END SUBROUTINE PARDISO_D_2D
+
+     SUBROUTINE PARDISO_S_2D( PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, PERM, NRHS, IPARM, MSGLVL, B, X, ERROR )
+       USE MKL_PARDISO_PRIVATE
+       TYPE(MKL_PARDISO_HANDLE), INTENT(INOUT) :: PT(*)
+       INTEGER,          INTENT(IN)    :: MAXFCT
+       INTEGER,          INTENT(IN)    :: MNUM
+       INTEGER,          INTENT(IN)    :: MTYPE
+       INTEGER,          INTENT(IN)    :: PHASE
+       INTEGER,          INTENT(IN)    :: N
+       INTEGER,          INTENT(IN)    :: IA(*)
+       INTEGER,          INTENT(IN)    :: JA(*)
+       INTEGER,          INTENT(INOUT) :: PERM(*)
+       INTEGER,          INTENT(IN)    :: NRHS
+       INTEGER,          INTENT(INOUT) :: IPARM(*)
+       INTEGER,          INTENT(IN)    :: MSGLVL
+       INTEGER,          INTENT(OUT)   :: ERROR
+       REAL(KIND=4),     INTENT(IN)    :: A(*)
+       REAL(KIND=4),     INTENT(INOUT) :: B(N,*)
+       REAL(KIND=4),     INTENT(OUT)   :: X(N,*)
+     END SUBROUTINE PARDISO_S_2D
   END INTERFACE
 END MODULE MKL_PARDISO
 
@@ -116,6 +135,27 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
     INTEGER,          INTENT(IN)    :: COMM
   END SUBROUTINE CLUSTER_SPARSE_SOLVER_D
 
+  SUBROUTINE CLUSTER_SPARSE_SOLVER_S(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
+    USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
+    TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
+    INTEGER,          INTENT(IN)    :: MAXFCT
+    INTEGER,          INTENT(IN)    :: MNUM
+    INTEGER,          INTENT(IN)    :: MTYPE
+    INTEGER,          INTENT(IN)    :: PHASE
+    INTEGER,          INTENT(IN)    :: N
+    INTEGER,          INTENT(IN)    :: IA(*)
+    INTEGER,          INTENT(IN)    :: JA(*)
+    INTEGER,          INTENT(IN)    :: PERM(*)
+    INTEGER,          INTENT(IN)    :: NRHS
+    INTEGER,          INTENT(INOUT) :: IPARM(*)
+    INTEGER,          INTENT(IN)    :: MSGLVL
+    INTEGER,          INTENT(OUT)   :: ERROR
+    REAL(KIND=4),     INTENT(IN)    :: A(*)
+    REAL(KIND=4),     INTENT(INOUT) :: B(*)
+    REAL(KIND=4),     INTENT(OUT)   :: X(*)
+    INTEGER,          INTENT(IN)    :: COMM
+  END SUBROUTINE CLUSTER_SPARSE_SOLVER_S
+
   SUBROUTINE CLUSTER_SPARSE_SOLVER_D_2D(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
     USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
     TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
@@ -137,7 +177,7 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
     INTEGER,          INTENT(IN)    :: COMM
   END SUBROUTINE CLUSTER_SPARSE_SOLVER_D_2D
 
-  SUBROUTINE CLUSTER_SPARSE_SOLVER_S(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
+  SUBROUTINE CLUSTER_SPARSE_SOLVER_S_2D(PT,MAXFCT,MNUM,MTYPE,PHASE,N,A,IA,JA,PERM,NRHS,IPARM,MSGLVL,B,X,COMM,ERROR)
     USE MKL_CLUSTER_SPARSE_SOLVER_PRIVATE
     TYPE(MKL_CLUSTER_SPARSE_SOLVER_HANDLE), INTENT(INOUT) :: PT(*)
     INTEGER,          INTENT(IN)    :: MAXFCT
@@ -153,10 +193,10 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
     INTEGER,          INTENT(IN)    :: MSGLVL
     INTEGER,          INTENT(OUT)   :: ERROR
     REAL(KIND=4),     INTENT(IN)    :: A(*)
-    REAL(KIND=4),     INTENT(INOUT) :: B(*)
-    REAL(KIND=4),     INTENT(OUT)   :: X(*)
+    REAL(KIND=4),     INTENT(INOUT) :: B(N,*)
+    REAL(KIND=4),     INTENT(OUT)   :: X(N,*)
     INTEGER,          INTENT(IN)    :: COMM
-  END SUBROUTINE CLUSTER_SPARSE_SOLVER_S
+  END SUBROUTINE CLUSTER_SPARSE_SOLVER_S_2D
 
   END INTERFACE
 END MODULE MKL_CLUSTER_SPARSE_SOLVER
@@ -7074,28 +7114,88 @@ INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ICF
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,IROW,ICC,JCC,ISIDE,IW
 REAL(EB):: AF,KFACE(2,2),F_LOC(2),CIJP,CIJM,VELC,ALPHAP1,AM_P1,AP_P1
 REAL(EB), POINTER, DIMENSION(:,:,:)  :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:)::  ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:)  :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:):: ZZP=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+INTEGER :: IIG,JJG,KKG,IOR
+REAL(EB) :: UN
 
 ! Mesh Loop:
 MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
+   UU=>WORK1
+   VV=>WORK2
+   WW=>WORK3
+
    IF (PREDICTOR) THEN
       ZZP  => ZZ
       RHOP => RHO
-      UP   => U
-      VP   => V
-      WP   => W
+      UU   = U
+      VV   = V
+      WW   = W
       PRFCT= 1._EB
+      WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP
+
    ELSE
       ZZP  => ZZS
       RHOP => RHOS
-      UP   => US
-      VP   => VS
-      WP   => WS
+      UU   = US
+      VV   = VS
+      WW   = WS
       PRFCT= 0._EB
+      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP_2
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP_2
    ENDIF
+
+   ! The use of UU, VV, WW is to maintain the divergence consistent in cells next to INTERPOLATED_BOUNDARY faces, when
+   ! The solver being used is the default POISSON solver (i.e. use normal velocities with velocity error).
+   UP => UU
+   VP => VV
+   WP => WW
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -8948,10 +9048,11 @@ MNUMZ   = 1
 
 ! Define CLUSTER_SPARSE_SOLVER control parameter vector iparmz:
 IPARMZ(1) = 1   ! no solver default
-! PARDISO:
-! IPARMZ(2) = 2   ! fill-in reordering from METIS
-! CLUSTER_SPARSE_SOLVER:
-IPARMZ(2) = 3   ! Parallel fill-in reordering from METIS
+IF (N_MPI_PROCESSES > 4) THEN ! Typical number of computing cores inside one chip.
+   IPARMZ(2) =10  ! 10 = MPI Parallel fill-in reordering from METIS. If 3 = OpenMP parallel reordering in Master Node.
+ELSE              ! Note IPARM(2)=10 has a bug which has been fixed from Intel MKL 2018 update 2 onwards.
+   IPARMZ(2) = 3
+ENDIF
 IPARMZ(4) = 0   ! no iterative-direct algorithm
 IPARMZ(5) = 0   ! no user fill-in reducing permutation
 IPARMZ(6) = 0   ! =0 solution on the first n components of x
@@ -18940,6 +19041,12 @@ REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_
 LOGICAL, PARAMETER :: ALL_GODUNOV = .FALSE. ! If false uses centered interpolation for diffusion velocity.
 REAL(EB),PARAMETER :: DO_ADV = 1._EB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:)  :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+INTEGER :: IIG,JJG,KKG,IOR
+REAL(EB) :: UN
+
 
 LOGICAL :: END_OF_STEP_RHO, DIFF_FROM_DIVG
 
@@ -18963,6 +19070,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
+   UU=>WORK1
+   VV=>WORK2
+   WW=>WORK3
+
    IF (PREDICTOR) THEN
       IF (END_OF_STEP_RHO) THEN
          RHOP => RHOS
@@ -18971,9 +19082,31 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          RHOP => RHO
          PRFCT= 1._EB
       ENDIF
-      UP   => U
-      VP   => V
-      WP   => W
+      UU   = U
+      VV   = V
+      WW   = W
+      WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP
    ELSE
       IF (END_OF_STEP_RHO) THEN
          RHOP => RHO
@@ -18982,10 +19115,38 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          RHOP => RHOS
          PRFCT= 0._EB
       ENDIF
-      UP   => US
-      VP   => VS
-      WP   => WS
+      UU   = US
+      VV   = VS
+      WW   = WS
+      WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE DEFAULT; CYCLE WALL_LOOP_2
+            ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+         END SELECT
+         SELECT CASE(IOR)
+            CASE( 1); UU(IIG-1,JJG,KKG) = UN
+            CASE(-1); UU(IIG,JJG,KKG)   = UN
+            CASE( 2); VV(IIG,JJG-1,KKG) = UN
+            CASE(-2); VV(IIG,JJG,KKG)   = UN
+            CASE( 3); WW(IIG,JJG,KKG-1) = UN
+            CASE(-3); WW(IIG,JJG,KKG)   = UN
+         END SELECT
+      ENDDO WALL_LOOP_2
    ENDIF
+
+   ! The use of UU, VV, WW is to maintain the divergence consistent in cells next to INTERPOLATED_BOUNDARY faces, when
+   ! The solver being used is the default POISSON solver (i.e. use normal velocities with velocity error).
+   UP => UU
+   VP => VV
+   WP => WW
 
    ! X direction bounds:
    ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -23399,7 +23560,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ELSEIF(PERIODIC_TEST==7) THEN
       IBM_CUTCELLS_FOUND_MESH =  (NXB+1) * (NYB+1) * (NZB+1) / 4
    ELSE
-      IBM_CUTCELLS_FOUND_MESH = 28 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
+      IBM_CUTCELLS_FOUND_MESH = 50 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
    ENDIF
 
    ! Here we have to allocate the size of MESHES(NM)%EDGE_CROSS:
@@ -31178,7 +31339,6 @@ REAL(EB) :: VOLUME
 REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
 LOGICAL :: HAVE_SURF, HAVE_MATL, IN_LIST
 INTEGER :: SORT_FACES
-INTEGER :: FIRST_FACE_INDEX
 REAL(EB) :: TXMIN, TXMAX, TYMIN, TYMAX, TX, TY
 
 LOGICAL COMPONENT_ONLY
@@ -31620,11 +31780,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ENDIF
    G%NSUB_GEOMS=NSUB_GEOMS
 
-   ! remove duplicate vertices
-
-   FIRST_FACE_INDEX=1
-   CALL REMOVE_DUPLICATE_VERTS(N_VERTS,N_FACES,N_VOLUS,MAX_VERTS,MAX_FACES,MAX_VOLUS,FIRST_FACE_INDEX,VERTS,FACES,VOLUS)
-
    ! wrap up
 
    G%ID = ID
@@ -31726,14 +31881,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ALLOCATE(G%MATLS(N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%MATLS',IZERO)
       MATL_INDEX = GET_MATL_INDEX(MATL_ID)
-      IF (MATL_INDEX==0) THEN
-         IF (TRIM(MATL_ID)=='null') THEN
-           WRITE(MESSAGE,'(A)') 'ERROR: problem with GEOM, the material keyword, MATL_ID, is not defined.'
-         ELSE
-           WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material ',TRIM(MATL_ID),' is not defined.'
-         ENDIF
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+      ! The following constraint is removed for the time being. When Tetrahedrons are actually used for heat transfer
+      ! and pyrolysis this will be needed.
+      !IF (MATL_INDEX==0) THEN
+      !   IF (TRIM(MATL_ID)=='null') THEN
+      !     WRITE(MESSAGE,'(A)') 'ERROR: problem with GEOM, the material keyword, MATL_ID, is not defined.'
+      !   ELSE
+      !     WRITE(MESSAGE,'(3A)') 'ERROR: problem with GEOM, the material ',TRIM(MATL_ID),' is not defined.'
+      !   ENDIF
+      !   CALL SHUTDOWN(MESSAGE)
+      !ENDIF
       G%MATLS(1:N_VOLUS) = MATL_INDEX
 
       ! construct an array of external faces
