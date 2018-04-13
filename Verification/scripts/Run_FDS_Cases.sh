@@ -34,7 +34,7 @@ OOPT=
 POPT=
 INTEL=
 INTEL2=
-GEOMCASES=
+GEOMCASES=1
 WAIT=
 EXE=
 
@@ -153,7 +153,7 @@ case $OPTION in
    ;;
   R)
    BENCHMARK=
-   GEOMCASES=
+   GEOMCASES=1
    REGULAR=1
    ;;
   s)
