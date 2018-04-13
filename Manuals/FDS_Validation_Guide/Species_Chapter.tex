@@ -527,7 +527,18 @@ Predicting the concentration of products of incomplete combustion is challenging
 \subsection{Smyth Slot Burner Experiment}
 \label{Smyth_Reactions}
 
-Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_h2o_h2} show predicted and measured concentrations of CH$_4$, O$_2$, CO, CO$_2$, H$_2$O and H$_2$ at the same three elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}}
+\end{tabular*}
+\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
+{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_temp}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -538,8 +549,8 @@ Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} s
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured fuel and oxygen species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_fuel_ox}
 \end{figure}
 
@@ -552,22 +563,26 @@ Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} s
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured carbon dioxide and carbon monoxide species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_co_co2}
 \end{figure}
 
 \begin{figure}[p]
-\centering
-\begin{tabular}{c}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}
-\end{tabular}
-\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_temp}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Hydrogen}
+\end{tabular*}
+\caption[H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_h2o_h2}
 \end{figure}
+
+
 
 \clearpage
 
