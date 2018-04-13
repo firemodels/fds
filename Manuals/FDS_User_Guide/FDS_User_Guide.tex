@@ -6067,20 +6067,20 @@ By default, particles are not recycled at a periodic boundary. To recycle the pa
 \subsection{Drag}
 \label{info:particle_drag}
 
-For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}. A summary of the drag laws and the technical reference guide sections describing them is in table~\ref{tbl:draglaws}. If none of these options are applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke a different drag law, that of a cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
 \caption{Drag laws available in FDS}
 \label{tbl:draglaws}
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|c|c|}
 \hline
-{\ct DRAG\_LAW}    & Tech.\ Guide Section \\ \hline
-default (sphere)   & 8.1                  \\ \hline
-{\ct CYLINDER}     & 8.1                  \\ \hline
-{\ct POROUS MEDIA} & 8.6.1                \\ \hline % \ref{info:porous_media}
-{\ct SCREEN}       & 8.6.1                \\ \hline % \ref{info:particle_screen}
+{\ct DRAG\_LAW}           & Reference   \\ \hline\hline
+{\ct 'SPHERE'} (default)  & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
+{\ct 'CYLINDER'}          & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
+{\ct 'POROUS MEDIA'}      & Sec.~\ref{info:porous_media}           \\ \hline
+{\ct 'SCREEN'}            & Sec.~\ref{info:particle_screen}        \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
