@@ -56,11 +56,11 @@ from three vertices. The user can assign a specific boundary condition to each o
 \subsection{Basics}
 \label{info:GEOM_Basics}
 
-A simple form of the {\ct \&GEOM}\ namelist defining an unstructured solid is given by
+A simple form of the {\ct GEOM}\ namelist defining an unstructured solid is given by
 
 \begin{verbatim}
-&GEOM ID='UNSTRUCTURED_SOLID',
-      SURF_ID='FIRE','INERT',
+&GEOM ID='UNSTRUCTURED_SOLID'
+      SURF_ID='FIRE','INERT'
       VERTS= -1.0, -1.0,  0.0, 
               1.0, -1.0,  0.0, 
               0.0,  1.0,  0.0, 
@@ -93,32 +93,114 @@ second and third faces have $b=1$ and are of type {\ct 'FIRE'}, and the fourth w
 
 \subsection{Triangulated surfaces quality}
 
-In order for FDS to correctly detect the solid portion of the volume from the rest of the fluid domain,
-some tests are performed at start on the quality of the triangulated surfaces.
+In order for FDS to correctly detect the solid portion of the volume from the rest
+of the fluid domain, some tests are performed at start on the quality of
+the triangulated surfaces.
 
-First of all, no \textit{degenerate geometry} is allowed.
-In a collection of vertices and faces of a {\ct \&GEOM}\ namelist:
+The following conditions are enforced by FDS on the collection of vertices and faces of each {\ct GEOM}\ namelist:
+
+\begin{enumerate}
+\item Each vertex must be unique, shared by edges, be part of an only well-formed surface so that its neighbor ring of faces could in theory be continuously deformed to a disk: a vertex that abides to these conditions is called \textit{non-degenerate} and \textit{manifold}. Examples of good and bad vertices are presented in Figure \ref{figure:GEOM_non_manifold_vert}.
+
+\item Each edge connecting vertices must have a non-zero length, and must always be shared by exactly two faces. An edge that abides to these conditions is called \textit{non-degenerate} and \textit{manifold}. See examples of good and bad edges in Figure \ref{figure:GEOM_non_manifold_edge}.
+
+\item Each face cannot intersect the others and must have a non-zero area; such a face is called \textit{non-intersecting} and \textit{non-degenerate}.
+
+\item The vertex orderings for the faces shall be chosen so that adjacent faces
+have outward consistent normals, as illustrated in Figure \ref{figure:GEOM_oriented_surface}.
+
+\item Each {\ct GEOM}\ namelist may define one or more distinct volumes (\textit{unconnected} volumes) that should never mutually intersect or self-intersect. See an example of a bad intersecting geometry in Figure \ref{figure:GEOM_self_intersecting}.
+
+\item An upper limit is set to the number of triangles for each {\ct MESH} cell; this condition reasonably limits the complexity of the discretization that can currently be elaborated by the immersed boundary method solver.
+
+\end{enumerate}
+
+If the previous conditions are respected, a well-formed {\ct GEOM}\ namelist is obtained that represents one or more \textit{closed}, \textit{manifold}, \textit{orientable}, \textit{non intersecting} triangulated surfaces, that enclose well-defined volumes. An example of a well-formed triangulated surface is presented in Figure \ref{figure:GEOM_ok_surface_2}.
+
+\pagebreak
+Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain:\nopagebreak
+\begin{verbatim}
+ERROR: Problem with GEOM ID='Cube':
+       Non manifold edge at XYZ=3.456879,1.983742,1.384858
+\end{verbatim}
+
+\begin{figure}
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_oriented_surface.png}
+		\caption{\textbf{Good {\ct GEOM}:} consistent normals on a manifold orientable surface}
+		\label{figure:GEOM_oriented_surface}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_ok_surface_2.png}
+		\caption{\textbf{Good {\ct GEOM}:} a well formed triangulated surface}
+		\label{figure:GEOM_ok_surface_2}	
+	\end{minipage}%
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_non_manifold_vert.png}
+		\caption{\textbf{Bad {\ct GEOM}:} the vertex shared by the two cubes is not manifold, because it is connected to two rings of faces, that cannot be continuously deformed to a single disk. The other vertices are manifold.}
+		\label{figure:GEOM_non_manifold_vert}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_non_manifold_edge.png}
+		\caption{\textbf{Bad {\ct GEOM}:} the edge shared by the two cubes is not manifold, because more than two faces are incident on it. The other edges are manifold.\newline}
+		\label{figure:GEOM_non_manifold_edge}
+	\end{minipage}%
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_open_surface.png}
+		\caption{\textbf{Bad {\ct GEOM}:} FDS cannot differentiate the internal volume from the rest of the domain, because the triangulated surface is open}
+		\label{figure:GEOM_open_surface}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_open_thick_surface.png}
+		\caption{\textbf{Good {\ct GEOM}:} by adding a thickness FDS can differentiate the internal volume from the rest of the domain\newline}
+		\label{figure:GEOM_open_thick_surface}
+\end{minipage}%
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=4in\textwidth]{../../../fig/fds/GEOM_self_intersecting.png}
+	\caption{\textbf{Bad {\ct GEOM}:} This volume is self-intersecting}
+	\label{figure:GEOM_self_intersecting}
+\end{figure}
+
+\subsection{Intersections and interactions}
+
+Several types of intersections can happen between {\ct GEOM}s and between {\ct GEOM}s and other namelists:
 
 \begin{itemize}
-\item each vertex must be unique and shared by edges,
-\item each edge connecting face vertices must be shared by two faces and have a non-zero length,
-\item each face cannot intersect the others and must have a non-zero area.
+	\item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with a solid condition;
+	\item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
+	\item {\ct GEOM} - {\ct VENT}: it is currently not possible to set boundary condition patches on {\ct GEOM} surfaces with {\ct VENT} namelists.
 \end{itemize}
 
-Furthermore the {\ct \&GEOM}\ namelist shall represent \textit{closed}, \textit{manifold}, \textit{orientable} surfaces.
-The surfaces may define one or more distinct volumes, that do not need to be \textit{connected}.
+Currently no control logic is available on {\ct GEOM} namelists.
 
-\textbf{FIXME}: [EG] insert a picture of well behaved surfaces that define non-connected spaces, with normals displayed
+\subsection{Coloring}
 
-A triangulated surface is said to be a \textit{manifold} and \textit{closed} if each edge is shared by exactly two faces.
-A manifold mesh is \textit{orientable} if the vertex orderings for the faces can be chosen so that adjacent faces
-have consistent normals. For example a Möbius strip is open and non-orientable.
-
-\textbf{FIXME}: [EG] insert a picture of various common types of flaws in triangulated surfaces.
+FIXME Colors and texture maps
 
 \subsection{Self-generated geometries}
 
-The {\ct \&GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
+The {\ct GEOM}\ namelist allows the quick definition of particular kinds of geometric objects, blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
 and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
 
 \subsubsection{Blocks}
@@ -126,22 +208,26 @@ A {\ct GEOM}\ namelist defining a block is given by
 
 \begin{verbatim}
 &GEOM ID='block'
+      SURF_ID='S1'
       XB=0.0,1.0,0.0,1.0,0.0,1.0
 /
 \end{verbatim}
 
 \noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
-The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
+The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VENT}\ line.
 A block may be refined into many parts by specifying the {\ct IJK} parameter.
 For example, {\ct IJK=8,6,4} would split the block into 8 parts along the $x$ dimension,
 6 parts along the $y$ dimension and 4 parts along the $z$ dimension.
 By default, blocks are discretized so that the block faces are consistent in size with the grid resolution.
+
+The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all the generated faces.
 
 \subsubsection{Spheres}
 A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
 \begin{verbatim}
 &GEOM ID='sphere'
+      SURF_ID='S1'
       SPHERE_ORIGIN=0.0,0.0,0.0, SPHERE_RADIUS=1.0
 /
 \end{verbatim}
@@ -150,10 +236,11 @@ A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ i
 One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times the sphere is split.
 
 \subsubsection{2D Terrain elevations}
-A {\ct \&GEOM}\ namelist defining a 2D terrain elevation is given by
+A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 
 \begin{verbatim}
-&GEOM ID='terrain',
+&GEOM ID='terrain'
+      SURF_ID='S1'
       IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax, ZVALS=...
 /
 \end{verbatim}
@@ -175,12 +262,12 @@ vertices and triangular faces.
 
 \textbf{FIXME}: [EG] Useful?
 
-{\ct \&GEOM}\ namelists for complex geometries can be automatically generated using third-party pre-processors
-provided by the FDS-SMV community. The links to this tools can be found at the project home page at https://pages.nist.gov/fds-smv/
+Generating well-formed complex geometries is a time-consuming and error-prone process.
+Several third-party pre-processing tools are provided by the FDS-SMV community for automatically translating CAD files to {\ct GEOM}\ namelists.
 
-The FDS/Smokeview distribution includes an example Python script that transforms a Wavefront .OBJ file,
-an open file format supported by many 3D graphics applications, into {\ct \&GEOM}\ namelists.
+These tools should always enforce quality checks on the triangulated surfaces and produce well-formed {\ct GEOM}\ namelists.
 
+The links to this tools can be found at the project home page at https://pages.nist.gov/fds-smv/
 
 
 
@@ -192,9 +279,9 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %
 %\subsubsection{General Surfaces}
 %
-%Unstructured geometric surfaces are defined using the {\ct \&GEOM}\ namelist.
+%Unstructured geometric surfaces are defined using the {\ct GEOM}\ namelist.
 %These surfaces consist of a collection of triangular faces where each face consists of three vertices.
-%A simple form of the {\ct \&GEOM}\ namelist defining one triangular face is given by
+%A simple form of the {\ct GEOM}\ namelist defining one triangular face is given by
 %
 %\begin{verbatim}
 %&GEOM ID='triangle'
@@ -205,14 +292,14 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %
 %\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
 %{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
-%face. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
+%face. Each index ranges from 1 to the number of vertices found on this {\ct GEOM}\ line.
 %
 %One may also define particular kinds of geometric objects,  blocks using {\ct XB}, spheres using {\ct SPHERE\_ORIGIN}\ and {\ct SPHERE\_RADIUS}
 %and a 2D surface using {\ct ZVALS}.
 %FDS generate vertices and faces to represent these objects, equivalent to what would have been defined using {\ct VERTS}\ and {\ct FACES}.
 %
 %\subsubsection{Blocks}
-%A {\ct \&GEOM}\ namelist defining a block is given by
+%A {\ct GEOM}\ namelist defining a block is given by
 %
 %\begin{verbatim}
 %&GEOM ID='block'
@@ -220,7 +307,7 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %\end{verbatim}
 %
 %\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
-%The {\ct XB}\ parameter is used in the same way as on an {\ct \&OBST}\ or {\ct \&VENT}\ line.
+%The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VENT}\ line.
 %A block may be discretized into many parts by
 %specifying the {\ct IJK} parameter.  For example, {\ct IJK=8,6,4} would split the block
 %into 8 parts along the $x$ dimension, 6 parts along the $y$ dimension and 4 parts along
@@ -228,7 +315,7 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %so that the block faces are consistent in size with the grid resolution.
 %
 %\subsubsection{Spheres}
-%A {\ct \&GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
+%A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 %
 %\begin{verbatim}
 %&GEOM ID='sphere'
@@ -239,7 +326,7 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
 %
 %\subsubsection{2D Surfaces}
-%A {\ct \&GEOM}\ namelist defining a 2D surface is given by
+%A {\ct GEOM}\ namelist defining a 2D surface is given by
 %
 %\begin{verbatim}
 %&GEOM ID='terrain'
@@ -260,9 +347,9 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %vertices and triangular faces.
 
 %\subsection{Defining Solids}
-%Unstructured geometric solids are also defined using the {\ct \&GEOM}\ namelist.
+%Unstructured geometric solids are also defined using the {\ct GEOM}\ namelist.
 %These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
-%A simple form of the {\ct \&GEOM}\ namelist defining one tetrahedron is given by
+%A simple form of the {\ct GEOM}\ namelist defining one tetrahedron is given by
 %
 %\begin{verbatim}
 %&GEOM ID='tetrahedron'
@@ -273,13 +360,13 @@ an open file format supported by many 3D graphics applications, into {\ct \&GEOM
 %
 %\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
 %{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
-%tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct \&GEOM}\ line.
+%tetrahedron. Each index ranges from 1 to the number of vertices found on this {\ct GEOM}\ line.
 
 
 \subsection{Transforming Objects}
 An object may be transformed.
 It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated about {\ct XYZ0}\ using {\ct AZIM}\ and/or {\ct ELEV}.
-For example, in the following {\ct \&GEOM}\ namelist,
+For example, in the following {\ct GEOM}\ namelist,
 
 {\small
 \begin{verbatim}
@@ -337,7 +424,7 @@ are place at a particular locations using the {\ct DXYZ}\ keyword.
 }
 
 \noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
-previous {\&GEOM}\ lines.  Forward references are not permitted.
+previous {GEOM}\ lines.  Forward references are not permitted.
 One may scale, rotate and translate objects as they are placed in the group using
 {\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
 
@@ -917,7 +1004,7 @@ is not intended to be included verbatim in the FDS User Guide).
 \newcommand{\figheightD}{2.75in}
 
 \subsection{geom\_simple.fds}
-Figure \ref{fig:geom_simple} was created using the following \&GEOM namelist.
+Figure \ref{fig:geom_simple} was created using the following GEOM namelist.
 The {\ct VERTS}\ keyword is used to specify 3 vertices and the {\ct FACES}\ keyword
 is used to specify the indices of the triangular face.
 
@@ -941,7 +1028,7 @@ SURF_ID='surf1'/
 \end{figure}
 
 \subsection{geom\_azim.fds}
-Figure \ref{fig:geom_azim} was created using the following \&GEOM namelists.
+Figure \ref{fig:geom_azim} was created using the following GEOM namelists.
 The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
 centered at $(0,0,0)$.
 
@@ -972,7 +1059,7 @@ FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
 \end{figure}
 
 \subsection{geom\_elev.fds}
-Figure \ref{fig:geom_elev} was created using the following \&GEOM namelists.
+Figure \ref{fig:geom_elev} was created using the following GEOM namelists.
 The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
 passing through $(0,0,0)$.
 
@@ -1003,7 +1090,7 @@ FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
 \end{figure}
 
 \subsection{geom\_scale.fds}
-Figure \ref{fig:geom_scale} was created using the following \&GEOM namelists.
+Figure \ref{fig:geom_scale} was created using the following GEOM namelists.
 The {\ct SCALE}\ keyword is used to change the size of the object.
 
 {\small
@@ -1033,9 +1120,9 @@ FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
 \end{figure}
 
 \subsection{geom\_obst.fds}
-Figure \ref{fig:geom_obst} was created using the following \&GEOM namelist.
+Figure \ref{fig:geom_obst} was created using the following GEOM namelist.
 The {\ct XB}\ keyword is used the same way to specify a block as on
-a {\ct \&OBST}\ or {\ct \&VENT}\ line.
+a {\ct OBST}\ or {\ct VENT}\ line.
 
 {\scriptsize
 \begin{verbatim}
@@ -1055,7 +1142,7 @@ a {\ct \&OBST}\ or {\ct \&VENT}\ line.
 
 \subsection{geom\_sphere1a.fds,...,geom\_sphere3f.fds}
 Figure \ref{fig:geom_sphere} was created using {\ct LEVEL=n}\
-in the following \&GEOM namelist
+in the following GEOM namelist
 where {\ct n}\ ranges from 0 to 5.
 
 {\scriptsize
@@ -1091,7 +1178,7 @@ the size and location of the sphere.  This discretization technique results in e
 \label{fig:geom_sphere}
 \end{figure}
 
-Figure \ref{fig:geom_sphere2a} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct \&GEOM}\ namelist
+Figure \ref{fig:geom_sphere2a} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct GEOM}\ namelist
 to split a sphere in latitudinal (north/south) and longitudinal (east/west) directions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
 
 \begin{figure}
@@ -1128,8 +1215,8 @@ Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
 \end{figure}
 
 \subsection{geom\_texture.fds}
-Figure \ref{fig:geom_texture} was created using the following \&SURF and \&GEOM namelists.
-The {\ct TEXTURE\_MAP}\ keyword on the {\ct \&SURF}\ is used to specify the name of the image
+Figure \ref{fig:geom_texture} was created using the following SURF and GEOM namelists.
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
 file used to texture map the geometric object.
 
 {\small
@@ -1153,8 +1240,8 @@ FACES=1,2,3,SURF_ID='surf1'/
 \end{figure}
 
 \subsection{geom\_texture2.fds}
-Figure \ref{fig:geom_texture2} was created using the following \&SURF and \&GEOM namelists.
-The {\ct TEXTURE\_MAP}\ keyword on the {\ct \&SURF}\ is used to specify the name of the image
+Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists.
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
 file used to texture map the geometric object. This example has two textures.
 
 {\small
@@ -1183,7 +1270,7 @@ FACES=1,2,3,SURF_ID='surf2'/
 \end{figure}
 
 \subsection{geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
-The spheres in Figure \ref{fig:geom_texture3} were created using \&SURF and \&GEOM namelists similar to the following.
+The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
 
 {\small
 \begin{verbatim}
@@ -1237,7 +1324,7 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 \end{figure}
 
 %\subsection{geom\_time.fds}
-%Figure \ref{fig:geom_time} was created using the following \&GEOM namelist.
+%Figure \ref{fig:geom_time} was created using the following GEOM namelist.
 %The {\ct AZIM}\ keyword is used to specify the initial rotational angle
 %and the {\ct AXIM\_DOT}\ is used to specify that rate at which
 %the azimuthal angle changes, in this  case 0.36 deg/s.
@@ -1264,7 +1351,7 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 %\end{figure}
 %
 %\subsection{geom\_time2.fds, geom\_time3.fds, geom\_time4.fds}
-%Figure \ref{fig:geom_time2} was created using the following \&GEOM namelists.
+%Figure \ref{fig:geom_time2} was created using the following GEOM namelists.
 %The {\ct AZIM}\ keyword is used to specify the initial rotational angle
 %and the {\ct AXIM\_DOT}\ is used to specify that rate at which
 %the azimuthal angle changes, in this  case 0.72 deg/s.
@@ -1328,7 +1415,7 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 %\end{figure}
 
 %\subsection{geom\_slice.fds}
-%The slice file in Figure \ref{fig:geom_slice} was generated using the {\tt SLICETYPE}\ keyword on a {\tt \&SLCF}\ namelist statement as in
+%The slice file in Figure \ref{fig:geom_slice} was generated using the {\tt SLICETYPE}\ keyword on a {\tt SLCF}\ namelist statement as in
 %{\footnotesize
 %\begin{verbatim}
 %&SLCF PBY=0.75,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE., SLICETYPE='EXCLUDEGEOM' /.
@@ -1338,7 +1425,7 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 %\noindent The {\tt SLICETYPE}\ keyword is used to specify the type of slice generated.  For example, a slice consisting of only cutcells, a slice  including the effects of immersed geometry, a slice ignoring immersed geometry and a slice output using the original slice file format.  These choices are documented in Table \ref{table:slicetype}.
 %
 %\begin{table}
-%\caption{Description of {\tt SLICETYPE}\ values used on a {\tt \&SLCF}\ namelist statement }
+%\caption{Description of {\tt SLICETYPE}\ values used on a {\tt SLCF}\ namelist statement }
 %\begin{tabular}{|l|l|}
 %  \hline
 %Keyword& Description\\
