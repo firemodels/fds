@@ -4475,11 +4475,3 @@ s,Cup Burner,Cub_Burner/Cup_buner_exp.csv,1,2,Time,Propanol_SF6,Exp,ko,0,50,,0,1
 s,Cup Burner,Cub_Burner/Cup_buner_exp.csv,1,2,Time,Toluene_Ar,Exp,ko,0,50,,0,1,,Cup_Burner/FDS_Output_Files/Cup_toluene_ar_devc.csv,1,2,Time,VF,FDS,k-,0,50,,0,1,0,Minimum Extinguishing Concentration,Time (s),Agent Volume Fraction (mol/mol),0,50,1,0,1,0.2,no,0.05 0.133,SouthEast,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Toluene_Ar.pdf,0,max,0,Cup Burner,co,m
 s,Cup Burner,Cub_Burner/Cup_buner_exp.csv,1,2,Time,Toluene_CO2,Exp,ko,0,50,,0,1,,Cup_Burner/FDS_Output_Files/Cup_toluene_co2_devc.csv,1,2,Time,VF,FDS,k-,0,50,,0,1,0,Minimum Extinguishing Concentration,Time (s),Agent Volume Fraction (mol/mol),0,50,1,0,1,0.2,no,0.05 0.134,SouthEast,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Toluene_CO2.pdf,0,max,0,Cup Burner,cs,m
 s,Cup Burner,Cub_Burner/Cup_buner_exp.csv,1,2,Time,Toluene_N2,Exp,ko,0,50,,0,1,,Cup_Burner/FDS_Output_Files/Cup_toluene_n2_devc.csv,1,2,Time,VF,FDS,k-,0,50,,0,1,0,Minimum Extinguishing Concentration,Time (s),Agent Volume Fraction (mol/mol),0,50,1,0,1,0.2,no,0.05 0.135,SouthEast,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Toluene_N2.pdf,0,max,0,Cup Burner,cd,m
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1.5,Cup_Burner/FDS_Output_Files/_git.txt,,,,,,,,
