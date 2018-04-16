@@ -11059,10 +11059,17 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    CALL SET_DEVC_DEFAULTS
    READ(LU_INPUT,DEVC)
 
+   ! Check the QUANTITY_RANGE
+
    IF (QUANTITY_RANGE(2) <= QUANTITY_RANGE(1)) THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' has QUANTITY_RANGE(2) <= QUANTITY_RANGE(1)'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
+
+   ! If the device is a clock, give it fictitious coordinates
+
+   IF (QUANTITY=='TIME' .OR. QUANTITY=='TIME STEP' .OR. QUANTITY=='WALL CLOCK TIME' .OR. QUANTITY=='WALL CLOCK TIME ITERATIONS') &
+      XYZ = (/MESHES(1)%XS,MESHES(1)%YS,MESHES(1)%ZS/)
 
    ! Determine if the device is a steady-state "line" device or the usual time-history device.
 
