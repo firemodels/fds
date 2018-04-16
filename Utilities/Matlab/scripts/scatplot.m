@@ -43,10 +43,6 @@ for k=1:2:length(varargin);
         Statistics_Tex_Output = varargin{k+1};
     case {'Histogram_Tex_Output'}
         Histogram_Tex_Output = varargin{k+1};
-    case {'NRC_Options'}
-        NRC_Options = varargin{k+1};
-    case {'Append_To_Scatterplot_Title'}
-        Append_To_Scatterplot_Title = varargin{k+1};
     end
 end
 
@@ -79,12 +75,6 @@ end
 % Read in global plot options
 plot_style
 Font_Interpreter = 'LaTeX';
-
-% Override the plot style options with NRC 1824 plot options
-if NRC_Options == true
-    Font_Name = 'Helvetica';
-    Image_File_Type = '-dpdf';
-end
 
 % Read in scatter plot inputs file
 Q = importdata(Scatterplot_Inputs_File);
@@ -320,7 +310,7 @@ for j=2:length(Q);
             Title_Position_Y_4 = 10^(log10(Plot_Min)+(Title_Position(2)-0.15)*(log10(Plot_Max)-log10(Plot_Min)));
         end
 
-        text(Title_Position_X,Title_Position_Y_1,[Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+        text(Title_Position_X,Title_Position_Y_1,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
         if Sigma_E > 0.0
             text(Title_Position_X,Title_Position_Y_2,['Exp. Rel. Std. Dev.: ',num2str(Sigma_E,'%4.2f')],'FontSize',Key_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
