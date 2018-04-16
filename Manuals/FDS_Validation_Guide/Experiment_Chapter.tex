@@ -248,7 +248,91 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 \section{Cup Burner Experiments}
 \label{Cup_Burner_Description}
 
-The cup-burner is a widely used experimental apparatus for studying the effectiveness of flame extinguishing agents. The test is designed to determine the effectiveness of various extinguishing agents. Typically, these experiments feature a steady fuel-air coflow diffusion flame that is established above the cup. The extinguishing agent is gradually introduced into the air stream to determine the minimum concentration of the agent that leads to lift off. Two experimental data sets are examined: methane (CH$_4$) - air coflow~\cite{Takahashi:2007} and n-heptane (C$_7$H$_{16}$) - air coflow~\cite{Moore:1996}. The extinguishing agents of interest are argon (Ar), carbon dioxide (CO$_2$), helium (He), and nitrogen (N$_2$).
+\subsection{Cup Burner Data Overview}
+
+The cup-burner is a widely used experimental apparatus for studying the effectiveness of ﬂame extinguishing
+agents. The test is designed to determine the effectiveness of various extinguishing agents. Typically,
+these experiments feature a steady fuel-air coﬂow diffusion ﬂame that is established above the cup. The
+extinguishing agent is gradually introduced into the air stream to determine the minimum concentration of
+the agent that leads to lift off. One hundred and ten experimental data sets are examined. The data sets
+include sixteen fuels: acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane,
+hydrogen, methane, methanol, octane, propanol, and toluene, and ﬁve inert gases: argon (Ar), carbon dioxide
+(CO$_2$), helium (He), and nitrogen (N$_2$), and sulfur hexaﬂouride (SF$_6$). A Stanjan calculation was performed
+to determine the equilibrium temperature using the measured minimum extinguishing concentration for each
+test. The calculation was constant pressure and enthalpy using a stoichiometric mixture of fuel and air plus
+agent. For combinations of fuel and agent with multiple tests, the average extinguishing concentration and
+the average ﬂame temperature was taken. This resulted forty-six unique combinations of fuel and agent. A
+summary of the data is shown in ~Table~\ref{Cup_Table}.
+
+\begin{table}[!ht]
+\centering
+\caption{Summary of Cup Burner Data}
+\label{Cup_Table}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Fuel & Extinguishing & MEC        & AIT            & CFT         & References  \\
+     & Agent         & (mol/mol)  & ($^\circ$C)    & ($^\circ$C) &  \\ \hline \hline
+Acetone & Ar & 34.0 & 465 & 1729 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Acetone & CO$_2$ & 19.0 & 465 & 1678 & \cite{Yamamoto:1}  \\ \hline
+Acetone & N$_2$ & 28.0 & 465 & 1670 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Acetylene & CO$_2$ & 45.0 & 300 & 1338 & \cite{Yamamoto:1}  \\ \hline
+Acetylene & N$_2$ & 58.0 & 300 & 1312 & \cite{Yamamoto:1}  \\ \hline
+Benzene & CO$_2$ & 20.1 & 560 & 1691 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Benzene & N$_2$ & 30.3 & 560 & 1683 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1} \cite{Yamamoto:1}  \\ \hline
+Butane & N$_2$ & 31.0 & 405 & 1594 & \cite{Yamamoto:1}  \\ \hline
+Butane & CO$_2$ & 19.0 & 405 & 1639 & \cite{Yamamoto:1}  \\ \hline
+Dodecane & N$_2$ & 33.0 & 204 & 1577 & \cite{Tapscott:1}  \\ \hline
+Ethanol & Ar & 36.5 & 365 & 1654 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Ethanol & CO$_2$ & 23.7 & 365 & 1542 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Ethanol & N$_2$ & 34.6 & 365 & 1529 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Ethylene & CO$_2$ & 32.0 & 490 & 1471 & \cite{Yamamoto:1}  \\ \hline
+Ethylene & N$_2$ & 45.0 & 490 & 1441 & \cite{Yamamoto:1}  \\ \hline
+Heptane & Ar & 39.5 & 223 & 1643 & \cite{Tapscott:1} \cite{Bogdan:1} \cite{Moore:1} \cite{Moore:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Saito:FSJ} \cite{NFPA_2001} \cite{ISO_14520} \cite{Senecal:FSJ}  \\ \hline
+Heptane & N$_2$ & 31.2 & 223 & 1617 & \cite{Tapscott:1} \cite{Bogdan:1} \cite{Hamins:CS1998} \cite{Moore:1} \cite{Hirst:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Yamamoto:1} \cite{Sakei:1} \cite{NFPA_2001} \cite{ISO_14520} \cite{Senecal:FSJ}  \\ \hline
+Heptane & CO$_2$ & 21.4 & 223 & 1617 & \cite{Moore:1} \cite{Hirst:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Heptane & He & 31.5 & 223 & 1763 & \cite{Sheinson:FSJ} \cite{Grosshandler:Cup}  \\ \hline
+Heptane & SF$_6$ & 11.0 & 223 & 1531 & \cite{Sheinson:FSJ}  \\ \hline
+Hexane & Ar & 33.0 & 223 & 1740 & \cite{Moore:1}  \\ \hline
+Hexane & CO$_2$ & 20.0 & 223 & 1647 & \cite{Yamamoto:1}  \\ \hline
+Hexane & N$_2$ & 29.0 & 223 & 1646 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Hydrogen & CO$_2$ & 60.0 & 400 & 913 & \cite{Yamamoto:1}  \\ \hline
+Hydrogen & N$_2$ & 72.0 & 400 & 870 & \cite{Yamamoto:1}  \\ \hline
+Methane & Ar & 33.8 & 537 & 1659 & \cite{Tapscott:1} \cite{Takahashi:CS2007} \cite{Moore:1}  \\ \hline
+Methane & N$_2$ & 24.2 & 537 & 1663 & \cite{Takahashi:CS2007} \cite{Yamamoto:1} \cite{Ural:1}  \\ \hline
+Methane & CO$_2$ & 14.4 & 537 & 1694 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Methane & He & 26.7 & 537 & 1746 & \cite{Takahashi:CS2007}  \\ \hline
+Methanol & Ar & 45.0 & 385 & 1494 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Methanol & CO$_2$ & 29.2 & 385 & 1410 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Methanol & N$_2$ & 40.8 & 385 & 1395 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Octane & Ar & 27.0 & 220 & 1790 & \cite{Moore:1}  \\ \hline
+Octane & CO$_2$ & 24.0 & 220 & 1542 & \cite{Yamamoto:1}  \\ \hline
+Octane & N$_2$ & 33.0 & 220 & 1564 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Propane & Ar & 37.5 & 466 & 1652 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Propane & CO$_2$ & 21.0 & 466 & 1600 & \cite{Yamamoto:1}  \\ \hline
+Propane & N$_2$ & 32.3 & 466 & 1573 & \cite{Hamins:CS1998} \cite{Yamamoto:1} \cite{Ural:1}  \\ \hline
+Propanol & Ar & 28.0 & 440 & 1781 & \cite{Moore:1}  \\ \hline
+Propanol & CO$_2$ & 22.0 & 440 & 1584 & \cite{Yamamoto:1}  \\ \hline
+Propanol & He & 30.0 & 440 & 1755 & \cite{Sheinson:FSJ}  \\ \hline
+Propanol & N$_2$ & 30.0 & 440 & 1608 & \cite{Yamamoto:1} \cite{Sheinson:FSJ}  \\ \hline
+Propanol & SF$_6$ & 11.0 & 440 & 1515 & \cite{Sheinson:FSJ}  \\ \hline
+Toluene & Ar & 27.0 & 480 & 1854 & \cite{Moore:1}  \\ \hline
+Toluene & CO$_2$ & 17.0 & 480 & 1744 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Toluene & N$_2$ & 24.4 & 480 & 1755 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+\end{tabular}
+\noindent
+\begin{tabbing}
+MEC  \hspace{0.05in} \= Minimum Extinguishing Concentration \\
+AIT                  \> Auto Ignition Temperature \\
+CFT                  \> Critical Flame Temperature
+\end{tabbing}
+\end{table}
+\subsection{Modeling Notes}
+
+Cup burner dimensions, fuel inlet velocity, and co-ﬂow inlet velocity vary slightly amongst the researchers;
+however, extinguishing concentrations have been shown to be fairly insensitive over the range of typical val-ues. The cup burner model was implemented as a 2D, cylindrical geometry with a 1 cm radius for the burner
+and a 4 cm radius for the tube. A 1 mm grid resolution was used. For gaseous fuels a 1 cm/s inlet velocity
+was used for the burner. Liquid fuels used burning rates from the SFPE Handbook; fuels without published
+burning rates scaled the burning rate of a chemically similar fuel (e.g. alcohol, alkane) using the heat of va-porization for the fuel. The fuel temperature boundary condition was ambient for gaseous fuels and one-halfof the boiling point for liquid fuels. The co-ﬂow was set to 12 cm/s. The agent mass fraction was rampedfrom approximately 10 \% below to 10 \% above the values shown in Table~\ref{Cup_Table}. The {\ct AUTO\_IGNITION\_TEMPERATURE} was set to values published in \cite{Zabetakis:1965}, the {\ct CRITICAL\_FLAME\_TEMPERATURE} was set to the values in Table~\ref{Cup_Table}, and a small region around the top of the burner was set to 0 K to remove the need for an ignition source.
 
 \section{DelCo Trainer Experiments}
 \label{DelCo_Description}
