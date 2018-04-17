@@ -58,11 +58,6 @@ Output_File = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FD
 Statistics_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
 Histogram_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
 
-% Override the plot style options with NRC 1824 plot options
-
-NRC_Options = false;
-Append_To_Scatterplot_Title = '';
-
 % Run dataplot and scatplot scripts
 
 [saved_data,drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir);
@@ -72,9 +67,7 @@ scatplot(saved_data, drange, ...
          'Stats_Output', Stats_Output, ...
          'Output_File', Output_File, ...
          'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'Histogram_Tex_Output', Histogram_Tex_Output, ...
-         'NRC_Options', NRC_Options, ...
-         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
+         'Histogram_Tex_Output', Histogram_Tex_Output)
 
 % Miscellaneous other scripts for special cases
 

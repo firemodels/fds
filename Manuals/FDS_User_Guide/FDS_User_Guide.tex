@@ -7156,7 +7156,22 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
 \be u(t) \; = \; K_{\rm p} \, e(t) \; + \; \; K_{\rm i} \int_0^t \! e(t) \, \d t   \; + \; K_{\rm d} \frac{\d e(t)}{\d t}\ee
 where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
-\linebreak[4]{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
+\linebreak[4]{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the {\ct INPUT\_ID}; and $u(t)$ is the output.
+
+
+\subsubsection{Example Case: using PID for time integration of mass loss rate }
+\label{sec:pidintmlr}
+
+The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct STATISTICS='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
+\begin{lstlisting}
+&DEVC ID='MY MLR', XB=..., QUANTITY='BURNING RATE', SURF_ID='s1',
+      STATISTICS='SURFACE INTEGRAL'/
+&CTRL ID='MY PID', FUNCTION_TYPE='PID', INPUT_ID='MY MLR',
+      PROPORTIONAL_GAIN=0, DIFFERENTIAL_GAIN=0, INTEGRAL_GAIN=1/
+&DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
+\end{lstlisting}
+Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}. 
+
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
