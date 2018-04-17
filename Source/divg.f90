@@ -36,7 +36,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,MW,UWP,TMP_F_GAS
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UWP,TMP_F_GAS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -124,29 +124,15 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
          RHO_D = 0._EB
-         IF (WD_PROPS) THEN
-            ALLOCATE(ZZ_GET(N_TRACKED_SPECIES))
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-                     CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)
-                     RHO_D(I,J,K)=9.26E-7_EB*SQRT(TMP(I,J,K))*MW/SPECIES_MIXTURE(N)%MW
-                  ENDDO
+         D_Z_N = D_Z(:,N)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
+                  RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
                ENDDO
             ENDDO
-            DEALLOCATE(ZZ_GET)
-         ELSE
-            D_Z_N = D_Z(:,N)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
-                     RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDIF
+         ENDDO
       ENDIF
 
       IF (SIM_MODE==LES_MODE) RHO_D = RHO_D + RHO_D_TURB
@@ -423,29 +409,15 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
 
    ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
    KP = 0._EB
-
-   IF (WD_PROPS) THEN ! Use thermal diffusivity from Westbrook + Dryer
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)
-               KP(I,J,K) = MW*1.92E-6_EB*SQRT(TMP(I,J,K))*CP(I,J,K)/4.186_EB/10._EB
-            ENDDO
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K))
          ENDDO
       ENDDO
-   ELSE
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
+   ENDDO
 
    DEALLOCATE(ZZ_GET)
 
