@@ -414,6 +414,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             LP%V = 0._EB
             LP%Y = DV%Y
          ENDIF
+write(0,*) dv%x,dv%y,dv%z,vlen,xtmp,ytmp,ztmp
          IF (LP%X<=XS .OR. LP%X>=XF) CYCLE CHOOSE_COORDS
          IF (LP%Y<=YS .OR. LP%Y>=YF) CYCLE CHOOSE_COORDS
          IF (LP%Z<=ZS .OR. LP%Z>=ZF) CYCLE CHOOSE_COORDS
