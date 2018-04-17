@@ -499,7 +499,7 @@ To confirm the speedup for the OpenMP version of the code, a series of test case
 \caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
-Details of how to run the simulation are included below for the different operating systems are as follows:
+Details of how to run the simulation are included below for the different operating systems. 
 
 \subsubsection{MS Windows}
 
@@ -955,53 +955,25 @@ the solution of the discretized equations.
 \subsection{Basics}
 \label{info:TIME_Basics}
 
-Usually, only the
-duration of the simulation is required on this line, via the
-parameter {\ct T\_END}. The default is 1 s.
-For example, the following line will instruct FDS to run the simulation for 5400 seconds.
+Usually, only the duration of the simulation is required on this line, via the parameter {\ct T\_END}. The default is 1~s. For example, the following line will instruct FDS to run the simulation for 5400~s.
 \begin{lstlisting}
 &TIME T_END=5400. /
 \end{lstlisting}
-If {\ct T\_END} is set to zero, only the set-up work is performed,
-allowing you to quickly check the geometry in Smokeview.
+If {\ct T\_END} is set to zero, only the set-up work is performed, allowing you to quickly check the geometry in Smokeview.
 
-If you want the time line to start at a number other than zero, you can use the parameter
-{\ct T\_BEGIN} to specify the time written to file for the first time step.
-This would be useful for matching time lines of experimental data or video recordings.
+If you want the time line to start at a number other than zero, you can use the parameter {\ct T\_BEGIN} to specify the time written to file for the first time step. This would be useful for matching time lines of experimental data or video recordings.
 
-Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
-{\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
-setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately
-linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
-For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP},
-{\ct T\_BEGIN} should be set slightly less than 10~s.
+Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as {\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, {\ct T\_BEGIN} should be set slightly less than 10~s.
 
 
 \subsection{Special Topic: Controlling the Time Step}
 \label{info:TIME_Control}
 
-The initial time step size can be specified with
-{\ct DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
-characteristic velocity of the flow.
-During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
-satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
-$\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh
-cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity. Note that by default the
-time step is never allowed to increase above its initial value. To allow this to happen, set
-{\ct RESTRICT\_TIME\_STEP=.FALSE.}
+The initial time step size can be specified with {\ct DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the characteristic velocity of the flow. During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where $\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity. Note that by default the time step is never allowed to increase above its initial value. To allow this to happen, set {\ct RESTRICT\_TIME\_STEP=.FALSE.}
 
-If something sudden is to happen right at the start of a simulation,
-like a sprinkler activation, it is a good idea to set the initial time step
-to avoid a numerical instability caused by too large a time step.
-Experiment with different values of {\ct DT} by monitoring the initial time step sizes
-recorded in the output file {\ct job\_name.out}.
+If something sudden is to happen right at the start of a simulation, like a sprinkler activation, it is a good idea to set the initial time step to avoid a numerical instability caused by too large a time step. Experiment with different values of {\ct DT} by monitoring the initial time step sizes recorded in the output file {\ct job\_name.out}.
 
-Finally, if you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.}
-on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted.
-This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
-numerical instabilities if the initial time step is set too high.
-
+At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
 
 \subsection{Special Topic: Steady-State Applications}
@@ -1217,30 +1189,13 @@ Do not specify either linear transformation points or {\ct IDERIV=0} points at c
 \subsection{Mesh Resolution}
 \label{info:Mesh_Resolution}
 
-A common question asked by new FDS users is, ``What should my grid spacing be?''
-The answer is not easy because it depends considerably on what you are trying
-to accomplish. In general, you should build an FDS input file using a relatively
-coarse mesh, and then gradually refine the mesh until you do not see
-appreciable differences in your results. This is referred to as a mesh sensitivity study.
+A common question asked by new FDS users is, ``What should my grid spacing be?'' The answer is not easy because it depends considerably on what you are trying to accomplish. In general, you should build an FDS input file using a relatively coarse mesh, and then gradually refine the mesh until you do not see appreciable differences in your results. This is referred to as a mesh sensitivity study.
 
-For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
-non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
-fire diameter
+For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic fire diameter
 \be D^* = \left(
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
      \right)^\frac{2}{5}  \ee
-and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
-fire diameter is related to the characteristic fire size via the
-relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
-fire.}. The quantity, $\dQ$, is the total heat release rate of the fire. If it changes over time, you should consider the
-corresponding change in resolution. The quantity $D^*/\dx$ can be thought of as the number of computational cells
-spanning the characteristic (not necessarily the physical) diameter of the fire.
-The more cells spanning the fire, the better the resolution of the
-calculation. It is better to assess the quality of the mesh in terms
-of this non-dimensional parameter, rather than an absolute mesh cell size.
-For example, a cell size of 10~cm may be ``adequate,'' in some sense,
-for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source.
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity, $\dQ$, is the total heat release rate of the fire. If it changes over time, you should consider the corresponding change in resolution. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source.
 
 The FDS Validation Guide~\cite{FDS_Validation_Guide} contains a table of the values of $D^*/\dx$ used in the simulation of the validation experiments. The table is near the end of the chapter that describes all the experiments. These values range over two orders of magnitude and were chosen based on a grid resolution study and the particular attributes of the given fire scenario. It would be inappropriate to take any of these values as an ``acceptable'' minimum.
 
@@ -1249,37 +1204,38 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
+
+
+\chapter{Global Simulation Parameters}
 \label{info:MISC}
 
-{\ct MISC} is the namelist group of global miscellaneous input parameters. It contains parameters that do not logically fit into any other category.
-
-\subsection{Basics}
-\label{info:MISC_Basics}
-
-Only one {\ct MISC} line should be entered in the data file. For example, the input line
+{\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). They are typically global in extent, like the ambient temperature. Only one {\ct MISC} line should be entered in the data file. For example, the input line
 \begin{lstlisting}
 &MISC TMPA=25. /
 \end{lstlisting}
-sets the ambient temperature at 25 $^\circ$C. The {\ct MISC} parameters vary in scope and degree of importance. Here is a partial list of {\ct MISC}ellaneous parameters. Others are described where necessary throughout this guide.
+sets the ambient temperature at 25~$^\circ$C. The following sections describe the various miscellaneous parameters.
+
+\section{Ambient Conditions}
+\label{info:MISC_Basics}
+
+You can set the ambient temperature and pressure using the following parameters:
 \begin{description}
-\item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
-as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
-on the order of a millimeter or less in size, or for diagnostic purposes.
-\item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
-\item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
-development of a perfectly symmetric flow when the boundary
-and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
-\item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \end{description}
 
 
+\section{Simulation Mode}
+\label{Sim_Mode}
+
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'VVLES'} (Very Very Large Eddy Simulation). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+\begin{lstlisting}
+&MISC ..., SIMULATION_MODE='DNS' /
+\end{lstlisting}
+indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=.TRUE.} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
 
 
-
-\subsection{Special Topic: Stopping and Restarting Calculations}
+\section{Stopping and Restarting Calculations}
 \label{info:restart}
 
 An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
@@ -1290,45 +1246,16 @@ It is also possible to use the new control function feature (see Section~\ref{in
 Between job stops and restarts, major changes cannot be made in the calculation like adding or removing vents and obstructions. The changes are limited to those parameters that do not instantly alter the existing flow field. Since the restart capability has been used infrequently by the developers, it should be considered a fragile construct. Examine the output to ensure that no sudden or unexpected events occur during the stop and restart.
 
 
-\subsection{Special Topic: Initializing a 3D Velocity Field}
-\label{info:velo_restart}
-\label{info:CSVF}
-
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
-\begin{lstlisting}
-&DUMP UVW_TIMER(1)=600 /
-\end{lstlisting}
-FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
-\begin{lstlisting}
-  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
-  DO K=KMIN,KMAX
-   DO J=JMIN,JMAX
-    DO I=IMIN,IMAX
-     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
-    ENDDO
-   ENDDO
-  ENDDO
-\end{lstlisting}
-You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
-\begin{lstlisting}
-&CSVF UVWFILE='my_velocity_field.csv' /
-\end{lstlisting}
-If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
-\begin{lstlisting}
-&CSVF UVWFILE='CHID_t001_m001.csv' /
-&CSVF UVWFILE='CHID_t001_m002.csv' /
-&MISC PROJECTION=.TRUE. /
-\end{lstlisting}
-It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
-\subsection{Special Topic: Turning off the Flow Field}
+
+\section{Special Topic: Turning off the Flow Field}
 \label{info:freeze_velocity}
 
 For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
 
 
-\subsection{Special Topic: Defying Gravity}
+\section{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
 By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
@@ -1353,7 +1280,7 @@ lines with a {\ct T}.
 
 
 
-\subsection{Special Topic: The Baroclinic Vorticity}
+\section{Special Topic: The Baroclinic Vorticity}
 \label{baroclinic_torque}
 
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
@@ -1397,7 +1324,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 \label{helium_plume}
 \end{figure}
 
-\subsection{Special Topic: Large Eddy Simulation Parameters}
+\section{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
 By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent viscosity,
@@ -1440,12 +1367,12 @@ An alternative to the damping function is to use the WALE model of Nicoud and Du
 
 
 
-\subsection{Special Topic: Numerical Stability Parameters}
+\section{Special Topic: Numerical Stability Parameters}
 \label{info:CFL}
 
 FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
 
-\subsubsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+\subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
 
 The well-known CFL constraint given by
 \begin{equation}
@@ -1470,7 +1397,7 @@ Three choices for velocity norm are available in FDS (set on {\ct MISC}):
     \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 }
     \end{equation}
 
-\subsubsection{The Von Neumann Constraint}
+\subsection{The Von Neumann Constraint}
 
 The Von Neumann constraint is given by
 \begin{equation}
@@ -1484,7 +1411,7 @@ u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{
 \end{equation}
 Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
 
-\subsubsection{Realizable Mass Density Constraint}
+\subsection{Realizable Mass Density Constraint}
 
 In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
@@ -1503,7 +1430,7 @@ as the basis for the time step restriction. To be clear, the CFL constraint is n
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
 
-\subsubsection{Stability of particle transport}
+\subsection{Stability of particle transport}
 \label{info:PART_Stability}
 
 The movement of Lagrangian particles over the course of a time step is calculated using an analytical solution and remains stable regardless of the time step used by the flow solver. However, if the particle moves over the width of several grid cells in a single time step, the momentum transferred between the particle and the gas cannot be allocated properly to all of the affected cells. To overcome this problem, FDS subdivides the gas phase time step based on each particle's velocity. For example, if the particle travels across two cells in a single gas phase time step, then its trajectory is calculated by subdividing the time step into two.
@@ -1513,17 +1440,15 @@ In some cases with extremely fast particles, however, the stability of the overa
 One additional parameter might be useful in some special cases. The numerical transport scheme for particles is first order accurate in time. If you want to improve the accuracy of the scheme, set \linebreak[4] {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} to {\ct .TRUE.} on the {\ct PART} line. There is an increased computational cost incurred by this option, so check whether or not the extra cost is worth the extra accuracy. For most applications, given the relatively small time step of the gas phase solver, and the subdivision of the particle trajectory calculation to enforce a local particle CFL constraint, the improved accuracy is not worth the additional cost.
 
 
-\subsubsection{Heat Transfer Constraint}
+\subsection{Heat Transfer Constraint}
 
 Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
-\subsubsection{Adjusting the Time Step}
-
-At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to simulations failing due to numerical instabilities. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
 
-\subsection{Special Topic: Flux Limiters}
+
+\section{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
 FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
@@ -1550,15 +1475,35 @@ MP5                    & {\ct 5}  \\ \hline
 \end{table}
 
 
+\section{Background Noise}
+\label{info:NOISE}
 
-\section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
+FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
+
+
+
+\section{Protecting Old Cases}
+\label{info:OVERWRITE}
+
+When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=.FALSE.} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
+
+
+
+\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
+\label{info:CLIP}
+
+The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
+
+
+
+\chapter{Initial Conditions}
 \label{info:INIT}
 
-Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}.
+Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. 
 
-Note that the rectangular regions defined by {\ct INIT} may overlap, but in such cases, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. IF two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
-\subsection*{Species}
+\section{Gas Species}
 
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
@@ -1571,7 +1516,7 @@ Here, within the region whose bounds are given by the sextuplet {\ct XB}, the in
 
 {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
 
-\subsection*{Temperature}
+\section{Temperature}
 
 To modify the local initial temperature, add lines of the form,
 \begin{lstlisting}
@@ -1585,7 +1530,7 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
       TEMPERATURE=60. /
 \end{lstlisting}
 
-\subsection*{Density}
+\section{Density}
 
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
 \begin{lstlisting}
@@ -1596,7 +1541,7 @@ When specifying an initial density it is important to recognize the order in whi
 \end{lstlisting}
 This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
-\subsection*{Heat Release Rate Per Unit Volume (HRRPUV)}
+\section{Heat Release Rate Per Unit Volume (HRRPUV)}
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 \begin{lstlisting}
@@ -1605,11 +1550,46 @@ The {\ct INIT} line may also be used to specify a volumetric heat source term. F
 indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
 
+\section{Velocity Field}
+\label{info:velo_restart}
+\label{info:CSVF}
 
-\section{The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
+\begin{lstlisting}
+&DUMP UVW_TIMER(1)=600 /
+\end{lstlisting}
+FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
+\begin{lstlisting}
+&CSVF UVWFILE='my_velocity_field.csv' /
+\end{lstlisting}
+If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
+\begin{lstlisting}
+&CSVF UVWFILE='CHID_t001_m001.csv' /
+&CSVF UVWFILE='CHID_t001_m002.csv' /
+&MISC PROJECTION=.TRUE. /
+\end{lstlisting}
+It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
+
+
+
+
+\chapter{Pressure}
 \label{info:PRES}
 
-\subsection{Parameters Related to the Solution of Poisson Equation for Pressure}
+Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table \ref{tbl:PRES}).
+
+\section{Accuracy of the Pressure Solver}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
 
@@ -1619,11 +1599,10 @@ If either the error in the normal component of the velocity at a mesh interface 
 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
-
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
 
-\subsection*{Optional Pressure Solver}
+\section{Optional Pressure Solver}
 
 The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}. GLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
 
@@ -1681,7 +1660,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 
 
 
-\subsection{Pressure Considerations in Long Tunnels}
+\section{Pressure Considerations in Long Tunnels}
 \label{tunnel_demo}
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the pressure, $\tp$ (the tilde indicates that this is the {\em perturbation} pressure, or pressure above background). To solve for $\tp$, an elliptic PDE is formed by taking the divergence of the momentum equation, which contains the term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
@@ -1720,7 +1699,7 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short
 \end{figure}
 
 
-\subsection{Parameters Related to the Background Pressure when Breaking Pressure Zones}
+\section{Parameters Related to the Background Pressure when Breaking Pressure Zones}
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
@@ -1731,20 +1710,6 @@ breach. Its default value is 1~s, meaning that equilibrium is achieved in roughl
 
 
 
-
-\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
-\label{info:CLIP}
-
-The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results,
-there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
-errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not
-possible in all cases to anticipate just how low or high a given value might be. Thus,
-on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. Temperature and density bounds are input under the
-namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
-``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an
-unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
-
-It is possible for the species mass fractions to dip slightly below zero or increase slightly above 1. To force the species mass fractions to remain strictly between 0 and 1, set {\ct CLIP\_MASS\_FRACTION} to {\ct .TRUE.} on the {\ct MISC} line.
 
 
 
@@ -7170,7 +7135,7 @@ The PID controller can be used to time integrate the mass loss from a pyrolyzing
       PROPORTIONAL_GAIN=0, DIFFERENTIAL_GAIN=0, INTEGRAL_GAIN=1/
 &DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
 \end{lstlisting}
-Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}. 
+Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}.
 
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
@@ -9472,7 +9437,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
-{\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9493,11 +9457,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
-{\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-{\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
+{\ct NOISE}                                     & Logical       & Section~\ref{info:NOISE}                              &               & {\ct .TRUE.}      \\ \hline
+{\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:NOISE}                              &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct NO\_RAMPS}                                 & Logical       & Turn off all ramps                                    &               & {\ct .FALSE.}     \\ \hline
-{\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct OVERWRITE}                                 & Logical       & Section~\ref{info:OVERWRITE}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
@@ -9512,7 +9476,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-%{\ct SIMULATION\_MODE}                          & Character     & Sets physics level                                    &               & {\ct 'VLES'}      \\ \hline
+{\ct SIMULATION\_MODE}                          & Character     & Section~\ref{Sim_Mode}                                &               & {\ct 'VLES'}      \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                         &               & {\ct .FALSE.}      \\ \hline
