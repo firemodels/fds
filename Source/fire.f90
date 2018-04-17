@@ -478,7 +478,7 @@ ELSE
       D_F = MAX(D_F,D_Z(MIN(4999,NINT(TMP_IN)),RN%FUEL_SMIX_INDEX))
    ENDDO
    TAU_D = DELTA**2/MAX(D_F,TWO_EPSILON_EB)                         ! FDS Tech Guide (5.14)
-   IF (LES) THEN
+   IF (SIM_MODE/=DNS_MODE) THEN
       TAU_U = C_U*RHO_IN*DELTA**2/MAX(MU_IN,TWO_EPSILON_EB)         ! FDS Tech Guide (5.15)
       TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))                    ! FDS Tech Guide (5.16)
       MIX_TIME_OUT= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME))  ! FDS Tech Guide (5.13)
