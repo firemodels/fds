@@ -499,7 +499,7 @@ To confirm the speedup for the OpenMP version of the code, a series of test case
 \caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
-Details of how to run the simulation are included below for the different operating systems. 
+Details of how to run the simulation are included below for the different operating systems.
 
 \subsubsection{MS Windows}
 
@@ -1249,13 +1249,10 @@ Between job stops and restarts, major changes cannot be made in the calculation 
 
 
 
-\section{Special Topic: Turning off the Flow Field}
-\label{info:freeze_velocity}
-
-For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
 
 
-\section{Special Topic: Defying Gravity}
+
+\section{Gravity}
 \label{info:GVEC}
 
 By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
@@ -1368,52 +1365,41 @@ An alternative to the damping function is to use the WALE model of Nicoud and Du
 
 
 \section{Special Topic: Numerical Stability Parameters}
-\label{info:CFL}
+\label{info:Stability_Constraints}
 
 FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
 
 \subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+\label{info:CFL}
 
 The well-known CFL constraint given by
 \begin{equation}
-\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} < 1
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\Delta} < 1
 \end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\delta x$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell width, $\Delta$, within one time step, $\delta t$. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\Delta$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for the purpose of taking time steps ten times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly ten times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm.
-Three choices for velocity norm are available in FDS (set on {\ct MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (LES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (LES and VLES default, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
 {\ct CFL\_VELOCITY\_NORM=1} (DNS default, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
+    \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
 {\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 }
+    \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
+{\ct CFL\_VELOCITY\_NORM=3} (VVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \end{equation}
+The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure. 
 
-\subsection{The Von Neumann Constraint}
-
-The Von Neumann constraint is given by
-\begin{equation}
-\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
-\end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
-
-We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
-\begin{equation}
-u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
-\end{equation}
-Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
-
-\subsection{Realizable Mass Density Constraint}
-
-In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
 \label{eqn_dtmassrestrict}
 \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
@@ -1424,11 +1410,25 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1}
-as the basis for the time step restriction. To be clear, the CFL constraint is now given by
+Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint.
+
+
+\subsection{The Von Neumann Constraint}
+\label{info:VN}
+
+The Von Neumann constraint is given by
 \begin{equation}
-\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
+\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
 \end{equation}
+The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+
+We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
+\begin{equation}
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+\end{equation}
+Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+
+
 
 \subsection{Stability of particle transport}
 \label{info:PART_Stability}
@@ -1441,6 +1441,7 @@ One additional parameter might be useful in some special cases. The numerical tr
 
 
 \subsection{Heat Transfer Constraint}
+\label{info:HT}
 
 Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
@@ -1487,6 +1488,11 @@ FDS initializes the flow field with a very small amount of ``noise'' to prevent 
 
 When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=.FALSE.} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
 
+\section{Turning off the Flow Field}
+\label{info:freeze_velocity}
+
+For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
+
 
 
 \section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
@@ -1499,7 +1505,7 @@ The algorithms in FDS are designed to work within a certain range of values for 
 \chapter{Initial Conditions}
 \label{info:INIT}
 
-Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. 
+Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
 There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. IF two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
@@ -9429,10 +9435,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_WALE}                                   & Real          & Section~\ref{info:LES}                                &               & 0.60              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
-{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
-{\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
+{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               &                   \\ \hline
+{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:HT}                                 &               & {\ct .FALSE.}     \\ \hline
+{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:VN}                                 &               & {\ct .TRUE.}      \\ \hline
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
@@ -9496,8 +9501,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
-{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
-{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+{\ct VN\_MAX}                                   & Real          & Section~\ref{info:VN}                                 &               & 1.0               \\ \hline
+{\ct VN\_MIN}                                   & Real          & Section~\ref{info:VN}                                 &               & 0.8               \\ \hline
 {\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
