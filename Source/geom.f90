@@ -584,7 +584,7 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
 
    ! Gas conductivity:
    K_G = ONE_D%MU_G*CPOPR
-   IF(DNS) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
+   IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
    ONE_D%K_G = K_G
 
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
@@ -5275,7 +5275,7 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
    TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
    KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
    ! KP on low-high side cells:
-   IF (DNS) THEN
+   IF (SIM_MODE==DNS_MODE) THEN
       DO ISIDE=-1,0
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
          CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5306,7 +5306,7 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
    TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
    KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
    ! KP on low-high side cells:
-   IF (DNS) THEN
+   IF (SIM_MODE==DNS_MODE) THEN
       DO ISIDE=-1,0
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
          CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5337,7 +5337,7 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
    TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
    KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
    ! KP on low-high side cells:
-   IF (DNS) THEN
+   IF (SIM_MODE==DNS_MODE) THEN
       DO ISIDE=-1,0
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
          CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5390,7 +5390,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (DNS) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -5440,7 +5440,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (DNS) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -5490,7 +5490,7 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (DNS) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -5559,7 +5559,7 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
                    PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
             (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
          END SELECT
-         IF(DNS) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+         IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
       ENDDO
       KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
       ! Add to divergence integral of surrounding cut-cells:
@@ -5719,7 +5719,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
             IF (ICC > MESHES(NM)%N_CUTCELL_MESH) CYCLE ! Cut-cell is guard-cell cc.
             JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
             TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
-            IF (DNS) THEN
+            IF (SIM_MODE==DNS_MODE) THEN
                ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                                        (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
                CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5801,7 +5801,7 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
         TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
         KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
         ! KP on low-high side cells:
-        IF (DNS) THEN
+        IF (SIM_MODE==DNS_MODE) THEN
            DO ISIDE=-1,0
               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
               CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5819,7 +5819,7 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
         TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
         KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
         ! KP on low-high side cells:
-        IF (DNS) THEN
+        IF (SIM_MODE==DNS_MODE) THEN
            DO ISIDE=-1,0
               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
               CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5837,7 +5837,7 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
         TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
         KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
         ! KP on low-high side cells:
-        IF (DNS) THEN
+        IF (SIM_MODE==DNS_MODE) THEN
            DO ISIDE=-1,0
               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
               CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
@@ -5925,7 +5925,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DXN(I)
 
       ! Diffusive Part:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -5995,7 +5995,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DYN(J)
 
       ! Diffusive Part:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -6065,7 +6065,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DZN(K)
 
       ! Diffusive Part:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -6241,7 +6241,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       ENDSELECT
 
       ! Interpolate D_Z to the face, linear interpolation:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -6332,7 +6332,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                print*, 'CUT_FACE face not connected to CC cell',NM,IFACE
                TMPV(ISIDE) = -1._EB
             END SELECT
-            IF (DNS) THEN
+            IF (SIM_MODE==DNS_MODE) THEN
                IF(PERIODIC_TEST==7) THEN
                   D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
                ELSE
@@ -6487,7 +6487,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                   ZZPV(ISIDE) =        PRFCT *CUT_CELL(ICC)%ZZ(N,JCC) + &
                                 (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(N,JCC)
                END SELECT
-               IF (DNS) THEN
+               IF (SIM_MODE==DNS_MODE) THEN
                   CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
                ELSE
                   D_Z_TEMP(ISIDE) = MUV(ISIDE)*RSC/RHOPV(ISIDE)
@@ -7689,7 +7689,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
    IF( (PREDICTOR.AND.FIRST_PASS) .OR. CORRECTOR) THEN
 
    ! Compute advection + diffusion matrix:
-   IF ( DNS .OR. (N==1) ) THEN
+   IF ( SIM_MODE==DNS_MODE .OR. (N==1) ) THEN
       IF (DO_SYMM_SCALAR_DIFFLUXES) THEN
          CALL GET_ADVDIFFMATRIX_SCALAR_SYMM_3D(N)
       ELSE
@@ -7771,7 +7771,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       ENDIF
    ENDIF
 
-   IF ( DNS .OR. (N==1) ) THEN
+   IF ( SIM_MODE==DNS_MODE .OR. (N==1) ) THEN
       ! Sum M_MAT + DT*D_MAT
       DO IROW_LOC=1,NUNKZ_LOCAL
          JCOL=JM_MAT_Z(IROW_LOC)
@@ -7796,7 +7796,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       ENDDO
    ENDIF
 
-   IF (.NOT.DNS) THEN
+   IF (SIM_MODE/=DNS_MODE) THEN
       IF (PREDICTOR) THEN
          D_MAT_Z(:,:) = 1._EB/DT*D_MAT_Z(:,:)
       ELSE
@@ -7880,7 +7880,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 ! CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 ! !STOP
 
-   IF ( DNS .OR. (N==1) ) THEN
+   IF ( SIM_MODE==DNS_MODE .OR. (N==1) ) THEN
       CALL SYMBLU_ZZ
       ! Numerical Factorization.
       PHASEZ = 22
@@ -7894,7 +7894,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
        A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
 
    ! Release internal memory for scalar:
-   IF ( DNS .OR. (N==N_TOTAL_SCALARS) ) THEN
+   IF ( SIM_MODE==DNS_MODE .OR. (N==N_TOTAL_SCALARS) ) THEN
       PHASEZ = -1
       CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
           A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
@@ -18488,7 +18488,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          DO ISIDE=-1,0
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
          ENDDO
@@ -18573,7 +18573,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          DO ISIDE=-1,0
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
          ENDDO
@@ -18658,7 +18658,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          DO ISIDE=-1,0
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
          ENDDO
@@ -18857,7 +18857,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDSELECT
 
       ! Interpolate D_Z to the face, linear interpolation:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          DO ISIDE=-1,0
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
          ENDDO
@@ -18958,7 +18958,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                print*, 'MESHES(NM)%CUT_FACE face not connected to CC cell',NM,IFACE
                TMP_ISIDE = -1._EB
             END SELECT
-            IF (DNS) CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
+            IF (SIM_MODE==DNS_MODE) CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
          ENDDO
          SELECT CASE(X1AXIS)
             CASE(IAXIS)
@@ -19192,7 +19192,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -19289,7 +19289,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -19384,7 +19384,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -19584,7 +19584,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDSELECT
 
       ! Interpolate D_Z to the face, linear interpolation:
-      IF (DNS) THEN
+      IF (SIM_MODE==DNS_MODE) THEN
          IF(PERIODIC_TEST==7) THEN
             ! Interpolate D_Z to the face:
             DO ISIDE=-1,0
@@ -19696,7 +19696,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                print*, 'MESHES(NM)%CUT_FACE face not connected to CC cell',NM,IFACE
                TMP_ISIDE = -1._EB
             END SELECT
-            IF (DNS) THEN
+            IF (SIM_MODE==DNS_MODE) THEN
                IF(PERIODIC_TEST==7) THEN
                   D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
                ELSE

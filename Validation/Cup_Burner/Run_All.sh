@@ -5,15 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_C7H16_Ar.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_C7H16_CO2.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_C7H16_He.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_C7H16_N2.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_CH4_Ar.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_CH4_CO2.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_CH4_He.fds
-$QFDS $DEBUG -p 4 $QUEUE -d $INDIR Cup_CH4_N2.fds
-
 $QFDS $DEBUG -p 1 $QUEUE -d $INDIR Cup_acetone_ar.fds
 $QFDS $DEBUG -p 1 $QUEUE -d $INDIR Cup_acetone_co2.fds
 $QFDS $DEBUG -p 1 $QUEUE -d $INDIR Cup_acetone_n2.fds

@@ -1180,7 +1180,7 @@ SLIP_FACTOR = -1._EB
 
 ! Step 2: compute turbulent (LES) stress
 
-LES_IF: IF (LES) THEN
+LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
 
    ! NOTE: 2 iterations converges TAU_W to roughly 5 % residual error
    !       3 iterations converges TAU_W to roughly 1 % residual error
@@ -1577,7 +1577,7 @@ U_NORM = U_NORM_WALL + DN*(DIVU-0.5_EB*DUSDS)
 RDN = 1._EB/DN
 
 ! ODE solution
-IF (DNS) THEN
+IF (SIM_MODE==DNS_MODE) THEN
    ETA = U_NORM + RRHO*MU*RDN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
    BB  = (TWTH*U_STRM_WALL*RDN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
@@ -1686,7 +1686,7 @@ ENDDO
 U_NORM = DN*(DIVU-0.5_EB*DUSDS)
 RDN = 1._EB/DN
 ! ODE solution
-IF (DNS) THEN
+IF (SIM_MODE==DNS_MODE) THEN
    ETA = U_NORM + RRHO*MU*RDN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
