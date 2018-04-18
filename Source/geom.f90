@@ -492,6 +492,9 @@ LOGICAL, PARAMETER :: IMP_REGION_FROM_MATRIX_DIFF=.FALSE. ! IF .FALSE. use scala
 
 REAL(EB):: VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_LOW,VAL_TESTZ_HIGH
 
+! GET_CUTCELLS_VERBOSE variables:
+INTEGER :: LU_SETCC=99
+
 PRIVATE
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
@@ -23321,13 +23324,20 @@ REAL(EB):: CF_AREA_INB=0._EB, CF_INXAREA_INB=0._EB, CF_INXSQAREA_INB=0._EB, &
 REAL(EB):: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
            CC_VOLUME_INB_AUX=0._EB, DM_VOLUME_AUX=0._EB, GP_VOLUME_AUX=0._EB
 
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH, CC_COMPUTE_MESH_AUX
 
 REAL(EB) :: TNOW
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
 
 INTEGER, SAVE :: CALL_COUNT = 0
+
+! GET_CUTCELL_VERBOSE variables:
+INTEGER :: IPROC, NMESH_CC, TAG
+INTEGER :: MPISTATUS(MPI_STATUS_SIZE)
+CHARACTER(MESSAGE_LENGTH) :: VERBOSE_FILE, VERBOSE_FILE_AUX
+CHARACTER(1), DIMENSION(3), PARAMETER :: AXSTR(1:3) = (/ 'X', 'Y', 'Z' /)
+REAL(EB) :: CPUTIME, CPUTIME_START, CPUTIME_MESH, CPUTIME_START_MESH
 
 #ifdef DEBUG_SET_CUTCELLS
 #define WRITE_GEOM_DEBUG
@@ -23338,6 +23348,10 @@ INTEGER :: ING,INOD,IWSEL,IEL,FACE_AUX(NOD1:NOD3),VOL_AUX(NOD1:NOD4)
 CHARACTER(30) :: FILENAME
 #endif
 
+IF (MYID==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_ERR,*) ' '
+   WRITE(LU_ERR,*) 'SET_CUTCELLS_3D : Cut-Cell computation in VERBOSE mode, 4 tasks to perform:'
+ENDIF
 
 ! Reset variables:
 IBM_NEDGECROSS = 0
@@ -23418,7 +23432,81 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 ENDDO
 
-! Main Loop over Meshes
+IF (GET_CUTCELLS_VERBOSE) THEN
+   ! MYID = 0 writes first:
+   IF (MYID==0) THEN
+      ! Open file to write SET_CUTCELLS_3D progress:
+      WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
+      OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
+      NMESH_CC=0
+      DO NOM=1,NMESHES
+         IF(CC_COMPUTE_MESH(NOM)) NMESH_CC = NMESH_CC + 1
+      ENDDO
+      WRITE(LU_ERR,*) ' '
+      WRITE(LU_ERR,*) '2. Generate Cut-cells in Meshes :'
+      WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MYID=',MYID,', will process M=',NMESH_CC, &
+                                                     ' meshes in file ',TRIM(VERBOSE_FILE),'.'
+      WRITE(LU_SETCC,*) ' '
+      WRITE(LU_SETCC,*) '2. Generate Cut-cells in Meshes :'
+      WRITE(LU_SETCC,'(A,I4,A,I4,A)',advance="no") ' Process MYID=',MYID,', will process M=',NMESH_CC,' meshes.'
+      WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
+      WRITE(LU_SETCC,'(A)',advance="no") ' Meshes to Process : '
+      DO NOM=1,NMESHES-1
+         IF(CC_COMPUTE_MESH(NOM)) THEN
+            WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
+            WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+         ENDIF
+      ENDDO
+      IF(CC_COMPUTE_MESH(NMESHES)) THEN
+         WRITE(LU_ERR,'(I4.4,A)') NMESHES,'.'
+         WRITE(LU_SETCC,'(I4.4,A)') NMESHES,'.'
+      ENDIF
+   ENDIF
+   IF (N_MPI_PROCESSES > 1) THEN
+      IF (MYID==0) ALLOCATE(CC_COMPUTE_MESH_AUX(1:NMESHES))
+      ! Now rest of processes pass their mesh info to process 0:
+      DO IPROC=1,N_MPI_PROCESSES-1
+         TAG = 0
+         IF (MYID==IPROC) THEN ! Send CC_COMPUTE_MESH array.
+            TAG=1000000+IPROC
+            CALL MPI_SEND(CC_COMPUTE_MESH(1),NMESHES,MPI_LOGICAL,0,TAG,MPI_COMM_WORLD,IERR)
+            ! Open file to write SET_CUTCELLS_3D progress:
+            WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
+            OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
+            WRITE(LU_SETCC,*) ' '
+            WRITE(LU_SETCC,*) '2. Generate Cut-cells in Meshes :'
+            WRITE(LU_SETCC,'(A,I4,A,I4,A)',advance="no") ' Process MYID=',IPROC,', will process M=',NMESH_CC,' meshes.'
+            WRITE(LU_SETCC,'(A)',advance="no") ' Meshes to Process :'
+            DO NOM=1,NMESHES-1
+               IF(CC_COMPUTE_MESH(NOM)) WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+            ENDDO
+            IF(CC_COMPUTE_MESH(NMESHES)) WRITE(LU_SETCC,'(I4.4,A)') NMESHES,'.'
+         ELSEIF (MYID==0) THEN ! Receive CC_COMPUTE_MESH array and write.
+            TAG=1000000+IPROC
+            CALL MPI_RECV(CC_COMPUTE_MESH_AUX(1),NMESHES,MPI_LOGICAL,IPROC,TAG,MPI_COMM_WORLD,MPISTATUS,IERR)
+            ! Write to LU_ERR:
+            NMESH_CC=0
+            DO NOM=1,NMESHES
+               IF(CC_COMPUTE_MESH_AUX(NOM)) NMESH_CC = NMESH_CC + 1
+            ENDDO
+            WRITE(VERBOSE_FILE_AUX,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',IPROC,'.log'
+            WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MYID=',IPROC,', will process M=',NMESH_CC, &
+                                                           ' meshes in file ',TRIM(VERBOSE_FILE_AUX),'.'
+            WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
+            DO NOM=1,NMESHES-1
+               IF(CC_COMPUTE_MESH_AUX(NOM)) WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
+            ENDDO
+            IF(CC_COMPUTE_MESH_AUX(NMESHES)) WRITE(LU_ERR,'(I4.4,A)') NMESHES,'.'
+         ENDIF
+         CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      ENDDO
+      IF (MYID==0) DEALLOCATE(CC_COMPUTE_MESH_AUX)
+   ENDIF
+   CALL CPU_TIME(CPUTIME_START_MESH)
+ENDIF
+
+
+! Main Loop over Meshes:
 MAIN_MESH_LOOP : DO NM=1,NMESHES
 
    IF (.NOT.CC_COMPUTE_MESH(NM)) CYCLE ! Only MESHES assigned to processor and OMESHES of these.
@@ -23563,6 +23651,16 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       IBM_CUTCELLS_FOUND_MESH = 50 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
    ENDIF
 
+   ! Write Mesh number allocation if GET_CUTCELLS_VERBOSE:
+   IF(GET_CUTCELLS_VERBOSE) THEN
+      WRITE(LU_SETCC,'(A)') ' '
+      WRITE(LU_SETCC,'(A,I5,A,I10)') ' Processing Mesh : ',NM,', CUT_CELL array allocation size :',IBM_CUTCELLS_FOUND_MESH
+      IF(MYID==0) THEN
+         WRITE(LU_ERR,'(A)') ' '
+         WRITE(LU_ERR,'(A,I5,A,I10)') ' Processing Mesh : ',NM,', CUT_CELL array allocation size :',IBM_CUTCELLS_FOUND_MESH
+      ENDIF
+   ENDIF
+
    ! Here we have to allocate the size of MESHES(NM)%EDGE_CROSS:
    MESHES(NM)%N_EDGE_CROSS = 0 ! Reset EDCROSS counter for mesh NM.
    MESHES(NM)%MAX_N_EDGECROSS_MESH = 3 * IBM_CUTCELLS_FOUND_MESH
@@ -23691,6 +23789,25 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
 
       END SELECT
 
+      IF(GET_CUTCELLS_VERBOSE) THEN
+         CALL CPU_TIME(CPUTIME_START)
+         IF(X1AXIS < KAXIS) THEN
+         WRITE(LU_SETCC,'(A,A,A,3I2,A)') ' Computing GEOMs-grid planes intersections for planes in ', &
+         AXSTR(X1AXIS),' direction, local axes X1, X2, X3:',X1AXIS,X2AXIS,X3AXIS,' ..'
+         IF (MYID==0) THEN
+         WRITE(LU_ERR,'(A,A,A,3I2,A)') ' Computing GEOMs-grid planes intersections for planes in ', &
+         AXSTR(X1AXIS),' direction, local axes X1, X2, X3:',X1AXIS,X2AXIS,X3AXIS,' ..'
+         ENDIF
+         ELSE
+         WRITE(LU_SETCC,'(A,A,A,3I2,A)',advance="no") ' Computing GEOMs-grid planes intersections for planes in ', &
+         AXSTR(X1AXIS),' direction, local axes X1, X2, X3:',X1AXIS,X2AXIS,X3AXIS,' ..'
+         IF (MYID==0) THEN
+         WRITE(LU_ERR,'(A,A,A,3I2,A)',advance="no") ' Computing GEOMs-grid planes intersections for planes in ', &
+         AXSTR(X1AXIS),' direction, local axes X1, X2, X3:',X1AXIS,X2AXIS,X3AXIS,' ..'
+         ENDIF
+         ENDIF
+      ENDIF
+
       ! Loop Coordinate Planes:
       DO K=KLO,KHI
          DO J=JLO,JHI
@@ -23714,6 +23831,14 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                IF ((MINVAL(BODINT_PLANE%XYZ(X2AXIS,1:BODINT_PLANE%NNODS))-X2FACE(X2HI)) > GEOMEPS) CYCLE
                IF ((X3FACE(X3LO)-MAXVAL(BODINT_PLANE%XYZ(X3AXIS,1:BODINT_PLANE%NNODS))) > GEOMEPS) CYCLE
                IF ((MINVAL(BODINT_PLANE%XYZ(X3AXIS,1:BODINT_PLANE%NNODS))-X3FACE(X3HI)) > GEOMEPS) CYCLE
+
+               ! IF (GET_CUTCELLS_VERBOSE) THEN
+               !    WRITE(LU_SETCC,'(I2,A,F14.8,A,3I8)') X1AXIS,', position :',X1PLN, &
+               !    '; Single Points, Segments, Triangles :', BODINT_PLANE%NSGLS,BODINT_PLANE%NSEGS,BODINT_PLANE%NTRIS
+               !    IF (MYID==0) &
+               !    WRITE(LU_ERR  ,'(I2,A,F14.8,A,3I8)') X1AXIS,', position :',X1PLN, &
+               !    '; Single Points, Segments, Triangles :',  BODINT_PLANE%NSGLS,BODINT_PLANE%NSEGS,BODINT_PLANE%NTRIS
+               ! ENDIF
 
                ! For plane normal to X1AXIS, shoot rays along X2AXIS on all X3AXIS gridline
                ! locations, get intersection data: Loop x3 axis locations
@@ -23777,6 +23902,12 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
 
    ENDDO X1AXIS_LOOP
 
+   IF(GET_CUTCELLS_VERBOSE) THEN
+      CALL CPU_TIME(CPUTIME)
+      WRITE(LU_SETCC,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,' sec.'
+      IF (MYID==0) WRITE(LU_ERR  ,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,' sec.'
+   ENDIF
+
    ! Now Define the INBOUNDARY cut-edge inside Cartesian cells:
    CALL GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
 
@@ -23816,7 +23947,14 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    IF (ALLOCATED(DYCELL)) DEALLOCATE(DYCELL)
    IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
 
-   ! Here we the SOLID array, to tag when writing slices:
+   IF (GET_CUTCELLS_VERBOSE) THEN
+      WRITE(LU_SETCC,'(A,I8,A)') ' Processing mesh : ',NM,' finished.'
+      WRITE(LU_SETCC,'(A)') ' '
+      IF (MYID==0) THEN
+         WRITE(LU_ERR  ,'(A,I8,A)') ' Processing mesh : ',NM,' finished.'
+         WRITE(LU_ERR  ,'(A)') ' '
+      ENDIF
+   ENDIF
 
 ENDDO MAIN_MESH_LOOP
 
@@ -23826,11 +23964,30 @@ T_CC_USED(SET_CUTCELLS_TIME_INDEX) = T_CC_USED(SET_CUTCELLS_TIME_INDEX) + CURREN
 ! Define FDS SOLID array for IBM_SOLID cells:
 !CALL SET_FDS_SOLID_CELLS
 
+IF(GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_MESH)
+   WRITE(LU_SETCC,'(A,F8.3,A)') ' Time taken to process meshes : ',CPUTIME_MESH-CPUTIME_START_MESH,', sec.'
+   WRITE(LU_SETCC,'(A)') ' '
+   IF (MYID==0) THEN
+      WRITE(LU_ERR  ,'(A,F8.3,A)') ' Time taken to process meshes : ',CPUTIME_MESH-CPUTIME_START_MESH,', sec.'
+      WRITE(LU_ERR,'(A)') ' '
+   ENDIF
+ENDIF
+
 ! Fill Guardcells for CCVAR IBM_CGSC and CUT_CELL for meshes assigned to MPI process:
 CALL SET_GC_CUTCELLS_3D
 
 ! Allocate and define entries for solid side CFACES:
 IF(PERIODIC_TEST/=105) CALL GET_INBCUTFACES_TO_CFACE
+
+IF(GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_SETCC,'(A)') ' SET_CUTCELLS_3D : Cut-cell definition finished.'
+   WRITE(LU_SETCC,'(A)') ' '
+   IF (MYID==0) THEN
+      WRITE(LU_ERR  ,'(A)') ' SET_CUTCELLS_3D : Cut-cell definition finished.'
+      WRITE(LU_ERR  ,'(A)') ' '
+   ENDIF
+ENDIF
 
 ! Write out:
 ! Increasee SET_CUTCELLS_3D call counter by 1:
@@ -23893,7 +24050,7 @@ DO NM=1,NMESHES
       DO ICC2=1,NCELL
          CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) + MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) * &
                                                                MESHES(NM)%CUT_CELL(ICC1)%XYZCEN(IAXIS:KAXIS,ICC2)
-         IF ( MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) < 0._EB) &
+         IF ( MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) < -GEOMEPS) &
              WRITE(LU_ERR,*) "Cut-cell=",ICC1,ICC2,", VOL=",MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2)
       ENDDO
       CC_VOLUME_INB = CC_VOLUME_INB + SUM(MESHES(NM)%CUT_CELL(ICC1)%VOLUME(1:NCELL))
@@ -24091,6 +24248,7 @@ DO NM=1,NMESHES
 
 ENDDO
 
+IF(GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
 
 RETURN
 
@@ -24171,6 +24329,35 @@ USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE
 ! Local Variables:
 INTEGER :: ICF, CFACE_INDEX_LOCAL, SURF_INDEX, IBOD, IWSEL
 
+! GET_CUTCELLS_VERBOSE variables:
+INTEGER, ALLOCATABLE, DIMENSION(:) :: NCFACE_BY_MESH
+
+IF(GET_CUTCELLS_VERBOSE) CALL CPU_TIME(CPUTIME_START)
+
+ALLOCATE(NCFACE_BY_MESH(1:NMESHES)); NCFACE_BY_MESH(1:NMESHES) = 0
+MESH_LOOP_0 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+      DO IFACE=1,CUT_FACE(ICF)%NFACE
+         NCFACE_BY_MESH(NM) = NCFACE_BY_MESH(NM) + 1
+      ENDDO
+   ENDDO
+ENDDO MESH_LOOP_0
+
+IF(GET_CUTCELLS_VERBOSE) THEN
+   CALL MPI_ALLREDUCE(MPI_IN_PLACE,NCFACE_BY_MESH(1),NMESHES,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+   WRITE(LU_SETCC,'(A,I10)',advance='no') ' 4. Generating CFACES from INBOUNDARY cut-faces, N_CFACE_CELLS=', &
+                             SUM(NCFACE_BY_MESH(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
+   IF (MYID==0) THEN
+      WRITE(LU_ERR  ,'(A,I10)') ' Total number of CFACES in all processes=', &
+                                SUM(NCFACE_BY_MESH(1:NMESHES))
+      WRITE(LU_ERR  ,'(A,I10)',advance='no') &
+      ' 4. Process 0 Generating CFACES from INBOUNDARY cut-faces, N_CFACE_CELLS=', &
+                                SUM(NCFACE_BY_MESH(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
+   ENDIF
+ENDIF
+
 ! Main Loop:
 MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
@@ -24178,7 +24365,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! ALLOCATE to zero size, size is dynamically increased in ALLOCATE_STORAGE:
    IF(ALLOCATED(MESHES(NM)%CFACE)) DEALLOCATE(MESHES(NM)%CFACE)
-   MESHES(NM)%N_CFACE_CELLS_DIM = 1000
+   MESHES(NM)%N_CFACE_CELLS_DIM = NCFACE_BY_MESH(NM)
    ALLOCATE(MESHES(NM)%CFACE(0:MESHES(NM)%N_CFACE_CELLS_DIM))
    ! Deallocate CFACEs storage array for this mesh, if necessary.
    IF(ALLOCATED(MESHES(NM)%CFACE_STORAGE)) DEALLOCATE(MESHES(NM)%CFACE_STORAGE)
@@ -24223,6 +24410,12 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MESH_LOOP_1
 
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   WRITE(LU_SETCC,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,', sec.'
+   IF (MYID==0) WRITE(LU_ERR  ,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,', sec.'
+ENDIF
+
 RETURN
 END SUBROUTINE GET_INBCUTFACES_TO_CFACE
 
@@ -24241,6 +24434,14 @@ INTEGER, PARAMETER :: INDADD(1:3,1:6) = RESHAPE((/-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,
 INTEGER, PARAMETER :: MYAXIS(1:6) = (/ IAXIS,IAXIS,JAXIS,JAXIS,KAXIS,KAXIS /)
 
 IF (CCGUARD == 0) RETURN
+
+IF(GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   WRITE(LU_SETCC,'(A)',advance='no') ' 3. Define boundary CUT_FACES, ghost-cell CUT_CELLs relation to NOM ones ..'
+   IF (MYID==0) THEN
+      WRITE(LU_ERR  ,'(A)',advance='no') ' 3. Define boundary CUT_FACES, ghost-cell CUT_CELLs relation to NOM ones ..'
+   ENDIF
+ENDIF
 
 ! Meshes Loop:
 ! First Mesh Loop:
@@ -24324,7 +24525,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          DXYZCEN(IAXIS:KAXIS) = MESHES( NM)%CUT_FACE( ICF)%XYZCEN(IAXIS:KAXIS,IFACE)   - &
                                 MESHES(NOM)%CUT_FACE(ICOF)%XYZCEN(IAXIS:KAXIS,IFACE)
          DIFF=SQRT(DXYZCEN(IAXIS)**2._EB+DXYZCEN(JAXIS)**2._EB+DXYZCEN(KAXIS)**2._EB)
-         IF (DIFF > GEOMEPS) TWINMATCH=.FALSE.
+         IF (DIFF > GEOMEPS .AND. &
+         ABS(MESHES(NM)%CUT_FACE(ICF)%AREA(IFACE)-MESHES(NOM)%CUT_FACE(ICOF)%AREA(IFACE)) > GEOMEPS) TWINMATCH=.FALSE.
       ENDDO
 
       IF (TWINMATCH) THEN
@@ -24332,7 +24534,13 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          MESHES(NOM)%CUT_FACE(ICOF)%NOMICF(1:2)=(/  NM,  ICF /)
       ELSE
          WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: MESH=',NM,', CUT_FACE=',ICF,' does not match OMESH=',&
-                         NOM,', CUT_FACE=',ICOF
+                         NOM,', CUT_FACE=',ICOF,', centroid location difference=',DIFF,', GEOMEPS=',GEOMEPS
+         DO IFACE=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
+             WRITE(LU_ERR,*) 'MESH=',NM,', CUT_FACE=',ICF,IFACE,' centroid=', &
+             MESHES( NM)%CUT_FACE( ICF)%XYZCEN(IAXIS:KAXIS,IFACE),', Area=',MESHES( NM)%CUT_FACE( ICF)%AREA(IFACE)
+             WRITE(LU_ERR,*) 'MESH=',NOM,', CUT_FACE=',ICOF,IFACE,' centroid=', &
+             MESHES(NOM)%CUT_FACE(ICOF)%XYZCEN(IAXIS:KAXIS,IFACE),', Area=',MESHES(NOM)%CUT_FACE(ICOF)%AREA(IFACE)
+         ENDDO
       ENDIF
 
    ENDDO EXTERNAL_WALL_LOOP_1
@@ -24383,6 +24591,13 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MESH_LOOP_2
 
+IF(GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   WRITE(LU_SETCC,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,' sec.'
+   IF (MYID==0) THEN
+      WRITE(LU_ERR  ,'(A,F8.3,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START,' sec.'
+   ENDIF
+ENDIF
 
 RETURN
 
@@ -25974,6 +26189,9 @@ REAL(EB):: X12(MAX_DIM), X23(MAX_DIM), X31(MAX_DIM), SQAREA(MAX_DIM), INT2
 REAL(EB):: MGNRM, XCEN
 LOGICAL :: INLIST
 
+IF(MYID==0 .AND. GET_CUTCELLS_VERBOSE) &
+WRITE(LU_ERR,'(A,I5,A)',advance="no") ' 1. Number of Geometries : ',N_GEOMETRY,', IBM_INIT_GEOM, processed GEOMETRY : '
+
 ! Geometry loop:
 GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
@@ -26095,6 +26313,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
    ENDDO
 
    GEOMETRY(IG)%N_EDGES = NWSEDG
+
+   IF(MYID==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+      IF (IG==N_GEOMETRY) THEN
+         WRITE(LU_ERR,'(I4.4,A)') IG,'.. done.'
+      ELSE
+         WRITE(LU_ERR,'(I4.4,A)',advance="no") IG,', '
+      ENDIF
+   ENDIF
 
 ENDDO GEOMETRY_LOOP
 
@@ -27508,6 +27734,21 @@ REAL(EB) :: XYZ_SEG1(IAXIS:KAXIS,NOD1:NOD2), XYZ_SEG2(IAXIS:KAXIS,NOD1:NOD2)
 LOGICAL :: DIFF(1:4)
 LOGICAL :: GET_SOLID_CUTFACES = .TRUE.
 REAL(EB) :: TNOW
+
+! GET_CUTCELLS_VERBOSE variables:
+REAL(EB) :: CPUTIME, CPUTIME_START
+INTEGER :: NCUTFCE
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   IF (BNDINT_FLAG) THEN ! Boundary and internal cartface cut-faces:
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating internal   CARTFACE_CUTFACES for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating internal   CARTFACE_CUTFACES for mesh :',NM,' ..'
+   ELSE
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating ghost-cell CARTFACE_CUTFACES for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating ghost-cell CARTFACE_CUTFACES for mesh :',NM,' ..'
+   ENDIF
+ENDIF
 
 TNOW=CURRENT_TIME()
 
@@ -28966,6 +29207,28 @@ ENDIF
 
 T_CC_USED(GET_CARTFACE_CUTFACES_TIME_INDEX) = T_CC_USED(GET_CARTFACE_CUTFACES_TIME_INDEX) + CURRENT_TIME() - TNOW
 
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   NCUTFCE = 0
+   IF (BNDINT_FLAG) THEN
+      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF (MESHES(NM)%CUT_FACE(ICF)%STATUS  /= IBM_GASPHASE) CYCLE
+         NCUTFCE = NCUTFCE + MESHES(NM)%CUT_FACE(ICF)%NFACE
+      ENDDO
+   ELSE
+      DO ICF=MESHES(NM)%N_CUTFACE_MESH+1,MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH
+         IF (MESHES(NM)%CUT_FACE(ICF)%STATUS  /= IBM_GASPHASE) CYCLE
+         NCUTFCE = NCUTFCE + MESHES(NM)%CUT_FACE(ICF)%NFACE
+      ENDDO
+   ENDIF
+   WRITE(LU_SETCC,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-faces : ',NCUTFCE,'. '
+   IF (MYID==0) THEN
+   WRITE(LU_ERR ,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-faces : ',NCUTFCE,'. '
+   ENDIF
+ENDIF
+
 RETURN
 END SUBROUTINE GET_CARTFACE_CUTFACES
 
@@ -29235,6 +29498,16 @@ INTEGER :: NWCROSS, IBCR, IDUM, INOD1, INOD2, NVERT, NEDGE, IEDGE, CEI
 REAL(EB):: SVAR1, SVAR2, SVAR12, XPOS, DV(IAXIS:KAXIS)
 REAL(EB) :: TNOW
 
+! GET_CUTCELLS_VERBOSE variables:
+REAL(EB) :: CPUTIME, CPUTIME_START
+INTEGER :: NCUTEDG
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating            CARTCELL_CUTEDGES for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating            CARTCELL_CUTEDGES for mesh :',NM,' ..'
+ENDIF
+
 TNOW=CURRENT_TIME()
 
 ! BODINT_CELL allocation size:
@@ -29456,6 +29729,20 @@ ENDDO GEOM_LOOP
 
 T_CC_USED(GET_CARTCELL_CUTEDGES_TIME_INDEX) = T_CC_USED(GET_CARTCELL_CUTEDGES_TIME_INDEX ) + CURRENT_TIME() - TNOW
 
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   NCUTEDG = 0
+   DO CEI=1,MESHES(NM)%N_CUTEDGE_MESH
+      NCUTEDG = NCUTEDG + MESHES(NM)%CUT_EDGE(CEI)%NEDGE
+   ENDDO
+   WRITE(LU_SETCC,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-edges in mesh : ',NCUTEDG,'. '
+   IF (MYID==0) THEN
+   WRITE(LU_ERR ,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-edges in mesh : ',NCUTEDG,'. '
+   ENDIF
+ENDIF
+
 RETURN
 END SUBROUTINE GET_CARTCELL_CUTEDGES
 
@@ -29514,6 +29801,21 @@ LOGICAL :: FOUND
 REAL(EB):: XYZV(IAXIS:KAXIS)
 
 REAL(EB) :: TNOW
+
+! GET_CUTCELLS_VERBOSE variables:
+REAL(EB) :: CPUTIME, CPUTIME_START
+INTEGER :: NCUTFCE
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   IF (BNDINT_FLAG) THEN ! Boundary and internal cartface cut-faces:
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating internal   CARTCELL_CUTFACES for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating internal   CARTCELL_CUTFACES for mesh :',NM,' ..'
+   ELSE
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating ghost-cell CARTCELL_CUTFACES for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating ghost-cell CARTCELL_CUTFACES for mesh :',NM,' ..'
+   ENDIF
+ENDIF
 
 TNOW=CURRENT_TIME()
 
@@ -30015,6 +30317,12 @@ DO K=KLO,KHI
                ENDDO
                IF (.NOT.INLIST) THEN
                    NSEG = NSEG + 1
+                   IF (NSEG > IBM_MAXCEELEM_CELL) THEN
+                      WRITE(LU_ERR,*) 'MESH=',NM,', CELL I,J,K=',I,J,K,', XC,YC,ZC=',XC(I),YC(J),ZC(K)
+                      WRITE(LU_ERR,*) 'ERROR: Number of segments in cut-cell greater than limit IBM_MAXCEELEM_CELL=',&
+                                       IBM_MAXCEELEM_CELL
+                      CALL SHUTDOWN('ERROR in cut-cell definition: routine GET_CARTCELL_CUTFACES')
+                   ENDIF
                    SEG_CELL(1:NOD2+IBM_MAX_WSTRIANG_SEG+2,NSEG) = VEC(1:NOD2+IBM_MAX_WSTRIANG_SEG+2)
                ENDIF
             ENDDO
@@ -30328,6 +30636,28 @@ IF (.NOT.BNDINT_FLAG) DEALLOCATE(IJK_COUNTED)
 
 T_CC_USED(GET_CARTCELL_CUTFACES_TIME_INDEX) = T_CC_USED(GET_CARTCELL_CUTFACES_TIME_INDEX) + CURRENT_TIME() - TNOW
 
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   NCUTFCE = 0
+   IF (BNDINT_FLAG) THEN
+      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF (MESHES(NM)%CUT_FACE(ICF)%STATUS  /= IBM_INBOUNDARY) CYCLE
+         NCUTFCE = NCUTFCE + MESHES(NM)%CUT_FACE(ICF)%NFACE
+      ENDDO
+   ELSE
+      DO ICF=MESHES(NM)%N_CUTFACE_MESH+1,MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH
+         IF (MESHES(NM)%CUT_FACE(ICF)%STATUS  /= IBM_INBOUNDARY) CYCLE
+         NCUTFCE = NCUTFCE + MESHES(NM)%CUT_FACE(ICF)%NFACE
+      ENDDO
+   ENDIF
+   WRITE(LU_SETCC,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-faces : ',NCUTFCE,'. '
+   IF (MYID==0) THEN
+   WRITE(LU_ERR ,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-faces : ',NCUTFCE,'. '
+   ENDIF
+ENDIF
+
 RETURN
 END SUBROUTINE GET_CARTCELL_CUTFACES
 
@@ -30367,6 +30697,16 @@ INTEGER :: NIEDGE, NEF, LOCSEG, JFACE, KFACE, NFACEK, NUM_FACE, NCUTCELL, NCFACE
 INTEGER :: IBNDINT
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:) :: IJK_COUNT
 REAL(EB) :: TNOW
+
+! GET_CUTCELLS_VERBOSE variables:
+REAL(EB) :: CPUTIME, CPUTIME_START
+INTEGER :: NCUTCEL
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME_START)
+   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating            CARTCELL_CUTCELLS for mesh :',NM,' ..'
+   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating            CARTCELL_CUTCELLS for mesh :',NM,' ..'
+ENDIF
 
 TNOW=CURRENT_TIME()
 
@@ -30543,6 +30883,12 @@ DO K=KLO,KHI
             FCT = -1._EB
             DO ICF=1,MESHES(NM)%CUT_FACE(CEI)%NFACE
                NFACE_CELL = NFACE_CELL + 1
+               IF ( NFACE_CELL > IBM_MAXCFELEM_CELL ) THEN
+                  WRITE(LU_ERR,*) 'MESH=',NM,', CELL I,J,K=',I,J,K,', XC,YC,ZC=',XC(I),YC(J),ZC(K)
+                  WRITE(LU_ERR,*) 'ERROR: Number of boundary cut-faces in cut-cell > limit IBM_MAXCFELEM_CELL=',&
+                                   IBM_MAXCFELEM_CELL
+                  CALL SHUTDOWN('ERROR in cut-cell definition: routine GET_CARTCELL_CUTCELLS')
+               ENDIF
                FACE_LIST(1:IBM_NPARAM_CCFACE,NFACE_CELL) = (/ IBM_FTYPE_CFINB, 0, 0, CEI, ICF /)
                ! IBM_FTYPE_CFINB in Cart-cell.
                AREAVARS(1:MAX_DIM+1,NFACE_CELL) = (/ MESHES(NM)%CUT_FACE(CEI)%INXAREA(ICF),   &
@@ -30754,6 +31100,20 @@ ENDDO IBNDINT_LOOP
 DEALLOCATE(IJK_COUNT)
 
 T_CC_USED(GET_CARTCELL_CUTCELLS_TIME_INDEX) = T_CC_USED(GET_CARTCELL_CUTCELLS_TIME_INDEX) + CURRENT_TIME() - TNOW
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CPU_TIME(CPUTIME)
+   NCUTCEL = 0
+   DO ICELL=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
+      NCUTCEL = NCUTCEL + MESHES(NM)%CUT_CELL(ICELL)%NCELL
+   ENDDO
+   WRITE(LU_SETCC,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-cells mesh/gc : ',NCUTCEL,'. '
+   IF (MYID==0) THEN
+   WRITE(LU_ERR ,'(A,F8.3,A,I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+   ' sec. Cut-cells mesh/gc : ',NCUTCEL,'. '
+   ENDIF
+ENDIF
 
 RETURN
 END SUBROUTINE GET_CARTCELL_CUTCELLS
@@ -34308,8 +34668,8 @@ INTEGER, INTENT(OUT) :: FACES(3*(NVERTS-2))
 INTEGER, INTENT(OUT) :: LOCTYPE(NVERTS-2)
 
 INTEGER :: IFACE, NLIST, NLIST_OLD
-INTEGER :: VERT_LIST(0:300), VERT_FLAG(0:300), EDGE_LIST(2,1:300)
-LOGICAL :: NODE_EXISTS(300)
+INTEGER :: VERT_LIST(0:1024), VERT_FLAG(0:1023), EDGE_LIST(2,1:1024)
+LOGICAL :: NODE_EXISTS(1024)
 INTEGER :: IM1, I, IP1, V0, V1, V2, IVERT, IEDGE
 LOGICAL HAVE_TRIANGLE
 REAL(FB), POINTER, DIMENSION(:) :: VV1, VV2, VV3
@@ -34320,6 +34680,8 @@ LOGICAL :: VERT_DROPPED, FLAG
 
 INTEGER :: HIDEDGE(3), EDGEI(1:2), NVERTS2, NEDGES, COUNT
 INTEGER, PARAMETER :: SHFT_NODE(1:4) = (/ 2, 1, 0, 2 /)
+
+INTEGER :: COUNT_OUT
 
 FLAG = .TRUE.
 
@@ -34429,8 +34791,21 @@ IF (FLAG) THEN ! find number of angles > 180 deg
 ENDIF
 
 ! more than 1 angles in polygon > 180 deg
+COUNT_OUT = 0
 IFACE = 1
 OUTER: DO WHILE (NLIST>=3)
+   COUNT_OUT = COUNT_OUT + 1
+   IF(COUNT_OUT > NVERTS**4) THEN
+      ! Revert to Convex poly solution:
+      DO IVERT = 1, NVERTS - 2 ! for now assume face is convex
+        ! vertex indices 1, 2, ..., NVF
+        ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
+          FACES(3*IVERT-2) = VERT_OFFSET+1
+          FACES(3*IVERT-1) = VERT_OFFSET+1+IVERT
+          FACES(3*IVERT)   = VERT_OFFSET+2+IVERT
+      ENDDO
+      EXIT
+   ENDIF
    IVERT = 1
    HAVE_TRIANGLE = .FALSE.
    INNER: DO WHILE (IVERT<=NLIST)
