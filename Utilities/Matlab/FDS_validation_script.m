@@ -76,7 +76,6 @@ beyler_hood
 sandia_helium_plume
 sandia_methane_fire
 spray_attenuation
-Cup_burner
 flame_height2
 purdue_flames
 christifire
