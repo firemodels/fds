@@ -5,9 +5,9 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 5 $QUEUE -d $INDIR VTT_01.fds
-$QFDS $DEBUG -p 5 $QUEUE -d $INDIR VTT_02.fds
-$QFDS $DEBUG -p 5 $QUEUE -d $INDIR VTT_03.fds
+$QFDS $DEBUG -p 5 -n 5 $QUEUE -d $INDIR VTT_01.fds
+$QFDS $DEBUG -p 5 -n 5 $QUEUE -d $INDIR VTT_02.fds
+$QFDS $DEBUG -p 5 -n 5 $QUEUE -d $INDIR VTT_03.fds
 
 echo FDS cases submitted
 
