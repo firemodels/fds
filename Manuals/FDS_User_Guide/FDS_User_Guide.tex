@@ -1234,6 +1234,23 @@ There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical
 \end{lstlisting}
 indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=.TRUE.} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
 
+Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail. 
+
+\begin{table}[ht]
+\centering
+\caption{Parameters effected by {\ct SIMULATION\_MODE}.}
+\label{tbl:SIMULATION_MODE}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'VVLES'}  \\ \hline \hline
+{\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 0           & 1            & 1             & 3              \\ \hline
+{\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
+\end{tabular}
+\end{table}
+
 
 \section{Stopping and Restarting Calculations}
 \label{info:restart}
@@ -1593,9 +1610,10 @@ It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if
 \chapter{Pressure}
 \label{info:PRES}
 
-Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table \ref{tbl:PRES}).
+Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
 
 \section{Accuracy of the Pressure Solver}
+\label{pressure_solver}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
 
@@ -1609,6 +1627,7 @@ If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the 
 
 
 \section{Optional Pressure Solver}
+\label{optional_pressure_solver}
 
 The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}. GLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
 
@@ -1633,6 +1652,7 @@ As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the n
 
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
+\label{dancing_eddies}
 
 In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
 
@@ -1706,6 +1726,7 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short
 
 
 \section{Parameters Related to the Background Pressure when Breaking Pressure Zones}
+\label{background_pressure}
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
@@ -9693,17 +9714,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{info:PRES}           &               &                           \\ \hline
-{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
-{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
-{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       &                           \\ \hline
-{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
-{\ct SOLVER}                        & Character     & Section~\ref{info:PRES}           &               & {\ct 'FFT'}               \\ \hline
-{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
-{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
+{\ct CHECK\_POISSON}                & Logical       & Section~\ref{pressure_solver}           &               & {\ct .FALSE.}             \\ \hline
+{\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{dancing_eddies}            &               &                           \\ \hline
+{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{pressure_solver}           & s             & 0.95                      \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}           &               & 10                        \\ \hline
+{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{background_pressure}       & s             & 1.                        \\ \hline
+{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & m/s$^2$       &                           \\ \hline
+{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{background_pressure}       &               & 1.                        \\ \hline
+{\ct SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}  &               & {\ct 'FFT'}               \\ \hline
+{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{pressure_solver}           &               & {\ct .TRUE.}              \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & m/s           &                           \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
