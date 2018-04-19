@@ -113,7 +113,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    IF (SIM_MODE/=DNS_MODE) THEN
       IF (SIM_MODE==LES_MODE) THEN
          RHO_D_TURB => WORK9
-         RHO_D_TURB = 0._EB
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ELSE
          RHO_D = MU*RSC
@@ -229,22 +228,26 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
 
-   !$OMP PARALLEL DO PRIVATE(N) SCHEDULE(STATIC)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I+1,J,K,1:N_TRACKED_SPECIES),1)
-            RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDX(I,J,K,N))
+   IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
 
-            N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J+1,K,1:N_TRACKED_SPECIES),1)
-            RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDY(I,J,K,N))
-
-            N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J,K+1,1:N_TRACKED_SPECIES),1)
-            RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDZ(I,J,K,N))
+      !$OMP PARALLEL DO PRIVATE(N) SCHEDULE(STATIC)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I+1,J,K,1:N_TRACKED_SPECIES),1)
+               RHO_D_DZDX(I,J,K,N) = -(SUM(RHO_D_DZDX(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDX(I,J,K,N))
+   
+               N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J+1,K,1:N_TRACKED_SPECIES),1)
+               RHO_D_DZDY(I,J,K,N) = -(SUM(RHO_D_DZDY(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDY(I,J,K,N))
+   
+               N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES)+ZZP(I,J,K+1,1:N_TRACKED_SPECIES),1)
+               RHO_D_DZDZ(I,J,K,N) = -(SUM(RHO_D_DZDZ(I,J,K,1:N_TRACKED_SPECIES))-RHO_D_DZDZ(I,J,K,N))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
+      !$OMP END PARALLEL DO
+
+   ENDIF
 
    ! Store diffusive species flux on EXIM boundary faces if present
 
@@ -324,7 +327,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          JJG = WC%ONE_D%JJG
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
-
+  
          N_ZZ_MAX = MAXLOC(WC%ONE_D%ZZ_F(1:N_TRACKED_SPECIES),1)
          RHO_D_DZDN = 2._EB*WC%ONE_D%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-WC%ONE_D%ZZ_F(N))*WC%ONE_D%RDN
          IF (N==N_ZZ_MAX) THEN
@@ -332,7 +335,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
          WC%ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
-
+ 
          IF (PREDICTOR) THEN
             UWP = WC%ONE_D%UWS
          ELSE
@@ -376,25 +379,29 @@ IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINDIFFLX_3D(ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_
 
 ! Get the specific heat
 
-CP => WORK5
-R_H_G => WORK9
+IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
-!$OMP PARALLEL PRIVATE(ZZ_GET)
-ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
-!$OMP DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
-         R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
+   CP => WORK5
+   R_H_G => WORK9
+   
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+   ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
+   !$OMP DO SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+            R_H_G(I,J,K) = 1._EB/(CP(I,J,K)*TMP(I,J,K))
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
-!$OMP END DO
-DEALLOCATE(ZZ_GET)
-!$OMP END PARALLEL
+   !$OMP END DO
+   DEALLOCATE(ZZ_GET)
+   !$OMP END PARALLEL
+
+ENDIF
 
 ! Compute del dot k del T
 
@@ -442,7 +449,7 @@ ENDIF K_DNS_OR_LES
 
 ! Store max diffusivity for stability check
 
-IF (CHECK_VN) THEN
+IF (CHECK_VN .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO K=1,KBAR
       DO J=1,JBAR
@@ -564,23 +571,42 @@ CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
       ENDDO
    ENDDO
 
-   IF(CC_IBM) CALL SET_EXIMRHOHSLIM_3D(NM) ! WORK2,WORK3,WORK4: Get flux limited \bar{rho Hs} on EXIM faces.
+   IF (CC_IBM) CALL SET_EXIMRHOHSLIM_3D(NM) ! WORK2,WORK3,WORK4: Get flux limited \bar{rho Hs} on EXIM faces.
 
 ENDIF CONST_GAMMA_IF_1
 
 ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
 
-!$OMP PARALLEL DO SCHEDULE(STATIC)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
-         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IPZ = PRESSURE_ZONE(I,J,K)
+            RTRM(I,J,K) = GM1OG*R_PBAR(K,IPZ)
+            DP(I,J,K)   = RTRM(I,J,K)*DP(I,J,K)
+        ENDDO
       ENDDO
    ENDDO
-ENDDO
-!$OMP END PARALLEL DO
+   !$OMP END PARALLEL DO
+
+ELSE
+
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            RTRM(I,J,K) = R_H_G(I,J,K)/RHOP(I,J,K)
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END PARALLEL DO
+
+ENDIF
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
 
