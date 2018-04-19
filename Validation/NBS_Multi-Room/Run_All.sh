@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 2 $QUEUE -d $INDIR  NBS_100A.fds
-$QFDS $DEBUG -p 2 $QUEUE -d $INDIR  NBS_100O.fds
-$QFDS $DEBUG -p 3 $QUEUE -d $INDIR  NBS_100Z.fds
+$QFDS $DEBUG -p 2 -n 2 $QUEUE -d $INDIR  NBS_100A.fds
+$QFDS $DEBUG -p 2 -n 2 $QUEUE -d $INDIR  NBS_100O.fds
+$QFDS $DEBUG -p 3 -n 3 $QUEUE -d $INDIR  NBS_100Z.fds
