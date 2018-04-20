@@ -480,6 +480,10 @@ REAL(EB), SAVE :: T_CC_USED(SET_CUTCELLS_TIME_INDEX:GET_CARTCELL_CUTCELLS_TIME_I
 
 INTEGER, SAVE :: N_CUTCELLS_PROC=0, N_INB_CUTFACES_PROC=0, N_REG_CUTFACES_PROC=0
 
+
+! Local arrays allocation variables:
+INTEGER, PARAMETER :: DELTA_VERT = 200
+
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
 
@@ -23333,11 +23337,12 @@ LOGICAL :: WRITE_CFACE_STATS = .FALSE.
 INTEGER, SAVE :: CALL_COUNT = 0
 
 ! GET_CUTCELL_VERBOSE variables:
-INTEGER :: IPROC, NMESH_CC, TAG
+INTEGER :: IPROC, NMESH_CC, NMESH_CC_AUX, TAG
 INTEGER :: MPISTATUS(MPI_STATUS_SIZE)
 CHARACTER(MESSAGE_LENGTH) :: VERBOSE_FILE, VERBOSE_FILE_AUX
 CHARACTER(1), DIMENSION(3), PARAMETER :: AXSTR(1:3) = (/ 'X', 'Y', 'Z' /)
 REAL(EB) :: CPUTIME, CPUTIME_START, CPUTIME_MESH, CPUTIME_START_MESH
+INTEGER :: MIN_FACES_PER_CUTCELL, MAX_FACES_PER_CUTCELL, MEAN_FACES_PER_CUTCELL, SUM_FACE, SUM_CCELL
 
 #ifdef DEBUG_SET_CUTCELLS
 #define WRITE_GEOM_DEBUG
@@ -23433,15 +23438,15 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (GET_CUTCELLS_VERBOSE) THEN
+   NMESH_CC=0
+   DO NOM=1,NMESHES
+      IF(CC_COMPUTE_MESH(NOM)) NMESH_CC = NMESH_CC + 1
+   ENDDO
    ! MYID = 0 writes first:
    IF (MYID==0) THEN
       ! Open file to write SET_CUTCELLS_3D progress:
       WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
       OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
-      NMESH_CC=0
-      DO NOM=1,NMESHES
-         IF(CC_COMPUTE_MESH(NOM)) NMESH_CC = NMESH_CC + 1
-      ENDDO
       WRITE(LU_ERR,*) ' '
       WRITE(LU_ERR,*) '2. Generate Cut-cells in Meshes :'
       WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MYID=',MYID,', will process M=',NMESH_CC, &
@@ -23451,16 +23456,19 @@ IF (GET_CUTCELLS_VERBOSE) THEN
       WRITE(LU_SETCC,'(A,I4,A,I4,A)',advance="no") ' Process MYID=',MYID,', will process M=',NMESH_CC,' meshes.'
       WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
       WRITE(LU_SETCC,'(A)',advance="no") ' Meshes to Process : '
-      DO NOM=1,NMESHES-1
+      NMESH_CC_AUX = 0
+      DO NOM=1,NMESHES
          IF(CC_COMPUTE_MESH(NOM)) THEN
-            WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
-            WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+            NMESH_CC_AUX = NMESH_CC_AUX + 1
+            IF(NMESH_CC_AUX < NMESH_CC) THEN
+               WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
+               WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+            ELSE
+               WRITE(LU_ERR,'(I4.4,A)') NOM,'.'
+               WRITE(LU_SETCC,'(I4.4,A)') NOM,'.'
+            ENDIF
          ENDIF
       ENDDO
-      IF(CC_COMPUTE_MESH(NMESHES)) THEN
-         WRITE(LU_ERR,'(I4.4,A)') NMESHES,'.'
-         WRITE(LU_SETCC,'(I4.4,A)') NMESHES,'.'
-      ENDIF
    ENDIF
    IF (N_MPI_PROCESSES > 1) THEN
       IF (MYID==0) ALLOCATE(CC_COMPUTE_MESH_AUX(1:NMESHES))
@@ -23477,10 +23485,17 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             WRITE(LU_SETCC,*) '2. Generate Cut-cells in Meshes :'
             WRITE(LU_SETCC,'(A,I4,A,I4,A)',advance="no") ' Process MYID=',IPROC,', will process M=',NMESH_CC,' meshes.'
             WRITE(LU_SETCC,'(A)',advance="no") ' Meshes to Process :'
-            DO NOM=1,NMESHES-1
-               IF(CC_COMPUTE_MESH(NOM)) WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+            NMESH_CC_AUX = 0
+            DO NOM=1,NMESHES
+               IF(CC_COMPUTE_MESH(NOM)) THEN
+                  NMESH_CC_AUX = NMESH_CC_AUX + 1
+                  IF ( NMESH_CC_AUX < NMESH_CC ) THEN
+                     WRITE(LU_SETCC,'(I4.4,A)',advance="no") NOM,', '
+                  ELSE
+                     WRITE(LU_SETCC,'(I4.4,A)') NOM,'.'
+                  ENDIF
+               ENDIF
             ENDDO
-            IF(CC_COMPUTE_MESH(NMESHES)) WRITE(LU_SETCC,'(I4.4,A)') NMESHES,'.'
          ELSEIF (MYID==0) THEN ! Receive CC_COMPUTE_MESH array and write.
             TAG=1000000+IPROC
             CALL MPI_RECV(CC_COMPUTE_MESH_AUX(1),NMESHES,MPI_LOGICAL,IPROC,TAG,MPI_COMM_WORLD,MPISTATUS,IERR)
@@ -23493,10 +23508,17 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MYID=',IPROC,', will process M=',NMESH_CC, &
                                                            ' meshes in file ',TRIM(VERBOSE_FILE_AUX),'.'
             WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
-            DO NOM=1,NMESHES-1
-               IF(CC_COMPUTE_MESH_AUX(NOM)) WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
+            NMESH_CC_AUX = 0
+            DO NOM=1,NMESHES
+               IF(CC_COMPUTE_MESH_AUX(NOM)) THEN
+                  NMESH_CC_AUX = NMESH_CC_AUX + 1
+                  IF ( NMESH_CC_AUX < NMESH_CC ) THEN
+                     WRITE(LU_ERR,'(I4.4,A)',advance="no") NOM,', '
+                  ELSE
+                     WRITE(LU_ERR,'(I4.4,A)') NOM,'.'
+                  ENDIF
+               ENDIF
             ENDDO
-            IF(CC_COMPUTE_MESH_AUX(NMESHES)) WRITE(LU_ERR,'(I4.4,A)') NMESHES,'.'
          ENDIF
          CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       ENDDO
@@ -23948,6 +23970,45 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
 
    IF (GET_CUTCELLS_VERBOSE) THEN
+      IF(MESHES(NM)%N_CUTCELL_MESH > 0) THEN
+         MIN_FACES_PER_CUTCELL = 1000000 !HUGE(MIN_FACES_PER_CUTCELL)
+         MAX_FACES_PER_CUTCELL = 0
+         SUM_FACE = 0
+         SUM_CCELL= 0
+         IF( MYID == 0 ) THEN
+            DO ICC1=1,MESHES(NM)%N_CUTCELL_MESH
+               SUM_CCELL = SUM_CCELL + MESHES(NM)%CUT_CELL(ICC1)%NCELL
+               DO ICC2=1,MESHES(NM)%CUT_CELL(ICC1)%NCELL
+                  MAX_FACES_PER_CUTCELL = MAX(MAX_FACES_PER_CUTCELL,MESHES(NM)%CUT_CELL(ICC1)%CCELEM(1,ICC2))
+                  MIN_FACES_PER_CUTCELL = MIN(MIN_FACES_PER_CUTCELL,MESHES(NM)%CUT_CELL(ICC1)%CCELEM(1,ICC2))
+                  SUM_FACE = SUM_FACE + MESHES(NM)%CUT_CELL(ICC1)%CCELEM(1,ICC2)
+               ENDDO
+            ENDDO
+            MEAN_FACES_PER_CUTCELL = SUM_FACE / SUM_CCELL
+         ENDIF
+         ! Write to file:
+         WRITE(LU_SETCC,'(A,3I8)') ' Min, Max, Mean Faces per cut-cell in mesh : ',&
+         MIN_FACES_PER_CUTCELL, MAX_FACES_PER_CUTCELL, MEAN_FACES_PER_CUTCELL
+         IF (MEAN_FACES_PER_CUTCELL > 30) THEN
+            WRITE(LU_SETCC,'(A,A)') ' NOTE : GEOMETRY triangulation is EXTREMELY fine for FDS Cartesian mesh.',&
+                                    ' This might make the calculation unnecessarily expensive.'
+         ELSEIF (MEAN_FACES_PER_CUTCELL > 15) THEN
+            WRITE(LU_SETCC,'(A,A)') ' NOTE : GEOMETRY triangulation is fine for FDS Cartesian mesh.',&
+                                    ' This might make the calculation unnecessarily expensive.'
+         ENDIF
+         ! Write to ERR file:
+         IF (MYID==0) THEN
+            WRITE(LU_ERR,'(A,3I8)') ' Min, Max, Mean Faces per cut-cell in mesh : ',&
+            MIN_FACES_PER_CUTCELL, MAX_FACES_PER_CUTCELL, MEAN_FACES_PER_CUTCELL
+            IF (MEAN_FACES_PER_CUTCELL > 30) THEN
+               WRITE(LU_ERR,'(A,A)') ' NOTE : GEOMETRY triangulation is EXTREMELY fine for FDS Cartesian mesh.',&
+                                     ' This might make the calculation unnecessarily expensive.'
+            ELSEIF (MEAN_FACES_PER_CUTCELL > 15) THEN
+               WRITE(LU_ERR,'(A,A)') ' NOTE : GEOMETRY triangulation is fine for FDS Cartesian mesh.',&
+                                     ' This might make the calculation unnecessarily expensive.'
+            ENDIF
+         ENDIF
+      ENDIF
       WRITE(LU_SETCC,'(A,I8,A)') ' Processing mesh : ',NM,' finished.'
       WRITE(LU_SETCC,'(A)') ' '
       IF (MYID==0) THEN
@@ -31225,7 +31286,6 @@ INTEGER,  INTENT(OUT):: INDSEG(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_FACE)
 REAL(EB), INTENT(OUT):: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
 
 ! Local Variables:
-REAL(EB) :: X2X3VERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
 REAL(EB) :: X2FMIN, X2FMAX, X3FMIN, X3FMAX, DUMMY(IAXIS:JAXIS)
 INTEGER  :: TRI(NOD1:NOD3), ITRI, INOD
 LOGICAL  :: INTEST, OUTX2, OUTX3, OUTFACE, TRUETHAT, XIALIGNED, OUTSEG, SEG_IN_SIDE
@@ -31246,16 +31306,29 @@ REAL(EB) :: XYEL(IAXIS:JAXIS,NOD1:NOD3)
 LOGICAL  :: INLIST, OUTPLANE1, OUTPLANE2
 INTEGER  :: EDGE_TRI
 
+REAL(EB), ALLOCATABLE, SAVE, DIMENSION(:,:) :: X2X3VERT
+INTEGER, SAVE :: SIZE_X2X3VERT
+
 ! Default return values:
 INB_FLG = .FALSE.
 NVERT = 0
 NEDGE = 0
+IF(.NOT.ALLOCATED(X2X3VERT)) THEN
+   SIZE_X2X3VERT = DELTA_VERT
+   ALLOCATE(X2X3VERT(IAXIS:JAXIS,1:SIZE_X2X3VERT))
+ENDIF
 X2X3VERT = 0._EB
 CEELEM   = IBM_UNDEFINED
 INDSEG   = IBM_UNDEFINED
 IF ( CEI /= 0 ) THEN
    NVERT = MESHES(NM)%CUT_EDGE(CEI)%NVERT
    NEDGE = MESHES(NM)%CUT_EDGE(CEI)%NEDGE
+
+   IF (NVERT > SIZE_X2X3VERT) THEN
+      DEALLOCATE(X2X3VERT)
+      SIZE_X2X3VERT = NVERT + DELTA_VERT
+      ALLOCATE(X2X3VERT(IAXIS:JAXIS,1:SIZE_X2X3VERT)); X2X3VERT = 0._EB
+   ENDIF
 
    X2X3VERT(IAXIS,1:NVERT)   = MESHES(NM)%CUT_EDGE(CEI)%XYZVERT(X2AXIS,1:NVERT)
    X2X3VERT(JAXIS,1:NVERT)   = MESHES(NM)%CUT_EDGE(CEI)%XYZVERT(X3AXIS,1:NVERT)
@@ -31264,7 +31337,6 @@ IF ( CEI /= 0 ) THEN
    INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE) = &
    MESHES(NM)%CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE)
 ENDIF
-XYVERT = X2X3VERT
 
 ! Quick discard test:
 X2FMIN = MINVAL(FVERT(IAXIS,NOD1:NOD4)); X2FMAX = MAXVAL(FVERT(IAXIS,NOD1:NOD4))
@@ -31339,7 +31411,7 @@ DO ITRI=1,BODINT_PLANE%NTRIS
 
       ! Insertion add point to intersection list:
       XP(IAXIS:JAXIS) = XYEL(IAXIS:JAXIS,IPT)
-      CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+      CALL INSERT_POINT_2D(XP,NINTP,SIZE_X2X3VERT,X2X3VERT,INOD)
 
       ! Insert sort node to triangles local list
       TRUETHAT = .TRUE.
@@ -31374,7 +31446,7 @@ DO ITRI=1,BODINT_PLANE%NTRIS
 
          ! Insertion add point to intersection list:
          XP(IAXIS:JAXIS) = FVERT(IAXIS:JAXIS,IPF)
-         CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+         CALL INSERT_POINT_2D(XP,NINTP,SIZE_X2X3VERT,X2X3VERT,INOD)
 
          ! Insert sort node to triangles local list
          TRUETHAT = .TRUE.
@@ -31458,7 +31530,7 @@ DO ITRI=1,BODINT_PLANE%NTRIS
                ! Insertion add point to intersection list:
                XP(XIAXIS) = SVARI
                XP(XJAXIS) = XJPLN
-               CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+               CALL INSERT_POINT_2D(XP,NINTP,SIZE_X2X3VERT,X2X3VERT,INOD)
 
                ! Insert sort node to triangles local list
                TRUETHAT = .TRUE.
@@ -31528,8 +31600,8 @@ DO ITRI=1,BODINT_PLANE%NTRIS
       DO ISEG=1,NEDGE
 
          IF ( (EDGETRI(NOD1,IEDGE) == CEELEM(NOD1,ISEG)) .AND. & ! same inod1
-             (EDGETRI(NOD2,IEDGE) == CEELEM(NOD2,ISEG)) .AND. & ! same inod2
-             (LOCBOD              == INDSEG(4,ISEG)) ) THEN     ! same ibod
+              (EDGETRI(NOD2,IEDGE) == CEELEM(NOD2,ISEG)) .AND. & ! same inod2
+              (LOCBOD              == INDSEG(4,ISEG)) ) THEN     ! same ibod
 
             SELECT CASE(INDSEG(1,ISEG))
                ! Only one triangle in list:
@@ -31543,7 +31615,7 @@ DO ITRI=1,BODINT_PLANE%NTRIS
                ! Two triangles in list:
                CASE(2)
                   IF ( (LOCTRI == INDSEG(2,ISEG)) .OR. &
-                      (LOCTRI == INDSEG(3,ISEG)) ) THEN
+                       (LOCTRI == INDSEG(3,ISEG)) ) THEN
                      INLIST = .TRUE.
                      EXIT
                   ELSE
@@ -31596,7 +31668,12 @@ DO ITRI=1,BODINT_PLANE%NTRIS
 ENDDO
 
 ! Populate XYVERT points array:
-XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE) = X2X3VERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+IF(SIZE_X2X3VERT > SIZE(XYVERT,DIM=2)) THEN
+   WRITE(LU_ERR,*) 'Error in GET_TRIANG_FACE_INT : SIZE_X2X3VERT in greater than SIZE(XYVERT,DIM=2).'
+   CALL SHUTDOWN('Shutting down..')
+ENDIF
+XYVERT = 0._EB
+XYVERT(IAXIS:JAXIS,1:SIZE_X2X3VERT) = X2X3VERT(IAXIS:JAXIS,1:SIZE_X2X3VERT)
 NVERT = NINTP
 IF (NVERT > 0) INB_FLG = .TRUE.
 
@@ -31607,16 +31684,18 @@ END SUBROUTINE GET_TRIANG_FACE_INT
 
 ! ------------------------- INSERT_POINT_2D -------------------------------------
 
-SUBROUTINE INSERT_POINT_2D(XP,NVERT,XYVERT,INOD)
+SUBROUTINE INSERT_POINT_2D(XP,NVERT,SIZE_XYVERT,XYVERT,INOD)
 
 REAL(EB), INTENT(IN)    :: XP(IAXIS:JAXIS)
 INTEGER,  INTENT(INOUT) :: NVERT
-REAL(EB), INTENT(INOUT) :: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+INTEGER, INTENT(INOUT) :: SIZE_XYVERT
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: XYVERT(:,:)
 INTEGER,  INTENT(OUT)   :: INOD
 
 ! Local Variables:
 LOGICAL :: INLIST
 REAL(EB):: DV(IAXIS:JAXIS), DVNORM
+REAL(EB),  ALLOCATABLE, DIMENSION(:,:) :: XYVERT_AUX
 
 INLIST = .FALSE.
 DO INOD=1,NVERT
@@ -31630,6 +31709,13 @@ ENDDO
 IF ( .NOT.INLIST ) THEN
    NVERT = NVERT + 1
    INOD  = NVERT
+   ! If NVERT > SIZE(XYVERT,DIM=2) reallocate:
+   IF(NVERT > SIZE_XYVERT) THEN
+       ALLOCATE(XYVERT_AUX(IAXIS:JAXIS,1:SIZE_XYVERT)); XYVERT_AUX(:,:) = XYVERT(:,:)
+       DEALLOCATE(XYVERT); ALLOCATE(XYVERT(IAXIS:JAXIS,SIZE_XYVERT+DELTA_VERT)); XYVERT = 0._EB
+       XYVERT(IAXIS:JAXIS,1:SIZE_XYVERT) = XYVERT_AUX(IAXIS:JAXIS,1:SIZE_XYVERT)
+       SIZE_XYVERT = SIZE_XYVERT + DELTA_VERT
+   ENDIF
    XYVERT(IAXIS:JAXIS,INOD) = XP(IAXIS:JAXIS)
 ENDIF
 
