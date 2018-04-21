@@ -133,7 +133,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: C,H,N,O,EPUMO2,HEAT_OF_COMBUSTION,HOC_COMPLETE,A,A_PRIME,A_PRIME_FAST,A_IN,E,E_IN,K,&
                Y_O2_INFTY,Y_N2_INFTY=0._EB,MW_FUEL,MW_SOOT,&
                CO_YIELD,SOOT_YIELD,H2_YIELD, SOOT_H_FRACTION,RHO_EXPONENT,RHO_EXPONENT_FAST,CRIT_FLAME_TMP,&
-               NU_O2=0._EB,NU_N2=0._EB,NU_H2O=0._EB,NU_CO2=0._EB,NU_CO=0._EB,NU_SOOT=0._EB,S=0._EB
+               NU_O2=0._EB,NU_N2=0._EB,NU_H2O=0._EB,NU_H2=0._EB,NU_CO2=0._EB,NU_CO=0._EB,NU_SOOT=0._EB,S=0._EB
    REAL(EB) :: AUTO_IGNITION_TEMPERATURE=0._EB,N_T=0._EB,CHI_R
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU,NU_READ,NU_SPECIES,N_S,N_S_READ,NU_MW_O_MW_F
    INTEGER :: FUEL_SMIX_INDEX=-1,AIR_SMIX_INDEX=-1,N_SMIX,N_SPEC,RAMP_CHI_R_INDEX=0,PRIORITY=1
@@ -374,9 +374,9 @@ TYPE IBM_CUTEDGE_TYPE
 END TYPE IBM_CUTEDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =216 ! Size definition parameter. Max number of vertices per Cartesian Face.
-INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE = IBM_MAXVERTS_FACE ! Size definition parameter. Max segments per face.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =216 ! Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =1024 ! Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =1024 ! Size definition parameter. Max segments per face.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =1024 ! Size definition parameter. Max number of cut faces per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 72 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
@@ -434,9 +434,9 @@ END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
 INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  = 16 ! Size definition parameter. Max number of cut-cell per cart cell.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  =216 ! Size definition parameter. Max number of cut-faces per cart cell.
-INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =256
-INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  =380
+INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  =1024 ! Size definition parameter. Max number of cut-faces per cart cell.
+INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =1024
+INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  =1024
 INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL=IBM_MAXCFELEM_CELL ! Size definition parameter.
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
 

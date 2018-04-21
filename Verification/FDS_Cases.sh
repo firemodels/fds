@@ -54,16 +54,16 @@ $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_cen.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
-$QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_cen.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
@@ -100,6 +100,7 @@ $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
+$QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires couch.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
@@ -264,29 +265,25 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow_uscarc_cg.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 $QFDS -d Pressure_Solver pressure_iteration2d_1mesh.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_tight.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cg_tight.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_cggmg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_gmg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_twolevel.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uscarc_cg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uscarc.fds
 $QFDS -d Pressure_Solver pressure_iteration3d_1mesh.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_tight.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cg_tight.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_cggmg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_gmg.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_twolevel.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc_cg.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_tight.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -344,7 +341,6 @@ $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
 $QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
-$QFDS -d Pyrolysis pyro3d_A_B.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 

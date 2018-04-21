@@ -68,6 +68,9 @@ CALL ChkMemErr('RADI','DLN',IZERO)
 ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
 
+! For the time being shutdown if CC_IBM and RADIATION are .TRUE.:
+IF (CC_IBM) CALL SHUTDOWN('ERROR: Currently RADIATION should be set to .FALSE. when having &GEOMs.')
+
 ! Determine mean direction normals and sweeping orders
 ! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
 
@@ -796,6 +799,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       !$OMP END DO
       DEALLOCATE(ZZ_GET)
       !$OMP END PARALLEL
+   ENDIF
+
+   ! Experimental use of BLOCKAGE_FACTOR to attenuate radiation at a fuel surface
+
+   IF (BLOCKAGE_FACTOR>0._EB .AND. N_REACTIONS>0) THEN
+      DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         IF (WALL(IW)%ONE_D%MASSFLUX(REACTION(1)%FUEL_SMIX_INDEX)>0._EB) &
+            KAPPA_GAS(WALL(IW)%ONE_D%IIG,WALL(IW)%ONE_D%JJG,WALL(IW)%ONE_D%KKG) = -LOG(1._EB-BLOCKAGE_FACTOR)*WALL(IW)%ONE_D%RDN
+      ENDDO
    ENDIF
 
    ! Compute source term KAPPA*4*SIGMA*TMP**4

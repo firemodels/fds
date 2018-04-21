@@ -43,7 +43,58 @@ A common validation experiment for CFD codes involves flow through a channel wit
 \section{Beyler Hood Experiments}
 \label{Beyler_Hood_Description}
 
-Craig Beyler performed a large number of experiments involving a variety of fuels, fire sizes, burner diameters, and burner distances beneath a hood~\cite{Beyler:Hood}.  The hood consisted of concentric cylinders separated by an air gap.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood.  Based on the published measurement uncertainties, species errors are estimated at 6~\%.  148 tests were performed with measurements made in the exhaust duct.  The fuels in those tests were as follows: 16 acetone, 11 ethanol, 13 isopropanol, 18 methanol, 51 propane, 28 propylene, and 11 toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 tests spanning the equivalence ratio range for each fuel was simulated for validation (5, 5, 5, 5, 15, 7, and 5 respectively for the fuels mentioned above).
+Craig Beyler performed small-scale fire experiments where a gas burner was positioned at various heights underneath a closed, cylindrical hood, 100~cm in diameter and 48~cm in height~\cite{Beyler:Hood}.  The hood consisted of two concentric cylinders separated by an air gap, as shown in Fig.~\ref{Beyler_Hood_Sketch}.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood. The reported relative standard uncertainty of the measured gas species mass fractions was 6~\%. The fuels consisted of acetone, ethanol, isopropanol, methanol, propane, propylene, and toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 of the original 148 experiments spanning the equivalence ratio range for each fuel were simulated for validation, see Table~\ref{beyler_sum}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{FIGURES/Beyler_Hood/Beyler_Hood}
+\caption[Sketch of Beyler Hood cross section]{Sketch of Beyler Hood cross section.}
+\label{Beyler_Hood_Sketch}
+\end{figure}
+
+\begin{table}[!ht]
+\centering
+\caption[Summary of simulated Beyler Hood experiments]{Summary of simulated Beyler Hood experiments. A negative value of Separation Distance indicates the burner top is below the lower rim of the hood.}
+\label{beyler_sum}
+\begin{tabular}{|c|c|c|c|c||c|c|c|c|c|}
+\hline
+Exp.   & Fuel          & HRR      & Burner           & Sep.           &  Exp.   & Fuel          & HRR      & Burner           & Sep.            \\
+No.    & Gas           & (kW)     & (cm)             & Dist. (cm)     &  No.    & Gas           & (kW)     & (cm)             & Dist. (cm)      \\ \hline \hline
+117    & Acetone       & 18.0     & 22.6             & -12            &  232    & Propane       & 13.5     & 19.5             & -5              \\ \hline
+119    & Acetone       & 16.4     & 22.6             & -1             &  257    & Propane       & 8.2      & 19.5             & -15             \\ \hline
+122    & Acetone       & 16.4     & 22.6             & 4              &  287    & Propane       & 7.9      & 19.5             & 5               \\ \hline
+142    & Acetone       & 12.1     & 22.6             & 4              &  303    & Propane       & 18.3     & 19.5             & 5               \\ \hline
+145    & Acetone       & 12.7     & 22.6             & 4              &  307    & Propane       & 21.4     & 19.5             & 5               \\ \hline
+106    & Ethanol       & 17.3     & 22.6             & -9             &  318    & Propane       & 18.3     & 19.5             & -20             \\ \hline
+107    & Ethanol       & 21.3     & 22.6             & -4             &  322    & Propane       & 21.4     & 19.5             & -20             \\ \hline
+108    & Ethanol       & 17.3     & 22.6             & 4              &  334    & Propane       & 21.4     & 19.5             & -15             \\ \hline
+110    & Ethanol       & 13.5     & 22.6             & 4              &  355    & Propane       & 18.3     & 19.5             & 0               \\ \hline
+115    & Ethanol       & 13.5     & 22.6             & 4              &  359    & Propane       & 21.4     & 19.5             & 0               \\ \hline
+130    & Isopropanol   & 12.4     & 22.6             & 4              &  371    & Propane       & 21.4     & 19.5             & -5              \\ \hline
+132    & Isopropanol   & 12.4     & 22.6             & 4              &  389    & Propane       & 18.3     & 19.5             & 0               \\ \hline
+133    & Isopropanol   & 12.4     & 22.6             & 4              &  429    & Propane       & 28.1     & 19.5             & -10             \\ \hline
+136    & Isopropanol   & 12.4     & 22.6             & -1             &  433    & Propane       & 31.5     & 19.5             & -10             \\ \hline
+141    & Isopropanol   & 12.4     & 22.6             & 4              &  445    & Propane       & 31.5     & 19.5             & -15             \\ \hline
+942    & Methanol      & 11.0     & 22.6             & 0              &  780    & Propylene     & 7.5      & 19.5             & -10             \\ \hline
+943    & Methanol      & 11.0     & 22.6             & 0              &  805    & Propylene     & 7.5      & 19.5             & -10             \\ \hline
+945    & Methanol      & 11.0     & 22.6             & -5             &  859    & Propylene     & 31.4     & 19.5             & -10             \\ \hline
+947    & Methanol      & 11.0     & 22.6             & 0              &  870    & Propylene     & 19.0     & 19.5             & -2              \\ \hline
+951    & Methanol      & 9.8      & 22.6             & 0              &  882    & Propylene     & 19.1     & 19.5             & -10             \\ \hline
+160    & Toluene       & 11.5     & 22.6             & -6             &  886    & Propylene     & 19.1     & 19.5             & -5              \\ \hline
+162    & Toluene       & 11.5     & 22.6             & -1             &  910    & Propylene     & 31.4     & 19.5             & -11             \\ \hline 
+165    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
+166    & Toluene       & 11.5     & 22.6             & 5              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
+170    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+Simulations of the Beyler Hood experiments are performed at 3~cm resolution within a fairly simple facsimile of the actual hood. The boundary conditions are set to adiabatic to allow for a relatively quick ramp up to steady-state conditions. 
+
+The two-step simple chemistry combustion scheme is applied, where an infinitely fast reaction converts the fuel to CO, soot, and water vapor, followed sequentially by a second fast reaction that converts the soot and CO to CO$_2$. Some of the soot and CO does not convert to CO$_2$, based on post-flame yields listed by Tewarson~\cite{SFPE:Tewarson}.
+
+A minimum auto-ignition temperature is specified for each fuel~\cite{SFPE:Beyler} to prevent the fuel vapor from igniting at the layer interface. This restriction is relaxed in the grid cells just above the burner surface to allow for ignition without a secondary heat source. In addition, a critical flame temperature of 500~$^\circ$C is applied in all cases to account for local flame extinction. The grid is too coarse to support the actual values, and the chosen value is a placeholder until a better flame extinction model is developed.
 
 
 \section{Bittern Sprinkler Experiments}
@@ -197,7 +248,91 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 \section{Cup Burner Experiments}
 \label{Cup_Burner_Description}
 
-The cup-burner is a widely used experimental apparatus for studying the effectiveness of flame extinguishing agents. The test is designed to determine the effectiveness of various extinguishing agents. Typically, these experiments feature a steady fuel-air coflow diffusion flame that is established above the cup. The extinguishing agent is gradually introduced into the air stream to determine the minimum concentration of the agent that leads to lift off. Two experimental data sets are examined: methane (CH$_4$) - air coflow~\cite{Takahashi:2007} and n-heptane (C$_7$H$_{16}$) - air coflow~\cite{Moore:1996}. The extinguishing agents of interest are argon (Ar), carbon dioxide (CO$_2$), helium (He), and nitrogen (N$_2$).
+\subsection{Cup Burner Data Overview}
+
+The cup-burner is a widely used experimental apparatus for studying the effectiveness of ﬂame extinguishing
+agents. The test is designed to determine the effectiveness of various extinguishing agents. Typically,
+these experiments feature a steady fuel-air coﬂow diffusion ﬂame that is established above the cup. The
+extinguishing agent is gradually introduced into the air stream to determine the minimum concentration of
+the agent that leads to lift off. One hundred and ten experimental data sets are examined. The data sets
+include sixteen fuels: acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane,
+hydrogen, methane, methanol, octane, propanol, and toluene, and ﬁve inert gases: argon (Ar), carbon dioxide
+(CO$_2$), helium (He), and nitrogen (N$_2$), and sulfur hexaﬂouride (SF$_6$). A Stanjan calculation was performed
+to determine the equilibrium temperature using the measured minimum extinguishing concentration for each
+test. The calculation was constant pressure and enthalpy using a stoichiometric mixture of fuel and air plus
+agent. For combinations of fuel and agent with multiple tests, the average extinguishing concentration and
+the average ﬂame temperature was taken. This resulted forty-six unique combinations of fuel and agent. A
+summary of the data is shown in ~Table~\ref{Cup_Table}.
+
+\begin{table}[!ht]
+\centering
+\caption{Summary of Cup Burner Data}
+\label{Cup_Table}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Fuel & Extinguishing & MEC        & AIT            & CFT         & References  \\
+     & Agent         & (mol/mol)  & ($^\circ$C)    & ($^\circ$C) &  \\ \hline \hline
+Acetone & Ar & 34.0 & 465 & 1729 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Acetone & CO$_2$ & 19.0 & 465 & 1678 & \cite{Yamamoto:1}  \\ \hline
+Acetone & N$_2$ & 28.0 & 465 & 1670 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Acetylene & CO$_2$ & 45.0 & 300 & 1338 & \cite{Yamamoto:1}  \\ \hline
+Acetylene & N$_2$ & 58.0 & 300 & 1312 & \cite{Yamamoto:1}  \\ \hline
+Benzene & CO$_2$ & 20.1 & 560 & 1691 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Benzene & N$_2$ & 30.3 & 560 & 1683 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1} \cite{Yamamoto:1}  \\ \hline
+Butane & N$_2$ & 31.0 & 405 & 1594 & \cite{Yamamoto:1}  \\ \hline
+Butane & CO$_2$ & 19.0 & 405 & 1639 & \cite{Yamamoto:1}  \\ \hline
+Dodecane & N$_2$ & 33.0 & 204 & 1577 & \cite{Tapscott:1}  \\ \hline
+Ethanol & Ar & 36.5 & 365 & 1654 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Ethanol & CO$_2$ & 23.7 & 365 & 1542 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Ethanol & N$_2$ & 34.6 & 365 & 1529 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Ethylene & CO$_2$ & 32.0 & 490 & 1471 & \cite{Yamamoto:1}  \\ \hline
+Ethylene & N$_2$ & 45.0 & 490 & 1441 & \cite{Yamamoto:1}  \\ \hline
+Heptane & Ar & 39.5 & 223 & 1643 & \cite{Tapscott:1} \cite{Bogdan:1} \cite{Moore:1} \cite{Moore:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Saito:FSJ} \cite{NFPA_2001} \cite{ISO_14520} \cite{Senecal:FSJ}  \\ \hline
+Heptane & N$_2$ & 31.2 & 223 & 1617 & \cite{Tapscott:1} \cite{Bogdan:1} \cite{Hamins:CS1998} \cite{Moore:1} \cite{Hirst:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Yamamoto:1} \cite{Sakei:1} \cite{NFPA_2001} \cite{ISO_14520} \cite{Senecal:FSJ}  \\ \hline
+Heptane & CO$_2$ & 21.4 & 223 & 1617 & \cite{Moore:1} \cite{Hirst:1} \cite{Sheinson:FSJ} \cite{Grosshandler:Cup} \cite{Saito:FSJ} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Heptane & He & 31.5 & 223 & 1763 & \cite{Sheinson:FSJ} \cite{Grosshandler:Cup}  \\ \hline
+Heptane & SF$_6$ & 11.0 & 223 & 1531 & \cite{Sheinson:FSJ}  \\ \hline
+Hexane & Ar & 33.0 & 223 & 1740 & \cite{Moore:1}  \\ \hline
+Hexane & CO$_2$ & 20.0 & 223 & 1647 & \cite{Yamamoto:1}  \\ \hline
+Hexane & N$_2$ & 29.0 & 223 & 1646 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Hydrogen & CO$_2$ & 60.0 & 400 & 913 & \cite{Yamamoto:1}  \\ \hline
+Hydrogen & N$_2$ & 72.0 & 400 & 870 & \cite{Yamamoto:1}  \\ \hline
+Methane & Ar & 33.8 & 537 & 1659 & \cite{Tapscott:1} \cite{Takahashi:CS2007} \cite{Moore:1}  \\ \hline
+Methane & N$_2$ & 24.2 & 537 & 1663 & \cite{Takahashi:CS2007} \cite{Yamamoto:1} \cite{Ural:1}  \\ \hline
+Methane & CO$_2$ & 14.4 & 537 & 1694 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Methane & He & 26.7 & 537 & 1746 & \cite{Takahashi:CS2007}  \\ \hline
+Methanol & Ar & 45.0 & 385 & 1494 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Methanol & CO$_2$ & 29.2 & 385 & 1410 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Methanol & N$_2$ & 40.8 & 385 & 1395 & \cite{Tapscott:1} \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Octane & Ar & 27.0 & 220 & 1790 & \cite{Moore:1}  \\ \hline
+Octane & CO$_2$ & 24.0 & 220 & 1542 & \cite{Yamamoto:1}  \\ \hline
+Octane & N$_2$ & 33.0 & 220 & 1564 & \cite{Tapscott:1} \cite{Yamamoto:1}  \\ \hline
+Propane & Ar & 37.5 & 466 & 1652 & \cite{Tapscott:1} \cite{Moore:1}  \\ \hline
+Propane & CO$_2$ & 21.0 & 466 & 1600 & \cite{Yamamoto:1}  \\ \hline
+Propane & N$_2$ & 32.3 & 466 & 1573 & \cite{Hamins:CS1998} \cite{Yamamoto:1} \cite{Ural:1}  \\ \hline
+Propanol & Ar & 28.0 & 440 & 1781 & \cite{Moore:1}  \\ \hline
+Propanol & CO$_2$ & 22.0 & 440 & 1584 & \cite{Yamamoto:1}  \\ \hline
+Propanol & He & 30.0 & 440 & 1755 & \cite{Sheinson:FSJ}  \\ \hline
+Propanol & N$_2$ & 30.0 & 440 & 1608 & \cite{Yamamoto:1} \cite{Sheinson:FSJ}  \\ \hline
+Propanol & SF$_6$ & 11.0 & 440 & 1515 & \cite{Sheinson:FSJ}  \\ \hline
+Toluene & Ar & 27.0 & 480 & 1854 & \cite{Moore:1}  \\ \hline
+Toluene & CO$_2$ & 17.0 & 480 & 1744 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+Toluene & N$_2$ & 24.4 & 480 & 1755 & \cite{Yamamoto:1} \cite{Sakei:1}  \\ \hline
+\end{tabular}
+\noindent
+\begin{tabbing}
+MEC  \hspace{0.05in} \= Minimum Extinguishing Concentration \\
+AIT                  \> Auto Ignition Temperature \\
+CFT                  \> Critical Flame Temperature
+\end{tabbing}
+\end{table}
+\subsection{Modeling Notes}
+
+Cup burner dimensions, fuel inlet velocity, and co-ﬂow inlet velocity vary slightly amongst the researchers;
+however, extinguishing concentrations have been shown to be fairly insensitive over the range of typical val-ues. The cup burner model was implemented as a 2D, cylindrical geometry with a 1 cm radius for the burner
+and a 4 cm radius for the tube. A 1 mm grid resolution was used. For gaseous fuels a 1 cm/s inlet velocity
+was used for the burner. Liquid fuels used burning rates from the SFPE Handbook; fuels without published
+burning rates scaled the burning rate of a chemically similar fuel (e.g. alcohol, alkane) using the heat of va-porization for the fuel. The fuel temperature boundary condition was ambient for gaseous fuels and one-halfof the boiling point for liquid fuels. The co-ﬂow was set to 12 cm/s. The agent mass fraction was rampedfrom approximately 10 \% below to 10 \% above the values shown in Table~\ref{Cup_Table}. The {\ct AUTO\_IGNITION\_TEMPERATURE} was set to values published in \cite{Zabetakis:1965}, the {\ct CRITICAL\_FLAME\_TEMPERATURE} was set to the values in Table~\ref{Cup_Table}, and a small region around the top of the burner was set to 0 K to remove the need for an ignition source.
 
 \section{DelCo Trainer Experiments}
 \label{DelCo_Description}
