@@ -1958,14 +1958,6 @@ WIND_LOOP: DO
 ENDDO WIND_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-! Check compatibility of constant_specific_heat_ratio and stratification
-
-IF (CONSTANT_SPECIFIC_HEAT_RATIO .AND. STRATIFICATION) THEN
-   STRATIFICATION = .FALSE.
-   WRITE(MESSAGE,'(A,A,A)')  'WARNING: CONSTANT_SPECIFIC_HEAT_RATIO option sets STRATIFICATION=.FALSE.'
-   IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-ENDIF
-
 ! Determine the appropriate wind speed if the user specifies SPEED or U_STAR. If
 ! the user specifies U0, V0, or W0, MEAN_FORCING will not be invokes unless the
 ! user specifies it.
