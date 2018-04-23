@@ -7047,10 +7047,10 @@ SUBROUTINE S2CFSS(LDIMF,F,SAVE,W)
 
 
 
-INTEGER                   :: LDIMF
-REAL(EB) SAVE(-3:*)
-REAL(EB) W(*)
-REAL(EB) F(LDIMF,*)
+INTEGER :: LDIMF
+REAL(EB) :: SAVE(-3:*)
+REAL(EB) :: W(*)
+REAL(EB) :: F(LDIMF,*)
 INTEGER :: M
 
 
@@ -7062,7 +7062,7 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               DEBUG PRINTOUTS UNDER CONTROL OF
 !                               PARAMETER LVLPRN
 
-M = SAVE(4)
+M = NINT(SAVE(4))
 
 CALL FSH02S(LDIMF,M,F,SAVE,W)
 
