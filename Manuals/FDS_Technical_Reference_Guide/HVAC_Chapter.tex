@@ -36,7 +36,7 @@ the loss term.  Additionally, the pressure difference between two nodes in the n
 nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).
 Solving the momentum equation, requires accounting for both of these.  This is done with the following discretization:
 \be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{p}^n_i - \tilde{p}^n_k\right)+\left(\rho g \Delta z\right)^{n}_j+\Delta p^{n}_j -
-   \frac{1}{2}K_j \rho_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
+   \frac{1}{2}K_j \rho_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n_j-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
 The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
 The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred between iterations.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
