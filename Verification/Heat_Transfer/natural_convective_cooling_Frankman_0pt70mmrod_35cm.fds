@@ -1,0 +1,232 @@
+&HEAD CHID='natural_convective_cooling_Frankman_0pt70mmrod_35cm', TITLE='Simulation of Frankman et al. experiment. Free convection only'
+
+&TIME T_END=15,WALL_INCREMENT=1. /
+&MISC TMPA=25 / 
+
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.25,-0.15,0,0.48 /
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.15,-0.05,0,0.48 /
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.05, 0.05,0,0.48 /
+&MESH IJK=48,10,48, XB=-0.48,0.0, 0.05, 0.15,0,0.48 /
+&MESH IJK=48,10,48, XB=-0.48,0.0, 0.15, 0.25,0,0.48 /
+
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.25,-0.15,-0.48,0.0 /
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.15,-0.05,-0.48,0.0 /
+&MESH IJK=48,10,48, XB=-0.48,0.0,-0.05, 0.05,-0.48,0.0 /
+&MESH IJK=48,10,48, XB=-0.48,0.0, 0.05, 0.15,-0.48,0.0 /
+&MESH IJK=48,10,48, XB=-0.48,0.0, 0.15, 0.25,-0.48,0.0 /
+
+- Radiant panel (using temp from Cohen & Finney ICFFR paper
+&SURF ID='radiant panel',TMP_FRONT=972,EMISSIVITY=0.242,TMP_BACK=20,RAMP_T='panelramp',COLOR='RED' / Matches Frankman panel emissive power 
+&RAMP ID='panelramp',T=0, F=0 /
+&RAMP ID='panelramp',T=0.5, F=1 /
+
+&REAC ID='WOOD FUEL VAPOR'
+      FUEL='WOOD FUEL VAPOR'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17936. /
+
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+
+Mass Fraction based on Md (moisture on a dry basis): Ystick=1/(1+Md); YH20=Md/(1+Md)
+Excelsior SV=7590 1/m, Diameter = 4/SV=0.5mm
+
+&SURF ID             = 'Ponderosa pine'
+      MATL_ID(1,1:2) = 'DRY VEGETATION','WATER'
+      MATL_MASS_FRACTION(1,1:2) = 0.99,0.01
+      THICKNESS      = 0.00035
+      LENGTH         = 0.01
+      GEOMETRY       = 'CYLINDRICAL' /
+
+Need to invoke natural convection only heat transfer model, e.g. HEAT_TRANSFER_MODEL = 'MORGAN'
+
+- Units: Density=kg/m^3, Conductivity=W/m/K, Specific Heat = kJ/(kg K)
+
+&MATL ID = 'WATER'
+      VEGETATION = .TRUE.
+      DENSITY = 997.
+      CONDUCTIVITY_RAMP = 'k_water'
+      SPECIFIC_HEAT_RAMP= 'c_water'
+      N_REACTIONS = 1
+      A = 600000.
+      E = 48221.
+      N_T = -0.5
+      SPEC_ID = 'WATER VAPOR'
+      NU_SPEC = 1.0
+      HEAT_OF_REACTION= 2259. /
+
+&RAMP ID='k_water', T= 0.,    F=0.569 /
+&RAMP ID='k_water', T= 26.85, F=0.613 /
+&RAMP ID='k_water', T= 51.85, F=0.645 /
+&RAMP ID='k_water', T= 76.85, F=0.668 /
+&RAMP ID='k_water', T= 100.,  F=0.680 /
+
+&RAMP ID='c_water', T= 0.,    F=4.217 /
+&RAMP ID='c_water', T= 6.85,  F=4.198 /
+&RAMP ID='c_water', T= 16.85, F=4.184 /
+&RAMP ID='c_water', T= 26.85, F=4.179 /
+&RAMP ID='c_water', T= 36.85, F=4.178 /
+&RAMP ID='c_water', T= 46.85, F=4.180 /
+&RAMP ID='c_water', T= 56.85, F=4.184 /
+&RAMP ID='c_water', T= 66.85, F=4.188 /
+&RAMP ID='c_water', T= 76.85, F=4.195 /
+&RAMP ID='c_water', T= 86.85, F=4.203 /
+&RAMP ID='c_water', T= 100.,  F=4.217 /
+      
+&MATL ID = 'DRY VEGETATION'
+      VEGETATION = .TRUE.
+      DENSITY = 460.
+      CONDUCTIVITY = 0.11
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT_RAMP='cp_dry_veg'
+      N_REACTIONS = 1
+      A = 36300.
+      E = 60277.
+      MATL_ID  = 'CHAR' 
+      NU_MATL = 0.20
+      SPEC_ID = 'WOOD FUEL VAPOR'
+      NU_SPEC = 0.80
+      HEAT_OF_REACTION= 418. /
+&RAMP ID='cp_dry_veg', T=    0., F=1.020 /
+&RAMP ID='cp_dry_veg', T= 1300., F=5.830 /
+ 
+&MATL ID = 'CHAR'
+      VEGETATION = .TRUE.
+      DENSITY  = 134.
+      CONDUCTIVITY = 0.052
+      SPECIFIC_HEAT_RAMP = 'cp_char'
+      N_REACTIONS = 1
+      N_S = 0.
+      NU_O2 = 1.65
+      BETA_CHAR = 0.2
+      A = 0.
+      E = 74826.
+      MATL_ID  = 'ASH'
+      NU_MATL = 0.27
+      SPEC_ID = 'CARBON DIOXIDE'
+      NU_SPEC = 0.73
+      HEAT_OF_REACTION= -12000. /
+
+&RAMP ID='cp_char', T=    0., F=1.041 /
+&RAMP ID='cp_char', T=   50., F=1.166 /
+&RAMP ID='cp_char', T=  100., F=1.295 /
+&RAMP ID='cp_char', T=  150., F=1.427 /
+&RAMP ID='cp_char', T=  200., F=1.562 /
+&RAMP ID='cp_char', T=  250., F=1.700 /
+&RAMP ID='cp_char', T=  300., F=1.842 /
+&RAMP ID='cp_char', T=  350., F=1.988 /
+&RAMP ID='cp_char', T=  400., F=2.137 /
+&RAMP ID='cp_char', T=  450., F=2.289 /
+&RAMP ID='cp_char', T=  500., F=2.445 /
+&RAMP ID='cp_char', T=  550., F=2.604 /
+&RAMP ID='cp_char', T=  600., F=2.766 /
+&RAMP ID='cp_char', T=  650., F=2.932 /
+&RAMP ID='cp_char', T=  700., F=3.102 /
+&RAMP ID='cp_char', T=  750., F=3.274 /
+&RAMP ID='cp_char', T=  800., F=3.451 /
+&RAMP ID='cp_char', T=  850., F=3.630 /
+&RAMP ID='cp_char', T=  900., F=3.813 /
+&RAMP ID='cp_char', T=  950., F=4.000 /
+&RAMP ID='cp_char', T= 1000., F=4.190 /
+&RAMP ID='cp_char', T= 1050., F=4.383 /
+&RAMP ID='cp_char', T= 1100., F=4.580 /
+&RAMP ID='cp_char', T= 1150., F=4.780 /
+&RAMP ID='cp_char', T= 1200., F=4.983 /
+&RAMP ID='cp_char', T= 1250., F=5.190 /
+&RAMP ID='cp_char', T= 1300., F=5.401 /
+
+&MATL ID = 'ASH'
+      VEGETATION = .TRUE.
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = 'cp_ash' /
+&RAMP ID='cp_ash', T=    0., F=1.208 /
+&RAMP ID='cp_ash', T=   50., F=1.273 /
+&RAMP ID='cp_ash', T=  100., F=1.332 /
+&RAMP ID='cp_ash', T=  150., F=1.386 /
+&RAMP ID='cp_ash', T=  200., F=1.436 /
+&RAMP ID='cp_ash', T=  250., F=1.482 /
+&RAMP ID='cp_ash', T=  300., F=1.525 /
+&RAMP ID='cp_ash', T=  350., F=1.566 /
+&RAMP ID='cp_ash', T=  400., F=1.605 /
+&RAMP ID='cp_ash', T=  450., F=1.641 /
+&RAMP ID='cp_ash', T=  500., F=1.676 /
+&RAMP ID='cp_ash', T=  550., F=1.710 /
+&RAMP ID='cp_ash', T=  600., F=1.742 /
+&RAMP ID='cp_ash', T=  650., F=1.772 /
+&RAMP ID='cp_ash', T=  700., F=1.802 /
+&RAMP ID='cp_ash', T=  750., F=1.831 /
+&RAMP ID='cp_ash', T=  800., F=1.859 /
+&RAMP ID='cp_ash', T=  850., F=1.886 /
+&RAMP ID='cp_ash', T=  900., F=1.911 /
+&RAMP ID='cp_ash', T=  950., F=1.937 /
+&RAMP ID='cp_ash', T= 1000., F=1.961 /
+&RAMP ID='cp_ash', T= 1050., F=1.985 /
+&RAMP ID='cp_ash', T= 1100., F=2.009 /
+&RAMP ID='cp_ash', T= 1150., F=2.031 /
+&RAMP ID='cp_ash', T= 1200., F=2.054 /
+&RAMP ID='cp_ash', T= 1250., F=2.075 /
+&RAMP ID='cp_ash', T= 1300., F=2.097 /
+
+&PART ID='Ponderosa pine', 
+      DRAG_LAW='CYLINDER',
+      INITIAL_TEMPERATURE=25.,
+      SURF_ID='Ponderosa pine', 
+      PROP_ID='wood image'
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', 
+      STATIC=.TRUE. /
+
+&INIT ID='Ponderosa pine',PART_ID='Ponderosa pine', XB=-0.35,-0.35,0.0,0.0,0.075,0.075, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE. /
+
+&PROP ID='wood image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.00035' /
+
+&DUMP MASS_FILE=.TRUE. /
+
+-Output
+&DUMP DT_DEVC=0.1,DT_PART=0.1,DT_SLCF=0.1 /
+-- wood stick
+&DEVC ID='T_surf',INIT_ID='Ponderosa pine', QUANTITY='WALL TEMPERATURE'/ 
+cDEVC ID='T_seed',INIT_ID='Ponderosa pine',QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.0003 /
+cDEVC ID='q_inc_rad',INIT_ID='Ponderosa pine',QUANTITY='INCIDENT HEAT FLUX' /
+cDEVC ID='Net q', INIT_ID='Ponderosa pine',QUANTITY='NET HEAT FLUX' /
+cDEVC ID='qc', INIT_ID='Ponderosa pine',QUANTITY='CONVECTIVE HEAT FLUX' /
+cDEVC ID='qr', INIT_ID='Ponderosa pine',QUANTITY='RADIATIVE HEAT FLUX',ORIENTATION=1,0,0 /
+cDEVC ID='hc', INIT_ID='Ponderosa pine',QUANTITY='HEAT TRANSFER COEFFICIENT' /
+
+cDEVC XB=-0.24,0.0,-0.05,0.05,0.00,0.48, QUANTITY='DENSITY', ID='fuel_gas_mass', STATISTICS='VOLUME INTEGRAL', TIME_AVERAGED=.FALSE., SPEC_ID='WOOD FUEL VAPOR' /
+cDEVC XB=-0.24,0.0,-0.05,0.05,0.00,0.48, QUANTITY='DENSITY', ID='water_vapor_mass', STATISTICS='VOLUME INTEGRAL', TIME_AVERAGED=.FALSE., SPEC_ID='WATER VAPOR' /
+cDEVC XB=-0.24,0.0,-0.05,0.05,0.00,0.48, QUANTITY='DENSITY', ID='C in CO2', STATISTICS='VOLUME INTEGRAL', TIME_AVERAGED=.FALSE., SPEC_ID='CARBON DIOXIDE', CONVERSION_FACTOR=0.273 /
+cDEVC XB=-0.24,0.0,-0.05,0.05,0.00,0.48, QUANTITY='MPUV', PART_ID='Ponderosa pine', ID='solid_mass', STATISTICS='VOLUME INTEGRAL', TIME_AVERAGED=.FALSE.  /
+
+cCTRL ID='total mass',FUNCTION_TYPE='SUM',INPUT_ID='fuel_gas_mass', 'water_vapor_mass', 'C in CO2', 'solid_mass'/
+cDEVC XB=-0.24,0.0,-0.05,0.05,0.00,0.48, QUANTITY='CONTROL VALUE', ID='total_mass', CTRL_ID='total mass', UNITS='kg'/
+
+cSLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR' /
+cSLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='WOOD FUEL VAPOR' /
+cSLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE' /
+cSLCF PBY=0.0, QUANTITY='HRRPUV' /
+cSLCF PBY=0.0, QUANTITY='VELOCITY',VECTOR=.TRUE. /
+cSLCF PBY=0.0, QUANTITY='RELATIVE HUMIDITY' /
+cSLCF PBY=0.0, QUANTITY='TEMPERATURE' /
+
+cDEVC ID='QR11cm',XYZ=-0.16,0,0.075,ORIENTATION=1,0,0,TIME_AVERAGED=.FALSE.,QUANTITY='RADIATIVE HEAT FLUX GAS' /
+cDEVC ID='QR10cm',XYZ=-0.15,0,0.075,ORIENTATION=1,0,0,TIME_AVERAGED=.FALSE.,QUANTITY='RADIATIVE HEAT FLUX GAS' /
+cDEVC ID='QR09cm',XYZ=-0.14,0,0.075,ORIENTATION=1,0,0,TIME_AVERAGED=.FALSE., QUANTITY='RADIATIVE HEAT FLUX GAS' /
+
+cDEVC ID='velocity',XYZ=-0.15,0.05,0.075,TIME_AVERAGED=.FALSE., QUANTITY='VELOCITY' /
+cDEVC ID='Tg',XYZ=-0.15,0.05,0.075,TIME_AVERAGED=.FALSE., QUANTITY='TEMPERATURE' /
+
+- Boundary conditions
+&SURF ID='wall',VEL_GRAD=0.,FREE_SLIP=.TRUE. /
+&VENT MB=XMIN,SURF_ID='OPEN' /
+&VENT XB=0.0,0.0,-0.12,0.12,0.0,0.15,SURF_ID='radiant panel' /
+&VENT MB=YMIN,SURF_ID='OPEN' /
+&VENT MB=YMAX,SURF_ID='OPEN' /
+&VENT MB=ZMIN,SURF_ID=OPEN /
+&VENT MB=ZMAX,SURF_ID=OPEN /
+
+&TAIL /
