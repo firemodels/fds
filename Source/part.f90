@@ -2375,7 +2375,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,*) 'WARNING Y_EQ < Y_G_N',NM,IP,R_DROP,TMP_DROP,TMP_G,Y_EQUIL,Y_GAS_NEW
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
                         !RETURN
                      ELSE
@@ -2391,7 +2391,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,*) 'WARNING Y_G_N > Y_EQ',NM,IP,R_DROP,TMP_DROP,TMP_G,Y_EQUIL,Y_GAS_NEW
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
                         !RETURN
                      ELSE
@@ -2446,7 +2446,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,*) 'WARNING Delta TMP_G',NM,IP,R_DROP,TMP_DROP,TMP_G,TMP_DROP_NEW,TMP_G_NEW
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,'Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
                      !RETURN
                   ELSE
@@ -2461,7 +2461,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,*) 'WARNING TMP_G_N < TMP_D_N',NM,IP,R_DROP,TMP_DROP,TMP_G,TMP_DROP_NEW,TMP_G_NEW
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,'Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
                      !RETURN
                   ELSE
