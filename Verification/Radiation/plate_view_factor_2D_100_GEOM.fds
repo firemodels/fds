@@ -1,0 +1,45 @@
+&HEAD CHID='plate_view_factor_2D_100_GEOM', TITLE='View factor from infinite slab' /
+
+The RADIATIVE HEAT FLUX should be 105.34 kW/m2
+
+! MESH J=4, because 2D is not managed by GEOM yet
+&MESH IJK=20,4,10, XB=0,2,-.5,.5,0,1 /
+
+&TIME T_END=.1 DT=0.001 / 
+
+! Added CC_IBM
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0., HUMIDITY=0., CC_IBM=.TRUE. / 
+
+! RADIATION is .FALSE. until it is ready to run
+&RADI RADIATION=.FALSE., NUMBER_RADIATION_ANGLES=100 /
+
+&SURF ID='HOT'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&SURF ID='COLD'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = -273.
+      TAU_T = 0.0 /
+
+! VENTs are replaced by GEOMs touching the ZMAX and ZMIN domain boundaries
+! The XMAX is not replaced to prevent intersection between GEOMs that is not
+! supported yet
+&VENT MB='XMAX', SURF_ID='COLD' /
+ VENT MB='ZMAX', SURF_ID='HOT'  /
+&GEOM ID='Block at ZMAX', SURF_ID='HOT',  IJK=2,2,2, XB=0,2,-.5,.5,1,2  /
+ VENT MB='ZMIN', SURF_ID='COLD' /
+&GEOM ID='Block at ZMIN', SURF_ID='COLD', IJK=2,2,2, XB=0,2,-.5,.5,-1,0 /
+
+&DEVC XYZ=1,0,0, IOR=3, QUANTITY='RADIATIVE HEAT FLUX' /
+
+! Additional outputs
+&SLCF PBY=0, QUANTITY='TEMPERATURE', FACE_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF QUANTITY='TEMPERATURE', SLICETYPE='CUT_CELLS' /
+&SLCF QUANTITY='TEMPERATURE', SLICETYPE='EXIMBND_FACES' /
+
+&TAIL /
