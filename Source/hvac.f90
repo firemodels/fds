@@ -555,9 +555,9 @@ SPEC_ID      = 'null'
 SQUARE       = .FALSE.
 SURF_ID      = 'null'
 TYPE_ID      = 'null'
-TAU_AC       = 1._EB
-TAU_FAN      = 1._EB
-TAU_VF       = 1._EB
+TAU_AC       = TAU_DEFAULT
+TAU_FAN      = TAU_DEFAULT
+TAU_VF       = TAU_DEFAULT
 VENT_ID      = 'null'
 VENT2_ID     = 'null'
 VOLUME_FLOW  = 1.E7_EB
@@ -1514,28 +1514,34 @@ WALL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          SELECT CASE (IOR)
             CASE (1)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(UP(II-1,JJ,KK)+WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                          0.5_EB*(UP(II-1,JJ,KK)+WC%ONE_D%UW)**2 * &
+                                          SIGN(1._EB,UP(II-1,JJ,KK)+WC%ONE_D%UW))* AREA
             CASE(-1)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(UP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                          0.5_EB*(UP(II,JJ,KK)-WC%ONE_D%UW)**2  * &
+                                          SIGN(1._EB,UP(II,JJ,KK)-WC%ONE_D%UW))*AREA
             CASE (2)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(VP(II,JJ-1,KK)+WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                          0.5_EB*(VP(II,JJ-1,KK)+WC%ONE_D%UW)**2 * &
+                                          SIGN(1._EB,VP(II,JJ-1,KK)+WC%ONE_D%UW))*AREA
             CASE(-2)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(VP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                          0.5_EB*(VP(II,JJ,KK)-WC%ONE_D%UW)**2 * &
+                                          SIGN(1._EB,VP(II,JJ,KK)-WC%ONE_D%UW))*AREA
             CASE (3)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(WP(II,JJ,KK-1)+WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                          0.5_EB*(WP(II,JJ,KK-1)+WC%ONE_D%UW)**2 * &
+                                          SIGN(1._EB,WP(II,JJ,KK-1)+WC%ONE_D%UW))*AREA
             CASE (-3)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
-                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK)+ &
-                                          0.5_EB*(WP(II,JJ,KK)-WC%ONE_D%UW)**2)*AREA
+                                          (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                          0.5_EB*(WP(II,JJ,KK)-WC%ONE_D%UW)**2 * &
+                                          SIGN(1._EB,WP(II,JJ,KK)-WC%ONE_D%UW))*AREA
          END SELECT
       ENDIF
    ELSE ZONE_LEAK_IF
