@@ -11,6 +11,7 @@ if [ ! -e .verification_script_dir ]; then
 fi
 
 QUEUE=batch
+QUEUEBENCH=batch
 DEBUG=
 SINGLE=
 nthreads=1
