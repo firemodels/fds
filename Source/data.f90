@@ -2569,6 +2569,16 @@ SELECT CASE (SPEC_ID_USE)
       CP = CP * 8314.472_EB / 18.01528_EB !J/kg/K
       H = -13975841.0717241_EB !J/kg
       G_F = -2.29410E-10_EB*TE**3 + 2.74187E-06_EB*TE**2 + 4.89267E-02_EB*TE - 2.43003E+02_EB !kJ/mol
+   CASE('XENON') !H2O (NASA/TP-2002-211556)
+      TE = MIN(6000._EB,MAX(TE,200._EB))
+      IF (TE<1000._EB) THEN
+         CP = 0_EB*TE**(-2)+0_EB/TE+2.5_EB+0_EB*TE+0_EB*TE**2+0_EB*TE**3+0_EB*TE**4
+      ELSE
+         CP = 4025.22668_EB*TE**(-2)-12.09507521_EB/TE+2.514153347_EB-0.00000824810208_EB*TE+0.000000002530232618_EB*TE**2 &
+            -3.89233323E-13_EB*TE**3+2.360439138E-17_EB*TE**4
+      ENDIF
+      CP = CP * 8314.472_EB / 131.293_EB !J/kg/K
+      H = -71027.5860505296_EB !J/kg
 END SELECT
 
 END SUBROUTINE JANAF_TABLE
@@ -3062,6 +3072,17 @@ SELECT CASE (SPEC_ID)
       BETA = 0.000889_EB !1/K
       MU = 0.00089_EB !Ns/m^2
       K = 0.609 !W/m/K
+   CASE('XENON') !JPCRD6
+      CP = 340000._EB !J/kg/K
+      H_L = -260129.3894_EB !J/kg
+      H_V = 160023.7636_EB !J/kg
+      T_REF = 165.01_EB !K
+      T_MELT = 161.40_EB !K
+      T_BOIL = 165.01_EB !K
+      DENSITY = 2879.8_EB !kg/m^3 JPCRD 59
+      BETA = 0.002372042_EB !1/K JPCRD 59
+      MU = 0.0004727_EB !Ns/m^2 JPCRD 59
+      K = 0.07165 !W/m/K JPCRD 59
    CASE DEFAULT
       CP = -1._EB
       H_L = -1._EB
@@ -3397,10 +3418,17 @@ SELECT CASE(GAS_NAME)
       H_F = -241.826_EB
       PR_GAS = 1.0 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
+   CASE('XENON')
+      SIGMA = 4.047_EB 
+      EPSOK = 231.0_EB
+      FORMULA = 'Xe'
+      H_F = 0.0_EB
+      PR_GAS = 0.64_EB
+      IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
    CASE DEFAULT !Uses NITROGEN
       SIGMA = 3.798_EB
       EPSOK = 71.4_EB
-      H_F = 0._EB
+      H_F = 0._EB 
       MW = 28.01340_EB
       PR_GAS = 0.71_EB ! JPCRD 19(5)
       LISTED = .FALSE.
