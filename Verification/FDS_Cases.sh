@@ -198,6 +198,18 @@ $QFDS -d Heat_Transfer ht3d_sphere_51.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt44mmrod_15cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt44mmrod_25cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt44mmrod_35cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt44mmrod_45cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt70mmrod_15cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt70mmrod_25cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt70mmrod_35cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_0pt70mmrod_45cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_1pt29mmrod_15cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_1pt29mmrod_25cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_1pt29mmrod_35cm.fds
+$QFDS -d Heat_Transfer natural_convective_cooling_Frankman_1pt29mmrod_45cm.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds

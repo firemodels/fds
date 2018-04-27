@@ -3533,6 +3533,35 @@ To test the second-order accuracy of the solid phase conduction algorithm, this 
 
 
 
+\section{Natural convective cooling of fine vegetative fuels (\texorpdfstring{\textct{natural\_convective\_cooling}}{natural\_convective\_cooling}) }
+\label{natural_convective_cooling}
+
+Frankman et al. \cite{Frankman:2010} measure the temperature rise at
+various distances of three fine, vegetative fuels subjected to
+radiation heat flux from a planar ceramic burner.  They find close
+agreement of their experimental results with the theory of comparable
+cylindrical shapes thus heated and simultaneously cooled by natural
+convection.
+
+The variance of the FDS results from those observed by Frankman et
+al. evident in Figure~\ref{natural_convective_cooling_plot} is due to the
+selection by FDS of an empirical convective cooling coefficient at
+each time step that is the maximum of the computed forced and natural
+coefficients.  For this case, the value of the natural convective
+coefficient should be selected.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/natural_convective_cooling_Frankman}
+\caption[The \textct{natural\_convective\_cooling} case]{The fuel
+  temperature rise at distances 0.15, 0.25, 0.35 and 0.45 m from a
+  ceramic radiant  panel of three fine vegetative fuels as reported by
+  Frankman et al. and computed by FDS.  The Frankman (green) and FDS
+  (blue) results are displaced horizontally for clarity.}
+\label{natural_convective_cooling_plot}
+\end{figure}
+
+
+
 \section{Simple Thermocouple Model (\texorpdfstring{\textct{thermocouples}}{thermocouples})}
 \label{thermocouples}
 
