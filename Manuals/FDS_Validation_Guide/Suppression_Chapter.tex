@@ -6,17 +6,16 @@ This chapter looks at validation exercises where the aim is to predict the extin
 
 \section{Cup Burner Experiments}
 \label{Minimum Extinguishing Concentration}
-The Cup Burner is an apparatus used to determine the minimum extinguishing concentration (MEC) for combinations of fuels and suppression agents. Sixteen fuels (acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane, hydrogen, methane, methanol, octane, propane, propanol, and toluene) and fifve suppression agents (argon, carbon dioxide, helium, nitrogen, and sulfur hexaflouride) are considered. For the simulations, the MEC is found when the post-ignition HRR remains below $1 \times 10^{-10}$~kW. The critical flame temperatures specified for the fuel reactions are shown in Table~\ref{Cup_Table}. The suppression agent concentration is measured at the outer edge of the cup burner tube at a level slightly below the cup rim. Results are shown in Fig.~\ref{cup_burner_extinguish_vol}.
+The Cup Burner is an apparatus used to determine the minimum extinguishing concentration (MEC) for combinations of fuels and suppression agents. Sixteen fuels (acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane, hydrogen, methane, methanol, octane, propane, propanol, and toluene) and fifve suppression agents (argon, carbon dioxide, helium, nitrogen, and sulfur hexaflouride) are considered. For the simulations, the MEC is found when the post-ignition HRR remains below $1 \times 10^{-10}$~kW. The critical flame temperatures specified for the fuel reactions are shown in Table~\ref{Cup_Table}. The extinguishing agent concentration is measured at the outer edge of the cup burner tube at a level slightly below the cup rim. Results are shown in Fig.~\ref{cup_burner_extinguish_vol} where color indicates the fuel and shape indicates the extinguishing agent.
 
 \newpage
 
-\begin{figure}[t]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Minimum_Extinguishing_Concentration}
-\end{tabular}
-\end{center}
-\caption[Results of Cup Burner experiments]{Comparison of measured and predicted minimum extinguishing volume fractions for the cup burner tests.}
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Minimum_Extinguishing_Concentration} &
+\raisebox{0.5\height}{\includegraphics[height=2in]{FIGURES/Cup_Burner/Cup_Legend}}
+\end{tabular*}
+\caption[Results of Cup Burner experiments]{Comparison of measured and predicted minimum extinguishing volume fractions for the cup burner tests. Fuel type is indicated by color, and extinguishing agent is indicated by shape.}
 \label{cup_burner_extinguish_vol}
 \end{figure}
 
