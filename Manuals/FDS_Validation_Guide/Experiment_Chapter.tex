@@ -81,7 +81,7 @@ No.    & Gas           & (kW)     & (cm)             & Dist. (cm)     &  No.    
 947    & Methanol      & 11.0     & 22.6             & 0              &  870    & Propylene     & 19.0     & 19.5             & -2              \\ \hline
 951    & Methanol      & 9.8      & 22.6             & 0              &  882    & Propylene     & 19.1     & 19.5             & -10             \\ \hline
 160    & Toluene       & 11.5     & 22.6             & -6             &  886    & Propylene     & 19.1     & 19.5             & -5              \\ \hline
-162    & Toluene       & 11.5     & 22.6             & -1             &  910    & Propylene     & 31.4     & 19.5             & -11             \\ \hline 
+162    & Toluene       & 11.5     & 22.6             & -1             &  910    & Propylene     & 31.4     & 19.5             & -11             \\ \hline
 165    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
 166    & Toluene       & 11.5     & 22.6             & 5              &  \multicolumn{5}{c|}{}                                                  \\ \cline{1-5}
 170    & Toluene       & 11.5     & 22.6             & 4              &  \multicolumn{5}{c|}{}                                                  \\ \hline
@@ -90,7 +90,7 @@ No.    & Gas           & (kW)     & (cm)             & Dist. (cm)     &  No.    
 
 \subsubsection{Modeling Notes}
 
-Simulations of the Beyler Hood experiments are performed at 3~cm resolution within a fairly simple facsimile of the actual hood. The boundary conditions are set to adiabatic to allow for a relatively quick ramp up to steady-state conditions. 
+Simulations of the Beyler Hood experiments are performed at 3~cm resolution within a fairly simple facsimile of the actual hood. The boundary conditions are set to adiabatic to allow for a relatively quick ramp up to steady-state conditions.
 
 The two-step simple chemistry combustion scheme is applied, where an infinitely fast reaction converts the fuel to CO, soot, and water vapor, followed sequentially by a second fast reaction that converts the soot and CO to CO$_2$. Some of the soot and CO does not convert to CO$_2$, based on post-flame yields listed by Tewarson~\cite{SFPE:Tewarson}.
 
@@ -538,47 +538,49 @@ Lechene et al.~\cite{Lechene} measured the attenuation of thermal radiation pass
 \section{LLNL Enclosure Experiments}
 \label{LLNL_Enclosure_Description}
 
-Sixty-four tests were conducted by Lawrence Livermore National Laboratory (LLNL) in 1986 to study the effects of ventilation on enclosure fires~\cite{Foote:LLNL1986}. The test enclosure was 6~m long, 4~m wide, and 4.5~m high (Fig.~\ref{LLNL_Enclosure_Drawing}). It contained a methane rock burner which was placed in the center of the space. For most of the tests the burner was placed on the floor. The fires varied in size from 50~kW to 400~kW. The burner was 0.57~m in diameter and 0.23~m height. The door was closed and sealed for most tests, and air was pulled through the space at rates varying from 100~g/s to 500~g/s. In some tests the enclosure included a plenum space, where make-up air could be injected from above or below. The test matrix is listed in Table~\ref{LLNL_Matrix}.
+Sixty-four compartment experiments were conducted at Lawrence Livermore National Laboratory (LLNL) in 1986 to study the effects of ventilation on enclosure fires~\cite{Foote:LLNL1986}. These experiments are the basis of the Foote, Pagni, Alvares compartment temperature correlation~\cite{Foote:IAFSS1}. 
+
+The test enclosure was 6~m long, 4~m wide, and 4.5~m high (Fig.~\ref{LLNL_Enclosure_Drawing}) with a methane rock burner in the center of the space positioned at various elevations. For most of the experiments the burner was placed on the floor. The fires varied in size, $\dot{Q}$, from 50~kW to 400~kW. The burner was 0.57~m in diameter and 0.23~m height. A single door was closed and sealed for most experiments, and air was pulled through the compartment at rates, $\dot{m}$, varying from 100~g/s to 500~g/s. In some tests the enclosure included a plenum space, where make-up air could be injected from above or below. The test matrix is listed in Table~\ref{LLNL_Matrix}.
 
 \begin{table}[p]
 \caption[Summary of LLNL Enclosure Experiments]{Summary of LLNL Enclosure Experiments.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c||c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c||c|c|c|c|c|c|c|}
 \hline
-Test & Room    & $h_0$ &  $\dot{Q}$ & $\dot{m}$ & $T_\infty$  &   Test & Room    & $h_0$ &  $\dot{Q}$ & $\dot{m}$ & $T_\infty$  \\
-No.  & Config. & m     &  kW        & g/s       & $^\circ$C   &   No.  & Config. & m     &  kW        & g/s       & $^\circ$C   \\ \hline \hline
-1    & TL      & 0     & 200        & 0         & 23          &   33   & PH      & 0     & 100        & 200       & 23          \\ \hline
-2    & TL      & 0     & 200        & 0         & 27          &   34   & PH      & 0     & 100        & 300       & 34          \\ \hline
-3    & TL      & 0     & 400        & 0         & 27          &   35   & PH      & 0     & 100        & 400       & 22          \\ \hline
-4    & TL      & 0     & 300        & 0         & 24          &   36   & PH      & 0     & 100        & 500       & 29          \\ \hline
-5    & TL      & 0     & 50         & 0         & 28          &   37   & PH      & 0     & 200        & 100       & 20          \\ \hline
-6    & TL      & 0     & 100        & 0         & 29          &   38   & PH      & 0     & 200        & 300       & 29          \\ \hline
-7    & TL      & 0     & 100        & 0         & 35          &   39   & PH      & 0     & 250        & 100       & 18          \\ \hline
-8    & TL      & 0     & 200        & 0         & 35          &   40   & PH      & 0     & 200        & 400       & 28          \\ \hline
-9    & TL      & 0     & 200        & 500       & 33          &   41   & PH      & 0     & 150        & 100       & 20          \\ \hline
-10   & TL      & 0     & 200        & 100       & 28          &   42   & PHE     & 2     & 200        & 180       & 30          \\ \hline
-11   & TL      & 0     & 200        & 200       & 18          &   43   & PHE     & 2     & 200        & 0         & 32          \\ \hline
-12   & TL      & 0     & 200        & 300       & 21          &   44   & PHE     & 1     & 200        & 180       & 19          \\ \hline
-13   & TL      & 0     & 200        & 400       & 28          &   45   & PHE     & 1     & 200        & 0         & 30          \\ \hline
-14   & TL      & 0     & 200        & 400       & 28          &   46   & PHE     & 0.6   & 200        & 180       & 19          \\ \hline
-15   & TL      & 0     & 100        & 300       & 24          &   47   & PHE     & 0.6   & 200        & 0         & 19          \\ \hline
-16   & TL      & 0     & 200        & 300       & 21          &   48   & PHE     & 0.3   & 200        & 0         & 21          \\ \hline
-17   & PL      & 0     & 200        & 500       & 26          &   49   & PHE     & 0.3   & 200        & 180       & 26          \\ \hline
-18   & PL      & 0     & 200        & 400       & 21          &   50   & PHE     & 1     & 200        & 180       & 21          \\ \hline
-19   & PL      & 0     & 200        & 300       & 18          &   51   & PNE     & 1     & 200        & NAT       & 33          \\ \hline
-20   & PL      & 0     & 200        & 200       & 16          &   52   & PN      & 0     & 200        & NAT       & 23          \\ \hline
-21   & PL      & 0     & 200        & 100       & 23          &   53   & PHGS    & 0     & 200        & 185       & 33          \\ \hline
-22   & PH      & 0     & 200        & 190       & 30          &   54   & PHGS    & 0     & 200        & 215       & 21          \\ \hline
-23   & PH      & 0     & 200        & 215       & 28          &   55   & PN      & 0     & 100        & NAT       & 31          \\ \hline
-24   & PH      & 0     & 200        & 205       & 26          &   56   & PHGW    & 0     & 200        & 190       & 20          \\ \hline
-25   & PH      & 0     & 200        & 205       & 25          &   57   & PHGW    & 0     & 200        & 215       & 29          \\ \hline
-26   & PH      & 0     & 200        & 500       & 24          &   58   & PHX     & 0     & 200        & 190       & 18          \\ \hline
-27   & PH      & 0     & 200        & 100       & 23          &   59   & PHXE    & 1     & 200        & 190       & 24          \\ \hline
-28   & PH      & 0     & 150        & 150       & 31          &   60   & PN      & 0     & 400        & NAT       & 22          \\ \hline
-29   & PH      & 0     & 250        & 250       & 28          &   61   & TN      & 0     & 200        & NAT       & 31          \\ \hline
-30   & PH      & 0     & 250        & 300       & 34          &   62   & TN      & 0     & 400        & NAT       & 22          \\ \hline
-31   & PH      & 0     & 250        & 500       & 36          &   63   & TN      & 0     & 50         & NAT       & 28          \\ \hline
-32   & PH      & 0     & 100        & 100       & 33          &   64   & TN      & 0     & 100        & NAT       & 17          \\ \hline
+Test & Room    & $h_0$ &  $\dot{Q}$ & $\dot{m}$ & $T_\infty$ & $t_{\rm end}$  &   Test & Room    & $h_0$ &  $\dot{Q}$ & $\dot{m}$ & $T_\infty$ & $t_{\rm end}$  \\
+No.  & Config. & m     &  kW        & g/s       & $^\circ$C  & s              &   No.  & Config. & m     &  kW        & g/s       & $^\circ$C  & s           \\ \hline \hline
+1    & TL      & 0     & 200        & 0         & 23         & 560            &   33   & PH      & 0     & 100        & 200       & 23         & 5100        \\ \hline
+2    & TL      & 0     & 200        & 0         & 27         & 545            &   34   & PH      & 0     & 100        & 300       & 34         & 4280        \\ \hline
+3    & TL      & 0     & 400        & 0         & 27         & 300            &   35   & PH      & 0     & 100        & 400       & 22         & 4110        \\ \hline
+4    & TL      & 0     & 300        & 0         & 24         & 385            &   36   & PH      & 0     & 100        & 500       & 29         & 4060        \\ \hline
+5    & TL      & 0     & 50         & 0         & 28         & 2770           &   37   & PH      & 0     & 200        & 100       & 20         & 520         \\ \hline
+6    & TL      & 0     & 100        & 0         & 29         & 1295           &   38   & PH      & 0     & 200        & 300       & 29         & 4100        \\ \hline
+7    & TL      & 0     & 100        & 0         & 35         & 1240           &   39   & PH      & 0     & 250        & 100       & 18         & 430         \\ \hline
+8    & TL      & 0     & 200        & 0         & 35         & 555            &   40   & PH      & 0     & 200        & 400       & 28         & 4290        \\ \hline
+9    & TL      & 0     & 200        & 500       & 33         & 4220           &   41   & PH      & 0     & 150        & 100       & 20         & 970         \\ \hline
+10   & TL      & 0     & 200        & 100       & 28         & 6050           &   42   & PHE     & 2     & 200        & 180       & 30         & 5120        \\ \hline
+11   & TL      & 0     & 200        & 200       & 18         & 4780           &   43   & PHE     & 2     & 200        & 0         & 32         & 570         \\ \hline
+12   & TL      & 0     & 200        & 300       & 21         & 5440           &   44   & PHE     & 1     & 200        & 180       & 19         & 2670        \\ \hline
+13   & TL      & 0     & 200        & 400       & 28         & 5150           &   45   & PHE     & 1     & 200        & 0         & 30         & 810         \\ \hline
+14   & TL      & 0     & 200        & 400       & 28         & 5090           &   46   & PHE     & 0.6   & 200        & 180       & 19         & 960         \\ \hline
+15   & TL      & 0     & 100        & 300       & 24         & 4070           &   47   & PHE     & 0.6   & 200        & 0         & 19         & 730         \\ \hline
+16   & TL      & 0     & 200        & 300       & 21         & 6560+          &   48   & PHE     & 0.3   & 200        & 0         & 21         & 520         \\ \hline
+17   & PL      & 0     & 200        & 500       & 26         & 3980           &   49   & PHE     & 0.3   & 200        & 180       & 26         & 970         \\ \hline
+18   & PL      & 0     & 200        & 400       & 21         & 4840           &   50   & PHE     & 1     & 200        & 180       & 21         & 4730        \\ \hline
+19   & PL      & 0     & 200        & 300       & 18         & 5110           &   51   & PNE     & 1     & 200        & NAT       & 33         & 3360        \\ \hline
+20   & PL      & 0     & 200        & 200       & 16         & 6570           &   52   & PN      & 0     & 200        & NAT       & 23         & 4680        \\ \hline
+21   & PL      & 0     & 200        & 100       & 23         & 6570           &   53   & PHGS    & 0     & 200        & 185       & 33         & 1540        \\ \hline
+22   & PH      & 0     & 200        & 190       & 30         & 950            &   54   & PHGS    & 0     & 200        & 215       & 21         & 4180        \\ \hline
+23   & PH      & 0     & 200        & 215       & 28         & 4260           &   55   & PN      & 0     & 100        & NAT       & 31         & 4120        \\ \hline
+24   & PH      & 0     & 200        & 205       & 26         & 1480           &   56   & PHGW    & 0     & 200        & 190       & 20         & 1240        \\ \hline
+25   & PH      & 0     & 200        & 205       & 25         & 2050           &   57   & PHGW    & 0     & 200        & 215       & 29         & 5390        \\ \hline
+26   & PH      & 0     & 200        & 500       & 24         & 4100           &   58   & PHX     & 0     & 200        & 190       & 18         & 4090        \\ \hline
+27   & PH      & 0     & 200        & 100       & 23         & 540            &   59   & PHXE    & 1     & 200        & 190       & 24         & 4090        \\ \hline
+28   & PH      & 0     & 150        & 150       & 31         & 1870           &   60   & PN      & 0     & 400        & NAT       & 22         & 2680        \\ \hline
+29   & PH      & 0     & 250        & 250       & 28         & 1520           &   61   & TN      & 0     & 200        & NAT       & 31         & 2730        \\ \hline
+30   & PH      & 0     & 250        & 300       & 34         & 4080           &   62   & TN      & 0     & 400        & NAT       & 22         & 2660        \\ \hline
+31   & PH      & 0     & 250        & 500       & 36         & 4160           &   63   & TN      & 0     & 50         & NAT       & 28         & 3240        \\ \hline
+32   & PH      & 0     & 100        & 100       & 33         & 4110           &   64   & TN      & 0     & 100        & NAT       & 17         & 3570        \\ \hline
 \end{tabular}
 \end{center}
 \begin{tabbing}
@@ -596,6 +598,16 @@ No.  & Config. & m     &  kW        & g/s       & $^\circ$C   &   No.  & Config.
 \caption[Geometry of the LLNL Enclosure Experiments]{Geometry of the LLNL Enclosure Experiments.}
 \label{LLNL_Enclosure_Drawing}
 \end{figure}
+
+\subsubsection{Modeling Notes}
+
+The LLNL Enclosure is modeled using a single mesh spanning the interior of the test compartment. The heat release rate of the methane burner and the thermal properties of the walls, ceiling and floor are specified based on information provided in the test report.
+
+The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct during the experiment. This mass flow rate is specified explicitly in the model. The make-up air into the compartment is supplied by an inlet duct and compartment leakage, both of which are modeled. The inlet duct is modeled as a 7~m long, 30~cm diameter circular duct with a loss coefficient of 25.6. The leakage area is then calculated based on the reported compartment under or over-pressures, $\Delta p$, during the experiment. The leak area is computed based on the following formulae:
+\be
+   \frac{\dot{m}}{\rho} = A_{\rm L} \, \sqrt{\frac{2 \, |\Delta p|}{\rho}}  \quad ; \quad A_{\rm L} = A_{\rm L,ref} \left( \frac{|\Delta p|}{|\Delta p_{\rm ref}|} \right)^{n-0.5}
+\ee
+The reference leakage area, $A_{\rm L,ref}$, is estimated to be 0.0033~m$^2$, $n=0.6311$, $\Delta p_{\rm ref}=50$~Pa.
 
 
 \section{LNG Dispersion Experiments}
