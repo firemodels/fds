@@ -232,7 +232,7 @@ for j=2:length(Q);
     
     % Write out the measured and predicted value for this quantity
     if n_lines > 0 && strcmp(Stats_Output, 'Validation')
-       fid = fopen([Scatterplot_Dir,Scatter_Plot_Title,'_Points.csv'],'w');
+       fid = fopen([Manuals_Dir,Plot_Filename,'_Points.csv'],'w');
        fprintf(fid,'%s\n','Row,Measured Value,Predicted Value');
        for nn=1:n_lines
           fprintf(fid,'%s\n',file_line(nn));
