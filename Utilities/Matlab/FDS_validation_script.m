@@ -54,7 +54,7 @@ Scatterplot_Inputs_File = 'FDS_validation_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Validation';
-Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'];
+Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'];
 
 % Run dataplot and scatplot scripts
 
