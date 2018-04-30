@@ -54,9 +54,7 @@ Scatterplot_Inputs_File = 'FDS_validation_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Validation';
-Output_File = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_validation_scatterplot_output.csv';
-Statistics_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
-Histogram_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
+Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'];
 
 % Run dataplot and scatplot scripts
 
@@ -65,9 +63,7 @@ scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
          'Stats_Output', Stats_Output, ...
-         'Output_File', Output_File, ...
-         'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'Histogram_Tex_Output', Histogram_Tex_Output)
+         'Scatterplot_Dir', Scatterplot_Dir)
 
 % Miscellaneous other scripts for special cases
 
