@@ -2447,6 +2447,15 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line.
 
+\subsubsection{Specified Convective Heat Transfer Coefficient}
+
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
+
 \subsubsection{Logarithmic Law of the Wall}
 
 Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
@@ -2457,16 +2466,13 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
-\subsubsection{Specified Convective Heat Transfer Coefficient}
+\subsubsection{Free Convection, Horizontal Cylinder}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
-
-
-\subsubsection{Specifying the Heat Flux at a Solid Surface}
-
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
-
+For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
+\be
+   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
+\ee
+where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
