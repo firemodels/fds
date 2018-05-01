@@ -1,4 +1,4 @@
-&HEAD CHID='compression_wave_FL5_32', TITLE='FLUX_LIMITER='MP5', MP5' /
+&HEAD CHID='compression_wave_FL5_32', TITLE='MP5' /
 
 &MESH IJK=32,1,32, XB=0.0,6.28318530718,-0.5,0.5,0.0,6.28318530718/
 
