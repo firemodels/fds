@@ -1228,7 +1228,7 @@ You can set the ambient temperature and pressure using the following parameters:
 \section{Simulation Mode}
 \label{Sim_Mode}
 
-There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'VVLES'} (Very Very Large Eddy Simulation). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
 \begin{lstlisting}
 &MISC ..., SIMULATION_MODE='DNS' /
 \end{lstlisting}
@@ -1242,7 +1242,7 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \label{tbl:SIMULATION_MODE}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'VVLES'}  \\ \hline \hline
+Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
 {\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
 {\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
@@ -1411,7 +1411,7 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=3} (VVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
