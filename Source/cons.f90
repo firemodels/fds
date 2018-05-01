@@ -7,7 +7,7 @@ IMPLICIT NONE
 
 ! Indices for various modes of operation
 
-INTEGER, PARAMETER :: DNS_MODE=1,LES_MODE=2,VLES_MODE=3,VVLES_MODE=4                        ! Overall simulation type
+INTEGER, PARAMETER :: DNS_MODE=1,LES_MODE=2,VLES_MODE=3,SVLES_MODE=4                        ! Overall simulation type
 INTEGER, PARAMETER :: GAS_SPECIES=2,AEROSOL_SPECIES=3                                       ! For SPECIES%MODE
 INTEGER, PARAMETER :: EXPLICIT_EULER=1,RK2=2,RK3=3,RK2_RICHARDSON=4                         ! For COMBUSTION_ODE
 INTEGER, PARAMETER :: EXTINCTION_1=1,EXTINCTION_2=2,EXTINCTION_3=3                          ! For EXTINCT_MOD
