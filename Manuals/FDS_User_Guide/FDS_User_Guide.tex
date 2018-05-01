@@ -1244,10 +1244,11 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \hline
 Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'VVLES'}  \\ \hline \hline
 {\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
-{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 0           & 1            & 1             & 3              \\ \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
+{\ct PROJECTION}                       & \ref{pressure_solver}          & T           & T            & F             & F              \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1398,7 +1399,7 @@ places a restriction on the time step due to the advection velocity.  The limits
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (LES and VLES default, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (VLES default, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
@@ -1406,7 +1407,7 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} (LES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
