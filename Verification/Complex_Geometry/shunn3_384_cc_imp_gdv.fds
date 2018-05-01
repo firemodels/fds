@@ -1,4 +1,4 @@
-&HEAD CHID='shunn3_384_cc_imp_gdv', TITLE='Shunn et al. (2012) JCP, Problem 3, Implicit integration of cut-cell region, FLUX_LIMITER='GODUNOV', GODUNOV' /
+&HEAD CHID='shunn3_384_cc_imp_gdv', TITLE='Shunn et al. (2012) JCP, Problem 3, Implicit integration of cut-cell region, GODUNOV' /
 
 &MESH IJK=384,1,384, XB=-1,1,-0.05,0.05,-1,1/
 
