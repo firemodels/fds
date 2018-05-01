@@ -5094,7 +5094,12 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       LPC%FTPR = FOTH*PI*LPC%DENSITY
    ENDIF
 
-   IF (SF%HEAT_TRANSFER_MODEL>0) THEN ; CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART') ; RETURN ; ENDIF
+   ! Exclude some convective heat transfer models from being applied to a particle
+
+   IF (SF%HEAT_TRANSFER_MODEL==H_LOGLAW .OR. SF%HEAT_TRANSFER_MODEL==H_ABL) THEN
+      CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART')
+      RETURN
+   ENDIF
 
    ! Set the flag to do particle exchanges between meshes
 
@@ -6444,6 +6449,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
          SF%HEAT_TRANSFER_MODEL = H_RAYLEIGH
       CASE('YUAN')
          SF%HEAT_TRANSFER_MODEL = H_YUAN
+      CASE('FREE HORIZONTAL CYLINDER')
+         SF%HEAT_TRANSFER_MODEL = H_FREE_HORIZONTAL_CYLINDER
    END SELECT
    SF%HRRPUA               = 1000._EB*HRRPUA
    SF%MLRPUA               = MLRPUA
