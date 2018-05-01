@@ -1,4 +1,4 @@
-&HEAD CHID='shunn3_64_cc_exp_gdv', TITLE='Shunn et al. (2012) JCP, Problem 3, Explicit integration of cut-cell region, FLUX_LIMITER=1, GODUNOV' /
+&HEAD CHID='shunn3_64_cc_exp_gdv', TITLE='Shunn et al. (2012) JCP, Problem 3, Explicit integration of cut-cell region, FLUX_LIMITER='GODUNOV', GODUNOV' /
 
 &MESH IJK=64,1,64, XB=-1,1,-0.05,0.05,-1,1/
 
@@ -11,7 +11,7 @@
       NOISE=.FALSE.
       DNS=.TRUE.
       CFL_MAX=0.25
-      FLUX_LIMITER=1
+      FLUX_LIMITER='GODUNOV'
       PERIODIC_TEST=7
       P_INF=243738.74668
       CC_IBM=.TRUE. /
