@@ -7,7 +7,7 @@ IMPLICIT NONE
 
 ! Indices for various modes of operation
 
-INTEGER, PARAMETER :: DNS_MODE=1,LES_MODE=2,VLES_MODE=3,VVLES_MODE=4                        ! Overall simulation type
+INTEGER, PARAMETER :: DNS_MODE=1,LES_MODE=2,VLES_MODE=3,SVLES_MODE=4                        ! Overall simulation type
 INTEGER, PARAMETER :: GAS_SPECIES=2,AEROSOL_SPECIES=3                                       ! For SPECIES%MODE
 INTEGER, PARAMETER :: EXPLICIT_EULER=1,RK2=2,RK3=3,RK2_RICHARDSON=4                         ! For COMBUSTION_ODE
 INTEGER, PARAMETER :: EXTINCTION_1=1,EXTINCTION_2=2,EXTINCTION_3=3                          ! For EXTINCT_MOD
@@ -16,7 +16,8 @@ INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1,NET_FLUX_BC=0,SPECIFIED_TEMPERATURE=
                       NO_CONVECTION=2,THERMALLY_THICK=3,INFLOW_OUTFLOW=4,&
                       INTERPOLATED_BC=6,THERMALLY_THICK_HT3D=7,&
                       VEG_BNDRY_FUEL=99                                                     ! Heat transfer BC
-INTEGER, PARAMETER :: H_CUSTOM=-1,H_DEFAULT=0,H_LOGLAW=1,H_ABL=2,H_RAYLEIGH=3,H_YUAN=4      ! Heat transfer coefficient model
+INTEGER, PARAMETER :: H_CUSTOM=-1,H_DEFAULT=0,H_LOGLAW=1,H_ABL=2,H_RAYLEIGH=3,H_YUAN=4,&
+                      H_FREE_HORIZONTAL_CYLINDER=5                                          ! Heat transfer coefficient model
 INTEGER, PARAMETER :: WALL_MODEL_BC=2,FREE_SLIP_BC=3,NO_SLIP_BC=4,INTERPOLATED_VELOCITY_BC=6 ! Velocity BC
 INTEGER, PARAMETER :: EXPOSED=0,VOID=1,INSULATED=2                                          ! Surface backing
 INTEGER, PARAMETER :: SURF_CARTESIAN=0,SURF_CYLINDRICAL=1,SURF_SPHERICAL=2                  ! Surface geometry
