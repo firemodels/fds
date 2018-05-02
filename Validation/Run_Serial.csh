@@ -33,6 +33,7 @@ cd UL_NIST_Vents; ./Run_All.sh -y; cd ..
 cd Ulster_SBI; ./Run_All.sh -y; cd ..
 cd UMD_Polymers; ./Run_All.sh -y; cd ..
 cd USCG_HAI; ./Run_All.sh -y; cd ..
+cd Vegetation; ./Run_All.sh -y; cd ..
 cd Vettori_Flat_Ceiling; ./Run_All.sh -y; cd ..
 cd Vettori_Sloped_Ceiling; ./Run_All.sh -y; cd ..
 cd VTT_Sprays; ./Run_All.sh -y; cd ..

@@ -659,7 +659,7 @@ HEAD_WIDTH   = 1.0_EB
 !LIMITER_LS = 3 !First order upwinding
 !
 !
-LIMITER_LS = FLUX_LIMITER
+LIMITER_LS = I_FLUX_LIMITER
 IF (LIMITER_LS > 3) LIMITER_LS = 1
 
 ! -- Output file
