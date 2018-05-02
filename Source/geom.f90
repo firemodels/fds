@@ -1900,7 +1900,7 @@ MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
 
 ! Set Flux limiter for cut-cell region:
-IF(FLUX_LIMITER==CENTRAL_LIMITER) THEN
+IF(I_FLUX_LIMITER==CENTRAL_LIMITER) THEN
    BRP1 = 1._EB ! If 0., Godunov for advective term; if 1., centered interp.
 ELSE ! For any other flux limiter use Godunov in CC region.
    BRP1 = 0._EB ! If 0., Godunov for advective term; if 1., centered interp.
