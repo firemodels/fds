@@ -6,9 +6,16 @@ In FDS, the pressure is decomposed into a temporally-varying background pressure
 
 \section{FM/FPRF Datacenter Experiments}
 
-Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA) and the ceiling plenum (CP). A comparison of measured and predicted pressures is shown in the table below.
+Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA) and the ceiling plenum (CP). A comparison of measured and predicted pressures for the exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests  is shown in the figure below.
 
-\IfFileExists{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}{\input{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_Pres}
+\end{tabular*}
+\caption{FM/FPRF Datacenter Differential Pressure (Left - low exahust rate, Right - high exhaust rate)}
+\label{FM_FPRF_Datacenter_Pres}
+\end{figure}
 
 \section{NIST/NRC Experiments}
 
