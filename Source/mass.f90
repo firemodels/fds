@@ -74,7 +74,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       DO J=1,JBAR
          DO I=1,IBM1
             ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
-            FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
+            FX(I,J,K,N) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,I_FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
@@ -85,7 +85,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       DO J=1,JBM1
          DO I=1,IBAR
             ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
-            FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+            FY(I,J,K,N) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,I_FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
@@ -96,7 +96,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       DO J=1,JBAR
          DO I=1,IBAR
             ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
-            FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+            FZ(I,J,K,N) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,I_FLUX_LIMITER)
          ENDDO
       ENDDO
    ENDDO
@@ -159,7 +159,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                !                       ^ WALL_INDEX(II+1,+1)
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                   ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
-                  FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)
+                  FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
                !            FX/UU(II-2)     ghost
@@ -167,27 +167,27 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                !              ^ WALL_INDEX(II-1,-1)
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                   ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)
+                  FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                   ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
-                  FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+                  FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                   ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+                  FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                   ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
-                  FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+                  FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                   ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+                  FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
 

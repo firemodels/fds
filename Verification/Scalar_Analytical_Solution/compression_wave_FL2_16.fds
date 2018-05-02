@@ -1,4 +1,4 @@
-&HEAD CHID='compression_wave_FL2_16', TITLE='FLUX_LIMITER=2, Superbee' /
+&HEAD CHID='compression_wave_FL2_16', TITLE='Superbee' /
 
 &MESH IJK=16,1,16, XB=0.0,6.28318530718,-0.5,0.5,0.0,6.28318530718/
 
