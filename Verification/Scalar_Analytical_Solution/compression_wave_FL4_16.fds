@@ -1,4 +1,4 @@
-&HEAD CHID='compression_wave_FL4_16', TITLE='FLUX_LIMITER=4, CHARM' /
+&HEAD CHID='compression_wave_FL4_16', TITLE='CHARM' /
 
 &MESH IJK=16,1,16, XB=0.0,6.28318530718,-0.5,0.5,0.0,6.28318530718/
 
@@ -8,7 +8,7 @@
       NOISE=.FALSE.
       FREEZE_VELOCITY=.TRUE.
       DNS=.TRUE.
-      FLUX_LIMITER=4
+      FLUX_LIMITER='CHARM'
       CFL_MAX=0.25
       PERIODIC_TEST=3
        /

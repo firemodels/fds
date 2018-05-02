@@ -1,4 +1,4 @@
-&HEAD CHID='compression_wave_FL5_64', TITLE='FLUX_LIMITER=5, MP5' /
+&HEAD CHID='compression_wave_FL5_64', TITLE='MP5' /
 
 &MESH IJK=64,1,64, XB=0.0,6.28318530718,-0.5,0.5,0.0,6.28318530718/
 
@@ -8,7 +8,7 @@
       NOISE=.FALSE.
       FREEZE_VELOCITY=.TRUE.
       DNS=.TRUE.
-      FLUX_LIMITER=5
+      FLUX_LIMITER='MP5'
       CFL_MAX=.25
       PERIODIC_TEST=3
        /

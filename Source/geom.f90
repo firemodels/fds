@@ -1903,7 +1903,7 @@ MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
 
 ! Set Flux limiter for cut-cell region:
-IF(FLUX_LIMITER==CENTRAL_LIMITER) THEN
+IF(I_FLUX_LIMITER==CENTRAL_LIMITER) THEN
    BRP1 = 1._EB ! If 0., Godunov for advective term; if 1., centered interp.
 ELSE ! For any other flux limiter use Godunov in CC region.
    BRP1 = 0._EB ! If 0., Godunov for advective term; if 1., centered interp.
@@ -1985,26 +1985,23 @@ IF (COMPUTE_CUTCELLS_ONLY) THEN
    STOP_STATUS = SETUP_ONLY_STOP
    RETURN
 ENDIF
-IF (MYID==0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. MYID==0) THEN
    CALL CPU_TIME(TNOW)
-   WRITE(LU_ERR,'(A)',advance="no") 'Executing GET_CRTCFCC_INTERPOLATION_STENCILS ..'
 ENDIF
 CALL GET_CRTCFCC_INTERPOLATION_STENCILS ! Computes interpolation stencils for face and cell centers.
-IF (MYID==0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. MYID==0) THEN
    CALL CPU_TIME(TDEL)
-   WRITE(LU_ERR,'(A,F8.3,A)') ' done. Time taken : ',TDEL-TNOW,' sec.'
-   WRITE(LU_ERR,'(A)',advance="no") 'Executing SET_CCIBM_MATVEC_DATA ..'
+   WRITE(LU_ERR,'(A,F8.3,A)') 'Executed GET_CRTCFCC_INTERPOLATION_STENCILS. Time taken : ',TDEL-TNOW,' sec.'
 ENDIF
 CALL SET_CCIBM_MATVEC_DATA              ! Defines data for discretization matrix-vectors.
-IF (MYID==0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. MYID==0) THEN
    CALL CPU_TIME(TNOW)
-   WRITE(LU_ERR,'(A,F8.3,A)') ' done. Time taken : ',TNOW-TDEL,' sec.'
-   WRITE(LU_ERR,'(A)',advance="no") 'Executing SET_CFACES_ONE_D_RDN ..'
+   WRITE(LU_ERR,'(A,F8.3,A)') 'Executing SET_CCIBM_MATVEC_DATA. Time taken : ',TNOW-TDEL,' sec.'
 ENDIF
 CALL SET_CFACES_ONE_D_RDN               ! Set inverse DXN for CFACES, uses cell linking information.
-IF (MYID==0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. MYID==0) THEN
    CALL CPU_TIME(TDEL)
-   WRITE(LU_ERR,'(A,F8.3,A)') ' done. Time taken : ',TDEL-TNOW,' sec.'
+   WRITE(LU_ERR,'(A,F8.3,A)') 'Executing SET_CFACES_ONE_D_RDN. Time taken : ',TDEL-TNOW,' sec.'
 ENDIF
 
 
@@ -11608,7 +11605,7 @@ IF (N_MPI_PROCESSES>1) THEN
 ENDIF
 
 
-IF (MYID==0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. (MYID==0)) THEN
    WRITE(LU_ERR,*) ' '
    WRITE(LU_ERR,*) "N Step    =",ICYC," T, DT=",T,DT
    NMV(1)=MINLOC(DIVMNX(LOW_IND ,1:NMESHES),DIM=1)
@@ -17375,20 +17372,22 @@ NUNKZ_LOCAL = sum(NUNKZ_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES, only non
                                         ! that belong to this process.
 NUNKZ_TOTAL = sum(NUNKZ_TOT(1:NMESHES))
 
-IF (MYID==0) THEN
-   WRITE(LU_ERR,*) ' '
-   IF (DO_IMPLICIT_CCREGION) THEN
-      WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced implicitly.'
-      WRITE(LU_ERR,'(A)') ' Using GLMAT as Implicit Scalar transport solver on cut-cell region.'
-   ELSE
-      WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced explicitly.'
+IF (GET_CUTCELLS_VERBOSE) THEN
+   IF (MYID==0) THEN
+      WRITE(LU_ERR,*) ' '
+      IF (DO_IMPLICIT_CCREGION) THEN
+         WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced implicitly.'
+         WRITE(LU_ERR,'(A)') ' Using GLMAT as Implicit Scalar transport solver on cut-cell region.'
+      ELSE
+         WRITE(LU_ERR,'(A)') ' Cut-cell region scalar transport advanced explicitly.'
+      ENDIF
+      WRITE(LU_ERR,'(A)') ' List of Scalar unknown numbers per proc:'
    ENDIF
-   WRITE(LU_ERR,'(A)') ' List of Scalar unknown numbers per proc:'
+   DO IPROC=0,N_MPI_PROCESSES-1
+      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      IF(MYID==IPROC) WRITE(LU_ERR,'(A,I8,A,I8)') ' MYID=',MYID,', NUNKZ_LOCAL=',NUNKZ_LOCAL
+   ENDDO
 ENDIF
-DO IPROC=0,N_MPI_PROCESSES-1
-   CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-   IF(MYID==IPROC) WRITE(LU_ERR,'(A,I8,A,I8)') ' MYID=',MYID,', NUNKZ_LOCAL=',NUNKZ_LOCAL
-ENDDO
 
 ! Allocate NNZ_D_MAT_Z, JD_MAT_Z:
 ALLOCATE( NNZ_D_MAT_Z(1:NUNKZ_LOCAL) )
@@ -19904,9 +19903,7 @@ ALLOCATE(  M_MAT_Z(1:NUNKZ_LOCAL) );  M_MAT_Z = 0._EB
 ALLOCATE( JM_MAT_Z(1:NUNKZ_LOCAL) ); JM_MAT_Z = 0 ! local index of diagonal entry in JD_MAT_Z
 
 ! Mesh Loop:
-MESH_LOOP : DO NM=1,NMESHES
-
-   IF (PROCESS(NM)/=MYID) CYCLE
+MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
 
@@ -19933,8 +19930,8 @@ MESH_LOOP : DO NM=1,NMESHES
    DO K=KLO_CELL,KHI_CELL
       DO J=JLO_CELL,JHI_CELL
          DO I=ILO_CELL,IHI_CELL
-            IF (MESHES(NM)%CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE ! Either explicit region or solid cell.
-            IROW = MESHES(NM)%CCVAR(I,J,K,IBM_UNKZ)
+            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE ! Either explicit region or solid cell.
+            IROW = CCVAR(I,J,K,IBM_UNKZ)
             IROW_LOC = IROW - UNKZ_IND(NM_START)
             M_MAT_Z(IROW_LOC) = M_MAT_Z(IROW_LOC) + DX(I)*DY(J)*DZ(K)
          ENDDO
@@ -19944,8 +19941,8 @@ MESH_LOOP : DO NM=1,NMESHES
       DO K=KLO_CELL,KHI_CELL
          DO J=JLO_CELL,JHI_CELL
             DO I=ILO_CELL,IHI_CELL
-               IF (MESHES(NM)%CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE ! Either explicit region or solid cell.
-               IROW = MESHES(NM)%CCVAR(I,J,K,IBM_UNKZ)
+               IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE ! Either explicit region or solid cell.
+               IROW = CCVAR(I,J,K,IBM_UNKZ)
                IROW_LOC = IROW - UNKZ_IND(NM_START)
                ! Now find diagonal in JD_MAT_Z(1:NNZ_ROW_Z,1:NUNKZ_LOCAL)
                DO JDIAG=1,NNZ_ROW_Z
@@ -19964,16 +19961,24 @@ MESH_LOOP : DO NM=1,NMESHES
 
    ! 2. Now Cut cells:
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      DO ICC2 = 1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-         IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKZ(ICC2)
+      DO ICC2 = 1,CUT_CELL(ICC)%NCELL
+         IROW     = CUT_CELL(ICC)%UNKZ(ICC2)
          IROW_LOC = IROW - UNKZ_IND(NM_START)
-         M_MAT_Z(IROW_LOC) = M_MAT_Z(IROW_LOC) + MESHES(NM)%CUT_CELL(ICC)%VOLUME(ICC2)
+         IF(CUT_CELL(ICC)%USE_CC_VOL(ICC2)) THEN
+            M_MAT_Z(IROW_LOC) = M_MAT_Z(IROW_LOC) + CUT_CELL(ICC)%VOLUME(ICC2)
+         ELSE
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            M_MAT_Z(IROW_LOC) = M_MAT_Z(IROW_LOC) + CCVOL_LINK*DX(I)*DY(J)*DZ(K) ! Set cut-cell volume to threshold
+                                                                                 ! volume for stability.
+         ENDIF
       ENDDO
    ENDDO
    IF (DO_IMPLICIT_CCREGION) THEN
       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         DO ICC2 = 1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-            IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKZ(ICC2)
+         DO ICC2 = 1,CUT_CELL(ICC)%NCELL
+            IROW     = CUT_CELL(ICC)%UNKZ(ICC2)
             IROW_LOC = IROW - UNKZ_IND(NM_START)
             ! Now find diagonal in JD_MAT_Z(1:NNZ_ROW_Z,1:NUNKZ_LOCAL)
             DO JDIAG=1,NNZ_ROW_Z
@@ -20776,8 +20781,8 @@ IF (N_MPI_PROCESSES > 1) THEN
                       MPI_SUM, MPI_COMM_WORLD, IERR)
 ENDIF
 #endif
-IF (MYID==0) WRITE(LU_ERR,"(A,3E12.4)") " GEOM EXIM faces test: Int{dot(ei,n)}dS, i=IAXIS:KAXIS =", &
-                                        IJK_DOT_AREA(IAXIS:KAXIS)
+IF (GET_CUTCELLS_VERBOSE .AND. (MYID==0)) &
+WRITE(LU_ERR,"(A,3E12.4)") " GEOM EXIM faces test: Int{dot(ei,n)}dS, i=IAXIS:KAXIS =",IJK_DOT_AREA(IAXIS:KAXIS)
 
 ! Debug flag test:
 #ifdef DEBUG_MATVEC_DATA
@@ -23036,7 +23041,7 @@ LOGICAL, SAVE :: UNLINKED_1ST_CALL=.TRUE.
 INTEGER :: LINK_ITER, ULINK_COUNT, II, JJ, KK
 CHARACTER(MESSAGE_LENGTH) :: UNLINKED_FILE
 REAL(EB) :: DV, DISTCELL
-
+INTEGER, PARAMETER :: N_LINK_ATTMP = 50
 
 ! Define local number of cut-cell:
 IF (ALLOCATED(NUNKZ_LOC)) DEALLOCATE(NUNKZ_LOC)
@@ -23086,7 +23091,6 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       DO K=KLO,KHI
          DO J=JLO,JHI
             DO I=ILO,IHI
-
                ! If regular cell centroid is outside the test box + DELTA -> drop:
                IF(XC(I) < (VAL_TESTX_LOW-DX(I) +GEOMEPS)) CYCLE; IF(XC(I) > (VAL_TESTX_HIGH+DX(I)-GEOMEPS)) CYCLE
                IF(YC(J) < (VAL_TESTY_LOW-DY(J) +GEOMEPS)) CYCLE; IF(YC(J) > (VAL_TESTY_HIGH+DY(J)-GEOMEPS)) CYCLE
@@ -23103,7 +23107,6 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO K=KLO-1,KHI+1
       DO J=JLO-1,JHI+1
          DO I=ILO-1,IHI+1
-
             ! Drop if cartesian cell is not type IBM_CUTCFE:
             IF (  CCVAR(I,J,K,IBM_CGSC) /= IBM_CUTCFE ) CYCLE
 
@@ -23137,7 +23140,6 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ! Add Scalar unknown:
                   NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
                   CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
-
                ENDDO
 
             CASE DEFAULT
@@ -23156,7 +23158,6 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ! Add Scalar unknown:
                         NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
                         CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
-
                      ENDDO
                   ENDDO
                ENDDO
@@ -23168,7 +23169,336 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MAIN_MESH_LOOP
 
-! Define total number of unknowns and global unknow index start per MESH:
+! Now link small cells to surrounding cells in the mesh:
+! NOTE: This linking scheme assumes there are no small cells trapped against a block boundary, i.e. there is a path
+! within the mesh between them and a large cell.
+! NOTE2: Two remediation methods are used to link small cells trapped acainst a block boundary:
+! 1. Try linking them to the closest cell regular cell with UNKZ > 0.
+! 2. Set for Mass matrix entry the cut-cell volume to ~ a cartesian cell and give a UNKZ > 0 to said cut-cell.
+!    This is done setting MESH(NM)%CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE., which will be used when building the
+!    Mass matrix.
+! NOTE3: This scheme links two unknowns local to the mesh, therefore parallel consistency is not maintained.
+MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   ! Test of use of Cart volume for ccs:
+   ! DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+   !    NCELL = CUT_CELL(ICC)%NCELL
+   !    I = CUT_CELL(ICC)%IJK(IAXIS)
+   !    J = CUT_CELL(ICC)%IJK(JAXIS)
+   !    K = CUT_CELL(ICC)%IJK(KAXIS)
+   !    CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+   !    DO JCC=1,NCELL
+   !       IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+   !       NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+   !       CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
+   !       CUT_CELL(ICC)%USE_CC_VOL(JCC)=.FALSE. ! Just a test to see what happens !!!!!
+   !    ENDDO
+   ! ENDDO
+
+
+   ! Small Cell linking scheme:
+   ! 1. Attempt to link to Regular GASPHASE cells with unknown UNKZ > 0.
+   ! 2. Attempt to link to large or already linked cut-cells.
+   ! 3. If there are unlinked cells after N_LINK_ATTMP:
+   !    3.a 1st Try : Link to closest UNKZ > 0 regular cell in the mesh.
+   !    3.b 2nd Try : Give small cell a local unknown number, set CUT_CELL(ICC)%USE_CC_VOL(JCC)=.FALSE., such that
+   !                  its volume in mass matrix is CCVOL_THRES.
+   ! Set counter to 0:
+   LINK_ITER = 0
+   LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL_LINK.
+
+      QUITLINK_FLG = .TRUE.
+
+      ! First attempt to link to regular GASPHASE cells:
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         NCELL = CUT_CELL(ICC)%NCELL
+         I = CUT_CELL(ICC)%IJK(IAXIS)
+         J = CUT_CELL(ICC)%IJK(JAXIS)
+         K = CUT_CELL(ICC)%IJK(KAXIS)
+         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+         DO JCC=1,NCELL
+            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+            ! Small cells, get IBM_UNKZ from a large cell neighbor:
+            VAL_UNKZ = IBM_UNDEFINED
+            VAL_CVOL = CCVOL_THRES
+            IFC_LOOP3A : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                  X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+                  CRTCELL_FLG = .FALSE.
+                  SELECT CASE(X1AXIS)
+                  ! Using IBM_UNKZ in the following conditionals assures no guard-cells outside of the domain (except
+                  ! case of periodic boundaries) are chosen. Deals with domain BCs.
+                  CASE(IAXIS)
+                     IF(CCVAR(I+ILH,J,K,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I+ILH,J,K,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  CASE(JAXIS)
+                     IF(CCVAR(I,J+ILH,K,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I,J+ILH,K,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  CASE(KAXIS)
+                     IF(CCVAR(I,J,K+ILH,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I,J,K+ILH,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  END SELECT
+                  IF ( CRTCELL_FLG ) EXIT IFC_LOOP3A
+
+               END SELECT
+            ENDDO IFC_LOOP3A
+            CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
+         ENDDO
+      ENDDO
+
+      ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(OCC)%UNKZ(JCC) > 0):
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         NCELL = CUT_CELL(ICC)%NCELL
+         I = CUT_CELL(ICC)%IJK(IAXIS)
+         J = CUT_CELL(ICC)%IJK(JAXIS)
+         K = CUT_CELL(ICC)%IJK(KAXIS)
+         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+         DO JCC=1,NCELL
+            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+
+            ! Small cells, get IBM_UNKZ from a large cell neighbor:
+            VAL_UNKZ = IBM_UNDEFINED
+            VAL_CVOL = -GEOMEPS
+            IFC_LOOP3 : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+               IF((CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
+                  (CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP3
+               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+
+               ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
+               ! at this point unknown numbers on guard-cells/guard-cell ccs:
+               X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  IF( (I+ILH < 1) .OR. (I+ILH > IBAR) ) CYCLE IFC_LOOP3
+               CASE(JAXIS)
+                  IF( (J+ILH < 1) .OR. (J+ILH > JBAR) ) CYCLE IFC_LOOP3
+               CASE(KAXIS)
+                  IF( (K+ILH < 1) .OR. (K+ILH > KBAR) ) CYCLE IFC_LOOP3
+               END SELECT
+
+               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                  !X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS)
+                     IF(CCVAR(I+ILH,J,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
+                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  CASE(JAXIS)
+                     IF(CCVAR(I,J+ILH,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
+                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  CASE(KAXIS)
+                     IF(CCVAR(I,J,K+ILH,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
+                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  END SELECT
+               CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
+
+                  IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                  IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+
+                  ICC2    = CUT_FACE(IFC2)%CELL_LIST(2,LOWHIGH,IFACE2)
+                  JCC2    = CUT_FACE(IFC2)%CELL_LIST(3,LOWHIGH,IFACE2)
+
+                  IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                  IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+
+                  VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                  VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+               END SELECT
+            ENDDO IFC_LOOP3
+
+            ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
+            ! neighbors:
+            IF (VAL_UNKZ <= 0) THEN
+               QUITLINK_FLG = .FALSE.
+            ENDIF
+            CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
+         ENDDO
+      ENDDO
+
+      IF (QUITLINK_FLG) EXIT LINK_LOOP
+
+      LINK_ITER = LINK_ITER + 1
+      IF (LINK_ITER > N_LINK_ATTMP) THEN
+          ! Count how many uninked cells we have in this mesh:
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          ! Write out unlinked cells properties:
+          ! Open file to write unlinked cells:
+          WRITE(UNLINKED_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_unlinked_',MYID,'.log'
+          ! Create file:
+          IF (UNLINKED_1ST_CALL) THEN
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
+             WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MYID
+             CLOSE(LU_UNLNK)
+             UNLINKED_1ST_CALL = .FALSE.
+          ENDIF
+          ! Open file to write unlinked cell information:
+          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+          WRITE(LU_UNLNK,*) ' '
+          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
+
+          ! Dump info:
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+                WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+             ENDDO
+          ENDDO
+          CLOSE(LU_UNLNK)
+
+          ! 1st Try: Link each cell to closest unknown numbered regular cell in the mesh:
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                DISTCELL=1._EB/GEOMEPS
+                ! 3D LOOP over regular cells:
+                DO KK=1,KBAR
+                   DO JJ=1,JBAR
+                      DO II=1,IBAR
+                         IF(CCVAR(II,JJ,KK,IBM_UNKZ) <= 0) CYCLE
+                         DV = SQRT( (X(II)-X(I))**2._EB + (Y(JJ)-Y(J))**2._EB + (Z(KK)-Z(K))**2._EB )
+                         IF ( DV-GEOMEPS > DISTCELL ) CYCLE
+                         DISTCELL=DV
+                         CUT_CELL(ICC)%UNKZ(JCC) = CCVAR(II,JJ,KK,IBM_UNKZ) ! Assign reg cell unknown number
+                      ENDDO
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+
+          ! Recount unlinked cells (i.e. no other viable cells in the mesh).
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          ! Write out remaining unlinked cells properties.
+          ! Open file to write unlinked cell information:
+          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+          WRITE(LU_UNLNK,*) ' '
+          WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
+          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
+          IF(ULINK_COUNT > 0) THEN
+             ! Dump info:
+             ULINK_COUNT = 0
+             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                NCELL = CUT_CELL(ICC)%NCELL
+                I = CUT_CELL(ICC)%IJK(IAXIS)
+                J = CUT_CELL(ICC)%IJK(JAXIS)
+                K = CUT_CELL(ICC)%IJK(KAXIS)
+                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+                DO JCC=1,NCELL
+                   IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                   ULINK_COUNT = ULINK_COUNT + 1
+                   WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                   CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+                ENDDO
+             ENDDO
+          ENDIF
+          CLOSE(LU_UNLNK)
+
+          IF (ULINK_COUNT == 0) EXIT LINK_LOOP
+
+          ! 2nd Try : Loop over cut cells and give the ramining unlinked cells a UNKZ>0,
+          ! plus CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.:
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+                CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
+                CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.
+             ENDDO
+          ENDDO
+
+          ! Recount unlinked cells (i.e. no other viable cells in the mesh).
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          ! Write out final status:
+          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+          WRITE(LU_UNLNK,*) ' '
+          WRITE(LU_UNLNK,*) 'STATUS AFTER SMALL CUT-CELL CUT_CELL(ICC)%USE_CC_VOL(JCC) change to .FALSE.:'
+          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after Vol change approx=',ULINK_COUNT
+          CLOSE(LU_UNLNK)
+
+          EXIT LINK_LOOP
+      ENDIF
+   ENDDO LINK_LOOP
+
+ENDDO MAIN_MESH_LOOP3
+
+! Define total number of unknowns and global unknown index start per MESH:
 IF (ALLOCATED(NUNKZ_TOT)) DEALLOCATE(NUNKZ_TOT)
 ALLOCATE(NUNKZ_TOT(1:NMESHES)); NUNKZ_TOT = 0
 IF (N_MPI_PROCESSES > 1) THEN
@@ -23233,301 +23563,11 @@ MAIN_MESH_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       K = CUT_CELL(ICC)%IJK(KAXIS)
       CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
       DO JCC=1,NCELL
-         IF ( CUT_CELL(ICC)%VOLUME(JCC) < CCVOL_THRES) CYCLE ! Small cell, dealt with later.
          CUT_CELL(ICC)%UNKZ(JCC) = CUT_CELL(ICC)%UNKZ(JCC) + UNKZ_IND(NM)
       ENDDO
    ENDDO
 
 ENDDO MAIN_MESH_LOOP2
-
-! Finally link small cells to surrounding cells:
-! Add initial index UNKX_ind to mesh blocks (regular + cut-cells):
-! NOTE: This linking scheme assumes there are no small cells trapped against a block boundary, i.e. there is a path
-! within the mesh between them and a large cell.
-! NOTE2: This scheme links to unknowns local to the mesh, therefore parallel consistency is not maintained.
-MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-
-   CALL POINT_TO_MESH(NM)
-
-   ! Set counter to 0:
-   LINK_ITER = 0
-   LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL_LINK.
-
-      QUITLINK_FLG = .TRUE.
-
-      ! First attempt to link to regular GASPHASE cells:
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         NCELL = CUT_CELL(ICC)%NCELL
-         I = CUT_CELL(ICC)%IJK(IAXIS)
-         J = CUT_CELL(ICC)%IJK(JAXIS)
-         K = CUT_CELL(ICC)%IJK(KAXIS)
-         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-         DO JCC=1,NCELL
-            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-
-            ! Small cells, get IBM_UNKZ from a large cell neighbor:
-            VAL_UNKZ = IBM_UNDEFINED
-            VAL_CVOL = CCVOL_THRES
-            IFC_LOOP3A : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-
-               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-
-               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
-                  X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
-                  CRTCELL_FLG = .FALSE.
-                  SELECT CASE(X1AXIS)
-                  ! Using IBM_UNKZ in the following conditionals assures no guard-cells outside of the domain (except
-                  ! case of periodic boundaries) are chosen. Deals with domain BCs.
-                  CASE(IAXIS)
-                     IF(CCVAR(I+ILH,J,K,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = CCVAR(I+ILH,J,K,IBM_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  CASE(JAXIS)
-                     IF(CCVAR(I,J+ILH,K,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = CCVAR(I,J+ILH,K,IBM_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  CASE(KAXIS)
-                     IF(CCVAR(I,J,K+ILH,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = CCVAR(I,J,K+ILH,IBM_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  END SELECT
-                  IF ( CRTCELL_FLG ) EXIT IFC_LOOP3A
-
-               END SELECT
-
-            ENDDO IFC_LOOP3A
-
-            CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
-         ENDDO
-      ENDDO
-
-      ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(OCC)%UNKZ(JCC) > 0):
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         NCELL = CUT_CELL(ICC)%NCELL
-         I = CUT_CELL(ICC)%IJK(IAXIS)
-         J = CUT_CELL(ICC)%IJK(JAXIS)
-         K = CUT_CELL(ICC)%IJK(KAXIS)
-         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-         DO JCC=1,NCELL
-            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-
-            ! Small cells, get IBM_UNKZ from a large cell neighbor:
-            VAL_UNKZ = IBM_UNDEFINED
-            VAL_CVOL = -GEOMEPS
-            IFC_LOOP3 : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-
-               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-
-               IF((CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
-                  (CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP3
-
-               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-
-               ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
-               ! at this point unknown numbers on guard-cells/guard-cell ccs:
-               X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
-               SELECT CASE(X1AXIS)
-               CASE(IAXIS)
-                  IF( (I+ILH < 1) .OR. (I+ILH > IBAR) ) CYCLE IFC_LOOP3
-               CASE(JAXIS)
-                  IF( (J+ILH < 1) .OR. (J+ILH > JBAR) ) CYCLE IFC_LOOP3
-               CASE(KAXIS)
-                  IF( (K+ILH < 1) .OR. (K+ILH > KBAR) ) CYCLE IFC_LOOP3
-               END SELECT
-
-               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
-                  !X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
-
-                  SELECT CASE(X1AXIS)
-                  CASE(IAXIS)
-                     IF(CCVAR(I+ILH,J,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
-                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
-                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-                     ENDIF
-                  CASE(JAXIS)
-                     IF(CCVAR(I,J+ILH,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
-                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
-                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-                     ENDIF
-                  CASE(KAXIS)
-                     IF(CCVAR(I,J,K+ILH,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-                        IRC = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-                        ICC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(2,LOWHIGH,1)
-                        JCC2= MESHES(NM)%IBM_RCFACE_VEL(IRC)%CELL_LIST(3,LOWHIGH,1)
-                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-                     ENDIF
-                  END SELECT
-
-               CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-
-                  IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-                  IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-
-                  ICC2    = CUT_FACE(IFC2)%CELL_LIST(2,LOWHIGH,IFACE2)
-                  JCC2    = CUT_FACE(IFC2)%CELL_LIST(3,LOWHIGH,IFACE2)
-
-                  IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-                  IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-
-                  VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-                  VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-
-               END SELECT
-
-            ENDDO IFC_LOOP3
-
-            ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
-            ! neighbors:
-            IF (VAL_UNKZ <= 0) THEN
-               QUITLINK_FLG = .FALSE.
-            ENDIF
-
-            CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
-         ENDDO
-      ENDDO
-
-      IF (QUITLINK_FLG) EXIT LINK_LOOP
-
-      LINK_ITER = LINK_ITER + 1
-      IF (LINK_ITER > 50) THEN
-
-          ! Count how many uninked cells we have in this mesh:
-          ULINK_COUNT = 0
-          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-             NCELL = CUT_CELL(ICC)%NCELL
-             DO JCC=1,NCELL
-                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                ULINK_COUNT = ULINK_COUNT + 1
-             ENDDO
-          ENDDO
-
-          ! Write out unlinked cells properties:
-          ! Open file to write unlinked cells:
-          WRITE(UNLINKED_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_unlinked_',MYID,'.log'
-          ! Create file:
-          IF (UNLINKED_1ST_CALL) THEN
-             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
-             WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MYID
-             CLOSE(LU_UNLNK)
-             UNLINKED_1ST_CALL = .FALSE.
-          ENDIF
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
-
-          ! Dump info:
-          ULINK_COUNT = 0
-          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-             NCELL = CUT_CELL(ICC)%NCELL
-             I = CUT_CELL(ICC)%IJK(IAXIS)
-             J = CUT_CELL(ICC)%IJK(JAXIS)
-             K = CUT_CELL(ICC)%IJK(KAXIS)
-             CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-             DO JCC=1,NCELL
-                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                ULINK_COUNT = ULINK_COUNT + 1
-                WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
-                ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-                CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
-             ENDDO
-          ENDDO
-          CLOSE(LU_UNLNK)
-
-          ! Link each cell to closest unknown numbered regular cell in the mesh:
-          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-             NCELL = CUT_CELL(ICC)%NCELL
-             I = CUT_CELL(ICC)%IJK(IAXIS)
-             J = CUT_CELL(ICC)%IJK(JAXIS)
-             K = CUT_CELL(ICC)%IJK(KAXIS)
-             DO JCC=1,NCELL
-                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                DISTCELL=1._EB/GEOMEPS
-                ! 3D LOOP over regular cells:
-                DO KK=1,KBAR
-                   DO JJ=1,JBAR
-                      DO II=1,IBAR
-                         IF(CCVAR(II,JJ,KK,IBM_UNKZ) <= 0) CYCLE
-                         DV = SQRT( (X(II)-X(I))**2._EB + (Y(JJ)-Y(J))**2._EB + (Z(KK)-Z(K))**2._EB )
-                         IF ( DV-GEOMEPS > DISTCELL ) CYCLE
-                         DISTCELL=DV
-                         CUT_CELL(ICC)%UNKZ(JCC) = CCVAR(II,JJ,KK,IBM_UNKZ) ! Assign reg cell unknown number
-                      ENDDO
-                   ENDDO
-                ENDDO
-             ENDDO
-          ENDDO
-
-          ! Recount unlinked cells (i.e. no other viable cells in the mesh).
-          ULINK_COUNT = 0
-          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-             NCELL = CUT_CELL(ICC)%NCELL
-             DO JCC=1,NCELL
-                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                ULINK_COUNT = ULINK_COUNT + 1
-             ENDDO
-          ENDDO
-
-          ! Write out final unlinked cells properties, make a setup stop because of cell linking error.
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
-
-          IF(ULINK_COUNT > 0) THEN
-             ! Dump info:
-             ULINK_COUNT = 0
-             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-                NCELL = CUT_CELL(ICC)%NCELL
-                I = CUT_CELL(ICC)%IJK(IAXIS)
-                J = CUT_CELL(ICC)%IJK(JAXIS)
-                K = CUT_CELL(ICC)%IJK(KAXIS)
-                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-                DO JCC=1,NCELL
-                   IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                   ULINK_COUNT = ULINK_COUNT + 1
-                   WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
-                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-                   CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
-                ENDDO
-             ENDDO
-          ENDIF
-
-          CLOSE(LU_UNLNK)
-
-          ! EXIT LINK_LOOP
-          EXIT LINK_LOOP
-
-      ENDIF
-
-   ENDDO LINK_LOOP
-
-ENDDO MAIN_MESH_LOOP3
-
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Exchange Guardcell + guard cc information on IBM_UNKZ:
 CALL FILL_UNKZ_GUARDCELLS
@@ -24397,7 +24437,7 @@ IF (N_MPI_PROCESSES > 1) THEN
    CALL MPI_ALLREDUCE(CF_AREA_INB_AUX, CF_AREA_INB, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
 ENDIF
 
-IF (MYID == 0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
 WRITE(LU_ERR,"(/A)") ' Computational Geometry: Sanity tests for cut-cell region'
 WRITE(LU_ERR,"(A,E11.4,A,E11.4,A,E11.4)") &
 ' GEOM Surf  Area=',AREA_GEOM,', InBoundary Cut-faces Area=',CF_AREA_INB, &
@@ -24426,13 +24466,13 @@ CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) / (CC_VOLUME_INB+GP_VOLUME)
 DM_XYZCEN(IAXIS:KAXIS)   = DM_XYZCEN(IAXIS:KAXIS)   / DM_VOLUME
 
 
-IF (MYID == 0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
 WRITE(LU_ERR,"(A,E11.4,A,E11.4,A,E11.4)") &
 ' GEOM Gas Volume=',DM_VOLUME-VOLUME_GEOM,', Cut/Regl Gas cells Volume=',GP_VOLUME+CC_VOLUME_INB, &
 ', Relative Difference=',((DM_VOLUME-VOLUME_GEOM)-(GP_VOLUME+CC_VOLUME_INB))/(DM_VOLUME-VOLUME_GEOM)
 ENDIF
 
-IF (MYID == 0) THEN
+IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
    WRITE(LU_ERR,"(A,3E12.4)") &
    ' GEOM Centroid               =',XYZCEN_GEOM(IAXIS:KAXIS)
    WRITE(LU_ERR,"(A,3E12.4)") &
@@ -31769,7 +31809,7 @@ ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%VOLUME(1:NCELL),   MESHES(NM)%CUT_CELL(ICC)%RH
          MESHES(NM)%CUT_CELL(ICC)%MIX_TIME(1:NCELL), MESHES(NM)%CUT_CELL(ICC)%H(1:NCELL),        &
          MESHES(NM)%CUT_CELL(ICC)%HS(1:NCELL),       MESHES(NM)%CUT_CELL(ICC)%RTRM(1:NCELL),     &
          MESHES(NM)%CUT_CELL(ICC)%R_H_G(1:NCELL),    MESHES(NM)%CUT_CELL(ICC)%RHO_0(1:NCELL),    &
-         MESHES(NM)%CUT_CELL(ICC)%WVEL(1:NCELL))
+         MESHES(NM)%CUT_CELL(ICC)%WVEL(1:NCELL),     MESHES(NM)%CUT_CELL(ICC)%USE_CC_VOL(1:NCELL))
 
 MESHES(NM)%CUT_CELL(ICC)%VOLUME   = 0._EB
 MESHES(NM)%CUT_CELL(ICC)%RHO      = 0._EB
@@ -31790,6 +31830,8 @@ MESHES(NM)%CUT_CELL(ICC)%RTRM     = 0._EB
 MESHES(NM)%CUT_CELL(ICC)%R_H_G    = 0._EB
 MESHES(NM)%CUT_CELL(ICC)%RHO_0    = 0._EB
 MESHES(NM)%CUT_CELL(ICC)%WVEL     = 0._EB
+
+MESHES(NM)%CUT_CELL(ICC)%USE_CC_VOL = .TRUE.
 
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,1:NCELL))
 MESHES(NM)%CUT_CELL(ICC)%XYZCEN = 0._EB
