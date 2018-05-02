@@ -82,7 +82,7 @@ ENDIF
 
 ! Compute viscosity for DNS using primitive species
 
-IF (SIM_MODE==VVLES_MODE) THEN
+IF (SIM_MODE==SVLES_MODE) THEN
 
    MU_DNS = MU_AIR_0
 

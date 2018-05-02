@@ -538,7 +538,7 @@ Lechene et al.~\cite{Lechene} measured the attenuation of thermal radiation pass
 \section{LLNL Enclosure Experiments}
 \label{LLNL_Enclosure_Description}
 
-Sixty-four compartment experiments were conducted at Lawrence Livermore National Laboratory (LLNL) in 1986 to study the effects of ventilation on enclosure fires~\cite{Foote:LLNL1986}. These experiments are the basis of the Foote, Pagni, Alvares compartment temperature correlation~\cite{Foote:IAFSS1}. 
+Sixty-four compartment experiments were conducted at Lawrence Livermore National Laboratory (LLNL) in 1986 to study the effects of ventilation on enclosure fires~\cite{Foote:LLNL1986}. These experiments are the basis of the Foote, Pagni, Alvares compartment temperature correlation~\cite{Foote:IAFSS1}.
 
 The test enclosure was 6~m long, 4~m wide, and 4.5~m high (Fig.~\ref{LLNL_Enclosure_Drawing}) with a methane rock burner in the center of the space positioned at various elevations. For most of the experiments the burner was placed on the floor. The fires varied in size, $\dot{Q}$, from 50~kW to 400~kW. The burner was 0.57~m in diameter and 0.23~m height. A single door was closed and sealed for most experiments, and air was pulled through the compartment at rates, $\dot{m}$, varying from 100~g/s to 500~g/s. In some tests the enclosure included a plenum space, where make-up air could be injected from above or below. The test matrix is listed in Table~\ref{LLNL_Matrix}.
 
@@ -1777,6 +1777,20 @@ The U.S. Navy sponsored a series of 33 tests within two hangars examining fire d
 The Hawaii tests were conducted in a 15~m high hangar measuring 97.8~m in length and 73.8~m in width. Of the 13 tests conducted in the facility 11 were conducted in pans ranging from .09~m$^2$ to 4.9~m$^2$ in area with heat release rates varying from 100~kW to 7.7~MW. The burner was placed in the center of the room on a scale that continuously recorded the pans weight. The facility was equipped with a number of detection devices including thermocouples, electronic smoke and spot heat detectors, projected beam smoke detectors, combination UV/IR optical flame detectors, line-type heat detectors, as well as sprinklers. Measurements were recorded at a large number of locations allowing for a thorough profile of compartment behavior.
 
 It was suspected that fire plume behavior and response of detection devices in a cold building may not have been well replicated by the experiments held in the warm hangar in Hawaii. The Iceland tests were conducted under a 22~m barrel vaulted ceiling in a hangar measuring 45.7~m by 73.8~m. 22 tests in total were conducted. The majority of these tests fires burned JP-5 fuel with the remainder burning JP-8. The jet fuel fires ranged in size from .06~m$^2$ to 20.9~m$^2$ and in heat release rate from 100~kW to approximately 33~MW. The facility was equipped similarly to the Hawaii hangar.
+
+
+
+\section{Vegetation Experiments}
+\label{Vegetation_Description}
+
+This folder includes a variety of bench-scale experiments involving vegetative fuels. 
+
+Experiments were performed by Frankman et al.~\cite{Frankman:CST2010} at Brigham Young University in 2010 in which small wood shavings and pine needles were exposed to various levels of heat flux from a ceramic burner. Small thermocouples recorded the steady state temperatures. The fuel elements were positioned 15~cm, 25~cm, 35~cm, and 45~cm from the 23~cm by 15~cm rectangular ceramic burner with a radiative heat flux of approximately 37~kW/m$^2$. The fuel elements were suspended by a wire with a horizontal orientation. The hydraulic diameters of the small excelsior, large excelsior and Ponderosa pine samples were reported to be 0.44~mm, 1.29~mm, and 0.70~mm, respectively.
+
+\subsubsection{Modeling Notes}
+
+These calculations are performed with a relatively crude grid because typical wildland fire simulations cannot employ fine grids. A free convection correlation for horizontal cylinders is employed for the convective heat transfer coefficient of the fuel samples. Cylindrical Lagrangian particles are used to represent the fuels with diameters equal to the reported hydraulic diameters. The burner is modeled as a hot plate with a radiative heat flux of 37~kW/m$^2$. Nominal values of 0.1~W/m/K, 1~kJ/kg/K, and 450~kg/m$^3$ are assumed for the thermal conductivity, specific heat, and density of the vegetation. The emissivity is assumed to be 1. The results are relatively insensitive to the thermal properties because the final temperatures are largely determined via the balance of radiation heat flux on to and convective heat flux off of the fuel samples. The temperature rise of all samples does not exceed 100~$^\circ$C.
+
 
 
 

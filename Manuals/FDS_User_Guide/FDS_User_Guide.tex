@@ -1228,13 +1228,13 @@ You can set the ambient temperature and pressure using the following parameters:
 \section{Simulation Mode}
 \label{Sim_Mode}
 
-There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'VVLES'} (Very Very Large Eddy Simulation). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
 \begin{lstlisting}
 &MISC ..., SIMULATION_MODE='DNS' /
 \end{lstlisting}
 indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=.TRUE.} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
 
-Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail. 
+Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
 
 \begin{table}[ht]
 \centering
@@ -1242,7 +1242,7 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \label{tbl:SIMULATION_MODE}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'VVLES'}  \\ \hline \hline
+Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
 {\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
 {\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
@@ -1411,11 +1411,11 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=3} (VVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure. 
+The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
 
 Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
@@ -1470,26 +1470,26 @@ Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Th
 \section{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default {\ct SIMULATION\_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
-&MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
+&MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
 \end{lstlisting}
 
 \begin{table}[ht]
 \caption[Flux limiter options]{Flux limiter options.}
 \label{tab:flux_limiters}
 \centering
-\begin{tabular}{|lc|}
+\begin{tabular}{|l|l|}
 \hline
-Scheme                 & {\ct FLUX\_LIMITER} \\
+Scheme                              & {\ct FLUX\_LIMITER} \\
 \hline
-Central differencing   & {\ct 0}  \\
-Godunov                & {\ct 1}  \\
-Superbee (LES default) & {\ct 2}  \\
-MINMOD                 & {\ct 3}  \\
-CHARM (DNS default)    & {\ct 4}  \\
-MP5                    & {\ct 5}  \\ \hline
+Central differencing                & {\ct 'CENTRAL'}  \\
+Godunov                             & {\ct 'GODUNOV'}  \\
+Superbee (VLES, SVLES default)      & {\ct 'SUPERBEE'}  \\
+MINMOD                              & {\ct 'MINMOD'}  \\
+CHARM (DNS, LES default)            & {\ct 'CHARM'}  \\
+MP5                                 & {\ct 'MP5'}  \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1702,11 +1702,11 @@ which leads to a Poisson equation that can be solved efficiently:
 \be
    \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
 \ee
-The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the following expression in discretized form:
+The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
 \be
   \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
 \ee
-drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size.
+drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
 
 If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
@@ -1714,7 +1714,7 @@ If a numerical instability occurs in a simulation involving a tunnel, you might 
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is one-half the grid cell size (with units of m). You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates wild oscillations in pressure.
 \end{enumerate}
-A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in column~8. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in column~13.
+A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
 
 Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
 
@@ -2447,6 +2447,15 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line.
 
+\subsubsection{Specified Convective Heat Transfer Coefficient}
+
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
+
 \subsubsection{Logarithmic Law of the Wall}
 
 Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
@@ -2457,16 +2466,13 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
-\subsubsection{Specified Convective Heat Transfer Coefficient}
+\subsubsection{Free Convection, Horizontal Cylinder}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
-
-
-\subsubsection{Specifying the Heat Flux at a Solid Surface}
-
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
-
+For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
+\be
+   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
+\ee
+where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
