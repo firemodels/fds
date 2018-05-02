@@ -1,4 +1,4 @@
-&HEAD CHID='compression_wave_FL0_128', TITLE='FLUX_LIMITER=0, central differencing' /
+&HEAD CHID='compression_wave_FL0_128', TITLE='central differencing' /
 
 &MESH IJK=128,1,128, XB=0.0,6.28318530718,-0.5,0.5,0.0,6.28318530718/
 
@@ -8,7 +8,7 @@
       NOISE=.FALSE.
       FREEZE_VELOCITY=.TRUE.
       DNS=.TRUE.
-      FLUX_LIMITER=0
+      FLUX_LIMITER='CENTRAL'
       CFL_MAX=.25
       PERIODIC_TEST=3
        /
