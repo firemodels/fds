@@ -17,11 +17,9 @@ case=$1
 infile=$DIR/${case%.*}.fds
 outfile=$DIR/${case%.*}.out
 if [  -e $outfile ]; then
-  if [[ grep -rI 'completed successfully' $outfile` == "" ]]; then
-    # Continue along
-  else
-    error "*** error: the case $infile did not complete"
+  if [[ `grep -rI 'completed successfully' $outfile` == "" ]] && [[  `grep -rI 'Set-up only' $outfile` == "" ]]; then
+    echo "*** error: the case $infile started but did not complete"
   fi
 else
-  error "*** error: the case $infile did not run ($outfile does not exist)"
+  echo "*** error: the case $infile did not run ($outfile does not exist)"
 fi
