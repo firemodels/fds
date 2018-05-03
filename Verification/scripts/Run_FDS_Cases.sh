@@ -38,6 +38,7 @@ INTEL2=
 GEOMCASES=1
 WAIT=
 EXE=
+CHECKCASES=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -110,13 +111,16 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:de:D:ghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:Cde:D:ghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
    BENCHMARK=1
    GEOMCASES=
    REGULAR=
+   ;;
+  C)
+   CHECKCASES="1"
    ;;
   d)
    DEBUG=_db
@@ -232,20 +236,30 @@ if [ "$BENCHMARK" == "1" ]; then
 fi
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+if [ "$CHECKCASES" == "1" ]; then
+  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
+fi
 
 cd $CURDIR
 cd ..
 if [ "$REGULAR" == "1" ]; then
   ./FDS_Cases.sh
-  echo FDS non-benchmark cases submitted
+  if [ "$CHECKCASES" == "" ]; then
+    echo FDS non-benchmark cases submitted
+  fi
 fi
 cd $CURDIR
 cd ..
 if [ "$GEOMCASES" == "1" ]; then
   ./GEOM_Cases.sh
-  echo FDS geometry cases submitted
+  if [ "$CHECKCASES" == "" ]; then
+    echo FDS geometry cases submitted
+  fi
 fi
-if [ "$WAIT" == "1" ]; then
-  wait_cases_end
+
+if [ "$CHECKCASES" == "" ]; then
+  if [ "$WAIT" == "1" ]; then
+    wait_cases_end
+  fi
 fi
 cd $CURDIR
