@@ -23,5 +23,5 @@ if [  -e $outfile ]; then
     error "*** error: the case $infile did not complete"
   fi
 else
-  error "*** error: the output file $outfile does not exist"
+  error "*** error: the case $infile did not run ($outfile does not exist)"
 fi
