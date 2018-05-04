@@ -33,21 +33,20 @@ for k=1:2:length(varargin);
         Scatterplot_Inputs_File = varargin{k+1};
     case {'Stats_Output'}
         Stats_Output = varargin{k+1};
-    case {'Output_File'}
-        Output_File = varargin{k+1};
-    case {'Output_File_Baseline'}
-        Output_File_Baseline = varargin{k+1};
-    case {'Validation_Statistics_Log'}
-        Validation_Statistics_Log = varargin{k+1};
-    case {'Statistics_Tex_Output'}
-        Statistics_Tex_Output = varargin{k+1};
-    case {'Histogram_Tex_Output'}
-        Histogram_Tex_Output = varargin{k+1};
-    case {'NRC_Options'}
-        NRC_Options = varargin{k+1};
-    case {'Append_To_Scatterplot_Title'}
-        Append_To_Scatterplot_Title = varargin{k+1};
+    case {'Scatterplot_Dir'}
+        Scatterplot_Dir = varargin{k+1};
     end
+end
+
+if strcmp(Stats_Output, 'Verification')
+   Statistics_Tex_Output = [Scatterplot_Dir,'verification_statistics.tex'];
+   Output_File = [Scatterplot_Dir,'verification_scatterplot_output.csv'];
+end
+
+if strcmp(Stats_Output, 'Validation')
+   Statistics_Tex_Output = [Scatterplot_Dir,'validation_statistics.tex'];
+   Output_File = [Scatterplot_Dir,'validation_scatterplot_output.csv'];
+   Histogram_Tex_Output = [Scatterplot_Dir,'validation_histograms.tex'];
 end
 
 % Unpack data
@@ -79,12 +78,6 @@ end
 % Read in global plot options
 plot_style
 Font_Interpreter = 'LaTeX';
-
-% Override the plot style options with NRC 1824 plot options
-if NRC_Options == true
-    Font_Name = 'Helvetica';
-    Image_File_Type = '-dpdf';
-end
 
 % Read in scatter plot inputs file
 Q = importdata(Scatterplot_Inputs_File);
@@ -124,6 +117,8 @@ if strcmp(Stats_Output, 'Validation')
     Output_Histograms = {};
 end
 
+file_line = strings(200);
+
 for j=2:length(Q);
 
     define_qrow_variables
@@ -139,6 +134,7 @@ for j=2:length(Q);
     set(gca,'Units','inches')
     set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
+    n_lines = 0;
     k = 0;
     for i=drange
         if i > Size_Save_Quantity(2); break; end
@@ -148,8 +144,12 @@ for j=2:length(Q);
             Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
             Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
 
-            for kk=1:10;
-                for jj=1:10;
+            for kk=1:10
+                for jj=1:10
+                    if abs(Measured_Metric(k,jj,kk))>0 
+                       n_lines = n_lines+1;
+                       file_line(n_lines) = [num2str(i),',',num2str(Measured_Metric(k,jj,kk)),',',num2str(Predicted_Metric(k,jj,kk))];
+                    end
                     if Measured_Metric(k,jj,kk) < Plot_Min; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
                     if Measured_Metric(k,jj,kk) > Plot_Max; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
                 end
@@ -229,6 +229,16 @@ for j=2:length(Q);
             end
         end
     end
+    
+    % Write out the measured and predicted value for this quantity
+    if n_lines > 0 && strcmp(Stats_Output, 'Validation')
+       fid = fopen([Manuals_Dir,Plot_Filename,'_Points.csv'],'w');
+       fprintf(fid,'%s\n','Row,Measured Value,Predicted Value');
+       for nn=1:n_lines
+          fprintf(fid,'%s\n',file_line(nn));
+       end
+       fclose(fid);
+    end
 
     % Perform this code block for FDS validation scatterplot output
     if k > 0 && strcmp(Stats_Output, 'Validation')
@@ -302,6 +312,11 @@ for j=2:length(Q);
         set(gca,'FontSize',Key_Font_Size)
         set(gca,'YTick',get(gca,'XTick'))
 
+        curtick = get(gca, 'XTick');
+        set(gca, 'XTickLabel', cellstr(num2str(curtick(:))));
+        curtick = get(gca, 'YTick');
+        set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
+
         if strcmp(Plot_Type,'linear') | strcmp(Plot_Type,'semilogy')
             Title_Position_X = Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min);
         else
@@ -320,7 +335,7 @@ for j=2:length(Q);
             Title_Position_Y_4 = 10^(log10(Plot_Min)+(Title_Position(2)-0.15)*(log10(Plot_Max)-log10(Plot_Min)));
         end
 
-        text(Title_Position_X,Title_Position_Y_1,[Scatter_Plot_Title, Append_To_Scatterplot_Title],'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+        text(Title_Position_X,Title_Position_Y_1,Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
         if Sigma_E > 0.0
             text(Title_Position_X,Title_Position_Y_2,['Exp. Rel. Std. Dev.: ',num2str(Sigma_E,'%4.2f')],'FontSize',Key_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)

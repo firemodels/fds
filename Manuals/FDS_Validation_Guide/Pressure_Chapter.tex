@@ -6,9 +6,16 @@ In FDS, the pressure is decomposed into a temporally-varying background pressure
 
 \section{FM/FPRF Datacenter Experiments}
 
-Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA) and the ceiling plenum (CP). A comparison of measured and predicted pressures is shown in the table below.
+Measurements made during flow mapping in the FM datacenter mockup included two pairs of differential pressure transmitters. One pair measured the pressure difference between the subfloor (SF) and the cold aisle (CA).  The other pair measured the pressure difference between the hot aisle (HA) and the ceiling plenum (CP). A comparison of measured and predicted pressures for the exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests  is shown in the figure below.
 
-\IfFileExists{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}{\input{SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex}}
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_Pres}
+\end{tabular*}
+\caption{FM/FPRF Datacenter Differential Pressure (Left - low exahust rate, Right - high exhaust rate)}
+\label{FM_FPRF_Datacenter_Pres}
+\end{figure}
 
 \section{NIST/NRC Experiments}
 
@@ -52,78 +59,123 @@ Note that for the closed door tests, there is often a dramatic drop in the predi
 
 \section{LLNL Enclosure Experiments}
 
-The test report of the LLNL Enclosure experiments lists the mass flow rate, $\dot{m}$, through the exhaust duct at different times during the tests. It also lists the compartment pressures, $\Delta p$, at these same times. From the simple leak formula:
-\be
-   \frac{\dot{m}}{\rho_0} = A \, \sqrt{\frac{2 \, \Delta p}{\rho_0}}
-\ee
-the leakage area, $A$, is estimated to be 0.018~m$^2$, based on the initial exhaust rate and pressure. For modeling purposes, the ``leakage area'' is assumed to be the sum of the inlet duct area plus any actual compartment leakage area. The mass flow rate through the exhaust duct is specified explicitly in the model. The test report does not provide enough information about the ventilation system to model the fan and filtration system within the exhaust duct.
+The reported compartment pressure in the LLNL Enclosure experiments was taken near the ceiling of the compartment, 0.6~m from the wall including the exhaust duct, and 0.6~m from the wall opposite the wall with the door.
 
 In the figures on the following pages, the open circles represent the measured pressure; the line represents the predicted pressure. The predicted pressures are time-averaged over a time interval that is one-tenth the total simulation time. In general, the short-duration pressure spike that is typical of fires within relatively tight compartments has been smoothed over in the reported test data. Depending on the simulation, it often appears in the simulation data. The comparison of measurement and prediction is based on the final few pressure points, not the initial spike.
 
-Only some of the 64 experiments are included. In some cases, the fan was turned off and there is not enough information in the test report to determine the pressure losses through the duct. In other cases, there are only two pressure measurements reported; one at the start of the test, the other either before or after extinction. In various other cases, either there is not enough data or the data is inconsistent with the reported conditions. For cases where the door to the compartment was open, the measured gauge pressures at the start of the experiment ranged from 0~Pa to 10~Pa. There is not enough information in the test report to explain why the starting pressures were not 0~Pa; thus, the measured pressures were adjusted so that the starting pressure is 0~Pa.
+The results of all 64 experiments are plotted for completeness, but a few of the results were excluded from the computation of the summary statistics, including Tests 3, 25, 27, 37, 39, and 48. In these experiments, the fire self-extinguished near the time of the last pressure measurement, sometimes leading to a reported final pressure being less than the initial pressure, typical when there is a sudden decrease in the heat release rate. 
+
+For cases where the door to the compartment was open, the measured gauge pressures at the start of the experiment ranged from 0~Pa to 10~Pa. There is not enough information in the test report to explain why the starting pressures were not 0~Pa; thus, the measured pressures were adjusted so that the starting pressure is 0~Pa.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_01_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_02_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_03_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_04_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_05_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_06_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_07_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_08_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 1-8.}
+\label{LLNL_Enclosure_Pres_1}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_Pres}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_10_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_Pres}
 \end{tabular*}
-\caption{LLNL Enclosure experiments, compartment pressure, Tests 9, 11-17.}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 9-16.}
 \label{LLNL_Enclosure_Pres_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_Pres}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_21_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_22_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_24_Pres}
 \end{tabular*}
-\caption{LLNL Enclosure experiments, compartment pressure, Tests 18-20, 23, 26, 29-31.}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 17-24.}
 \label{LLNL_Enclosure_Pres_3}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_Pres}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_25_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_27_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_28_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_Pres}
 \end{tabular*}
-\caption{LLNL Enclosure experiments, compartment pressure, Tests 32-36, 38, 40, 42.}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 25-32.}
 \label{LLNL_Enclosure_Pres_4}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_Pres} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_Pres} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_Pres}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_37_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_39_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_Pres}
 \end{tabular*}
-\caption{LLNL Enclosure experiments, compartment pressure, Tests 44, 50-52, 54-55, 57-58.}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 33-40.}
 \label{LLNL_Enclosure_Pres_5}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_41_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_43_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_45_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_46_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_47_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_48_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 41-48.}
+\label{LLNL_Enclosure_Pres_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_49_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_53_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_Pres} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_56_Pres}
+\end{tabular*}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 49-56.}
+\label{LLNL_Enclosure_Pres_7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_Pres} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_Pres} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_Pres} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_Pres} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_Pres} &
@@ -131,9 +183,10 @@ Only some of the 64 experiments are included. In some cases, the fan was turned 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_Pres} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_Pres}
 \end{tabular*}
-\caption{LLNL Enclosure experiments, compartment pressure, Tests 59-64.}
-\label{LLNL_Enclosure_Pres_6}
+\caption{LLNL Enclosure experiments, compartment pressure, Tests 57-64.}
+\label{LLNL_Enclosure_Pres_8}
 \end{figure}
+
 
 
 \clearpage

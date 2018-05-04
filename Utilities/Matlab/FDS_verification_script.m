@@ -49,13 +49,7 @@ Scatterplot_Inputs_File = 'FDS_verification_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Verification';
-Output_File = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/FDS_verification_scatterplot_output.csv'];
-Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
-
-% Override the plot style options with NRC 1824 plot options
-
-NRC_Options = false;
-Append_To_Scatterplot_Title = '';
+Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/'];
 
 % Run dataplot and scatplot scripts
 
@@ -64,10 +58,7 @@ scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
          'Stats_Output', Stats_Output, ...
-         'Output_File', Output_File, ...
-         'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'NRC_Options', NRC_Options, ...
-         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
+         'Scatterplot_Dir', Scatterplot_Dir)
 
 % Special cases
 

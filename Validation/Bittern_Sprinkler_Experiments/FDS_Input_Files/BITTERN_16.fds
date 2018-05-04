@@ -6,7 +6,7 @@
 
 Ambient temperature
 
-&MISC TMPA=20.6/
+&MISC SIMULATION_MODE='SVLES', TMPA=20.6/
 
 Reaction
 

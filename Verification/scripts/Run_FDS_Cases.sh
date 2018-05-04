@@ -11,6 +11,7 @@ if [ ! -e .verification_script_dir ]; then
 fi
 
 QUEUE=batch
+QUEUEBENCH=batch
 DEBUG=
 SINGLE=
 nthreads=1
@@ -34,7 +35,7 @@ OOPT=
 POPT=
 INTEL=
 INTEL2=
-GEOMCASES=
+GEOMCASES=1
 WAIT=
 EXE=
 
@@ -109,7 +110,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:de:D:ghj:JL:m:o:q:r:RsS:w:W' OPTION
+while getopts 'bB:c:de:D:ghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
@@ -148,12 +149,15 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
+  Q)
+   QUEUEBENCH="$OPTARG"
+   ;;
   r)
    resource_manager="$OPTARG"
    ;;
   R)
    BENCHMARK=
-   GEOMCASES=
+   GEOMCASES=1
    REGULAR=1
    ;;
   s)
@@ -212,6 +216,10 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+if [ "$QUEUEBENCH" != "" ]; then
+   QUEUEBENCH="-q $QUEUEBENCH"
+   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUEBENCH $OOPT $POPT" 
+fi
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
@@ -222,6 +230,8 @@ if [ "$BENCHMARK" == "1" ]; then
   fi
   echo FDS benchmark cases submitted
 fi
+
+export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 
 cd $CURDIR
 cd ..

@@ -103,14 +103,14 @@ This is just a demonstration calculation. All material properties are completely
 &OBST XB= 0.00, 0.80, 2.60, 2.80, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Chair, left wall, left armrest
 &OBST XB= 0.00, 0.20, 2.00, 2.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Chair, left wall, back cushion
 
-&OBST XB= 1.80, 3.80, 0.00, 1.00, 0.00, 0.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Futon on floor?
+&OBST XB= 1.80, 3.80, 0.00, 1.00, 0.00, 0.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Futon on floor
 
 &OBST XB= 2.00, 2.40, 1.60, 2.00, 0.00, 0.40 /
 &OBST XB= 2.00, 2.40, 1.60, 2.00, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Small chair, room center, seat cushion
 &OBST XB= 1.80, 2.00, 1.60, 2.00, 0.00, 0.80, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Small chair, room center, left armrest
 &OBST XB= 2.40, 2.60, 1.60, 2.00, 0.00, 0.80, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Small chair, room center, right armrest
 &OBST XB= 1.80, 2.60, 1.40, 1.60, 0.00, 0.80, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 / Small chair, room center, back cushion
- OBST XB= 4.40, 5.20, 1.00, 2.00, 0.00, 0.80, SURF_ID='SPRUCE' / TV cart?
+ OBST XB= 4.40, 5.20, 1.00, 2.00, 0.00, 0.80, SURF_ID='SPRUCE' / TV cart
 
 &OBST XB= 0.00, 5.20, -0.20, 0.00, 0.00, 2.40 / Front wall
 &HOLE XB= 4.00, 4.90, -0.20, 0.00, 0.00, 2.00 / Door

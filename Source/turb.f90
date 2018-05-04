@@ -1180,7 +1180,7 @@ SLIP_FACTOR = -1._EB
 
 ! Step 2: compute turbulent (LES) stress
 
-LES_IF: IF (LES) THEN
+LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
 
    ! NOTE: 2 iterations converges TAU_W to roughly 5 % residual error
    !       3 iterations converges TAU_W to roughly 1 % residual error
@@ -1320,8 +1320,15 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
       ! Incropera and DeWitt, 3rd, 1990, Eq. 7.44
       NUSSELT = 0.037_EB*RE**0.8_EB*PR_ONTH
    CASE (SURF_CYLINDRICAL)
-      ! Incropera and DeWitt, 3rd, 1990, Eq. 7.55, 40 < Re < 4000
-      NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
+      ! Incropera and DeWitt, 3rd, 1990, Eq. 7.55
+      IF (RE >= 40._EB) THEN
+         NUSSELT = 0.683_EB*RE**0.466_EB*PR_ONTH
+      ELSEIF (RE >= 4._EB) THEN
+         NUSSELT = 0.911_EB*RE**0.385_EB*PR_ONTH
+      ELSE
+         NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH
+      ENDIF
+
    CASE (SURF_SPHERICAL)
       ! Incropera and DeWitt, 3rd, 1990, Eq. 7.59
       NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH
@@ -1577,7 +1584,7 @@ U_NORM = U_NORM_WALL + DN*(DIVU-0.5_EB*DUSDS)
 RDN = 1._EB/DN
 
 ! ODE solution
-IF (DNS) THEN
+IF (SIM_MODE==DNS_MODE) THEN
    ETA = U_NORM + RRHO*MU*RDN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
    BB  = (TWTH*U_STRM_WALL*RDN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))
@@ -1686,7 +1693,7 @@ ENDDO
 U_NORM = DN*(DIVU-0.5_EB*DUSDS)
 RDN = 1._EB/DN
 ! ODE solution
-IF (DNS) THEN
+IF (SIM_MODE==DNS_MODE) THEN
    ETA = U_NORM + RRHO*MU*RDN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA*RDN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN*0.5_EB*RDN ))

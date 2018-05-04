@@ -404,7 +404,7 @@ irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
-wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.o
+wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj scrc.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj

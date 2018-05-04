@@ -1,4 +1,4 @@
-&HEAD CHID='shunn3_384_cc_imp_cen', TITLE='Shunn et al. (2012) JCP, Problem 3, Implicit integration of cut-cell region, FLUX_LIMITER=0, CENTRAL' /
+&HEAD CHID='shunn3_384_cc_imp_cen', TITLE='Shunn et al. (2012) JCP, Problem 3, Implicit integration of cut-cell region, CENTRAL' /
 
 &MESH IJK=384,1,384, XB=-1,1,-0.05,0.05,-1,1/
 
@@ -11,7 +11,7 @@
       NOISE=.FALSE.
       DNS=.TRUE.
       CFL_MAX=0.25
-      FLUX_LIMITER=0
+      FLUX_LIMITER='CENTRAL'
       PERIODIC_TEST=7
       P_INF=243738.74668
       CC_IBM=.TRUE. 

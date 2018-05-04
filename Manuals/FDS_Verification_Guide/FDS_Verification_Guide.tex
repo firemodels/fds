@@ -4366,7 +4366,7 @@ The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integra
       MATL_ID               = 'char'
       NU_SPEC               = 0.51 /
 \end{lstlisting}
-Only the relevant parameters are shown. The other parameters are not relevant in this exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{\alpha,{\rm p}}$ in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,0}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of \si{\degree C}/min. \textct{NU\_MATL} is $\nu_{\rm r}$ and \textct{NU\_SPEC} is ($1-\nu_{\rm r}$). Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little meaning in their own.
+Only the relevant parameters are shown. The other parameters are not relevant in this exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{\alpha,{\rm p}}$ in units of \si{\degreeCelsius}. \textct{REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,0}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of \si{\degree C}/min. \textct{NU\_MATL} is $\nu_{\rm r}$ and \textct{NU\_SPEC} is ($1-\nu_{\rm r}$). Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little meaning in their own.
 
 \begin{table}[!htb]
 \centering
@@ -4385,28 +4385,45 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 \section{Three-Dimensional Pyrolysis (PYRO3D) (Beta)}
 \label{sec:pyro3d}
 
-\subsection{Residual Mass Conversion}
-\label{pyro3d_A_B}
 
-This is a simple test of mass conversion using the PYRO3D routines (see Fig.~\ref{fig:pyro3d_A_B}).  A block of Material A with a density of 100 \si{kg/m^3} is converted to Material B with a lower density of 50 \si{kg/m^3}.  Here we do not account for the gas phase pyrolyzate that would make up the mass difference (in other words, this case is not meant to conserve mass after conversion).  The goal of the test case is to ensure that the output quantities for both individual materials, identified using {\ct MATL\_ID}, and the total solid densities are correct.  This case was also the working example used to integrate the material properties to the 3D solid obstructions via the {\ct SURF} line.  Hence, that machinery is also being exercised within the code.
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_A_B}
-\caption[PYRO3D mass conversion (the {\ct pyro3d\_A\_B} case)]{Simple conversion of mass with 3D solid heat transfer and pyrolysis.}
-\label{fig:pyro3d_A_B}
-\end{figure}
-
-\subsection{Char Formation}
+\subsection{Char Formation (\texorpdfstring{\textct{pyro3d\_wood\_char}}{pyro3d\_wood\_char})}
 \label{pyro3d_wood_char}
 
-This case is a simple mass conservation test for pyrolysis of wood into char and gas.  A small block of wood, 0.08 m on a side, is heated externally at 50 \si{kW/m^2} from the top.  Gas phase combustion is suppressed.  The pyrolysis stoichiometry splits the wood to equal parts by mass of char and gas.  In Fig.~\ref{fig:pyro3d_wood_char}, you can see that the pine wood mass goes to zero, the char ends up with half the original wood mass, and the pyrolyzate gas production is equal to the char production.
+This case is a simple mass conservation test for pyrolysis of wood into char and gas.  A small block of wood, 0.08 m on a side, is heated externally at 50 \si{kW/m^2} on all sides.  Gas phase combustion is suppressed.  The pyrolysis stoichiometry splits the wood to equal parts by mass of char and gas.  In Fig.~\ref{fig:pyro3d_wood_char}, you can see that the pine wood mass goes to zero, the char ends up with half the original wood mass, and the pyrolyzate gas production is equal to the char production.
 
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_wood_char}
 	\caption[PYRO3D char formation (the {\ct pyro3d\_wood\_char} case)]{Conversion of wood to char and pyrolyzate gas with 3D solid heat transfer and pyrolysis.}
 	\label{fig:pyro3d_wood_char}
+\end{figure}
+
+
+\subsection{Burn Away (\texorpdfstring{\textct{box\_burn\_away1\_pyro3d\_vs\_pyro1d}}{box\_burn\_away1\_pyro3d\_vs\_pyro1d})}
+\label{box_burn_away1_pyro3d_vs_pyro1d}
+
+This case is a replicate of the {\ct box\_burn\_away1} case used as verification of the 1D pyrolysis solver (PYRO1D).  A foam block 0.4 m on a side (0.064 \si{m^3}) with a bulk density of 20 \si{kg/m^3} (total mass of 1.28 kg) is heated from a wall kept at 1000 \si{\degreeCelsius}.  The gas phase (and hence 3D solid phase) grid resolution is relatively coarse, $\delta x = 0.1 \;\si{m}$.  However, the cell spacing for the 1D solver is internally computed to be approximately $3 \times 10^{-3} \;\si{m}$.  The 1D solver thus resolves the temperature gradient near the surface on the inside of the solid.  The 3D solver uses an internal wall model to enhance the heat flux into the solid cell.  Given the difference in bulk grid resolution, it is not surprising to find differences in the rate of pyrolysis.  The verification target here is simply the total mass of 1.28 kg.  It is worth noting that the 3D solver is reasonably time accurate at 100 times coarser resolution.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/box_burn_away1_pyro3d_vs_pyro1d}
+	\caption[PYRO3D vs.~PYRO1D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
+	\label{fig:box_burn_away1_pyro3d_vs_pyro1d}
+\end{figure}
+
+\subsection{Mass Loss Rate and Thickness (\texorpdfstring{\textct{pyro3d\_vs\_pyro1d}}{pyro3d\_vs\_pyro1d})}
+\label{pyro3d_vs_pyro1d}
+
+This case compares mass loss rates and material thickness for pyrolysis of black PMMA between the 1D pyrolysis solver without burn away and the 3D solver with burn away.  The 3D solver is effectively solving a 1D problem, so the results should be very similar.  In-depth radiation absorption is not considered.  The problem is set up with insulating sides for each column of material.  The material is heated from the top with an external flux of 50 \si{kW/m^2}.  The material thickness is 0.01 m.  The grid resolution of the 3D solver is set to be equivalent to the node spacing for the 1D solver, $\delta z = 2.8571 \times 10^{-4} \;\si{m}$.  The key difference between the solvers is that in the 1D solver the top face of the {\ct OBST} does not move, instead the material {\ct THICKNESS} changes and shrinks from the bottom up.  Conversely, in the 3D solver, cells burn away as their mass goes to zero.  If the material mass of a given cell goes below a threshold, the mass is shifted to a neighboring cell before the cell is burned away.  The final cell burns down to a numerical threshold mass before that mass is finally clipped for numerical reasons.  We still track the local solid volume within a cell, and this ratio times the cell size gives a measure of the material thickness for the 3D solver. Fig.~\ref{fig:pyro3d_vs_pyro1d} shows mass loss rate per unit area (left) and the material thickness (right) for the 1D and 3D solutions.  Note that in the 3D solution the ``thickness'' is taken as the integral of the volume ratio $V_{\rm solid}/V_{\rm cell}$ over the height of the column.
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_mlr} &
+       \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_thickness}
+    \end{tabular*}
+	\caption[PYRO3D vs.~PYRO1D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
+	\label{fig:pyro3d_vs_pyro1d}
 \end{figure}
 
 \chapter{Lagrangian Particles}

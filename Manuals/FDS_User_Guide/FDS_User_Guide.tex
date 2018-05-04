@@ -499,7 +499,7 @@ To confirm the speedup for the OpenMP version of the code, a series of test case
 \caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
-Details of how to run the simulation are included below for the different operating systems are as follows:
+Details of how to run the simulation are included below for the different operating systems.
 
 \subsubsection{MS Windows}
 
@@ -955,53 +955,25 @@ the solution of the discretized equations.
 \subsection{Basics}
 \label{info:TIME_Basics}
 
-Usually, only the
-duration of the simulation is required on this line, via the
-parameter {\ct T\_END}. The default is 1 s.
-For example, the following line will instruct FDS to run the simulation for 5400 seconds.
+Usually, only the duration of the simulation is required on this line, via the parameter {\ct T\_END}. The default is 1~s. For example, the following line will instruct FDS to run the simulation for 5400~s.
 \begin{lstlisting}
 &TIME T_END=5400. /
 \end{lstlisting}
-If {\ct T\_END} is set to zero, only the set-up work is performed,
-allowing you to quickly check the geometry in Smokeview.
+If {\ct T\_END} is set to zero, only the set-up work is performed, allowing you to quickly check the geometry in Smokeview.
 
-If you want the time line to start at a number other than zero, you can use the parameter
-{\ct T\_BEGIN} to specify the time written to file for the first time step.
-This would be useful for matching time lines of experimental data or video recordings.
+If you want the time line to start at a number other than zero, you can use the parameter {\ct T\_BEGIN} to specify the time written to file for the first time step. This would be useful for matching time lines of experimental data or video recordings.
 
-Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
-{\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
-setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately
-linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
-For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP},
-{\ct T\_BEGIN} should be set slightly less than 10~s.
+Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as {\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, {\ct T\_BEGIN} should be set slightly less than 10~s.
 
 
 \subsection{Special Topic: Controlling the Time Step}
 \label{info:TIME_Control}
 
-The initial time step size can be specified with
-{\ct DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
-characteristic velocity of the flow.
-During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
-satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
-$\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh
-cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity. Note that by default the
-time step is never allowed to increase above its initial value. To allow this to happen, set
-{\ct RESTRICT\_TIME\_STEP=.FALSE.}
+The initial time step size can be specified with {\ct DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the characteristic velocity of the flow. During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where $\dx$, $\dy$, and $\dz$ are the dimensions of the smallest mesh cell, $H$ is the height of the computational domain, and $g$ is the acceleration of gravity. Note that by default the time step is never allowed to increase above its initial value. To allow this to happen, set {\ct RESTRICT\_TIME\_STEP=.FALSE.}
 
-If something sudden is to happen right at the start of a simulation,
-like a sprinkler activation, it is a good idea to set the initial time step
-to avoid a numerical instability caused by too large a time step.
-Experiment with different values of {\ct DT} by monitoring the initial time step sizes
-recorded in the output file {\ct job\_name.out}.
+If something sudden is to happen right at the start of a simulation, like a sprinkler activation, it is a good idea to set the initial time step to avoid a numerical instability caused by too large a time step. Experiment with different values of {\ct DT} by monitoring the initial time step sizes recorded in the output file {\ct job\_name.out}.
 
-Finally, if you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.}
-on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted.
-This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
-numerical instabilities if the initial time step is set too high.
-
+At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
 
 \subsection{Special Topic: Steady-State Applications}
@@ -1217,30 +1189,13 @@ Do not specify either linear transformation points or {\ct IDERIV=0} points at c
 \subsection{Mesh Resolution}
 \label{info:Mesh_Resolution}
 
-A common question asked by new FDS users is, ``What should my grid spacing be?''
-The answer is not easy because it depends considerably on what you are trying
-to accomplish. In general, you should build an FDS input file using a relatively
-coarse mesh, and then gradually refine the mesh until you do not see
-appreciable differences in your results. This is referred to as a mesh sensitivity study.
+A common question asked by new FDS users is, ``What should my grid spacing be?'' The answer is not easy because it depends considerably on what you are trying to accomplish. In general, you should build an FDS input file using a relatively coarse mesh, and then gradually refine the mesh until you do not see appreciable differences in your results. This is referred to as a mesh sensitivity study.
 
-For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
-non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
-fire diameter
+For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic fire diameter
 \be D^* = \left(
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
      \right)^\frac{2}{5}  \ee
-and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
-fire diameter is related to the characteristic fire size via the
-relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
-fire.}. The quantity, $\dQ$, is the total heat release rate of the fire. If it changes over time, you should consider the
-corresponding change in resolution. The quantity $D^*/\dx$ can be thought of as the number of computational cells
-spanning the characteristic (not necessarily the physical) diameter of the fire.
-The more cells spanning the fire, the better the resolution of the
-calculation. It is better to assess the quality of the mesh in terms
-of this non-dimensional parameter, rather than an absolute mesh cell size.
-For example, a cell size of 10~cm may be ``adequate,'' in some sense,
-for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source.
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity, $\dQ$, is the total heat release rate of the fire. If it changes over time, you should consider the corresponding change in resolution. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source.
 
 The FDS Validation Guide~\cite{FDS_Validation_Guide} contains a table of the values of $D^*/\dx$ used in the simulation of the validation experiments. The table is near the end of the chapter that describes all the experiments. These values range over two orders of magnitude and were chosen based on a grid resolution study and the particular attributes of the given fire scenario. It would be inappropriate to take any of these values as an ``acceptable'' minimum.
 
@@ -1249,37 +1204,56 @@ There are a number of special output quantities that provide local measures of g
 
 
 
-\section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
+
+
+\chapter{Global Simulation Parameters}
 \label{info:MISC}
 
-{\ct MISC} is the namelist group of global miscellaneous input parameters. It contains parameters that do not logically fit into any other category.
-
-\subsection{Basics}
-\label{info:MISC_Basics}
-
-Only one {\ct MISC} line should be entered in the data file. For example, the input line
+{\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). They are typically global in extent, like the ambient temperature. Only one {\ct MISC} line should be entered in the data file. For example, the input line
 \begin{lstlisting}
 &MISC TMPA=25. /
 \end{lstlisting}
-sets the ambient temperature at 25 $^\circ$C. The {\ct MISC} parameters vary in scope and degree of importance. Here is a partial list of {\ct MISC}ellaneous parameters. Others are described where necessary throughout this guide.
+sets the ambient temperature at 25~$^\circ$C. The following sections describe the various miscellaneous parameters.
+
+\section{Ambient Conditions}
+\label{info:MISC_Basics}
+
+You can set the ambient temperature and pressure using the following parameters:
 \begin{description}
-\item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
-as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
-on the order of a millimeter or less in size, or for diagnostic purposes.
-\item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
-\item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
-development of a perfectly symmetric flow when the boundary
-and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
-\item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \end{description}
 
 
+\section{Simulation Mode}
+\label{Sim_Mode}
+
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+\begin{lstlisting}
+&MISC ..., SIMULATION_MODE='DNS' /
+\end{lstlisting}
+indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=.TRUE.} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
+
+Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
+
+\begin{table}[ht]
+\centering
+\caption{Parameters effected by {\ct SIMULATION\_MODE}.}
+\label{tbl:SIMULATION_MODE}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
+{\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
+{\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
+{\ct PROJECTION}                       & \ref{pressure_solver}          & T           & T            & F             & F              \\ \hline
+\end{tabular}
+\end{table}
 
 
-
-\subsection{Special Topic: Stopping and Restarting Calculations}
+\section{Stopping and Restarting Calculations}
 \label{info:restart}
 
 An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
@@ -1290,45 +1264,13 @@ It is also possible to use the new control function feature (see Section~\ref{in
 Between job stops and restarts, major changes cannot be made in the calculation like adding or removing vents and obstructions. The changes are limited to those parameters that do not instantly alter the existing flow field. Since the restart capability has been used infrequently by the developers, it should be considered a fragile construct. Examine the output to ensure that no sudden or unexpected events occur during the stop and restart.
 
 
-\subsection{Special Topic: Initializing a 3D Velocity Field}
-\label{info:velo_restart}
-\label{info:CSVF}
-
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
-\begin{lstlisting}
-&DUMP UVW_TIMER(1)=600 /
-\end{lstlisting}
-FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
-\begin{lstlisting}
-  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
-  DO K=KMIN,KMAX
-   DO J=JMIN,JMAX
-    DO I=IMIN,IMAX
-     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
-    ENDDO
-   ENDDO
-  ENDDO
-\end{lstlisting}
-You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
-\begin{lstlisting}
-&CSVF UVWFILE='my_velocity_field.csv' /
-\end{lstlisting}
-If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
-\begin{lstlisting}
-&CSVF UVWFILE='CHID_t001_m001.csv' /
-&CSVF UVWFILE='CHID_t001_m002.csv' /
-&MISC PROJECTION=.TRUE. /
-\end{lstlisting}
-It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
-\subsection{Special Topic: Turning off the Flow Field}
-\label{info:freeze_velocity}
-
-For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
 
 
-\subsection{Special Topic: Defying Gravity}
+
+
+\section{Gravity}
 \label{info:GVEC}
 
 By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
@@ -1353,7 +1295,7 @@ lines with a {\ct T}.
 
 
 
-\subsection{Special Topic: The Baroclinic Vorticity}
+\section{Special Topic: The Baroclinic Vorticity}
 \label{baroclinic_torque}
 
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
@@ -1397,7 +1339,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 \label{helium_plume}
 \end{figure}
 
-\subsection{Special Topic: Large Eddy Simulation Parameters}
+\section{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
 By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent viscosity,
@@ -1440,53 +1382,42 @@ An alternative to the damping function is to use the WALE model of Nicoud and Du
 
 
 
-\subsection{Special Topic: Numerical Stability Parameters}
-\label{info:CFL}
+\section{Special Topic: Numerical Stability Parameters}
+\label{info:Stability_Constraints}
 
 FDS uses an explicit time advancement scheme; thus, the time step plays an important role in maintaining numerical stability and accuracy. Below we examine the constraints on the time step necessary for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields. In addition, there are additional constraints that ensure accuracy of various algorithms.
 
-\subsubsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+\subsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
+\label{info:CFL}
 
 The well-known CFL constraint given by
 \begin{equation}
-\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} < 1
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\Delta} < 1
 \end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\delta x$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} (default 0.8) and {\ct CFL\_MAX} (default 1) on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell width, $\Delta$, within one time step, $\delta t$. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other. In other words, in order to resolve an eddy of size $\Delta$, the time step needs to obey the CFL constraint. If one were to employ an implicit scheme for the purpose of taking time steps ten times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly ten times the grid spacing, which would severely limit the benefit of using LES.  In most cases, if you want the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm.
-Three choices for velocity norm are available in FDS (set on {\ct MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (LES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (VLES default, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
 {\ct CFL\_VELOCITY\_NORM=1} (DNS default, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
+    \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} (LES default, $L_2$ norm of velocity vector)
     \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 }
+    \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
+{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \end{equation}
+The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
 
-\subsubsection{The Von Neumann Constraint}
-
-The Von Neumann constraint is given by
-\begin{equation}
-\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
-\end{equation}
-The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
-
-We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
-\begin{equation}
-u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
-\end{equation}
-Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
-
-\subsubsection{Realizable Mass Density Constraint}
-
-In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
 \label{eqn_dtmassrestrict}
 \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
@@ -1497,13 +1428,27 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1}
-as the basis for the time step restriction. To be clear, the CFL constraint is now given by
-\begin{equation}
-\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
-\end{equation}
+Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint.
 
-\subsubsection{Stability of particle transport}
+
+\subsection{The Von Neumann Constraint}
+\label{info:VN}
+
+The Von Neumann constraint is given by
+\begin{equation}
+\mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
+\end{equation}
+The limits for VN may be adjusted using {\ct VN\_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and {\ct VN\_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on {\ct MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+
+We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
+\begin{equation}
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+\end{equation}
+Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''; otherwise, the neighboring cell values may be shifted in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+
+
+
+\subsection{Stability of particle transport}
 \label{info:PART_Stability}
 
 The movement of Lagrangian particles over the course of a time step is calculated using an analytical solution and remains stable regardless of the time step used by the flow solver. However, if the particle moves over the width of several grid cells in a single time step, the momentum transferred between the particle and the gas cannot be allocated properly to all of the affected cells. To overcome this problem, FDS subdivides the gas phase time step based on each particle's velocity. For example, if the particle travels across two cells in a single gas phase time step, then its trajectory is calculated by subdividing the time step into two.
@@ -1513,52 +1458,76 @@ In some cases with extremely fast particles, however, the stability of the overa
 One additional parameter might be useful in some special cases. The numerical transport scheme for particles is first order accurate in time. If you want to improve the accuracy of the scheme, set \linebreak[4] {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} to {\ct .TRUE.} on the {\ct PART} line. There is an increased computational cost incurred by this option, so check whether or not the extra cost is worth the extra accuracy. For most applications, given the relatively small time step of the gas phase solver, and the subdivision of the particle trajectory calculation to enforce a local particle CFL constraint, the improved accuracy is not worth the additional cost.
 
 
-\subsubsection{Heat Transfer Constraint}
+\subsection{Heat Transfer Constraint}
+\label{info:HT}
 
 Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
-\subsubsection{Adjusting the Time Step}
-
-At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to simulations failing due to numerical instabilities. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
 
-\subsection{Special Topic: Flux Limiters}
+
+\section{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default {\ct SIMULATION\_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
-&MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
+&MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
 \end{lstlisting}
 
 \begin{table}[ht]
 \caption[Flux limiter options]{Flux limiter options.}
 \label{tab:flux_limiters}
 \centering
-\begin{tabular}{|lc|}
+\begin{tabular}{|l|l|}
 \hline
-Scheme                 & {\ct FLUX\_LIMITER} \\
+Scheme                              & {\ct FLUX\_LIMITER} \\
 \hline
-Central differencing   & {\ct 0}  \\
-Godunov                & {\ct 1}  \\
-Superbee (LES default) & {\ct 2}  \\
-MINMOD                 & {\ct 3}  \\
-CHARM (DNS default)    & {\ct 4}  \\
-MP5                    & {\ct 5}  \\ \hline
+Central differencing                & {\ct 'CENTRAL'}  \\
+Godunov                             & {\ct 'GODUNOV'}  \\
+Superbee (VLES, SVLES default)      & {\ct 'SUPERBEE'}  \\
+MINMOD                              & {\ct 'MINMOD'}  \\
+CHARM (DNS, LES default)            & {\ct 'CHARM'}  \\
+MP5                                 & {\ct 'MP5'}  \\ \hline
 \end{tabular}
 \end{table}
 
 
+\section{Background Noise}
+\label{info:NOISE}
 
-\section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
+FDS initializes the flow field with a very small amount of ``noise'' to prevent the development of a perfectly symmetric flow when the boundary and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
+
+
+
+\section{Protecting Old Cases}
+\label{info:OVERWRITE}
+
+When you run a job that has been run previously, FDS will automatically overwrite the old output with new. If you do not want this to happen, set {\ct OVERWRITE=.FALSE.} on the {\ct MISC} line, in which case FDS will check for the existence of previously created output files and stop execution if they exist.
+
+\section{Turning off the Flow Field}
+\label{info:freeze_velocity}
+
+For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
+
+
+
+\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
+\label{info:CLIP}
+
+The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
+
+
+
+\chapter{Initial Conditions}
 \label{info:INIT}
 
-Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}.
+Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-Note that the rectangular regions defined by {\ct INIT} may overlap, but in such cases, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. IF two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
-\subsection*{Species}
+\section{Gas Species}
 
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
@@ -1571,7 +1540,7 @@ Here, within the region whose bounds are given by the sextuplet {\ct XB}, the in
 
 {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
 
-\subsection*{Temperature}
+\section{Temperature}
 
 To modify the local initial temperature, add lines of the form,
 \begin{lstlisting}
@@ -1585,7 +1554,7 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
       TEMPERATURE=60. /
 \end{lstlisting}
 
-\subsection*{Density}
+\section{Density}
 
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
 \begin{lstlisting}
@@ -1596,7 +1565,7 @@ When specifying an initial density it is important to recognize the order in whi
 \end{lstlisting}
 This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
-\subsection*{Heat Release Rate Per Unit Volume (HRRPUV)}
+\section{Heat Release Rate Per Unit Volume (HRRPUV)}
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 \begin{lstlisting}
@@ -1605,11 +1574,47 @@ The {\ct INIT} line may also be used to specify a volumetric heat source term. F
 indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
 
+\section{Velocity Field}
+\label{info:velo_restart}
+\label{info:CSVF}
 
-\section{The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
+\begin{lstlisting}
+&DUMP UVW_TIMER(1)=600 /
+\end{lstlisting}
+FDS will then write {\ct CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
+\begin{lstlisting}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
+    ENDDO
+   ENDDO
+  ENDDO
+\end{lstlisting}
+You may read in the 3-D velocity field using a {\ct CSVF} line.  For example:
+\begin{lstlisting}
+&CSVF UVWFILE='my_velocity_field.csv' /
+\end{lstlisting}
+If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes. For two meshes you might have the following:
+\begin{lstlisting}
+&CSVF UVWFILE='CHID_t001_m001.csv' /
+&CSVF UVWFILE='CHID_t001_m002.csv' /
+&MISC PROJECTION=.TRUE. /
+\end{lstlisting}
+It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
+
+
+
+
+\chapter{Pressure}
 \label{info:PRES}
 
-\subsection{Parameters Related to the Solution of Poisson Equation for Pressure}
+Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
+
+\section{Accuracy of the Pressure Solver}
+\label{pressure_solver}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
 
@@ -1619,11 +1624,11 @@ If either the error in the normal component of the velocity at a mesh interface 
 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
-
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
 
-\subsection*{Optional Pressure Solver}
+\section{Optional Pressure Solver}
+\label{optional_pressure_solver}
 
 The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}. GLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
 
@@ -1648,8 +1653,9 @@ As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the n
 
 
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
+\label{dancing_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1659,7 +1665,7 @@ In this example, air is pushed through a 30~cm long, two-dimensional channel at 
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
 \caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the GLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
-\label{dancing_eddies}
+\label{dancing_eddies_figure}
 \end{figure}
 
 One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the GLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
@@ -1681,7 +1687,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 
 
 
-\subsection{Pressure Considerations in Long Tunnels}
+\section{Pressure Considerations in Long Tunnels}
 \label{tunnel_demo}
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the pressure, $\tp$ (the tilde indicates that this is the {\em perturbation} pressure, or pressure above background). To solve for $\tp$, an elliptic PDE is formed by taking the divergence of the momentum equation, which contains the term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
@@ -1696,11 +1702,11 @@ which leads to a Poisson equation that can be solved efficiently:
 \be
    \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
 \ee
-The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the following expression in discretized form:
+The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
 \be
   \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
 \ee
-drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size.
+drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
 
 If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
@@ -1708,7 +1714,7 @@ If a numerical instability occurs in a simulation involving a tunnel, you might 
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is one-half the grid cell size (with units of m). You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates wild oscillations in pressure.
 \end{enumerate}
-A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in column~8. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in column~13.
+A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
 
 Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
 
@@ -1720,7 +1726,8 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short
 \end{figure}
 
 
-\subsection{Parameters Related to the Background Pressure when Breaking Pressure Zones}
+\section{Parameters Related to the Background Pressure when Breaking Pressure Zones}
+\label{background_pressure}
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
@@ -1731,20 +1738,6 @@ breach. Its default value is 1~s, meaning that equilibrium is achieved in roughl
 
 
 
-
-\section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
-\label{info:CLIP}
-
-The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results,
-there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
-errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not
-possible in all cases to anticipate just how low or high a given value might be. Thus,
-on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. Temperature and density bounds are input under the
-namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
-``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an
-unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
-
-It is possible for the species mass fractions to dip slightly below zero or increase slightly above 1. To force the species mass fractions to remain strictly between 0 and 1, set {\ct CLIP\_MASS\_FRACTION} to {\ct .TRUE.} on the {\ct MISC} line.
 
 
 
@@ -2454,6 +2447,15 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line.
 
+\subsubsection{Specified Convective Heat Transfer Coefficient}
+
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
+
 \subsubsection{Logarithmic Law of the Wall}
 
 Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
@@ -2464,16 +2466,13 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
-\subsubsection{Specified Convective Heat Transfer Coefficient}
+\subsubsection{Free Convection, Horizontal Cylinder}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
-
-
-\subsubsection{Specifying the Heat Flux at a Solid Surface}
-
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
-
+For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
+\be
+   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
+\ee
+where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -2725,9 +2724,6 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \subsection{Solid Heat Transfer 3D (Beta)}
 \label{info:ht3d}
 
-{\bf NOTE: {\ct HT3D} is not currently hooked up to the pyrolysis model.}
-\vskip0.5\baselineskip
-
 The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
 
 The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick. The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces you will need to use {\ct SURF\_IDS} or {\ct SURF\_ID6}.
@@ -2744,7 +2740,7 @@ An {\ct OBST} with {\ct HT3D} may cross {\ct MESH} boundaries.  If the {\ct OBST
 
 {\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements.
 
-  Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
+Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
 \begin{equation}
 \label{eq:vnht3d}
 \delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
@@ -2764,9 +2760,45 @@ You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} l
 &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
 
+\subsection{Solid Pyrolysis 3D (Beta)}
+\label{info:pyro3d}
 
+The pyrolysis models to be described below may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, the user sets {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
+\begin{lstlisting}
+&SURF ID='PMMA SLAB 3D'
+      MATL_ID='BLACKPMMA 3D'
+      EXTERNAL_FLUX=50
+      HT3D=T
+      BURN_AWAY=T /
+\end{lstlisting}
+Since the 3D pyrolysis model does not have an internal ``thickness'' that shrinks from the bottom up, it is usually necessary to add {\ct BURN\_AWAY=T}.
 
+Like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  By default, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell.  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  For example,
+\begin{lstlisting}
+&OBST XB=..., HT3D=T, PYRO3D_IOR=3, BULK_DENSITY=1100.,
+      SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
+\end{lstlisting}
 
+\subsubsection*{Useful Outputs}
+
+With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions).  The solid cell temperatures can be viewed using the gas phase output
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+\end{lstlisting}
+
+With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid volume to gas phase cell volume ratio
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', CELL_CENTERED=T / total material density (omit MATL_ID)
+&SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', MATL_ID='CHAR', CELL_CENTERED=T /
+&SLCF PBY=..., QUANTITY='SOLID CELL VOLUME RATIO', CELL_CENTERED=T /
+\end{lstlisting}
+
+To output the volumetric heat source term [\si{kW/m^3}] in the 3D heat transfer equation use
+\begin{lstlisting}
+&SLCF PBY=..., QUANTITY='SOLID CELL Q_S', CELL_CENTERED=T /
+\end{lstlisting}
+
+All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
 \section{Simple Pyrolysis Models}
 
@@ -2797,10 +2829,6 @@ in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and dow
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line.  Neither of them can be used if the model contains multiple reactions.
-
-
-
-
 
 
 
@@ -4753,6 +4781,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          &                            \\ \hline
 {\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &  {\ct TOLUENE}             \\ \hline
 {\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y       &  {\ct WATER VAPOR}         \\ \hline
+{\ct XENON}           & 131.293  & Xe               & 4.047   & 231.0    &  Y       &                            \\ \hline
 \end{longtable}
 
 
@@ -5077,12 +5106,14 @@ If the reaction is under defined, FDS will return an error at the start of the c
 \label{info:two-step_simple_chemistry}
 \label{propane_flame_2reac}
 
-The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes the CO and Soot to form CO$_2$ in the second step:
+The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
 \begin{eqnarray}
-  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
+  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \; \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
    \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
 \end{eqnarray}
-By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
+
+Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
 
 The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot play an important role in the flame chemistry and radiative emission. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means depends on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar variable referred to as ``Intermediate Products.''
 
@@ -6036,7 +6067,23 @@ By default, particles are not recycled at a periodic boundary. To recycle the pa
 \subsection{Drag}
 \label{info:particle_drag}
 
-For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}.  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke a different drag law, that of a cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+
+\vspace{\baselineskip}
+\begin{table}[ht]
+\begin{center}
+\caption{Drag laws available in FDS}
+\label{tbl:draglaws}
+\begin{tabular}{|c|c|}
+\hline
+{\ct DRAG\_LAW}           & Reference   \\ \hline\hline
+{\ct 'SPHERE'} (default)  & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
+{\ct 'CYLINDER'}          & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
+{\ct 'POROUS MEDIA'}      & Sec.~\ref{info:porous_media}           \\ \hline
+{\ct 'SCREEN'}            & Sec.~\ref{info:particle_screen}        \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 \subsection{Splitting Particles}
 \label{info:particle_split}
@@ -6200,6 +6247,7 @@ These lines are a model of aluminum foam. The basic geometry of the foam ligamen
 
 The {\ct PART} line provides information about the particles. The {\ct DRAG\_LAW} indicates a special empirical model for the porous media. This model states that the pressure drop through the media is given by
 \be
+   \label{eqn_porous_media}
    \Delta p =  \delta \, \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
 where $\delta$ is the thickness of the foam block in the flow direction, $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
@@ -6223,6 +6271,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 \end{lstlisting}
 The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via the {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen, and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example, an aluminum screen with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the fraction of the grid cell flow area occupied by the screen is equal to 1 - {\ct FREE\_AREA\_FRACTION}. The pressure drop across the screen is given by
 \be
+   \label{eqn_screen}
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
 where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by
@@ -6518,13 +6567,21 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. (Default 0.05~m)
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
-\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the {\ct ORIENTATION} of the sprinkler is (0,0,-1), the default. Elliptical spray patterns can be defined by giving a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1:2,1)=0.,60.}  and {\ct SPRAY\_ANGLE(1:2,2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
+\item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water spray through a band between 30$^\circ$ and 80$^\circ$ of the {\ct ORIENTATION} vector, which is (0,0,-1) by default (see Figure~\ref{Sprinkler_Sketch}). Elliptical spray patterns can be specified via a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1:2,1)=0.,60.}  and {\ct SPRAY\_ANGLE(1:2,2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. From above, the spray pattern resembles an ellipse. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
 \item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
 Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets.
+
+Do not locate a sprinkler or nozzle within {\ct OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
+
+\begin{figure}[ht]
+\includegraphics[width=6.5in]{FIGURES/Sprinkler_Sketch}
+\caption[Sketch of sprinkler spray]{Sketch showing the role of {\ct OFFSET} and {\ct SPRAY\_ANGLE}.}
+\label{Sprinkler_Sketch}
+\end{figure}
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
@@ -7099,7 +7156,22 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
 \be u(t) \; = \; K_{\rm p} \, e(t) \; + \; \; K_{\rm i} \int_0^t \! e(t) \, \d t   \; + \; K_{\rm d} \frac{\d e(t)}{\d t}\ee
 where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
-\linebreak[4]{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
+\linebreak[4]{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subtracting the {\ct TARGET\_VALUE} from the {\ct INPUT\_ID}; and $u(t)$ is the output.
+
+
+\subsubsection{Example Case: using PID for time integration of mass loss rate }
+\label{sec:pidintmlr}
+
+The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct STATISTICS='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
+\begin{lstlisting}
+&DEVC ID='MY MLR', XB=..., QUANTITY='BURNING RATE', SURF_ID='s1',
+      STATISTICS='SURFACE INTEGRAL'/
+&CTRL ID='MY PID', FUNCTION_TYPE='PID', INPUT_ID='MY MLR',
+      PROPORTIONAL_GAIN=0, DIFFERENTIAL_GAIN=0, INTEGRAL_GAIN=1/
+&DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
+\end{lstlisting}
+Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}.
+
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -8604,6 +8676,9 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL DENSITY}                        & Section~\ref{info:pyro3d}                     & kg/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL Q\_S}                           & Section~\ref{info:pyro3d}                     & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct SOLID CELL VOLUME RATIO}                   & Section~\ref{info:pyro3d}                     & m$^3$/m$^3$    & D,I,P,S      \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
 {\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
 {\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)} & D            \\ \hline
@@ -8861,10 +8936,10 @@ properties be specified as well. Simply prescribing as many properties as possib
 \hline \hline
 \endhead
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
-%{\ct COMPUTE\_ZETA\_SOURCE\_TERM}               & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
+{\ct FUEL\_H\_TO\_H2\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  0                   \\ \hline
 %{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
@@ -8876,9 +8951,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
 %{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}        \\ \hline
-%{\ct TRANSPORT\_UNMIXED\_FRACTION}              & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
-%{\ct TRANSPORT\_ZETA\_SCHEME}                   & Integer       & Section~\ref{}                                        &               & 1                    \\ \hline
-%{\ct WD\_PROPS}                                 & Logical       & Section~\ref{}                                        &               & {\ct .FALSE.}        \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9386,21 +9458,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}      \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
+%{\ct CC\_IBM}                                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct C\_WALE}                                   & Real          & Section~\ref{info:LES}                                &               & 0.60              \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 0 (LES), 1 (DNS)  \\ \hline
-{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
-{\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
+{\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               &                   \\ \hline
+{\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:HT}                                 &               & {\ct .FALSE.}     \\ \hline
+{\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:VN}                                 &               & {\ct .TRUE.}      \\ \hline
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
-{\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -9421,11 +9492,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}             & Character     & Section~\ref{info:LES}                                &               &                   \\ \hline
-{\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-{\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
+{\ct NOISE}                                     & Logical       & Section~\ref{info:NOISE}                              &               & {\ct .TRUE.}      \\ \hline
+{\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:NOISE}                              &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct NO\_RAMPS}                                 & Logical       & Turn off all ramps                                    &               & {\ct .FALSE.}     \\ \hline
-{\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct OVERWRITE}                                 & Logical       & Section~\ref{info:OVERWRITE}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test               &               & 0                 \\ \hline
@@ -9437,10 +9508,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
-%{\ct RESEARCH\_MODE}                            & Logical       & $\rho D_\alpha + mu_t/\mbox{Sc}_t$                    &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART}                                   & Logical       & Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
+{\ct SIMULATION\_MODE}                          & Character     & Section~\ref{Sim_Mode}                                &               & {\ct 'VLES'}      \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOOT\_OXIDATION}                           & Logical       & Section~\ref{info:deposition}                         &               & {\ct .FALSE.}      \\ \hline
@@ -9460,8 +9531,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
 {\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
-{\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
-{\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+{\ct VN\_MAX}                                   & Real          & Section~\ref{info:VN}                                 &               & 1.0               \\ \hline
+{\ct VN\_MIN}                                   & Real          & Section~\ref{info:VN}                                 &               & 0.8               \\ \hline
 {\ct Y\_CO2\_INFTY}                             & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 {\ct Y\_O2\_INFTY}                              & Real          & Section~\ref{info:simple_chemistry}                   &  kg/kg        &                   \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
@@ -9652,17 +9723,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{info:PRES}           &               &                           \\ \hline
-{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{info:PRES}           & s             & 0.95                      \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               & 10                        \\ \hline
-{\ct PRES\_ON\_WHOLE\_DOMAIN}       & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
-{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
-{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       &                           \\ \hline
-{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
-{\ct SOLVER}                        & Character     & Section~\ref{info:PRES}           &               & {\ct 'FFT'}               \\ \hline
-{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
-{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
+{\ct CHECK\_POISSON}                & Logical       & Section~\ref{pressure_solver}           &               & {\ct .FALSE.}             \\ \hline
+{\ct FISHPAK\_BC(3)}                & Integer       & Section~\ref{dancing_eddies}            &               &                           \\ \hline
+{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{pressure_solver}           & s             & 0.95                      \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}           &               & 10                        \\ \hline
+{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{background_pressure}       & s             & 1.                        \\ \hline
+{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & m/s$^2$       &                           \\ \hline
+{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{background_pressure}       &               & 1.                        \\ \hline
+{\ct SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}  &               & {\ct 'FFT'}               \\ \hline
+{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{pressure_solver}           &               & {\ct .TRUE.}              \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & m/s           &                           \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,

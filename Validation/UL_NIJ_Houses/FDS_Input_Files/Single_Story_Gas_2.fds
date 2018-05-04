@@ -2,6 +2,8 @@
 
 &TIME T_END=2400. /
 
+&MISC SIMULATION_MODE='SVLES' /
+
 &MESH IJK=72,48,30, XB=-0.2,7.0,-0.6,4.2,0.0,3.0, MULT_ID='mesh' / 
 &MULT ID='mesh', DX=7.2, DY=4.8, I_UPPER=1, J_UPPER=1 /
 

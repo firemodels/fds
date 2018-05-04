@@ -36,7 +36,7 @@ TEST=
 SMV_PATH=""
 START_X=yes
 SSH=
-GEOMFIGURES=
+GEOMFIGURES=1
 FDSFIGURES=1
 
 while getopts 'dghp:rs:S:tX' OPTION

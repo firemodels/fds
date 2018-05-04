@@ -78,6 +78,260 @@ Carbon dioxide and carbon monoxide were measured near the ceiling in the forward
 
 \clearpage
 
+\subsection{LLNL Enclosure}
+
+Oxygen and carbon dioxide concentrations were reported for a single location within the LLNL Enclosure. The test report~\cite{Foote:LLNL1986} specifies the lateral location of the sensors (1.5~m from the wall opposite the exhaust duct, along the room centerline), but the reported height is only ``top of room.'' In the model, the sensors were located 4.3~m off the floor, 0.2~m below the ceiling of the compartment.
+
+Also, the test report does not indicate whether the reported volume fractions were taken to be ``wet'' or ``dry''; that is, whether the water vapor was condensed out of the sample. For the sake of comparison, the FDS results are assumed to be ``dry''.
+
+Further details of the modeling can be found in Section~\ref{LLNL_Enclosure_Description}.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_01_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_01_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_02_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_02_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_03_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_03_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_04_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_04_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 1-4.}
+\label{LLNL_Gas_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_05_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_05_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_06_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_06_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_07_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_07_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_08_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_08_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 5-8.}
+\label{LLNL_Gas_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_10_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_10_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 9-12.}
+\label{LLNL_Gas_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 13-16.}
+\label{LLNL_Gas_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 17-20.}
+\label{LLNL_Gas_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_21_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_21_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_22_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_22_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_24_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_24_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 21-24.}
+\label{LLNL_Gas_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_25_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_25_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_27_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_27_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_28_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_28_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 25-28.}
+\label{LLNL_Gas_7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 29-32.}
+\label{LLNL_Gas_8}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 33-36.}
+\label{LLNL_Gas_9}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_37_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_37_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_39_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_39_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 37-40.}
+\label{LLNL_Gas_10}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_41_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_41_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_43_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_43_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 41-44.}
+\label{LLNL_Gas_11}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_45_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_45_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_46_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_46_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_47_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_47_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_48_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_48_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 45-48.}
+\label{LLNL_Gas_12}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_49_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_49_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 49-52.}
+\label{LLNL_Gas_13}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_53_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_53_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_56_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_56_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 53-56.}
+\label{LLNL_Gas_14}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 57-60.}
+\label{LLNL_Gas_15}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_62_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_62_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 61-64.}
+\label{LLNL_Gas_16}
+\end{figure}
+
+
+\clearpage
+
+
 \subsection{NIST/NRC Experiments}
 
 The following pages present comparisons of oxygen and carbon dioxide concentration predictions and measurements for the
@@ -349,15 +603,21 @@ Oxygen concentration measurements were made across the coflow section of the bur
 \subsection{FM/FPRF Datacenter Experiments}
 \label{FM Smoke Concentration}
 
-Results of the low speed (78 ACH) and high speed (265 ACH) tests for propylene and cables is shown in the figure below. The error is a propagation of the non-linear error in the FM laser aspiration device combined with the fan flow error. Each test had three measurement locations (subfloor, ceiling, and ceiling plenum); however, not all locations for all tests had a measurement above background noise in the laser signal.
+Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests for propylene and cables is shown in the figure below. Each test had three measurement locations (subfloor, ceiling, and ceiling plenum); however, not all locations for all tests had a measurement above background noise in the laser signal.
 
-\begin{figure}[!h]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot.pdf}
-\end{tabular}
-\end{center}
-\caption[Summary of smoke concentration predictions for the FM/FPRF Datacenter Tests]{Summary of smoke concentration predictions for the FM/FPRF Datacenter Tests.}
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_C3H6_SF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_C3H6_SF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_C3H6_HA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_C3H6_HA} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_Cable_SF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_Cable_SF} 
+\end{tabular*}
+\caption{FM/FPRF Datacentert Tests, smoke concentration, low and high exhaust rate, propylene and cable tests}
+\label{FM_FPRF_Datacenter_Smoke}
 \end{figure}
 
 \clearpage
@@ -527,7 +787,18 @@ Predicting the concentration of products of incomplete combustion is challenging
 \subsection{Smyth Slot Burner Experiment}
 \label{Smyth_Reactions}
 
-Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_h2o_h2} show predicted and measured concentrations of CH$_4$, O$_2$, CO, CO$_2$, H$_2$O and H$_2$ at the same three elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}}
+\end{tabular*}
+\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
+{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_temp}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -538,8 +809,8 @@ Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} s
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured fuel and oxygen species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_fuel_ox}
 \end{figure}
 
@@ -552,28 +823,34 @@ Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} s
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured carbon dioxide and carbon monoxide species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_co_co2}
 \end{figure}
 
 \begin{figure}[p]
-\centering
-\begin{tabular}{c}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}
-\end{tabular}
-\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_temp}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Hydrogen}
+\end{tabular*}
+\caption[H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth slot burner]
+{Predicted and measured H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_h2o_h2}
 \end{figure}
+
+
 
 \clearpage
 
 \subsection{Beyler Hood Experiments}
 
-Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model compared with measured data for a range of fire sizes and burner positions.  The model outputs are the time-averaged species concentration at the hood exhaust vent whereas the experiment is the time-averaged species concentration downstream in the exhaust duct.
+Fig.~\ref{Beyler_Species} compares measured and predicted species mass fractions in the Beyler Hood experiments. Both measured and predicted values are time-averaged. The FDS results are taken at the extraction vent, whereas the measurements were made downstream of the vent. Details of the experiments can be found in Section~\ref{Beyler_Hood_Description}.
+
+
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
@@ -619,7 +896,7 @@ Figures~\ref{NIST_RSE_1994_CO} through \ref{NIST_RSE_1994_H2O} show the measured
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear}
 \end{tabular*}
 \caption[Comparison of measured and predicted O$_2$ concentration, NIST RSE experiments]{Comparison of measured and predicted O$_2$ concentration, NIST RSE experiments.}
 \label{NIST_RSE_1994_O2}
@@ -1183,10 +1460,11 @@ Hamins and Lock~\cite{Hamins:TN1928} made product species concentration measurem
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_O2_CL} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CO2_CL} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CO_CL} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_H2O_CL} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CH3OH_CL}}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CH3OH_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CO2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_CO_CL}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_H2O_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_H2_CL}
 \end{tabular*}
 \caption[Waterloo Methanol, centerline product species concentrations]{Waterloo Methanol, centerline product species concentrations.}
 \label{Waterloo_Methanol_Gas_Species}

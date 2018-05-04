@@ -301,10 +301,9 @@ SELECT CASE(IPS)
 
 END SELECT
 
-! In case of ScaRC-method leave routine
+! In case of ScaRC-, UScaRC-or GLMAT-method leave routine
 
-IF (PRES_METHOD == 'SCARC') RETURN
-IF (PRES_METHOD == 'GLMAT') RETURN
+IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'SCARC' .OR. PRES_METHOD == 'USCARC') RETURN
 
 ! Call the Poisson solver
 
@@ -2284,7 +2283,7 @@ MAXFCT = 1
 MNUM   = 1
 
 ! Set level MSG to 1 for factorization:
-MSGLVL = 1
+IF(GLMAT_VERBOSE) MSGLVL = 1
 
 ! Define control parameter vector iparm:
 ALLOCATE(IPARM(64)); IPARM(:) = 0
@@ -2495,7 +2494,7 @@ RETURN
 #endif
 
 ! Set level MSG to 0 for solution:
-MSGLVL = 0
+IF(GLMAT_VERBOSE) MSGLVL = 0
 
 END SUBROUTINE GET_H_MATRIX_LUDCMP
 
