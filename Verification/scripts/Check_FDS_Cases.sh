@@ -15,9 +15,12 @@ shift $(($OPTIND-1))
 
 case=$1
 infile=$DIR/${case%.*}.fds
-outfile=$DIR/${case%.*}.out
-if [  -e $outfile ]; then
-  if [[ `grep -rI 'completed successfully' $outfile` == "" ]] && [[  `grep -rI 'Set-up only' $outfile` == "" ]] && [[ `grep -rI 'stopped by KILL control' $outfile` == "" ]]; then
+errfile=$DIR/${case%.*}.err
+if [  -e $errfile ]; then
+  if [[ `grep -iE 'completed successfully|Set-up only|stopped by KILL control|TGA analysis only' $errfile` != "" ]]; then
+    # continue along
+    :
+  else
     echo "ERROR: $infile started but did not complete"
   fi
 else
