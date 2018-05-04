@@ -227,12 +227,17 @@ fi
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
+  if [ "$CHECKCASES" == "1" ]; then
+    export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
+  fi
   if [ "$SINGLE" == "" ]; then
     ./FDS_Benchmark_Cases.sh
   else
     ./FDS_Benchmark_Cases_single.sh
   fi
-  echo FDS benchmark cases submitted
+  if [ "$CHECKCASES" == "" ]; then
+    echo FDS benchmark cases submitted
+  fi
 fi
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
