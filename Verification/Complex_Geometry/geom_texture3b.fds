@@ -2,6 +2,8 @@
 
 &MESH IJK=10,10,10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 
+&RADI RADIATION=.FALSE. /
+
 &SURF ID='surf2'
       TEXTURE_MAP='sphere_cover_03.png',COLOR='RED',
       TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
