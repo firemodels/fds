@@ -1,6 +1,8 @@
 &HEAD CHID='geom_texture4a' /
 
 &MESH IJK=10,10,10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+&RADI RADIATION=.FALSE. /
+&MISC PROCESS_CUTCELLS=.FALSE. /
 
 &SURF ID='surf1'
       TEXTURE_MAP='sphere_cover_04.png'COLOR='BLUE',

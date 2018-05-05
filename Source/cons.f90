@@ -359,6 +359,7 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 ! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
+LOGICAL :: PROCESS_CUTCELLS=.TRUE.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_SOLVER =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
