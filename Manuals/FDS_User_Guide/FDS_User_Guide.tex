@@ -7457,14 +7457,23 @@ Note that this quantity is only meaningful if the front or exposed surface of th
 where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction calculation.
 
 
-\section{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
+\section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
+FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time.
+
+The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a wall cell, the parameters are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a wall cell:
 \begin{lstlisting}
-&PROF XYZ=..., QUANTITY='TEMPERATURE', ID='T-1', IOR=3 /
+&PROF ID='T-1', XYZ=..., QUANTITY='TEMPERATURE', IOR=3 /
 \end{lstlisting}
-Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
+For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
+\begin{lstlisting}
+&INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' / 
+&PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
+\end{lstlisting}
+For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
+
+The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total ({\ct 'DENSITY'}) or the density of a particular solid material component, ({\ct '[MATL\_ID]'}), where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
 
 
 
@@ -9762,8 +9771,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct FORMAT\_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
+{\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
