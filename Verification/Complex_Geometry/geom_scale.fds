@@ -1,7 +1,7 @@
 &HEAD CHID='geom_scale' /
 
 &MESH IJK=10,10,10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
-
+&MISC PROCESS_CUTCELLS=.FALSE. /
 &SURF ID='surf1',RGB=255,0,0 /
 &SURF ID='surf2',RGB=0,255,0 /
 &SURF ID='surf3',RGB=0,0,255 /

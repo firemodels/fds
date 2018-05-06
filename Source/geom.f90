@@ -32448,8 +32448,6 @@ ENDDO COUNT_GEOM_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_GEOMETRY==0) RETURN
 
-! Here: there are GEOMs, set CC_IBM=.TRUE. to engage cut-cell scheme around GEOMs.
-CC_IBM = .TRUE.
 
 ! Allocate temporary buffers used when reading &GEOM namelists
 
@@ -33314,6 +33312,13 @@ DO I = 1, N_GEOMETRY
 ENDDO
 
 CALL CONVERTGEOM(T_BEGIN)
+
+
+! Here: there are GEOMs and PROCESS_CUTCELLS, set CC_IBM=.TRUE. to engage
+! cut-cell definition and discretization scheme around GEOMs.
+IF(.NOT.PROCESS_CUTCELLS) RETURN
+CC_IBM = .TRUE.
+
 
 IF (CC_IBM) CALL GET_GEOM_TRIBIN
 
