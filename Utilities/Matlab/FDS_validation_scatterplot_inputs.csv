@@ -23,7 +23,7 @@ Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposit
 Burning Rate,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0.001,0.1,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0.00001,0.2,0.03 0.95,EastOutside,1.5,19,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Monoxide_Concentration
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Entrainment
-Extinction Time,Measured Time (s),Predicted Time (s),10,1000,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
+Extinction Time,Measured Time (s),Predicted Time (s),10,5000,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
 Species Concentration,Measured Change in Volume Fraction (\%),Predicted Change in Volume Fraction (\%),1,100,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Species_Concentration
 Smoke Obscuration,Measured Obscuration (\%/m),Predicted Obscuration (\%/m),1,100,0.03 0.95,EastOutside,1.5,20,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Obscuration
 Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,EastOutside,1.5,8,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Convective_Heat_Flux
