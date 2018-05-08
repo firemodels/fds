@@ -56,7 +56,7 @@ switch style
 
         Scat_Plot_Width      = 4.75;
         Scat_Plot_Height     = 4.75;
-        Scat_Plot_X          = 0.75;
+        Scat_Plot_X          = 1.00;
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
 
