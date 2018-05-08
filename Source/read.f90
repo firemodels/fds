@@ -1987,7 +1987,7 @@ ENDDO WIND_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
 ! Determine the appropriate wind speed if the user specifies SPEED or U_STAR. If
-! the user specifies U0, V0, or W0, MEAN_FORCING will not be invokes unless the
+! the user specifies U0, V0, or W0, MEAN_FORCING will not be invoked unless the
 ! user specifies it.
 
 IF (U_STAR>0._EB) SPEED = U_STAR*LOG(Z_REF/Z_0)/KAPPA_VK
