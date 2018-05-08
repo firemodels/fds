@@ -386,9 +386,8 @@ INTEGER, PARAMETER :: NSCARC_STACK_ZERO              =  0, &         !> root sta
                       NSCARC_STACK_ROOT              =  1, &         !> maximum number of consecutive solvers
                       NSCARC_STACK_MAX               = 10            !> maximum number of consecutive solvers
 
-REAL(EB), PARAMETER:: NSCARC_THRESHOLD_CONVERGENCE   = 1.0E-15, &    !> threshold for convergence
-                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+15, &    !> threshold for divergence
-                      NSCARC_THRESHOLD_NONZERO       = 1.0E-16          
+REAL(EB), PARAMETER:: NSCARC_THRESHOLD_CONVERGENCE   = 1.0E-15_EB, & !> threshold for convergence
+                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+15_EB    !> threshold for divergence
 
 INTEGER :: IERROR = 0
 
@@ -581,7 +580,7 @@ INTEGER :: ICG_PTR = 0                                     !> ghost cell pointer
 INTEGER :: ICO_PTR = 0                                     !> overlapping cell pointer
 INTEGER :: ICE_PTR = 0                                     !> extended cell pointer
 INTEGER :: IWL_PTR = 0                                     !> local wall cell pointer
-INTEGER , ALLOCATABLE, DIMENSION (:)  :: ICN_TO_ICE        !> mapping from ICN to ICE    ! ACHTUNG: RIESIG
+!INTEGER , ALLOCATABLE, DIMENSION (:)  :: ICN_TO_ICE        !> mapping from ICN to ICE    ! ACHTUNG: RIESIG
 INTEGER , ALLOCATABLE, DIMENSION (:)  :: ICE_TO_IWG        !> mapping from ICE to IWG
 INTEGER , ALLOCATABLE, DIMENSION (:)  :: ICE_TO_IWL        !> mapping from ICE to IWL
 INTEGER , ALLOCATABLE, DIMENSION (:)  :: ICE_TO_ICG        !> mapping from ICE to ICG
@@ -3333,8 +3332,8 @@ CALL SCARC_ALLOCATE_INT1(OM%ICG_TO_ICE, 1, OL%NCG, NSCARC_INIT_ZERO, 'ICG_TO_ICE
 
 IF (BAMG) CALL SCARC_ALLOCATE_INT2(OM%IWL_TO_ICG, 1, OL%NWL, 1, OL%NCPL, NSCARC_INIT_ZERO,'IWL_TO_ICG')
 
-IF (PRES_ON_WHOLE_DOMAIN.AND.OL%NCS>0) &         !> ACHTUNG: kann verbessert werden??? riesig!
-   CALL SCARC_ALLOCATE_INT1(OM%ICN_TO_ICE, 1, OL%NCS, NSCARC_INIT_ZERO,'ICN_TO_ICE')
+!IF (PRES_ON_WHOLE_DOMAIN.AND.OL%NCS>0) &         !> ACHTUNG: kann verbessert werden??? riesig!
+!   CALL SCARC_ALLOCATE_INT1(OM%ICN_TO_ICE, 1, OL%NCS, NSCARC_INIT_ZERO,'ICN_TO_ICE')
 
 CALL SCARC_LEAVE_ROUTINE()
 END SUBROUTINE SCARC_SETUP_OMAPPINGS
@@ -3603,7 +3602,7 @@ DO IZ = NZ1, NZ2
             ELSE IF (IBCF(1)==MIRROR_BOUNDARY .OR. IBCF(2)==MIRROR_BOUNDARY) THEN
                WC(IWC)%BOUNDARY_TYPE = MIRROR_BOUNDARY
             ELSE
-               WRITE(*,*) 'WRONG BOUNDARY TYPE'
+               CALL SCARC_SHUTDOWN('Wrong boundary type ', 'NONE', IBCF(1))
             ENDIF
 
             !> in case of an internal boundary set neighboring WALL cells
@@ -4928,11 +4927,11 @@ WRITE(*,*) 'ACHTUNG HIER WEGEN ICN SCHAUEN!'
                IF (JC < 0 .AND. JCA <= OL%NC) THEN
                   !IF (OL%MAP%ICN_TO_ICE(JCA)==0) THEN
                   IF (JC==-1) THEN
-                     OL%MAP%ICN_TO_ICE(JCA) = NCE0
+!                     OL%MAP%ICN_TO_ICE(JCA) = NCE0
                      L%AMG%MAPPING(2, ICE) = NCE0
                      NCE0 = NCE0 + 1
                   ELSE
-                     L%AMG%MAPPING(2, ICE) = OL%MAP%ICN_TO_ICE(JCA)
+!                     L%AMG%MAPPING(2, ICE) = OL%MAP%ICN_TO_ICE(JCA)
                   ENDIF
                   L%AMG%MAPPING(3, ICE) = JC
                   A%COL(ICOL) = L%AMG%MAPPING(2,ICE)
@@ -4991,7 +4990,7 @@ WRITE(*,*) 'ACHTUNG HIER WEGEN ICN SCHAUEN!'
                IG  = IG + 1
                !OLF%AMG%ICG0 = OLF%AMG%ICG0 + 1
                OLF%AMG%ICG0 = IG
-               LC%MAP%ICN_TO_ICE(OPF%COL(ICOL))   = ICCE
+!               LC%MAP%ICN_TO_ICE(OPF%COL(ICOL))   = ICCE
                LC%MAP%ICG_TO_ICE(OLF%AMG%ICG0) = ICCE
             ENDIF
 
@@ -5020,10 +5019,10 @@ WRITE(*,*) 'ACHTUNG HIER WEGEN ICN SCHAUEN!'
                   !> Additionally identify coarse cells from second layer
                   !> adjacent to internal boundary
 WRITE(*,*) 'ACHTUNG HIER WEGEN ICN SCHAUEN'
-                  IF (JC < 0) THEN
-                     IC = LF%MAP%ICN_TO_ICE(ABS(JC))
-                     PF%COL(ICOL) = LF%AMG%CTYPE(IC)
-                  ENDIF
+!                  IF (JC < 0) THEN
+!                     IC = LF%MAP%ICN_TO_ICE(ABS(JC))
+!                     PF%COL(ICOL) = LF%AMG%CTYPE(IC)
+!                  ENDIF
                ENDDO
             ENDIF
          ENDDO PROLONGATION_WALL_LOOP2
@@ -5044,7 +5043,7 @@ WRITE(*,*) 'ACHTUNG HIER WEGEN ICN SCHAUEN'
 
             DO ICOLG = OPF%ROW(ICG), OPF%ROW(ICG+1)-1
                PF%COL(ICOLE) = OPF%COL(ICOLG)
-               PF%COL(ICOLE) = LF%MAP%ICN_TO_ICE(OPF%COL(ICOLG))
+!               PF%COL(ICOLE) = LF%MAP%ICN_TO_ICE(OPF%COL(ICOLG))
                PF%VAL(ICOLE) = OPF%VAL(ICOLG)
                ICOLE = ICOLE + 1
 
@@ -5102,10 +5101,10 @@ IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MATRIX_VALUE, NLEVEL_MIN)
    IF (NM == NMESHES) THEN
       IL = 1
-      IP = A%ROW(L%NC)
+      IP = A%ROW(L%CELL%NC_LOCAL(NMESHES))
       A%VAL_LAST(IL) = A%VAL(IP)
       A%COL_LAST(IL) = A%COL(IP)
-      DO IP = A%ROW(L%NC)+1, A%ROW(L%NC+1)-1
+      DO IP = A%ROW(L%CELL%NC_LOCAL(NMESHES))+1, A%ROW(L%CELL%NC_LOCAL(NMESHES)+1)-1
          IL = IL + 1
          A%VAL_LAST(IL) = A%VAL(IP)
          A%COL_LAST(IL) = A%COL(IP)
@@ -5149,54 +5148,63 @@ IF (TWO_D) THEN
             CASE (DIRICHLET)                      !> set Dirichlet BC's along open boundary cells
                A%VAL(IP) = A%VAL(IP) - DBC
             CASE (NEUMANN)                        !> set Neumann BC's at all other nodes
+               IF (NOM > 0 .AND. PRES_ON_WHOLE_DOMAIN) CYCLE
                A%VAL(IP) = A%VAL(IP) + DBC
          END SELECT
 
       !> purely Neumann matrix - build condensed matrix system by manipulating last cell of last mesh
       ELSE
 
-         IF (NM == NMESHES .AND. IC == L%NC) THEN
+         IP = A%ROW(IC)
+         IF (L%WALL(IW)%BTYPE == NEUMANN) THEN
 
-            IP = A%ROW(IC)
-     
-            !> set row related to last cell of last mesh to one at diagonal and to zero at offdiagonals
-            A%VAL(IP) = 1.0_EB
-            DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-               A%VAL(IP) = 0.0_EB
-            ENDDO 
-   
-            JC = IC - 1
-            DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
-               IF (A%COL(IP) == IC) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
+            A%VAL(IP) = A%VAL(IP) + DBC
+            IF (NM == NMESHES .AND. IC == L%CELL%NC_LOCAL(NMESHES)) A%VAL(IP) = 1.0_EB
 
-            JC = IC - L%NX
-            DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
-               IF (A%COL(IP) == IC) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
+         ELSE 
+            IF (NM == NMESHES .AND. IC == L%CELL%NC_LOCAL(NMESHES)) THEN
+
+               IP = A%ROW(IC)
      
-         ENDIF 
-   
-         !> if a leg of the matrix stencil for cell IC connects to the last cell of the last mesh, 
-         !> set matrix value to zero (sets last column of global matrix to zero for condensed system)
-         IF (NOM == NMESHES) THEN
-   
-            ICE = L%WALL(IW)%ICE(1)                             !> adjacent ghost cell number
-            ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
-            IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell of last mesh, cycle
+               !> set row related to last cell of last mesh to one at diagonal and to zero at offdiagonals
+               A%VAL(IP) = 1.0_EB
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  A%VAL(IP) = 0.0_EB
+               ENDDO 
       
-            DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-               IF (A%COL(IP) == ICE) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
+               JC = IC - 1
+               DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
+                  IF (A%COL(IP) == IC) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+
+               JC = IC - L%NX
+               DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
+                  IF (A%COL(IP) == IC) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+        
+            ENDIF 
+   
+            !> if a leg of the matrix stencil for cell IC connects to the last cell of the last mesh, 
+            !> set matrix value to zero (sets last column of global matrix to zero for condensed system)
+            IF (NOM == NMESHES) THEN
+      
+               ICE = L%WALL(IW)%ICE(1)                             !> adjacent ghost cell number
+               ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
+               IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell of last mesh, cycle
+         
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  IF (A%COL(IP) == ICE) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+            ENDIF
 
          ENDIF
 
@@ -5237,64 +5245,72 @@ ELSE
          SELECT CASE (L%WALL(IW)%BTYPE)
             CASE (DIRICHLET)                      !> set Dirichlet BC's at open and null boundary cells
                A%VAL(IP) = A%VAL(IP) - DBC
-            !CASE (INTERNAL)                      !> do nothing along internal boundaries (only debugging)
             CASE (NEUMANN)                        !> set Neumann BC's at all other cells
+               IF (NOM > 0 .AND. PRES_ON_WHOLE_DOMAIN) CYCLE
                A%VAL(IP) = A%VAL(IP) + DBC
          END SELECT
 
       !> purely Neumann matrix - build condensed matrix system by manipulating last cell of last mesh
       ELSE
 
-         IF (NM == NMESHES .AND. IC == L%NC) THEN
+         IP = A%ROW(IC)
+         IF (L%WALL(IW)%BTYPE == NEUMANN) THEN
 
-            IP = A%ROW(IC)
-     
-            !> set row related to last cell of last mesh to one at diagonal and to zero at offdiagonals
-            A%VAL(IP) = 1.0_EB
-            DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-               A%VAL(IP) = 0.0_EB
-            ENDDO 
-   
-            JC = IC - 1
-            DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
-               IF (A%COL(IP) == IC) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
+            A%VAL(IP) = A%VAL(IP) + DBC
+            IF (NM == NMESHES .AND. IC == L%CELL%NC_LOCAL(NMESHES)) A%VAL(IP) = 1.0_EB
 
-            JC = IC - L%NX
-            DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
-               IF (A%COL(IP) == IC) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
-     
-            JC = IC - L%NX * L%NY
-            DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
-               IF (A%COL(IP) == IC) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
-         ENDIF 
+         ELSE 
+            IF (NM == NMESHES .AND. IC == L%CELL%NC_LOCAL(NMESHES)) THEN
    
-         !> if a leg of the matrix stencil for cell IC connects to the last cell of the last mesh, 
-         !> set matrix value to zero (sets last column of global matrix to zero for condensed system)
-         IF (NOM == NMESHES) THEN
-   
-            ICE = L%WALL(IW)%ICE(1)                             !> adjacent ghost cell number
-            ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
-            IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell in last mesh, cycle
+               IP = A%ROW(IC)
+        
+               !> set row related to last cell of last mesh to one at diagonal and to zero at offdiagonals
+               A%VAL(IP) = 1.0_EB
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  A%VAL(IP) = 0.0_EB
+               ENDDO 
       
-            DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-               IF (A%COL(IP) == ICE) THEN
-                  A%VAL(IP) = 0.0_EB
-                  EXIT  
-               ENDIF 
-            ENDDO 
-
+               JC = IC - 1
+               DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
+                  IF (A%COL(IP) == IC) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+   
+               JC = IC - L%NX
+               DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
+                  IF (A%COL(IP) == IC) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+        
+               JC = IC - L%NX * L%NY
+               DO IP = A%ROW(JC)+1, A%ROW(JC+1)-1
+                  IF (A%COL(IP) == IC) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+            ENDIF 
+      
+            !> if a leg of the matrix stencil for cell IC connects to the last cell of the last mesh, 
+            !> set matrix value to zero (sets last column of global matrix to zero for condensed system)
+            IF (NOM == NMESHES) THEN
+      
+               ICE = L%WALL(IW)%ICE(1)                             !> adjacent ghost cell number
+               ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
+               IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell in last mesh, cycle
+         
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  IF (A%COL(IP) == ICE) THEN
+                     A%VAL(IP) = 0.0_EB
+                     EXIT  
+                  ENDIF 
+               ENDDO 
+   
+            ENDIF
          ENDIF
       ENDIF
 
@@ -5328,12 +5344,12 @@ IF (UPPER_MESH_INDEX == NMESHES) THEN
    VC => POINT_TO_VECTOR (NVECTOR, NMESHES, NL)
    DO ICOL = 2, A%NCOL_LAST
       JC = A%COL_LAST(ICOL)
-      IF (JC < L%NC) THEN
-         VC(JC) = VC(JC) - A%VAL_LAST(ICOL)*VC(L%NC)
+      IF (JC < L%CELL%NC_LOCAL(NMESHES)) THEN
+         VC(JC) = VC(JC) - A%VAL_LAST(ICOL)*VC(L%CELL%NC_LOCAL(NMESHES))
       ENDIF
    ENDDO
-   LOCAL_REAL(NMESHES) = VC(L%NC)
-   VC(L%NC) = 0.0_EB                 !> set last entry of last mesh to zero
+   LOCAL_REAL(NMESHES) = VC(L%CELL%NC_LOCAL(NMESHES))
+   VC(L%CELL%NC_LOCAL(NMESHES)) = 0.0_EB                 !> set last entry of last mesh to zero
 ENDIF
 
 !> Broadcast last RHS-value of last cell in last mesh to all meshes
@@ -5365,20 +5381,21 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       DO IW = IWL, IWL + NWL - 1
 
          IWG = OL%MAP%IWL_TO_IWG(IW)                         !> corresponding global wall cell number
-         NOM = L%WALL(IWG)%NOM                               !> neighbor for that wall cell
-         IF (NOM /= NMESHES) CYCLE                           !> only check for common matrix entries with last mesh
-
          ICE = L%WALL(IWG)%ICE(1)                            !> adjacent ghost cell number
          ICW = L%WALL(IWG)%ICW                               !> adjacent internal cell number
-         ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
+         NOM = L%WALL(IWG)%NOM                               !> neighbor for that wall cell
 
-         IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell in last mesh, cycle
-
-         VC(ICW) = VC(ICW) - L%MAP%ICE_TO_VAL(ICE)*SCARC(NM)%RHS_END
+         IF (NOM > 0) THEN
+            IF (NOM /= NMESHES) CYCLE                           !> only check for common matrix entries with last mesh
+            ICN = L%MAP%ICE_TO_ICN(ICE)                         !> get column index of neighboring offdiagonal matrix entry
+            IF (ICN /= SCARC(NMESHES)%N_CELLS) CYCLE            !> if no relation to last cell in last mesh, cycle
+            VC(ICW) = VC(ICW) - L%MAP%ICE_TO_VAL(ICE)*SCARC(NM)%RHS_END
+         ENDIF
 
       ENDDO
    ENDDO
 ENDDO
+
 CALL SCARC_LEAVE_ROUTINE()
 END SUBROUTINE SCARC_SETUP_CONDENSED
 
@@ -6441,7 +6458,6 @@ SELECT CASE (NTYPE)
                OLF => SCARC(NM)%OSCARC(NOM)%LEVEL(NL)
 
                !WRITE(*,*) 'ACHTUNG: HIER WALL%ICN aendern auf OFI!'
-               !WRITE(*,*) 'ACHTUNG: MUSS NOCH UEBERARBEITET WERDEN !>'
 
                IC = LF%WALL(IW)%ICW
                !ICE = LF%WALL(IW)%ICE(1)
@@ -6511,11 +6527,9 @@ SELECT CASE (NTYPE)
             OLF%AMG%NCC = OLF%AMG%NCCS
 
             WRITE(*,*) 'ACHTUNG: STIMMT DAS MIT OLF%AMG%NCC?'
-            WRITE(*,*) 'ACHTUNG: HIER WEGEN ICN SCHAUEN'
 
             CALL SCARC_ALLOCATE_INT1(LC%MAP%ICG_TO_ICE, 1, OLC%NC   , NSCARC_INIT_ZERO, 'ICG_TO_ICG')
-            CALL SCARC_ALLOCATE_INT1(LC%MAP%ICN_TO_ICE, 1, OLF%AMG%NCCI, NSCARC_INIT_ZERO, 'ICN_TO_ICE')
-
+!            CALL SCARC_ALLOCATE_INT1(LC%MAP%ICN_TO_ICE, 1, OLF%AMG%NCCI, NSCARC_INIT_ZERO, 'ICN_TO_ICE')
 
             DO IG = 1, OLC%NC
                LC%MAP%ICG_TO_ICE(IG) = LF%AMG%NCCE + IG
@@ -6930,7 +6944,6 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ICW = LC%WALL(IW)%ICW
 
       WRITE(*,*) 'L: HIER WALL%ICN aendernauf OFI!'
-      WRITE(*,*) 'L: MUSS NOCH UEBERARBEITET WERDEN !>'
 
 !>    LC%WALL(IW)%NCPL = NCPL
 !>    CALL SCARC_ALLOCATE_INT1(LC%WALL(IW)%ICN, 1, NCPL, NSCARC_INIT_NONE, 'ICN')
@@ -10249,7 +10262,7 @@ CALL SCARC_SETUP_WORKSPACE(NS, NL)
 IF (N_DIRIC_GLOBAL(NL) == 0) THEN
    CALL SCARC_VECTOR_INIT (X, 0.0_EB, NL)               ! set x to zero
    CALL SCARC_FILTER_MEANVALUE(F, NL)                   ! filter out mean value of F
-   CALL SCARC_SETUP_CONDENSED (F, NL)
+   CALL SCARC_SETUP_CONDENSED (F, NL)                   ! setup condensed system
 ENDIF
 
 !> ------------------------------------------------------------------------------------------------
@@ -10262,7 +10275,7 @@ RES = SCARC_L2NORM (W, NL)                                   !>  RESIN := ||W||
 RESIN = RES
 
 ITE = 0
-NSTATE = SCARC_CONVERGENCE_STATE (X, W, 0, NL)               !>  RES < TOL already ??
+NSTATE = SCARC_CONVERGENCE_STATE (0, NL)                     !>  RES < TOL already ??
 
 IF (NSTATE /= NSCARC_STATE_CONV0) THEN                       !>  if no convergence yet, start precon
    CALL SCARC_PRECONDITIONER(NS, NS, NL)
@@ -10289,7 +10302,7 @@ CG_LOOP: DO ITE = 1, NIT
    CALL SCARC_VECTOR_SUM (Y, W, ALPHA0, 1.0_EB, NL)          !>  W := ALPHA0*Y + W
 
    RES = SCARC_L2NORM (W, NL)                                !>  RES := ||W||
-   NSTATE = SCARC_CONVERGENCE_STATE (X, W, 0, NL)            !>  RES < TOL ??
+   NSTATE = SCARC_CONVERGENCE_STATE (0, NL)                  !>  RES < TOL ??
    IF (NSTATE /= NSCARC_STATE_PROCEED) EXIT CG_LOOP
 
    CALL SCARC_PRECONDITIONER(NS, NS, NL)
@@ -10373,7 +10386,7 @@ CALL SCARC_PRECONDITIONER(NS, NS, NL)
 
 ITE = 0
 RESIN = SCARC_L2NORM (W, NL)                                 !>  RESIN := ||W||
-NSTATE = SCARC_CONVERGENCE_STATE (X, W, 0, NL)               !>  RES < TOL already ??
+NSTATE = SCARC_CONVERGENCE_STATE (0, NL)                     !>  RES < TOL already ??
 
 IF (NSTATE /= NSCARC_STATE_CONV0) THEN                       !>  if no convergence yet, start precon
    CALL SCARC_VECTOR_COPY (W, G, 1.0_EB, NL)                 !>  G := W
@@ -10416,7 +10429,7 @@ BICG_LOOP: DO ITE = 1, NIT
 
    RES = SCARC_L2NORM (W, NL)                                         !> RES := ||W||
 
-   NSTATE = SCARC_CONVERGENCE_STATE(X, W, 0, NL)                      !> RES < TOL ???
+   NSTATE = SCARC_CONVERGENCE_STATE(0, NL)                            !> RES < TOL ???
 IF (BVERBOSE_LESS.AND.MYID==0) &
    WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' BICG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
    IF (NSTATE /= NSCARC_STATE_PROCEED) EXIT BICG_LOOP
@@ -10608,7 +10621,7 @@ ICYCLE = SCARC_CYCLING_CONTROL(NSCARC_CYCLING_SETUP, NL)
 
 ITE = 0
 RESIN = SCARC_L2NORM (D, NL)                                          !>  RESIN := ||D||
-NSTATE = SCARC_CONVERGENCE_STATE (X, D, 0, NL)                        !>  RES < TOL already ??
+NSTATE = SCARC_CONVERGENCE_STATE (0, NL)                              !>  RES < TOL already ??
 
 !> ------------------------------------------------------------------------------------------------
 !> Perform multigrid-looping (start each iteration on finest level)
@@ -10657,7 +10670,7 @@ MULTIGRID_LOOP: DO ITE = 1, NIT
    CALL SCARC_VECTOR_SUM (F, D, 1.0_EB, -1.0_EB, NL)                          !> D := F - D
 
    RES = SCARC_L2NORM (D, NL)                                                 !> RES := ||D||
-   NSTATE = SCARC_CONVERGENCE_STATE(X, D, 0, NL)                              !> convergence ?
+   NSTATE = SCARC_CONVERGENCE_STATE(0, NL)                                    !> convergence ?
 
    IF (BVERBOSE_LESS.AND.MYID==0) &
       WRITE(LU_OUTPUT,'(a,i3,a,e14.5,a,e14.5)') '       SCARC_MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
@@ -10846,7 +10859,7 @@ SMOOTH_LOOP: DO ITE=1, NIT
 
    IF (BL2NORM.OR.ITE==NIT) THEN
       RES = SCARC_L2NORM (D, NL)                                        !>  RES := ||D||
-      NSTATE = SCARC_CONVERGENCE_STATE(X, D, NTYPE, NL)  
+      NSTATE = SCARC_CONVERGENCE_STATE(NTYPE, NL)  
       IF (NSTATE /= NSCARC_STATE_PROCEED) EXIT SMOOTH_LOOP              !>  RES < TOL ?
    ENDIF
 
@@ -11300,17 +11313,14 @@ END SUBROUTINE SCARC_SETUP_WORKSPACE
 !> ------------------------------------------------------------------------------------------------
 !> Check if solver converges or diverges and print out residual information
 !> ------------------------------------------------------------------------------------------------
-INTEGER FUNCTION SCARC_CONVERGENCE_STATE(X, R, ISM, NL)
-INTEGER, INTENT(IN) :: X, R, NL, ISM
+INTEGER FUNCTION SCARC_CONVERGENCE_STATE(ISM, NL)
+INTEGER, INTENT(IN) :: NL, ISM
 INTEGER :: NSTATE
 
 NSTATE = NSCARC_STATE_PROCEED
 
 IF (BVERBOSE_LESS.AND.MYID==0) WRITE(LU_OUTPUT,    1000) TRIM(CNAME), NL, ITE, RES
 IF (BDEBUG_LESS)               WRITE(MSG%LU_DEBUG, 1000) TRIM(CNAME), NL, ITE, RES
-
-CALL SCARC_DUMP_QUANTITY(R, 'RESIDUAL', ISM, NL)
-CALL SCARC_DUMP_QUANTITY(X, 'DISCRET' , ISM, NL)
 
 CALL SCARC_DUMP_RESIDUAL(ISM, NL)
 
@@ -11354,7 +11364,7 @@ ELSE
    ELSE
      ITE= ITE-1
    ENDIF
-   IF (RESIN >= NSCARC_THRESHOLD_NONZERO) THEN
+   IF (RESIN >= TWO_EPSILON_EB) THEN
       IF (ITE== 0) THEN
          !CAPPA = (RES/RESIN)
          CAPPA = 0.0_EB
@@ -13361,62 +13371,13 @@ CALL SCARC_LEAVE_ROUTINE()
 
 END SUBROUTINE SCARC_SETUP_DISCRETIZATION_LEVEL
 
-!> ------------------------------------------------------------------------------------------------
-!> Save dump of vector in dump-directory
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_DUMP_QUANTITY (NVECTOR, CNAME, ISM, NL)
-INTEGER, INTENT(IN):: NVECTOR, NL, ISM
-CHARACTER(*), INTENT(IN):: CNAME
-REAL (EB), POINTER, DIMENSION(:)     :: VC
-CHARACTER(80) :: CDIR
-INTEGER :: IC, NM
-TYPE (SCARC_LEVEL_TYPE), POINTER :: L
-
-IF (.NOT.BDEBUG_MUCH) RETURN
-
-IF (TRIM(CNAME) == 'RESIDUAL') THEN
-   CDIR = 'res'
-ELSE IF (TRIM(CNAME) == 'ERROR') THEN
-   CDIR = 'err'
-ELSE IF (TRIM(CNAME) == 'EXACT') THEN
-   CDIR = 'exa'
-ELSE IF (TRIM(CNAME) == 'DISCRET') THEN
-   CDIR = 'dis'
-ENDIF
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-   VC => POINT_TO_VECTOR (NVECTOR, NM, NL)
-   L => SCARC(NM)%LEVEL(NL)
-   if (ISM == 0) THEN
-      WRITE (MSG%FILE_DUMP, '(A,A3,A,i4.4,A,i3.3,A,I3.3,A,I3.3,A,I1,A,A)') &
-      'dump/',TRIM(CDIR),'_t',ITE_TOTAL,'_ALL',ITE_SMOOTH,'_mg',ITE_MG,'_cg',ITE_CG,'_level',NL,'_',&
-      TRIM(MSG%HISTORY(MSG%NCURRENT))
-   else if (ISM == NSCARC_CYCLING_PRESMOOTH) THEN
-      WRITE (MSG%FILE_DUMP, '(A,A3,A,i4.4,A,i3.3,A,I3.3,A,I3.3,A,I1,A,A)') &
-      'dump/',TRIM(CDIR),'_t',ITE_TOTAL,'_PRE',ITE_SMOOTH,'_mg',ITE_MG,'_cg',ITE_CG,'_level',NL,'_',&
-      TRIM(MSG%HISTORY(MSG%NCURRENT))
-   ELSE IF (ISM == NSCARC_CYCLING_POSTSMOOTH) THEN
-      WRITE (MSG%FILE_DUMP, '(A,A3,A,i4.4,A,i3.3,A,I3.3,A,I3.3,A,I1,A,A)') &
-      'dump/',TRIM(CDIR),'_t',ITE_TOTAL,'_POST',ITE_SMOOTH,'_mg',ITE_MG,'_cg',ITE_CG,'_level',NL,'_',&
-      TRIM(MSG%HISTORY(MSG%NCURRENT))
-   ENDIF
-   MSG%LU_DUMP = GET_FILE_NUMBER()
-   OPEN (MSG%LU_DUMP, FILE=MSG%FILE_DUMP)
-   DO IC = 1, L%NC
-      !WRITE(MSG%LU_DUMP,'(F25.16)') VC(IC)
-      WRITE(MSG%LU_DUMP,*) VC(IC)
-   ENDDO
-   CLOSE(MSG%LU_DUMP)
-ENDDO
-
-END SUBROUTINE SCARC_DUMP_QUANTITY
-
 
 !> ----------------------------------------------------------------------------------------------------
 !> Filter out mean value
 !> --------------------------------------------------------------------------------------------------ss
 SUBROUTINE SCARC_FILTER_MEANVALUE(NVECTOR, NL)
 INTEGER, INTENT(IN) :: NVECTOR, NL
-INTEGER :: NM, IC
+INTEGER :: NM, IC, I, J, K
 TYPE (SCARC_LEVEL_TYPE), POINTER :: L
 TYPE (SCARC_SCOPE_TYPE), POINTER :: SC 
 REAL(EB), DIMENSION(:) , POINTER :: VC 
@@ -13426,10 +13387,15 @@ LOCAL_REAL = 0.0_EB
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    L  => SCARC(NM)%LEVEL(NL)
    VC => POINT_TO_VECTOR(NVECTOR, NM, NL)
-
-   DO IC = 1, L%NC                      
-      LOCAL_REAL(NM) = LOCAL_REAL(NM) + VC(IC)
-   ENDDO 
+   DO K = 1, L%NZ
+      DO J = 1, L%NY
+         DO I = 1, L%NX
+            IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.L%CELL%STATE(I,J,K) /= NSCARC_DISCRET_GASPHASE) CYCLE
+            IC = L%CELL%DOF(I,J,K)
+            LOCAL_REAL(NM) = LOCAL_REAL(NM) + VC(IC)
+         ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 IF (N_MPI_PROCESSES > 1) &
@@ -13442,8 +13408,15 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    L  => SCARC(NM)%LEVEL(NL)
    SC => SCARC(NM)%SCOPE(1,NL)
    VC => POINT_TO_VECTOR(NVECTOR, NM, NL)
-   VC(1: L%NC) = VC(1:L%NC) - GLOBAL_REAL
-
+   DO K = 1, L%NZ
+      DO J = 1, L%NY
+         DO I = 1, L%NX
+            IF (.NOT.PRES_ON_WHOLE_DOMAIN.AND.L%CELL%STATE(I,J,K) /= NSCARC_DISCRET_GASPHASE) CYCLE
+            IC = L%CELL%DOF(I,J,K)
+            VC(IC) = VC(IC) - GLOBAL_REAL
+         ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 END SUBROUTINE SCARC_FILTER_MEANVALUE
