@@ -387,8 +387,7 @@ INTEGER, PARAMETER :: NSCARC_STACK_ZERO              =  0, &         !> root sta
                       NSCARC_STACK_MAX               = 10            !> maximum number of consecutive solvers
 
 REAL(EB), PARAMETER:: NSCARC_THRESHOLD_CONVERGENCE   = 1.0E-15, &    !> threshold for convergence
-                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+20, &    !> threshold for divergence
-                      NSCARC_THRESHOLD_NONZERO       = 1.0E-16          
+                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+15       !> threshold for divergence
 
 INTEGER :: IERROR = 0
 
@@ -11365,7 +11364,7 @@ ELSE
    ELSE
      ITE= ITE-1
    ENDIF
-   IF (RESIN >= NSCARC_THRESHOLD_NONZERO) THEN
+   IF (RESIN >= TWO_EPSILON_EB) THEN
       IF (ITE== 0) THEN
          !CAPPA = (RES/RESIN)
          CAPPA = 0.0_EB
