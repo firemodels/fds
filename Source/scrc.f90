@@ -386,8 +386,8 @@ INTEGER, PARAMETER :: NSCARC_STACK_ZERO              =  0, &         !> root sta
                       NSCARC_STACK_ROOT              =  1, &         !> maximum number of consecutive solvers
                       NSCARC_STACK_MAX               = 10            !> maximum number of consecutive solvers
 
-REAL(EB), PARAMETER:: NSCARC_THRESHOLD_CONVERGENCE   = 1.0E-15, &    !> threshold for convergence
-                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+15       !> threshold for divergence
+REAL(EB), PARAMETER:: NSCARC_THRESHOLD_CONVERGENCE   = 1.0E-15_EB, & !> threshold for convergence
+                      NSCARC_THRESHOLD_DIVGERGENCE   = 1.0E+15_EB    !> threshold for divergence
 
 INTEGER :: IERROR = 0
 
