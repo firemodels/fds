@@ -49,7 +49,9 @@ The following sections present results for experiments in which fires within for
 \subsection{LLNL Enclosure Experiments}
 \label{LLNL_Extinction Time}
 
-The figures on the following pages contain plots of the heat release rate in both the experiments and the simulation. The experimental curve is just the value reported in the test report, which drops to zero instantly at the reported extinguishment time. The simulated curve is the total HRR for the compartment.
+The figures on the following pages contain plots of the heat release rate in both the experiments and the simulation. The experimental curve is just the value reported in the test report, which drops to zero instantly at the reported extinguishment time. The simulated curve is the total HRR for the compartment, which means that in some cases, the fire moves from the burner to the inlet vent.
+
+In cases where the model does not predict extinction, the extinction time data is not used in the summary scatter plot, Fig.~\ref{USCG_Scatter}.
 
 \newpage
 
@@ -112,6 +114,9 @@ The figures on the following pages contain plots of the heat release rate in bot
 \subsection{USCG/HAI Water Mist Suppression Tests}
 
 The following pages contain comparisons of the predicted heat release rates for fires that are suppressed with a water mist system. In all cases, the flow rate of liquid fuel is specified in the model, but the decrease in HRR due to the extinguishing system is predicted by the model. Table~\ref{USCG_HAI_Times} reports the observed extinguishment times. Figure~\ref{USCG_Scatter} compares the measured versus predicted extinguishment times. For the simulations, the extinguishment time is taken to be when the HRR drops to half of its specified value.
+
+In cases where there is no reported fire extinction or the model does not predict extinction, the extinction time data is not used in the summary scatter plot, Fig.~\ref{USCG_Scatter}.
+
 
 \begin{table}[h!]
 \caption[USCG/HAI water mist suppression extinguishment times]{Recorded extinguishment times for the USCG/HAI water mist suppression tests in a small shipboard machinery space. ``No''
