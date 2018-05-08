@@ -359,6 +359,7 @@ LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debu
 ! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
+LOGICAL :: PROCESS_CUTCELLS=.TRUE.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_SOLVER =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
@@ -395,7 +396,7 @@ INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 
 ! Maximum number of wet surface triangles related to element
 
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 32  ! Up to 32 wstriangles related to a wet surface vertex.
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL =360  ! Up to 360 wstriangles related to a wet surface vertex. 
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)

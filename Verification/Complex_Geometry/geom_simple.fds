@@ -2,7 +2,7 @@
 
 &TIME T_END=0.0 /
 &MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-
+&MISC PROCESS_CUTCELLS=.FALSE. /
 &SURF ID='surf1',RGB=255,0,0 /
 
 &GEOM ID='geom1',
