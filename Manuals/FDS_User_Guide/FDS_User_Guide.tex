@@ -5158,42 +5158,67 @@ The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed infor
 \subsection{Special Topic: Flame Extinction}
 \label{info:extinction}
 
-Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a compartment is challenging because the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The default {\ct EXTINCTION\_MODEL} is called {\ct 'EXTINCTION 2'}. Alternative models are under development and when ready will be specified on the {\ct COMB} line.
+Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a closed compartment is challenging because the relevant physical mechanisms typically occur at subgrid-scale. Flames are extinguished due to lowered temperatures and dilution of the fuel or oxygen supply. There are two flame extinction algorithms in FDS that attempt to gauge whether or not combustion is viable based on the local temperature and the local oxygen and fuel concentrations. In brief, for combustion to occur there must be sufficient oxygen and fuel to raise the cell temperature from its current value to a {\em critical flame temperature}. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The {\ct EXTINCTION\_MODEL} called {\ct 'EXTINCTION~1'} is the default in Simple Very Large Eddy Simulation (SVLES) mode, whereas {\ct 'EXTINCTION 2'} is used in all other modes. The difference between the two models is that for {\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermo-physical gas species properties are not invoked. The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
 
-For the default extinction model, the only parameter you can control is the \linebreak[4]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
+The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT), which is the adiabatic flame temperature at the lower flammability limit, is the key parameter in both extinction models. It is set on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700~K) and default values for select fuels are listed in Table~\ref{tab:CFT}. If you are using an effective heat of combustion or an unlisted fuel, the CFT\footnote{Beyler denotes the CFT as T(OI), where OI stands for Oxygen Index.} can be calculated from the following equation~\cite{SFPE:Beyler}:
+\begin{align}
+T_{\rm CFT} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_{\rm c}}{n \, \overline{c_p}}
+\end{align}
+where
+\begin{tabbing}
+$\Delta H_{\rm c}$  \hspace{0.5in}   \=  Heat of combustion of the fuel (kJ/mol)  \\
+LFL                                  \>  Lower Flammability Limit, expressed as the volume fraction of fuel (\%)  \\
+$n$                                  \>  Number of moles of products of combustion per mole of fuel/air mixture  \\
+$\overline{c_p}$                     \>  Heat capacity of products of combustion (kJ/(mol$\cdot$K)  \\
+$T_0$                                \>  Initial temperature of the fuel/air mixture (ambient conditions) (K) \\
+$T_{\rm CFT}$                        \>  Adiabatic flame temperature of a lower flammability limit mixture (K)
+\end{tabbing}
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+\begin{table}[!ht]
+\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels~\cite{SFPE:Beyler}.}
+\vspace{0.1in}
+\label{tab:CFT}
+\begin{center}
+\begin{tabular}{|l|l|c|c|}
+\hline
+Fuel              & Formula & LFL (\%)      & $T_{\rm CFT}$ ($^\circ$C)   \\ \hline \hline
+{\ct ACETONE}     & C$_3$H$_6$O      & 2.6     & 1457 \\ \hline
+{\ct ACETYLENE}   & C$_2$H$_2$       & 2.7     & 1267 \\ \hline
+{\ct BENZENE}     & C$_6$H$_6$       & 1.3     & 1537 \\ \hline
+{\ct DODECANE}    & C$_{12}$H$_{26}$ & 0.6     & 1507 \\ \hline
+{\ct ETHANE}      & C$_2$H$_6$       & 3.0     & 1357 \\ \hline
+{\ct ETHANOL}     & C$_2$H$_6$O      & 3.3     & 1397 \\ \hline
+{\ct ETHYLENE}    & C$_2$H$_4$       & 2.7     & 1337 \\ \hline
+{\ct HYDROGEN}    & H$_2$            & 4.0     & 807  \\ \hline
+{\ct ISOPROPANOL} & C$_3$H$_8$O      & 2.2     & 1427 \\ \hline
+{\ct METHANE}     & CH$_4$           & 5.0     & 1507 \\ \hline
+{\ct METHANOL}    & CH$_3$OH         & 6.7     & 1257 \\ \hline
+{\ct N-DECANE}    & C$_{10}$H$_{22}$ & 0.75    & 1507 \\ \hline
+{\ct N-HEPTANE}   & C$_7$H$_{16}$    & 1.05    & 1507 \\ \hline
+{\ct N-HEXANE}    & C$_6$H$_{14}$    & 1.2     & 1497 \\ \hline
+{\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.9     & 1507 \\ \hline
+{\ct PROPANE}     & C$_3$H$_8$       & 2.1     & 1447 \\ \hline
+All other species &                  &         & 1427 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
-\paragraph{Finding Extinction Parameters}
 
-For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT for several common fuels (listed as {\it T}(OI), for temperature at the oxygen index for diffusion flames).
-
-%If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
-%\begin{align}
-%T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
-%\end{align}
-%where
-%\begin{itemize}
-%{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
-%{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
-%{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
-%{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
-%{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
-%{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
-%\end{itemize}
 
 \subsection{Special Topic: Piloted Ignition Zone}
-
 \label{info:ignition}
 
-Since by default the AIT is 0 K, it is possible to get spurious reignition of unburned fuel when fresh air is encountered after extinction.  To prevent this from happening you need to set an AIT for the fuel on the {\ct REAC} line, as discussed above.  However, this then leads to the problem of ignition at a burner surface.  It is usually too difficult to model the ignition process from first principles.  Instead, you can use an {\ct INIT} line to mimic a piloted ignition zone. For example, you might use something like this for a piloted methane flame:
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present. For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is -273~$^\circ$, meaning that it is possible to get spurious re-ignition of unburned fuel when fresh air is encountered after extinction. Setting an AIT, however, leads to the problem of ignition at a burner surface.  It can be tricky to model the ignition process explicitly because of limited grid resolution. Instead, you can set a fictitiously low value on the {\ct SURF} line that is associated with the burning surface or the {\ct INIT} line that essentially creates a piloted ignition zone in the vicinity of the burning surface. For example, you might use something like this for a piloted methane flame:
 \begin{lstlisting}
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
 &INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
-where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.  On the {\ct REAC} line you are telling FDS to use AIT = 627 \si{\degreeCelsius} throughout the domain.  Then the {\ct INIT} line takes precedence over the {\ct REAC} line within the specified region.
-
-
+The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the domain except within the region specified by {\ct XB} at the base of the burner where the AIT is effectively turned off. You can achieve a similar end with the following {\ct SURF} line:
+\begin{lstlisting}
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
+&SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
+\end{lstlisting}
+    
 \newpage
 
 \section{Complex Stoichiometry}
@@ -5353,25 +5378,21 @@ In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and
       FUEL='PROPANE'
       SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT'
       SOOT_H_FRACTION=0.
-      NU=-1,-3,2,4,1
-      CRITICAL_FLAME_TEMPERATURE=1447.
-      AUTO_IGNITION_TEMPERATURE=450. /
+      NU=-1,-3,2,4,1 /
 &REAC ID='R2'
       FUEL='CARBON MONOXIDE'
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU=-1,-0.5,1
-      AUTO_IGNITION_TEMPERATURE=609.
       PRIORITY=2 /
 &REAC ID='R3'
       FUEL='SOOT'
       SPEC_ID_NU='SOOT','OXYGEN','CARBON DIOXIDE'
       NU=-1,-1,1
-      AUTO_IGNITION_TEMPERATURE=609.
       PRIORITY=2 /
 \end{lstlisting}
 By specifying {\ct PRIORITY=2} for reactions {\ct R2} and {\ct R3}, you are assuming that the first reaction, {\ct R1}, occurs first, followed by {\ct R2} and {\ct R3}. This sequence allows for the build-up of soot and CO in compartments that are oxygen starved.
 
-Notice in this reaction scheme that a {\ct CRITICAL\_FLAME\_TEMPERATURE} is applied to the first reaction but not the second and third because the default extinction model is only applied to the first of multiple fast reactions. For more information on extinction, see Section~\ref{info:extinction}.
+Note that in this reaction scheme, the extinction model is applied to the first reaction but not the second and third because the default extinction model is only applied to the first of multiple fast reactions. For more information on extinction, see Section~\ref{info:extinction}.
 
 
 
@@ -5558,8 +5579,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
       SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU = -1,-3.5,3,4
-      CRITICAL_FLAME_TEMPERATURE = 730. /
+      NU = -1,-3.5,3,4 /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
@@ -7468,7 +7488,7 @@ The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a w
 \end{lstlisting}
 For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
 \begin{lstlisting}
-&INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' / 
+&INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
 &PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
@@ -10076,6 +10096,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ADIABATIC}                         & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}       & Real            & Section~\ref{info:ignition}               & $^\circ$C           & -273                    \\ \hline
 {\ct BACKING}                           & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
 {\ct BURN\_AWAY}                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
