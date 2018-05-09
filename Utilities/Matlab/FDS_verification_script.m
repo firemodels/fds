@@ -90,7 +90,6 @@ disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
 disp('vegetation...');                    vegetation
-disp('radiation_gas_panel...');           radiation_gas_panel
 disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
