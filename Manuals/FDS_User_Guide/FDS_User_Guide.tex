@@ -5162,7 +5162,7 @@ Modeling suppression of a fire due to the introduction of a suppression agent li
 
 The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) is based on the {\em minimum extinguishing concentration} (MEC) that results from a cup burner experiment\footnote{Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler} refers to the {\em limiting oxygen index} (LOI) or just OI as the basis for determining a critical flame temperature.}, where a small gas or liquid burner is extinguished by gradually diluting the co-flowing air with a diluent like nitrogent. The MEC is the volume fraction of the diluent in the air stream when extinguishment occurs. The CFT is the adiabatic flame temperature of a stoichiometric mixture of the fuel and oxygen plus the diluent at the MEC.
 
-Values for the CFT are listed in Table~\ref{tab:CFT}. These values are appropriate for self-extinction or extinction via nitrogen dilution of the air stream. For all other cases, set the CFT on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700~K). If you know the MEC for a particular combination of fuel and diluent, the CFT be calculated from the following equation:
+Values for the CFT are listed in Table~\ref{tab:CFT}. These values are appropriate for self-extinction or extinction via nitrogen dilution of the air stream. For all other cases, set the CFT on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1550~\si{\degreeCelsius}. If you know the MEC for a particular combination of fuel and diluent, the CFT be calculated from the following equation:
 \begin{align}
 T_{\rm CFT} = T_0 +  X_{\rm O_2,\infty} \left( 1 - \frac{\mbox{MEC}}{100} \right) \frac{\Delta H_{\rm c}/r}{n \, \overline{c_p}}
 \end{align}
@@ -5200,7 +5200,7 @@ Fuel              & Formula          & MEC (N$_2$ \%)    & $T_{\rm CFT}$ ($^\cir
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 33.0        & 1564 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 32.3        & 1573 \\ \hline
 {\ct TOLUENE}     & C$_7$H$_8$       & 24.4        & 1755 \\ \hline
-All other species &                  &             & 1427 \\ \hline
+All other species &                  &             & 1550 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
