@@ -5160,45 +5160,47 @@ The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed infor
 
 Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a closed compartment is challenging because the relevant physical mechanisms typically occur at subgrid-scale. Flames are extinguished due to lowered temperatures and dilution of the fuel or oxygen supply. There are two flame extinction algorithms in FDS that attempt to gauge whether or not combustion is viable based on the local temperature and the local oxygen and fuel concentrations. In brief, for combustion to occur there must be sufficient oxygen and fuel to raise the cell temperature from its current value to a {\em critical flame temperature}. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The {\ct EXTINCTION\_MODEL} called {\ct 'EXTINCTION~1'} is the default in Simple Very Large Eddy Simulation (SVLES) mode, whereas {\ct 'EXTINCTION 2'} is used in all other modes. The difference between the two models is that for {\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermo-physical gas species properties are not invoked. The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
 
-The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT), which is the adiabatic flame temperature at the lower flammability limit, is the key parameter in both extinction models. It is set on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700~K) and default values for select fuels are listed in Table~\ref{tab:CFT}. If you are using an effective heat of combustion or an unlisted fuel, the CFT\footnote{Beyler denotes the CFT as T(OI), where OI stands for Oxygen Index.} can be calculated from the following equation~\cite{SFPE:Beyler}:
+The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) is based on the {\em minimum extinguishing concentration} (MEC) that results from a cup burner experiment\footnote{Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler} refers to the {\em limiting oxygen index} (LOI) or just OI as the basis for determining a critical flame temperature.}, where a small gas or liquid burner is extinguished by gradually diluting the co-flowing air with a diluent like nitrogent. The MEC is the volume fraction of the diluent in the air stream when extinguishment occurs. The CFT is the adiabatic flame temperature of a stoichiometric mixture of the fuel and oxygen plus the diluent at the MEC.
+
+Values for the CFT are listed in Table~\ref{tab:CFT}. These values are appropriate for self-extinction or extinction via nitrogen dilution of the air stream. For all other cases, set the CFT on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700~K). If you know the MEC for a particular combination of fuel and diluent, the CFT be calculated from the following equation:
 \begin{align}
-T_{\rm CFT} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_{\rm c}}{n \, \overline{c_p}}
+T_{\rm CFT} = T_0 +  X_{\rm O_2,\infty} \left( 1 - \frac{\mbox{MEC}}{100} \right) \frac{\Delta H_{\rm c}/r}{n \, \overline{c_p}}
 \end{align}
 where
 \begin{tabbing}
-$\Delta H_{\rm c}$  \hspace{0.5in}   \=  Heat of combustion of the fuel (kJ/mol)  \\
-LFL                                  \>  Lower Flammability Limit, expressed as the volume fraction of fuel (\%)  \\
+$T_0$     \hspace{0.5in}             \=  Initial temperature of the fuel/air mixture (ambient conditions) (K) \\
+$X_{\rm O_2,\infty}$                 \>  Ambient oxygen volume fraction (mol/mol) \\
+MEC                                  \>  Minimum Extinguishing Concentration, expressed as a volume fraction (\%)  \\
+$\Delta H_{\rm c}/r$                 \>  Heat of combustion per mole of oxygen consumed (kJ/mol)  \\
 $n$                                  \>  Number of moles of products of combustion per mole of fuel/air mixture  \\
-$\overline{c_p}$                     \>  Heat capacity of products of combustion (kJ/(mol$\cdot$K)  \\
-$T_0$                                \>  Initial temperature of the fuel/air mixture (ambient conditions) (K) \\
-$T_{\rm CFT}$                        \>  Adiabatic flame temperature of a lower flammability limit mixture (K)
+$\overline{c_p}$                     \>  Average heat capacity of products of combustion (kJ/(mol$\cdot$K) in the range $T_0$ to $T_{\rm CFT}$ 
 \end{tabbing}
 
 \begin{table}[!ht]
-\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels~\cite{SFPE:Beyler}.}
+\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels.}
 \vspace{0.1in}
 \label{tab:CFT}
 \begin{center}
 \begin{tabular}{|l|l|c|c|}
 \hline
-Fuel              & Formula & LFL (\%)      & $T_{\rm CFT}$ ($^\circ$C)   \\ \hline \hline
-{\ct ACETONE}     & C$_3$H$_6$O      & 2.6     & 1457 \\ \hline
-{\ct ACETYLENE}   & C$_2$H$_2$       & 2.7     & 1267 \\ \hline
-{\ct BENZENE}     & C$_6$H$_6$       & 1.3     & 1537 \\ \hline
-{\ct DODECANE}    & C$_{12}$H$_{26}$ & 0.6     & 1507 \\ \hline
-{\ct ETHANE}      & C$_2$H$_6$       & 3.0     & 1357 \\ \hline
-{\ct ETHANOL}     & C$_2$H$_6$O      & 3.3     & 1397 \\ \hline
-{\ct ETHYLENE}    & C$_2$H$_4$       & 2.7     & 1337 \\ \hline
-{\ct HYDROGEN}    & H$_2$            & 4.0     & 807  \\ \hline
-{\ct ISOPROPANOL} & C$_3$H$_8$O      & 2.2     & 1427 \\ \hline
-{\ct METHANE}     & CH$_4$           & 5.0     & 1507 \\ \hline
-{\ct METHANOL}    & CH$_3$OH         & 6.7     & 1257 \\ \hline
-{\ct N-DECANE}    & C$_{10}$H$_{22}$ & 0.75    & 1507 \\ \hline
-{\ct N-HEPTANE}   & C$_7$H$_{16}$    & 1.05    & 1507 \\ \hline
-{\ct N-HEXANE}    & C$_6$H$_{14}$    & 1.2     & 1497 \\ \hline
-{\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.9     & 1507 \\ \hline
-{\ct PROPANE}     & C$_3$H$_8$       & 2.1     & 1447 \\ \hline
-All other species &                  &         & 1427 \\ \hline
+Fuel              & Formula          & MEC (N$_2$ \%)    & $T_{\rm CFT}$ ($^\circ$C)   \\ \hline \hline
+{\ct ACETONE}     & C$_3$H$_6$O      & 28.0        & 1670 \\ \hline
+{\ct ACETYLENE}   & C$_2$H$_2$       & 58.0        & 1312 \\ \hline
+{\ct BENZENE}     & C$_6$H$_6$       & 30.3        & 1683 \\ \hline
+{\ct BUTANE}      & C$_4$H$_{10}$    & 31.0        & 1594 \\ \hline
+{\ct DODECANE}    & C$_{12}$H$_{26}$ & 33.0        & 1577 \\ \hline
+{\ct ETHANOL}     & C$_2$H$_6$O      & 34.6        & 1529 \\ \hline
+{\ct ETHYLENE}    & C$_2$H$_4$       & 45.0        & 1441 \\ \hline
+{\ct HYDROGEN}    & H$_2$            & 72.0        & 870  \\ \hline
+{\ct ISOPROPANOL} & C$_3$H$_8$O      & 30.0        & 1608 \\ \hline
+{\ct METHANE}     & CH$_4$           & 24.2        & 1663 \\ \hline
+{\ct METHANOL}    & CH$_3$OH         & 40.8        & 1395 \\ \hline
+{\ct N-HEPTANE}   & C$_7$H$_{16}$    & 31.2        & 1617 \\ \hline
+{\ct N-HEXANE}    & C$_6$H$_{14}$    & 29.0        & 1646 \\ \hline
+{\ct N-OCTANE}    & C$_8$H$_{18}$    & 33.0        & 1564 \\ \hline
+{\ct PROPANE}     & C$_3$H$_8$       & 32.3        & 1573 \\ \hline
+{\ct TOLUENE}     & C$_7$H$_8$       & 24.4        & 1755 \\ \hline
+All other species &                  &             & 1427 \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
