@@ -113,6 +113,20 @@ hh(1)=loglog(dxx,erx,'k+-'); hold on
 hh(2)=loglog(dyy,ery,'rsq-');
 hh(3)=loglog(dzz,erz,'bo-');
 
+error_tol = 0.005;
+if min(erx)>error_tol
+    display(['Error: ht3d_nx out of tolerance'])
+    erx
+end
+if min(ery)>error_tol
+    display(['Error: ht3d_ny out of tolerance'])
+    ery
+end
+if min(erz)>error_tol
+    display(['Error: ht3d_nz out of tolerance'])
+    erz
+end
+
 hh(4)=loglog(dxx,100*dxx,'k--');
 hh(5)=loglog(dxx,500*dxx.^2,'k-');
 

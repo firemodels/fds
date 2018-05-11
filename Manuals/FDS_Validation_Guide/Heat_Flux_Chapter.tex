@@ -2,9 +2,9 @@
 
 \chapter{Heat Flux}
 
-Radiative heat transfer is included in FDS via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model.  The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model. Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases. The absorption and scattering coefficients are based on Mie theory.
+This chapter contains a wide variety of heat flux measurements, ranging from less than a kW/m$^2$ from very small methane gas burners up to about 150~kW/m$^2$ in full-scale compartment fires. The results are broken up into two broad categories---heat flux to compartment walls, ceiling, and floor, and heat flux to ``targets''. A target is any object of interest in a fire simulation, like a steel beam or electrical cable.
 
-This chapter contains a wide variety of heat flux measurements, ranging from less than a kW/m$^2$ from very small methane gas burners up to about 150~kW/m$^2$ in full-scale compartment fires.
+There are also sections that look at special cases, like the heat flux measured at a liquid fuel surface, attenuation of thermal radiation by water sprays, and convective heat flux.
 
 
 \clearpage
@@ -635,6 +635,9 @@ HCe4    &  2.56     & 0.35    & 3.82      &     $-z$     & Ceiling              
 \clearpage
 
 \section{Heat Flux to Targets}
+
+The heat flux measurements are broken up into two broad categories---heat flux to walls, floors, and ceiling, and heat flux to ``targets''. A target is any object of interest in a fire, like a steel beam or electrical cable. The following subsections consider heat flux to targets.
+
 
 \subsection{Fleury Experiments}
 

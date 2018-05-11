@@ -729,41 +729,7 @@ $\bar{\kappa}_i$ and $\bar{\gamma}_i$ in temperature and/or in wavenumber is
 performed by RADCAL when necessary. If the temperature sought is out of the
 tabulated data range, then the data at the nearest temperature are used.
 
-\chapter{Alternative Extinction Models}
-\label{alternative_extinction_models}
 
-This section contains alternatives to the default flame extinction model in FDS.
-
-\section{A Simple Model of Flame Extinction}
-\label{o2_based_model}
-
-\subsubsection*{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
-
-A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the available oxygen from the atmosphere.  The classic example of this behavior is a candle burning within an inverted jar.  This same concept has been applied within FDS to determine the conditions under which the local ambient oxygen concentration will no longer support a diffusion flame.  In this appendix, the critical adiabatic flame temperature concept is used to estimate the local ambient oxygen concentration at which extinction will occur.
-
-Consider a control volume characterized by a bulk temperature, $T_m$, a mass, $m$, an average specific heat, $\overline{c_p}$, and an oxygen mass fraction, $Y_\OTWO$.  Complete combustion of the oxygen within the control volume would release a quantity of energy given by:
-\be
-   Q = m \, \hat{Y}_\OTWO \, \left( \frac{\Delta H}{r_\OTWO}  \right)  \label{bbb}
-\ee
-where $\Delta H/r_\OTWO$ has a relatively constant value of approximately 13100~kJ/kg for most fuels of interest for fire applications \cite{Huggett:1}. Under adiabatic conditions, the energy released by combustion of the available oxygen within the control volume would raise the bulk temperature of the gases within the control volume by an amount equal to:
-\be
-   Q = m \, \overline{c_p} \, (T_f - T_m)  \label{eee}
-\ee
-The average specific heat of the gases within the control volume can be calculated based on the composition of the combustion products as:
-\be
-   \overline{c_p} = \frac{1}{(T_f-T_m)} \, \sum_\alpha \int_{T_m}^{T_f} c_{p,\alpha} (T) \, dT
-\ee
-To simplify the analysis, the combustion products are assumed to have an average specific heat over the temperature range of interest. The relationship between the oxygen mass fraction within the control volume and the adiabatic temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb}) and (\ref{eee}):
-\be
-   \hat{Y}_{\OTWO,lim} = \frac{ \overline{c_p} (T_f-T_m) }{\Delta H/r_\OTWO}
-\ee
-If $\hat{Y}_{\OTWO} < \hat{Y}_{\OTWO,\lim}$ then combustion is not allowed and  $\Delta \hat{Y}_{F}$ is set to 0.
-
-As an example, the critical adiabatic flame temperature can be assumed to have a constant value of approximately 1700~K for hydrocarbon diffusion flames, as suggested by Beyler \cite{SFPE:Beyler}. The combustion products can have an average specific heat of \SI{1.2}{kJ/(kg.K)} which is a value similar to that of nitrogen, the primary component of the products. Then, the relationship between the limiting oxygen mass fraction and the bulk temperature of a control volume is given by:
-\be
-   \hat{Y}_{\OTWO,\lim} = \frac{ \overline{c_p} (T_{\rm CFT}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{13100}  \label{extinction_model}
-\ee
-For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction would evaluate to $\hat{Y}_{\OTWO,\lim}=0.13$.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration at extinction of flames by dilution of air with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
 
 
