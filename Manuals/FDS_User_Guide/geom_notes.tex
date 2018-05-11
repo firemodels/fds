@@ -922,73 +922,833 @@ Figure \ref{figure:facelist}.
 
 \clearpage
 
-\section{Cut Cell Immersed Boundary Method (CCIBM) Technical Notes}
+\section{Cut Cell Immersed Boundary Method (CC\_IBM) Technical Notes}
 
-\paragraph{Abstract} In this chapter, we discuss implementation of a hybrid cutcell direct-forcing immersed boundary method (CIBM) to handle complex geometry in the Fire Dynamics Simulator (FDS).  Particular attention is paid to the challenges associated with thin (zero thickness) obstructions in variable density flows with heat and mass transfer.  The triangular facet is chosen as the basic element for construction of complex geometry.  Reasons behind this choice are discussed.  A linked-list data structure for the facets is presented.  One-sided differencing and methods for overcoming numerical diffusion issues are discussed.  Verification cases for momentum, heat, and mass transport are presented.
 
 \subsection{Introduction}
 
-The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immersed boundary method (IBM) to handle flow obstructions.  Generally, obstructions are restricted to conform to the underlying Cartesian mesh, leading to stair-step approximations to curvilinear geometries (see Fig.~\ref{fig:circle}).
 
-\begin{figure}
-\begin{center}
-\begin{tabular}{cc}
-\begin{tikzpicture}
-\draw[line width=1mm,fill=lightgray] (1.8,1.8) circle [radius=1.5];
-\draw[help lines] (0,0) grid (5,5);
-\draw[ultra thick,->] (2.66,4.5) -- (3.33,4.5);
-\draw[ultra thick,->] (2.66,3.5) -- (3.33,3.5);
-\draw[ultra thick,->] (3.66,4.5) -- (4.33,4.5);
-\draw[ultra thick,->] (3.66,3.5) -- (4.33,3.5);
-\draw[thick] (2.665,3.0255) -- (3.335,3.9745);
-\draw[fill] (3.335,3.9745) circle [radius=0.1];
-\end{tikzpicture}
-\hspace{1cm}&\hspace{1cm}
-\begin{tikzpicture}
-\draw[line width=1mm,fill=lightgray] (1,0) to (1,1) to (0,1) to (0,2) to (1,2) to (1,3) to (3,3) to (3,1) to (2,1) to (2,0) to (.95,0);
-\draw[help lines] (0,0) grid (5,5);
-\end{tikzpicture}
-\end{tabular}
-\caption{(Left) Desired geometry (circle). (Right) FDS representation---a cell is solid if more than half its volume is occupied by the desired geometry.}
-\label{fig:circle}
-\end{center}
-\end{figure}
+\subsection{Computational Geometry engine for cut-cell definition in FDS}
 
 
-There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun:temp}.
-In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
+\subsubsection{Cut-cell definition scheme implementation notes}
 
-In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun:temp}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
 
-More elaborate schemes exist to obtain the velocity near the surface \cite{Balaras:temp,Choi:temp,McDermott:temp}.  But the emphasis here is on the implementation of a scheme to transport heat and mass near thin obstructions (an issue yet to be addressed in the literature).  Therefore, Fadlun's simple interpolation method is sufficient for momentum.   In 2D, complex surfaces are constructed from a series of connected line segments. In 3D, surfaces are constructed from triangular facets.  Our goal is to minimize numerical diffusion across thin obstructions arbitrarily oriented relative to the Cartesian mesh.  The cause of this diffusion is discussed in more detail below.
+\subsection{Scalar Transport discretization for Complex geometry}
 
-In the following sections, we first discuss the linked-list data structure used to connect the surface elements to the grid, similar to the wall cell type used in the basic FDS scheme.  Next, we illustrate the momentum scheme for both simple and complex flow geometries.  We then discuss the unique issues faced by the FDS flow solver for simulating variable density flows with thin obstructions not aligned with the mesh.  Hopefully, we can develop a scheme that handles these problems!
 
-\subsection{Data Structure}
+\subsubsection{Multispecies mass balance equations}
 
-\subsubsection{Block Geometry}
-
-In the basic FDS method, a wall cell (WC) is one face of a gas phase cell.  A WC derived type stores the indices of the gas phase cell\footnote{Here I am not getting into the difference between wall cell and 1D in-depth derived types.  When I say WC, in most cases I mean precisely {\ct WC\%ONE\_D}.}.  It also stores face values of density, species mass fraction, and temperature, and the wall-normal cell dimension used to construct gradients.  The relevant variables in the code are:
-
-\begin{table}[h!]
-\begin{tabular}{ll}
-{\ct WC\%IIG, WC\%JJG, WC\%KKG} & gas phase cell indices \\
-{\ct WC\%UW}                    & wall-normal velocity component \\
-{\ct WC\%RHO\_F}                & gas phase mass density at the wall \\
-{\ct WC\%ZZ\_F}                 & lumped species mass fraction at the wall \\
-{\ct WC\%TMP\_F}                & temperature at the wall \\
-{\ct WC\%DN}                    & wall-normal cell dimension \\
-{\ct WC\%IOR}                   & orientation from wall to cell center
-\end{tabular}
-\end{table}
-
-The face values serve as Dirichlet boundary conditions.  If Neumann boundary conditions are needed, they are constructed from a one-sided difference.  For example, the temperature gradient at the wall is obtained from
+Consider a set of gaseous, reacting  chemical species $\alpha=1,\dots,N$ flowing on a given spatial domain $\Omega \in \mathbb{R}^n, \; n=2,3$, with boundary $\partial \Omega$, paramaterized by an Eulerian reference frame $N$. These species are transported on a given point $\mathbf{x}$ in space with velocity $\mathbf{v}_\alpha(\mathbf{x},t)$ respect to $N$, and a mass weighted average velocity $\mathbf{v}(\mathbf{x},t)$
+%
 \begin{equation}
-\frac{\partial T}{\partial n} \approx \frac{T_g - T_f}{\delta n/2}
+  \mathbf{v} = \frac{ \sum\limits_{\alpha=1}^{N} {\rho_\alpha \mathbf{v}_\alpha}}{\rho} \; , \; \rho =  \sum\limits_{\alpha=1}^{N} {\rho_\alpha} \label{eq:veldens}
 \end{equation}
+%
+where space and time dependencies are not shown for simplicity, $\rho_\alpha(\mathbf{x},t) = \rho(\mathbf{x},t) Y_\alpha (\mathbf{x},t)$, $\rho$ is the mixture density and $Y_\alpha = \rho_\alpha / \rho$ is species $\alpha$ mass fraction. Definition: $\rho_\alpha(\mathbf{x},t)$ is the amount of mass of species $\alpha$ on a given differential volume $d\Omega$ centered in $\mathbf{x}$, while  $\rho(\mathbf{x},t)$ is the mass of \textit{all} species in $d\Omega$.
 
-\subsubsection{Complex Geometry}
+As defined, each species $\alpha$ has a velocity $\mathbf{v}_\alpha(\mathbf{x},t)$ which is different from the average mixture velocity $\mathbf{v}(\mathbf{x},t)$. This difference quantity is called the \textit{diffusion velocity} of species $\alpha$, $\mathbf{V}_\alpha$
+%
+\begin{equation}
+   \mathbf{V}_\alpha(\mathbf{x},t) = \mathbf{v}_\alpha(\mathbf{x},t) - \mathbf{v}(\mathbf{x},t) \label{eq:vdiff}
+\end{equation}
+%
 
+The transport-reaction mass balance equation for each individual species $\alpha$ is given by
+%
+\begin{equation}
+   \frac{\partial \rho_\alpha}{ \partial t} + \nabla \cdot (\rho_\alpha  \mathbf{v}_\alpha) = \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal}
+\end{equation}
+% 
+in $\Omega$, where $\dot{m}_\alpha'''(\mathbf{x},t)$ is the chemical reaction volume source (area source for $n=2$, sink if negative) of species $\alpha$. The problem is completely defined stating initial and boundary conditions for $\rho_\alpha(\mathbf{x},t)$ as well as time dependent fields $\mathbf{v}_\alpha(\mathbf{x},t)$, $\dot{m}_\alpha'''(\mathbf{x},t)$.
+
+Noting that $ \rho_\alpha = \rho Y_\alpha$, and using equation~\eqref{eq:vdiff} in the previous
+%
+\begin{equation}
+   \frac{\partial \rho Y_\alpha}{ \partial t} + \nabla \cdot \left( \rho Y_\alpha  (\mathbf{v}+\mathbf{V}_\alpha) \right) = \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal2}
+\end{equation} 
+%
+
+We see from these equations that the evolution of these species can be considered as a function of the mixture $\rho$ and average $\mathbf{v}$, and written as such, depending on the other species through equations~\eqref{eq:veldens}, and through the mass conservation statement on reactive sources
+%
+\begin{equation}
+  \sum\limits_{\alpha=1}^{N} \dot{m}_\alpha'''(\mathbf{x},t) = 0
+\end{equation}
+%  
+
+In equation~\eqref{eq:bal2}, the following convective and diffusive fluxes per unit time and area are found:
+%
+\begin{eqnarray}
+  \mathbf{J_{c \alpha}} &=& \rho Y_\alpha  \mathbf{v} \label{eq:jc} \\
+  \mathbf{J_{d \alpha}} &=& \rho Y_\alpha  \mathbf{V}_\alpha \label{eq:jd}
+\end{eqnarray} 
+%
+The definition of diffusion velocities $\mathbf{V}_\alpha$ is a central component of multispecies mass transport. For atmospheric combustion we consider the binary diffusion of all species respect to Nitrogen, the most abundant (\textit{background}) species. This simplification allows us to uncouple the diffusive fluxes, using Ficks Law of diffusion
+%
+\begin{equation}
+   \mathbf{J_{d \alpha}} = \rho Y_\alpha  \mathbf{V}_\alpha = - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \label{eq:fick}
+\end{equation}
+%
+where $D_\alpha$ is the binary diffusivity coefficient respect to the background species.
+
+Using this last expression in equation~\eqref{eq:bal2} we arrive to the basic form of the species balance equations based on mass fractions, and used in FDS
+%
+\begin{equation}
+   \frac{\partial \rho Y_\alpha}{ \partial t} + \nabla \cdot ( \rho Y_\alpha  \mathbf{v} ) = \nabla \cdot ( \rho D_\alpha \boldsymbol{\nabla} Y_\alpha ) + \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal3}
+\end{equation}
+%
+
+A spatially discretized version of the previous equations in a domain divided in $n_{tot}$ computational cells is given by:
+
+%
+\begin{equation}
+\left[ \mathbf{M} \right] \frac{\partial}{\partial t} \left\{ \mathbf{\rho Y_\alpha} \right\} + \left[ \mathbf{A}_{adv}  \right] \left\{ \mathbf{\rho Y_\alpha} \right\} = \left\{ \mathbf{F_{diff \alpha}} \right\} + \left\{  \mathbf{\dot{m}_\alpha'''} \right\} +  \left\{ \mathbf{F_{BC \alpha}} \right\} \; , \; \alpha=1,\dots,N \label{eq:discbal3}
+\end{equation}
+%
+where the vector $\left\{ \mathbf{\rho Y_\alpha} \right\}$ of size $n_{tot}$ is the vector of unknowns (assuming one unknown per computational cell), matrices $\left[ \mathbf{M} \right]$ and $ \left[ \mathbf{A_{adv}}  \right]$ are the systems mass and advection matrices, and $\left\{ \mathbf{F_{diff \alpha}} \right\}$, $\left\{  \mathbf{\dot{m}_\alpha'''} \right\}$, $\left\{ \mathbf{F_{BC \alpha}} \right\}$ are vectors due to diffusion, reaction and boundary conditions. Note that $\left\{ \mathbf{F_{diff \alpha}} \right\}$ is a function of the equations unknowns $\rho Y_\alpha$. In the next section we recast this term in a format amenable to be defined discretely as matrix-vector products.
+
+
+\subsubsection*{Diffusive flux decomposition for Implicit time integration}
+
+Consider the exact decomposition of the diffusive flux in equations~\eqref{eq:bal3}
+%
+\begin{equation}
+   \mathbf{J_{d \alpha}} = - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha =  - \left( D_\alpha \boldsymbol{\nabla} ( \rho Y_\alpha) 
+   - \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \; ( \rho Y_\alpha) \right) \label{eq:expdfl2} 
+\end{equation}
+%
+which, substituted in the balance equation~\eqref{eq:bal3} leads to:
+%
+\begin{equation}
+ \frac{\partial \rho Y_\alpha}{ \partial t} + \nabla \cdot \left(  \mathbf{v}' (\rho Y_\alpha)   \right) = - \nabla \cdot \left(  \mathbf{J_{d \alpha}'} \right) + \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal4}
+\end{equation}
+%
+where
+%
+\begin{eqnarray}
+  \mathbf{v}' &=& \mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho  \label{eq:vprime} \\
+   \mathbf{J_{d \alpha}'} &=& -D_\alpha \boldsymbol{\nabla}  (\rho Y_\alpha )  \label{eq:jdaprime}
+\end{eqnarray}
+%
+are the sum $\mathbf{v}'$ of the fluid mixture velocity $\mathbf{v}$ and a diffusion driven velocity term for species $\alpha$ in presence of density gradients $D_\alpha \boldsymbol{\nabla} \rho / \rho $, and a constant density diffusive flux term $\mathbf{J_{d \alpha}'}$. 
+
+A spatially discretized version of equations~\eqref{eq:bal4} in $n_{tot}$ computational cells is given by:
+%
+\begin{equation}
+\left[ \mathbf{M} \right] \frac{\partial}{\partial t} \left\{ \mathbf{\rho Y_\alpha} \right\} + \left( \left[ \mathbf{A}_{adv \alpha}'  \right] +\left[ \mathbf{A}_{diff \alpha}' \right] \right) \left\{ \mathbf{\rho Y_\alpha} \right\}   =  \left\{  \mathbf{\dot{m}_\alpha'''} \right\} +  \left\{ \mathbf{F_{BC \alpha}} \right\} \; , \; \alpha=1,\dots,N \label{eq:discbal4}
+\end{equation}
+%
+where in this case $ \left[ \mathbf{A}_{adv \alpha}'  \right]$ is the advection matrix due to the velocity field $\mathbf{v}'$, and  $\left[ \mathbf{A}_{diff \alpha}' \right]$ is the diffusion matrix due to $ \mathbf{J_{d \alpha}'} $. Note also that boundary conditions might not only produce right hand side entries, but also affect the advection and diffusion discretization matrices.
+
+
+
+%The spatially discretized version of system~\eqref{}
+
+
+
+\subsubsection{Finite Volume method on staggered grid in 2D}
+
+The finite volume discretization (FV) starts by considering the integral form of equation~\eqref{eq:bal3} over a cell control volume $\Omega_{ii}$. For 
+cell $ii$ individualized by the index pair $(i,j)$ we have
+%
+\begin{equation}
+ \int_{\Omega_{ii}} {\frac{\partial \rho Y_\alpha}{\partial t}} d \Omega + \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot  \left(  \rho Y_\alpha \mathbf{v} \right)
+      } d \Omega  = -\int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}}  \right)  } d \Omega + \int_{\Omega_{ii}} { \dot{m}_\alpha''' } d \Omega \label{eq:intconvdiff}
+\end{equation}
+%
+Assuming a time independent control volume, the time derivative and source terms are approximated by
+%
+\begin{eqnarray}
+  \int_{\Omega_{ii}} {\frac{\partial \rho Y_\alpha}{\partial t}} d \Omega & = & \frac{\partial}{\partial t} \int_{\Omega_{ii}} {\rho Y_\alpha} d \Omega 
+  = \frac{\partial \widetilde{\rho \: Y_\alpha }_{i,j}}{\partial t} V_{i,j} \\
+  \int_{\Omega_{ii}} { \dot{m}_\alpha''' } d \Omega & = & \widetilde{ \dot{m}_\alpha''' }_{i,j} V_{i,j} \label{eq:intcons}
+\end{eqnarray}
+%
+where $V_{i,j}$ is the volume of cell $(i,j)$. These cell averaged quantities (denoted by tildes) match the cell centroid values of the corresponding scalar fields up to second order spatial accuracy. A consequence of this known fact is that using a second order finite difference method (FD), or a \textit{difference} finite volume approach with same definition 
+ for diffusion flux spatial derivatives and interpolation on the advective term, will lead to identical discretization matrices (they will vary up to a volume factor) on uniform cartesian grids. The difference between these two numerical discretization methods arises from the source $\dot{m}_\alpha''' $, which for a given cell is the cell centroid value $\dot{m}'''_{\alpha (i,j)}$ in FD, and it is the cell average $ \widetilde{ \dot{m}_\alpha''' }_{i,j}$ in FV. To discretize both diffusive and advective terms in equation~\eqref{eq:intconvdiff}, we make use of the divergence theorem. In the following we drop the tildes to simplify the notation, keeping in mind that using FV, quantities will always be cell or face averaged where it corresponds.
+
+\subsubsection*{FV spatial discretization of Diffusive term} \label{Sec:FVdiff}
+
+\subsubsection*{Ficks Law of diffusion}
+Consider Fick's law governing the diffusive flux of quantity $\rho Y_\alpha$, $ \mathbf{J_{d \alpha}} = - \rho \: D_\alpha \boldsymbol{\nabla} Y_\alpha$. This expression is used in explicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intcons} is 
+%
+\begin{equation}
+  \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}} \right)  } d \Omega = 
+  \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)  } d \Omega =
+  \int_{\partial \Omega_{ii}} { \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega 
+\end{equation}
+%
+where $\partial \Omega_{ii}$ is the boundary surface of cell $ii$, and $\hat{\mathbf{n}}_{ii}$ is the normal unit vector pointing outside of the cell control volume. Assuming a number of \textit{planar} faces $k=1,...,nf_c$ (with constant  $\hat{\mathbf{n}}_{ii,k}$) describe the surface of the cell, we have
+%
+\begin{equation}
+    \int_{\partial \Omega_{ii}} { \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega = \sum^{nf_c}_{k=1} 
+    \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:discfvdiff}
+\end{equation}
+%
+where the last term in parenthesis is the average value of $ \mathbf{J_{d \alpha}} $ over face $k$, and $A_k$ is the corresponding area. 
+%
+\begin{figure}[h]
+      %\centering
+      \includegraphics[trim = 60mm 40mm 60mm 30mm, clip,
+       width=0.49\linewidth]{../../../fig/fds/CellsFVDiscretization.png} 
+      \includegraphics[trim = 60mm 40mm 60mm 30mm, clip,
+       width=0.49\linewidth]{../../../fig/fds/CellsFVHiXBc.png}        
+      \put(-350,-10){(a)}    
+      \put(-120,-10){(b)}
+      \caption{Finite volume discretization in 2D: (a) Control volume of staggered cell $i,j$ individualized also by single index $ii$.  (b) Low $x$ boundary cell. In face $(\mathbf{ILO_f},j)$, corresponding to $\partial \Omega$, boundary conditions are derived.}
+	\label{Fig:FVdisc}
+\end{figure}
+%
+We use centered differences to estimate the $\boldsymbol{\nabla} Y_\alpha$ at each cell face. See figure~\ref{Fig:FVdisc}a. Being $[\rho D_\alpha]_{i,j}$ a cell centered quantity on the staggered cell, we have for the east face ($ii,k_e \rightarrow i+1/2,j$) of a generic 2D cell:
+%
+\begin{eqnarray}
+   \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_{i+1/2,j} \cdot \hat{\mathbf{n}}_{ii,ke} \: A_{i+1/2,j} & = &  
+   -[\rho D_\alpha]_{i+1/2,j} \frac{Y_{\alpha i+1,j}-Y_{ \alpha i,j}}{\Delta x_{f(i)}} \Delta y_{c(j)} \label{eq:diffii}
+\end{eqnarray} 
+%
+For the other adjacent cell $jj$, with index pair $(i+1,j)$ the normal unit vector is $\hat{\mathbf{n}}_{jj,kw}=-\hat{\mathbf{n}}_{ii,ke}$. Therefore the dot product becomes:
+%
+\begin{eqnarray}
+   \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_{i+1/2,j} \cdot \hat{\mathbf{n}}_{ii,kw} \: A_{i+1/2,j} & = &  
+   [\rho D_\alpha]_{i+1/2,j} \frac{Y_{\alpha i+1,j}-Y_{ \alpha i,j}}{\Delta x_{f(i)}} \Delta y_{c(j)} \label{eq:diffjj}
+\end{eqnarray} 
+%
+of opposite sign and same magnitude, as required by conservation.
+
+
+\subsubsection*{Constant density diffusive flux for implicit time integration}
+
+Now consider $ \mathbf{J_{d \alpha}'} = - D_\alpha \boldsymbol{\nabla} \left(\rho Y_\alpha \right)$, used in implicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intcons} is 
+%
+\begin{equation}
+  \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}'} \right)  } d \Omega = 
+  \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left( -  D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right)  } d \Omega =
+  \int_{\partial \Omega_{ii}} {\left( -  D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega 
+\end{equation}
+%
+and in discrete form, we have
+%
+\begin{equation}
+    \int_{\partial \Omega_{ii}} {\left( -  D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega = \sum^{nf_c}_{k=1} 
+    \left( -  D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:discfvdiff2}
+\end{equation}
+%
+where the last term in parenthesis is the average value of $ \mathbf{J_{d \alpha}'} $ over face $k$. Following similar derivation as in the previous section, we have for the east face ($ii,k_e \rightarrow i+1/2,j$) of a generic 2D cell:
+%
+\begin{eqnarray}
+   \left( - D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right)_{i+1/2,j} \cdot \hat{\mathbf{n}}_{ii,ke} \: A_{i+1/2,j} & = &  
+   -[D_\alpha]_{i+1/2,j} \frac{ \left( \rho Y_\alpha \right)_{i+1,j} - \left( \rho Y_\alpha \right)_{i,j} } {\Delta x_{f(i)}} \Delta y_{c(j)}  \nonumber \\
+   & = &  K_x \:\left( \rho Y_\alpha \right)_{i,j}-K_x \: \left( \rho Y_\alpha \right)_{i+1,j} \label{eq:diffii2}
+\end{eqnarray} 
+where $K_x=[\D_\alpha]_{i+1/2,j} \frac{\Delta y_{c(j)}}{\Delta x_{f(i)}}$. By looking at equation~\eqref{eq:discfvdiff2}, we note that this term will add to the row $ii$ of a global diffusion matrix $\left[ \mathbf{A}_{diff \alpha} \right]$ corresponding to cell $(i,j)$ with single index $ii$. Now, for the adjacent cell indexed by $(i+1,j)$ with unique index $jj$, we have a term
+%
+\begin{equation}
+   - \left[ -[D_\alpha]_{i+1/2,j} \frac{\left( \rho Y_\alpha \right)_{i+1,j} - \left( \rho Y_\alpha \right)_{i,j}}{\Delta x_{f(i)}} \Delta y_{c(j)} \right] = -K_x \: \left( \rho Y_\alpha \right)_{i,j}+K_x \: \left( \rho Y_\alpha \right)_{i+1,j} \label{eq:diffjj2}
+\end{equation}
+%
+which will be added to the $jj$ equation of matrix $\left[ \mathbf{A}_{diff \alpha} \right]$, corresponding to the diffusive flux computed on face $i+1/2,j$. Therefore, the contribution of $x$-faces to $\left[ \mathbf{A}_{diff \alpha} \right]$ can be computed by assembling into the global matrix a set of face $2 \times 2$ matrices
+%
+\begin{equation}
+   K^x_{i+1/2,j} = \left[ \begin{array}{cc} K_x & -K_x \\ -K_x & K_x \end{array} \right]
+\end{equation}
+whose coefficients map from local $1,2$ indexes to global $ii,jj$ indexes. 
+For the north ($i,j+1/2$) $y$-face the corresponding local diffusion matrix is
+%
+\begin{equation}
+   K^y_{i,j+1/2} = \left[ \begin{array}{cc} K_y & -K_y \\ -K_y & K_y \end{array} \right]
+\end{equation}  
+%
+where $K_y=[D_\alpha]_{i,j+1/2} \frac{\Delta x_{c(i)}}{\Delta y_{f(j)}}$. Then, the global $\left[ \mathbf{A}_{diff \alpha} \right]$ is assembled looping through faces in the $x$ and $y$ directions. The same process would give a local matrix in the $z$ direction for 3D problems. The special case of domain boundary faces is discussed at the end of this section. The treatment of cell faces of irregular cut-cells that belong to the immersed geometry boundaries will be discussed in Section~\ref{sec:cc}.
+
+\subsubsection*{FV spatial discretization of Advective Term}
+
+The advective term of equation~\eqref{eq:intconvdiff} for cell $ii$ is discretized as
+%
+\begin{equation}
+  \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot  \left(  \rho Y_\alpha \mathbf{u} \right) } d \Omega =
+  \int_{\partial \Omega_{ii}} { \left( \rho Y_\alpha \mathbf{u} \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega =
+  \sum^{nf_c}_{k=1} \left( \rho Y_\alpha \mathbf{u} \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:fvadv}
+\end{equation}
+%
+where the velocity vector $\mathbf{u}$ can either refer to the advection velocity $\mathbf{v}$ or $\mathbf{v}'$. For the east ($ii,k_e \rightarrow i+1/2,j$)  face of a generic 2D cell:
+%
+\begin{eqnarray}
+  \left( \rho Y_\alpha \mathbf{u} \right)_{i+1/2,j} \cdot \hat{\mathbf{n}}_{ii,ke} \: A_{i+1/2,j} & = & 
+  \overline{\left[ \rho Y_\alpha \right]}_{i+1/2,j} u_{i,j} \: \Delta y_{c(j)} \nonumber \\
+  & = & \left(a^-_{i+1/2,j} \rho_{i,j} Y_{\alpha i,j} + a^+_{i+1/2,j} \rho_{i+1,j} Y_{\alpha i+1,j} \right) u_{i,j} \: \Delta y_{c(j)} \nonumber \\ 
+  & = & C^-_x  \left( \rho Y_{\alpha} \right)_{i,j}  +  C^+_x  \left( \rho Y_{\alpha} \right)_{i+1,j} \label{eq:advfvcx}
+\end{eqnarray}
+%
+where
+%
+\begin{eqnarray}
+   C^-_x & = &  a^-_{i+1/2,j} \: u_{i,j}  \: \Delta y_{c(j)} \\
+   C^+_x & = &  a^+_{i+1/2,j} \: u_{i,j} \:  \Delta y_{c(j)} 
+\end{eqnarray}
+%
+The coefficients $a^-_{i+1/2,j}$ and $a^+_{i+1/2,j}$ depend on the flux limiter chosen in the following form: 
+%
+\begin{eqnarray}
+   a^-_{i+1/2,j}  & = & \frac{1}{2} \left[ 1 + sgn(u_{i,j}) \left(1-B(r) \right) \right] \\
+   a^+_{i+1/2,j} & = & \frac{1}{2} \left[ 1 - sgn(u_{i,j}) \left(1-B(r) \right) \right]
+\end{eqnarray}
+%
+where $sgn(u_{i,j})$ is the sign of the face velocity and $B(r)=0$ implies \texttt{GODUNOV\_LIMITER} flux limiter, and $B(r)=1$ implies linear interpolation in cut-cell region faces (i.e. \texttt{CENTRAL\_LIMITER}). 
+
+Expression~\eqref{eq:advfvcx} defines the coefficients that will be added to row $ii$ of the global matrix $\left[ \mathbf{A}_{adv \alpha} \right]$. For cell $i+1,j$ indexed by single index $jj$ the corresponding term is
+%
+\begin{eqnarray}
+  \left( \rho Y_\alpha \mathbf{u} \right)_{i+1/2,j} \cdot \hat{\mathbf{n}}_{jj,ke} \: A_{i+1/2,j} & = & - \overline{\left[ \rho Y_\alpha \right]}_{i+1/2,j} u_{i,j} \: \Delta y_{c(j)} \nonumber \\
+  & = & -C^-_x \left( \rho Y_{\alpha} \right)_{i,j} - C^+_x \left( \rho Y_{\alpha} \right)_{i+1,j} \label{eq:advfvcxjj}
+\end{eqnarray}
+%
+Leading to the face ${i+1/2,j}$ contribution to the advective matrix $\left[ \mathbf{A}_{adv \alpha} \right]$
+%
+\begin{equation}
+   C^x_{i+1/2,j} = \left[ \begin{array}{cc} C^-_x & C^+_x \\ -C^-_x & -C^+_x \end{array} \right]
+\end{equation}
+%
+In similar manner for the north ($i,j+1/2$) $y$-face, the corresponding local advection matrix is
+%
+\begin{equation}
+   C^y_{i,j+1/2} = \left[ \begin{array}{cc} C^-_y & C^+_y \\ -C^-_y & -C^+_y \end{array} \right]
+\end{equation}
+%
+where $C^-_y = a^-_{i,j+1/2} \: v_{i,j}  \: \Delta x_{c(i)}$, $C^+_y = a^+_{i,j+1/2} \: v_{i,j}  \: \Delta x_{c(i)}$.
+
+
+\subsubsection*{FV treatment of boundary conditions} \label{sec:FVBCsCart}
+
+%We look how boundary conditions affect each term in the discrete equation for boundary cells. We will maintain the guard cell approach (centered interpolation and difference on the boundary face), although using the prescribed face value or face derivative (first order one sided difference or face value) leads to the same result. 
+
+We are interested in \texttt{SOLID\_BOUNDARY} conditions. This boundary condition specifies zero mass transfer at the solid boundary. Kinematically, is specifies zero normal velocity at the solid boundary. Therefore the total mass flux integral for species $\alpha$ on a face $w$ belonging to a solid boundary adjacent to cell $g$ is (see figure~\ref{Fig:FVdisc}b):
+%
+\begin{equation}
+    \dot{m}''_{\alpha,w} \; A_w = \left( \rho Y_\alpha \mathbf{v} - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right) \cdot \hat{\mathbf{n}}_{g,w} \: A_w = 0 \label{eq:fvsolidbc}
+\end{equation}
+% 
+where
+\begin{equation}
+    \dot{m}''_{\alpha,w} = \left( \rho Y_\alpha v_n - \rho D_\alpha \frac{\partial Y_\alpha}{\partial x_n} \right) = 0 \label{eq:fvsolidbc2}
+\end{equation}
+and from kinematics the normal advection velocity $\mathbf{v} \cdot \hat{\mathbf{n}}_{g,w}=v_n=0$, and from zero diffusive mass flux $\frac{\partial Y_\alpha}{\partial x_n}=0$. We note this last homogeneous Neumann condition on $Y_\alpha$ within our discretization as 
+%
+\begin{equation}
+   Y_{\alpha,w} = Y_{\alpha,g}
+\end{equation}
+%
+The no mass flux condition at solid boundaries essentially specifies a zero component added to $\left\{ \mathbf{F_{BC \alpha}} \right\}$ on our previous equations, and no discretization matrix entries due to boundary conditions in case of implicit integration.
+
+When using immersed boundary forcing to specify the no slip boundary conditions, a small value of normal velocity $v_{n,IB}$ (positive outside of cell $g$) is expected at face $w$. This is a consequence of the method used to reconstruct velocities at the boundary and the projection method used for time integration. Assuming a small known $v_{n,IB}$ and zero diffusive flux at face $w$, a transpiration mass flux:
+%
+\begin{equation}
+    \rho_w Y_{\alpha,w} v_{n,IB}  \: A_w 
+\end{equation}
+%
+is added to $\left\{ \mathbf{F_{BC \alpha}} \right\}$ with corresponding sign. 
+%Note that this essentially explicit approximation of transpiration fluxes is also taken in implicit integration.
+
+
+% Here, once implemented, also add SPECIFIED_MASS_FLUX BC.
+
+
+
+\subsubsection{Cut-Cell Approaches} \label{sec:cc}
+
+The treatment of irregular gas phase Eulerian grid faces and cells that remain after the inclusion of immersed bodies is described in this section. 
+We assume (see figure~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has been successful in defining the following:
+%
+\begin{itemize} 
+   \item All \texttt{GASPHASE} faces in the $x$ and $y$ directions, which are tagged as regular or cut-faces. 
+           For these, we also know vertex points, areas (length in 2D), and face centroid location. We know for faces that are \texttt{GASPHASE} 
+           cut-faces the $i,j$ coordinates of the face they belong to.
+  \item All \texttt{INBOUNDARY} faces, which arise from the intersection of the immersed bodies surface elements and the Eulerian 
+           grid cells. For these we know vertex points, areas (length in 2D), and face centroid location.
+   \item All \texttt{GASPHASE} cut cells and regular cells. We know which faces define their boundary. For cut-cells, a list of cut-faces 
+           (type \texttt{GASPHASE} and \texttt{INBOUNDARY}) is provided. Also we know their volume and face centroid location. 
+  %\item By boolean difference of the Eulerian grid set and \texttt{GASPHASE} cut/regular cells and faces, we know the ~\texttt{SOLID} cells and faces on the grid (\textit{we might be interested on the \texttt{SOLID} cells and faces}).
+\end{itemize}
+%  
+%
+\begin{figure}[h]
+      %\centering
+      \includegraphics[trim = 65mm 50mm 70mm 40mm, clip,
+       width=0.49\linewidth]{../../../fig/fds/CutCellsSketch.png} 
+      \includegraphics[trim = 65mm 40mm 50mm 30mm, clip,
+       width=0.49\linewidth]{../../../fig/fds/CutCellsBCSketch.png}        
+      \put(-350,-10){(a)}    
+      \put(-120,-10){(b)}
+      \caption{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
+	\label{Fig:FVdiscCC}
+\end{figure}
+%
+\subsubsection{CC discretization of Diffusive term}  \label{sec:CCdiff}
+
+%Here we discuss:
+%\begin{itemize} 
+%  \item How are \texttt{GASPHASE} cut faces treated.
+%  \item How are \texttt{INBOUNDARY} faces treated. Changes in diffusion matrix and $\mathbf{F_{bc}}$ for non homogeneous Neuman and Dirichlet.
+%\end{itemize}
+
+Consider the FV discretization of the diffusive term (equation~\eqref{eq:discfvdiff}) on cut-cell $ii$ in figure~\ref{Fig:FVdiscCC}b. We have
+%
+\begin{equation}
+    \int_{\partial \Omega_{ii}} { \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega = \sum^{nf_c=6}_{k=1} 
+    \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:discfvdiffcc}
+\end{equation}
+%
+
+In case of the diffusive like flux definition used in implicit time integration the expression is:
+%
+\begin{equation}
+    \int_{\partial \Omega_{ii}} { \left( - D_\alpha \boldsymbol{\nabla} \left(  \rho Y_\alpha \right) \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega = \sum^{nf_c=6}_{k=1} 
+    \left( - D_\alpha \boldsymbol{\nabla} \left(  \rho Y_\alpha \right) \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:discfvdiffcc2}
+\end{equation}
+%
+The $nf_c=6$ faces that compose the boundary of the cut-cell can be divided in:
+
+\subsubsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} faces:}
+The treatment of these is as described in the previous sections, with the caveat that the diffusive flux computation now involves the cut-cell centroid location (i.e. to compute spatial derivatives of $Y_\alpha$ and interpolation of $\rho D_\alpha$ in equation~\eqref{eq:discfvdiffcc}).
+
+\subsubsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{cut-faces}:}
+
+In order to compute the discrete term of equation~\eqref{eq:discfvdiffcc} on these faces, the factor $\rho D_\alpha$ needs to be interpolated from cell centroids to the face centroid and the spatial derivative of $Y_\alpha$ computed at the face centroid. The use of face centroids is required to maintain spatial accuracy when going from the left to right hand side of~\eqref{eq:discfvdiffcc} in difference FV methods. To maintain accuracy of the overall cut cell method, interpolation and differentiation to the cut-face centroid must also be sufficiently accurate. 
+
+The following discussion is fairly general, in the sense that it is agnostic to the interpolation methods employed (Lagrange polynomials, isoparametric, least squares, etc.).
+Consider a stencil of points $e=1,...,ne$, where the scalar $Y_\alpha$ is assumed defined (i.e. cell centroids). Then for a location of interest $ck$ (i.e. the centroid of \texttt{GASPHASE} cut-face $k=3,6$), interpolation and derivatives of $Y_\alpha$ at $ck$ can be obtained as
+%
+\begin{eqnarray}
+   Y_\alpha(\mathbf{x}_{ck}) & = & \sum^{ne}_{e=1} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) Y_{\alpha e} \label{eq:interpqfluid} \\
+   \frac{\partial Y_\alpha(\mathbf{x}_{ck})}{\partial x_i} & = & \sum^{ne}_{e=1} \frac{\partial \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e)}{\partial x_i} Y_{\alpha e} \label{eq:interpdqfluid}
+\end{eqnarray}
+%
+where $\mathbf{x}_e$ is the location of stencil point $e$, $Y_{\alpha e} =Y_\alpha(\mathbf{x}_e)$  and $\phi_e(\mathbf{x}-\mathbf{x}_e)$, $e=1,...,ne$ is a suitable set of interpolation functions.
+For this discussion we assume that no boundary values of $Y_\alpha$ are involved on the interpolation. For these faces the diffusive flux is:
+%
+\begin{eqnarray}
+  \left( - \rho D_q \boldsymbol{\nabla} Y_\alpha \right)_k & = & - \sum^{ne}_{m=1} \phi_m(\mathbf{x}_{ck}-\mathbf{x}_m) [\rho D_\alpha]_m \times 
+      \sum^{ne}_{e=1} \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \; Y_{\alpha e} \nonumber \\
+      &=& - \sum^{ne}_{e=1} [\rho D_\alpha]_k \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \; Y_{\alpha e}
+\end{eqnarray}
+%
+where 
+%
+\begin{equation}
+ [\rho D_\alpha]_k = \left[ \sum^{ne}_{m=1} \phi_m(\mathbf{x}_{ck}-\mathbf{x}_m) [\rho D_\alpha]_m \right]
+\end{equation}
+%
+The contribution to the equation of the cut-cell $jj$ on the \textit{low} side of the  \texttt{GASPHASE} cut-cell is, following what was seen for regular cells:
+%
+\begin{equation}
+   \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = - \sum^{ne}_{e=1} K_{e,k} \; Y_{\alpha e} \label{eq:kekdiff}
+\end{equation} 
+%
+where $K_{ek} = [\rho D_\alpha]_k \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \cdot \hat{\mathbf{n}}_{jj,k} \: A_k$.
+
+Similarly for constant density diffusive fluxes (equation~\eqref{eq:discfvdiffcc2}) on a \texttt{GASPHASE} cut-face $k$:
+%
+\begin{equation}
+   \left( - D_\alpha \boldsymbol{\nabla} \left( \rho Y_\alpha \right) \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = - \sum^{ne}_{e=1} K_{e,k}' \; \left( \rho Y_{\alpha} \right)_e \label{eq:kekdiff2}
+\end{equation} 
+%
+where $K_{ek}' = [D_\alpha]_k \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \cdot \hat{\mathbf{n}}_{jj,k} \: A_k$.
+
+We see by this last expression that unknown connectivity on the row $jj$ of $\left[ \mathbf{A}_{diff \alpha} \right]$ has been increased, that is, now it involves $ne$ unknowns instead of 2. For cut-cell $ii$ on the high side of cut-face $k$ the contribution is $\sum^{ne}_{e=1} K_{e,k} \; Y_{\alpha e}$ or  $\sum^{ne}_{e=1} K_{e,k}' \; \left( \rho Y_{\alpha} \right)_e$ (different sign).
+
+
+%%
+%%
+\subsubsection*{1D Linear Isoparametric Polynomial Interpolation:}
+%%%%%
+
+Consider a stencil with cells $jj$ and $ii$ as in figure~\ref{Fig:FVdiscCC}b. Their centroids are located at $\mathbf{x}_{jj}$ and $\mathbf{x}_{ii}$ respectively. Parameterizing point locations along the segment that unites $\mathbf{x}_{jj}$ to $\mathbf{x}_{ii}$ by $-1 \le \xi \le 1$, we have
+%
+\begin{eqnarray}
+   \mathbf{x}(\xi)  & = &  \phi_1(\xi) \mathbf{x}_{jj} + \phi_2(\xi) \mathbf{x}_{ii} \label{eq:xxi} \\
+   Y_\alpha (\xi)  & = & \phi_1(\xi) Y_{\alpha jj} + \phi_2(\xi) Y_{\alpha ii}  
+\end{eqnarray}
+%
+\begin{equation}
+[ \rho D_\alpha ] (\xi)  =  \phi_1(\xi) [ \rho D_\alpha ]_{jj} + \phi_2(\xi) [ \rho D_\alpha ]_{ii}
+\end{equation}
+where 
+%
+\begin{equation}
+   \phi_1(\xi) = \frac{1}{2} \left(1 - \xi \right) \; ; \; \phi_2(\xi) = \frac{1}{2} \left(1 + \xi \right)
+\end{equation}
+%
+We assume the value of the parameter where the cut-face lies known $\xi_p$, corresponding to the face and centroid segment intersection $\mathbf{x}_p$. From equation~\eqref{eq:xxi} with $\mathbf{x}=x\hat{\mathbf{i}}+y\hat{\mathbf{j}}$, we have
+%
+\begin{eqnarray}
+   \frac{\partial \xi}{\partial x} = \frac{2}{(x_{ii}-x_{jj})} \; ; \;  \frac{\partial \xi}{\partial y} = \frac{2}{(y_{ii}-y_{jj})}
+\end{eqnarray}
+%
+and the interpolation function gradient components are:
+%
+\begin{eqnarray}
+  \frac{\partial\phi_1}{\partial x} & = & \frac{\partial\phi_1}{\partial \xi} \frac{\partial \xi}{\partial x}=-\frac{1}{(x_{ii}-x_{jj})} \\
+  \frac{\partial\phi_1}{\partial y} & = & \frac{\partial\phi_1}{\partial \xi} \frac{\partial \xi}{\partial y}=-\frac{1}{(y_{ii}-y_{jj})} \\
+  \frac{\partial\phi_2}{\partial x} & = & \frac{\partial\phi_2}{\partial \xi} \frac{\partial \xi}{\partial x}= \frac{1}{(x_{ii}-x_{jj})} \\
+  \frac{\partial\phi_2}{\partial y} & = & \frac{\partial\phi_2}{\partial \xi} \frac{\partial \xi}{\partial y}= \frac{1}{(y_{ii}-y_{jj})}
+\end{eqnarray}
+%
+which are constant. Finally, being $k=3$, for cut-cell $jj$ the normal is $\hat{\mathbf{n}}_{jj,k}=\hat{\mathbf{j}}$, and expression~\eqref{eq:kekdiff} reduces to
+%
+\begin{equation}
+  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = 
+  -\left[  -K_{jj,k} \: Y_{\alpha jj} +  K_{ii,k} \: Y_{\alpha ii} \right]
+\end{equation} 
+%
+where $K_{jj,k}=K_{ii,k}=[ \rho D_\alpha ]_p \frac{A_k}{(y_{ii}-y_{jj})}$. Note that, an assumption of approximation of the cut-face centroid location by point $p$ has been made. For cut-cell $ii$ on the high side of face $k=3$ the expression is
+%
+\begin{equation}
+  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k = 
+  \left[  -K_{jj,k} \: Y_{\alpha jj} +  K_{ii,k} \: Y_{\alpha ii} \right]
+\end{equation} 
+%
+
+Similar expressions would be found for a \texttt{GASPHASE} cut-face normal to the $x$ direction. The last two expressions are the cut-cell versions of what was seen on Section~\ref{Sec:FVdiff}. Similar expressions are found for constant density diffusive fluxes, where $K_{jj,k}'=K_{ii,k}'=[D_\alpha ]_p \frac{A_k}{(y_{ii}-y_{jj})}$ coefficients are associated with variables $\left( \rho Y_{\alpha} \right)_{ii}$, and $\left( \rho Y_{\alpha} \right)_{jj}$.
+
+
+\subsubsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
+
+Consider \texttt{INBOUNDARY} cut-face $k=\mathbf{1}$ in figure~\ref{Fig:FVdiscCC}b. If a Neumann immersed boundary condition is specified in such a face, the term 
+%
+\begin{equation}
+  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k = [\rho D_\alpha]_k \partial \gamma_{ii,k} \: A_k 
+\end{equation} 
+%
+where as before, the prescribed normal derivative of $Y_\alpha$ on this face $\partial Y_\alpha / \partial n |_k=\partial  \gamma_{ii,k}$ is defined in the direction of $\hat{\mathbf{n}}_1$. 
+This term adds to $\mathbf{F_{BC \alpha}}$ in the location of cell $ii$. Similarly to what was seen on section~\ref{sec:FVBCsCart} for \texttt{SOLID\_BOUNDARIES}, zero diffusive mass flux implies a homogeneous $\partial Y_\alpha / \partial n |_k=0$ for the mass fraction field of species $\alpha$.
+
+
+
+% We note that, as seen for domain boundary faces, there is no modification of the diffusion matrix by \texttt{INBOUNDARY} cut-faces.
+
+%When using \textit{Dirichlet} boundary conditions for the scalar $Y_\alpha$ on immersed geometries, an estimation of $\partial Y_\alpha / \partial n |_k$ is required. The data is $Y_{\alpha k}=\gamma_{ii,k}$, and we assume we know its values on the face vertices (i.e. $Y_{\alpha lk}$ in $\mathbf{x}_{lk}$, and $Y_{\alpha hk}$ in $\mathbf{x}_{hk}$ where here $k=1$). Therefore, the $\partial Y_\alpha / \partial n |_k$ is generally approximated using a stencil composed of: (a) a set of $ne$ points corresponding to \texttt{GASPHASE} cut-cell centroids, and (b) a set of $nik$ points located on the \texttt{INBOUNDARY} cut-face $k$. The corresponding expressions for interpolation and derivative approximations are
+%%
+%\begin{eqnarray}
+%   Y_\alpha(\mathbf{x}) & = &  \sum^{ne}_{e=1} \phi_e(\mathbf{x}-\mathbf{x}_e) Y_{\alpha e}
+%                              +   \sum^{ne+nik}_{e=ne+1} \phi_e(\mathbf{x}-\mathbf{x}_e) \gamma_{ek}  \label{eq:interpqfluidbdy} \\
+%   \frac{\partial Y_\alpha(\mathbf{x})}{\partial x_i} & = &  \sum^{ne}_{e=1} \frac{\partial \phi_e(\mathbf{x}-\mathbf{x}_e)}{\partial x_i} Y_{\alpha e}
+%                                                                        + \sum^{ne+nik}_{e=ne+1} \frac{\partial \phi_e(\mathbf{x}-\mathbf{x}_e)}{\partial x_i} \gamma_{ek}   \label{eq:interpdqfluidbdy}                                                                    
+%\end{eqnarray}
+%%
+%where $\gamma_{ek}$, $e=1,...,nik$, are the Dirichlet data on the \texttt{INBOUNDARY} cut-face. Assuming derivatives approximation to the cut-cell centroid $ck$, the diffusive flux on the face is
+%%
+%\begin{eqnarray}
+%  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k =  - [\rho D_\alpha]_k \sum^{ne}_{e=1} \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) Y_{\alpha e}
+%                                                                                - [\rho D_\alpha]_k \sum^{ne+nik}_{e=ne+1} \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e)\gamma_{ek}
+%\end{eqnarray}
+%%
+%and
+%\begin{eqnarray}
+%  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k = 
+%  &-&  \sum^{ne}_{e=1} [\rho D_\alpha]_k \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \cdot \hat{\mathbf{n}}_{ii,k} \:  A_k  \: Y_{\alpha e}  \nonumber \\  
+%  &-&[\rho D_\alpha]_k \left[ \sum^{ne+nik}_{e=ne+1} \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \gamma_{ek} \right] \cdot \hat{\mathbf{n}}_{ii,k} \:  A_k 
+%\end{eqnarray}
+%%
+%But as $\hat{\mathbf{n}}_{ii,k}=-\hat{\mathbf{n}}_{k}$, 
+%%
+%\begin{equation}
+%  \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k = \sum^{ne}_{e=1} K_{e,k} \: Y_{\alpha e} + F_{k}
+%\end{equation}
+%%
+%with $F_{k}=[\rho D_\alpha]_k \left[ \sum^{ne+nik}_{e=ne+1} \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \gamma_{ek} \right] \cdot \hat{\mathbf{n}}_{k} \:  A_k$ being added to $\mathbf{F_{bc}}$, and $K_{e,k}=[\rho D_\alpha]_k \boldsymbol{\nabla} \phi_e(\mathbf{x}_{ck}-\mathbf{x}_e) \cdot \hat{\mathbf{n}}_{k} \:  A_k$ are coefficients to be assembled into row $ii$ of $\left[ \mathbf{A}_{diff \alpha} \right]$. As found for domain boundary faces, Dirichlet conditions on \texttt{INBOUNDARY} cut-faces modify both diffusion matrix and boundary condition vector.
+%
+%
+% 
+%
+%
+%%%
+%%%
+%\subsubsection*{2D Linear Isoparametric Polynomial Interpolation:}
+%%%%%%
+%In figure~\ref{Fig:FVdiscCC}b, we define the triangle $T_{ii,k}$, connecting vertices $\mathbf{x}_{ii}$, $\mathbf{x}_{hk}$ and $\mathbf{x}_{lk}$. These vertices take local triangle indexes $1$, $2$, and $3$ respectively. Data values of $Y_\alpha$ on face $k=1$ are given ($Y_{\alpha hk}=\gamma_{hk}$ and $Y_{\alpha lk}=\gamma_{lk}$). The isoparamteric interpolation formulas on a unitary master triangle are
+%%
+%\begin{eqnarray}
+%  \mathbf{x}(\xi,\eta) & = & \phi_1(\xi)  \mathbf{x}_{ii} + \phi_2(\eta) \mathbf{x}_{hk} + \phi_3(\xi,\eta) \mathbf{x}_{lk} \\
+%  Y_\alpha(\xi,\eta) & = & \phi_1(\xi)  Y_{\alpha ii} + \phi_2(\eta) Y_{\alpha hk} + \phi_3(\xi,\eta)Y_{\alpha lk}
+%\end{eqnarray}
+%%
+%where $\phi_1(\xi)=\xi$, $\phi_2(\eta)=\eta$, and $\phi_3(\xi,\eta)=1-\xi-\eta$. The gradient of a function respect to the spatial coordinates is related  to the derivatives respect to natural coordinates $\xi,\eta$ as $\boldsymbol{\nabla} () = [\mathbf{J}]^{-1} [\partial/\partial \xi \; \partial/\partial \eta]^T$. The Jacobian matrix and its inverse are
+%%
+%\begin{equation}
+%  [\mathbf{J}] = \left[ \begin{array}{cc} x_1-x_3 & y_1-y_3 \\ x_2-x_3 & y_2-y_3 \end{array} \right] \; ; \; 
+%  [\mathbf{J}]^{-1} = \frac{1}{det([\mathbf{J}])} \left[ \begin{array}{cc} y_2-y_3 & y_3-y_1 \\ x_3-x_2 & x_1-x_3 \end{array} \right]
+%\end{equation}
+%%
+%where $det([\mathbf{J}])$ is the determinant of $[\mathbf{J}]$. As $\phi_1$ is the interpolation function related to centroid $ii$ we have 
+%$\boldsymbol{\nabla} \phi_1 = det([\mathbf{J}])^{-1} [(y_2-y_3) \; (x_3-x_2)]^T$ (constant), and the unique factor that will add to the diagonal of $\left[ \mathbf{A}_{diff \alpha} \right]$ in row $ii$ is
+%%
+%\begin{equation}
+%  K_{e,k}=[\rho D_\alpha]_k det([\mathbf{J}])^{-1} \left[ (y_2-y_3)n^x_k + (x_3-x_2) n^y_k \right] A_k
+%\end{equation}
+%%
+%while the coefficient adding to $\mathbf{F^{diff}_{bc}}$ is
+%%
+%\begin{equation}
+%  F_{k}=[\rho D_\alpha]_k \left[ \boldsymbol{\nabla} \phi_2 \gamma_{hk} + \boldsymbol{\nabla} \phi_3 \gamma_{lk} \right] \cdot \hat{\mathbf{n}}_{k} \:  A_k
+%\end{equation}
+%%
+%where $\hat{\mathbf{n}}_{k}=n^x_k \hat{\mathbf{i}}+n^y_k\hat{\mathbf{j}}$, and
+%%
+%\begin{eqnarray}
+%   \boldsymbol{\nabla} \phi_2 & = & det([\mathbf{J}])^{-1} [(y_3-y_1) \; (x_1-x_3)]^T \\
+%   \boldsymbol{\nabla} \phi_3 & = & -(\boldsymbol{\nabla} \phi_1+\boldsymbol{\nabla} \phi_2)
+%\end{eqnarray}
+
+\subsubsection{CC discretization of Advective term}
+
+We study the discretization of the advective term~\eqref{eq:fvadv} for the six faces of cell $ii$ in figure~\ref{Fig:FVdiscCC}b, making use of the interpolation and derivative approximation expressions~\eqref{eq:interpqfluid}-\eqref{eq:interpdqfluid}, seen on the previous section.
+
+\subsubsection*{A. Faces $k=\mathbf{4},\mathbf{5}$ are \textit{regular} \texttt{GASPHASE} faces:}
+The treatment of these is as described in the previous section, with the caveat that the advective flux computation for $\rho Y_\alpha$ may now involve the cut-cell centroid location in the case of spatial interpolation to the face (i.e. \texttt{CENTRAL\_LIMITER} flux limiter).
+
+\subsubsection*{B. Faces $k=\mathbf{3},\mathbf{6}$ are \texttt{GASPHASE} \textit{cut-faces}:}
+
+For \texttt{GASPHASE} cut-face $k=3$ in figure~\ref{Fig:FVdiscCC}b, the advective term corresponding to cell $jj$ is
+%
+\begin{equation}
+  \left( \rho Y_\alpha \mathbf{u} \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = \overline{[\rho Y_\alpha]}_k \left( \mathbf{u}_k \cdot \hat{\mathbf{n}}_{jj,k} \right) \: A_k \label{eq:convgcutface}
+\end{equation}
+%
+where the average face normal velocity $\mathbf{u}_k \cdot \hat{\mathbf{n}}_{jj,k} $ (i.e. approximated by the face centroid value) is assumed known, and $\overline{[\rho Y_\alpha]}_k$ is obtained by flux limited interpolation to the face. 
+
+Consider a flux limited spatial interpolation of the form~\eqref{eq:interpqfluid} for $[\rho Y_\alpha]$ to face centroid $ck$
+%
+\begin{equation}
+  \overline{[\rho Y_\alpha]}_k = \sum^{ne}_{e=1} \overline{\phi}_e(\mathbf{x}_{ck}-\mathbf{x}_e) \left( \rho Y_{\alpha} \right)_e
+\end{equation}
+% 
+where $e=1,...,ne$ refers to a suitable flux limited stencil of \texttt{GASPHASE} cell centroids. The $\overline{\phi}_e$ are the flux limited interpolation functions  related to said centroids. Then inserting this approximation in equation~\eqref{eq:convgcutface}
+%
+\begin{equation}
+  \left( \rho Y_\alpha \mathbf{u} \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = \sum^{ne}_{e=1}  C_{e,k} \left( \rho Y_{\alpha} \right)_e
+\end{equation}
+being $C_{e,k}=\overline{\phi}_e(\mathbf{x}_{ck}-\mathbf{x}_e) \left( \mathbf{u}_k \cdot \hat{\mathbf{n}}_{jj,k} \right) \: A_k$.
+
+
+%%
+%%
+\subsubsection*{1D Linear Isoparametric Polynomial Interpolation:}
+%%%%%
+
+For face $k=3$ consider the $y$ coordinate interpolation to point $p$ using cell centroids $\mathbf{x}_{jj}$ and $\mathbf{x}_{ii}$ (see  figure~\ref{Fig:FVdiscCC}b) 
+%
+\begin{equation}
+  y_p =  \phi_1(\xi_p) y_{jj} + \phi_2(\xi_p) y_{ii}
+\end{equation}
+%
+As we know $y_p$ (face coordinate), the previous expression is used to obtain the natural coordinate directly
+%
+\begin{equation}
+  \xi_p = \frac{y_p - \frac{1}{2} \left( y_{jj} + y_{ii} \right)}{\frac{1}{2} \left( y_{ii} - y_{jj} \right)}
+\end{equation}
+%
+we see that if $y_p$ is located in the midpoint between $y_{jj}$ and $y_{ii}$, then $\xi_p=0$, the interpolation functions $\phi_1(\xi_p)=\phi_2(\xi_p)=1/2$, and the \textit{central} interpolation is recovered. In similar manner as seen for diffusion, for cell $jj$ 
+$\hat{\mathbf{n}}_{jj,k}=\hat{\mathbf{j}}$ and:
+%
+\begin{equation}
+   \left( \rho Y_\alpha \mathbf{u} \right)_k \cdot \hat{\mathbf{n}}_{jj,k} \: A_k = C_{1,k} \left( \rho Y_\alpha \right)_{jj} + C_{2,k} \left( \rho Y_\alpha \right)_{ii} 
+\end{equation}
+%
+where $C_{1,k}=\phi_1(\xi_p) v_k \: A_k$, $C_{2,k}=\phi_2(\xi_p) v_k \: A_k$. For cell $ii$ the advective flux term is 
+($\hat{\mathbf{n}}_{jj,k}=-\hat{\mathbf{j}}$). 
+%
+\begin{equation}
+   \left( \rho Y_\alpha \mathbf{u} \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k = - C_{1,k}  \left( \rho Y_\alpha \right)_{jj} - C_{2,k}  \left( \rho Y_\alpha \right)_{ii} 
+\end{equation}
+%
+Similar expressions can be found for \texttt{GASPHASE} cut-faces aligned in other directions. For a \textit{Godunov} (1st order upwind) interpolation, 
+we replace $\phi_1(\xi_p)$ by $\overline{\phi_1}(v_k)=1/2*(1+sgn(v_k))$ and $\phi_2(\xi_p)$ by $\overline{\phi}_2(v_k)=1/2*(1-sgn(v_k))$ on the $C_{1,k}$ and $C_{2,k}$ definitions. Godunov flux limited interpolation is used in these cut-faces.
+
+
+\subsubsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
+
+The treatment of advective terms in boundary cut-faces is the same as defined in section~\ref{sec:FVBCsCart}, in particular in the source arising from the immersed boundary treatment derived transpiration velocities.
+
+\subsubsection{Unsteady evolution: Fully explicit time integration for scalars} \label{sec:exscl}
+
+It is well known that cut-cell methods pose a significant time constraint when used with explicit time integration methods. 
+This is so because, inevitably for general problems there will arise \texttt{GASPHASE} cut-cells whose small-size will penalize 
+severely the time step. We recall that each cell on the \texttt{GASPHASE}, including cut-cells, needs to meet CFL and Von Neuman stability constraints. Several different ways have been proposed in the literature to deal with this problem, i.e. cell merging, mixing or linking methods. In general, these lead to ad hoc selection procedures for surrounding cells, having to deal with many special cases, and in some cases potential solution deterioration close to the boundary.
+
+In our fully explicit time integration implementation we use a simple and robust procedure to address this problem. Within the scheme for numeration of scalar cell unknowns, a test is performed on cut-cells. If the cut-cell volume is less than the threshold volume $V_{thr}= c_{thr} V_{cart}$, where $V_{cart}$ is the local Cartesian cell volume and $c_{thr}<1$ is a threshold factor, the unknown number this cell takes is the one of an adjacent cell which has a volume larger than $V_{thr}$. This mathematically defines a single control volume of the two linked cells. Cell volumes are added in building the mass matrix for the FV discretization, and fluxes and matrix terms are added with their corresponding signs. Note that, flux quantities corresponding to the common face of these two cells effectively cancel on the single equation for the set.
+Alternatively, if after a number of cell numbering iterations an unlinked small cell persists in the mesh, the method tries to link such cut-cell to the closest numbered regular cell. Finally, if this does not succeed the small cell is given the $V_{thr}$ volume. This last resort makes the scheme fault proof, albeit at an error penalty on these "trapped" small cells.  
+
+
+
+\subsubsection{Unsteady evolution: Explicit-implicit time integration for scalars} \label{sec:eximscl}
+
+
+We define another way to handle the small cell-problem in a robust manner using implicit integration of scalars. Nevertheless, to reduce the cost of building discretization matrices and solving linear systems of the size of the vector $\{\mathbf{\rho Y_\alpha}\}$, that contains unknowns for the whole domain, we only solve implicitly our problem in a band of cells on the cut-cell region. See figure~\ref{Fig:DOMEXIM}. We gather the unknowns from  $\{\mathbf{\rho Y_\alpha}\}$ that belong to this implicit region in vector $\{\mathbf{\rho Y_\alpha}\}_{IM}$, and their complement on $\{\mathbf{\rho Y_\alpha}\}$ in the explicit region unknowns $\{\mathbf{\rho Y_\alpha}\}_{EX}$. In general, the explicit region is advanced first. For the integration to be conservative, the normal flux of $q$ used in the implicit-explicit boundary has to be the same for implicit and explicit region time advancement. This constraint provides the non-homogeneous flux boundary condition to be used in integrating the implicit region. 
+
+%
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 65mm 55mm 70mm 40mm, clip,
+       width=0.49\linewidth]{../../../fig/fds/DomainsEXIM.png} 
+      \caption{Explicit-implicit integration of \texttt{GASPHASE} region including cut-cells. The regular grid in $\Omega_{EX}$ is integrated explicitly, while a band region $\Omega_{IM}$ of three cells including cut-cells surrounding the solid is integrated implicitly. Fluxes computed explicitly in the boundary $\Gamma_{EXIM}$ are used as boundary condition for the implicit solve.}
+	\label{Fig:DOMEXIM}
+\end{figure}
+%
+
+The idea of using an explicit flux of $q$ definition to separate subdomains of integration is not new. In their landmark work applied to parabolic problems, Dawson and Dupont~\cite{Dawson:1994} used it to decompose the spatial domain in different subdomains that would be integrated implicitly. The computation speedup is obtained here when solving smaller matrix systems in parallel, but in general the stability of the method is reduced compared to solving the original implicit problem. This work has led to a large body of research and literature on what is called explicit-implicit domain decomposition (EIDD) or time-stepping. Recently, May and Berger~\cite{May:2014,May:2017} used similar arguments to couple a MUSCL solver on an explicit integration region with either implicit Euler or trapezoidal rule on the implicit region, with application to the linear advection equation. They prove strong stability preservation (SSP) for the MUSCL-implicit Euler combination, alleviating successfully the small cut-cell problem on their embedded boundary method. Although the SSP property is only required for convergence in nonlinear advection, in many linear advection cases is desirable to reduce numerical oscillation~\cite{Gottlieb:2001}.
+In our case we are interested in explicit-implicit solve combinations for Runge-Kutta methods. A schematic of the method can be given considering the explicit-implicit Euler pair: given $\{\mathbf{\rho Y_\alpha}\}^n$, $\rho^n$, $\mathbf{v}^n$ and $D_\alpha^n$ known on $\Omega_{EX} \cup \Omega_{IM}$ at time instance $n$, and a suitable time step $\Delta t$ 
+%
+\begin{enumerate}
+  \item Integrate the discrete version of equation~\eqref{eq:bal3} on $\Omega_{EX}$, $\{\mathbf{q}_{EX}\}$ using Explicit Euler:  
+  \begin{equation}
+  \{\mathbf{\rho Y_\alpha}\}^{n+1}_{EX}=\{\mathbf{\rho Y_\alpha}\}^{n}_{EX} + \Delta t \mathbf{L}(\{\mathbf{\rho Y_\alpha}\}^n,t_n)
+  \end{equation} 
+  Where $\mathbf{L}()$ corresponds to the discrete convection, diffusion and source terms.
+  \item Using $\{\mathbf{\rho Y_\alpha}\}^n$, define fluxes $\left( [\rho Y_\alpha \mathbf{v} -\rho D_\alpha \boldsymbol{\nabla} Y_\alpha] \cdot \hat{\mathbf{n}} \right)^n$ at the $\Gamma_{EXIM}$ boundary.
+  \item Using the previously defined scalar fluxes as boundary condition, perform integration of equation~\eqref{eq:bal4} on $\Omega_{IM}$ using implicit Euler:
+  \begin{equation}
+  \{\mathbf{\rho Y_\alpha}\}^{n+1}_{IM}=\{\mathbf{\rho Y_\alpha}\}^{n}_{IM}+\Delta t \mathbf{L}'(\{\mathbf{\rho Y_\alpha}\}^{n+1},t_{n+1})  
+  \end{equation}  
+\end{enumerate}
+%
+where $\mathbf{L}()'$ is the convection-diffusion operator plus source terms in equation~\eqref{eq:bal4}. We note that step 2, ensures the conservation of $\rho Y_\alpha$ on $\Omega_{EX} \cup \Omega_{IM}$. 
+
+We are interested in using as explicit scheme the strong stability preserving SSPRK2~\cite{Gottlieb:2001} method currently used in FDS. 
+Following~\cite{May:2014}, we use as implicit counterparts either implicit Euler or trapezoidal rule, the latter providing second order time accuracy, albeit at the loss of the SSP property for time step sizes corresponding to local CFL number greater than 2\textbf{?}~\cite{Ketcheson:2009,Gottlieb:2009}. As expected, this implicit scheme is still linearly stable for all time steps. Indeed, the time step restriction for the integration in both time stepping combinations is the restriction obtained for the explicit region.
+We define the following schemes:
+
+\subsubsection*{Explicit SSPRK2 + Implicit 1st order BE:} 
+
+%
+\begin{enumerate}
+   \item First Stage: Euler pair with time step $\Delta t$
+   Forward Euler FE for $EX$ region and Backward Euler BE for $IM$ region. Boundary conditions for the implicit solve are provided by the explicit mass fluxes $\left( [\rho Y_\alpha \mathbf{v} -\rho D_\alpha \boldsymbol{\nabla} Y_\alpha] \cdot \hat{\mathbf{n}} \right)^n$ at the $\Gamma_{EXIM}$ boundary.
+   \begin{eqnarray}
+   \{\mathbf{\rho Y_\alpha}\}^*_{EX}&=&\{\mathbf{\rho Y_\alpha}\}^{n}_{EX} + 
+   \Delta t \mathbf{L}(\{\mathbf{\mathbf{\rho Y_\alpha}}\}^n,t_n) \label{eq:m1s1ex} \\
+   \{\mathbf{\rho Y_\alpha}\}^*_{IM}&=&\{\mathbf{\rho Y_\alpha}\}^{n}_{IM} + 
+   \Delta t \mathbf{L}'(\{\mathbf{\mathbf{\rho Y_\alpha}}\}^{n+1},t_{n+1}) \label{eq:m1s1im}
+   \end{eqnarray} 
+  \item Second Stage: SSPRK2 corrector for $EX$ and $IM$ regions. At the $IM$ region $L'()$ is evaluated implicitly. Boundary conditions for the implicit solve are given by $\left( [\rho Y_\alpha \mathbf{v} -\rho D_\alpha \boldsymbol{\nabla} Y_\alpha] \cdot \hat{\mathbf{n}} \right)^*$.
+   \begin{eqnarray}
+   \{\mathbf{\rho Y_\alpha}\}^{n+1}_{EX}&=& \frac{1}{2}\left( \{\mathbf{\rho Y_\alpha}\}^{n}_{EX} + 
+                                                                                              \{\mathbf{\rho Y_\alpha}\}^*_{EX} \right) + 
+                                                   \frac{\Delta t}{2} \mathbf{L}(\{\mathbf{\rho Y_\alpha}\}^*,t_{n+1})  \label{eq:m1s2ex} \\
+   \{\mathbf{\rho Y_\alpha}\}^{n+1}_{IM}&=& \frac{1}{2}\left( \{\mathbf{\rho Y_\alpha}\}^{n}_{IM} + 
+                                                                                             \{\mathbf{\rho Y_\alpha}\}^{*}_{IM} \right) +
+                                                   \frac{\Delta t}{2} \mathbf{L}'(\{\mathbf{\rho Y_\alpha}\}^{n+1},t_{n+1}) \label{eq:m1s2im}
+   \end{eqnarray}   
+\end{enumerate}
+%
+In the hypothetical case where the $IM$ region covers the whole computational domain, it is easy to see that the implicit integrations on first and second stages correspond to the backward Euler method (replace~\eqref{eq:m1s1im} in~\eqref{eq:m1s2im}). This combination maintains the sequence of SSPRK2 used in FDS. It provides a first order accurate method which is also SSP for any time step, as both SSPRK2 and BE methods are, and the fluxes at the explicit-implicit boundary are evaluated as in SSPRK2.
+
+\subsubsection*{Explicit SSPRK2 + Implicit 1st order BE and Trapezoidal rule:}
+%
+\begin{enumerate}
+   \item First Stage: Same solution as in the previous method and also integrate explicitly the $IM$ region (in practice an explicit integration of the whole domain is done, followed by BE on the $IM$ region)
+   \begin{equation}
+     \{\mathbf{\rho Y_\alpha}\}^{ex}_{IM} = \{\mathbf{\rho Y_\alpha}\}^{n}_{IM}+\Delta t \mathbf{L}'(\{\mathbf{\rho Y_\alpha}\}^n,t_n) \label{eq:m2s1imex}
+   \end{equation}
+
+  \item Second Stage: SSPRK2 corrector for $EX$ and $IM$ regions. At the $IM$ region $\mathbf{L}'()$ is evaluated implicitly, boundary fluxes are defined as for the previous corrector, and $\{\mathbf{\rho Y_\alpha}\}^{*}_{IM}$ is replaced by $\{\mathbf{\rho Y_\alpha}\}^{ex}_{IM}$
+   \begin{eqnarray}
+   \{\mathbf{\rho Y_\alpha}\}^{n+1}_{EX}&=& \frac{1}{2}\left( \{\mathbf{\rho Y_\alpha}\}^{n}_{EX} + 
+                                                                                              \{\mathbf{\rho Y_\alpha}\}^*_{EX} \right) + 
+                                                   \frac{\Delta t}{2} \mathbf{L}(\{\mathbf{\rho Y_\alpha}\}^*,t_{n+1})  \label{eq:m2s2ex} \\
+   \{\mathbf{\rho Y_\alpha}\}^{n+1}_{IM}&=& \frac{1}{2}\left( \{\mathbf{\rho Y_\alpha}\}^{n}_{IM} + 
+                                                                                             \{\mathbf{\rho Y_\alpha}\}^{ex}_{IM} \right) +
+                                                   \frac{\Delta t}{2} \mathbf{L}'(\{\mathbf{\rho Y_\alpha}\}^{n+1},t_{n+1}) \label{eq:m2s2im}
+   \end{eqnarray}     
+\end{enumerate}
+%
+Replacing equation~\eqref{eq:m2s1imex} in~\eqref{eq:m2s2im} we see that this last step correspond to the Trapezoidal rule applied to the $IM$ region. 
+
+
+\subsubsection{Implicit time discretization and simplifications}
+
+%Consider the exact decomposition of the diffusive flux in equations~\eqref{eq:bal3}
+%%
+%\begin{equation}
+%   \mathbf{J_{d \alpha}} = - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha =  - \left( D_\alpha \boldsymbol{\nabla} ( \rho Y_\alpha) 
+%   - \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \; ( \rho Y_\alpha) \right) \label{eq:expdfl} 
+%\end{equation}
+%%
+%which, substituted in the balance equation~\eqref{eq:bal3} leads to:
+%%
+%\begin{equation}
+% \frac{\partial \rho Y_\alpha}{ \partial t} + \nabla \cdot \left(  \left[ \mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \right](\rho Y_\alpha)   \right) = \nabla \cdot \left( D_\alpha \boldsymbol{\nabla}  (\rho Y_\alpha ) \right) + \dot{m}_\alpha''' \; , \; \alpha=1,\dots,N \label{eq:bal4b}
+%\end{equation}
+%
+%Next, we define the following implicit BE time discretization from time level $t$ (step $n$) to $t+\Delta t$ (step $n+1$) for the predictor step:
+%%
+%\begin{equation}
+%\frac{ (\rho Y_\alpha)^{n+1} - (\rho Y_\alpha)^n}{\Delta t} = - \nabla \cdot \left(  \left[ \mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \right]^{n} (\rho Y_\alpha)^{n+1} \right) + \nabla \cdot \left( D_\alpha^n \boldsymbol{\nabla}  (\rho Y_\alpha )^{n+1} \right) + \dot{m}_\alpha'''^{n} \; , \; \alpha=1,\dots,N \label{eq:bal5}
+%\end{equation}
+%%
+%where the advective and diffusive terms have been linearized, consistently with the time levels at which the velocity, diffusivity and mixture density are known, when solving the scalar transport-reaction equations within the predictor of the FDS scheme. 
+%The time discretization differs from a backward Euler discretization in the following:
+%%
+%\begin{itemize}
+%  \item The velocity term $\mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho$, is taken at step $n$ instead of step $n+1$.
+%  \item Similarly, the diffusivity $D_\alpha$, is taken at step $n$.
+%  \item The reactive term is known and taken at step $n$.
+%\end{itemize}
+%%
+%
+%A similar expression to~\eqref{eq:bal5} can be used when when implicitly solving on the corrector step with the trapezoidal rule, using the predicted (star) values to evaluate the factors on the different terms. That is, for example:
+
+
+Consider implicit BE solution in cut-cell region for the first stage of SSPRK2 and trapezoidal rule applied in the second stage. Assume advective and diffusive terms have been linearized, consistently with the time levels at which the velocity, diffusivity and mixture density are known. The scheme defined in the previous section applied to species transport results in:
+%
+\begin{enumerate}
+  \item Predictor: 
+%
+\begin{equation}
+\frac{ (\rho Y_\alpha)^{*} - (\rho Y_\alpha)^n}{\Delta t} = - \nabla \cdot \left(  \left[ \mathbf{v} + 
+\frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \right]^{n} (\rho Y_\alpha)^{*} \right) + 
+\nabla \cdot \left( D_\alpha^n \boldsymbol{\nabla}  (\rho Y_\alpha )^{*} \right) + \dot{m}_\alpha'''^{n} \label{eq:pred}
+\end{equation}
+%  
+  \item Corrector:
+%
+\begin{equation}
+\frac{ (\rho Y_\alpha)^{n+1} - (\rho Y_\alpha)^n}{\Delta t} = - \nabla \cdot \left(  \mathbf{v}' (\rho Y_\alpha) \right)^{n+1/2} + \nabla \cdot \left( D_\alpha \boldsymbol{\nabla}  (\rho Y_\alpha ) \right)^{n+1/2} + \dot{m}_\alpha'''^{n} \label{eq:corr}
+\end{equation}
+%
+where the trapezoidal approximations to time level $t_{n+1/2}$ for advection and diffusion terms are:
+%
+\begin{eqnarray}
+  \left(  \mathbf{v}'(\rho Y_\alpha) \right)^{n+1/2} & \simeq & 
+  \frac{1}{2} \left( \left[ \mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \right]^n (\rho Y_\alpha)^{n} + 
+                           \left[ \mathbf{v} + \frac{D_\alpha}{\rho} \boldsymbol{\nabla} \rho \right]^* (\rho Y_\alpha)^{n+1} \right) 
+                           \label{eq:ad12}  \\
+  \left( D_\alpha \boldsymbol{\nabla}  (\rho Y_\alpha ) \right)^{n+1/2}   & \simeq &   
+  \frac{1}{2} \left(  D_\alpha^{n} \boldsymbol{\nabla}  (\rho Y_\alpha )^{n} + 
+                            D_\alpha^* \boldsymbol{\nabla}  (\rho Y_\alpha )^{n+1}  \right) \label{eq:df12} 
+\end{eqnarray}
+%  
+\end{enumerate}
+%
+In the corrector discretization the lagged in time $\dot{m}_\alpha'''^{n}$ has been used, as defined in the new MOL (method of lines: advection diffusion discretized with SSPRK2, reaction uses forward Euler.) time integration scheme implemented in FDS. The mid-step values for the advection and difussion factors~\eqref{eq:ad12}-\eqref{eq:df12} are approximated from the predicted unknowns, and values at step $n$. This stepping scheme combination is found to be second order time accurate in the numerical tests section. 
+
+
+
+
+
+
+
+\subsubsection{Cut-cell scheme for species transport implementation notes}
+
+
+\subsection{Momentum time marching and Immersed Boundaries}
+
+
+\subsubsection{\&GEOM IB forcing implementation notes}
+
+
+\subsection{Energy equation, thermodynamic divergence}
+
+
+\subsubsection{Cut-cell divergence implementation notes}
 
 
 
@@ -1535,7 +2295,7 @@ Six cases are defined for this test:
 \begin{enumerate}
  \item[a]  Three correspond to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, plus Godunov flux limiter and explicit SSPRK2 time integration in cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}. 
  
-  \item[b] The other three cases correspond to default flux limiter and time integration in cells not covered by cut-cells, plus Godunov flux limiter and implicit time integration in cut-cell region for the same CFL numbers. The implicit integration on the cut-cell region is done applying an Backward Euler step in the predictor, and Trapezoidal Rule on the corrector step. The imposition of boundary conditions for the implicit region in domain and explicit-implicit (EXIM) boundaries follows the technical notes in section \texttt{sec:exim_scalar_transport} of the Technical Reference Guide. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_implicit\_*.fds}.
+  \item[b] The other three cases correspond to default flux limiter and time integration in cells not covered by cut-cells, plus Godunov flux limiter and implicit time integration in cut-cell region for the same CFL numbers. The implicit integration on the cut-cell region is done applying an Backward Euler step in the predictor, and Trapezoidal Rule on the corrector step. The imposition of boundary conditions for the implicit region in domain and explicit-implicit (EXIM) boundaries follows the technical notes in section \texttt{sec:exim\_scalar\_transport} of the Technical Reference Guide. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_implicit\_*.fds}.
   
 \end{enumerate}
 %
@@ -1543,6 +2303,7 @@ Six cases are defined for this test:
 Same procedure as explained in section  \texttt{sec:saad\_temporal\_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The two bottom figures show the order $p$ computed point wise in the $x$ direction for explicit and implicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in section~\texttt{sec:saad\_temporal\_error}. 
 The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells is \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_l2_norm}\!, and for implicit time integration of scalars on these is  \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_implicit_l2_norm}\!. 
 
+% Figure Saad_CC:
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_Z.pdf}
@@ -1555,6 +2316,32 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 
 \subsubsection{Variable-Density manufactured solution}
 
+\label{sec:shunn_cc_mms}
+
+
+We set to test the manufactured solution test case~\texttt{sec:shunn\_mms} for scalar transport, including an internal region of the two dimensional domain where cut-cells with same shape and size as regular Cartesian cells are artificially defined. This problem allows us to check the overall accuracy (spatial+temporal) of the cut-cell implementation for scalar transport for both explicit and implicit integration on the cut-cell region.
+The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in section~\texttt{sec:shunn\_mms}.
+
+The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in section~\texttt{sec:shunn\_mms}. Therefore, source terms from manufactured solution are treated following the base SSPRK2 integration method defined in FDS.
+The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$m) centered on the previous is filled with cut-cells of regular cell geometry. See figure~\texttt{fig:smokeview\_fig}. 
+
+
+% Plot of a slice of temperature on the whole domain with the cut-cell edges showing the cut-cell region:
+% Figure:
+
+
+Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\texttt{sec:shunn\_mms}, are solved using the GODUNOV flux limiter and centered interpolation. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Both explicit and implicit time integration in the cut-cell region produce second-order accurate solutions for density, mixture fraction, and velocity, when centered interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\texttt{sec:shunn\_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+
+
+% Figure Shunn_CC:
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_cen_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_imp_cen_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_imp_gdv_mms_convergence.pdf}
+\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Two flux limiting options for scalar advection are used: centered interpolation and Godunov.  (Upper-left) Convergence for explicit scalar time integration and centered interpolation for advection.  (Upper-right) Convergence for explicit scalar time integration and Godunov flux limiter.  (Lower-left) Convergence for implicit scalar time integration (Backward Euler step in predictor and Trapezoidal rule in corrector step), and  centered interpolation for advection. (Lower-right) Convergence for implicit scalar time integration and Godunov flux limiter.  }\label{fig:shunn_cc_accuracy_order}
+\end{figure}
 
 
 
@@ -1607,6 +2394,71 @@ The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells i
 
 
 
+
+%\paragraph{Abstract} In this chapter, we discuss implementation of a hybrid cutcell direct-forcing immersed boundary method (CIBM) to handle complex geometry in the Fire Dynamics Simulator (FDS).  Particular attention is paid to the challenges associated with thin (zero thickness) obstructions in variable density flows with heat and mass transfer.  The triangular facet is chosen as the basic element for construction of complex geometry.  Reasons behind this choice are discussed.  A linked-list data structure for the facets is presented.  One-sided differencing and methods for overcoming numerical diffusion issues are discussed.  Verification cases for momentum, heat, and mass transport are presented.
+%
+%\subsection{Introduction}
+%
+%The Fire Dynamics Simulator (FDS) has always used a simple direct forcing immersed boundary method (IBM) to handle flow obstructions.  Generally, obstructions are restricted to conform to the underlying Cartesian mesh, leading to stair-step approximations to curvilinear geometries (see Fig.~\ref{fig:circle}).
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{cc}
+%\begin{tikzpicture}
+%\draw[line width=1mm,fill=lightgray] (1.8,1.8) circle [radius=1.5];
+%\draw[help lines] (0,0) grid (5,5);
+%\draw[ultra thick,->] (2.66,4.5) -- (3.33,4.5);
+%\draw[ultra thick,->] (2.66,3.5) -- (3.33,3.5);
+%\draw[ultra thick,->] (3.66,4.5) -- (4.33,4.5);
+%\draw[ultra thick,->] (3.66,3.5) -- (4.33,3.5);
+%\draw[thick] (2.665,3.0255) -- (3.335,3.9745);
+%\draw[fill] (3.335,3.9745) circle [radius=0.1];
+%\end{tikzpicture}
+%\hspace{1cm}&\hspace{1cm}
+%\begin{tikzpicture}
+%\draw[line width=1mm,fill=lightgray] (1,0) to (1,1) to (0,1) to (0,2) to (1,2) to (1,3) to (3,3) to (3,1) to (2,1) to (2,0) to (.95,0);
+%\draw[help lines] (0,0) grid (5,5);
+%\end{tikzpicture}
+%\end{tabular}
+%\caption{(Left) Desired geometry (circle). (Right) FDS representation---a cell is solid if more than half its volume is occupied by the desired geometry.}
+%\label{fig:circle}
+%\end{center}
+%\end{figure}
+%
+%
+%There are two shortcomings of the block geometry method.  First, it is zeroth-order accurate for curvilinear geometries \cite{Fadlun:temp}.
+%In other words, as the grid is refined---even after laborious reconstruction of the block geometry---we never recover the exact solution.  Second, creation of even simple geometries can be tedious. For example, users will go to incredible lengths to carve out rounded tunnels for circular ducts, a task that is fairly simple for most unstructured codes (not that the meshes tend to be much better!).
+%
+%In direct forcing IBM, the force term in the momentum equation is set to drive a specific velocity component to a desired value.  In the block geometry approach (Fig.~\ref{fig:circle}, right), the impermeability condition is enforced by setting the normal component of velocity to zero on the solid surface. But as shown by Fadlun \cite{Fadlun:temp}, it is relatively simple to obtain a second-order solution for the velocity field: the velocity component is found from a linear interpolation between the velocity of the solid surface (no slip, impermeability) and a value at some distance normal to the surface.  This is illustrated on the left in Fig.~\ref{fig:circle}.  Away from the surface the staggered $u$ velocity components are interpolated to the point marked by the solid dot, which is twice the normal distance from the surface as the nearest velocity component.
+%
+%More elaborate schemes exist to obtain the velocity near the surface \cite{Balaras:temp,Choi:temp,McDermott:temp}.  But the emphasis here is on the implementation of a scheme to transport heat and mass near thin obstructions (an issue yet to be addressed in the literature).  Therefore, Fadlun's simple interpolation method is sufficient for momentum.   In 2D, complex surfaces are constructed from a series of connected line segments. In 3D, surfaces are constructed from triangular facets.  Our goal is to minimize numerical diffusion across thin obstructions arbitrarily oriented relative to the Cartesian mesh.  The cause of this diffusion is discussed in more detail below.
+%
+%In the following sections, we first discuss the linked-list data structure used to connect the surface elements to the grid, similar to the wall cell type used in the basic FDS scheme.  Next, we illustrate the momentum scheme for both simple and complex flow geometries.  We then discuss the unique issues faced by the FDS flow solver for simulating variable density flows with thin obstructions not aligned with the mesh.  Hopefully, we can develop a scheme that handles these problems!
+%
+%\subsection{Data Structure}
+%
+%\subsubsection{Block Geometry}
+%
+%In the basic FDS method, a wall cell (WC) is one face of a gas phase cell.  A WC derived type stores the indices of the gas phase cell\footnote{Here I am not getting into the difference between wall cell and 1D in-depth derived types.  When I say WC, in most cases I mean precisely {\ct WC\%ONE\_D}.}.  It also stores face values of density, species mass fraction, and temperature, and the wall-normal cell dimension used to construct gradients.  The relevant variables in the code are:
+%
+%\begin{table}[h!]
+%\begin{tabular}{ll}
+%{\ct WC\%IIG, WC\%JJG, WC\%KKG} & gas phase cell indices \\
+%{\ct WC\%UW}                    & wall-normal velocity component \\
+%{\ct WC\%RHO\_F}                & gas phase mass density at the wall \\
+%{\ct WC\%ZZ\_F}                 & lumped species mass fraction at the wall \\
+%{\ct WC\%TMP\_F}                & temperature at the wall \\
+%{\ct WC\%DN}                    & wall-normal cell dimension \\
+%{\ct WC\%IOR}                   & orientation from wall to cell center
+%\end{tabular}
+%\end{table}
+%
+%The face values serve as Dirichlet boundary conditions.  If Neumann boundary conditions are needed, they are constructed from a one-sided difference.  For example, the temperature gradient at the wall is obtained from
+%\begin{equation}
+%\frac{\partial T}{\partial n} \approx \frac{T_g - T_f}{\delta n/2}
+%\end{equation}
+%
+%\subsubsection{Complex Geometry}
 
 
 %As we move toward complex shapes immersed within the Cartesian mesh, to the extent possible we have tried to maintain a correspondence with the WC data type.  The analog in the new approach is, in 3D, a triangular facet, FC. This choice was made for the following reasons:
