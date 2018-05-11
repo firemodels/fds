@@ -25,7 +25,7 @@ We refer to the Fuel, Air, and Products in Eq.~(\ref{eq:simple}) as \emph{lumped
 
 \subsection{Relationship between Lumped and Primitive Species}
 
-In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. The primitive species mass fractions are given by the composition vector
+In a simple hydrocarbon reaction, the reactants are the fuel, oxygen, and nitrogen and the products are carbon dioxide, water vapor, and nitrogen. For methane, the primitive species mass fractions are given by the composition vector
 \begin{equation}\label{eq:prim_vector}
 \mathbf{Y} = [Y_{\mathrm{CH}_4}\, \, Y_{\mathrm{O}_2}\, \, Y_{\mathrm{N}_2}\, \, Y_{\mathrm{CO}_2}\, \, Y_{\mathrm{H}_2\mathrm{O}}]^T
 \end{equation}
@@ -37,9 +37,9 @@ In terms of primitive species, a one-step methane reaction may be written as
 \end{equation}
 This is equivalent to
 \begin{equation}\label{eq:lumped_expand}
-\mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Air, $Z_0$}+\underbrace{\mbox{CH}_4}_\text{Fuel,~$Z_1$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_2$}}
+\mathrm{9.52\underbrace{(0.21\,\mbox{O}_2+.79\,\mbox{N}_2)}_\text{Air, $Z_1$} + \underbrace{ \mbox{CH}_4}_\text{Fuel,~$Z_2$} \rightarrow 10.52\underbrace{(0.095\,\mbox{CO}_2+0.19\,\mbox{H}_2\mbox{O}+0.715\,\mbox{N}_2)}_\text{Products,~$Z_3$}}
 \end{equation}
-where 9.52~moles of Air react with 1~mole of Fuel to produce 10.52~moles of Products. Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}). Note that 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients. The lumped species mass fractions are denoted $Z_i$, $i=1,...,N_Z$, where $N_Z$ is the number of tracked species.
+where 9.52~moles of Air react with 1~mole of Fuel to produce 10.52~moles of Products. Notice that the primitive species have been grouped by volume fraction into lumped species and the lumped species stoichiometric coefficients are the sum of the primitive species coefficients from Eq.~(\ref{eq:lumped_methane}). Note that 9.52 $\times$ 0.21 is only approximately equal to 2. In practice the atom balance requires machine precision. To alleviate this issue, FDS internally normalizes the lumped species volume fractions and makes any necessary adjustments to the specified lumped stoichiometric coefficients. The lumped species mass fractions are denoted $Z_i$, $i=1,...,N_Z$, where $N_Z$ is the number of tracked species. The first tracked species, $Z_1$, is typically the background species, Air.
 
 The linear transformation from lumped species to primitive species is given by
 \begin{equation}\label{eq:transform}
@@ -345,12 +345,56 @@ The heat release per unit volume is then found by summing the species mass produ
 
 A limitation of the default mixing-controlled reaction model described above is that it assumes fuel and oxygen always react regardless of the local temperature, reactant concentration, or strain rate. For large-scale, well-ventilated fires, this approximation is usually sufficient. However, if a fire is in an under-ventilated compartment, or if a suppression agent like water mist or CO$_2$ is introduced, or if the strain between the fuel and oxidizing streams is high, burning may not occur.
 
-FDS uses simple empirical rules---which ignore strain---to predict local extinction within a given grid cell based on resolved species concentrations and the mean cell temperature.  The default FDS extinction model consists of two parts (shown below) based on the concept of a \emph{critical flame temperature} \cite{SFPE:Beyler}. If either criterion fails, then there is no chemical reaction and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step.
-\begin{enumerate}
-\item If the cell temperature is below the auto-ignition temperature (AIT) for all fuels in the cell then combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source when using the default combustion model because fuel and oxygen burn on contact.
-\item If the potential heat release from the reactants cannot raise the temperature of the cell above an empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning and the end of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
+FDS uses simple empirical rules---which ignore strain---to predict local extinction within a given grid cell based on resolved species concentrations and the mean cell temperature. There are two options for predicting extinction, both of which are based on the concept of a \emph{critical flame temperature}. The basic theory behind the critical flame temperature is described in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler} even though he never explicitly uses this term. In fact, it is mentioned only a few times in the Handbook, and each time it has a slightly different interpretation.
+
+
+\subsection{Critical Flame Temperature}
+\label{CFT}
+
+A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the available oxygen. The classic example of this behavior is a candle burning within an inverted jar.  With this picture in mind, consider a control volume characterized by a bulk temperature, $T$, a mass, $m$, and an oxygen mass fraction, $Y_\OTWO$.  Complete combustion of the oxygen within the control volume would release a quantity of energy given by:
 \be
-   \label{eq:dza} 
+   Q = m \, Y_\OTWO \, \left( \frac{\Delta H}{r_\OTWO}  \right)  \label{bbb}
+\ee
+where $\Delta H/r_\OTWO$ has a relatively constant value of approximately 13100~kJ/kg for most fuels of interest in fire applications~\cite{Huggett:1}. Under adiabatic conditions, the energy released by the reaction of the available oxygen and the corresponding stoichiometric amount of fuel would increase the bulk temperature of the gases to $T_{\rm f}$:
+\be
+   Q = m \, \overline{c_p} \, (T_{\rm f} - T)  \label{eee}
+\ee
+The average specific heat of the gases can be calculated based on the composition of the combustion products as:
+\be
+   \overline{c_p} = \frac{1}{(T_{\rm f}-T)} \, \sum_\alpha \int_{T}^{T_{\rm f}} c_{p,\alpha} (T') \, \d T'
+\ee
+Equating Eqs.~(\ref{bbb}) and (\ref{eee}) yields:
+\be
+   Y_\OTWO = \frac{ \overline{c_p} \, (T_{\rm f}-T) }{\Delta H/r_\OTWO} \label{YO2eq}
+\ee
+The critical flame temperature (CFT) as interpreted within FDS is based on the cup burner flame extinction apparatus, where a small liquid or gaseous burner with a co-flowing air stream is extinguished by a relatively slow increase of nitrogen\footnote{A cup burner experiment can use any number of extinguishing agents. Nitrogen is most appropriate for simulating self-extinction.} within the stream. The volume fraction of nitrogen in the air stream at the time of extinction is referred to as the {\em minimum extinguishing concentration} (MEC, usually expressed as a percent), and this is related to the volume fraction of oxygen in the stream by
+\be
+  X_{\OTWO,\lim} = X_{\OTWO,\infty} \, \left( 1 - \hbox{MEC}/100 \right)
+\ee
+A definition of the critical flame temperature can be derived using Eq.~(\ref{YO2eq}):
+\be
+   T_{\rm CFT} = T_\infty + Y_{\OTWO,\lim} \, \left( \frac{\Delta H/r_\OTWO}{\overline{c_p}} \right) \quad ; \quad  Y_{\OTWO,\lim} = \frac{X_{\OTWO,\lim} \, W_\OTWO}{X_{\OTWO,\lim} \, W_\OTWO + (1-X_{\OTWO,\lim}) \, W_\NTWO }
+   \label{CFT_def}
+\ee
+For a variety of fuels for which cup burner results are available, Eq.~(\ref{CFT_def}) has been used\footnote{The equilibrium chemistry program STANJAN was used to calculate the critical flame temperatures based on measured minimum extinguishing concentrations in the cup burner where nitrogen was used as the extinguishing agent.} to create a look-up table within FDS. For other fuels, a default value of 1550~$^\circ$C is used.
+
+\subsection{Extinction Based on Oxygen Only}
+\label{o2_based_model}
+
+The simple extinction model (referred to as Model~1 in FDS) applies Eq.~(\ref{YO2eq}) directly to determine a critical oxygen mass fraction, $Y_{\OTWO,\lim}$, for a given grid cell with bulk temperature, $T$. If $Y_{\OTWO}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step. 
+
+As an example, the critical flame temperature is assumed to be 1823~K for hydrocarbon fuels for which no cup burner data is available. Given that nitrogen is the primary component, the combustion products have an average specific heat of approximately \SI{1.2}{kJ/(kg.K)}. The limiting oxygen mass fraction of a control volume is given by:
+\be
+   Y_{\OTWO,\lim} = \frac{ \overline{c_p} (T_{\rm CFT}-T) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1823-T) }{13100}  \label{extinction_model}
+\ee
+For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction is approximately 0.14.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+
+
+\subsection{Extinction Based on Both Fuel and Oxygen}
+
+There is a second extinction model in FDS, referred to as Model~2, which considers both the oxygen and the fuel content of a given grid cell at the start of a time step. If the potential heat release from the reactants cannot raise the temperature of the cell above the empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning and the end of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
+\be
+   \label{eq:dza}
    \tilde{\phi} \equiv  \min \left( \, 1 \, , \, \frac{s \, Z_{\rm F}^0}{Z_{\rm A}^0} \, \right) = \frac{Z_{\rm A}^0-Z_{\rm A}}{Z_{\rm A}^0}
 \ee
 where $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). The extinction criterion is given by:
@@ -360,13 +404,10 @@ Z_{\rm F}^0 \, h_{\rm F}(T) + \tilde{\phi} \, Z_{\rm A}^0 \, h_{\rm A}(T) + \til
 Z_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \left[ (\tilde{\phi}-1) \, Z_{\rm P}^0 + Z_{\rm P} \right] \, h_{\rm P}(T_{\rm CFT})
 \end{align}
 where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy; thus, the left-hand-side includes the combustion heat release.  If the inequality (\ref{eq:extinction}) holds, combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature. The extinction criterion assumes that excess fuel acts as a diluent, but excess air and a proportional amount of products do \emph{not}. Hence, a large computational cell which is mostly air with a small amount of fuel is likely to burn, whereas a cell which is mostly fuel with little air will not. To achieve this, a fraction of the total mass of the grid cell equal to $(1-\tilde{\phi}) (Z_{\rm A}^0+Z_{\rm P}^0)$ has been removed from the calculation of the enthalpy of the left and right hand sides of the inequality (\ref{eq:extinction}).
-\end{enumerate}
-These extinction criteria can be applied to multiple reaction schemes. An AIT can be specified for each individual reaction, and if the cell temperature exceeds any, all reactions are allowed to proceed. The critical flame temperature criterion is applied to the entire reaction scheme. In other words, the individual reactions are allowed to occur, and the enthalpy inequality (\ref{eq:extinction}) is applied to the initial and final species mass fractions. If insufficient energy has been released, all reactions are suppressed and the species mass fractions are returned to their original values at the start of the time step.
+
+This extinction model can be applied to multiple reaction schemes. The critical flame temperature criterion is applied to the entire reaction. In other words, the individual reactions are allowed to occur, and the enthalpy inequality (\ref{eq:extinction}) is applied to the initial and final species mass fractions. If insufficient energy has been released, all reactions are suppressed and the species mass fractions are returned to their original values at the start of the time step.
 
 
-\paragraph{Alternative Extinction Model}
+\subsection{Auto-Ignition Temperature}
 
-In addition to the extinction model described above, there is the option to select a simpler extinction model based on the limiting oxygen concentration. Details of this model are discussed in Appendix~\ref{alternative_extinction_models}.
-
-
-
+As a convenience to users, FDS is designed so that there is no need to create an ignition source to initiate combustion---fuel and air burn on contact until the combustion becomes unviable as discussed above. However, in certain fire scenarios this assumption leads to spurious burning of fuel gas at the boundary of an oxygen-starved compartment. To prevent this, it is possible to turn off the assumption of piloted ignition by way of an auto-ignition temperature. If the cell temperature is below the user-specified auto-ignition temperature (AIT) for all fuels in the cell, combustion is suppressed. The auto-ignition temperature for each fuel is zero by default; thus, the user does not need to specify an ignition source when using the default combustion model because fuel and oxygen burn on contact.
