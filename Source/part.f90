@@ -911,7 +911,10 @@ SUBROUTINE VOLUME_INIT_PARTICLE
 
 ! Initialize particle indices and velocity
 
+USE OUTPUT_DATA, ONLY: N_PROF
 INTEGER :: ND
+TYPE (PROFILE_TYPE), POINTER :: PF
+
 IN => INITIALIZATION(IB)
 LP => LAGRANGIAN_PARTICLE(NLP)
 
@@ -922,14 +925,15 @@ LP%U = IN%U0
 LP%V = IN%V0
 LP%W = IN%W0
 
-! If the INITIALIZATION group has an ID, match it with a device
+! If the INITIALIZATION group has an ID, match it with a DEVC (device) and/or PROFile
 
 IF (IN%ID/='null') THEN
+
    DO ND=1,N_DEVC
       DV => DEVICE(ND)
       IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
          DV%LP_TAG = PARTICLE_TAG
-         DV%PART_INDEX = ILPC
+         DV%PART_CLASS_INDEX = ILPC
          DV%MESH = NM
          DV%X = LP%X
          DV%Y = LP%Y
@@ -941,6 +945,19 @@ IF (IN%ID/='null') THEN
          ENDIF
       ENDIF
    ENDDO
+
+   DO ND=1,N_PROF
+      PF => PROFILE(ND)
+      IF (IN%ID==PF%INIT_ID) THEN
+         PF%LP_TAG = PARTICLE_TAG
+         PF%PART_CLASS_INDEX = ILPC
+         PF%MESH = NM
+         PF%X = LP%X
+         PF%Y = LP%Y
+         PF%Z = LP%Z
+      ENDIF
+   ENDDO
+
 ENDIF
 
 ! Process particle and set more initial values

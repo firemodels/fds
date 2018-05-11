@@ -152,6 +152,8 @@ for j=2:length(Q);
                     end
                     if Measured_Metric(k,jj,kk) < Plot_Min; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
                     if Measured_Metric(k,jj,kk) > Plot_Max; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
+                    if Predicted_Metric(k,jj,kk) < Plot_Min; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
+                    if Predicted_Metric(k,jj,kk) > Plot_Max; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
                 end
             end
 

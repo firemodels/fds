@@ -139,8 +139,8 @@ REAL(EB) :: CPOPR,RSC,RPR,TMPA,TMPA4,RHOA,P_INF,RADIATIVE_FRACTION,BLOCKAGE_FACT
 REAL(EB), PARAMETER :: TMPM=273.15_EB, P_STP=101325._EB,R0=8314.472_EB,R1=1.986257E-03_EB,&
                        SIGMA=5.670373E-8_EB,K_BOLTZMANN=1.3806488E-23_EB
 
-REAL(FB) :: HRRPUV_MAX_SMV=-1.0_FB
-INTEGER :: USE_HRRPUV_MAX_SMV=0
+REAL(FB) :: HRRPUV_MAX_SMV=-1.0_FB, TEMP_MAX_SMV=-1.0_FB
+INTEGER :: USE_HRRPUV_MAX_SMV=0, USE_TEMP_MAX_SMV=0
 
 ! Parameters associated with parallel mode
 
@@ -396,7 +396,7 @@ INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 
 ! Maximum number of wet surface triangles related to element
 
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 32  ! Up to 32 wstriangles related to a wet surface vertex.
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL =360  ! Up to 360 wstriangles related to a wet surface vertex. 
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)

@@ -1859,8 +1859,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ELSE ! Assume the device is tied to a particle
 
-      IF (DV%PART_INDEX<1) CYCLE DEVICE_LOOP
-      SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(DV%PART_INDEX)%SURF_INDEX
+      IF (DV%PART_CLASS_INDEX<1) CYCLE DEVICE_LOOP
+      SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(DV%PART_CLASS_INDEX)%SURF_INDEX
 
    ENDIF
 
@@ -1902,37 +1902,52 @@ IF (EVACUATION_ONLY(NM)) RETURN
 M => MESHES(NM)
 
 PROF_LOOP: DO N=1,N_PROF
+
    PF => PROFILE(N)
    IF (NM/=PF%MESH) CYCLE PROF_LOOP
    II  = INT(GINV(PF%X-M%XS,1,NM)*M%RDXI   + 1._EB)
    JJ  = INT(GINV(PF%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
    KK  = INT(GINV(PF%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
-   IOR = PF%IOR
-   CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
-   IF (IW>0) THEN
-      PF%IW = IW
-      SF => SURFACE(M%WALL(IW)%SURF_INDEX)
-      IF (.NOT.SF%THERMALLY_THICK) THEN
-         WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
+
+   IF (PF%IOR/=0) THEN
+
+      ! The PROFile is for a WALL cell
+
+      IOR = PF%IOR
+      CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
+      IF (IW>0) THEN
+         PF%WALL_INDEX = IW
+         SF => SURFACE(M%WALL(IW)%SURF_INDEX)
+      ELSE
+         WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition PROF No. ',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
-      IF (PF%QUANTITY /= 'TEMPERATURE' .AND. PF%QUANTITY /= 'DENSITY') THEN
-         SUCCESS = .FALSE.
-         DO NN=1,SF%N_MATL
-            IF (PF%QUANTITY==SF%MATL_NAME(NN)) SUCCESS = .TRUE.
-         ENDDO
-         IF (.NOT.SUCCESS) THEN
-            WRITE(LU_ERR,'(A,A,A)') 'ERROR: QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
-            STOP_STATUS = SETUP_STOP
-            RETURN
-         ENDIF
-      ENDIF
-   ELSE
-      WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition PROF No.',PF%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+
+   ELSE  ! The PROFile is for a Lagrangian PARTicle
+
+      SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(PF%PART_CLASS_INDEX)%SURF_INDEX)
+ 
+   ENDIF
+      
+   IF (.NOT.SF%THERMALLY_THICK) THEN
+      WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
       STOP_STATUS = SETUP_STOP
       RETURN
    ENDIF
+
+   IF (PF%QUANTITY /= 'TEMPERATURE' .AND. PF%QUANTITY /= 'DENSITY') THEN
+      SUCCESS = .FALSE.
+      DO NN=1,SF%N_MATL
+         IF (PF%QUANTITY==SF%MATL_NAME(NN)) SUCCESS = .TRUE.
+      ENDDO
+      IF (.NOT.SUCCESS) THEN
+         WRITE(LU_ERR,'(A,A,A)') 'ERROR: QUANTITY ',TRIM(PF%QUANTITY), ' is not appropriate for the designated location'
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ENDIF
+   ENDIF
+
 ENDDO PROF_LOOP
 
 END SUBROUTINE INITIALIZE_PROFILES
