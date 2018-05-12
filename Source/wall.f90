@@ -744,14 +744,20 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                      IF (OB%MATL_INDEX>0) THEN
                         CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_MATL_INDEX=OB%MATL_INDEX)
                      ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                        MS => SURFACE(OB%MATL_SURF_INDEX)
                         VSRVC_LOC = 0._EB
                         DO NN=1,SURFACE(OB%MATL_SURF_INDEX)%N_MATL
                            ML => MATERIAL(SURFACE(OB%MATL_SURF_INDEX)%MATL_INDEX(NN))
                            VSRVC_LOC = VSRVC_LOC + OB%RHO(IIO,JJO,KKO,NN)/ML%RHO_S
                         ENDDO
-                        RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(IIO,JJO,KKO,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)&
-                                                                      / VSRVC_LOC
+                        RHO_GET(1:MS%N_MATL) = OB%RHO(IIO,JJO,KKO,1:MS%N_MATL) / VSRVC_LOC
                         CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+                        IF (MS%INTERNAL_RADIATION) THEN
+                           CALL GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_S,OB%MATL_SURF_INDEX,RHO_GET)
+                           CALL GET_SOLID_REFRACTIVE_INDEX(REFRACTIVE_INDEX_S,OB%MATL_SURF_INDEX,RHO_GET)
+                           K_R = 16._EB*(REFRACTIVE_INDEX_S**2)*SIGMA*(TMP_OTHER**3) / (3._EB*KAPPA_S)
+                           K_GET = K_GET + K_R
+                        ENDIF
                      ENDIF
                      K_OTHER = K_OTHER + K_GET
 
