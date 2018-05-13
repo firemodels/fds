@@ -1,6 +1,7 @@
 &HEAD CHID='geom_texture3a' /
 
 &MESH IJK=10,10,10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+&RADI RADIATION=.FALSE. /
 
 &SURF ID='surf1'
       TEXTURE_MAP='sphere_cover_03.png',COLOR='BLUE',

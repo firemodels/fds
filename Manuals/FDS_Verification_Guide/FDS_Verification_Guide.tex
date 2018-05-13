@@ -2620,46 +2620,22 @@ The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 \section{Radiation from a gas-fired panel (\texorpdfstring{\textct{radiation\_gas\_panel}}{radiation\_gas\_panel}) }
 \label{radiation_gas_panel}
 
-A radiant gas-fired panel is often used to provide a source of heat flux in
-laboratory experiments.  Here, the heat flux received from a 1ft$^2$
-gas panel is computed at 0.1, 0.15, 0.25, 0.38, 0.46, 0.61 and 0.76 m
-distance from the panel along its center axis, and along the
-perpendicular axis displaced (0.14, 0.14) m from its center. The
-center-axis configuration is illustrated in
-Figure~\ref{radiation_gas_panel_plot}.  We
-compare the results computed by FDS to those calculated using the
-Stephan-Bolzmann law and configuration factors and, along the panel
-axis, with measurements taken by Simms \cite{Simms:1963} (see Table
-3 therein). In agreement with the values used by Simms, the
-temperature and emissivity of the panel are taken to be $1250^\circ$K
-and 0.7, respectively, and the ambient temperature taken to be
-$273^\circ$K.
+A gas-fired panel is often used as a source of thermal radiation in laboratory experiments.  Here, the heat flux from an $h=30.48$~cm square panel is computed at distances of 10~cm, 15~cm, 25~cm, 38~cm, 46~cm, 61~cm, and 76~cm along its perpendicular center axis, and along a perpendicular line that is displaced laterally 14~cm and vertically 14~cm from the center axis, as illustrated in Fig.~\ref{radiation_gas_panel_plot}.  We compare the results computed by FDS to those calculated using configuration factors. The temperature and emissivity of the panel are set to 1250~K and 0.7, respectively, and the ambient temperature is 273~K.
 
-The configuration factor $dF_{2 \rightarrow d1}$ describing the energy
-exchange between a radiant square panel with dimension $h$ and a
-target with differential area $dA_1$ located on a perpendicular
-extending from the panel at $(\overline{x}, \overline{y})$ relative to
-its center is computed using Equation~\eqref{eq:2->d1 configuration
-  factor - general}. Figure~\ref{radiation_gas_panel_plot} illustrates
-the configuration for $(\overline{x}, \overline{y}) = (0, 0)$.
+The configuration factor, $\d F_{2 \rightarrow 1}$, describing the energy exchange between the radiant panel and a target with differential area $\d A_1$ located on a perpendicular line extending from the panel at the point  $(\overline{x}, \overline{y})$ is computed from the following: 
 \begin{align}
- dF_{2 \rightarrow d1} (\overline{x}, \overline{y})
-    &= \frac{dA_1}{\pi A_2}
-        \int_{-h/2}^{h/2} \int_{-h/2}^{h/2} \frac{R^2}{\left[ (x-\overline{x})^2 + (y-\overline{y})^2 + R^2 \right]^2} dx dy.
+ \d F_{2 \rightarrow 1} (R; \overline{x}, \overline{y})
+    &= \frac{\d A_1}{\pi \, A_2}
+        \int_{-h/2}^{h/2} \int_{-h/2}^{h/2} \frac{R^2}{\left[ (x-\overline{x})^2 + (y-\overline{y})^2 + R^2 \right]^2} \d x \, \d y
  \label{eq:2->d1 configuration factor - general}
 \end{align}
+The comparison of FDS and the exact solution is shown in Fig.~\ref{radiation_gas_panel_plot}.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{FIGURES/radiation_gas_panel_configuration}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
-\caption[The \textct{radiation\_gas\_panel} case]{\emph{Left}: A
-  radiant panel and target dA$_1$ located a distance $R$ from
-  the panel on its center axis.  \emph{Right}: Heat flux from a
-  radiant panel at $1250^\circ$K  with emissivity 0.7 at 0.1, 0.15,
-  0.25, 0.38, 0.46, 0.61 and 0.76 m, along the panel's center axis,
-  and along the perpendicular axis displaced (0.14, 0.14) m from the
-  panel center.}
+\caption[The \textct{radiation\_gas\_panel} case]{\emph{Left}: A radiant panel and target dA$_1$ located a distance $R$ from the panel on its center axis.  \emph{Right}: Comparison of FDS and the exact result.}
 \label{radiation_gas_panel_plot}
 \end{figure}
 
@@ -5097,7 +5073,7 @@ In a typical building as the interior pressure rises, the leakage area will grow
 \be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
 By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
-This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected. 
+This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
 
 \begin{figure}[ht]
 	\centering
@@ -5302,11 +5278,11 @@ Computation of the these quantities by their typical statistical definition woul
 \subsection{RMS as a Running Average (\texorpdfstring{\textct{rms\_example}}{rms\_example})}
 \label{rms_example}
 
-In this example, we want to compute the mean and rms of a hypothetical velocity time series 
+In this example, we want to compute the mean and rms of a hypothetical velocity time series
 \be
    u(t) = \tanh(t) + {\cal U}(-0.5,0.5)
 \ee
-where ${\cal U}(-0.5,0.5)$ is a uniformly distributed random variable. The expected RMS of the time series beyond its initial transient is equal to the standard deviation of the uniform distribution over the unit interval, $\sigma=\sqrt{1/12}\approx 0.2887$. The expected mean is 1. This exercise is as much a check of the intrinsic random number generator in Fortran as it is the computation within FDS. Figure~\ref{rms_example_plot} displays the result. 
+where ${\cal U}(-0.5,0.5)$ is a uniformly distributed random variable. The expected RMS of the time series beyond its initial transient is equal to the standard deviation of the uniform distribution over the unit interval, $\sigma=\sqrt{1/12}\approx 0.2887$. The expected mean is 1. This exercise is as much a check of the intrinsic random number generator in Fortran as it is the computation within FDS. Figure~\ref{rms_example_plot} displays the result.
 \begin{figure}[h!]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/rms_example}
@@ -5316,13 +5292,13 @@ where ${\cal U}(-0.5,0.5)$ is a uniformly distributed random variable. The expec
 Note that this example is also a useful demonstration of how to use the math functions within FDS. Although there is not a tanh function included, it can be constructed from the expression:
 \be
    \tanh(t) = \frac{{\rm e}^t - {\rm e}^{-t}}{{\rm e}^t + {\rm e}^{-t}}
-\ee 
+\ee
 using the base functions as shown below.
 \begin{lstlisting}
 &DEVC ID='rn',    QUANTITY='RANDOM NUMBER', XYZ=0,0,0 /
 &DEVC ID='t',     QUANTITY='TIME', XYZ=0,0,0 /
 &DEVC ID='u',     QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s' /
-&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s', 
+&DEVC ID='u_rms', QUANTITY='CONTROL VALUE', CTRL_ID='sum', XYZ=0,0,1, UNITS='m/s',
       STATISTICS='RMS', STATISTICS_START=5. /
 
 &CTRL ID='exp(t)',  FUNCTION_TYPE='EXP',      INPUT_ID='t' /

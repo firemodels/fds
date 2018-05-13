@@ -1228,13 +1228,13 @@ You can set the ambient temperature and pressure using the following parameters:
 \section{Simulation Mode}
 \label{Sim_Mode}
 
-There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'VVLES'} (Very Very Large Eddy Simulation). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
+There are four basic modes of operation in FDS: {\ct 'DNS'} (Direction Numerical Simulation), {\ct 'LES'} (Large Eddy Simulation), {\ct 'VLES'} (Very Large Eddy Simulation), and {\ct 'SVLES'} (Simple Very Large Eddy Simulation---VLES with simplified physics). These modes govern a number of physical and numerical parameters that determine the level of physics and the accuracy of the numerical model. They are specified using {\ct SIMULATION\_MODE} on the {\ct MISC} line. For example
 \begin{lstlisting}
 &MISC ..., SIMULATION_MODE='DNS' /
 \end{lstlisting}
 indicates a direct numerical simulation\footnote{Prior versions specified a DNS using {\ct DNS=.TRUE.} on the {\ct MISC} line.}. The default value is {\ct 'VLES'}.
 
-Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail. 
+Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for each of the four simulation modes and the sections where these parameters are explained in detail.
 
 \begin{table}[ht]
 \centering
@@ -1242,12 +1242,13 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \label{tbl:SIMULATION_MODE}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'VVLES'}  \\ \hline \hline
+Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
 {\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
-{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 0           & 1            & 1             & 3              \\ \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
+{\ct PROJECTION}                       & \ref{pressure_solver}          & T           & T            & F             & F              \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1398,7 +1399,7 @@ places a restriction on the time step due to the advection velocity.  The limits
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (LES and VLES default, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (VLES default, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
@@ -1406,15 +1407,15 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} (LES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=3} (VVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
+{\ct CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure. 
+The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
 
 Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
@@ -1469,26 +1470,26 @@ Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Th
 \section{Special Topic: Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for LES is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the integer codes which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default {\ct SIMULATION\_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
-&MISC FLUX_LIMITER=1 / ! invoke Godunov (first-order upwind scheme)
+&MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
 \end{lstlisting}
 
 \begin{table}[ht]
 \caption[Flux limiter options]{Flux limiter options.}
 \label{tab:flux_limiters}
 \centering
-\begin{tabular}{|lc|}
+\begin{tabular}{|l|l|}
 \hline
-Scheme                 & {\ct FLUX\_LIMITER} \\
+Scheme                              & {\ct FLUX\_LIMITER} \\
 \hline
-Central differencing   & {\ct 0}  \\
-Godunov                & {\ct 1}  \\
-Superbee (LES default) & {\ct 2}  \\
-MINMOD                 & {\ct 3}  \\
-CHARM (DNS default)    & {\ct 4}  \\
-MP5                    & {\ct 5}  \\ \hline
+Central differencing                & {\ct 'CENTRAL'}  \\
+Godunov                             & {\ct 'GODUNOV'}  \\
+Superbee (VLES, SVLES default)      & {\ct 'SUPERBEE'}  \\
+MINMOD                              & {\ct 'MINMOD'}  \\
+CHARM (DNS, LES default)            & {\ct 'CHARM'}  \\
+MP5                                 & {\ct 'MP5'}  \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1701,11 +1702,11 @@ which leads to a Poisson equation that can be solved efficiently:
 \be
    \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
 \ee
-The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the following expression in discretized form:
+The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
 \be
   \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
 \ee
-drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size.
+drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
 
 If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
@@ -1713,7 +1714,7 @@ If a numerical instability occurs in a simulation involving a tunnel, you might 
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is one-half the grid cell size (with units of m). You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates wild oscillations in pressure.
 \end{enumerate}
-A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in column~8. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in column~13.
+A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
 
 Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
 
@@ -2446,6 +2447,15 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line.
 
+\subsubsection{Specified Convective Heat Transfer Coefficient}
+
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
+{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
+
 \subsubsection{Logarithmic Law of the Wall}
 
 Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
@@ -2456,16 +2466,13 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
 
-\subsubsection{Specified Convective Heat Transfer Coefficient}
+\subsubsection{Free Convection, Horizontal Cylinder}
 
-If you want to specify the convective heat transfer coefficient, you can set it to a constant using \\
-{\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct SURF} line in units of \si{W/(m$^2$.K)}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, you can specify the heat transfer coefficient of the back side using {\ct HEAT\_TRANSFER\_COEFFICIENT\_BACK}. This back side condition is appropriate for a {\ct SURF} line with {\ct BACKING='VOID'} or {\ct BACKING='EXPOSED'}.
-
-
-\subsubsection{Specifying the Heat Flux at a Solid Surface}
-
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both {\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately on the {\ct SURF} line. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
-
+For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
+\be
+   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
+\ee
+where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -5151,42 +5158,69 @@ The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed infor
 \subsection{Special Topic: Flame Extinction}
 \label{info:extinction}
 
-Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a compartment is challenging because the relevant physical mechanisms occur at length scales smaller than a single mesh cell. Flames are extinguished due to lowered temperatures and dilution of the oxygen supply. A simple suppression algorithm has been implemented in FDS that attempts to gauge whether or not combustion is viable based on the local energy release. There must be sufficient energy released to raise the cell temperature above the critical flame temperature for combustion to occur. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The default {\ct EXTINCTION\_MODEL} is called {\ct 'EXTINCTION 2'}. Alternative models are under development and when ready will be specified on the {\ct COMB} line.
+Modeling suppression of a fire due to the introduction of a suppression agent like CO$_2$ or water mist, or due to the exhaustion of oxygen within a closed compartment is challenging because the relevant physical mechanisms typically occur at subgrid-scale. Flames are extinguished due to lowered temperatures and dilution of the fuel or oxygen supply. There are two flame extinction algorithms in FDS that attempt to gauge whether or not combustion is viable based on the local temperature and the local oxygen and fuel concentrations. In brief, for combustion to occur there must be sufficient oxygen and fuel to raise the cell temperature from its current value to a {\em critical flame temperature}. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more details about how the mechanism works. The {\ct EXTINCTION\_MODEL} called {\ct 'EXTINCTION~1'} is the default in Simple Very Large Eddy Simulation (SVLES) mode, whereas {\ct 'EXTINCTION 2'} is used in all other modes. The difference between the two models is that for {\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermo-physical gas species properties are not invoked. The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
 
-For the default extinction model, the only parameter you can control is the \linebreak[4]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) (the adiabatic flame temperature at the lower flammability limit) set on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1427~\si{\degreeCelsius} (1700 K). This value represents combustion of typical hydrocarbon fuels. Note that if you are using an effective heat of combustion or other types of fuels, the CFT should be calculated (see below) to reflect your reaction system. To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.
+The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) is based on the {\em minimum extinguishing concentration} (MEC) that results from a cup burner experiment\footnote{Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler} refers to the {\em limiting oxygen index} (LOI) or just OI as the basis for determining a critical flame temperature.}, where a small gas or liquid burner is extinguished by gradually diluting the co-flowing air with a diluent like nitrogent. The MEC is the volume fraction of the diluent in the air stream when extinguishment occurs. The CFT is the adiabatic flame temperature of a stoichiometric mixture of the fuel and oxygen plus the diluent at the MEC.
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen somewhere else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
+Values for the CFT are listed in Table~\ref{tab:CFT}. These values are appropriate for self-extinction or extinction via nitrogen dilution of the air stream. For all other cases, set the CFT on the {\ct REAC} line because it is specific to each individual reaction. The default value is 1550~\si{\degreeCelsius}. If you know the MEC for a particular combination of fuel and diluent, the CFT be calculated from the following equation:
+\begin{align}
+T_{\rm CFT} = T_0 +  X_{\rm O_2,\infty} \left( 1 - \frac{\mbox{MEC}}{100} \right) \frac{\Delta H_{\rm c}/r}{n \, \overline{c_p}}
+\end{align}
+where
+\begin{tabbing}
+$T_0$     \hspace{0.5in}             \=  Initial temperature of the fuel/air mixture (ambient conditions) (K) \\
+$X_{\rm O_2,\infty}$                 \>  Ambient oxygen volume fraction (mol/mol) \\
+MEC                                  \>  Minimum Extinguishing Concentration, expressed as a volume fraction (\%)  \\
+$\Delta H_{\rm c}/r$                 \>  Heat of combustion per mole of oxygen consumed (kJ/mol)  \\
+$n$                                  \>  Number of moles of products of combustion per mole of fuel/air mixture  \\
+$\overline{c_p}$                     \>  Average heat capacity of products of combustion (kJ/(mol$\cdot$K) in the range $T_0$ to $T_{\rm CFT}$ 
+\end{tabbing}
 
-\paragraph{Finding Extinction Parameters}
+\begin{table}[!ht]
+\caption[Default Critical Flame Temperatures for common fuels]{Default Critical Flame Temperatures for common fuels.}
+\vspace{0.1in}
+\label{tab:CFT}
+\begin{center}
+\begin{tabular}{|l|l|c|c|}
+\hline
+Fuel              & Formula          & MEC (N$_2$ \%)    & $T_{\rm CFT}$ ($^\circ$C)   \\ \hline \hline
+{\ct ACETONE}     & C$_3$H$_6$O      & 28.0        & 1670 \\ \hline
+{\ct ACETYLENE}   & C$_2$H$_2$       & 58.0        & 1312 \\ \hline
+{\ct BENZENE}     & C$_6$H$_6$       & 30.3        & 1683 \\ \hline
+{\ct BUTANE}      & C$_4$H$_{10}$    & 31.0        & 1594 \\ \hline
+{\ct DODECANE}    & C$_{12}$H$_{26}$ & 33.0        & 1577 \\ \hline
+{\ct ETHANOL}     & C$_2$H$_6$O      & 34.6        & 1529 \\ \hline
+{\ct ETHYLENE}    & C$_2$H$_4$       & 45.0        & 1441 \\ \hline
+{\ct HYDROGEN}    & H$_2$            & 72.0        & 870  \\ \hline
+{\ct ISOPROPANOL} & C$_3$H$_8$O      & 30.0        & 1608 \\ \hline
+{\ct METHANE}     & CH$_4$           & 24.2        & 1663 \\ \hline
+{\ct METHANOL}    & CH$_3$OH         & 40.8        & 1395 \\ \hline
+{\ct N-HEPTANE}   & C$_7$H$_{16}$    & 31.2        & 1617 \\ \hline
+{\ct N-HEXANE}    & C$_6$H$_{14}$    & 29.0        & 1646 \\ \hline
+{\ct N-OCTANE}    & C$_8$H$_{18}$    & 33.0        & 1564 \\ \hline
+{\ct PROPANE}     & C$_3$H$_8$       & 32.3        & 1573 \\ \hline
+{\ct TOLUENE}     & C$_7$H$_8$       & 24.4        & 1755 \\ \hline
+All other species &                  &             & 1550 \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
-For most fuels of interest, the AIT and CFT may be found in \cite{SFPE:Beyler}.  The AITs are tabulated for a range of fuels in Table 2-7.1 of the SFPE Handbook \cite{SFPE}, ``Summary of Limits of Flammability, Lower Temperature Limits (TL), and Minimum Autoignition Temperatures (AIT) of Individual Gases and Vapors in Air at Atmospheric Pressure.''  Similarly, Table 2-7.3, ``Thermodynamic Equilibrium Properties at Extinction,'' provides CFT for several common fuels (listed as {\it T}(OI), for temperature at the oxygen index for diffusion flames).
 
-%If the lower flammability limit (LFL) of the fuel mixture is known but the CFT is not, then Beyler's Eq.~(4) may be used to estimate the CFT.  The formula is repeated here for convenience:
-%\begin{align}
-%T_{\si{CFT}} = T_0 + \left(\frac{\mbox{LFL}}{100}\right) \frac{\Delta H_c}{n \, C_{\si{p}}}
-%\end{align}
-%where
-%\begin{itemize}
-%{\setlength\itemindent{50pt} \item[$\Delta H_c = $] Heat of combustion of the fuel (\si{J/kg})}
-%{\setlength\itemindent{50pt} \item[$\mbox{LFL/100} = $] Mole fraction of fuel}
-%{\setlength\itemindent{50pt} \item[$n = $] Number of moles of products of combustion per mole of fuel/air mixture}
-%{\setlength\itemindent{50pt} \item[$C_{\si{p}} = $] Heat capacity of products of combustion (\si{J/(kg.K)})}
-%{\setlength\itemindent{50pt} \item[$T_0 = $] Initial temperature of the fuel/air mixture (ambient conditions) (K)}
-%{\setlength\itemindent{50pt} \item[$T_{\si{CFT}} = $] Adiabatic flame temperature of a lower flammability limit mixture (K)}
-%\end{itemize}
 
 \subsection{Special Topic: Piloted Ignition Zone}
-
 \label{info:ignition}
 
-Since by default the AIT is 0 K, it is possible to get spurious reignition of unburned fuel when fresh air is encountered after extinction.  To prevent this from happening you need to set an AIT for the fuel on the {\ct REAC} line, as discussed above.  However, this then leads to the problem of ignition at a burner surface.  It is usually too difficult to model the ignition process from first principles.  Instead, you can use an {\ct INIT} line to mimic a piloted ignition zone. For example, you might use something like this for a piloted methane flame:
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present. For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is -273~$^\circ$, meaning that it is possible to get spurious re-ignition of unburned fuel when fresh air is encountered after extinction. Setting an AIT, however, leads to the problem of ignition at a burner surface.  It can be tricky to model the ignition process explicitly because of limited grid resolution. Instead, you can set a fictitiously low value on the {\ct SURF} line that is associated with the burning surface or the {\ct INIT} line that essentially creates a piloted ignition zone in the vicinity of the burning surface. For example, you might use something like this for a piloted methane flame:
 \begin{lstlisting}
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
 &INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
-where the {\ct XB} specifies a region at the base of the burner where AIT is set to achieve ``mixed is burnt''.  On the {\ct REAC} line you are telling FDS to use AIT = 627 \si{\degreeCelsius} throughout the domain.  Then the {\ct INIT} line takes precedence over the {\ct REAC} line within the specified region.
-
-
+The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the domain except within the region specified by {\ct XB} at the base of the burner where the AIT is effectively turned off. You can achieve a similar end with the following {\ct SURF} line:
+\begin{lstlisting}
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
+&SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
+\end{lstlisting}
+    
 \newpage
 
 \section{Complex Stoichiometry}
@@ -5346,25 +5380,21 @@ In the first step, the fuel is converted quickly to CO, H$_2$O and soot (C), and
       FUEL='PROPANE'
       SPEC_ID_NU='PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR','SOOT'
       SOOT_H_FRACTION=0.
-      NU=-1,-3,2,4,1
-      CRITICAL_FLAME_TEMPERATURE=1447.
-      AUTO_IGNITION_TEMPERATURE=450. /
+      NU=-1,-3,2,4,1 /
 &REAC ID='R2'
       FUEL='CARBON MONOXIDE'
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU=-1,-0.5,1
-      AUTO_IGNITION_TEMPERATURE=609.
       PRIORITY=2 /
 &REAC ID='R3'
       FUEL='SOOT'
       SPEC_ID_NU='SOOT','OXYGEN','CARBON DIOXIDE'
       NU=-1,-1,1
-      AUTO_IGNITION_TEMPERATURE=609.
       PRIORITY=2 /
 \end{lstlisting}
 By specifying {\ct PRIORITY=2} for reactions {\ct R2} and {\ct R3}, you are assuming that the first reaction, {\ct R1}, occurs first, followed by {\ct R2} and {\ct R3}. This sequence allows for the build-up of soot and CO in compartments that are oxygen starved.
 
-Notice in this reaction scheme that a {\ct CRITICAL\_FLAME\_TEMPERATURE} is applied to the first reaction but not the second and third because the default extinction model is only applied to the first of multiple fast reactions. For more information on extinction, see Section~\ref{info:extinction}.
+Note that in this reaction scheme, the extinction model is applied to the first reaction but not the second and third because the default extinction model is only applied to the first of multiple fast reactions. For more information on extinction, see Section~\ref{info:extinction}.
 
 
 
@@ -5551,8 +5581,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
       SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      NU = -1,-3.5,3,4
-      CRITICAL_FLAME_TEMPERATURE = 730. /
+      NU = -1,-3.5,3,4 /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
@@ -7450,14 +7479,23 @@ Note that this quantity is only meaningful if the front or exposed surface of th
 where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction calculation.
 
 
-\section{Profiles of Quantities: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
+\section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
-FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
+FDS uses a fine one-dimensional grid at each boundary cell to calculate the heat conduction and reactions within a solid. The solid can be a wall cell or a Lagrangian particle. In either case, use the {\ct PROF} output to record the properties of the solid in depth at discrete intervals of time.
+
+The parameters for a {\ct PROF} line are listed in Table~\ref{tbl:PROF}. For a wall cell, the parameters are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a wall cell:
 \begin{lstlisting}
-&PROF XYZ=..., QUANTITY='TEMPERATURE', ID='T-1', IOR=3 /
+&PROF ID='T-1', XYZ=..., QUANTITY='TEMPERATURE', IOR=3 /
 \end{lstlisting}
-Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
+For a particle, you must reference an {\ct INIT} line used to place the particle within the domain:
+\begin{lstlisting}
+&INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
+&PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
+\end{lstlisting}
+For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
+
+The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total ({\ct 'DENSITY'}) or the density of a particular solid material component, ({\ct '[MATL\_ID]'}), where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
 
 
 
@@ -9451,6 +9489,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP}& Character  & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}      \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
+%{\ct CC\_IBM}                                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
@@ -9495,6 +9534,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct PROCESS\_ALL\_MESHES}                      & Logical       & Section~\ref{sec:periodic}                            &               & {\ct .FALSE.}     \\ \hline
+%{\ct PROCESS\_CUTCELLS}                         & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct PROJECTION}                                & Logical       & Section~\ref{info:CSVF}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
@@ -9753,8 +9793,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct FORMAT\_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
+{\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
+{\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct IOR}                   & Real              & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
@@ -10057,6 +10098,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ADIABATIC}                         & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}       & Real            & Section~\ref{info:ignition}               & $^\circ$C           & -273                    \\ \hline
 {\ct BACKING}                           & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
 {\ct BURN\_AWAY}                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline

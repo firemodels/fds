@@ -4,9 +4,13 @@
 
 This chapter looks at validation exercises where the aim is to predict the extinguishment of a fire.
 
-\section{Cup Burner Experiments}
+\section{Minimum Agent Concentration Experiments}
+
+In the following sections, results of experiments are presented in which relatively small flames are extinguished due to the introduction of an inerting agent in the oxidizer stream.
+
+\subsection{Cup Burner Experiments}
 \label{Minimum Extinguishing Concentration}
-The Cup Burner is an apparatus used to determine the minimum extinguishing concentration (MEC) for combinations of fuels and suppression agents. Sixteen fuels (acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane, hydrogen, methane, methanol, octane, propane, propanol, and toluene) and fifve suppression agents (argon, carbon dioxide, helium, nitrogen, and sulfur hexaflouride) are considered. For the simulations, the MEC is found when the post-ignition HRR remains below $1 \times 10^{-10}$~kW. The critical flame temperatures specified for the fuel reactions are shown in Table~\ref{Cup_Table}. The extinguishing agent concentration is measured at the outer edge of the cup burner tube at a level slightly below the cup rim. Results are shown in Fig.~\ref{cup_burner_extinguish_vol} where color indicates the fuel and shape indicates the extinguishing agent.
+A cup burner is an apparatus used to determine the minimum extinguishing concentration (MEC) for combinations of fuels and suppression agents. Sixteen fuels (acetone, acetylene, benzene, butane, dodecane, ethanol, ethylene, heptane, hexane, hydrogen, methane, methanol, octane, propane, propanol, and toluene) and five suppression agents (argon, carbon dioxide, helium, nitrogen, and sulfur hexaflouride) are considered. For the simulations, the MEC is found when the post-ignition HRR remains below $1 \times 10^{-10}$~kW. The critical flame temperatures specified for the fuel reactions are shown in Table~\ref{Cup_Table}. The extinguishing agent concentration is measured at the outer edge of the cup burner tube at a level slightly below the cup rim. Results are shown in Fig.~\ref{cup_burner_extinguish_vol} where color indicates the fuel and shape indicates the extinguishing agent.
 
 \newpage
 
@@ -21,10 +25,98 @@ The Cup Burner is an apparatus used to determine the minimum extinguishing conce
 
 \clearpage
 
-\section{USCG/HAI Water Mist Suppression Tests}
-\label{Extinction Time}
+\subsection{UMD Line Burner}
+
+In the UMD line burner experiments the oxygen coflow is slowly diluted with nitrogen until the flame weakens and eventually blows out.  In this series of FDS calculations, the nitrogen coflow is setup with a ramp in time to achieve a linear decrease in the coflow oxygen volume fraction over one minute of real time. In Fig.~\ref{fig_umd_comb_eta}, we plot the combustion efficiency as a function of oxygen volume fraction for both methane and propane and compare with the measurements of White~et~al.~\cite{White:2015}.  Note that the FDS results are presented for three different grid resolutions corresponding to $W/\delta x$ = 4, 8, and 16 ($\delta x$ = 1.25~cm, 0.625~cm, and 0.3125~cm, respectively), where $W=5$ cm is the width of the burner.  A simple reignition model with an ignition temperature threshold set to the SFPE Handbook~\cite{SFPE} value of the Auto-Ignition Temperature (AIT) for methane and propane is used.  A piloted ignition region (AIT = 0~K) is set just within the near field of the line burner.  Details of the reignition model and pilot region as well as parameter sensitivity studies are provided in White~et~al.~\cite{White:2017}.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_eta} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_eta}
+\end{tabular*}
+\caption[UMD Line Burner combustion efficiency]{UMD Line Burner combustion efficiency.}
+\label{fig_umd_comb_eta}
+\end{figure}
+
+\clearpage
+
+
+\section{Compartment Fire Extinction}
+
+The following sections present results for experiments in which fires within forced ventilation compartments either self-extinguish due to lack of oxygen, or extinguish due to a water mist system.
+
+
+\subsection{LLNL Enclosure Experiments}
+\label{LLNL_Extinction Time}
+
+The figures on the following pages contain plots of the heat release rate in both the experiments and the simulation. The experimental curve is just the value reported in the test report, which drops to zero instantly at the reported extinguishment time. The simulated curve is the total HRR for the compartment, which means that in some cases, the fire moves from the burner to the inlet vent.
+
+In cases where the model does not predict extinction, the extinction time data is not used in the summary scatter plot, Fig.~\ref{USCG_Scatter}.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_2} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_4} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_5} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_6} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_7} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_8}
+\end{tabular*}
+\caption{LLNL Extinction Time, Tests 1-8.}
+\label{LLNL_Extinction_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_22} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_24} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_25} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_27} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_28} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_29} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_32} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_37}
+\end{tabular*}
+\caption{LLNL Extinction Time, Tests 22, 24, 25, 27, 28, 29, 32, 37.}
+\label{LLNL_Extinction_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_39} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_41} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_43} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_44} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_45} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_46} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_47} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_48}
+\end{tabular*}
+\caption{LLNL Extinction Time, Tests 39, 41, 43-48.}
+\label{LLNL_Extinction_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_Extinction_Test_49} &
+\end{tabular*}
+\caption{LLNL Extinction Time, Test 49.}
+\label{LLNL_Extinction_4}
+\end{figure}
+
+\clearpage
+
+
+\subsection{USCG/HAI Water Mist Suppression Tests}
 
 The following pages contain comparisons of the predicted heat release rates for fires that are suppressed with a water mist system. In all cases, the flow rate of liquid fuel is specified in the model, but the decrease in HRR due to the extinguishing system is predicted by the model. Table~\ref{USCG_HAI_Times} reports the observed extinguishment times. Figure~\ref{USCG_Scatter} compares the measured versus predicted extinguishment times. For the simulations, the extinguishment time is taken to be when the HRR drops to half of its specified value.
+
+In cases where there is no reported fire extinction or the model does not predict extinction, the extinction time data is not used in the summary scatter plot, Fig.~\ref{USCG_Scatter}.
+
 
 \begin{table}[h!]
 \caption[USCG/HAI water mist suppression extinguishment times]{Recorded extinguishment times for the USCG/HAI water mist suppression tests in a small shipboard machinery space. ``No''
@@ -60,56 +152,56 @@ Fire Scenario       & Ventilation                       & \multicolumn{5}{c|}{Ex
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fike} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fike}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Closed_Fike} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Natural_Fike}
 \end{tabular*}
 \label{USCG_HAI_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fike} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fike}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_1000_Forced_Fike} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Closed_Fike}
 \end{tabular*}
 \label{USCG_HAI_4}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fike} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fike}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Natural_Fike} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_500_Forced_Fike}
 \end{tabular*}
 \label{USCG_HAI_6}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fike} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fike}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Closed_Fike} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Natural_Fike}
 \end{tabular*}
 \label{USCG_HAI_8}
 \end{figure}
@@ -117,13 +209,18 @@ Fire Scenario       & Ventilation                       & \multicolumn{5}{c|}{Ex
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Grinnell} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Navy} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fogtec} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fike}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Grinnell} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Navy} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fogtec} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/USCG_HAI/USCG_HAI_HRR_250_Forced_Fike}
 \end{tabular*}
 \label{USCG_HAI_9}
 \end{figure}
+
+\clearpage
+
+\subsection{Summary, Flame Extinction Time}
+\label{Extinction Time}
 
 \begin{figure}[h!]
 \begin{center}
@@ -141,28 +238,14 @@ Figure~\ref{LN02} presents profiles of mean droplet diameter, mean velocity, and
 
 \begin{figure}
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62}  \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62}  \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62}  \\
 \end{tabular*}
 \caption[Droplet speed, flux, and mean diameter profiles of the LN-2 nozzle]{Comparison of predicted and experimental droplet speed (top), droplet flux (middle) and mean diameter (bottom) profiles of the LN-2 nozzle. The left column corresponds to measurements made 40~cm from the nozzle, while the right column corresponds to measurements made 62~cm from the nozzle.}
 \label{LN02}
 \end{figure}
 
-\clearpage
-
-\section{UMD Line Burner}
-
-In the UMD line burner experiments the oxygen coflow is slowly diluted with nitrogen until the flame weakens and eventually blows out.  In this series of FDS calculations, the nitrogen coflow is setup with a ramp in time to achieve a linear decrease in the coflow oxygen volume fraction over one minute of real time. In Fig.~\ref{fig_umd_comb_eta}, we plot the combustion efficiency as a function of oxygen volume fraction for both methane and propane and compare with the measurements of White~et~al.~\cite{White:2015}.  Note that the FDS results are presented for three different grid resolutions corresponding to $W/\delta x$ = 4, 8, and 16 ($\delta x$ = 1.25~cm, 0.625~cm, and 0.3125~cm, respectively), where $W=5$ cm is the width of the burner.  A simple reignition model with an ignition temperature threshold set to the SFPE Handbook~\cite{SFPE} value of the Auto-Ignition Temperature (AIT) for methane and propane is used.  A piloted ignition region (AIT = 0~K) is set just within the near field of the line burner.  Details of the reignition model and pilot region as well as parameter sensitivity studies are provided in White~et~al.~\cite{White:2017}.
-
-\begin{figure}[!h]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_eta} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_eta}
-\end{tabular*}
-\caption[UMD Line Burner combustion efficiency]{UMD Line Burner combustion efficiency.}
-\label{fig_umd_comb_eta}
-\end{figure}
