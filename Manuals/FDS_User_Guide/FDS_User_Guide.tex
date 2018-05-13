@@ -2436,16 +2436,20 @@ This section is labeled as a special topic because normally you do not need to m
 \subsubsection{Default Convective Heat Transfer Model}
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
+    h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; ,
+      \;  \frac{k}{L} \, \NU \; ,
+      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}
 \ee
-where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
+where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
 \be
    \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7
 \ee
 For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For cylindrical surfaces, the default values are $C_1=0$, $C_2=0.683$, $n=0.466$, $m=0.33$, and $L=D$, the diameter of the cylinder. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
 
-You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line.
+The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
+
+You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line. Note that setting both $C_1$ and $C_2$ zero turns on their default values.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 

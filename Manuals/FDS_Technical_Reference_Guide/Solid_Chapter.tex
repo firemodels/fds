@@ -99,8 +99,10 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 \subsubsection{Empirical Natural/Forced Convection Model}
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
+    h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;
+    \frac{k}{L} \, \NU \; , \;
+    \frac{k}{\dn/2} \right]  \quad  \si{W/(m^2.K)}
     \label{eq:qconv}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
