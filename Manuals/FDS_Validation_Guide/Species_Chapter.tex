@@ -600,16 +600,14 @@ Oxygen concentration measurements were made across the coflow section of the bur
 \clearpage
 
 
-\section{Smoke and Aerosols}
+\section{Smoke}
 
-\subsection{FM/FPRF Datacenter Experiments}
+\subsection{FM/FPRF Data Center Experiments}
 \label{FM Smoke Concentration}
 
 Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests for propylene and cables is shown in the figure below. Each test had three measurement locations (subfloor, ceiling, and ceiling plenum); however, not all locations for all tests had a measurement above background noise in the laser signal.
 
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_C3H6_SF} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_C3H6_SF} \\
@@ -618,7 +616,7 @@ Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests f
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_Cable_SF} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_Cable_SF}
 \end{tabular*}
-\caption{FM/FPRF Datacentert Tests, smoke concentration, low and high exhaust rate, propylene and cable tests}
+\caption{FM/FPRF Data Center, smoke concentration, low and high exhaust rate, propylene and cable sources.}
 \label{FM_FPRF_Datacenter_Smoke}
 \end{figure}
 
@@ -703,55 +701,12 @@ Beam obscuration measurements were made at different locations within the compar
 
 \clearpage
 
+\section{Aerosols}
+
 \subsection{Sippola Aerosol Deposition Experiments}
 \label{Aerosol Deposition Velocity}
 
-FDS treats smoke particulate and aerosols in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke or aerosols to deposit on solid surfaces, thus reducing its concentration in the product stream. A total of 16 aerosol deposition experiments were conducted in a straight steel duct with smooth walls for 5 different particle diameters (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). In the simulations, the aerosol is tracked explicitly, and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide} for more details). A summary of the 16~experiments is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
-
-\begin{table}[h]
-\caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline
-Test      &  Air Speed        &  Particle Diameter          &  Particle Density             \\
-No.       &  (m/s)            &  ($\mu$m)                   &  (kg/m$^3$)                   \\ \hline \hline
-1         &  2.2              &  1.0                        &  1350                         \\ \hline
-2         &  2.2              &  2.8                        &  1170                         \\ \hline
-3         &  2.1              &  5.2                        &  1210                         \\ \hline
-4         &  2.2              &  9.1                        &  1030                         \\ \hline
-5         &  2.2              &  16                         &  950                          \\ \hline
-6         &  5.3              &  1.0                        &  1350                         \\ \hline
-7         &  5.2              &  1.0                        &  1350                         \\ \hline
-8         &  5.2              &  3.1                        &  1170                         \\ \hline
-9         &  5.4              &  5.2                        &  1210                         \\ \hline
-10        &  5.3              &  9.8                        &  1030                         \\ \hline
-11        &  5.3              &  16                         &  950                          \\ \hline
-12        &  9.0              &  1.0                        &  1350                         \\ \hline
-13        &  9.0              &  3.1                        &  1170                         \\ \hline
-14        &  8.8              &  5.4                        &  1210                         \\ \hline
-15        &  9.2              &  8.7                        &  1030                         \\ \hline
-16        &  9.1              &  15                         &  950                          \\ \hline
-\end{tabular}
-\end{center}
-\label{Sippola_Aerosol_Deposition_Summary}
-\end{table}
-
-\noindent The particle deposition velocity, $u_{\rm dep}$, is calculated by
-\be
-   u_{\rm dep} = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{\rm avg}}
-\ee
-where $J_1$ through $J_4$ are the deposition fluxes (\si{kg/(m^2.s)}) for duct panels 1 through 4 given by
-\be
-   J = \frac{m_{\rm d}}{A_{\rm d} \; \Delta t}
-\ee
-where $m_{\rm d}$ is the mass of particles on the duct panel (kg), $A_{\rm d}$ is the area of the duct panel (m$^2$),
-and $\Delta t$ is the duration over which the aerosol deposits onto the panel (s). $C_{\rm avg}$ is the
-average aerosol concentration in the duct test section (kg/m$^3$) and is given by
-\be
-   C_{\rm avg} = \frac{C_{\rm upstream} + C_{\rm downstream}}{2}
-\ee
-Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities,
-and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results.
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities in the Sippola experiments, and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results. Details of the experiment and simulation are found in Section~\ref{Sippola_Aerosol_Deposition_Description}
 
 \begin{figure}[!ht]
 \begin{center}
