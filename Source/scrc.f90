@@ -10259,7 +10259,7 @@ NP = NPARENT
 CALL SCARC_SETUP_SOLVER(NS, NP)
 CALL SCARC_SETUP_WORKSPACE(NS, NL)
 
-IF (N_DIRIC_GLOBAL(NL) == 0) THEN
+IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL SCARC_VECTOR_INIT (X, 0.0_EB, NL)               ! set x to zero
    CALL SCARC_FILTER_MEANVALUE(F, NL)                   ! filter out mean value of F
    CALL SCARC_SETUP_CONDENSED (F, NL)                   ! setup condensed system
@@ -10324,7 +10324,7 @@ ENDDO CG_LOOP
 !> ------------------------------------------------------------------------------------------------
 CALL SCARC_CONVERGENCE_RATE(NSTATE)
 
-IF (N_DIRIC_GLOBAL(NL) == 0) THEN
+IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL SCARC_RESTORE_LAST_CELL(X, NL)
    CALL SCARC_FILTER_MEANVALUE(X, NL)
 ENDIF
@@ -11263,7 +11263,7 @@ SELECT CASE (TYP%TYPE_SOLVER)
 
       !> In case of pure Neumann or periodic BCs, broadcast RHS(end) from last mesh
       !> to all and store it on all meshes
-      IF (N_DIRIC_GLOBAL(NL) == 0) THEN
+      IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
          IF (UPPER_MESH_INDEX == NMESHES) THEN
             L  => SCARC(NMESHES)%LEVEL(NL)
             SC => SCARC(NMESHES)%SCOPE(TYP%TYPE_SCOPE, NL)
