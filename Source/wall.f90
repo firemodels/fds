@@ -1163,18 +1163,22 @@ INIT_IF: IF (T_LOC<TWO_EPSILON_EB) THEN
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP
                IOR_SELECT: SELECT CASE(OB%PYRO3D_IOR)
                   CASE DEFAULT
-                     WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
-                     SF=>SURFACE(WC%SURF_INDEX)
-                     WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-                     WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-                     WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
-                  CASE(0)
-                     DO IOR=-3,3
-                        WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
+                     IF (WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)>0) THEN
+                        WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
                         SF=>SURFACE(WC%SURF_INDEX)
                         WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
                         WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
                         WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                     ENDIF
+                  CASE(0)
+                     DO IOR=-3,3
+                        IF (WALL_INDEX_HT3D(IC,IOR)>0) THEN
+                           WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
+                           SF=>SURFACE(WC%SURF_INDEX)
+                           WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+                           WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+                           WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                        ENDIF
                      ENDDO
                END SELECT IOR_SELECT
             ENDDO I_LOOP
@@ -1230,8 +1234,10 @@ OBST_LOOP_2: DO N=1,N_OBST
 
             IF (OB%PYRO3D_MASS_TRANSPORT) THEN
                DO NS=1,N_TRACKED_SPECIES
-                  ZZ(I,J,K,NS) = ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS)/RHO(I,J,K)
+                  ZZ(I,J,K,NS) = MAX( 0._EB, RHO(I,J,K)*ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS) )
                ENDDO
+               RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
+               ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
             ELSE
                ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
                DO NS=1,N_TRACKED_SPECIES
