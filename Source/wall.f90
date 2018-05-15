@@ -1228,20 +1228,23 @@ OBST_LOOP_2: DO N=1,N_OBST
 
             OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)
 
-            ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
-
-            DO NS=1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
-            ENDDO
-            DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
-            ENDDO
-
-            ! If the fuel or water massflux is non-zero, set the ignition time
-
-            IF (WC%ONE_D%T_IGN > T) THEN
-               IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+            IF (OB%PYRO3D_MASS_TRANSPORT) THEN
+               DO NS=1,N_TRACKED_SPECIES
+                  ZZ(I,J,K,NS) = ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS)/RHO(I,J,K)
+               ENDDO
+            ELSE
+               ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
+               DO NS=1,N_TRACKED_SPECIES
+                  WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+                  WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+               DO NN=1,SF%N_MATL
+                  WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+               ! If the fuel or water massflux is non-zero, set the ignition time
+               IF (WC%ONE_D%T_IGN > T) THEN
+                  IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+               ENDIF
             ENDIF
 
             CONSUMABLE_IF: IF (OB%CONSUMABLE) THEN
