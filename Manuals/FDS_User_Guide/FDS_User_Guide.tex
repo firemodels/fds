@@ -2777,7 +2777,7 @@ The pyrolysis models to be described below may also be applied with 3D heat tran
 \end{lstlisting}
 Since the 3D pyrolysis model does not have an internal ``thickness'' that shrinks from the bottom up, it is usually necessary to add {\ct BURN\_AWAY=T}.
 
-Like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  By default, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell.  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  For example,
+Like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  By default, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell ({\ct PYRO3D\_IOR=0}).  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  The pyrolyzate is ejected via the nearest wall cell in the direction of the orientation index. For example, to send the gas to nearest cell in the vertical direction use something like this,
 \begin{lstlisting}
 &OBST XB=..., HT3D=T, PYRO3D_IOR=3, BULK_DENSITY=1100.,
       SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
@@ -5177,7 +5177,7 @@ $X_{\rm O_2,\infty}$                 \>  Ambient oxygen volume fraction (mol/mol
 MEC                                  \>  Minimum Extinguishing Concentration, expressed as a volume fraction (\%)  \\
 $\Delta H_{\rm c}/r$                 \>  Heat of combustion per mole of oxygen consumed (kJ/mol)  \\
 $n$                                  \>  Number of moles of products of combustion per mole of fuel/air mixture  \\
-$\overline{c_p}$                     \>  Average heat capacity of products of combustion (kJ/(mol$\cdot$K) in the range $T_0$ to $T_{\rm CFT}$ 
+$\overline{c_p}$                     \>  Average heat capacity of products of combustion (kJ/(mol$\cdot$K) in the range $T_0$ to $T_{\rm CFT}$
 \end{tabbing}
 
 \begin{table}[!ht]
@@ -5224,7 +5224,7 @@ The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the d
 &REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
 &SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
-    
+
 \newpage
 
 \section{Complex Stoichiometry}
@@ -9657,6 +9657,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OVERLAY}             & Logical             & Section~\ref{info:OBST_Basics}            &           & {\ct .TRUE.}  \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
 {\ct PROP\_ID}            & Character           & Reference~\cite{Smokeview_Users_Guide}    &           &               \\ \hline
+{\ct PYRO3D\_IOR}         & Integer             & Section~\ref{info:pyro3d}                 &           & 0             \\ \hline
+%{\ct PYRO3D\_MASS\_TRANSPORT}  & Logical        & Section~\ref{info:pyro3d}                 &           & .FALSE.       \\ \hline
 {\ct RADIUS}              & Real                & Section~\ref{info:multobst}               & m         &               \\ \hline
 {\ct REMOVABLE}           & Logical             & Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
 {\ct RGB(3)}              & Integer Triplet     & Section~\ref{info:OBST_Basics}            &           &               \\ \hline
