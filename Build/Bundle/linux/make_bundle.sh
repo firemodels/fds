@@ -12,6 +12,6 @@ export fdshost=$linux_hostname
 export smvhost=$linux_hostname
 export MPI_VERSION=$linux_mpi_version
 
-export INSTALLDIR=FDS/$FDSEDITION
+export INSTALLDIR=FDS
 
 ~/$fds_smvroot/fds/Build/Bundle/scripts/bundle_generic.sh
