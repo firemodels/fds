@@ -230,6 +230,8 @@ if [ "$MPI_VERSION" == "INTEL" ]; then
   fdsmpidirdb=impi_intel$FDSOS$DB
   fdsmpidb=fds_impi_intel$FDSOS$DB
 else
+  fdsmpidir=mpi_intel$FDSOS
+  fdsmpi=fds_mpi_intel$FDSOS
   fdsmpidirdb=mpi_intel$FDSOS$DB
   fdsmpidb=fds_mpi_intel$FDSOS$DB
 fi
