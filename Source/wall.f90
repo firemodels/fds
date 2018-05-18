@@ -1239,16 +1239,17 @@ OBST_LOOP_2: DO N=1,N_OBST
                   ZZ(I,J,K,NS) = MAX( 0._EB, RHO(I,J,K)*ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS) )
                ENDDO
                RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
-               ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+               IF (RHO(I,J,K)>TWO_EPSILON_EB) ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
             ELSE
                ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
                DO NS=1,N_TRACKED_SPECIES
                   WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
                   WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
                ENDDO
-               DO NN=1,SF%N_MATL
-                  WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
-               ENDDO
+               !! MASSFLUX_MATL should not be needed in 3D
+               ! DO NN=1,SF%N_MATL
+               !    WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               ! ENDDO
                ! If the fuel or water massflux is non-zero, set the ignition time
                IF (WC%ONE_D%T_IGN > T) THEN
                   IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
@@ -1364,49 +1365,29 @@ END SUBROUTINE SOLID_PYROLYSIS_3D
 
 SUBROUTINE SOLID_MASS_TRANSFER_3D(DT_SUB)
 
-! Based on C. Lautenberger, C. Fernandez-Pello / Fire Safety Journal 44 (2009) 819-839.
-
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 REAL(EB), INTENT(IN) :: DT_SUB
-INTEGER :: I,J,K,N,IC,NN,II,JJ,KK,IOR,ICM,ICP
-REAL(EB) :: D_Z_TEMP,D_Z_N(0:5000),VOLSUM,PSISUM,VOLRAT,RHO_D_F,R_RHO_D,VN_MT3D,ZZ_I,RHO_D_MAX,RHO_D_M,RHO_D_P,RHO_D_BAR
-REAL(EB), POINTER, DIMENSION(:,:,:) :: PSIBAR=>NULL(),RHO_D_DZDX=>NULL(),RHO_D_DZDY=>NULL(),RHO_D_DZDZ=>NULL(),RHO_D=>NULL()
+INTEGER :: I,J,K,N,IC,II,JJ,KK,IOR,ICM,ICP,IIG,JJG,KKG
+REAL(EB) :: D_Z_TEMP,D_Z_N(0:5000),D_F,R_D,VN_MT3D,RHO_ZZ_I,D_MAX,D_M,D_P,D_BAR,RDN
+REAL(EB), POINTER, DIMENSION(:,:,:) :: D_DRHOZDX=>NULL(),D_DRHOZDY=>NULL(),D_DRHOZDZ=>NULL(),D_Z_P=>NULL(),RHO_ZZ_P=>NULL()
 LOGICAL :: CONT_MATL_PROP
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: MS=>NULL()
-TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 
-! compute cell porosity, LFP Eq. (5)
+! initialize work arrays
 
-PSIBAR=>WORK1; PSIBAR=0._EB
-DO K=0,KBP1
-   DO J=0,JBP1
-      DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
-         OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D)   CYCLE
-         MS => SURFACE(OB%MATL_SURF_INDEX)
-         VOLSUM = 0._EB
-         DO NN=1,MS%N_MATL
-            ML => MATERIAL(MS%MATL_INDEX(NN))
-            VOLRAT = OB%RHO(I,J,K,NN)/ML%RHO_S
-            VOLSUM = VOLSUM + VOLRAT
-            PSISUM = PSISUM + VOLRAT*(1._EB - VOLRAT)
-         ENDDO
-         IF (VOLSUM>TWO_EPSILON_EB) PSIBAR(I,J,K) = PSISUM/VOLSUM
-      ENDDO
-   ENDDO
-ENDDO
+D_Z_P    =>WORK1; D_Z_P=0._EB
+D_DRHOZDX=>WORK2; D_DRHOZDX=0._EB
+D_DRHOZDY=>WORK3; D_DRHOZDY=0._EB
+D_DRHOZDZ=>WORK4; D_DRHOZDZ=0._EB
+RHO_ZZ_P =>WORK5; RHO_ZZ_P=0._EB
+
+! loop over all tracked gas species
 
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-   RHO_D_DZDX=>WORK2
-   RHO_D_DZDY=>WORK3
-   RHO_D_DZDZ=>WORK4
+   ! get gas phase diffusivity and density
 
-   ! get gas phase diffusivity
-
-   RHO_D => WORK5
-   RHO_D = 0._EB
    D_Z_N = D_Z(:,N)
    DO K=0,KBP1
       DO J=0,JBP1
@@ -1414,7 +1395,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
             OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D)   CYCLE
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
-            RHO_D(I,J,K) = PSIBAR(I,J,K)*RHO(I,J,K)*D_Z_TEMP
+            D_Z_P(I,J,K) = D_Z_TEMP
+            RHO_ZZ_P(I,J,K) = RHO(I,J,K)*ZZ(I,J,K,N)
          ENDDO
       ENDDO
    ENDDO
@@ -1436,11 +1418,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             !    2. we assume that if either OBM%MT3D .OR. OBP%MT3D we should process the boundary
             IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
 
-            RHO_D_M = RHO_D(I,J,K)
-            RHO_D_P = RHO_D(I+1,J,K)
+            D_M = D_Z_P(I,J,K)
+            D_P = D_Z_P(I+1,J,K)
 
-            IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
-               RHO_D_DZDX(I,J,K) = 0._EB
+            IF (D_M<TWO_EPSILON_EB .OR. D_P<TWO_EPSILON_EB) THEN
+               D_DRHOZDX(I,J,K) = 0._EB
                CYCLE
             ENDIF
 
@@ -1458,17 +1440,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
             IF (CONT_MATL_PROP) THEN
                ! use linear average from inverse lever rule
-               RHO_D_BAR = ( RHO_D_M*DX(I+1) + RHO_D_P*DX(I) )/( DX(I) + DX(I+1) )
-               RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
-               RHO_D_DZDX(I,J,K) = RHO_D_BAR*(ZZ(I+1,J,K,N)-ZZ(I,J,K,N))*2._EB/(DX(I+1)+DX(I))
+               D_BAR = ( D_M*DX(I+1) + D_P*DX(I) )/( DX(I) + DX(I+1) )
+               D_MAX = MAX(D_MAX,D_BAR)
+               D_DRHOZDX(I,J,K) = D_BAR*(RHO_ZZ_P(I+1,J,K)-RHO_ZZ_P(I,J,K))*2._EB/(DX(I+1)+DX(I))
             ELSE
                ! for discontinuous material properties maintain continuity of flux, C0 continuity of composition
                ! (allow C1 discontinuity of composition due to jump in properties across interface)
-               R_RHO_D = RHO_D_P/RHO_D_M * DX(I)/DX(I+1)
-               ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I+1,J,K,N))/(1._EB + R_RHO_D) ! interface concentration
-               !! RHO_D_DZDX(I,J,K) = RHO_D_P * (ZZ(I+1,J,K,N)-ZZ_I) * 2._EB/DX(I+1) !! should be identical
-               RHO_D_DZDX(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DX(I)
-               RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+               R_D = D_P/D_M * DX(I)/DX(I+1)
+               RHO_ZZ_I = (RHO_ZZ_P(I,J,K) + R_D*RHO_ZZ_P(I+1,J,K))/(1._EB + R_D) ! interface concentration
+               !! D_DRHOZDX(I,J,K) = D_P * (RHO_ZZ_P(I+1,J,K)-RHO_ZZ_I) * 2._EB/DX(I+1) !! should be identical
+               D_DRHOZDX(I,J,K) = D_M * (RHO_ZZ_I-RHO_ZZ_P(I,J,K)) * 2._EB/DX(I)
+               D_MAX = MAX(D_MAX,MAX(D_M,D_P))
             ENDIF
          ENDDO
       ENDDO
@@ -1484,11 +1466,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
                IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
 
-               RHO_D_M = RHO_D(I,J,K)
-               RHO_D_P = RHO_D(I,J+1,K)
+               D_M = D_Z_P(I,J,K)
+               D_P = D_Z_P(I,J+1,K)
 
-               IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
-                  RHO_D_DZDY(I,J,K) = 0._EB
+               IF (D_M<TWO_EPSILON_EB .OR. D_P<TWO_EPSILON_EB) THEN
+                  D_DRHOZDY(I,J,K) = 0._EB
                   CYCLE
                ENDIF
 
@@ -1504,20 +1486,20 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDIF
 
                IF (CONT_MATL_PROP) THEN
-                  RHO_D_BAR = ( RHO_D_M*DY(J+1) + RHO_D_P*DY(J) )/( DY(J) + DY(J+1) )
-                  RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
-                  RHO_D_DZDY(I,J,K) = RHO_D_BAR*(ZZ(I,J+1,K,N)-ZZ(I,J,K,N))*2._EB/(DY(J+1)+DY(J))
+                  D_BAR = ( D_M*DY(J+1) + D_P*DY(J) )/( DY(J) + DY(J+1) )
+                  D_MAX = MAX(D_MAX,D_BAR)
+                  D_DRHOZDY(I,J,K) = D_BAR*(RHO_ZZ_P(I,J+1,K)-RHO_ZZ_P(I,J,K))*2._EB/(DY(J+1)+DY(J))
                ELSE
-                  R_RHO_D = RHO_D_P/RHO_D_M * DY(J)/DY(J+1)
-                  ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I,J+1,K,N))/(1._EB + R_RHO_D)
-                  RHO_D_DZDY(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DY(J)
-                  RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+                  R_D = D_P/D_M * DY(J)/DY(J+1)
+                  RHO_ZZ_I = (RHO_ZZ_P(I,J,K) + R_D*RHO_ZZ_P(I,J+1,K))/(1._EB + R_D)
+                  D_DRHOZDY(I,J,K) = D_M * (RHO_ZZ_I-RHO_ZZ_P(I,J,K)) * 2._EB/DY(J)
+                  D_MAX = MAX(D_MAX,MAX(D_M,D_P))
                ENDIF
             ENDDO
          ENDDO
       ENDDO
    ELSE TWO_D_IF
-      RHO_D_DZDY(I,J,K) = 0._EB
+      D_DRHOZDY(I,J,K) = 0._EB
    ENDIF TWO_D_IF
    DO K=0,KBAR
       DO J=1,JBAR
@@ -1529,11 +1511,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
             IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
 
-            RHO_D_M = RHO_D(I,J,K)
-            RHO_D_P = RHO_D(I,J,K+1)
+            D_M = D_Z_P(I,J,K)
+            D_P = D_Z_P(I,J,K+1)
 
-            IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
-               RHO_D_DZDZ(I,J,K) = 0._EB
+            IF (D_M<TWO_EPSILON_EB .OR. D_P<TWO_EPSILON_EB) THEN
+               D_DRHOZDZ(I,J,K) = 0._EB
                CYCLE
             ENDIF
 
@@ -1549,14 +1531,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             ENDIF
 
             IF (CONT_MATL_PROP) THEN
-               RHO_D_BAR = ( RHO_D_M*DZ(K+1) + RHO_D_P*DZ(K) )/( DZ(K) + DZ(K+1) )
-               RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
-               RHO_D_DZDZ(I,J,K) = RHO_D_BAR*(ZZ(I,J,K+1,N)-ZZ(I,J,K,N))*2._EB/(DZ(K+1)+DZ(K))
+               D_BAR = ( D_M*DZ(K+1) + D_P*DZ(K) )/( DZ(K) + DZ(K+1) )
+               D_MAX = MAX(D_MAX,D_BAR)
+               D_DRHOZDZ(I,J,K) = D_BAR*(RHO_ZZ_P(I,J,K+1)-RHO_ZZ_P(I,J,K))*2._EB/(DZ(K+1)+DZ(K))
             ELSE
-               R_RHO_D = RHO_D_P/RHO_D_M * DZ(K)/DZ(K+1)
-               ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I,J,K+1,N))/(1._EB + R_RHO_D)
-               RHO_D_DZDZ(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DZ(K)
-               RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+               R_D = D_P/D_M * DZ(K)/DZ(K+1)
+               RHO_ZZ_I = (RHO_ZZ_P(I,J,K) + R_D*RHO_ZZ_P(I,J,K+1))/(1._EB + R_D)
+               D_DRHOZDZ(I,J,K) = D_M * (RHO_ZZ_I-RHO_ZZ_P(I,J,K)) * 2._EB/DZ(K)
+               D_MAX = MAX(D_MAX,MAX(D_M,D_P))
             ENDIF
          ENDDO
       ENDDO
@@ -1573,6 +1555,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
       IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE MT3D_WALL_LOOP
@@ -1580,23 +1565,45 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       MS => SURFACE(OB%MATL_SURF_INDEX)
 
       CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,WC%ONE_D%TMP_F,D_Z_TEMP)
-      RHO_D_F = PSIBAR(II,JJ,KK)*RHO(II,JJ,KK)*D_Z_TEMP
-      RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_F)
+      D_F = D_Z_TEMP
+      D_MAX = MAX(D_MAX,D_F)
 
-      METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
+      SELECT CASE(IOR)
+         CASE( 1); RDN=RDX(II)
+         CASE(-1); RDN=RDX(II)
+         CASE( 2); RDN=RDY(JJ)
+         CASE(-2); RDN=RDY(JJ)
+         CASE( 3); RDN=RDZ(KK)
+         CASE(-3); RDN=RDZ(KK)
+      END SELECT
+
+      METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
 
          CASE DEFAULT METHOD_OF_MASS_TRANSFER
 
+            ! for simplicity, assume surface mass fraction is equivalent to gas phase adjacent to wall cell
+
+            WC%ONE_D%ZZ_F(N) = ZZ(IIG,JJG,KKG,N)
+
+            ! compute mass flux at the surface
+
+            WC%ONE_D%MASSFLUX_SPEC(N) = - D_F * 2._EB*(WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)-RHO_ZZ_P(II,JJ,KK))*RDN
+            WC%ONE_D%MASSFLUX(N)      = WC%ONE_D%MASSFLUX_SPEC(N) * WC%ONE_D%AREA_ADJUST
+
             SELECT CASE(IOR)
-               CASE( 1); RHO_D_DZDX(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDX(II)
-               CASE(-1); RHO_D_DZDX(II-1,JJ,KK) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDX(II)
-               CASE( 2); RHO_D_DZDY(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDY(JJ)
-               CASE(-2); RHO_D_DZDY(II,JJ-1,KK) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDY(JJ)
-               CASE( 3); RHO_D_DZDZ(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDZ(KK)
-               CASE(-3); RHO_D_DZDZ(II,JJ,KK-1) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDZ(KK)
+               CASE( 1); D_DRHOZDX(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
+               CASE(-1); D_DRHOZDX(II-1,JJ,KK) = -WC%ONE_D%MASSFLUX(N)
+               CASE( 2); D_DRHOZDY(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
+               CASE(-2); D_DRHOZDY(II,JJ-1,KK) = -WC%ONE_D%MASSFLUX(N)
+               CASE( 3); D_DRHOZDZ(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
+               CASE(-3); D_DRHOZDZ(II,JJ,KK-1) = -WC%ONE_D%MASSFLUX(N)
             END SELECT
 
-            ! NEED TO POPULATE MASSFLUX
+            ! If the fuel or water massflux is non-zero, set the ignition time
+
+            IF (WC%ONE_D%T_IGN > T) THEN
+               IF (ABS(WC%ONE_D%MASSFLUX(N)) > 0._EB) WC%ONE_D%T_IGN = T
+            ENDIF
 
       END SELECT METHOD_OF_MASS_TRANSFER
 
@@ -1612,16 +1619,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
 
             IF (TWO_D) THEN
-               VN_MT3D = MAX( VN_MT3D, 2._EB*RHO_D_MAX/RHO(I,J,K)*( RDX(I)**2 + RDZ(K)**2 ) )
+               VN_MT3D = MAX( VN_MT3D, 2._EB*D_MAX*( RDX(I)**2 + RDZ(K)**2 ) )
             ELSE
-               VN_MT3D = MAX( VN_MT3D, 2._EB*RHO_D_MAX/RHO(I,J,K)*( RDX(I)**2 + RDY(J)**2 + RDZ(K)**2 ) )
+               VN_MT3D = MAX( VN_MT3D, 2._EB*D_MAX*( RDX(I)**2 + RDY(J)**2 + RDZ(K)**2 ) )
             ENDIF
 
-            ZZ(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N) + DT_SUB * ( (RHO_D_DZDX(I,J,K)*R(I)-RHO_D_DZDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
-                                                              (RHO_D_DZDY(I,J,K)     -RHO_D_DZDY(I,J-1,K)       )*RDY(J) + &
-                                                              (RHO_D_DZDZ(I,J,K)     -RHO_D_DZDZ(I,J,K-1)       )*RDZ(K) )
+            ZZ(I,J,K,N) = RHO_ZZ_P(I,J,K) + DT_SUB * ( (D_DRHOZDX(I,J,K)*R(I)-D_DRHOZDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                       (D_DRHOZDY(I,J,K)     -D_DRHOZDY(I,J-1,K)       )*RDY(J) + &
+                                                       (D_DRHOZDZ(I,J,K)     -D_DRHOZDZ(I,J,K-1)       )*RDZ(K) )
 
             ZZ(I,J,K,N) = MAX(0._EB,ZZ(I,J,K,N)) ! guarantee boundedness
+
          ENDDO
       ENDDO
    ENDDO
@@ -1638,18 +1646,16 @@ DO K=1,KBAR
          OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
 
          RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
-         ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
-         N=MAXLOC(ZZ(I,J,K,1:N_TRACKED_SPECIES),1) ! absorb error in most abundant local species
-         ZZ(I,J,K,N) = 1._EB - ( SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES)) - ZZ(I,J,K,N) ) ! enforce sum(ZZ)=1
+         IF (RHO(I,J,K)>TWO_EPSILON_EB) ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
       ENDDO
    ENDDO
 ENDDO
 
-! stability check
+! ! stability check
 
-IF (DT_SUB*VN_MT3D > VN_MAX) THEN
-   print *, 'VN:', DT_SUB*VN_MT3D
-ENDIF
+! IF (DT_SUB*VN_MT3D > VN_MAX) THEN
+!    print *, 'VN:', DT_SUB*VN_MT3D
+! ENDIF
 
 END SUBROUTINE SOLID_MASS_TRANSFER_3D
 
@@ -2069,7 +2075,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK .AND. .NOT.SF%THERMALLY_THICK_HT3D) THEN
             OB => OBSTRUCTION(WC%OBST_INDEX)
             DO N=1,N_TRACKED_SPECIES
-               OB%MASS = OB%MASS - ONE_D%MASSFLUX_SPEC(N)*DT*ONE_D%AREA
+               OB%MASS = OB%MASS - ONE_D%MASSFLUX(N)*DT*ONE_D%AREA
             ENDDO
          ENDIF CONSUME_MASS
 
