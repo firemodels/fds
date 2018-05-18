@@ -2573,7 +2573,6 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
-   IF (N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
