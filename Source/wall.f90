@@ -1119,6 +1119,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
          IS_STABLE_DT_SUB = .TRUE.
          TMP = TMP_NEW
          IF (SOLID_PYRO3D) CALL SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
+         IF (SOLID_MT3D)   CALL SOLID_MASS_TRANSFER_3D(DT_SUB)
          T_LOC = T_LOC + DT_SUB
          IF (.NOT.LOCK_TIME_STEP) DT_SUB = MAX( DT_SUB, VN_MIN / MAX(VN_HT3D,TWO_EPSILON_EB) )
       ELSE
@@ -1232,7 +1233,8 @@ OBST_LOOP_2: DO N=1,N_OBST
 
             OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)
 
-            IF (OB%PYRO3D_MASS_TRANSPORT) THEN
+            IF (OB%MT3D) THEN
+               ! update cell gas composition after pyrolysis
                DO NS=1,N_TRACKED_SPECIES
                   ZZ(I,J,K,NS) = MAX( 0._EB, RHO(I,J,K)*ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS) )
                ENDDO
@@ -1347,6 +1349,7 @@ OBST_LOOP_2: DO N=1,N_OBST
             OB%MASS = SUM(OB%RHO(I,J,K,1:MS%N_MATL))*VC
             IF (OB%MASS<TWO_EPSILON_EB) THEN
                OB%HT3D   = .FALSE.
+               OB%MT3D   = .FALSE.
                OB%PYRO3D = .FALSE.
                Q_DOT_PPP_S(I,J,K) = 0._EB
             ENDIF
@@ -1357,6 +1360,298 @@ OBST_LOOP_2: DO N=1,N_OBST
 ENDDO OBST_LOOP_2
 
 END SUBROUTINE SOLID_PYROLYSIS_3D
+
+
+SUBROUTINE SOLID_MASS_TRANSFER_3D(DT_SUB)
+
+! Based on C. Lautenberger, C. Fernandez-Pello / Fire Safety Journal 44 (2009) 819-839.
+
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+REAL(EB), INTENT(IN) :: DT_SUB
+INTEGER :: I,J,K,N,IC,NN,II,JJ,KK,IOR,ICM,ICP
+REAL(EB) :: D_Z_TEMP,D_Z_N(0:5000),VOLSUM,PSISUM,VOLRAT,RHO_D_F,R_RHO_D,VN_MT3D,ZZ_I,RHO_D_MAX,RHO_D_M,RHO_D_P,RHO_D_BAR
+REAL(EB), POINTER, DIMENSION(:,:,:) :: PSIBAR=>NULL(),RHO_D_DZDX=>NULL(),RHO_D_DZDY=>NULL(),RHO_D_DZDZ=>NULL(),RHO_D=>NULL()
+LOGICAL :: CONT_MATL_PROP
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
+TYPE(SURFACE_TYPE), POINTER :: MS=>NULL()
+TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
+
+! compute cell porosity, LFP Eq. (5)
+
+PSIBAR=>WORK1; PSIBAR=0._EB
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
+         OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D)   CYCLE
+         MS => SURFACE(OB%MATL_SURF_INDEX)
+         VOLSUM = 0._EB
+         DO NN=1,MS%N_MATL
+            ML => MATERIAL(MS%MATL_INDEX(NN))
+            VOLRAT = OB%RHO(I,J,K,NN)/ML%RHO_S
+            VOLSUM = VOLSUM + VOLRAT
+            PSISUM = PSISUM + VOLRAT*(1._EB - VOLRAT)
+         ENDDO
+         IF (VOLSUM>TWO_EPSILON_EB) PSIBAR(I,J,K) = PSISUM/VOLSUM
+      ENDDO
+   ENDDO
+ENDDO
+
+SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+
+   RHO_D_DZDX=>WORK2
+   RHO_D_DZDY=>WORK3
+   RHO_D_DZDZ=>WORK4
+
+   ! get gas phase diffusivity
+
+   RHO_D => WORK5
+   RHO_D = 0._EB
+   D_Z_N = D_Z(:,N)
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
+            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D)   CYCLE
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
+            RHO_D(I,J,K) = PSIBAR(I,J,K)*RHO(I,J,K)*D_Z_TEMP
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! build mass flux vectors
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I+1,J,K)
+            IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+
+            OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+            OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+            ! At present OBST_INDEX_C is not defined for ghost cells.
+            ! This means that:
+            !    1. continuous material properties will be assumed at a mesh boundary
+            !    2. we assume that if either OBM%MT3D .OR. OBP%MT3D we should process the boundary
+            IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
+
+            RHO_D_M = RHO_D(I,J,K)
+            RHO_D_P = RHO_D(I+1,J,K)
+
+            IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
+               RHO_D_DZDX(I,J,K) = 0._EB
+               CYCLE
+            ENDIF
+
+            ! determine if we have continuous material properties
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ENDIF
+
+            IF (CONT_MATL_PROP) THEN
+               ! use linear average from inverse lever rule
+               RHO_D_BAR = ( RHO_D_M*DX(I+1) + RHO_D_P*DX(I) )/( DX(I) + DX(I+1) )
+               RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
+               RHO_D_DZDX(I,J,K) = RHO_D_BAR*(ZZ(I+1,J,K,N)-ZZ(I,J,K,N))*2._EB/(DX(I+1)+DX(I))
+            ELSE
+               ! for discontinuous material properties maintain continuity of flux, C0 continuity of composition
+               ! (allow C1 discontinuity of composition due to jump in properties across interface)
+               R_RHO_D = RHO_D_P/RHO_D_M * DX(I)/DX(I+1)
+               ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I+1,J,K,N))/(1._EB + R_RHO_D) ! interface concentration
+               !! RHO_D_DZDX(I,J,K) = RHO_D_P * (ZZ(I+1,J,K,N)-ZZ_I) * 2._EB/DX(I+1) !! should be identical
+               RHO_D_DZDX(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DX(I)
+               RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+   TWO_D_IF: IF (.NOT.TWO_D) THEN
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J+1,K)
+               IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+               OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+               OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+               IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
+
+               RHO_D_M = RHO_D(I,J,K)
+               RHO_D_P = RHO_D(I,J+1,K)
+
+               IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
+                  RHO_D_DZDY(I,J,K) = 0._EB
+                  CYCLE
+               ENDIF
+
+               CONT_MATL_PROP=.TRUE.
+               IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+                  CONT_MATL_PROP=.FALSE.
+               ENDIF
+
+               IF (CONT_MATL_PROP) THEN
+                  RHO_D_BAR = ( RHO_D_M*DY(J+1) + RHO_D_P*DY(J) )/( DY(J) + DY(J+1) )
+                  RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
+                  RHO_D_DZDY(I,J,K) = RHO_D_BAR*(ZZ(I,J+1,K,N)-ZZ(I,J,K,N))*2._EB/(DY(J+1)+DY(J))
+               ELSE
+                  R_RHO_D = RHO_D_P/RHO_D_M * DY(J)/DY(J+1)
+                  ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I,J+1,K,N))/(1._EB + R_RHO_D)
+                  RHO_D_DZDY(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DY(J)
+                  RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE TWO_D_IF
+      RHO_D_DZDY(I,J,K) = 0._EB
+   ENDIF TWO_D_IF
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            ICM = CELL_INDEX(I,J,K)
+            ICP = CELL_INDEX(I,J,K+1)
+            IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+            OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+            OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+            IF (.NOT.(OBM%MT3D.OR.OBP%MT3D)) CYCLE
+
+            RHO_D_M = RHO_D(I,J,K)
+            RHO_D_P = RHO_D(I,J,K+1)
+
+            IF (RHO_D_M<TWO_EPSILON_EB .OR. RHO_D_P<TWO_EPSILON_EB) THEN
+               RHO_D_DZDZ(I,J,K) = 0._EB
+               CYCLE
+            ENDIF
+
+            CONT_MATL_PROP=.TRUE.
+            IF (OBM%MATL_INDEX>0 .AND. OBP%MATL_INDEX>0 .AND. OBM%MATL_INDEX/=OBP%MATL_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0 .AND. OBM%MATL_SURF_INDEX/=OBP%MATL_SURF_INDEX) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_INDEX>0 .AND. OBP%MATL_SURF_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ELSEIF (OBM%MATL_SURF_INDEX>0 .AND. OBP%MATL_INDEX>0) THEN
+               CONT_MATL_PROP=.FALSE.
+            ENDIF
+
+            IF (CONT_MATL_PROP) THEN
+               RHO_D_BAR = ( RHO_D_M*DZ(K+1) + RHO_D_P*DZ(K) )/( DZ(K) + DZ(K+1) )
+               RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_BAR)
+               RHO_D_DZDZ(I,J,K) = RHO_D_BAR*(ZZ(I,J,K+1,N)-ZZ(I,J,K,N))*2._EB/(DZ(K+1)+DZ(K))
+            ELSE
+               R_RHO_D = RHO_D_P/RHO_D_M * DZ(K)/DZ(K+1)
+               ZZ_I = (ZZ(I,J,K,N) + R_RHO_D*ZZ(I,J,K+1,N))/(1._EB + R_RHO_D)
+               RHO_D_DZDZ(I,J,K) = RHO_D_M * (ZZ_I-ZZ(I,J,K,N)) * 2._EB/DZ(K)
+               RHO_D_MAX = MAX(RHO_D_MAX,MAX(RHO_D_M,RHO_D_P))
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! build fluxes on boundaries of INTERNAL WALL CELLS
+
+   MT3D_WALL_LOOP: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE MT3D_WALL_LOOP
+
+      SURF_INDEX = WC%SURF_INDEX
+      SF => SURFACE(SURF_INDEX)
+      II = WC%ONE_D%II
+      JJ = WC%ONE_D%JJ
+      KK = WC%ONE_D%KK
+      IOR = WC%ONE_D%IOR
+
+      IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE MT3D_WALL_LOOP
+      OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D  ) CYCLE MT3D_WALL_LOOP
+      MS => SURFACE(OB%MATL_SURF_INDEX)
+
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,WC%ONE_D%TMP_F,D_Z_TEMP)
+      RHO_D_F = PSIBAR(II,JJ,KK)*RHO(II,JJ,KK)*D_Z_TEMP
+      RHO_D_MAX = MAX(RHO_D_MAX,RHO_D_F)
+
+      METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
+
+         CASE DEFAULT METHOD_OF_MASS_TRANSFER
+
+            SELECT CASE(IOR)
+               CASE( 1); RHO_D_DZDX(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDX(II)
+               CASE(-1); RHO_D_DZDX(II-1,JJ,KK) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDX(II)
+               CASE( 2); RHO_D_DZDY(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDY(JJ)
+               CASE(-2); RHO_D_DZDY(II,JJ-1,KK) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDY(JJ)
+               CASE( 3); RHO_D_DZDZ(II,JJ,KK)   = RHO_D_F * 2._EB*(WC%ONE_D%ZZ_F(N)-ZZ(II,JJ,KK,N))*RDZ(KK)
+               CASE(-3); RHO_D_DZDZ(II,JJ,KK-1) = RHO_D_F * 2._EB*(ZZ(II,JJ,KK,N)-WC%ONE_D%ZZ_F(N))*RDZ(KK)
+            END SELECT
+
+            ! NEED TO POPULATE MASSFLUX
+
+      END SELECT METHOD_OF_MASS_TRANSFER
+
+   ENDDO MT3D_WALL_LOOP
+
+   ! Note: for 2D cylindrical KDTDX at X=0 remains zero after initialization
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IC = CELL_INDEX(I,J,K)
+            IF (.NOT.SOLID(IC)) CYCLE
+            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
+
+            IF (TWO_D) THEN
+               VN_MT3D = MAX( VN_MT3D, 2._EB*RHO_D_MAX/RHO(I,J,K)*( RDX(I)**2 + RDZ(K)**2 ) )
+            ELSE
+               VN_MT3D = MAX( VN_MT3D, 2._EB*RHO_D_MAX/RHO(I,J,K)*( RDX(I)**2 + RDY(J)**2 + RDZ(K)**2 ) )
+            ENDIF
+
+            ZZ(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N) + DT_SUB * ( (RHO_D_DZDX(I,J,K)*R(I)-RHO_D_DZDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                              (RHO_D_DZDY(I,J,K)     -RHO_D_DZDY(I,J-1,K)       )*RDY(J) + &
+                                                              (RHO_D_DZDZ(I,J,K)     -RHO_D_DZDZ(I,J,K-1)       )*RDZ(K) )
+
+            ZZ(I,J,K,N) = MAX(0._EB,ZZ(I,J,K,N)) ! guarantee boundedness
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO SPECIES_LOOP
+
+! update mass fractions
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IC = CELL_INDEX(I,J,K)
+         IF (.NOT.SOLID(IC)) CYCLE
+         OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
+
+         RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
+         ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+         N=MAXLOC(ZZ(I,J,K,1:N_TRACKED_SPECIES),1) ! absorb error in most abundant local species
+         ZZ(I,J,K,N) = 1._EB - ( SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES)) - ZZ(I,J,K,N) ) ! enforce sum(ZZ)=1
+      ENDDO
+   ENDDO
+ENDDO
+
+! stability check
+
+IF (DT_SUB*VN_MT3D > VN_MAX) THEN
+   print *, 'VN:', DT_SUB*VN_MT3D
+ENDIF
+
+END SUBROUTINE SOLID_MASS_TRANSFER_3D
 
 
 SUBROUTINE CRANK_TEST_1(DIM)
