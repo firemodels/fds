@@ -907,9 +907,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
 
 ENDDO OBST_LOOP_2
 
-! Solid 3D heat transfer
+! Solid 3D heat and mass transfer
 
 IF (ANY(OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
+IF (ANY(OBSTRUCTION%MT3D)) SOLID_MT3D=.TRUE.
 
 ! Solid phase chemical heat source term
 
@@ -1927,9 +1928,9 @@ PROF_LOOP: DO N=1,N_PROF
    ELSE  ! The PROFile is for a Lagrangian PARTicle
 
       SF => SURFACE(LAGRANGIAN_PARTICLE_CLASS(PF%PART_CLASS_INDEX)%SURF_INDEX)
- 
+
    ENDIF
-      
+
    IF (.NOT.SF%THERMALLY_THICK) THEN
       WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
       STOP_STATUS = SETUP_STOP
