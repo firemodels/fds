@@ -8931,7 +8931,8 @@ MESH_LOOP: DO NM=1,NMESHES
                         ML=>MATERIAL(SF%MATL_INDEX(NNN))
                         IF (ML%N_REACTIONS>0) THEN
                            OB%PYRO3D=.TRUE.
-                           OB%PYRO3D_IOR=PYRO3D_IOR  ! tell PYRO3D which direction to send pyrolyzate fuel gas
+                           OB%PYRO3D_IOR=PYRO3D_IOR      ! tell PYRO3D which direction to send pyrolyzate
+                           OB%MT3D=PYRO3D_MASS_TRANSPORT ! supercedes PYRO3D_IOR
                            PYRO3D_RESIDUE=.FALSE.
                            DO NR=1,ML%N_REACTIONS
                               IF (ABS(SUM(ML%NU_RESIDUE(:,NR)))>TWO_EPSILON_EB) PYRO3D_RESIDUE=.TRUE.
