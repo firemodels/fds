@@ -5,5 +5,6 @@ platforms.  The batch file make_bundle.bat creates an FDS/Smokeview installation
 Environment variables required by make_bundle.sh are defined in ~/.bundle/FDS_SMV_ENV.sh.  
 
 To use this script, type ./make_bundle.sh in a bash shell. To see usage information type ./make_bundle.sh -h . 
+Likewise to use make_bundle.bat, type ./make_bundle.bat in a command shell.
 
-Note, this is as work in progress. The script is not complete.  
+Note, this is as work in progress, these scripts are not complete.  
