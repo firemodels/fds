@@ -1,10 +1,11 @@
 # Bundle FDS
 
-The script make_bundle.sh is used to create an FDS/Smokeview installation bundle for Linux and OSX 
-platforms.  The batch file make_bundle.bat creates an FDS/Smokeview installation bundle for Windows.
+The scripts make_bundle.sh and make_bundle.bat are used for creating FDS/Smokeview installation bundles.  make_bundle.sh is used for  Linux and OSX platforms and make_bundle.bat is used for Windows.
 Environment variables required by make_bundle.sh are defined in ~/.bundle/FDS_SMV_ENV.sh.  
 
-To use this script, type ./make_bundle.sh in a bash shell. To see usage information type ./make_bundle.sh -h . 
-Likewise to use make_bundle.bat, type ./make_bundle.bat in a command shell.
+To use this script, type ./make_bundle.sh in a bash shell (in this directory). To see usage information type ./make_bundle.sh -h . 
+Likewise to use make_bundle.bat, type make_bundle.bat in a windows command shell (again in this directory).
 
-These scripts build all the software (by calling other scripts), collect manuals, example files and libraries that are needed then builds the bundle script.  Note, this is as work in progress, these scripts are not yet complete.  
+These scripts build all the software (by calling other scripts), collect manuals, example files and libraries that are needed then builds the bundle script.  The created bundles are placed in the Utilities/uploads directory. 
+
+Note, this is as work in progress, these scripts are not yet complete.  
