@@ -429,6 +429,7 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
+bundlepath=`pwd`/$bundlebase.sh
 $makeinstaller -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh
 
 mkdir -p $BUNDLE_DIR
@@ -452,4 +453,5 @@ if [ -e $errlog ]; then
   fi
   rm $errlog
 fi
-
+echo installer located at:
+echo $bundlepath
