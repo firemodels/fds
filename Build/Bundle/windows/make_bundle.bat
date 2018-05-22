@@ -13,7 +13,7 @@ set fdsmpidirdb=%svn_root%\fds\Build\impi_intel_win_64_db
 set basename=%fds_version%-%smv_version%_win64
 
 set in_pdf=%userprofile%\.bundle\pubs
-set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL17
+set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL18
 set in_shortcut=%userprofile%\fire-notes\INSTALL\repoexes
 set in_for_bundle=%svn_root%\smv\for_bundle
 
