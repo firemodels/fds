@@ -2,8 +2,8 @@
 
 source ../scripts/GET_ENV.sh
 
-export INTELLIBDIR=/var/local/bundle/INTEL/INTEL_17u4/LIB
-export INTELBINDIR=/var/local/bundle/INTEL/INTEL_17u4/bin64
+export INTELLIBDIR=/var/local/bundle/INTEL/INTEL_18u2/LIB
+export INTELBINDIR=/var/local/bundle/INTEL/INTEL_18u2/bin64
 export OSLIBDIR=/var/local/bundle/OSLIBS/LINUX
 
 export fds_smvroot=$linux_svn_root
