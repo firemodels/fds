@@ -2622,7 +2622,7 @@ The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
 A gas-fired panel is often used as a source of thermal radiation in laboratory experiments.  Here, the heat flux from an $h=30.48$~cm square panel is computed at distances of 10~cm, 15~cm, 25~cm, 38~cm, 46~cm, 61~cm, and 76~cm along its perpendicular center axis, and along a perpendicular line that is displaced laterally 14~cm and vertically 14~cm from the center axis, as illustrated in Fig.~\ref{radiation_gas_panel_plot}.  We compare the results computed by FDS to those calculated using configuration factors. The temperature and emissivity of the panel are set to 1250~K and 0.7, respectively, and the ambient temperature is 273~K.
 
-The configuration factor, $\d F_{2 \rightarrow 1}$, describing the energy exchange between the radiant panel and a target with differential area $\d A_1$ located on a perpendicular line extending from the panel at the point  $(\overline{x}, \overline{y})$ is computed from the following: 
+The configuration factor, $\d F_{2 \rightarrow 1}$, describing the energy exchange between the radiant panel and a target with differential area $\d A_1$ located on a perpendicular line extending from the panel at the point  $(\overline{x}, \overline{y})$ is computed from the following:
 \begin{align}
  \d F_{2 \rightarrow 1} (R; \overline{x}, \overline{y})
     &= \frac{\d A_1}{\pi \, A_2}
@@ -3108,27 +3108,7 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 
 
 
-
-\section{Extinction Model (\textct{extinction})}
-\label{Extinct}
-
-The current extinction model used in FDS is based on the critical flame temperature concept \cite{SFPE:Beyler}. Within any computational cell, complete consumption of the limiting reactant must produce enough energy to raise the temperature of the cell above the critical flame temperature. In this approach the critical flame temperature is the adiabatic flame temperature at that particular fuel's lower flammability limit. If a critical flame temperature is not specified, the default value is 1700 K.
-
-Here, we examine a 10 $\times$ 10 array of cases: varying initial temperature from 300 K to 1875 K and initial fuel (methane) mass fraction from 0.05 to 0.95. The oxidizer is air which is assumed to be 23 \% oxygen  and 77 \% nitrogen by mass. A simple one-step methane reaction is used to govern combustion:
-\begin{equation}\label{eq:methane_ex}
-\mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
-\end{equation}
-Based on the combination of oxygen concentration, methane concentration, and temperature each case can either sustain burning for a finite period of time or not (Fig.~\ref{fig:extinct}).
-\begin{figure}[h!]
-\centering
-\includegraphics[height=3.2in]{SCRIPT_FIGURES/extinction}
-\caption[\textct{extinction} model test cases]{Array of initial temperatures and oxygen concentrations that can can sustain burning.}
-\label{fig:extinct}
-\end{figure}
-For the same initial conditions, FDS predictions for burning or extinction (closed symbols) fall identically on the expected results (open symbols). This example also illustrates that for these initial conditions, the delineation between burning and extinction is not linear as the simple model suggests. More detailed information on the extinction model, which uses the critical flame temperature and local enthalpy change, can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
-
-
-\section{Ideal and Non-Ideal Heat of Combustion (\textct{extinction})}
+\section{Ideal and Non-Ideal Heat of Combustion (\textct{HoC})}
 \label{HoC}
 \label{HoC_Ideal}
 \label{HoC_NonIdeal}
