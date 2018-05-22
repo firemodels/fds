@@ -1143,7 +1143,7 @@ SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_LOC)
 REAL(EB), INTENT(IN) :: DT_SUB,T_LOC
 INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX
 REAL(EB) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
-            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,RHOCBAR,RHOCBAR2,DUMMY,RHO_2
+            RHO_IN(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,RHOCBAR,RHOCBAR2,DUMMY
 LOGICAL :: OB2_FOUND
 REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
@@ -1234,12 +1234,10 @@ OBST_LOOP_2: DO N=1,N_OBST
             OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)
 
             IF (OB%MT3D) THEN
-               ! update cell gas composition after pyrolysis
+               ! store mass production rate of gas species, adjusted for potential difference in heats of combustion
                DO NS=1,N_TRACKED_SPECIES
-                  ZZ(I,J,K,NS) = MAX( 0._EB, RHO(I,J,K)*ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS) )
+                  M_DOT_G_PPP_S(I,J,K,NS) = M_DOT_G_PPP_ADJUST(NS)
                ENDDO
-               RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
-               IF (RHO(I,J,K)>TWO_EPSILON_EB) ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
             ELSE
                ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
                DO NS=1,N_TRACKED_SPECIES
@@ -1337,9 +1335,8 @@ OBST_LOOP_2: DO N=1,N_OBST
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
                      ! transfer mass of gas
                      IF (OB%MT3D .AND. OB2%MT3D) THEN
-                        RHO_2 = RHO(II2,JJ2,KK2) + RHO(I,J,K)*VC/VC2
                         DO NS=1,N_TRACKED_SPECIES
-                           ZZ(II2,JJ2,KK2,NS) = ( RHO(II2,JJ2,KK2)*ZZ(II2,JJ2,KK2,NS) + RHO(I,J,K)*ZZ(I,J,K,NS)*VC/VC2 ) / RHO_2
+                           RHO_ZZ_G_S(II2,JJ2,KK2,NS) = RHO_ZZ_G_S(II2,JJ2,KK2,NS) + RHO_ZZ_G_S(I,J,K,NS)*VC/VC2
                         ENDDO
                      ENDIF
                      ! compute new cell temperature
@@ -1360,6 +1357,8 @@ OBST_LOOP_2: DO N=1,N_OBST
                OB%MT3D   = .FALSE.
                OB%PYRO3D = .FALSE.
                Q_DOT_PPP_S(I,J,K) = 0._EB
+               M_DOT_G_PPP_S(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+               RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
             ENDIF
 
          ENDDO I_LOOP_2
@@ -1375,7 +1374,7 @@ SUBROUTINE SOLID_MASS_TRANSFER_3D(DT_SUB)
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 REAL(EB), INTENT(IN) :: DT_SUB
 INTEGER :: I,J,K,N,NN,NR,IC,II,JJ,KK,IOR,ICM,ICP,IIG,JJG,KKG
-REAL(EB) :: D_Z_TEMP,D_Z_N(0:5000),D_F,R_D,VN_MT3D,RHO_ZZ_I,D_MAX,D_M,D_P,D_BAR,RDN
+REAL(EB) :: D_Z_TEMP,D_Z_N(0:5000),D_F,R_D,VN_MT3D,RHO_ZZ_I,D_MAX,D_M,D_P,D_BAR,RDN,RHO_ZZ_F,RHO_ZZ_S
 REAL(EB), POINTER, DIMENSION(:,:,:) :: D_DRHOZDX=>NULL(),D_DRHOZDY=>NULL(),D_DRHOZDZ=>NULL(),D_Z_P=>NULL(),RHO_ZZ_P=>NULL()
 LOGICAL :: CONT_MATL_PROP,IS_GAS_IN_SOLID(1:N_TRACKED_SPECIES)
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
@@ -1417,7 +1416,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D)   CYCLE
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K),D_Z_TEMP)
             D_Z_P(I,J,K) = D_Z_TEMP
-            RHO_ZZ_P(I,J,K) = RHO(I,J,K)*ZZ(I,J,K,N)
+            RHO_ZZ_P(I,J,K) = RHO_ZZ_G_S(I,J,K,N)
          ENDDO
       ENDDO
    ENDDO
@@ -1588,6 +1587,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,WC%ONE_D%TMP_F,D_Z_TEMP)
       D_F = D_Z_TEMP
       D_MAX = MAX(D_MAX,D_F)
+      RHO_ZZ_F = WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)
+      RHO_ZZ_S = RHO_ZZ_P(II,JJ,KK)
 
       SELECT CASE(IOR)
          CASE( 1); RDN=RDX(II)
@@ -1602,23 +1603,19 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
          CASE DEFAULT METHOD_OF_MASS_TRANSFER
 
-            ! for simplicity, assume surface mass fraction is equivalent to gas phase adjacent to wall cell
-
-            WC%ONE_D%ZZ_F(N) = ZZ(IIG,JJG,KKG,N)
-
             ! compute mass flux at the surface
 
-            WC%ONE_D%MASSFLUX_SPEC(N) = - D_F * 2._EB*(0._EB-RHO_ZZ_P(II,JJ,KK))*RDN
-            WC%ONE_D%MASSFLUX(N)      = WC%ONE_D%MASSFLUX_SPEC(N) * WC%ONE_D%AREA_ADJUST
-
             SELECT CASE(IOR)
-               CASE( 1); D_DRHOZDX(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
-               CASE(-1); D_DRHOZDX(II-1,JJ,KK) = -WC%ONE_D%MASSFLUX(N)
-               CASE( 2); D_DRHOZDY(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
-               CASE(-2); D_DRHOZDY(II,JJ-1,KK) = -WC%ONE_D%MASSFLUX(N)
-               CASE( 3); D_DRHOZDZ(II,JJ,KK)   =  WC%ONE_D%MASSFLUX(N)
-               CASE(-3); D_DRHOZDZ(II,JJ,KK-1) = -WC%ONE_D%MASSFLUX(N)
+               CASE( 1); D_DRHOZDX(II,JJ,KK)   = D_F * 2._EB*(RHO_ZZ_F-RHO_ZZ_S)*RDN
+               CASE(-1); D_DRHOZDX(II-1,JJ,KK) = D_F * 2._EB*(RHO_ZZ_S-RHO_ZZ_F)*RDN
+               CASE( 2); D_DRHOZDY(II,JJ,KK)   = D_F * 2._EB*(RHO_ZZ_F-RHO_ZZ_S)*RDN
+               CASE(-2); D_DRHOZDY(II,JJ-1,KK) = D_F * 2._EB*(RHO_ZZ_S-RHO_ZZ_F)*RDN
+               CASE( 3); D_DRHOZDZ(II,JJ,KK)   = D_F * 2._EB*(RHO_ZZ_F-RHO_ZZ_S)*RDN
+               CASE(-3); D_DRHOZDZ(II,JJ,KK-1) = D_F * 2._EB*(RHO_ZZ_S-RHO_ZZ_F)*RDN
             END SELECT
+
+            WC%ONE_D%MASSFLUX_SPEC(N) = -SIGN(1._EB,REAL(IOR,EB)) * D_DRHOZDZ(II,JJ,KK)
+            WC%ONE_D%MASSFLUX(N)      = WC%ONE_D%MASSFLUX_SPEC(N) * WC%ONE_D%AREA_ADJUST
 
             ! If the fuel or water massflux is non-zero, set the ignition time
 
@@ -1645,11 +1642,18 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                VN_MT3D = MAX( VN_MT3D, 2._EB*D_MAX*( RDX(I)**2 + RDY(J)**2 + RDZ(K)**2 ) )
             ENDIF
 
-            ZZ(I,J,K,N) = RHO_ZZ_P(I,J,K) + DT_SUB * ( (D_DRHOZDX(I,J,K)*R(I)-D_DRHOZDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
-                                                       (D_DRHOZDY(I,J,K)     -D_DRHOZDY(I,J-1,K)       )*RDY(J) + &
-                                                       (D_DRHOZDZ(I,J,K)     -D_DRHOZDZ(I,J,K-1)       )*RDZ(K) )
+            RHO_ZZ_G_S(I,J,K,N) = RHO_ZZ_P(I,J,K) + DT_SUB * ( (D_DRHOZDX(I,J,K)*R(I)-D_DRHOZDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
+                                                               (D_DRHOZDY(I,J,K)     -D_DRHOZDY(I,J-1,K)       )*RDY(J) + &
+                                                               (D_DRHOZDZ(I,J,K)     -D_DRHOZDZ(I,J,K-1)       )*RDZ(K) + &
+                                                               M_DOT_G_PPP_S(I,J,K,N) )
 
-            ZZ(I,J,K,N) = MAX(0._EB,ZZ(I,J,K,N)) ! guarantee boundedness
+            RHO_ZZ_G_S(I,J,K,N) = MAX(0._EB,RHO_ZZ_G_S(I,J,K,N)) ! guarantee boundedness
+
+            ! ! debug
+            ! if (RHO_ZZ_G_S(I,J,K,N)<0._EB) then
+            !    print *,I,J,K,N,RHO_ZZ_G_S(I,J,K,N)
+            !    stop
+            ! endif
 
          ENDDO
       ENDDO
@@ -1657,7 +1661,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
-! update mass fractions
+! update mass density
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1666,8 +1670,12 @@ DO K=1,KBAR
          IF (.NOT.SOLID(IC)) CYCLE
          OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
 
-         RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
-         IF (RHO(I,J,K)>TWO_EPSILON_EB) ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+         RHO(I,J,K) = SUM(RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES))
+         IF (RHO(I,J,K)>TWO_EPSILON_EB) THEN
+            ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+         ELSE
+            ZZ(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+         ENDIF
       ENDDO
    ENDDO
 ENDDO
