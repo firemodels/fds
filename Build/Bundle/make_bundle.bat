@@ -1,5 +1,4 @@
 @echo off
-:: dummy comment
 
 set CURDIR=%CD%
 cd windows
