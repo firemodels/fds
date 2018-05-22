@@ -23,7 +23,7 @@ set in_for_bundle=%svn_root%\smv\for_bundle
 :: files we got from intel that fixed a problem we reported (does work)
 set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
-set uploads=%svn_root%\fds\Utilities\uploads
+set uploads=%svn_root%\fds\Build\Bundle\uploads
 set basedir=%uploads%\%basename%
 
 set out_bundle=%basedir%\firemodels
