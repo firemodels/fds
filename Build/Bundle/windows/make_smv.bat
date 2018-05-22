@@ -19,7 +19,7 @@ call :BUILD    smokediff
 call :BUILD    smokezip
 call :BUILD    wind2fds
 call :BUILDSMV smokeview
-call :BUILD    setpath
+call :BUILD    set_path
 call :BUILD    sh2bat
 call :BUILD    get_time
 echo "bundle complete"
