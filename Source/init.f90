@@ -957,20 +957,18 @@ ENDIF
 ! Initialize gas densities for 3D pyrolysis
 
 IF (SOLID_MT3D) THEN
-   OBST_LOOP_5: DO N=1,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      IF (.NOT.OB%MT3D) CYCLE OBST_LOOP_5
-      DO K=OB%K1+1,OB%K2
-         DO J=OB%J1+1,OB%J2
-            DO I=OB%I1+1,OB%I2
-               M%RHO(I,J,K) = 0._EB
-               DO NN=1,N_TRACKED_SPECIES
-                  M%ZZ(I,J,K,NN) = 0._EB
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO OBST_LOOP_5
+   ! store mass production rate for tracked species
+   ALLOCATE(M%M_DOT_G_PPP_S(0:M%IBP1,0:M%JBP1,0:M%KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
+   CALL ChkMemErr('INIT','M_DOT_G_PPP_S',IZERO)
+   M%M_DOT_G_PPP_S = 0._EB
+   ! initialize gas phase mass densities
+   ALLOCATE(M%RHO_ZZ_G_S(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
+   CALL ChkMemErr('INIT','RHO_ZZ_G_S',IZERO)
+   M%RHO_ZZ_G_S = 0._EB
+   ! !! debug !!
+   ! ALLOCATE(M%SCALAR_SAVE1(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
+   ! CALL ChkMemErr('INIT','SCALAR_SAVE1',IZERO)
+   ! M%SCALAR_SAVE1 = 0._EB
 ENDIF
 
 ! Allocate local auto-ignition temperature
