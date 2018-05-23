@@ -302,7 +302,7 @@ where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the vol
 
 \subsection{Porous Media (Filters, Screens, Metal Meshes, and Similar Materials)}
 
-Filters, pebble beds, screens, grating ,and similar flow obstructions can all be considered
+Air filters, screens, grating, and similar flow obstructions can all be considered
 as type of porous media. In general, material forming the porous media will have dimensions will below that of the grid size (e.g. 100 micron diameter filter fibers on a multi-cm grid).  There is, therefore, no easy way to model these materials using solid obstructions. Lagrangian particles can; however, be used to represent both the drag and the mass of these materials. By placing particles in a plane or volume and assigning the particles a porous media drag law, the effects of the porous media can be modeled. The pressure drop over a length $\Delta x$ through porous media is given by \cite{VafaiTien:1981}:
 \be
    \frac {\Delta p}{\Delta x} =  \frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} \, u^2
