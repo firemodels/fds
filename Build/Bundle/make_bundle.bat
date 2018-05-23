@@ -24,7 +24,7 @@ call get_smv_pubs
 echo -------------------------------------------------
 echo -------getting fds release notes ----------------
 echo -------------------------------------------------
-call get_fds_release_notes
+call get_fds_release_notes bot
 echo -------------------------------------------------
 echo ------- making the bundle -----------------------
 echo -------------------------------------------------
