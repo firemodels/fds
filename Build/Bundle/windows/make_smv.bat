@@ -72,7 +72,7 @@ echo ********** building %dir%
 echo
 cd %CURDIR%\..\..\..\..\Build
 cd %dir%\intel_win_64
-call %script% release bot
+call %script% -r bot
 cd %BUILDDIR%
 exit /b /0
 
