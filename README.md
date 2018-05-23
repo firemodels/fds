@@ -1,7 +1,5 @@
 # fds-smv 
 
-<-- ![Build Status](badges/buildpassing.svg) -->
-
 Fire Dynamics Simulator and Smokeview
 
 *Continuous Integration. Continuous Improvement.*
