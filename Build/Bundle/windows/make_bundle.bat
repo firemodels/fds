@@ -6,6 +6,10 @@ set SMVEDITION=SMV6
 set fdsversion=%FDSEDITION%
 set smvversion=%SMVEDITION%
 
+:: files from Intel version 18 update 2
+set      in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL18
+set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL18
+
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64
 set fdsmpidir=%svn_root%\fds\Build\impi_intel_win_64
@@ -13,15 +17,9 @@ set fdsmpidirdb=%svn_root%\fds\Build\impi_intel_win_64_db
 set basename=%fds_version%-%smv_version%_win64
 
 set in_pdf=%userprofile%\.bundle\pubs
-set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL17
 set in_shortcut=%userprofile%\fire-notes\INSTALL\repoexes
 set in_for_bundle=%svn_root%\smv\for_bundle
 
-:: files from mpi version 17 update 1 (doesn't work)
-::set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL17
-
-:: files we got from intel that fixed a problem we reported (does work)
-set in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
 set uploads=%svn_root%\fds\Build\Bundle\uploads
 set basedir=%uploads%\%basename%

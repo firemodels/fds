@@ -18,8 +18,8 @@ call :BUILD    hashfile
 call :BUILD    smokediff
 call :BUILD    smokezip
 call :BUILD    wind2fds
-call :BUILD    smokeview
-call :BUILD    setpath
+call :BUILDSMV smokeview
+call :BUILD    set_path
 call :BUILD    sh2bat
 call :BUILD    get_time
 echo "bundle complete"
@@ -59,6 +59,23 @@ cd %dir%\intel_win_64
 call %script% bot
 cd %BUILDDIR%
 exit /b /0
+
+:: -------------------------------------------------------------
+ :BUILDSMV
+:: -------------------------------------------------------------
+
+set dir=%1
+set script=make_%dir%
+
+echo
+echo ********** building %dir%
+echo
+cd %CURDIR%\..\..\..\..\Build
+cd %dir%\intel_win_64
+call %script% release bot
+cd %BUILDDIR%
+exit /b /0
+
 
 :: -------------------------------------------------------------
  :BUILD
