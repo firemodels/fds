@@ -1,6 +1,6 @@
-# Fire Dynamics Simulator and Smokeview 
-
 [![Build Status](Utilities/badges/buildpassing.svg)](https://github.com/firemodels/fds/commit/41de37d4c08de88093e5a214c8fe6aea8e613b57)
+
+# Fire Dynamics Simulator and Smokeview 
 
 *Continuous Integration. Continuous Improvement.*
 
