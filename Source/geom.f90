@@ -222,7 +222,7 @@ REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
-REAL(EB), SAVE :: GEOMEPS = 1.E-12_EB
+REAL(EB), SAVE :: GEOMEPS=1.E-12_EB, GEOMEPSSQ=1.E-12_EB**2._EB
 REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 INTEGER,  SAVE :: NGUARD= 6        ! Layers of guard-cells.
@@ -26551,10 +26551,11 @@ SUBROUTINE IBM_INIT_GEOM
 ! Local Variables:
 INTEGER :: IG, IWSEL, INOD, IEDGE, NWSEL, NWSEDG, IEDLIST, IX
 INTEGER :: WSELEM(NOD1:NOD3),SEG(NOD1:NOD2)
-REAL(EB):: XYZV(MAX_DIM,NODS_WSEL), V12(MAX_DIM), V23(MAX_DIM), WSNORM(MAX_DIM)
+REAL(EB):: XYZV(MAX_DIM,NODS_WSEL), V12(MAX_DIM), V23(MAX_DIM), V31(MAX_DIM), WSNORM(MAX_DIM)
 REAL(EB):: X12(MAX_DIM), X23(MAX_DIM), X31(MAX_DIM), SQAREA(MAX_DIM), INT2
 REAL(EB):: MGNRM, XCEN
 LOGICAL :: INLIST
+CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 
 IF(MYID==0 .AND. GET_CUTCELLS_VERBOSE) &
 WRITE(LU_ERR,'(A,I5,A)',advance="no") ' 1. Number of Geometries : ',N_GEOMETRY,', IBM_INIT_GEOM, processed GEOMETRY : '
@@ -26600,6 +26601,24 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       V12(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD2) - XYZV(IAXIS:KAXIS,NOD1)
       V23(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD3) - XYZV(IAXIS:KAXIS,NOD2)
+      V31(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD1) - XYZV(IAXIS:KAXIS,NOD3)
+
+      ! Check that face edges are not null
+      IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
+        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
+        CALL SHUTDOWN(MESSAGE) ; RETURN
+      END IF
+      IF ((V23(IAXIS)**2._EB + V23(JAXIS)**2._EB + V23(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
+        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
+        CALL SHUTDOWN(MESSAGE) ; RETURN
+      END IF
+      IF ((V31(IAXIS)**2._EB + V31(JAXIS)**2._EB + V31(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
+        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
+        CALL SHUTDOWN(MESSAGE) ; RETURN
+      END IF
 
       ! Cross V12 x V23:
       WSNORM(IAXIS) = V12(JAXIS)*V23(KAXIS) - V12(KAXIS)*V23(JAXIS)
@@ -26610,8 +26629,12 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       XCEN  = (XYZV(IAXIS,NOD1) + XYZV(IAXIS,NOD2) + XYZV(IAXIS,NOD3)) / 3._EB
 
-      IF(MGNRM < GEOMEPS) THEN
+      ! Check that face area is not null
+      IF(MGNRM < GEOMEPSSQ) THEN
          WRITE(LU_ERR,*) 'FACE IWSEL=',IWSEL,', Connectivity=',WSELEM(NOD1:NOD3),', Norm Cross=',MGNRM
+         WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+           "': Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
       ! Assign to GEOMETRY:
