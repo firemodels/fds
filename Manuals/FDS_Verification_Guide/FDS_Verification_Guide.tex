@@ -4382,6 +4382,18 @@ This case compares mass loss rates and material thickness for pyrolysis of black
 	\label{fig:pyro3d_vs_pyro1d}
 \end{figure}
 
+\subsection{Mass Transport (\texorpdfstring{\textct{pyro3d\_transport}}{pyro3d\_transport})}
+\label{pyro3d_transport}
+
+This case is a 3D version of the {\ct FAA\_Polymers\_PMMA} validation case.  A block of ``black'' PMMA 0.1 m $\times$ 0.1 m $\times$ 0.009 m, giving $9 \times 10^{-5} \;\si{m^3}$, with a bulk density of 1100 \si{kg/m^3}, giving 0.099 kg of total mass, is heated from above with 52 \si{kW/m^2}, generating methane as a pyrolysis gas.  The verification target to confirm that as the PMMA is consumed the correct amount of methane gets produced.  The results are shown below in Fig.~\ref{fig:pyro3d_transport}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_transport}
+    \caption[PYRO3D with mass transport of fuel gas (the {\ct pyro3d\_transport} case)]{Check of mass conservation in conversion of solid (PMMA) to fuel gas (methane) with burn away using the 3D pyrolysis mass transport algorithm.}
+    \label{fig:pyro3d_transport}
+\end{figure}
+
 \chapter{Lagrangian Particles}
 
 This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, Lagrangian particles are used for a variety of purposes, not just water droplets.
