@@ -1,6 +1,6 @@
 # fds-smv 
 
-# ![Build Status](badges/buildpassing.svg)
+<-- ![Build Status](badges/buildpassing.svg) -->
 
 Fire Dynamics Simulator and Smokeview
 
