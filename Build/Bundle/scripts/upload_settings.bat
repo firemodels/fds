@@ -39,8 +39,9 @@ call :dos2bash osx_mpi_version   %osx_mpi_version%
 
 call :title2bash #  ---- Linux/OSX repo locations ----
 call :dos2bash linux_svn_root %linux_svn_root%
-call :dos2bash compiler_dir   %compiler_dir%
-call :dos2bash misc_dir       %misc_dir%
+call :dos2bash INTEL_LIB_DIR  %INTEL_LIB_DIR%
+call :dos2bash INTEL_BIN_DIR  %INTEL_BIN_DIR%
+call :dos2bash OS_LIB_DIR     %OS_LIB_DIR%
 
 call :title2bash #  shouldn't have to change anything below
 

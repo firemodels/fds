@@ -45,11 +45,11 @@ CP ()
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
-    echo "$FROMFILE copied"
+    echo "$FROMFILE copied to $TODIR/$TOFILE"
   else
     if [ "ERR" == "" ]; then
-      echo "***error: $FROMFILE could not be copied to $DIR" >> $errlog
-      echo "***error: $FROMFILE could not be copied to $DIR"
+      echo "***error: $FROMFILE could not be copied from $FROMDIR to $TODIR" >> $errlog
+      echo "***error: $FROMFILE could not be copied from $FROMDIR to $TODIR"
       if [ "$NOPAUSE" == "" ]; then
         read val
       fi
@@ -164,7 +164,7 @@ CPDIRFILES ()
   FROMDIR=$1
   TODIR=$2
   ERR=
-  if [ ! -e $FROMDIR ]; then
+  if [ ! -d $FROMDIR ]; then
     echo "***error: the directory $FROMDIR does not exist" >> $errlog
     echo "***error: the directory $FROMDIR does not exist"
     ERR="1"
@@ -249,7 +249,7 @@ dem2fdsroot=$scp_fds_smvroot/smv/Build/dem2fds
 smvscriptdir=$scp_fds_smvroot/smv/scripts
 wind2fdsroot=$scp_fds_smvroot/smv/Build/wind2fds
 hashfileroot=$scp_fds_smvroot/smv/Build/hashfile
-uploaddir=$fds_smvroot/fds/Utilities/uploads
+uploaddir=$fds_smvroot/fds/Build/Bundle/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
@@ -358,36 +358,26 @@ CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
-if [ ! "$INTELBINDIR" == "" ]; then
-  if [ -d $INTELBINDIR ]; then
-    if [ "$MPI_VERSION" == "INTEL" ]; then
+if [ "$INTEL_BIN_DIR" != "" ]; then
+  if [ "$MPI_VERSION" == "INTEL" ]; then
     echo ""
     echo "--- copying Intel exe's ---"
     echo ""
-      CP $INTELBINDIR mpiexec   $bundledir/bin mpiexec
-      CP $INTELBINDIR pmi_proxy $bundledir/bin pmi_proxy
-    fi
+    CP $INTEL_BIN_DIR mpiexec   $bundledir/bin mpiexec
+    CP $INTEL_BIN_DIR pmi_proxy $bundledir/bin pmi_proxy
   fi
+  echo ""
+  echo "--- copying compiler run time libraries ---"
+  echo ""
+  CP $INTEL_LIB_DIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
+  CP $INTEL_LIB_DIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
+  CP $INTEL_LIB_DIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
 fi
-if [ "$INTELLIBDIR" != "" ]; then
-  if [ -d $INTELLIBDIR ]; then
-
-    echo ""
-    echo "--- copying compiler run time libraries ---"
-    echo ""
-    CP $INTELLIBDIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
-    CP $INTELLIBDIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
-    CP $INTELLIBDIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
-  fi
-fi
-if [ "$OSLIBDIR" != "" ]; then
-  if [ -d $OSLIBDIR ]; then
-
-    echo ""
-    echo "--- copying miscellaneous run time libraries ---"
-    echo ""
-    CPDIRFILES $OSLIBDIR $bundledir/bin/LIB64
-  fi
+if [ "$OS_LIB_DIR" != "" ]; then
+  echo ""
+  echo "--- copying run time libraries ---"
+  echo ""
+  CPDIRFILES $OS_LIB_DIR $bundledir/bin/LIB64
 fi
 
 echo ""
