@@ -1634,8 +1634,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       ! need to add ADJUST_BURN_RATE
       WC%ONE_D%MASSFLUX_SPEC(N) = WC%ONE_D%MASSFLUX(N)
 
-      IF (N==2) TOTAL_METHANE_FLUX = TOTAL_METHANE_FLUX + DT_SUB * WC%ONE_D%MASSFLUX(N) * WC%ONE_D%AREA
-
       ! If the fuel or water massflux is non-zero, set the ignition time
 
       IF (WC%ONE_D%T_IGN > T) THEN
@@ -1664,45 +1662,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                                                                (D_DRHOZDZ(I,J,K)     -D_DRHOZDZ(I,J,K-1)       )*RDZ(K) + &
                                                                M_DOT_G_PPP_S(I,J,K,N) )
 
-            ! ! debug
-
-            ! IF (N==2) TOTAL_METHANE_GEN = TOTAL_METHANE_GEN + DT_SUB * M_DOT_G_PPP_S(I,J,K,N) * DX(I)*DY(J)*DZ(K)
-
-            ! if (RHO_ZZ_G_S(I,J,K,N)<0._EB) then
-            !    print *,I,J,K,N,RHO_ZZ_G_S(I,J,K,N)
-            ! endif
-
             RHO_ZZ_G_S(I,J,K,N) = MAX(0._EB,RHO_ZZ_G_S(I,J,K,N)) ! guarantee boundedness
 
          ENDDO
       ENDDO
    ENDDO
-
-   ! ! handle cells in which all solid mass has burned away, but gas remains that needs to be put into MASSFLUX
-
-   ! MT3D_WALL_LOOP_2: DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   !    WC => WALL(IW)
-   !    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE MT3D_WALL_LOOP_2
-
-   !    II = WC%ONE_D%II
-   !    JJ = WC%ONE_D%JJ
-   !    KK = WC%ONE_D%KK
-   !    IOR = WC%ONE_D%IOR
-
-   !    IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC))         CYCLE MT3D_WALL_LOOP_2
-   !    OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D  )         CYCLE MT3D_WALL_LOOP_2
-   !                                         IF (OB%MASS>TWO_EPSILON_EB) CYCLE MT3D_WALL_LOOP_2
-
-   !    WC%ONE_D%MASSFLUX(N) = WC%ONE_D%MASSFLUX(N) + RHO_ZZ_G_S(II,JJ,KK,N)/DT_SUB/WC%ONE_D%RDN
-
-   !    ! need to add ADJUST_BURN_RATE
-   !    WC%ONE_D%MASSFLUX_SPEC(N) = WC%ONE_D%MASSFLUX(N)
-
-   !    IF (N==2) TOTAL_METHANE_FLUX = TOTAL_METHANE_FLUX + DT_SUB * (RHO_ZZ_G_S(II,JJ,KK,N)/DT_SUB/WC%ONE_D%RDN) * WC%ONE_D%AREA
-
-   !    RHO_ZZ_G_S(II,JJ,KK,N) = 0._EB
-
-   ! ENDDO MT3D_WALL_LOOP_2
 
 ENDDO SPECIES_LOOP
 
@@ -1714,11 +1678,6 @@ DO K=1,KBAR
          IC = CELL_INDEX(I,J,K)
          IF (.NOT.SOLID(IC)) CYCLE
          OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%MT3D) CYCLE
-
-         ! IF (OB%MASS<TWO_EPSILON_EB) THEN
-         !    print *,'in mt3d:',I,J,K,RHO_ZZ_G_S(I,J,K,2)
-         !    ORPHAN_METHANE = ORPHAN_METHANE + RHO_ZZ_G_S(I,J,K,2) * DX(I)*DY(J)*DZ(K)
-         ! ENDIF
 
          RHO(I,J,K) = SUM(RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES))
          IF (RHO(I,J,K)>TWO_EPSILON_EB) THEN
@@ -1737,6 +1696,7 @@ ENDDO
 !    print *, 'VN:', DT_SUB*VN_MT3D
 ! ENDIF
 
+! ! debug
 ! print *,'ORPHAN METHANE    : ', ORPHAN_METHANE
 ! print *,'TOTAL METHANE FLUX: ', TOTAL_METHANE_FLUX
 ! print *,'TOTAL METHANE GEN : ', TOTAL_METHANE_GEN
