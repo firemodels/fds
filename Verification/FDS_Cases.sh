@@ -101,6 +101,7 @@ $QFDS -d Fires box_burn_away4.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
+$QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
