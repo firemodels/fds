@@ -3264,7 +3264,7 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 \subsection{Solid Pyrolysis 3D (Beta)}
 \label{info:pyro3d}
 
-The pyrolysis models to be described below may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, the user sets {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
+Pyrolysis may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, set {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
 \begin{lstlisting}
 &SURF ID='PMMA SLAB 3D'
       MATL_ID='BLACKPMMA 3D'
@@ -3274,13 +3274,13 @@ The pyrolysis models to be described below may also be applied with 3D heat tran
 \end{lstlisting}
 Since the 3D pyrolysis model does not have an internal ``thickness'' that shrinks from the bottom up, it is usually necessary to add {\ct BURN\_AWAY=T}.
 
-By default, like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  By default, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell ({\ct PYRO3D\_IOR=0}).  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  The pyrolyzate is ejected via the nearest wall cell in the direction of the orientation index. For example, to send the gas to nearest cell in the vertical direction use something like this,
+By default, like the 1D model, the current 3D pyrolysis model uses a very simple form of mass transfer---any mass that is pyrolyzed is instantly transported to a surface cell to be injected into the gas phase.  Unless otherwise specified, the 3D solver sends the pyrolyzate to the \emph{nearest} wall cell ({\ct PYRO3D\_IOR=0}).  You can change this behavior by setting {\ct PYRO3D\_IOR} on the {\ct OBST} line.  The pyrolyzate is ejected via the nearest wall cell in the direction of the orientation index. For example, to send the gas to nearest cell in the vertical direction use something like this,
 \begin{lstlisting}
 &OBST XB=..., HT3D=T, PYRO3D_IOR=3, BULK_DENSITY=1100.,
       SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
 \end{lstlisting}
 
-As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, add {\ct PYRO3D\_MASS\_TRANSPORT=T} on {\ct OBST}.  At present, only transport \emph{out} of the solid is possible.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used (see Sec.~\ref{gas_species_props}).
+As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, add {\ct PYRO3D\_MASS\_TRANSPORT=T} on {\ct OBST} (this supercedes {\ct PYRO3D\_IOR}).  At present, only transport \emph{out} of the solid is possible.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used (see Sec.~\ref{gas_species_props}).
 
 \subsubsection*{Useful Outputs}
 
