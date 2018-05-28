@@ -77,7 +77,8 @@ SUBROUTINE THERMAL_BC(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,&
-                               GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR,GET_SOLID_ABSORPTION_COEFFICIENT
+                               GET_SOLID_CONDUCTIVITY,GET_SOLID_RHOCBAR,GET_SOLID_ABSORPTION_COEFFICIENT,&
+                               GET_SOLID_REFRACTIVE_INDEX
 USE COMPLEX_GEOMETRY, ONLY : CFACE_THERMAL_GASVARS
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DT_BC,DTMP,DT_BC_HT3D
@@ -615,7 +616,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 REAL(EB) :: DT_SUB,T_LOC,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
-            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VSRVC_LOC,RDS,KDTDN_S
+            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VSRVC_LOC,RDS,KDTDN_S,KAPPA_S,K_R,REFRACTIVE_INDEX_S
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,ITER
 LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
 INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1,SURFACE_HEAT_FLUX_MODEL=1
@@ -686,6 +687,13 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         RHO_GET(1:MS%N_MATL) = 0._EB
                      ENDIF
                      CALL GET_SOLID_CONDUCTIVITY(KP(I,J,K),TMP_NEW(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+                     IF (MS%INTERNAL_RADIATION) THEN
+                        CALL GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_S,OB%MATL_SURF_INDEX,RHO_GET)
+                        CALL GET_SOLID_REFRACTIVE_INDEX(REFRACTIVE_INDEX_S,OB%MATL_SURF_INDEX,RHO_GET)
+                        K_R = 16._EB*(REFRACTIVE_INDEX_S**2)*SIGMA*(TMP_NEW(I,J,K)**3) / (3._EB*KAPPA_S)
+                        KP(I,J,K) = KP(I,J,K) + K_R
+                     ENDIF
+                     ! solid volume to cell volume ratio
                      SELECT CASE(ABS(OB%PYRO3D_IOR))
                         CASE DEFAULT
                            ! isotropic shrinking and swelling
@@ -736,14 +744,20 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                      IF (OB%MATL_INDEX>0) THEN
                         CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_MATL_INDEX=OB%MATL_INDEX)
                      ELSEIF (OB%MATL_SURF_INDEX>0) THEN
+                        MS => SURFACE(OB%MATL_SURF_INDEX)
                         VSRVC_LOC = 0._EB
                         DO NN=1,SURFACE(OB%MATL_SURF_INDEX)%N_MATL
                            ML => MATERIAL(SURFACE(OB%MATL_SURF_INDEX)%MATL_INDEX(NN))
                            VSRVC_LOC = VSRVC_LOC + OB%RHO(IIO,JJO,KKO,NN)/ML%RHO_S
                         ENDDO
-                        RHO_GET(1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL) = OB%RHO(IIO,JJO,KKO,1:SURFACE(OB%MATL_SURF_INDEX)%N_MATL)&
-                                                                      / VSRVC_LOC
+                        RHO_GET(1:MS%N_MATL) = OB%RHO(IIO,JJO,KKO,1:MS%N_MATL) / VSRVC_LOC
                         CALL GET_SOLID_CONDUCTIVITY(K_GET,TMP_OTHER,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+                        IF (MS%INTERNAL_RADIATION) THEN
+                           CALL GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_S,OB%MATL_SURF_INDEX,RHO_GET)
+                           CALL GET_SOLID_REFRACTIVE_INDEX(REFRACTIVE_INDEX_S,OB%MATL_SURF_INDEX,RHO_GET)
+                           K_R = 16._EB*(REFRACTIVE_INDEX_S**2)*SIGMA*(TMP_OTHER**3) / (3._EB*KAPPA_S)
+                           K_GET = K_GET + K_R
+                        ENDIF
                      ENDIF
                      K_OTHER = K_OTHER + K_GET
 
@@ -926,6 +940,12 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                   RHO_GET(1:MS%N_MATL) = 0._EB
                ENDIF
                CALL GET_SOLID_CONDUCTIVITY(K_S,WC%ONE_D%TMP_F,OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_GET)
+               IF (MS%INTERNAL_RADIATION) THEN
+                  CALL GET_SOLID_ABSORPTION_COEFFICIENT(KAPPA_S,OB%MATL_SURF_INDEX,RHO_GET)
+                  CALL GET_SOLID_REFRACTIVE_INDEX(REFRACTIVE_INDEX_S,OB%MATL_SURF_INDEX,RHO_GET)
+                  K_R = 16._EB*(REFRACTIVE_INDEX_S**2)*SIGMA*(WC%ONE_D%TMP_F**3) / (3._EB*KAPPA_S)
+                  K_S = K_S + K_R
+               ENDIF
             ENDIF MATL_IF
             K_S_MAX = MAX(K_S_MAX,K_S)
 
@@ -1143,18 +1163,22 @@ INIT_IF: IF (T_LOC<TWO_EPSILON_EB) THEN
                IF (.NOT.SOLID(IC)) CYCLE I_LOOP
                IOR_SELECT: SELECT CASE(OB%PYRO3D_IOR)
                   CASE DEFAULT
-                     WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
-                     SF=>SURFACE(WC%SURF_INDEX)
-                     WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-                     WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-                     WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
-                  CASE(0)
-                     DO IOR=-3,3
-                        WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
+                     IF (WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)>0) THEN
+                        WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
                         SF=>SURFACE(WC%SURF_INDEX)
                         WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
                         WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
                         WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                     ENDIF
+                  CASE(0)
+                     DO IOR=-3,3
+                        IF (WALL_INDEX_HT3D(IC,IOR)>0) THEN
+                           WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
+                           SF=>SURFACE(WC%SURF_INDEX)
+                           WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
+                           WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
+                           WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                        ENDIF
                      ENDDO
                END SELECT IOR_SELECT
             ENDDO I_LOOP
@@ -1208,20 +1232,25 @@ OBST_LOOP_2: DO N=1,N_OBST
 
             OB%RHO(I,J,K,1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL) + RHO_OUT(1:MS%N_MATL) - RHO_IN(1:MS%N_MATL)
 
-            ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
-
-            DO NS=1,N_TRACKED_SPECIES
-               WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-               WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
-            ENDDO
-            DO NN=1,SF%N_MATL
-               WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
-            ENDDO
-
-            ! If the fuel or water massflux is non-zero, set the ignition time
-
-            IF (WC%ONE_D%T_IGN > T) THEN
-               IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+            IF (OB%PYRO3D_MASS_TRANSPORT) THEN
+               DO NS=1,N_TRACKED_SPECIES
+                  ZZ(I,J,K,NS) = MAX( 0._EB, RHO(I,J,K)*ZZ(I,J,K,NS) + DT_SUB*M_DOT_G_PPP_ADJUST(NS) )
+               ENDDO
+               RHO(I,J,K) = SUM(ZZ(I,J,K,1:N_TRACKED_SPECIES))
+               ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
+            ELSE
+               ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
+               DO NS=1,N_TRACKED_SPECIES
+                  WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+                  WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+               DO NN=1,SF%N_MATL
+                  WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
+               ENDDO
+               ! If the fuel or water massflux is non-zero, set the ignition time
+               IF (WC%ONE_D%T_IGN > T) THEN
+                  IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+               ENDIF
             ENDIF
 
             CONSUMABLE_IF: IF (OB%CONSUMABLE) THEN
