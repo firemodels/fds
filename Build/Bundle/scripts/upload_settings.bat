@@ -31,6 +31,7 @@ call :title2bash # ---- FDS and smokeview version ----
 call :dos2bash fds_version %fds_version%
 call :dos2bash smv_version %smv_version%
 call :dos2bash fds_debug   %fds_debug%
+call :dos2bash FDSEDITION  %fds_edition%
 
 call :title2bash #  ---- MPI version ----
 call :dos2bash linux_mpi_version %linux_mpi_version%
@@ -38,8 +39,9 @@ call :dos2bash osx_mpi_version   %osx_mpi_version%
 
 call :title2bash #  ---- Linux/OSX repo locations ----
 call :dos2bash linux_svn_root %linux_svn_root%
-call :dos2bash compiler_dir   %compiler_dir%
-call :dos2bash misc_dir       %misc_dir%
+call :dos2bash INTEL_LIB_DIR  %INTEL_LIB_DIR%
+call :dos2bash INTEL_BIN_DIR  %INTEL_BIN_DIR%
+call :dos2bash OS_LIB_DIR     %OS_LIB_DIR%
 
 call :title2bash #  shouldn't have to change anything below
 

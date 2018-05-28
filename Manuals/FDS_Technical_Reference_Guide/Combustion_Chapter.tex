@@ -367,27 +367,21 @@ Equating Eqs.~(\ref{bbb}) and (\ref{eee}) yields:
 \be
    Y_\OTWO = \frac{ \overline{c_p} \, (T_{\rm f}-T) }{\Delta H/r_\OTWO} \label{YO2eq}
 \ee
-The critical flame temperature (CFT) as interpreted within FDS is based on the cup burner flame extinction apparatus, where a small liquid or gaseous burner with a co-flowing air stream is extinguished by a relatively slow increase of nitrogen\footnote{A cup burner experiment can use any number of extinguishing agents. Nitrogen is most appropriate for simulating self-extinction.} within the stream. The volume fraction of nitrogen in the air stream at the time of extinction is referred to as the {\em minimum extinguishing concentration} (MEC, usually expressed as a percent), and this is related to the volume fraction of oxygen in the stream by
+The critical flame temperature (CFT), as interpreted within FDS, is based on the {\em limiting oxygen index} (LOI), the oxygen volume fraction in the oxidant stream at the point of flame extinction. The adiabatic flame temperature corresponding to a stoichiometric mixture of fuel and oxygen at the LOI can be derived using Eq.~(\ref{YO2eq}):
 \be
-  X_{\OTWO,\lim} = X_{\OTWO,\infty} \, \left( 1 - \hbox{MEC}/100 \right)
-\ee
-A definition of the critical flame temperature can be derived using Eq.~(\ref{YO2eq}):
-\be
-   T_{\rm CFT} = T_\infty + Y_{\OTWO,\lim} \, \left( \frac{\Delta H/r_\OTWO}{\overline{c_p}} \right) \quad ; \quad  Y_{\OTWO,\lim} = \frac{X_{\OTWO,\lim} \, W_\OTWO}{X_{\OTWO,\lim} \, W_\OTWO + (1-X_{\OTWO,\lim}) \, W_\NTWO }
+   T_{\OI} = T_\infty + Y_{\OI} \, \left( \frac{\Delta H/r_\OTWO}{\overline{c_p}} \right) \quad ; \quad  Y_{\OI} = \frac{X_{\OI} \, W_\OTWO}{X_{\OI} \, W_\OTWO + (1-X_{\OI}) \, W_\NTWO }
    \label{CFT_def}
 \ee
-For a variety of fuels for which cup burner results are available, Eq.~(\ref{CFT_def}) has been used\footnote{The equilibrium chemistry program STANJAN was used to calculate the critical flame temperatures based on measured minimum extinguishing concentrations in the cup burner where nitrogen was used as the extinguishing agent.} to create a look-up table within FDS. For other fuels, a default value of 1550~$^\circ$C is used.
+Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler} includes $X_{\OI}$ and $T_{\OI}$ for several common fuels. For other fuels, a default values are used. These values are given in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 \subsection{Extinction Based on Oxygen Only}
 \label{o2_based_model}
 
-The simple extinction model (referred to as Model~1 in FDS) applies Eq.~(\ref{YO2eq}) directly to determine a critical oxygen mass fraction, $Y_{\OTWO,\lim}$, for a given grid cell with bulk temperature, $T$. If $Y_{\OTWO}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step. 
-
-As an example, the critical flame temperature is assumed to be 1823~K for hydrocarbon fuels for which no cup burner data is available. Given that nitrogen is the primary component, the combustion products have an average specific heat of approximately \SI{1.2}{kJ/(kg.K)}. The limiting oxygen mass fraction of a control volume is given by:
+The simple extinction model (referred to as Model~1 in FDS) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen mass fraction that is a simple linear function of the cell bulk temperature:
 \be
-   Y_{\OTWO,\lim} = \frac{ \overline{c_p} (T_{\rm CFT}-T) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1823-T) }{13100}  \label{extinction_model}
-\ee
-For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction is approximately 0.14.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+   Y_{\OTWO,\lim}(T) = Y_{\OI} \, \left( \frac{T_{\OI}-T}{T_{\OI}-T_\infty} \right)  \label{extinction_model}
+\ee 
+If $Y_{\OTWO}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step. For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction is approximately 0.14.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
 
 \subsection{Extinction Based on Both Fuel and Oxygen}

@@ -1834,7 +1834,7 @@ WRITE(LU_SMV,'(3F13.5)') (TEX_ORI(I),I=1,3)
 
 WRITE(LU_SMV,'(/A)') 'HRRPUVCUT'
 WRITE(LU_SMV,'(I6)') ONE_INTEGER
-WRITE(LU_SMV,'(F13.5)') MIN(HRRPUVCUT_MAX,20._EB/CHARACTERISTIC_CELL_SIZE)
+WRITE(LU_SMV,'(F13.5)') HRRPUV_CUT/1000._EB
 
 ! Write out RAMP info to .smv file
 
@@ -2573,7 +2573,6 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
-   IF (N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0

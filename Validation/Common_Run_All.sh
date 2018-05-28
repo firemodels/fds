@@ -115,7 +115,7 @@ case $OPTION in
    export STOPFDS=1
    ;;
   u)
-  DV="-u"
+  DV="-T dv"
    ;;
   V)
   showcommandline="-V"
