@@ -490,7 +490,6 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (.NOT.CONTROL(LPC%CTRL_INDEX)%CURRENT_STATE) CYCLE WALL_INSERT_LOOP
    ENDIF
    IF (T < SF%PARTICLE_INSERT_CLOCK(NM)) CYCLE WALL_INSERT_LOOP
-   IF (WC%ONE_D%UW >= -0.0001_EB) CYCLE WALL_INSERT_LOOP
 
    II = WC%ONE_D%II
    JJ = WC%ONE_D%JJ
@@ -554,32 +553,34 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       ! Give particles an initial velocity
 
-      SELECT CASE(IOR)
-         CASE( 1)
-            LP%U = -WALL(IW)%ONE_D%UW
-            LP%V = SF%VEL_T(1)
-            LP%W = SF%VEL_T(2)
-         CASE(-1)
-            LP%U =  WALL(IW)%ONE_D%UW
-            LP%V = SF%VEL_T(1)
-            LP%W = SF%VEL_T(2)
-         CASE( 2)
-            LP%U = SF%VEL_T(1)
-            LP%V = -WALL(IW)%ONE_D%UW
-            LP%W = SF%VEL_T(2)
-         CASE(-2)
-            LP%U = SF%VEL_T(1)
-            LP%V =  WALL(IW)%ONE_D%UW
-            LP%W = SF%VEL_T(2)
-         CASE( 3)
-            LP%U = SF%VEL_T(1)
-            LP%V = SF%VEL_T(2)
-            LP%W = -WALL(IW)%ONE_D%UW
-         CASE(-3)
-            LP%U = SF%VEL_T(1)
-            LP%V = SF%VEL_T(2)
-            LP%W =  WALL(IW)%ONE_D%UW
-      END SELECT
+      IF (.NOT.LPC%STATIC) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               LP%U = -WALL(IW)%ONE_D%UW
+               LP%V = SF%VEL_T(1)
+               LP%W = SF%VEL_T(2)
+            CASE(-1)
+               LP%U =  WALL(IW)%ONE_D%UW
+               LP%V = SF%VEL_T(1)
+               LP%W = SF%VEL_T(2)
+            CASE( 2)
+               LP%U = SF%VEL_T(1)
+               LP%V = -WALL(IW)%ONE_D%UW
+               LP%W = SF%VEL_T(2)
+            CASE(-2)
+               LP%U = SF%VEL_T(1)
+               LP%V =  WALL(IW)%ONE_D%UW
+               LP%W = SF%VEL_T(2)
+            CASE( 3)
+               LP%U = SF%VEL_T(1)
+               LP%V = SF%VEL_T(2)
+               LP%W = -WALL(IW)%ONE_D%UW
+            CASE(-3)
+               LP%U = SF%VEL_T(1)
+               LP%V = SF%VEL_T(2)
+               LP%W =  WALL(IW)%ONE_D%UW
+         END SELECT
+      ENDIF
 
       LP%ONE_D%IIG = IIG
       LP%ONE_D%JJG = JJG
@@ -595,7 +596,7 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
       SF=>SURFACE(LPC%SURF_INDEX)
       IF (.NOT.LPC%MASSLESS_TRACER .AND. .NOT.LPC%MASSLESS_TARGET) THEN
-         MASS_SUM = MASS_SUM + LP%PWT*LPC%FTPR*LP%ONE_D%X(SF%N_CELLS_INI)**3
+         MASS_SUM = MASS_SUM + LP%PWT*LP%MASS
       ENDIF
 
    ENDDO PARTICLE_INSERT_LOOP2
@@ -765,7 +766,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
             ! If cannot find non-solid grid cell, stop searching
 
-            IF (N>10000) EXIT CHOOSE_XYZ_LOOP
+            IF (N>N_PARTICLES_INSERT) EXIT INSERT_PARTICLE_LOOP
 
          ENDDO CHOOSE_XYZ_LOOP
 
