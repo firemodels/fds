@@ -505,7 +505,7 @@ fi
 # Report bindings in the .err or .log file
 
 if [ "$use_intel_mpi" == "1" ]; then
- REPORT_BINDINGS="-print-rank-map"
+ REPORT_BINDINGS=" "
 else
  REPORT_BINDINGS="--report-bindings"
 fi
@@ -532,7 +532,7 @@ if [ "$use_intel_mpi" == "1" ]; then
       echo "Intel MPI environment not setup. Run aborted."
       ABORTRUN=y
     else
-      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+      MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
       if [ ! -e $MPIRUNEXE ]; then
         echo "Intel mpiexec, $MPIRUNEXE, not found at:"
         echo "$MPIRUNEXE"
