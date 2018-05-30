@@ -99,7 +99,9 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found
 
+IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
 CALL READ_DATA(DT)
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
 CALL STOP_CHECK(1)
 
@@ -185,6 +187,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_EXCHANGE_2(NM)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed INITIALIZE_MESH_EXCHANGE_2'
 
 ! Exchange CELL_COUNT, the dimension of various arrays related to obstructions
 
@@ -211,6 +214,7 @@ CALL MESH_EXCHANGE(0)
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_VARIABLES_2(NM)
 ENDDO
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed INITIALIZE_MESH_VARIABLES_2'
 
 ! Create arrays and communicators to exchange back wall information across mesh boundaries
 
@@ -299,6 +303,7 @@ DO I=1,INITIAL_RADIATION_ITERATIONS
       CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
    ENDDO
 ENDDO
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Initialized Radiation'
 
 IF(CHECK_MASS_CONSERVE) CALL MASS_CONSERVE_INIT
 IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) CALL CCIBM_RHO0W_INTERP
@@ -331,6 +336,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_MESH_DUMPS(NM)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Inserted particles'
 
 ! Check for any stop flags at this point in the set up.
 
@@ -346,8 +352,13 @@ ENDIF
 
 ! Initialize output files containing global data (Master Node Only)
 
-IF (MYID==0) CALL INITIALIZE_GLOBAL_DUMPS(T,DT)
+IF (MYID==0) THEN
+   CALL INITIALIZE_GLOBAL_DUMPS(T,DT)
+   IF (VERBOSE) WRITE(LU_ERR,'(A)') ' Called INITIALIZE_GLOBAL_DUMPS'
+ENDIF
+
 ! Initialize GLMat solver for H:
+
 IF (GLMAT_SOLVER) THEN
    CALL GLMAT_SOLVER_SETUP_H(1)
    CALL STOP_CHECK(1)
@@ -388,6 +399,7 @@ IF (.NOT.RESTART) THEN
       CALL UPDATE_GLOBAL_OUTPUTS(T,DT,NM)
       CALL DUMP_MESH_OUTPUTS(T,DT,NM)
    ENDDO
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Called DUMP_MESH_OUTPUTS'
 ENDIF
 
 ! If there are zones and HVAC pass PSUM
@@ -450,6 +462,8 @@ IF (VEG_LEVEL_SET_UNCOUPLED .OR. VEG_LEVEL_SET_COUPLED) CALL INITIALIZE_LEVEL_SE
 ! This ends the initialization part of the program
 
 INITIALIZATION_PHASE = .FALSE.
+
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Start the time-stepping loop'
 
 !***********************************************************************************************************************************
 !                                                   MAIN TIMESTEPPING LOOP
@@ -1337,7 +1351,6 @@ LOGICAL :: OPN
 IF (STOP_STATUS==NO_STOP .OR. STOP_STATUS==USER_STOP) CALL DUMP_TIMERS
 
 IF (VERBOSE) WRITE(LU_ERR,'(A,I6,A)') ' MPI process ',MYID,' has completed'
-CALL MPI_FINALIZE(IERR)
 
 IF (MYID==0) THEN
 
@@ -1374,6 +1387,12 @@ IF (MYID==0) THEN
    IF (OPN) WRITE(LU_OUTPUT,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
 
 ENDIF
+
+! Shutdown MPI
+
+CALL MPI_FINALIZE(IERR)
+
+! Shutdown FDS
 
 STOP
 

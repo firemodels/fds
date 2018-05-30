@@ -5,5 +5,5 @@ git clean -dxf
 echo
 echo ********** build FDS
 echo
-call make_fds
+call make_fds bot
 cd %CURDIR%

@@ -4358,7 +4358,7 @@ This case is a simple mass conservation test for pyrolysis of wood into char and
 \subsection{Burn Away (\texorpdfstring{\textct{box\_burn\_away1\_pyro3d\_vs\_pyro1d}}{box\_burn\_away1\_pyro3d\_vs\_pyro1d})}
 \label{box_burn_away1_pyro3d_vs_pyro1d}
 
-This case is a replicate of the {\ct box\_burn\_away1} case used as verification of the 1D pyrolysis solver (PYRO1D).  A foam block 0.4 m on a side (0.064 \si{m^3}) with a bulk density of 20 \si{kg/m^3} (total mass of 1.28 kg) is heated from a wall kept at 1000 \si{\degreeCelsius}.  The gas phase (and hence 3D solid phase) grid resolution is relatively coarse, $\delta x = 0.1 \;\si{m}$.  However, the cell spacing for the 1D solver is internally computed to be approximately $3 \times 10^{-3} \;\si{m}$.  The 1D solver thus resolves the temperature gradient near the surface on the inside of the solid.  The 3D solver uses an internal wall model to enhance the heat flux into the solid cell.  Given the difference in bulk grid resolution, it is not surprising to find differences in the rate of pyrolysis.  The verification target here is simply the total mass of 1.28 kg.  It is worth noting that the 3D solver is reasonably time accurate at 100 times coarser resolution.
+This case is a replicate of the {\ct box\_burn\_away1} case used as verification of the 1D pyrolysis solver (PYRO1D).  A foam block 0.4 m on a side (0.064 \si{m^3}) with a bulk density of 20 \si{kg/m^3} (total mass of 1.28 kg) is heated from a wall kept at 1000 \si{\degreeCelsius}.  The gas phase (and hence 3D solid phase) grid resolution is relatively coarse, $\delta x = 0.1 \;\si{m}$.  However, the cell spacing for the 1D solver is internally computed to be approximately $3 \times 10^{-3} \;\si{m}$.  The 1D solver thus resolves the temperature gradient near the surface on the inside of the solid.  The 3D solver uses an internal wall model to enhance the heat flux into the solid cell.  The verification target here is simply the total mass of 1.28 kg.  Results are shown for the 3D solver with and without mass transport of fuel gas.  In the latter, the gas is ejected to the nearest wall cell upon pyrolysis.
 
 \begin{figure}[!ht]
 	\centering
@@ -4380,6 +4380,18 @@ This case compares mass loss rates and material thickness for pyrolysis of black
     \end{tabular*}
 	\caption[PYRO3D vs.~PYRO1D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
 	\label{fig:pyro3d_vs_pyro1d}
+\end{figure}
+
+\subsection{Mass Transport (\texorpdfstring{\textct{pyro3d\_transport}}{pyro3d\_transport})}
+\label{pyro3d_transport}
+
+This case is a 3D version of the {\ct FAA\_Polymers\_PMMA} validation case.  A block of ``black'' PMMA 0.1 m $\times$ 0.1 m $\times$ 0.009 m, giving $9 \times 10^{-5} \;\si{m^3}$, with a bulk density of 1100 \si{kg/m^3}, giving 0.099 kg of total mass, is heated from above with 52 \si{kW/m^2}, generating methane as a pyrolysis gas.  The verification target to confirm that as the PMMA is consumed the correct amount of methane gets produced.  The results are shown below in Fig.~\ref{fig:pyro3d_transport}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_transport}
+    \caption[PYRO3D with mass transport of fuel gas (the {\ct pyro3d\_transport} case)]{Check of mass conservation in conversion of solid (PMMA) to fuel gas (methane) with burn away using the 3D pyrolysis mass transport algorithm.}
+    \label{fig:pyro3d_transport}
 \end{figure}
 
 \chapter{Lagrangian Particles}
