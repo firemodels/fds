@@ -222,7 +222,7 @@ REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
-REAL(EB), SAVE :: GEOMEPS=1.E-12_EB, GEOMEPSSQ=1.E-12_EB**2._EB
+REAL(EB), SAVE :: GEOMEPS=1.E-12_EB, GEOMEPSSQ
 REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 INTEGER,  SAVE :: NGUARD= 6        ! Layers of guard-cells.
@@ -23674,6 +23674,7 @@ IF (FIRST_CALL) THEN
 
    ! Initialize GEOMETRY fields used by CC_IBM:
    CALL IBM_INIT_GEOM
+   IF (STOP_STATUS==SETUP_STOP) RETURN
    FIRST_CALL = .FALSE.
 
 ENDIF
@@ -26603,7 +26604,8 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       V23(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD3) - XYZV(IAXIS:KAXIS,NOD2)
       V31(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD1) - XYZV(IAXIS:KAXIS,NOD3)
 
-      ! Check that face edges are not null
+      ! Check that face edges are not too small
+      GEOMEPSSQ = GEOMEPS**2._EB
       IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
         WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
           "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
@@ -26629,7 +26631,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       XCEN  = (XYZV(IAXIS,NOD1) + XYZV(IAXIS,NOD2) + XYZV(IAXIS,NOD3)) / 3._EB
 
-      ! Check that face area is not null
+      ! Check that face area is not too small
       IF(MGNRM < GEOMEPSSQ) THEN
          WRITE(LU_ERR,*) 'FACE IWSEL=',IWSEL,', Connectivity=',WSELEM(NOD1:NOD3),', Norm Cross=',MGNRM
          WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
