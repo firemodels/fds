@@ -26668,40 +26668,68 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       GEOMETRY(IG)%GEOM_XYZCEN(IX) = SQAREA(IX) / (2._EB * GEOMETRY(IG)%GEOM_VOLUME)
    ENDDO
 
+   ! Build geometry connectivity
+   ! While building, check that the triangulated surface is manifold and oriented
+   ! FIXME there are currently no checks on self-interections
+
    NWSEDG = 0
    DO IWSEL=1,NWSEL
 
       WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
 
-      DO IEDGE=EDG1,EDG3
+      DO IEDGE=EDG1,EDG3 ! For each face halfedge
 
-         SEG(NOD1:NOD2) = WSELEM(NOD1:NOD2)
+         SEG(NOD1:NOD2) = WSELEM(NOD1:NOD2) ! Get halfedge
 
          ! Test triangles edge iedge is already on list
          ! GEOMETRY(IG)%EDGES. Makes use of fact that two triangles
          ! sharing an edge have opposite connectivity for it (right hand
          ! rule for connectivity for normal outside solid).
+
          INLIST = .FALSE.
          DO IEDLIST=1,NWSEDG
-            ! TEST SEG(2)=EDGE(1) AND SEG(1)=EDGE(2):
+            ! Check if halfedge already in list. This would mean that the surface is
+            ! - non-manifold (three faces share the same edge) or
+            ! - not oriented (opposite normals in adjacent faces)
+            IF ( (SEG(NOD1) == GEOMETRY(IG)%EDGES(NOD1,IEDLIST)) .AND. &
+                 (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) ) THEN
+               XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+               XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+               WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+                  "': Non manifold geometry or opposite normals in adjacent faces at edge: (", &
+                  XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            ! Check if opposite halfedge already in list.
             IF ( (SEG(NOD1) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) .AND. &
                  (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD1,IEDLIST)) ) THEN
                INLIST = .TRUE.
                EXIT
             ENDIF
          ENDDO
-         IF (INLIST) THEN ! LOCAL EDGE ALREADY ON LIST.
-             GEOMETRY(IG)%EDGE_FACES(1,IEDLIST)   = 2
-             GEOMETRY(IG)%EDGE_FACES(4,IEDLIST)   = IWSEL;
-             GEOMETRY(IG)%EDGE_FACES(5,IEDLIST)   = IEDGE;
-             GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = IEDLIST;
-         ELSE ! NEW ENTRY ON LIST
-             NWSEDG = NWSEDG + 1;
-             GEOMETRY(IG)%EDGES(NOD1:NOD2,NWSEDG) = SEG(NOD1:NOD2)
-             GEOMETRY(IG)%EDGE_FACES(1,NWSEDG)    = 1
-             GEOMETRY(IG)%EDGE_FACES(2,NWSEDG)    = IWSEL
-             GEOMETRY(IG)%EDGE_FACES(3,NWSEDG)    = IEDGE
-             GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = NWSEDG
+         IF (INLIST) THEN ! Opposite halfedge already in list
+            ! Check if the opposite halfedge is already coupled with its pair.
+            ! This would mean that the surface is non-manifold (three faces share the same edge)
+            IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 2) THEN
+               XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+               XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+               WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+                  "': Non manifold geometry at edge: (", &
+                  XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            ! Couple halfedge with its pair
+            GEOMETRY(IG)%EDGE_FACES(1,IEDLIST)   = 2
+            GEOMETRY(IG)%EDGE_FACES(4,IEDLIST)   = IWSEL;
+            GEOMETRY(IG)%EDGE_FACES(5,IEDLIST)   = IEDGE;
+            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = IEDLIST;
+         ELSE ! Opposite halfedge not in list, add a new entry
+            NWSEDG = NWSEDG + 1;
+            GEOMETRY(IG)%EDGES(NOD1:NOD2,NWSEDG) = SEG(NOD1:NOD2)
+            GEOMETRY(IG)%EDGE_FACES(1,NWSEDG)    = 1
+            GEOMETRY(IG)%EDGE_FACES(2,NWSEDG)    = IWSEL
+            GEOMETRY(IG)%EDGE_FACES(3,NWSEDG)    = IEDGE
+            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = NWSEDG
          ENDIF
 
          WSELEM=CSHIFT(WSELEM,1)
@@ -26709,7 +26737,22 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       ENDDO
    ENDDO
 
+   ! Check if the surface is closed
+   ! Each halfedge should be coupled with an opposite halfedge
+   DO IEDLIST=1,NWSEDG
+      IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 1) THEN
+         XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+         XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+         WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+            "': Open geometry at edge: (", &
+            XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+   ENDDO
+
    GEOMETRY(IG)%N_EDGES = NWSEDG
+
+   ! At this point the surface is manifold, well oriented, and closed.
 
    IF(MYID==0 .AND. GET_CUTCELLS_VERBOSE) THEN
       IF (IG==N_GEOMETRY) THEN
