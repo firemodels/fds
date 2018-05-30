@@ -6377,6 +6377,10 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \label{info:particle_flux}
 \label{particle_flux}
 
+There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation. 
+
+\subsubsection{Particles specified using a mass flux}
+
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
 &PART ID='particles', ... /
@@ -6394,6 +6398,10 @@ creates an obstruction that ejects particles out of its sides at a rate of 0.1~\
 \end{figure}
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
+
+\subsubsection{Particles specified using a surface density}
+
+Instead of a mass flux, you can specify the {\ct PARTICLE\_SURFACE\_DENSITY} (kg/m$^2$) for particles introduced at the start of a simulation. You can introduce {\ct NPPC} particles per cell, although 1 is sufficient to represent the specified surface density. This feature is useful for creating subgrid-scale dry vegetative fuels.
 
 
 \subsection{Particles or Droplets Introduced at a Sprinkler or Nozzle}
@@ -10178,6 +10186,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct PARTICLE\_SURFACE\_DENSITY}        & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
 {\ct PLE}                               & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
 {\ct PROFILE}                           & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
