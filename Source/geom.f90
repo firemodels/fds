@@ -26672,7 +26672,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
    ! While building, check that the triangulated surface is manifold and oriented
    ! FIXME there are currently no checks on self-interections
 
-   write (*,*) "Build GEOMs connectivity:", IG ! FIXME remove
+   WRITE(LU_ERR,'(A)') "Build GEOMs connectivity:", IG ! FIXME remove
 
    NWSEDG = 0
    DO IWSEL=1,NWSEL
@@ -26739,7 +26739,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       ENDDO
    ENDDO
 
-   write (*,*) "Check close GEOM:", IG ! FIXME remove
+   WRITE(LU_ERR,'(A)') "Check close GEOM:", IG ! FIXME remove
 
    ! Check if the surface is closed
    ! Each halfedge should be coupled with an opposite halfedge
