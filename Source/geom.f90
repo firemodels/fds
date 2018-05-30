@@ -222,7 +222,8 @@ REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
-REAL(EB), SAVE :: GEOMEPS=1.E-12_EB, GEOMEPSSQ
+REAL(EB), SAVE :: GEOMEPS=1.E-12_EB
+REAL(EB), PARAMETER :: GEOMQUALITYFCT=1000._EB ! Factor for GEOMs quality check
 REAL(EB), PARAMETER :: GEOFCT=10._EB
 
 INTEGER,  SAVE :: NGUARD= 6        ! Layers of guard-cells.
@@ -26555,11 +26556,16 @@ INTEGER :: WSELEM(NOD1:NOD3),SEG(NOD1:NOD2)
 REAL(EB):: XYZV(MAX_DIM,NODS_WSEL), V12(MAX_DIM), V23(MAX_DIM), V31(MAX_DIM), WSNORM(MAX_DIM)
 REAL(EB):: X12(MAX_DIM), X23(MAX_DIM), X31(MAX_DIM), SQAREA(MAX_DIM), INT2
 REAL(EB):: MGNRM, XCEN
+REAL(EB):: GEOMEPSSQ ! Local epsilon for GEOM quality check
 LOGICAL :: INLIST
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 
 IF(MYID==0 .AND. GET_CUTCELLS_VERBOSE) &
 WRITE(LU_ERR,'(A,I5,A)',advance="no") ' 1. Number of Geometries : ',N_GEOMETRY,', IBM_INIT_GEOM, processed GEOMETRY : '
+
+! In this subroutine the quality of the GEOM lines is checked
+! Calc local squared epsilon for GEOM quality check
+GEOMEPSSQ = (GEOMEPS * GEOMQUALITYFCT)**2._EB
 
 ! Geometry loop:
 GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
@@ -26605,7 +26611,6 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       V31(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS,NOD1) - XYZV(IAXIS:KAXIS,NOD3)
 
       ! Check that face edges are not too small
-      GEOMEPSSQ = GEOMEPS**2._EB
       IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
         WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
           "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
