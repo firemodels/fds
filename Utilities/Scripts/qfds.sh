@@ -112,6 +112,7 @@ function usage {
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
+  echo " -r   - append trace flag to the mpiexec call generated"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
@@ -196,6 +197,7 @@ else
 max_processes_per_node=1
 fi
 n_openmp_threads=1
+trace=
 use_installed=
 use_debug=
 use_devel=
@@ -307,6 +309,9 @@ case $OPTION  in
    ;;
   q)
    queue="$OPTARG"
+   ;;
+  r)
+   trace="-trace"
    ;;
   s)
    stopjob=1
@@ -563,7 +568,7 @@ else                                 # using OpenMPI
 fi
 
 TITLE="$infile"
-MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes $trace"
 
 cd $dir
 fulldir=`pwd`
