@@ -1917,6 +1917,8 @@ ENDIF
 
 TNOW = CURRENT_TIME()
 CALL SET_CUTCELLS_3D                    ! Defines CUT_CELL data for each mesh.
+IF (STOP_STATUS==SETUP_STOP) RETURN
+
 TDEL = CURRENT_TIME() - TNOW
 
 IF (PERIODIC_TEST == 105) THEN ! Cut-cell definition timings test.
