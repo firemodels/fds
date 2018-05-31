@@ -26670,6 +26670,10 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    ! Build geometry connectivity
    ! While building, check that the triangulated surface is manifold and oriented
+<<<<<<< HEAD
+=======
+   ! FIXME there are currently no checks on self-interections
+>>>>>>> f1831a1a3542dd42a29b0229df219fc7c4371661
 
    NWSEDG = 0
    DO IWSEL=1,NWSEL
