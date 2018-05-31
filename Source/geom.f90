@@ -26670,9 +26670,6 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    ! Build geometry connectivity
    ! While building, check that the triangulated surface is manifold and oriented
-   ! FIXME there are currently no checks on self-interections
-
-   WRITE(LU_ERR,'(A)') "Build GEOMs connectivity:", IG ! FIXME remove
 
    NWSEDG = 0
    DO IWSEL=1,NWSEL
@@ -26698,7 +26695,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
                WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-                  "': Non manifold geometry or opposite normals in adjacent faces at edge: (", &
+                  "': Non manifold geometry or inconsistent normals in adjacent faces at edge: (", &
                   XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
@@ -26738,8 +26735,6 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ENDDO
    ENDDO
-
-   WRITE(LU_ERR,'(A)') "Check close GEOM:", IG ! FIXME remove
 
    ! Check if the surface is closed
    ! Each halfedge should be coupled with an opposite halfedge
