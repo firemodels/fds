@@ -118,10 +118,9 @@ have outward consistent normals, as illustrated in Figure \ref{figure:GEOM_orien
 If the previous conditions are respected, a well-formed {\ct GEOM}\ namelist is obtained that represents one or more \textit{closed}, \textit{manifold}, \textit{orientable}, \textit{non intersecting} triangulated surfaces, that enclose well-defined volumes. An example of a well-formed triangulated surface is presented in Figure \ref{figure:GEOM_ok_surface_2}.
 
 \pagebreak
-Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain:\nopagebreak
+Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain. For example:\nopagebreak
 \begin{verbatim}
-ERROR: Problem with GEOM ID='Cube':
-       Non manifold edge at XYZ=3.456879,1.983742,1.384858
+ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 \end{verbatim}
 
 \begin{figure}
