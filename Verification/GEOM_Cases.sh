@@ -27,6 +27,12 @@ $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
 $QFDS -d Complex_Geometry geom_arch.fds
 
+$QFDS -d Complex_Geometry bad_GEOM_inconsistent-normals.fds
+$QFDS -d Complex_Geometry bad_GEOM_non-manifold-edge.fds
+$QFDS -d Complex_Geometry bad_GEOM_non-manifold-vert.fds
+$QFDS -d Complex_Geometry bad_GEOM_open.fds
+$QFDS -d Complex_Geometry bad_GEOM_self-intersection.fds
+
 # $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 # $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 # $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds

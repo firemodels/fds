@@ -65,6 +65,12 @@ $QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
+$QFDS -d Complex_Geometry bad_GEOM_inconsistent-normals.fds
+$QFDS -d Complex_Geometry bad_GEOM_non-manifold-edge.fds
+$QFDS -d Complex_Geometry bad_GEOM_non-manifold-vert.fds
+$QFDS -d Complex_Geometry bad_GEOM_open.fds
+$QFDS -d Complex_Geometry bad_GEOM_self-intersection.fds
+
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
 $QFDS -d Controls control_test_2.fds
