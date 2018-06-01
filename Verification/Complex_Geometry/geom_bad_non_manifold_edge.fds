@@ -4,7 +4,7 @@
 ! Date: Thu, 31 May 2018, 14:35:51
 ! File: /home/egissi/github/blenderfds/examples/geometry/broken_GEOMs.blend
 
-&HEAD CHID='bad_GEOM_non-manifold-edge' /
+&HEAD CHID='geom_bad_non_manifold_edge' /
 &TIME T_END=1. /
 &RADI RADIATION=.FALSE. /
 

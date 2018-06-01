@@ -4,7 +4,7 @@
 ! Date: Thu, 31 May 2018, 14:36:07
 ! File: /home/egissi/github/blenderfds/examples/geometry/broken_GEOMs.blend
 
-&HEAD CHID='bad_GEOM_open' /
+&HEAD CHID='geom_bad_open_surface' /
 &TIME T_END=1. /
 &RADI RADIATION=.FALSE. /
 

@@ -4,7 +4,7 @@
 ! Date: Thu, 31 May 2018, 14:36:16
 ! File: /home/egissi/github/blenderfds/examples/geometry/broken_GEOMs.blend
 
-&HEAD CHID='bad_GEOM_self-intersection' /
+&HEAD CHID='geom_bad_self_intersection' /
 &TIME T_END=1. /
 &RADI RADIATION=.FALSE. /
 
