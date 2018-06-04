@@ -26227,11 +26227,17 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
             WRITE(LU_ERR,*) "X1PLN=",X1PLN,ICRS,", X2AXIS,X3AXIS=",X2AXIS,X3AXIS,", X3RAY=",X3RAY
             ! FIXME This was an example of an exception condition creating zombie processes
             IF (IDCR==1) THEN
-               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-                  "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
+               ! FIXME: this should be the error message, IG should be made available here
+               !    WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+               !       "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
+               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM: ",
+                   "Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
             ELSE
-               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-                  "': Media continuity problem: maybe a self-intersection, or intersection with other GEOM line geometry."
+               ! FIXME: this should be the error message, IG should be made available here
+               ! WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+               !    "': Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
+               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM: ",
+                  "Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
             ENDIF
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
