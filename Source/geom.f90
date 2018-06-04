@@ -24181,6 +24181,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
 
                   ! Intersections along x2 for X3RAY x3 location:
                   CALL GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY,X1PLN)
+                  IF (STOP_STATUS==SETUP_STOP) RETURN
 
                   ! Drop x2 ray if all intersections are outside of the MESH block domain:
                   IF (IBM_N_CRS > 0) THEN
@@ -26222,8 +26223,15 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
          ELSE
             WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem"
             WRITE(LU_ERR,*) "X1PLN=",X1PLN,ICRS,", X2AXIS,X3AXIS=",X2AXIS,X3AXIS,", X3RAY=",X3RAY
-            IF(IDCR==1) WRITE(LU_ERR,*) "CHECK THAT YOUR &GEOM SURFACE NORMALS PONT OUTSIDE INTO THE GASPHASE."
-            CALL SHUTDOWN("")
+            ! FIXME This was an example of an exception condition creating zombie processes
+            IF (IDCR==1) THEN
+               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+                  "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
+            ELSE
+               WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
+                  "': Media continuity problem: maybe a self-intersection, or intersection with other GEOM line geometry."
+            ENDIF
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
 
