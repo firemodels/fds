@@ -4666,6 +4666,27 @@ Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS so
 
 
 
+\clearpage
+
+\section{Radiation Absorption by Particles}
+
+\subsection{Radiation Absorption by Vegetation}
+\label{vegetation_absorb}
+
+In this example, six channels, each measuring 4~m by 1~m by 1~m, are filled with various amounts of particles that represent vegetation, like a bush. The vegetation occupies exactly one cubic meter within each channel. One end of each channel is a solid wall with a temperature of 1000~$^\circ$C and the opposite end is a wall with a temperature of 20~$^\circ$C. Each wall has an emissivity of 1 and a heat transfer coefficient of 0. The side walls of the channels are ``mirror'' boundaries which essentially means that the end walls and vegetation layer are infinitely wide, rendering the configuration one-dimensional. With no particles present, the heat flux onto the cold wall is $\dot{q}_0''=149$~kW/m$^2$. With particles, the heat flux is expected to be:
+\be
+   \dot{q}'' = \dot{q}_0'' \, \hbox{e}^{-C_{\rm s} \beta \sigma L}
+\ee
+where $C_{\rm s}$ is the shape factor, $\beta$ is the ``packing ratio,'' $\sigma$ is the surface area to volume ratio, and $L=1$~m is the depth of the vegetation layer. It is assumed that the vegetation in this case consists of uniformly sized cylinders that are 1~mm in diameter and 2~cm long. The shape factor is taken to be the ratio of the cylinder's cross sectional area to surface area when oriented normal to the central axis of the channel, or $1/\pi$. The packing ratio is $m'''/\rho_{\rm p}$, the vegetation mass per unit volume, or bulk density, divided by the density of the vegetation itself, 500~kg/m$^3$ in this example. The surface area to volume ratio of the cylinder is $2/r=4000$~m$^{-1}$. Figure~\ref{vegetation_absorb_fig} displays the comparison of the expected radiative heat flux versus that calculated by FDS.
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/vegetation_absorb}
+\caption[Results of the \textct{vegetation\_absorb} test case.]{Decrease in the heat flux from a hot to cold wall due to layers of vegetation of various densities.}
+\label{vegetation_absorb_fig}
+\end{figure}
+
+
+\clearpage
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\textct{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
