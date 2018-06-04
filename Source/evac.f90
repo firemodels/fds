@@ -14249,7 +14249,8 @@ CONTAINS
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST') ; RETURN
     END SELECT
-
+    HR%Speed = Max(HR%Speed, 0.0_EB)
+    
     SELECT CASE(PCP%I_DIA_DIST)
     CASE(-1)
        CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
@@ -14339,6 +14340,7 @@ CONTAINS
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST') ; RETURN
     END SELECT
+    HR%Radius = Max(HR%Radius, 0.05_EB) ! 5cm minimum radius
     HR%Mass   = PCP%m_agent*(HR%Radius/0.27_EB)**2
 
     SELECT CASE(PCP%I_TAU_DIST)
@@ -14432,6 +14434,7 @@ CONTAINS
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST') ; RETURN
     END SELECT
+    HR%Tau = Max(HR%Tau, 0.01_EB) ! 0.01s minimum motive force parameter
 
     SELECT CASE(I_DET_DIST)
     CASE(-1)

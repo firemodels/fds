@@ -2738,10 +2738,10 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
    IF (ML%C_S>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.2)') '     Specific Heat (kJ/kg/K)      ',ML%C_S*0.001_EB
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',ML%C_S*0.001_EB
    ELSE
       NR = -NINT(ML%C_S)
-      WRITE(LU_OUTPUT,'(A,F8.2)') '     Specific Heat (kJ/kg/K)      ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
    ENDIF
    IF (ML%K_S>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.4)') '     Conductivity (W/m/K)         ',ML%K_S
