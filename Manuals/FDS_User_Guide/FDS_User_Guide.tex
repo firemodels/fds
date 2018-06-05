@@ -5917,6 +5917,8 @@ since {\ct MASSLESS} particles are for visualization only.
 Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.  To properly account for subgrid-scale (unresolved) turbulent motions, add the parameter {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  For further information, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
 
 
+\clearpage
+
 \section{Liquid Droplets}
 
 Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
@@ -6076,8 +6078,13 @@ If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo sec
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
 {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
+\subsection{Dense Clouds of Droplets}
+\label{info:DENSE_VOLUME_FRACTION}
+
+If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
 
+\clearpage
 
 \section{Solid Particles}
 \label{info:PART_SURF}
@@ -6115,9 +6122,8 @@ By default, particles are not recycled at a periodic boundary. To recycle the pa
 \subsection{Drag}
 \label{info:particle_drag}
 
-For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke a different drag law, that of a cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+The drag force exerted by moving or stationary particles is detailed in the FDS Technical Reference Guide, chapter ``Lagrangian Particles''~\cite{FDS_Math_Guide}. For solid particles, the default drag law is that of a solitary sphere. To invoke a different drag law, that of a solitary cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
-\vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
 \caption{Drag laws available in FDS}
@@ -6132,6 +6138,20 @@ For solid particles, the default drag law (i.e., the drag coefficient correlatio
 \end{tabular}
 \end{center}
 \end{table}
+
+If you are modeling a relatively dense collection of solid particles, like vegetation, you should set the {\ct DRAG\_COEFFICIENT} explicitly and not rely on the correlations for spheres and cylinders which were developed for relatively independent bodies, not clusters.
+
+
+\subsection{Radiation Absorption and Emission}
+\label{info:particle_radiation_absorption}
+
+The absorption and emission of thermal radiation by a group of solid particles is controlled by the absorption coefficient:
+\be
+   \kappa_{\rm p} = \frac{\sum C_{\rm s} \, A_{\rm p,s}}{V}
+\ee
+where $C_{\rm s}$ is the shape factor (ratio of cross sectional area to surface area) of the class of particles, $A_{\rm p,s}$ is the surface area of the particle, and $V$ is the volume of the grid cell. You can specify the {\ct SHAPE\_FACTOR} of a class of particles on the {\ct PART} line. The default value is that of a sphere, 0.25.
+
+
 
 \subsection{Splitting Particles}
 \label{info:particle_split}
@@ -6359,6 +6379,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The second argument indicates that there can be more than one {\ct ORIENTATION}. {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
+\clearpage
 
 \section{Particle Insertion}
 \label{info:controlling_droplets}
@@ -6487,6 +6508,7 @@ If you want to introduce particles within a given region periodically in time an
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
 
 
+\clearpage
 
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
@@ -9735,7 +9757,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                              & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-{\ct DENSE\_VOLUME\_FRACTION}            & Real            & Section~\ref{info:particle_drag}        &           & $1\times 10^{-5}$ \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}            & Real            & Section~\ref{info:DENSE_VOLUME_FRACTION}&           & $1\times 10^{-5}$ \\ \hline
 {\ct DEVC\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                           & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
 {\ct DISTRIBUTION}                       & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
@@ -9767,7 +9789,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_drag}        &           & 0.25          \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_radiation_absorption}&   & 0.25          \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
