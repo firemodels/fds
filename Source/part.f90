@@ -1333,8 +1333,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) &
-         CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
 
       ! Save original particle radius.
 
