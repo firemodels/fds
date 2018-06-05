@@ -183,8 +183,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-
-impi_intel_linux_64_db : FFLAGS = -tcollect -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS = -static-intel
 impi_intel_linux_64_db : FCOMPL = mpiifort
@@ -229,13 +228,14 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none $(GITINFO) $(INTELMPI_COMPINFO)
+impi_intel_linux_64_inspect : FFLAGS = -tcollect -m64 -mt_mpi -check -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGS = -static-intel
 impi_intel_linux_64_inspect : FCOMPL = mpiifort
 impi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 impi_intel_linux_64_inspect : obj = fds_impi_intel_linux_64_inspect
 impi_intel_linux_64_inspect : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_OPENMPI)
 mpi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
