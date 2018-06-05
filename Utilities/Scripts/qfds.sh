@@ -114,7 +114,7 @@ function usage {
   echo " -S   - use startup files to set the environment, do not load modules"
   echo " -r   - append trace flag to the mpiexec call generated"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
-  echo " -T type - run dv (development) or db (debug) version of fds"
+  echo " -T type - run dv (development), db (debug), or inspect version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
@@ -201,6 +201,7 @@ trace=
 use_installed=
 use_debug=
 use_devel=
+use_inspect=
 use_intel_mpi=1
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
@@ -335,6 +336,9 @@ case $OPTION  in
    if [ "$TYPE" == "db" ]; then
      use_debug=1
    fi
+   if [ "$TYPE" == "inspect" ]; then
+     use_inspect=1
+   fi
    ;;
   v)
    showinput=1
@@ -413,6 +417,9 @@ else
   fi
   if [ "$use_devel" == "1" ]; then
     DB=_dv
+  fi
+  if [ "$use_inspect" == "1" ]; then
+    DB=_inspect
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
