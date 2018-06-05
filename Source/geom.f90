@@ -26230,12 +26230,14 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
                ! FIXME: this should be the error message, IG should be made available here
                !    WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !       "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
-               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
+               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Face normals are probably pointing in the wrong direction. "
+               WRITE(MESSAGE,'(A)') "             Check they point towards the gas phase."
             ELSE
                ! FIXME: this should be the error message, IG should be made available here
                ! WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !    "': Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
-               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
+               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Media continuity problem: maybe a self-intersection, "
+               WRITE(MESSAGE,'(A)') "             or an intersection with other GEOM line geometry."
             ENDIF
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
