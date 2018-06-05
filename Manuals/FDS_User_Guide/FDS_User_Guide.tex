@@ -6377,7 +6377,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \label{info:particle_flux}
 \label{particle_flux}
 
-There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation. 
+There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation.
 
 \subsubsection{Particles specified using a mass flux}
 
@@ -9767,6 +9767,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_drag}        &           & 0.25          \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
