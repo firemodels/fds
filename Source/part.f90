@@ -1333,7 +1333,8 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) &
+         CYCLE PARTICLE_LOOP
 
       ! Save original particle radius.
 
@@ -1368,7 +1369,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! If the particle is massless or does not move, go on to the next particle
 
-         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. LPC%STATIC) CYCLE PARTICLE_LOOP
+         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) CYCLE PARTICLE_LOOP
 
       ENDIF SOLID_GAS_MOVE
 
@@ -1398,7 +1399,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       CROSS_CELL_BOUNDARY: IF (IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG) THEN
 
          ! Calculate the STEP_FRACTION, which indicates the relative distance between the particles's old and new
-         ! position where the particle hits a cell boundary. 
+         ! position where the particle hits a cell boundary.
 
          HIT_SOLID = .FALSE.
          STEP_FRACTION = 1.1_EB
@@ -1410,7 +1411,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          IF (LP%ONE_D%KKG>KKG_OLD) STEP_FRACTION(-3) = (Z(KKG_OLD)  -Z_OLD)/(LP%Z-Z_OLD)
          IF (LP%ONE_D%KKG<KKG_OLD) STEP_FRACTION( 3) = (Z(KKG_OLD-1)-Z_OLD)/(LP%Z-Z_OLD)
 
-         ! The minimum value of STEP_FRACTION indicates the relative location along the particle path where it first crosses 
+         ! The minimum value of STEP_FRACTION indicates the relative location along the particle path where it first crosses
          ! a cell boundary. Test this location to see if the cell the particle crosses into is solid. If it is, indicate that
          ! that the particle has HIT_SOLID and EXIT. If not, cycle through the other cell boundary crossings. The particle can
          ! cross at most three cell boundaries in one sub-timestep.
@@ -1525,8 +1526,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ENDIF CROSS_CELL_BOUNDARY
 
       ! If the droplet was attached to a solid (LP%ONE_D%IOR/=0), but now it is not, change its course. If the droplet was
-      ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick 
-      ! to the underside or drip off. If the droplet moves off an upward facing horizontal surface (IOR=3), reverse its course 
+      ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
+      ! to the underside or drip off. If the droplet moves off an upward facing horizontal surface (IOR=3), reverse its course
       ! and drop it down the side of the solid obstruction. If the droplet moves off a downward facing horizontal obstruction
       ! (IOR=-3), do nothing and let it continue free-falling.
 
@@ -1592,7 +1593,7 @@ REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT,&
             GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)
 REAL(EB), SAVE :: FP_MASS,HALF_DT2,BETA,OBDT,ALPHA,OPA,DTOPA,BDTOA
-INTEGER :: IIX,JJY,KKZ
+INTEGER :: IIX,JJY,KKZ,SURF_INDEX
 
 ! Save current values of particle velocity components
 
@@ -1750,9 +1751,19 @@ IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
    ENDIF
 ENDIF
 
+! Experimental ember generation model
+
+IF (LPC%EMBER_PARTICLE .AND. .NOT.LP%EMBER) THEN
+   SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
+   SF => SURFACE(SURF_INDEX)
+   IF ( SUM(LP%ONE_D%RHO(1,1:SF%N_MATL)) < LPC%EMBER_DENSITY_THRESHOLD .AND. QREL > LPC%EMBER_VELOCITY_THRESHOLD ) THEN
+      LP%EMBER = .TRUE.
+   ENDIF
+ENDIF
+
 ! Move the particles unless they are STATIC
 
-PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationary particles
+PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne, non-stationary particles
 
    IF (ITER==1) THEN
       FP_MASS = (RHO_G/RVC)/NDPC(IIG_OLD,JJG_OLD,KKG_OLD) ! fluid parcel mass
