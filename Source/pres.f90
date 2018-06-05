@@ -2274,8 +2274,10 @@ INTEGER :: I, IPROC
 #endif
 !.. All other variables
 INTEGER MAXFCT, MNUM, MTYPE, NRHS, ERROR
+#ifdef WITH_MKL
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MB_FACTOR
 INTEGER :: IERR
+#endif
 
 ! Define parameters:
 NRHS   = 1
