@@ -1032,60 +1032,7 @@ Figure~\ref{Waterloo_HRR} displays the measured and predicted heat release rates
 \section{Wildland Fire Spread (CSIRO Grassland Fires)}
 \label{WUI}
 
-This section contains a description and results for simulations of two of the CSIRO Grassland Fire experiments. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
-
-\begin{figure}[ht]
-\includegraphics[width=\textwidth]{FIGURES/CSIRO_Grassland_Fires/Case_F19_0358.png}
-\caption[Snapshot of the simulation of CSIRO Grassland Fire F19]{Snapshot of the simulation of CSIRO Grassland Fire F19.}
-\label{F19}
-\end{figure}
-
-A snapshot of the simulation of Experiment~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented by 800,000 Lagrangian particles with a cylindrical geometry, or about 5 simulated blades per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
-
-
-
-\begin{table}[ht]
-\begin{center}
-\caption[Measured properties for the CSIRO Grassland Fire cases]{Measured properties for the CSIRO Grassland Fire cases~\cite{Cheney:IJWF1993}.}
-\label{Properties_Grasses}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Property                        & Units         & Case F19      & Case C064     \\ \hline \hline
-Wind Speed                      & m/s           & 4.8           & 4.6           \\ \hline
-Ambient Temperature             & $^\circ$C     & 34            & 32            \\ \hline
-Surface Area to Volume Ratio    & m$^{-1}$      & 12240         & 9770          \\ \hline
-Grass Height                    & m             & 0.51          & 0.21          \\ \hline
-Bulk Mass per Unit Area         & kg/m$^2$      & 0.313         & 0.283         \\ \hline
-Moisture Fraction               & \%            & 5.8           & 6.3           \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{table}
-\begin{center}
-\caption[Assumed properties for dry grass and soil]{Assumed properties for various types of dried grass and soil. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
-\label{Assumed_Properties_Grasses}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
-Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
-Heat of Combustion              & kJ/kg                 & 15600                     & \cite{Susott:FS1982}                  \\ \hline
-Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
-Char Yield                      & kg/kg                 & 0.2                       & \cite{Susott:FS1982}                  \\ \hline
-Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                       & Various sources                       \\ \hline
-Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
-Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
-Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
-Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
-Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
-Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
-
-\end{tabular}
-\end{center}
-\end{table}
-
-The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
+This section presents the results for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

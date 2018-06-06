@@ -242,7 +242,63 @@ Petra Andersson and Patrick Van Hees of the Swedish National Testing and Researc
 \section{CSIRO Grassland Fires}
 \label{CSIRO_Grassland_Fires_Description}
 
-In July and August of 1986, the Commonwealth Scientific and Industrial Research Organisation (CSIRO) of Australia conducted controlled grassland fire experiments near Darwin, Northern Territory~\cite{Cheney:IJWF1993}. July and August are in the middle of the dry season when the grasses are fully cured (dried) and the weather is warm and dry. The experiments were conducted on flat plots measuring 100~m by 100~m, 200~m by 200~m, or 200~m by 300~m. Two of these experiments were simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007} and are included in this guide. Case~C064 was conducted on a 100~m by 100~m plot of kerosene grass ({\it Eriachne burkittii}); Case~F19 was conducted on a 200~m by 200~m plot of kangaroo grass ({\it Themeda australis}).
+In July and August of 1986, the Commonwealth Scientific and Industrial Research Organisation (CSIRO) of Australia conducted controlled grassland fire experiments near Darwin, Northern Territory~\cite{Cheney:IJWF1993}. July and August are in the middle of the dry season when the grasses are fully cured (dried) and the weather is warm and dry. The experiments were conducted on flat plots measuring 100~m by 100~m, 200~m by 200~m, or 200~m by 300~m. Two cases have been simulated. Case~C064 was conducted on a 100~m by 100~m plot of kerosene grass ({\it Eriachne burkittii}); Case~F19 was conducted on a 200~m by 200~m plot of kangaroo grass ({\it Themeda australis}).
+
+\subsubsection{Modeling Notes}
+
+Two of these experiments were simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/CSIRO_Grassland_Fires/Case_F19_0358.png}
+\caption[Snapshot of the simulation of CSIRO Grassland Fire F19]{Snapshot of the simulation of CSIRO Grassland Fire F19.}
+\label{F19}
+\end{figure}
+
+A snapshot of the simulation of Case~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented by 800,000 Lagrangian particles with a cylindrical geometry, or about 5 simulated blades per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
+
+\begin{table}[ht]
+\begin{center}
+\caption[Measured properties for the CSIRO Grassland Fire cases]{Measured properties for the CSIRO Grassland Fire cases~\cite{Cheney:IJWF1993}.}
+\label{Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units         & Case F19      & Case C064     \\ \hline \hline
+Wind Speed                      & m/s           & 4.8           & 4.6           \\ \hline
+Ambient Temperature             & $^\circ$C     & 34            & 32            \\ \hline
+Surface Area to Volume Ratio    & m$^{-1}$      & 12240         & 9770          \\ \hline
+Grass Height                    & m             & 0.51          & 0.21          \\ \hline
+Bulk Mass per Unit Area         & kg/m$^2$      & 0.313         & 0.283         \\ \hline
+Moisture Fraction               & \%            & 5.8           & 6.3           \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}
+\begin{center}
+\caption[Assumed properties for dry grass and soil]{Assumed properties for various types of dried grass and soil. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\label{Assumed_Properties_Grasses}
+\begin{tabular}{|l|c|c|c|}
+\hline
+Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption                            \\ \hline
+Heat of Combustion              & kJ/kg                 & 15600                     & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
+Char Yield                      & kg/kg                 & 0.2                       & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                       & Various sources                       \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
+Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
+Obukhov Length                  & m                     & -500                      & Assumption                            \\ \hline
+Aerodynamic Roughness Length    & m                     & 0.03                      & Assumption                            \\ \hline
+Drag Coefficient                & --                    & 2.6                       & \cite{Falkenstein-Smith:2018}         \\ \hline \hline
+Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
+Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
+Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
+
+\end{tabular}
+\end{center}
+\end{table}
 
 
 \section{Cup Burner Experiments}
@@ -696,26 +752,9 @@ The National Bureau of Standards (NBS, which is now called the National Institut
 
 Following is additional information provided by the test director, Richard Peacock of NIST:
 \begin{description}
-\item[Heat Release Rate:] In the two tests for which
-the door was open, the HRR during the steady-burn period measured via oxygen consumption
-calorimetry was 110~kW with an uncertainty of about 15~\%, consistent with the replicate
-measurements made during the experimental series and the uncertainty typical of oxygen
-consumption calorimetry. It was assumed that the closed door test (Test~100O) had the same HRR as the open
-door tests.
-\item[Radiative Fraction:] Natural gas was used as the fuel in
-Test~100A. In Tests~100O and 100Z, acetylene was added to the natural gas to increase the
-smoke yield, and as a consequence, the radiative fraction increased. The radiative fraction of
-natural gas has been studied previously, whereas the radiative fraction of the acetylene/natural
-gas mixture has not been studied. The radiative fraction for the natural gas fire was assigned a
-value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires.
-\item[Measurements:] Only two types of measurements conducted during the NBS test series were used in the
-evaluation considered here, because there was less confidence in the other measurements.
-The measurements considered here were the HGL temperature and depth, in which bare bead
-TCs were used to make these measurements. Single point measurements of temperature within
-the burn room were not used in the evaluation of plume or ceiling jet algorithms. This is because
-the geometry was not consistent in either case with the assumptions used in the model algorithms
-of plumes or jets. Specifically, the burner was mounted against a wall, and the room width-to-height
-ratio was less than that assumed by the various ceiling jet correlations.
+\item[Heat Release Rate:] In the two tests for which the door was open, the HRR during the steady-burn period measured via oxygen consumption calorimetry was 110~kW with an uncertainty of about 15~\%, consistent with the replicate measurements made during the experimental series and the uncertainty typical of oxygen consumption calorimetry. It was assumed that the closed door test (Test~100O) had the same HRR as the open door tests.
+\item[Radiative Fraction:] Natural gas was used as the fuel in Test~100A. In Tests~100O and 100Z, acetylene was added to the natural gas to increase the smoke yield, and as a consequence, the radiative fraction increased. The radiative fraction of natural gas has been studied previously, whereas the radiative fraction of the acetylene/natural gas mixture has not been studied. The radiative fraction for the natural gas fire was assigned a value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires.
+\item[Measurements:] Only two types of measurements conducted during the NBS test series were used in the evaluation considered here, because there was less confidence in the other measurements. The measurements considered here were the HGL temperature and depth, in which bare bead TCs were used to make these measurements. Single point measurements of temperature within the burn room were not used in the evaluation of plume or ceiling jet algorithms. This is because the geometry was not consistent in either case with the assumptions used in the model algorithms of plumes or jets. Specifically, the burner was mounted against a wall, and the room width-to-height ratio was less than that assumed by the various ceiling jet correlations.
 \end{description}
 
 \begin{figure}[p]
@@ -735,11 +774,6 @@ In 2009, Mell et~al. measured the burning rate of individual Douglas fir trees o
 \label{NIST_Enclosure_Description}
 
 A variety of reduced-scale and full-scale compartment fire experiments have been performed at NIST over the past few decades. The main objective of each series is to measure the concentrations of oxygen, carbon dioxide, carbon monoxide, soot, and unburned hydrocarbons in an under-ventilated compartment. These data sets also provide extreme temperature and heat flux measurements.
-
-
-
-
-
 
 \subsection{NIST Reduced Scale Enclosure Experiments, 1994}
 \label{NIST_RSE_1994_Description}
@@ -837,6 +871,8 @@ In the simulations of all of the NIST enclosure experiments, it is assumed that 
 In the experiments, the heat release rate was measured via oxygen consumption calorimetry. In the simulations, the mass loss rate of fuel was specified by taking the measured HRR and dividing by the heats of combustion listed in Ref.~\cite{SFPE:Tewarson}.
 
 In all simulations, the model geometry included the compartment interior plus a comparable volume at the exterior to allow for a natural flow into and out of the compartment.
+
+Also, in all simulations, the fire suppression algorithm has been turned off ({\ct SUPPRESSION=.FALSE.}). The reason for this is that the suppression algorithm is not able to distinguish viability of a fire that is close to the point of extinction. Research continues in this area.
 
 
 \FloatBarrier
