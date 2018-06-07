@@ -16,16 +16,16 @@ clear all
 % Cases and error strings
 
 infile{1} = '../../Verification/Complex_Geometry/geom_bad_inconsistent_normals.err';
-errstring{1} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge'
+errstring{1} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge';
 
 infile{2} = '../../Verification/Complex_Geometry/geom_bad_open_surface.err';
-errstring{2} = 'Open geometry at edge'
+errstring{2} = 'Open geometry at edge';
 
 infile{3} = '../../Verification/Complex_Geometry/geom_bad_self_intersection.err';
-errstring{3} = 'Face normals are probably pointing in the wrong direction'
+errstring{3} = 'Face normals are probably pointing in the wrong direction';
 
 infile{4} = '../../Verification/Complex_Geometry/geom_bad_non_manifold_edge.err';
-errstring{4} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge'
+errstring{4} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge';
 
 % FIXME This error condition is currently not caught
 % It will be caught when boolean operations are performed
@@ -38,13 +38,14 @@ for n = 1:4
     % infile exists?
     if ~exist(infile{n},'file')
         display(['Error: File ',infile{n},' does not exist. Skipping case.'])
-        return
+        continue
     end
 
     % errstring in infile?
-    errfile = fileread(infile{n})
-    if ~strfind(errfile, errstring{n})
-        display(['Error: File ',infile{n},' does not contain the following positive error message:'])
+    errfile = fileread(infile{n});
+    if isempty(strfind(errfile, errstring{n}));
+        display(['Error: File ',infile{n},':'])
+        display(['  Does not contain the following positive error message:'])
         display(['  <',errstring{n},'>'])
     end
 end
