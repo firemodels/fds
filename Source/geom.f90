@@ -26228,7 +26228,7 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
                ! FIXME: this should be the error message, IG should be made available here
                !    WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !       "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
-               IF (FIREBOT_NO_ERROR) THEN
+               IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
                ELSE
                  WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
@@ -26239,7 +26239,7 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
                ! FIXME: this should be the error message, IG should be made available here
                ! WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !    "': Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
-               IF (FIREBOT_NO_ERROR) THEN
+               IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
                ELSE
                  WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
@@ -26638,7 +26638,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face edges are not too small
       IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (FIREBOT_NO_ERROR) THEN
+        IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26647,7 +26647,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V23(IAXIS)**2._EB + V23(JAXIS)**2._EB + V23(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (FIREBOT_NO_ERROR) THEN
+        IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26656,7 +26656,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V31(IAXIS)**2._EB + V31(JAXIS)**2._EB + V31(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (FIREBOT_NO_ERROR) THEN
+        IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26676,7 +26676,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face area is not too small
       IF(MGNRM < GEOMEPSSQ) THEN
-        IF (FIREBOT_NO_ERROR) THEN
+        IF (POSITIVE_ERROR_TEST) THEN
           WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ELSE
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26736,7 +26736,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
                  (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) ) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (FIREBOT_NO_ERROR) THEN
+               IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
                ELSE
                  WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26758,7 +26758,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 2) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (FIREBOT_NO_ERROR) THEN
+               IF (POSITIVE_ERROR_TEST) THEN
                  WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
                ELSE
                  WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
@@ -26792,7 +26792,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 1) THEN
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-         IF (FIREBOT_NO_ERROR) THEN
+         IF (POSITIVE_ERROR_TEST) THEN
            WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
          ELSE
            WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"

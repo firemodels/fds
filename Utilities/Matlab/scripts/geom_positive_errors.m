@@ -5,7 +5,7 @@
 % This script catches errors produced during FDS setup of bad geometries cases.
 % The success condition is the existance of the error message. The error message has
 % its 'ERROR' label replaced by 'SUCCESS' label, thanks to the MISC parameter
-% FIREBOT_NO_ERROR=.TRUE. in the bad geometries cases.
+% POSITIVE_ERROR_TEST=.TRUE. in the bad geometries cases.
 % The absence of the 'ERROR' label makes current Firebot to consider the run a success.
 
 % Clean up
