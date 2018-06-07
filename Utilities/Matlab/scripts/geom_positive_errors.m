@@ -1,0 +1,50 @@
+% Emanuele Gissi
+% 6-7-2017
+% geom_positive_errors.m
+
+% This script catches errors produced during FDS setup of bad geometries cases.
+% The success condition is the existance of the error message. The error message has
+% its 'ERROR' label replaced by 'SUCCESS' label, thanks to the MISC parameter
+% FIREBOT_NO_ERROR=.TRUE. in the bad geometries cases.
+% The absence of the 'ERROR' label makes current Firebot to consider the run a success.
+
+% Clean up
+
+close all
+clear all
+
+% Cases and error strings
+
+infile{1} = '../../Verification/Complex_Geometry/geom_bad_inconsistent_normals.err';
+errstring{1} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge'
+
+infile{2} = '../../Verification/Complex_Geometry/geom_bad_open_surface.err';
+errstring{2} = 'Open geometry at edge'
+
+infile{3} = '../../Verification/Complex_Geometry/geom_bad_self_intersection.err';
+errstring{3} = 'Face normals are probably pointing in the wrong direction'
+
+infile{4} = '../../Verification/Complex_Geometry/geom_bad_non_manifold_edge.err';
+errstring{4} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge'
+
+% FIXME This error condition is currently not caught
+% It will be caught when boolean operations are performed
+%infile{5} = '../../Verification/Complex_Geometry/geom_bad_non_manifold_vert.err';
+%errstring{5} = 'Non manifold geometry at vertex'
+
+% Check existance of errstring in each infile
+
+for n = 1:4
+    % infile exists?
+    if ~exist(infile{n},'file')
+        display(['Error: File ',infile{n},' does not exist. Skipping case.'])
+        return
+    end
+
+    % errstring in infile?
+    errfile = fileread(infile{n})
+    if ~strfind(errfile, errstring{n})
+        display(['Error: File ',infile{n},' does not contain the following positive error message:'])
+        display(['  <',errstring{n},'>'])
+    end
+end
