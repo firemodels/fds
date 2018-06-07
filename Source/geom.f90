@@ -4,7 +4,7 @@
 
 ! Routines related to unstructured geometry and immersed boundary methods
 !
-! Definitions for preprocessor: 
+! Definitions for preprocessor:
 ! MPI:
 #define MPI_ENABLED
 ! Debug:
@@ -25998,8 +25998,6 @@ LOGICAL :: DROP_SS_GG, FOUND_LEFT, NOT_COUNTED(IBM_MAXCROSS_X2), USE_INT_POINT(I
 REAL(EB) :: TNOW
 ! INTEGER :: IAUX
 
-CHARACTER(MESSAGE_LENGTH) :: MESSAGE
-
 TNOW = CURRENT_TIME()
 
 ! Initialize crossings arrays:
@@ -26230,16 +26228,26 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
                ! FIXME: this should be the error message, IG should be made available here
                !    WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !       "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
-               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Face normals are probably pointing in the wrong direction. "
-               WRITE(MESSAGE,'(A)') "             Check they point towards the gas phase."
+               IF (FIREBOT_NO_ERROR) THEN
+                 WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
+               ELSE
+                 WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
+               ENDIF
+               WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
+               WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
             ELSE
                ! FIXME: this should be the error message, IG should be made available here
                ! WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !    "': Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
-               WRITE(MESSAGE,'(A)') "ERROR: GEOM: Media continuity problem: maybe a self-intersection, "
-               WRITE(MESSAGE,'(A)') "             or an intersection with other GEOM line geometry."
+               IF (FIREBOT_NO_ERROR) THEN
+                 WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
+               ELSE
+                 WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
+               ENDIF
+               WRITE(LU_ERR,'(A)') "  Media continuity problem: maybe a self-intersection, "
+               WRITE(LU_ERR,'(A)') "  or an intersection with other GEOM line geometry."
             ENDIF
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN("") ; RETURN
          ENDIF
       ENDIF
 
@@ -26630,19 +26638,31 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face edges are not too small
       IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
-        CALL SHUTDOWN(MESSAGE) ; RETURN
-      END IF
+        IF (FIREBOT_NO_ERROR) THEN
+          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ELSE
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ENDIF
+        WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
+        CALL SHUTDOWN("") ; RETURN
+      ENDIF
       IF ((V23(IAXIS)**2._EB + V23(JAXIS)**2._EB + V23(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
-        CALL SHUTDOWN(MESSAGE) ; RETURN
-      END IF
+        IF (FIREBOT_NO_ERROR) THEN
+          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ELSE
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ENDIF
+        WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
+        CALL SHUTDOWN("") ; RETURN
+      ENDIF
       IF ((V31(IAXIS)**2._EB + V31(JAXIS)**2._EB + V31(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-          "': Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
-        CALL SHUTDOWN(MESSAGE) ; RETURN
+        IF (FIREBOT_NO_ERROR) THEN
+          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ELSE
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ENDIF
+        WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
+        CALL SHUTDOWN("") ; RETURN
       END IF
 
       ! Cross V12 x V23:
@@ -26656,10 +26676,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face area is not too small
       IF(MGNRM < GEOMEPSSQ) THEN
-         WRITE(LU_ERR,*) 'FACE IWSEL=',IWSEL,', Connectivity=',WSELEM(NOD1:NOD3),', Norm Cross=',MGNRM
-         WRITE(MESSAGE,'(A,A,A,3F12.3)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-           "': Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+        IF (FIREBOT_NO_ERROR) THEN
+          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ELSE
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ENDIF
+        WRITE(LU_ERR,'(A,3F12.3)') "  Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
+        WRITE(LU_ERR,*) '  Face IWSEL=', IWSEL, ', Connectivity=', WSELEM(NOD1:NOD3),', Norm Cross=', MGNRM
+        CALL SHUTDOWN("") ; RETURN
       ENDIF
 
       ! Assign to GEOMETRY:
@@ -26712,10 +26736,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
                  (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) ) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-                  "': Non manifold geometry or inconsistent normals in adjacent faces at edge: (", &
-                  XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               IF (FIREBOT_NO_ERROR) THEN
+                 WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               ELSE
+                 WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               ENDIF
+               WRITE(LU_ERR,'(A)') "  Non manifold geometry or inconsistent normals in adjacent faces at edge:"
+               WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+               CALL SHUTDOWN("") ; RETURN
             ENDIF
             ! Check if opposite halfedge already in list.
             IF ( (SEG(NOD1) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) .AND. &
@@ -26730,10 +26758,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 2) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-                  "': Non manifold geometry at edge: (", &
-                  XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               IF (FIREBOT_NO_ERROR) THEN
+                 WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               ELSE
+                 WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               ENDIF
+               WRITE(LU_ERR,'(A)') "  Non manifold geometry at edge:"
+               WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+               CALL SHUTDOWN("") ; RETURN
             ENDIF
             ! Couple halfedge with its pair
             GEOMETRY(IG)%EDGE_FACES(1,IEDLIST)   = 2
@@ -26760,10 +26792,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 1) THEN
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-         WRITE(MESSAGE,'(A,A,A,3F12.3,A,3F12.3,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
-            "': Open geometry at edge: (", &
-            XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         IF (FIREBOT_NO_ERROR) THEN
+           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ELSE
+           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ENDIF
+         WRITE(LU_ERR,'(A)') "  Open geometry at edge:"
+         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+         CALL SHUTDOWN("") ; RETURN
       ENDIF
    ENDDO
 
