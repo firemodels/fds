@@ -27,11 +27,11 @@ $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
 $QFDS -d Complex_Geometry geom_arch.fds
 
-#$QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
-#$QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
-#$QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
-#$QFDS -d Complex_Geometry geom_bad_open_surface.fds
-#$QFDS -d Complex_Geometry geom_bad_self_intersection.fds
+$QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
+$QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
+$QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
+$QFDS -d Complex_Geometry geom_bad_open_surface.fds
+$QFDS -d Complex_Geometry geom_bad_self_intersection.fds
 
 # $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 # $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
@@ -66,4 +66,3 @@ $QFDS -d Complex_Geometry geom_arch.fds
 # $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
 # $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
 # $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
-

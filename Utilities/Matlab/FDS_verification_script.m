@@ -95,5 +95,6 @@ disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
+disp('geom_positive_errors...');          geom_positive_errors
 
 display('verification scripts completed successfully!')
