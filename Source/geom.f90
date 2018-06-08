@@ -26705,6 +26705,19 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       ENDDO
    ENDDO
 
+   ! In the broken case where GEOM normals are wrong, GEOM_VOLUME can become too small
+   IF(GEOMETRY(IG)%GEOM_VOLUME < GEOMEPSSQ) THEN
+     IF (POSITIVE_ERROR_TEST) THEN
+       WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+     ELSE
+       WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+     ENDIF
+     WRITE(LU_ERR,'(A)') "  Geometry volume too small."
+     WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
+     WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
+     CALL SHUTDOWN("") ; RETURN
+   ENDIF
+
    ! Geometry Centroid:
    DO IX=IAXIS,KAXIS
       GEOMETRY(IG)%GEOM_XYZCEN(IX) = SQAREA(IX) / (2._EB * GEOMETRY(IG)%GEOM_VOLUME)
