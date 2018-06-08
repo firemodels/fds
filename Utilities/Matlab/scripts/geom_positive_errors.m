@@ -16,7 +16,7 @@ clear all
 % Cases and error strings
 
 infile{1} = '../../Verification/Complex_Geometry/geom_bad_inconsistent_normals.err';
-errstring{1} = 'Non manifold geometry or inconsistent normals in adjacent faces at edge';
+errstring{1} = 'Face normals are probably pointing in the wrong direction';
 
 infile{2} = '../../Verification/Complex_Geometry/geom_bad_open_surface.err';
 errstring{2} = 'Open geometry at edge';
