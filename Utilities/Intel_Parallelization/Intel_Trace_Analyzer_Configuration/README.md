@@ -1,5 +1,7 @@
 # Intel Trace Analyzer Configuration
 
+For details on Intel Trace Analyzer, view the manual [here](https://software.intel.com/en-us/ita-user-and-reference-guide).
+
 The files in this folder are example .itarc files. Segments of these files should be pasted into a configuration file to be loaded into Intel Trace Analyzer as described below. In order to make these settings the default for Intel Trace Analyzer, paste into the hidden .itarc file in your home directory (the directory with your username for Linux and C:\Users\%username%\ for Windows).
 
 **function_colors.itarc:**
