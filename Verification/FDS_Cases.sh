@@ -9,6 +9,8 @@ $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -p 8 -d Atmospheric_Effects wind_example.fds
 
+$QFDS -d Complex_Geometry geom_bad_intersection.fds
+$QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -d Complex_Geometry geom_simple.fds
 $QFDS -d Complex_Geometry geom_azim.fds
 $QFDS -d Complex_Geometry geom_elev.fds
