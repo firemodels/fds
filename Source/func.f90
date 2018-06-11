@@ -3092,6 +3092,32 @@ TMP = THETA*(P_0/(P_0-RHOA*GRAV*Z))**(-0.286_EB)
 END SUBROUTINE MONIN_OBUKHOV_SIMILARITY
 
 
+SUBROUTINE TURBULENT_VISCOSITY_INTERP1D(NU_OUT,NU_2,NU_3,DX_1,DX_2,DX_3)
+
+! quadratic interpolation of the turbulent viscosity (MU_SGS) to the first off-wall gas phase cell center
+! using 2nd and 3rd gas values
+! assumes NU(z=0)=0, allows for non-uniform grid
+!
+!        NU_OUT         NU_2                 NU_3
+! /////|    o    |        o        |           o           |
+!         DX_1          DX_2                 DX_3
+
+REAL(EB), INTENT(IN) :: NU_2,NU_3,DX_1,DX_2,DX_3
+REAL(EB), INTENT(OUT) :: NU_OUT
+REAL(EB) :: B,C,L_1,L_2,L_3
+
+L_1 = 0.5_EB*DX_1
+L_2 = DX_1 + 0.5_EB*DX_2
+L_3 = DX_1 + DX_2 + 0.5_EB*DX_3
+
+C = ( NU_3 - NU_2*L_3/L_2 ) / ( L_3**2 - L_2*L_3 )
+B = ( NU_2 - C*L_2**2 ) / L_2
+
+NU_OUT = MAX(0._EB,B*L_1 + C*L_1**2)
+
+END SUBROUTINE TURBULENT_VISCOSITY_INTERP1D
+
+
 END MODULE PHYSICAL_FUNCTIONS
 
 

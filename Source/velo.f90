@@ -44,14 +44,14 @@ END SUBROUTINE COMPUTE_VELOCITY_FLUX
 
 SUBROUTINE COMPUTE_VISCOSITY(T,NM)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE,TURBULENT_VISCOSITY_INTERP1D
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,RNG_EDDY_VISCOSITY,WALE_VISCOSITY
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_EFF,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
-            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT
+            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,NU_2,NU_3,DX_1,DX_2,DX_3
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB, C_LS=0.76_EB
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
@@ -410,6 +410,43 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
                   A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
                   CALL WALE_VISCOSITY(NU_EDDY,A_IJ,DELTA)
+               CASE(MU_TURB_INTERP)
+                  !! Experimental !!
+                  ! avoids jump in viscosity model from bulk to near-wall cells
+                  DX_1 = 1._EB/WC%ONE_D%RDN
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        NU_2 = RHO(MIN(IIG+1,IBP1),JJG,KKG)*MU(MIN(IIG+1,IBP1),JJG,KKG)
+                        NU_3 = RHO(MIN(IIG+2,IBP1),JJG,KKG)*MU(MIN(IIG+2,IBP1),JJG,KKG)
+                        DX_2 = DX(MIN(IIG+1,IBP1))
+                        DX_3 = DX(MIN(IIG+2,IBP1))
+                     CASE(-1)
+                        NU_2 = RHO(MAX(IIG-1,0),JJG,KKG)*MU(MAX(IIG-1,0),JJG,KKG)
+                        NU_3 = RHO(MAX(IIG-2,0),JJG,KKG)*MU(MAX(IIG-2,0),JJG,KKG)
+                        DX_2 = DX(MAX(IIG-1,0))
+                        DX_3 = DX(MAX(IIG-2,0))
+                     CASE( 2)
+                        NU_2 = RHO(IIG,MIN(JJG+1,JBP1),KKG)*MU(IIG,MIN(JJG+1,JBP1),KKG)
+                        NU_3 = RHO(IIG,MIN(JJG+2,JBP1),KKG)*MU(IIG,MIN(JJG+2,JBP1),KKG)
+                        DX_2 = DY(MIN(JJG+1,JBP1))
+                        DX_3 = DY(MIN(JJG+2,JBP1))
+                     CASE(-2)
+                        NU_2 = RHO(IIG,MAX(JJG-1,0),KKG)*MU(IIG,MAX(JJG-1,0),KKG)
+                        NU_3 = RHO(IIG,MAX(JJG-2,0),KKG)*MU(IIG,MAX(JJG-2,0),KKG)
+                        DX_2 = DY(MAX(JJG-1,0))
+                        DX_3 = DY(MAX(JJG-2,0))
+                     CASE( 3)
+                        NU_2 = RHO(IIG,JJG,MIN(KKG+1,KBP1))*MU(IIG,JJG,MIN(KKG+1,KBP1))
+                        NU_3 = RHO(IIG,JJG,MIN(KKG+2,KBP1))*MU(IIG,JJG,MIN(KKG+2,KBP1))
+                        DX_2 = DZ(MIN(KKG+1,KBP1))
+                        DX_3 = DZ(MIN(KKG+2,KBP1))
+                     CASE(-3)
+                        NU_2 = RHO(IIG,JJG,MAX(KKG-1,0))*MU(IIG,JJG,MAX(KKG-1,0))
+                        NU_3 = RHO(IIG,JJG,MAX(KKG-2,0))*MU(IIG,JJG,MAX(KKG-2,0))
+                        DX_2 = DZ(MAX(KKG-1,0))
+                        DX_3 = DZ(MAX(KKG-2,0))
+                  END SELECT
+                  CALL TURBULENT_VISCOSITY_INTERP1D(NU_EDDY,NU_2,NU_3,DX_1,DX_2,DX_3)
             END SELECT
             IF (CELL_COUNTER(IIG,JJG,KKG)==0) MU(IIG,JJG,KKG) = 0._EB
             CELL_COUNTER(IIG,JJG,KKG) = CELL_COUNTER(IIG,JJG,KKG) + 1
