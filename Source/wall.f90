@@ -2929,9 +2929,8 @@ DEALLOCATE(TMP_W_NEW)
 
 ! If the surface temperature exceeds the ignition temperature, burn it
 
-IF (ONE_D%T_IGN > T ) THEN
-   IF (ONE_D%TMP_F >= SF%TMP_IGN) ONE_D%T_IGN = T
-ENDIF
+IF (ONE_D%T_IGN>T  .AND. ONE_D%TMP_F>=SF%TMP_IGN) ONE_D%T_IGN = T
+IF (SF%TMP_IGN<5000._EB .AND. ONE_D%TMP_F<SF%TMP_EXT .AND. ONE_D%T_IGN<T) ONE_D%T_IGN = HUGE(1._EB)
 
 ! Determine convective heat flux at the wall
 

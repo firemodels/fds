@@ -2821,12 +2821,7 @@ If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware th
 \subsection{Solid Fuels that Burn at a Specified Rate}
 \label{info:specified_burning}
 
-Real objects, like furnishings, office equipment, and so on, are
-often difficult to describe via the {\ct SURF} and {\ct MATL}
-parameters. Sometimes the only information about a given object is its
-bulk thermal properties, its ``ignition'' temperature, and its
-subsequent burning rate as a function of time from ignition. For
-this situation, add lines similar to the following:
+Real objects, like furnishings, office equipment, and so on, are often difficult to describe via the {\ct SURF} and {\ct MATL} parameters. Sometimes the only information about a given object is its bulk thermal properties, its ``ignition'' temperature, and its subsequent burning rate as a function of time from ignition. For this situation, add lines similar to the following:
 \begin{lstlisting}
 &MATL ID                   = 'stuff'
       CONDUCTIVITY         = 0.1
@@ -2846,22 +2841,9 @@ this situation, add lines similar to the following:
 &RAMP ID='fire_ramp', T=310.0, F=1.0 /
 &RAMP ID='fire_ramp', T=320.0, F=0.0 /
 \end{lstlisting}
-An object with surface properties defined by {\ct 'my surface'} shall
-burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
-following its ``ignition'' when its surface temperature reaches
-500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down
-in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
-ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface
-property, not material property.
+An object with surface properties defined by {\ct 'my surface'} shall burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s following its ``ignition'' when its surface temperature reaches 500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface property, not material property.
 
-After the surface has ignited, the heat transfer into the solid is
-still calculated, but there is no coupling between the burning rate
-and the surface temperature. As a result, the surface temperature may
-increase too much. To account for the energy loss due to the
-vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
-specified for the surface. For example, when using the lines below,
-the net heat flux at the material surface is reduced by a factor
-1000~kJ/kg times the instantaneous burning rate.
+After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the net heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
 \begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
@@ -2872,14 +2854,9 @@ the net heat flux at the material surface is reduced by a factor
       RAMP_Q               = 'fire_ramp'
       THICKNESS            = 0.01 /
 \end{lstlisting}
-The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
-burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they
-are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
-an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION}
-tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing
-a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like
-those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
-the conditions of the surrounding environment.
+Finally, if you desire that the burning stop if the surface temperature drops below a specified value, set {\ct EXTINCTION\_TEMPERATURE} on the {\ct SURF} line. This value should be less than or equal to the \linebreak[4]{\ct IGNITION\_TEMPERATURE}.
+
+The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
 
 
@@ -10179,8 +10156,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY}                        & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                  & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                     & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
-{\ct EXTERNAL\_FLUX}                    & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
 {\ct E\_COEFFICIENT}                    & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
+{\ct EXTERNAL\_FLUX}                    & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
+{\ct EXTINCTION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & -273.                   \\ \hline
 {\ct FREE\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                          & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}            & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
