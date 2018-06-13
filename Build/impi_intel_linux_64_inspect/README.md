@@ -8,7 +8,7 @@ The Intel Trace Collector and Analyzer are two separate programs with a single p
 
 For details on the Intel Trace Collector, read the [manual](https://software.intel.com/sites/default/files/intel-trace-collector-2018-user-and-reference-guide.pdf). For details on the Intel Trace Analyzer, read the [manual](https://software.intel.com/en-us/ita-user-and-reference-guide).
 
-The main in tracing FDS is that the trace file can become enormous if you run a long job and trace each and every function and subroutine call. To prevent this, there is a configuration file called `fds_trace.conf` in this directory that contains a list of the main subroutines called in FDS. Only these subroutines are traced, keeping the trace file to a reasonable size and enabling you to more easily visualize the work flow. 
+The main consideration in tracing FDS is that the trace file can become enormous if you run a long job and trace each and every function and subroutine call. To prevent this, there is a configuration file called `fds_trace.conf` in this directory that contains a list of the main subroutines called in FDS. Only these subroutines are traced, keeping the trace file to a reasonable size and enabling you to more easily visualize the work flow. 
 
 To use the configuration file, add the line
 ```
@@ -26,10 +26,12 @@ Make sure that the job only runs a handful of time steps, as there's no need to 
 ```
 traceanalyzer fds_trace.stf &
 ```
-The most important thing to look at in the Trace Analyzer is the timeline. Get this from the `Charts` menu, `Event Timeline`. You will first see the entire timeline, but you can click and drag over shorter time intervals to see details. You will also notice that the first time you use the Trace Analyzer, everything is either colored red (MPI) or blue (Application). Go to the chart in the lower left corner and right click on the `Groups`, and choose to ungroup them. You should see the modules and subroutines you've chosen to trace. Keep ungrouping until you get down to the subroutine level. If you right-click again, you can choose to color the various routines, making it much easier to visualize. Your chosen color scheme will be saved in a file called `itarc` in your home directory.
+The most important graphic in the Trace Analyzer is the timeline. Get this from the `Charts` menu, `Event Timeline`. You will first see the entire timeline, but you can click and drag over shorter time intervals to see details. You will also notice that the first time you use the Trace Analyzer, everything is either colored red (MPI) or blue (Application). Go to the chart in the lower left corner and right click on the `Groups`, and choose to ungroup them. You should see the modules and subroutines you've chosen to trace. Keep ungrouping until you get down to the subroutine level. If you right-click again, you can choose to color the various routines, making it much easier to visualize. Your chosen color scheme will be saved in a file called `itarc` in your home directory.
 
 
 ### Creating a new configuration file
+
+If you do not want to use the configuration file `fds_trace.conf` that is included above, you can create your own by following these steps.
 
 1. Compile a special version of FDS in `Build/impi_intel_linux_64_inspect`. This is essentially a debug compilation with the additional compiler option `-tcollect`. 
 
