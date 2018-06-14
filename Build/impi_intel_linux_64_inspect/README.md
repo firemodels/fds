@@ -56,3 +56,15 @@ itcconfig <trace_file.stf>
 ```
 traceanalyzer <trace_file.stf>
 ```
+
+## Intel Inspector
+
+The [Intel Inspector](https://software.intel.com/en-us/node/622387) can help detect improperly coded OpenMP directives.
+
+1. Compile the `inspect` version of FDS using the script `make_fds.sh` in this directory. The relevant compiler options are listed [here](https://software.intel.com/en-us/inspector-user-guide-linux-building-applications).
+2. Launch the graphical user interface (GUI) using this command
+   ```
+   inspxe-gui
+   ```
+3. Create and configure the project through Inspector. If trying to inspect fds, use `qfds.sh` with the `-v` (verbose) flag in order to see which settings will be need to be configured in Inspector.
+
