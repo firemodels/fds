@@ -79,7 +79,6 @@ Volume 2: Verification\\
 
 \headerC{
 \today \\
-FDS Version \fdsversion \\
 Revision:~\gitrevision}
 
 
@@ -2305,12 +2304,14 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
 \label{race_test}
 
-OpenMP is used in FDS to sub-divide the work of the do-loops among multiple cores belonging to the same processor. Figure~\ref{race_test_fig} displays two pairs of temperature traces from two calculations, one using one OpenMP thread and one using four. The results of the two calculations ought to be identical, in which case the respective pairs of temperature traces ought to completely overlap.
+OpenMP is used in FDS to sub-divide the work of the do-loops among multiple cores belonging to the same processor. Figure~\ref{race_test_fig} displays temperature and velocity traces from two calculations, one using one OpenMP thread and one using four. The results of the two calculations ought to be identical, in which case the respective pairs of temperature and velocity traces ought to completely overlap.
 
 \begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test}
-\caption[Result of the \textct{race\_test}]{Temperature time histories of two calculations that use different numbers of OpenMP threads. The pairs of temperature traces ought to be identical.}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test_tmp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test_vel}
+\end{tabular*}
+\caption[Result of the \textct{race\_test}]{Temperature and velocity time histories of two calculations that use different numbers of OpenMP threads. The traces ought to be identical.}
 \label{race_test_fig}
 \end{figure}
 
@@ -4363,7 +4364,7 @@ This case is a replicate of the {\ct box\_burn\_away1} case used as verification
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[height=2.2in]{SCRIPT_FIGURES/box_burn_away1_pyro3d_vs_pyro1d}
-	\caption[PYRO3D vs.~PYRO1D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
+	\caption[PYRO3D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
 	\label{fig:box_burn_away1_pyro3d_vs_pyro1d}
 \end{figure}
 
@@ -4378,7 +4379,7 @@ This case compares mass loss rates and material thickness for pyrolysis of black
        \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_mlr} &
        \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_thickness}
     \end{tabular*}
-	\caption[PYRO3D vs.~PYRO1D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
+	\caption[PYRO3D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
 	\label{fig:pyro3d_vs_pyro1d}
 \end{figure}
 

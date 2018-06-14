@@ -29,10 +29,7 @@ Manuals_Dir = '../../Manuals/';
 datadir = [OUT_Dir,'McCaffrey_Plume/FDS_Output_Files/'];
 plotdir = [Manuals_Dir,'FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
 
-% resolution = {'Coarse','Medium','Fine'};
-
-% omit high res cases temporarily
-resolution = {'Coarse','Medium'};
+resolution = {'Coarse','Medium','Fine'};
 
 for k=1:length(resolution)
 
