@@ -92,18 +92,6 @@ TYPE MESH_TYPE
                                                         REGFACE_JAXIS_H, &
                                                         REGFACE_KAXIS_H
 
-   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NNZ_D_MAT_H
-   REAL(EB),ALLOCATABLE, DIMENSION(:,:) :: D_MAT_H
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: JD_MAT_H
-
-   INTEGER, ALLOCATABLE, DIMENSION(:)   :: IA_H, JA_H
-   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H
-
-   LOGICAL :: H_MATRIX_INDEFINITE
-
-   REAL(EB), ALLOCATABLE, DIMENSION(:)  :: F_H
-   REAL(EB), ALLOCATABLE, DIMENSION(:)  :: X_H
-
    !---------------------- STR: CC_IBM mesh Arrays ------------------------------------------
    INTEGER :: N_EDGE_CROSS=0,  N_CUTEDGE_MESH=0, N_CUTFACE_MESH=0, N_CUTCELL_MESH=0
    INTEGER :: N_BBCUTFACE_MESH=0, N_GCCUTFACE_MESH=0, N_GCCUTCELL_MESH=0
