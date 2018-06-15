@@ -96,6 +96,7 @@ function usage {
     exit
   fi
   echo "Other options:"
+  echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
@@ -203,6 +204,7 @@ use_debug=
 use_devel=
 use_inspect=
 use_intel_mpi=1
+use_config=""
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
   use_intel_mpi=
@@ -234,11 +236,14 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
+while getopts 'Ac:Cd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
    DUMMY=1
+   ;;
+  c)
+   use_config="$OPTARG"
    ;;
   C)
    FDS_MODULE_OPTION=
@@ -752,6 +757,12 @@ fi
 if [ "$TCP" != "" ]; then
   cat << EOF >> $scriptfile
 export I_MPI_FABRICS=shm:tcp
+EOF
+fi
+
+if [ "$use_config" != "" ]; then
+  cat << EOF >> $scriptfile
+export VT_CONFIG=$use_config
 EOF
 fi
 
