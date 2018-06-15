@@ -430,11 +430,11 @@ If you ever want to keep an older version of FDS and Smokeview, copy the install
 
 \section{Computer Hardware Requirements}
 
-The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 4~GB RAM per processor. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
+The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 2 to 4~GB RAM per core. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 10~GB of storage space.
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
-The MPI version of FDS requires shared disk access to each computer where cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the MPI version of FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of MPI FDS running the parallel cases.
+Running FDS using MPI requires shared disk access to each computer where cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of FDS running the parallel cases.
 
 
 \section{Computer Operating System (OS) and Software Requirements}
@@ -563,7 +563,7 @@ There are different implementations of MPI, much like there are different Fortra
 
 The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
-To run the MPI version of FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
+To run an MPI calculation with FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
 
 First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
 
@@ -717,7 +717,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
     \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Section~\ref{info:PRES} for details.
     \end{itemize}
     There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
-\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky. In fact, for a typical 32~bit Windows PC with 4~GB RAM, only 2~GB will be available to FDS, based on user feedback. If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the calculation into multiple meshes and use the MPI version of FDS. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
+\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky; using MPI and mulitple machines would be better. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
 \item[{\bf File Writing Errors}:] Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
 \begin{lstlisting}
@@ -1028,7 +1028,7 @@ The governing equations solved in FDS are written in terms of a three dimensiona
 
 The term ``multiple meshes'' means that the computational domain consists of more than one computational mesh, usually connected although this is not required. If more than one mesh is used, there should be a {\ct MESH} line for each. The order in which these lines are entered in the input file matters. In general, the meshes should be entered from finest to coarsest. FDS assumes that a mesh listed first in the input file has precedence over a mesh listed second if the two meshes overlap. Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate calculations are performed with no communication at all between them. Obstructions and vents are entered in terms of the overall coordinate system and need not apply to any one particular mesh. Each mesh checks the coordinates of all the geometric entities and decides whether or not they are to be included.
 
-To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases with the MPI version of FDS if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the MPI version to work well, there has to be a comparable number of cells assigned to each MPI process, or otherwise most of the processes will sit idle waiting for the one with the largest number of cells to finish processing each time step. You can use multiple meshes even when running the non-MPI version of FDS, in which case one CPU will serially process each mesh, one by one.
+To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases using MPI if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For MPI to work well, there has to be a comparable number of cells assigned to each MPI process, or otherwise most of the processes will sit idle waiting for the one with the largest number of cells to finish processing each time step. You can use multiple meshes on a single processor without using MPI , in which case one CPU will serially process each mesh, one by one.
 
 Usually in a MPI calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 \begin{lstlisting}
@@ -1948,7 +1948,7 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 
 \label{info:Special_VENTS}
 
-There are three reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'}, {\ct 'MIRROR'}, and {\ct 'PERIODIC'}. The term {\em reserved} means that these {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
+There are four reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'}, {\ct 'MIRROR'}, {\ct 'PERIODIC'}, and {\ct HVAC}. The term {\em reserved} means that these {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
 \subsubsection{Open Vents}
 
@@ -1988,6 +1988,10 @@ For additional information related to periodic boundaries and the pressure solve
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
 Note that, by default, particles are not recycled at periodic boundaries.  See Section~\ref{info:periodic-particles} if periodic particles are desired.
+
+\subsubsection{HVAC Vents}
+
+A {\ct VENT} with {\ct SURF\_ID='HVAC'} denotes that the vent is connected to an HVAC system. See Section~\ref{info:HVAC} for a description of inputs for HVAC systems.
 
 \subsubsection{Circular Vents}
 \label{sec:circvents}
@@ -2061,7 +2065,7 @@ Colors for many items within FDS can be prescribed in two ways; a triplet of int
 &OBST XB=..., COLOR='BLUE' /
 \end{lstlisting}
 will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
-It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
+It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line. As the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the geometry.
 
 Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
@@ -2461,7 +2465,7 @@ Instead of altering the convective heat transfer coefficient, you may specify a 
 
 \subsubsection{Logarithmic Law of the Wall}
 
-Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
+Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of the near-wall flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
 By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_{\rm p}$. The local heat transfer coefficient is then obtained from
 \begin{equation}
@@ -2510,7 +2514,7 @@ Material layers and components are specified on the {\ct SURF} line via the arra
 \end{lstlisting}
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
-When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
+When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined, and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
 calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
 Mixtures of solid materials within the same layer can be defined using the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same two indices as the {\ct MATL\_ID} keyword. For example, if the brick layer contains some additional water, the input could look like this:
@@ -2565,7 +2569,7 @@ The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allo
 \subsection{Back Side Boundary Conditions}
 \label{info:BACKING}
 
-The layers of a solid boundary are listed in order from the surface. By default, if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, it is assumed to back up to an air gap at ambient temperature. For example a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
+The layers of a solid boundary are listed in order from the surface. By default, if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, then it is assumed to back up to an air gap at ambient temperature. For example, a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
 
 There are other back side boundary conditions that can be applied. One is to assume that the wall backs up to an insulated material in which case no heat is lost to the backing material. The expression {\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition means that you  do not have to specify properties of the inner insulating material because it is assumed to be perfectly insulated.
 
@@ -2867,8 +2871,8 @@ The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPE
 
 This section describes the parameters that describe the reactions that occur within solid
 materials when they are burning. It is strongly recommended before reading this section that you read some background material on
-solid phase pyrolysis, for example ``Thermal Decomposition of Polymers,'' by Hirschler and Morgan, or
-``Flaming Ignition of Solid Fuels,'' by Torero, both of which are in the 4th edition of the
+solid phase pyrolysis, for example ``Thermal Decomposition of Polymeric Materials,'' by Witkowski, Stec, and Hull, or
+``Flaming Ignition of Solid Fuels,'' by Torero, both of which are in the 5th edition of the
 {\em SFPE Handbook of Fire Protection Engineering}.
 
 \subsection{Reaction Mechanism}
@@ -2993,8 +2997,8 @@ produces fuel gas using the appropriate {\ct SPEC\_ID}.
 Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
 per unit mass of fuel gas that mixes with oxygen and combusts.  This
 has nothing to do with the pyrolysis process, so why is it specified
-here? The answer is that there can be only one {\em gas phase}
-reaction of fuel and oxygen in FDS, but there can be dozens of
+here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase}
+reaction of fuel and oxygen, but there can be dozens of
 different materials and dozens of {\em solid phase} reactions. To
 ensure that the fuel vapors from different materials combust to
 produce the proper amount of energy, it is very important to specify a
@@ -3385,7 +3389,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
-Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
+Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
 &HEAD CHID='pmma_example', TITLE='Black PMMA at 50 kW/m2' /
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
