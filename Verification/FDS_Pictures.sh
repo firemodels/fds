@@ -31,6 +31,7 @@ $RUNSMV -d Miscellaneous pyramid
 $RUNSMV -d Miscellaneous obst_sphere
 $RUNSMV -d Miscellaneous obst_cylinder
 $RUNSMV -d Miscellaneous obst_cone
+$RUNSMV -d Miscellaneous obst_rotbox
 $RUNSMV -d NS_Analytical_Solution ns2d_64
 $RUNSMV -d Pressure_Effects pressure_boundary
 $RUNSMV -d Pressure_Solver dancing_eddies_tight
