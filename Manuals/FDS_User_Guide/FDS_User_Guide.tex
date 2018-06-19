@@ -2292,9 +2292,9 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \subsection{Special Topic: Using {\ct MULT} to make shapes out of obstructions}
 \label{info:multobst}
 
-Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
+Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of four basic shapes: sphere, cylinder, cone or box.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
 
-With regard to the {\ct SURF\_ID},
+%With regard to the {\ct SURF\_ID},
 
 The first step in carving out the shape is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
 
@@ -2307,7 +2307,8 @@ The first step in carving out the shape is to create a {\ct MULT} line that defi
 {\ct SHAPE} \hfill   & Parameters (default values in Table~\ref{tbl:OBST})    \hfill    \\ \hline
 {\ct 'SPHERE'}       & {\ct XYZ}, {\ct RADIUS}                                  \\
 {\ct 'CYLINDER'}     & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
-{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\ \hline
+{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
+{\ct 'BOX'}            & {\ct XYZ}, {\ct LENGTH}, {\ct WIDTH}, {\ct HEIGHT}, {\ct ORIENTATION}, {\ct THETA} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -2353,7 +2354,7 @@ To create a cylinder we need a height and orientation in addition to the radius.
 \label{fig:obst_cylinder}
 \end{figure}
 
-A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig X.
+A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig~\ref{fig:obst_cone}.
 
 \begin{lstlisting}
 &SURF ID='shape', COLOR='FOREST GREEN'/
@@ -2375,6 +2376,31 @@ A cone needs basically the same input parameters as a cylinder.  The position of
 \label{fig:obst_cone}
 \end{figure}
 
+Finally, the box shape allows to define rotated cuboids. A box shape is defined locally by its {\ct HEIGHT}, {\ct WIDTH} and {\ct LENGTH}. The location of the box center is provided in {\ct XYZ}. The angle {\ct THETA} in degrees specifies a rotation of the box respect to the global $z$ axis, following right hand rule.
+Subsequently, the {\ct ORIENTATION} direction vector allows for an orientation change respect to the {\ct THETA} rotated reference frame. This direction vector changes the box orientation such that the local {\ct HEIGHT} direction matches it.
+A simple example is shown Fig~\ref{fig:obst_rotbox}.
+
+\begin{lstlisting}
+&SURF ID='shape', COLOR='GRAY'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='BOX'
+      LENGTH=0.075
+      WIDTH=0.025
+      HEIGHT=0.05
+      XYZ=0,0,0.01
+      ORIENTATION=0.5,0,1
+      THETA = 45. /
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
+\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_rotbox}
+\end{figure}
 
 
 \chapter{Fire and Thermal Boundary Conditions}
