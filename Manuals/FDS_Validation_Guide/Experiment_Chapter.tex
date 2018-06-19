@@ -43,7 +43,7 @@ A common validation experiment for CFD codes involves flow through a channel wit
 \section{Beyler Hood Experiments}
 \label{Beyler_Hood_Description}
 
-Craig Beyler performed small-scale fire experiments where a gas burner was positioned at various heights underneath a closed, cylindrical hood, 100~cm in diameter and 48~cm in height~\cite{Beyler:Hood}.  The hood consisted of two concentric cylinders separated by an air gap, as shown in Fig.~\ref{Beyler_Hood_Sketch}.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood. The reported relative standard uncertainty of the measured gas species mass fractions was 6~\%. The fuels consisted of acetone, ethanol, isopropanol, methanol, propane, propylene, and toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 of the original 148 experiments spanning the equivalence ratio range for each fuel were simulated for validation, see Table~\ref{beyler_sum}.
+Craig Beyler performed small-scale fire experiments where a variety of circular gas burners were centered at various heights underneath a closed, cylindrical hood, 100~cm in diameter and 48~cm in height~\cite{Beyler:Hood}.  The hood consisted of two concentric cylinders separated by an air gap, as shown in Fig.~\ref{Beyler_Hood_Sketch}.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations. The burner could be raised and lowered with respect to the bottom edge of the hood. The reported relative standard uncertainty of the measured gas species mass fractions was 6~\%. The fuels consisted of acetone, ethanol, isopropanol, methanol, propane, propylene, and toluene. Hood equivalence ratios varied from 0.2 to 1.7.  A subset of 47 of the original 148 experiments spanning the equivalence ratio range for each fuel were simulated for validation, see Table~\ref{beyler_sum}.
 
 \begin{figure}[h]
 \centering
@@ -116,7 +116,7 @@ Table~\ref{bit_sum} reports the sprinkler actuation times of each sprinkler.
 
 \begin{table}[!ht]
 \centering
-\caption{Summary of results, Bittern experiments. Note that Exp.~11 has been excluded because of a failed mass loss measurement.}
+\caption[Summary of results, Bittern experiments]{Summary of results, Bittern experiments. Note that Exp.~11 has been excluded because of a failed mass loss measurement.}
 \label{bit_sum}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
@@ -145,15 +145,11 @@ Exp. & Spr.~1 & Time (s) & Spr.~2 & Time (s) & $T_0$ ($^\circ$C) & Door   & Fire
 \end{tabular}
 \end{table}
 
-\subsection{Modeling Notes}
+\subsubsection{Modeling Notes}
 
 The assumptions given in this section were used in the original analysis of the experiments~\cite{Bittern:Thesis}.
 
-\subsubsection{Material Properties}
-
 The gypsum board had a thickness of 1~cm, density of 731~kg/m\textsuperscript{3}, specific heat of 0.90~kJ/(kg$\cdot$K), conductivity of 0.17~W/(m$\cdot$K), and emissivity of 0.88. The concrete floor was assumed to have a thickness of 10~cm, density of 2300~kg/m$^3$, specific heat of 0.88~kJ/(kg$\cdot$K), conductivity of 1.2~W/(m$\cdot$K), and emissivity of 0.5.
-
-\subsubsection{Sprinkler Properties}
 
 The properties of the sprinklers are shown in Table~\ref{Bittern_Sprinklers}. These properties are based on the manufacturer's specification where available or otherwise estimated based on measured values of comparable sprinklers. For modeling purposes, the sprinkler offset, 2~cm, was selected based on an approximate 2~cm glass bulb length, and the C-factor selected was based on a sensitivity analyses undertaken in the original study.
 
@@ -172,11 +168,7 @@ SS93           & Standard Response, 5 mm glass bulb  & 95                  & 0.4
 \end{tabular}
 \end{table}
 
-\subsubsection{Fire and Combustion}
-
 The average heat of combustion of the upholstery was measured in a cone calorimeter to be 21.9~MJ/kg (Exp.~1-10) and 20.4~MJ/kg (Exp.~12-22). Since the primary fuel used in the experiments was flexible polyurethane foam, the radiant loss fraction assumed in the fire model was 0.46. Other combustion parameters were as for polyurethane foam, and all parameters selected are consistent with those used in the original BRANZFIRE study~\cite{Wade:FT2007}. For the ``simple chemistry'' combustion model, inputs for stoichiometric yields have been selected from literature based on GM23 foam, with an effective molecular formula of CH$_{1.8}$O$_{0.35}$N$_{0.06}$. The soot yield was assumed to be 0.227~kg/kg. The area of the fire was taken to be 0.4~m by 0.5~m. The height of the fire was assumed to be 0.65~m above the floor.
-
-\subsubsection{Ventilation and Leakage}
 
 For experiments 11 to 22, the door to the compartment was closed. The estimated leakage area was assumed based on data for loose-fitting internal walls. An area of 0.053 m\textsuperscript{2} was evenly distributed across the door.
 
