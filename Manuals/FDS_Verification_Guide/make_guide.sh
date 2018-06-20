@@ -23,6 +23,7 @@ pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Gui
 bibtex FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 if [ -e "$PDFUSER" ]; then
   cp $PDFUSER .
 fi
@@ -54,4 +55,4 @@ if [[ $clean_build == 0 ]]
       :
    else
       echo "FDS Verification Guide built successfully!"
-fi    
+fi

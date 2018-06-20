@@ -14,6 +14,7 @@ pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.e
 bibtex FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
+pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Validation_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
@@ -42,4 +43,4 @@ if [[ $clean_build == 0 ]]
       :
    else
       echo "FDS Validation Guide built successfully!"
-fi    
+fi
