@@ -379,55 +379,55 @@ The layer thickness is updated according to the ratio of the instantaneous mater
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
 
-\subsection{Solid Pyrolysis 3D (Beta) {\color{red}[UNDER CONSTRUCTION]}}
+% \subsection{Solid Pyrolysis 3D (Beta) {\color{red}[UNDER CONSTRUCTION]}}
 
-In three dimensions, the mass transport equation for solid material component $\alpha$ in conservative form is given by
-\begin{align}
-\label{eq:3dmatlsolid}
-\frac{\partial \rho_{\rm s,\alpha}}{\partial t} + \Div{(\rho_{\rm s,\alpha} \mathbf{u}_{\rm s})} &= \rho_{\rm s}(0) \left[S_\alpha - \sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta}\right] =  \dot{m}_{\alpha}^{\ppp}
-\end{align}
+% In three dimensions, the mass transport equation for solid material component $\alpha$ in conservative form is given by
+% \begin{align}
+% \label{eq:3dmatlsolid}
+% \frac{\partial \rho_{\rm s,\alpha}}{\partial t} + \Div{(\rho_{\rm s,\alpha} \mathbf{u}_{\rm s})} &= \rho_{\rm s}(0) \left[S_\alpha - \sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta}\right] =  \dot{m}_{\alpha}^{\ppp}
+% \end{align}
 
-Expanding Eq.~(\ref{eq:3dmatlsolid}) and integrating over a cell volume leads to a transport equation for the mean cell density of solid material $\alpha$,
-\begin{align}
-\frac{1}{V_{\rm c}} \int_{V_{\rm c}} \left[ \frac{\partial \rho_{\rm s,\alpha}}{\partial t} + \rho_{\rm s,\alpha} \Div{\mathbf{u}_{\rm s}} + \mathbf{u}_{\rm s} \cdot \nabla \rho_{\rm s,\alpha} \right] \,\mbox{d}V &=  \frac{1}{V_{\rm c}} \int_{V_{\rm c}} \dot{m}_{\alpha}^{\ppp} \,\mbox{d}V \\
-\frac{\partial \overline{\rho}_{\rm s,\alpha}}{\partial t} + \overline{\rho}_{\rm s,\alpha} \Div{\mathbf{u}_{\rm s}} + ... &= \overline{\dot{m}_{\alpha}^{\ppp}}
-\end{align}
-where the overline represents a cell average value.
+% Expanding Eq.~(\ref{eq:3dmatlsolid}) and integrating over a cell volume leads to a transport equation for the mean cell density of solid material $\alpha$,
+% \begin{align}
+% \frac{1}{V_{\rm c}} \int_{V_{\rm c}} \left[ \frac{\partial \rho_{\rm s,\alpha}}{\partial t} + \rho_{\rm s,\alpha} \Div{\mathbf{u}_{\rm s}} + \mathbf{u}_{\rm s} \cdot \nabla \rho_{\rm s,\alpha} \right] \,\mbox{d}V &=  \frac{1}{V_{\rm c}} \int_{V_{\rm c}} \dot{m}_{\alpha}^{\ppp} \,\mbox{d}V \\
+% \frac{\partial \overline{\rho}_{\rm s,\alpha}}{\partial t} + \overline{\rho}_{\rm s,\alpha} \Div{\mathbf{u}_{\rm s}} + ... &= \overline{\dot{m}_{\alpha}^{\ppp}}
+% \end{align}
+% where the overline represents a cell average value.
 
-In our present formulation movement of the solid material is not tracked explicitly---we do not have a representation of $\mathbf{u}_{\rm s}$ in the model.  Instead, a volume expansion (or contraction) within an Eulerian cell is imagined.  When the volume falls below a threshold (10 \%) of the original cell volume, the local cell mass is merged with its neighbor and the cell is ``burned away''.
+% In our present formulation movement of the solid material is not tracked explicitly---we do not have a representation of $\mathbf{u}_{\rm s}$ in the model.  Instead, a volume expansion (or contraction) within an Eulerian cell is imagined.  When the volume falls below a threshold (10 \%) of the original cell volume, the local cell mass is merged with its neighbor and the cell is ``burned away''.
 
-When pyrolyzate gas is produced via Eq.~(\ref{eq:pyrolyzate}) it evolves by
-\begin{equation}
-\label{eq:pryo3dgas}
-\DoD{\rho_\gamma}{t} = - \nabla\cdot \mathbf{J}_\gamma + \dot{m}_{\gamma}^{\ppp}
-\end{equation}
-where $\mathbf{J}_\gamma$ is the diffusive flux for gas species $\gamma$.
+% When pyrolyzate gas is produced via Eq.~(\ref{eq:pyrolyzate}) it evolves by
+% \begin{equation}
+% \label{eq:pryo3dgas}
+% \DoD{\rho_\gamma}{t} = - \nabla\cdot \mathbf{J}_\gamma + \dot{m}_{\gamma}^{\ppp}
+% \end{equation}
+% where $\mathbf{J}_\gamma$ is the diffusive flux for gas species $\gamma$.
 
-For completeness, we rewrite the heat equation in this section since the shrinking and swelling of materials has important consequences for the heat flux between Eulerian cells on the Cartesian grid.  Additionally, to account for internal radiation, we apply the optically thick (diffusion) approximation \cite{Modest:2003}.  The ``radiative conductivity'' is given by
-\begin{equation}
-\label{eq:krad}
-k_{\rm r} = \frac{16 n^2 \sigma T^3}{3 \beta_{\rm r}}
-\end{equation}
-and the thermal energy equation for the solid becomes
-\begin{equation}
-  \rho_{\rm s} c_{\rm s} \; \DoD{T_{\rm s}}{t} = \nabla\cdot \left( [k_{\rm s}+k_{\rm r}] \nabla T_{\rm s} \right) + \dot{q}_{\rm s}'''
-  \label{eq:3dheatGibbs}
-\end{equation}
+% For completeness, we rewrite the heat equation in this section since the shrinking and swelling of materials has important consequences for the heat flux between Eulerian cells on the Cartesian grid.  Additionally, to account for internal radiation, we apply the optically thick (diffusion) approximation \cite{Modest:2003}.  The ``radiative conductivity'' is given by
+% \begin{equation}
+% \label{eq:krad}
+% k_{\rm r} = \frac{16 n^2 \sigma T^3}{3 \beta_{\rm r}}
+% \end{equation}
+% and the thermal energy equation for the solid becomes
+% \begin{equation}
+%   \rho_{\rm s} c_{\rm s} \; \DoD{T_{\rm s}}{t} = \nabla\cdot \left( [k_{\rm s}+k_{\rm r}] \nabla T_{\rm s} \right) + \dot{q}_{\rm s}'''
+%   \label{eq:3dheatGibbs}
+% \end{equation}
 
 
 
-\begin{figure}[h!]
+% \begin{figure}[h!]
 
-\begin{picture}(200,200)(0,0)
-\setlength{\unitlength}{0.02in}
+% \begin{picture}(200,200)(0,0)
+% \setlength{\unitlength}{0.02in}
 
-\linethickness{0.25mm}
-\put(140,0){\framebox(40,40){ }}
-\end{picture}
+% \linethickness{0.25mm}
+% \put(140,0){\framebox(40,40){ }}
+% \end{picture}
 
-\caption{Solid to cell volume ratio, $V_{\rm s}/V_{\rm c}$.}
-\label{fig:vsrvc}
-\end{figure}
+% \caption{Solid to cell volume ratio, $V_{\rm s}/V_{\rm c}$.}
+% \label{fig:vsrvc}
+% \end{figure}
 
 
 \newpage
