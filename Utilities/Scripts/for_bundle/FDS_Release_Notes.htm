@@ -1,3 +1,24 @@
+<h2 id="fds-6.7.0">FDS 6.7.0</h2>
+<ul>
+<li><p><code>SIMULATION_MODE</code> replaces <code>RESEARCH_MODE</code> to control the level of physics. For example, <code>SIMULATION_MODE='DNS'</code>, sets the code to run in direct numerical simulation model. Other options include <code>'LES'</code> (high-fidelity, convergent LES simulations), <code>'VLES'</code> (&quot;very large-eddy simulation&quot; [default] for coarse-grained, practical LES calculations), and finally <code>'SVLES'</code> (&quot;Simple VLES&quot;, makes simplifying physical assumptions, such as constant specific heat ratio, to speed calculations when appropriate).</p></li>
+<li><p>Create look-up table for <code>CRITICAL_FLAME_TEMPERATURE</code> based on minimum extinguishing concentration (MEC) measurements in cup burner experiments with nitrogen as the diluent.</p></li>
+<li><p><code>FLUX_LIMITER</code> is now specified using a character string on <code>MISC</code>. Defaults are automatically set by <code>SIMULATION_MODE</code>, as discussed in the user guide.</p></li>
+<li><p>Create a new namelist group called <code>COMB</code> for various global combustion parameters, most of which are numerical and were previously specified on the <code>MISC</code> line. This new namelist group is intended to better organize these parameters, but will typically not be needed by most users.</p></li>
+<li><p>Add <code>PRIORITY</code> to the <code>REAC</code> line for cases with multiple fast serial combustion reactions. Without this parameter, all fast reactions are performed in parallel.</p></li>
+<li><p>Set the default radiation <code>PATH_LENGTH</code> to 0.1 m. Previously it was a function of the cell size.</p></li>
+<li><p>Add <code>I_LOWER_SKIP</code>, etc., to <code>MULT</code> line to more easily embed a fine mesh within an array of coarse meshes.</p></li>
+<li><p>Add <code>SHAPE</code> feature to <code>OBST</code> line. When combined with <code>MULT</code> this allows the user to &quot;sculpt&quot; a basic shape (sphere, cylinder, or cone) out of the obstructions.</p></li>
+<li><p><code>PYRO3D</code> in Beta testing.</p></li>
+<li><p>Fix temperature error at horizontal mesh refinement boundaries with <code>STRATIFICATION</code>. This problem is relevant for atmospheric flow simulations with mesh refinement (coarsening) in the vertical direction.</p></li>
+<li><p>Ensure that <code>TMP_EXTERIOR</code> at <code>OPEN</code> boundaries is properly applied in radiation transport equation.</p></li>
+<li><p>Make <code>RAMP_SPEED</code> functional in <code>WIND</code> simulations.</p></li>
+<li><p>Add <code>CTRL</code> function types for <code>MIN</code> and <code>MAX</code>.</p></li>
+<li><p>Add <code>XENON</code> as a species to give a low conductivity gas.</p></li>
+<li><p>On <code>MISC</code> remove <code>HVAC_DT</code> and add <code>HVAC_LOCAL_PRESSURE</code>. Setting to <code>FALSE</code> improves stability but requires that <code>VENT</code>s connected to the HVAC system lie in pressure <code>ZONE</code>s as this option no longer uses the perturbation pressure and only uses the background pressure plus any stagnation pressure (i.e. air blown at an inlet will still push air into a duct but a fire in a compartment without a <code>ZONE</code> will not).</p></li>
+<li><p>Fix bug in output values for Fractional Incapacitation Concentration (FIC) with user-defined species.</p></li>
+<li><p>Fix bug when sprinklers are present along with a <code>VENT</code> on a boundary that burns away.</p></li>
+<li><p>Add drift flux model for gas phase thermophoretic movement of aerosols (<code>THERMOPHORETIC_SETTLING</code> on <code>MISC</code>)</p></li>
+</ul>
 <h2 id="fds-6.6.0-oct-31-2017">FDS 6.6.0 (Oct 31, 2017)</h2>
 <ul>
 <li><p>Implementation of new implicit droplet evaporation scheme. Fixes many stability issues with droplet cases.</p></li>
@@ -276,7 +297,7 @@
 <li><p>A line of devices can be specified using a number of POINTS on one DEVC line.</p></li>
 <li><p>Statistical outputs for RMS, covariance, and correlation coefficient are available.</p></li>
 </ul>
-<h2 id="fds-5.5">FDS 5.5</h2>
+<h2 id="fds-5.5-april-6-2010">FDS 5.5 (April 6, 2010)</h2>
 <ul>
 <li><p>Restoration of the baroclinic torque term in the momentum equation, by default (removed in 5.5.3)</p></li>
 <li><p>Secondary breakup model for droplets (simplified version of WAVE model by Reitz 1987)</p></li>
@@ -288,7 +309,7 @@
 <li><p>RAMP_PART and TAU_PART on SURF to control PARTICLE_MASS_FLUX</p></li>
 <li><p>Use of a SURF line to describe Lagrangian particles</p></li>
 </ul>
-<h2 id="fds-5.4">FDS 5.4</h2>
+<h2 id="fds-5.4-sep-1-2009">FDS 5.4 (Sep 1, 2009)</h2>
 <ul>
 <li><p>Pyrolysis model for solid materials has changed. The most important change is the definition of REFERENCE_TEMPERATURE and the elimination of REFERENCE_RATE. See the FDS User's Guide for more details.</p></li>
 <li><p>Werner-Wengle wall model, a better description of the velocity boundary condition.</p></li>
@@ -296,7 +317,7 @@
 <li><p>ORIFICE_DIAMETER has been added to PROP inputs to provide a simple way to set droplet velocity. This is an alternative to specifying DROPLET_VELOCITY.</p></li>
 <li><p>Thermally-Induced Electrical Failure (THIEF) model added to predict damage to electrical cables.</p></li>
 </ul>
-<h3 id="fds-5.3">FDS 5.3</h3>
+<h3 id="fds-5.3-jan-30-2009">FDS 5.3 (Jan 30, 2009)</h3>
 <ul>
 <li><p>New output quantity: Fractional Effective Dose (FED) by Purser.</p></li>
 <li><p>TIME INTEGRAL statistics is available for device outputs.</p></li>
@@ -310,7 +331,7 @@
 <li><p>The output quantity that was once called 'soot density' and the newer version, QUANTITY='DENSITY', SPEC_ID='soot', is now in units of kg/m^3.</p></li>
 <li><p>Device (DEVC) output units can be changed via a CONVERSION_FACTOR.</p></li>
 </ul>
-<h3 id="fds-5.2">FDS 5.2</h3>
+<h3 id="fds-5.2-aug-1-2008">FDS 5.2 (Aug 1, 2008)</h3>
 <ul>
 <li><p>A simple &quot;Eddy Dissipation&quot; model is added to predict the mixing time of fuel and oxygen. Previous versions of FDS used the time step, which was tied to the flow velocity via the CFL criterion. The eddy dissipation model ties the mixing time to the turbulent diffusion coefficient, which is ultimately related to the eddy viscosity of the Smagorinsky form of LES. The eddy dissipation concept is based on scaling arguments and involves an empirical coefficient which has been determined by comparing calculations to classical fire plume experiments and correlations.</p></li>
 <li><p>The names of the output quantities have changed, but the old names are still acceptable. The idea is to use parameters like SPEC_ID and PART_ID in conjunction with QUANTITY's like 'MASS FRACTION' and 'VOLUME FRACTION.' Details are in the User's Guide. Also, the underscores in QUANTITY names are no longer needed.</p></li>
@@ -318,7 +339,7 @@
 <li><p>The mean beam length (PATH_LENGTH) for the radiation solver is no longer based on the size of the overall domain, but rather it defaults to 5 times the mesh cell size.</p></li>
 <li><p>It is now possible to declare explicitly a surrogate species for smoke that can be visualized with SMOKE3D and a new output QUANTITY called VISIBILITY.</p></li>
 </ul>
-<h3 id="fds-5.1">FDS 5.1</h3>
+<h3 id="fds-5.1-jan-8-2008">FDS 5.1 (Jan 8, 2008)</h3>
 <p>In simulations involving multiple meshes, FDS no longer allows the meshes to be arbitrarily connected. Starting with version 5.1, mesh resolution can only increase or decrease in integer increments. This change in functionality means that some input files that ran previously will no longer run.</p>
 <h3 id="details-of-fds-maintenance-releases">Details of FDS Maintenance Releases</h3>
 <p>Version 6.1.2 - September 26, 2014 (SVN Revision 20564)</p>
