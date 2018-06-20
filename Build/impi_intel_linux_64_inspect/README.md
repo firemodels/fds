@@ -10,15 +10,13 @@ For details on the Intel Trace Collector, read the [manual](https://software.int
 
 The main consideration in tracing FDS is that the trace file can become enormous if you run a long job and trace each and every function and subroutine call. To prevent this, there is a configuration file called `fds_trace.conf` in this directory that contains a list of the main subroutines called in FDS. Only these subroutines are traced, keeping the trace file to a reasonable size and enabling you to more easily visualize the work flow. 
 
-To use the configuration file, add the line
+To use the configuration file, add the `-c <filepath>/<configfilename>.conf` flag to qfds.sh. If using a custom script, add
 ```
 export VT_CONFIG=<Full path to FDS repo>/Build/impi_intel_linux_64_inspect/fds_trace.conf
 ```
-to your PBS script that can be created using `qfds.sh`
+to your PBS script.
 ```
-qfds.sh -p N -T inspect -v job_name.fds
-```
-Submit the job into whatever queue you want
+Submit the job into whatever queue you want with
 ```
 qsub -q whatever my_PBS_script
 ```
