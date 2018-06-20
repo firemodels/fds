@@ -15,7 +15,7 @@ To use the configuration file, add the `-c <filepath>/<configfilename>.conf` fla
 export VT_CONFIG=<Full path to FDS repo>/Build/impi_intel_linux_64_inspect/fds_trace.conf
 ```
 to your PBS script.
-```
+
 Submit the job into whatever queue you want with
 ```
 qsub -q whatever my_PBS_script
