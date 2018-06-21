@@ -237,6 +237,15 @@ impi_intel_linux_64_advise : obj = fds_impi_intel_linux_64_advise
 impi_intel_linux_64_advise : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -debug inline-debug-info -D TBB_USE_THREADING_TOOLS -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_vtune : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_64_vtune : LFLAGS = -shared-intel
+impi_intel_linux_64_vtune : FCOMPL = mpiifort
+impi_intel_linux_64_vtune : FOPENMPFLAGS = -qopenmp -qopenmp-link dynamic -liomp5
+impi_intel_linux_64_vtune : obj = fds_impi_intel_linux_64_vtune
+impi_intel_linux_64_vtune : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
 impi_intel_linux_64_inspect : FFLAGS = -tcollect -m64 -mt_mpi -check none -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGS = -shared-intel
