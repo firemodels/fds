@@ -2,7 +2,7 @@
 % 12-14-2016
 % wind_profiles.m
 %
-% Atmospheric Boundary Layer profiles, based on M-O theory as described in 
+% Atmospheric Boundary Layer profiles, based on M-O theory as described in
 % "Falcon Series Data Report", GRI-89/0138, June 1990.
 
 clear all
@@ -71,6 +71,10 @@ set(legend_handle,'Fontsize',Key_Font_Size);
 xlabel('Velocity (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
+% add Git revision if file is available
+Git_Filename = [outdir,test{i},'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
@@ -93,6 +97,9 @@ legend_handle=legend('Measured','M-O Theory','Simulated','Location','SouthEast')
 set(legend_handle,'Fontsize',Key_Font_Size);
 xlabel('Temperature (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+
+% add Git revision if file is available
+addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
