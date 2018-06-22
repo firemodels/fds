@@ -77,7 +77,6 @@ end
 
 % Read in global plot options
 plot_style
-Font_Interpreter = 'LaTeX';
 
 % Read in scatter plot inputs file
 Q = importdata(Scatterplot_Inputs_File);
@@ -146,7 +145,7 @@ for j=2:length(Q);
 
             for kk=1:10
                 for jj=1:10
-                    if abs(Measured_Metric(k,jj,kk))>0 
+                    if abs(Measured_Metric(k,jj,kk))>0
                        n_lines = n_lines+1;
                        file_line(n_lines) = [num2str(i),',',num2str(Measured_Metric(k,jj,kk)),',',num2str(Predicted_Metric(k,jj,kk))];
                     end
@@ -231,7 +230,7 @@ for j=2:length(Q);
             end
         end
     end
-    
+
     % Write out the measured and predicted value for this quantity
     if n_lines > 0 && strcmp(Stats_Output, 'Validation')
        fid = fopen([Manuals_Dir,Plot_Filename,'_Points.csv'],'w');
