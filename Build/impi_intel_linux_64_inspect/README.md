@@ -68,3 +68,12 @@ The [Intel Inspector](https://software.intel.com/en-us/node/622387) can help det
    ```
 3. Create and configure the project through Inspector. If trying to inspect fds, use `qfds.sh` with the `-v` (verbose) flag in order to see which settings will be need to be configured in Inspector.
 
+
+## Intel Cluster Checker
+
+The Intel Cluster Checker is a diagnostic tool that checks the overall health of your compute cluster. To use it, first consult the [User's Guide](https://software.intel.com/en-us/cluster-checker-user-guide-2019-beta). In brief, do the following:
+
+   1. Install Intel Cluster Checker and run `source /opt/intel19/clck/2019b/bin/clckvars.sh`. Your path might be slightly different.
+   2. Create a `nodefile`, which is just a text file with a list of the cluster node names, one per line.
+   3. Run `clck -f nodefile`
+
