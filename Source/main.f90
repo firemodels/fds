@@ -453,7 +453,7 @@ ENDDO
 
 WALL_CLOCK_START_ITERATIONS = CURRENT_TIME()
 T_USED = 0._EB
-T_USED(1) = CURRENT_TIME()
+T_USED(1) = WALL_CLOCK_START_ITERATIONS
 
 ! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
 
