@@ -329,7 +329,11 @@ COUNT_MESH_LOOP: DO
    ENDIF
    NMESHES      = NMESHES + N_MESH_NEW
    IF (.NOT.EVACUATION) NMESHES_FIRE =  NMESHES_FIRE + N_MESH_NEW
-   16 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with MESH line.') ; RETURN ; ENDIF
+16 IF (IOS>0) THEN
+      WRITE(MESSAGE,'(A,I0)') 'ERROR: Problem with MESH line, line number ',INPUT_FILE_LINE_NUMBER
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
 ENDDO COUNT_MESH_LOOP
 15 CONTINUE
 
@@ -9246,7 +9250,7 @@ COUNT_LOOP: DO
    ENDIF
    N_HOLE   = N_HOLE   + N_HOLE_NEW
    2 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with HOLE number',N_HOLE_O+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with HOLE number',N_HOLE_O+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_LOOP
@@ -9317,8 +9321,8 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
              (TEMP_XB(NN,3) <= XB(4) .AND. TEMP_XB(NN,4) >= XB(3)) .AND. &
              (TEMP_XB(NN,5) <= XB(6) .AND. TEMP_XB(NN,6) >= XB(5))) THEN
             IF (CONTROLLED(N) .OR. CONTROLLED(NN)) THEN
-               WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Cannot overlap HOLEs with a DEVC_ID or CTRL_ID. HOLE number',N_HOLE_O+1,&
-                                             ', line number',INPUT_FILE_LINE_NUMBER
+               WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Cannot overlap HOLEs with a DEVC_ID or CTRL_ID. HOLE number ',N_HOLE_O+1,&
+                                             ', line number ',INPUT_FILE_LINE_NUMBER
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -9720,7 +9724,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       ELSE
          IF (SURF_ID=='HVAC') THEN
             WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Cannot use MULT with an HVAC VENT, VENT ', N_VENT+1,&
-                                         ', line number',INPUT_FILE_LINE_NUMBER
+                                         ', line number ',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO N=1,N_MULT
@@ -9729,18 +9733,18 @@ MESH_LOOP_1: DO NM=1,NMESHES
          ENDDO
          IF (N_VENT_NEW==0) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1,&
-                                             ', line number',INPUT_FILE_LINE_NUMBER
+                                             ', line number ',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
       IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
          WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: must specify an ID for an HVAC VENT, VENT ', N_VENT+1,&
-                                      ', line number',INPUT_FILE_LINE_NUMBER
+                                      ', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       N_VENT = N_VENT + N_VENT_NEW
       4 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with VENT ',N_VENT+1,', line number',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with VENT ',N_VENT+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO COUNT_VENT_LOOP
@@ -10459,7 +10463,7 @@ COUNT_LOOP: DO
    READ(LU_INPUT,NML=INIT,END=11,ERR=12,IOSTAT=IOS)
    N_INIT_READ = N_INIT_READ + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with INIT number ',N_INIT_READ+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with INIT number ',N_INIT_READ+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    N_INIT_NEW = 0
@@ -10905,7 +10909,7 @@ COUNT_ZONE_LOOP: DO
    READ(LU_INPUT,NML=ZONE,END=11,ERR=12,IOSTAT=IOS)
    N_ZONE = N_ZONE + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ZONE number ',N_ZONE+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ZONE number ',N_ZONE+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_ZONE_LOOP
@@ -11114,7 +11118,7 @@ COUNT_DEVC_LOOP: DO
    N_DEVC_READ = N_DEVC_READ + 1
    IF (POINTS>1 .AND. .NOT.TIME_HISTORY) MAX_DEVC_LINE_POINTS = MAX(MAX_DEVC_LINE_POINTS,POINTS)
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with DEVC number ',N_DEVC_READ+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with DEVC number ',N_DEVC_READ+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_DEVC_LOOP
@@ -11612,7 +11616,7 @@ COUNT_CTRL_LOOP: DO
    READ(LU_INPUT,NML=CTRL,END=11,ERR=12,IOSTAT=IOS)
    N_CTRL = N_CTRL + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with CTRL number ',N_CTRL+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with CTRL number ',N_CTRL+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_CTRL_LOOP
@@ -12366,7 +12370,7 @@ COUNT_PROF_LOOP: DO
    READ(LU_INPUT,NML=PROF,END=11,ERR=12,IOSTAT=IOS)
    N_PROF = N_PROF + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with PROF number ',N_PROF+1,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with PROF number ',N_PROF+1,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ENDDO COUNT_PROF_LOOP
@@ -12464,7 +12468,7 @@ COUNT_ISOF_LOOP: DO
    READ(LU_INPUT,NML=ISOF,END=9,ERR=10,IOSTAT=IOS)
    N_ISOF = N_ISOF + 1
    10 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ISOF number ',N_ISOF,', line number',INPUT_FILE_LINE_NUMBER
+      WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with ISOF number ',N_ISOF,', line number ',INPUT_FILE_LINE_NUMBER
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 ENDDO COUNT_ISOF_LOOP
@@ -12543,7 +12547,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF + 2
       IF (VECTOR .AND. .NOT. TWO_D) N_SLCF = N_SLCF + 3
       10 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SLCF number ',N_SLCF_O+1,', line number',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with SLCF number ',N_SLCF_O+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO COUNT_SLCF_LOOP
@@ -12814,7 +12818,7 @@ COUNT_BNDF_LOOP: DO
    READ(LU_INPUT,NML=BNDF,END=209,ERR=210,IOSTAT=IOS)
    N_BNDF = N_BNDF + 1
    210 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with BNDF number ',N_BNDF+1,', line number',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with BNDF number ',N_BNDF+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 ENDDO COUNT_BNDF_LOOP
@@ -12897,7 +12901,7 @@ COUNT_BNDE_LOOP: DO
    READ(LU_INPUT,NML=BNDE,END=309,ERR=310,IOSTAT=IOS)
    N_BNDE = N_BNDE + 1
    310 IF (IOS>0) THEN
-         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with BNDE number ',N_BNDE+1,', line number',INPUT_FILE_LINE_NUMBER
+         WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with BNDE number ',N_BNDE+1,', line number ',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
        ENDIF
 ENDDO COUNT_BNDE_LOOP
