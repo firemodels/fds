@@ -58,3 +58,5 @@ Stat_Dataname      = parameters(find(strcmp(headers,'Dataname')));
 Stat_Plot_Filename = parameters(find(strcmp(headers,'Plot_Filename')));
 Stat_Dep_Title     = parameters(find(strcmp(headers,'Dep_Title')));
 Error_Tolerance    = parameters(find(strcmp(headers,'Error_Tolerance')));
+Font_Interpreter   = char(parameters(find(strcmp(headers,'Font_Interpreter'))));
+
