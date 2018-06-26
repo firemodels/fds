@@ -2292,9 +2292,9 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \subsection{Special Topic: Using {\ct MULT} to make shapes out of obstructions}
 \label{info:multobst}
 
-Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
+Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of four basic shapes: sphere, cylinder, cone or box.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
 
-With regard to the {\ct SURF\_ID},
+%With regard to the {\ct SURF\_ID},
 
 The first step in carving out the shape is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
 
@@ -2307,7 +2307,8 @@ The first step in carving out the shape is to create a {\ct MULT} line that defi
 {\ct SHAPE} \hfill   & Parameters (default values in Table~\ref{tbl:OBST})    \hfill    \\ \hline
 {\ct 'SPHERE'}       & {\ct XYZ}, {\ct RADIUS}                                  \\
 {\ct 'CYLINDER'}     & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
-{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\ \hline
+{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
+{\ct 'BOX'}            & {\ct XYZ}, {\ct LENGTH}, {\ct WIDTH}, {\ct HEIGHT}, {\ct ORIENTATION}, {\ct THETA} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -2353,7 +2354,7 @@ To create a cylinder we need a height and orientation in addition to the radius.
 \label{fig:obst_cylinder}
 \end{figure}
 
-A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig X.
+A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig~\ref{fig:obst_cone}.
 
 \begin{lstlisting}
 &SURF ID='shape', COLOR='FOREST GREEN'/
@@ -2375,6 +2376,31 @@ A cone needs basically the same input parameters as a cylinder.  The position of
 \label{fig:obst_cone}
 \end{figure}
 
+Finally, the box shape allows to define rotated cuboids. A box shape is defined locally by its {\ct HEIGHT}, {\ct WIDTH} and {\ct LENGTH}. The location of the box center is provided in {\ct XYZ}. The angle {\ct THETA} in degrees specifies a rotation of the box respect to the global $z$ axis, following right hand rule.
+Subsequently, the {\ct ORIENTATION} direction vector allows for an orientation change respect to the {\ct THETA} rotated reference frame. This direction vector changes the box orientation such that the local {\ct HEIGHT} direction matches it.
+A simple example is shown Fig~\ref{fig:obst_rotbox}.
+
+\begin{lstlisting}
+&SURF ID='shape', COLOR='GRAY'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='BOX'
+      LENGTH=0.075
+      WIDTH=0.025
+      HEIGHT=0.05
+      XYZ=0,0,0.01
+      ORIENTATION=0.5,0,1
+      THETA = 45. /
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
+\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_rotbox}
+\end{figure}
 
 
 \chapter{Fire and Thermal Boundary Conditions}
@@ -3287,28 +3313,35 @@ When using 3D mass transport, view the fuel gas density inside the solid using
 All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
 
+\clearpage
 
 \section{Thermal Degradation Model for Vegetation}
 
-The working model for the thermal degradation of a vegetative fuel is similar to that employed by others~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process has three reactions:
+FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+
+\vspace{\baselineskip}
 
 \noindent 1. Endothermic drying
 \be
- {\rm Wet Vegetation} \rightarrow M_{\rm dw} \, {\rm H_2O} + (1-M_{\rm dw}) \, {\rm Dry\ Vegetation}
+ {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
 \ee
 
 \noindent 2. Endothermic pyrolysis
 \be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, ({\rm Fuel\ Gas + Soot})
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
 \ee
 
 \noindent 3. Exothermic char oxidation
 \be
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \ee
-$M_{\rm dw}$ is the fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ is the mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ = 1.65~\cite{Porterie:2006};  $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
+$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
+\be
+  Y_{\rm w} = \frac{M}{1+M}
+\ee
+$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
 
-In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
+In the equations to follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
 
 The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
 \begin{eqnarray}
@@ -3317,7 +3350,7 @@ The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
   r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
   \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
 \end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder, where $\sigma_{\rm v}$ is the surface area to volume ratio of the cylinder. $\beta_{\rm v}$ is the {\em packing ratio}; that is, the ratio of the vegetation volume to the overall volume containing the vegetation. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
@@ -3326,13 +3359,14 @@ where $T_{\rm v}$ is the temperature of the vegetation. The default values of th
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-Constant                 &   Default Value  \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
-$E_{\rm H_2O}/R$ (K)         & 5,800 \\ \hline
-$A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
-$E_{\rm pyr}/R$ (K)            & 7,250  \\ \hline
-$A_{\rm char}$ (m/s)          & 430 \\ \hline
-$E_{\rm char}/R$ (K)           & 9,000 \\ \hline
+Constant                        &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
+$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
+$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
+$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
+$A_{\rm char}$ (m/s)            & 430              \\ \hline
+$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
+$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -3342,7 +3376,7 @@ The equation governing the temperature of a thermally thin fuel element is
 \label{eq:Tv_thermally_thin}
 \rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
 \ee
-The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32 \times 10^3$~kJ/kg~\cite{Dahale:2013}.
+The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2259$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32000$~kJ/kg~\cite{Dahale:2013}.
 
 In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
 \begin{eqnarray}
@@ -3351,9 +3385,9 @@ In the condensed phase model, the bulk density and specific heat have contributi
 \end{eqnarray}
 where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
 \begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
-c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
-c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm p, dry} &=& 10 + 3.7 \, T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
+c_{\rm p, char} &=& 420 + 2.09 \, T_{\rm v} + 6.85 \times 10^{-4} \, T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
+c_{\rm p, ash} &=& 1244 \, (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
 c_{\rm p,H_2O} &=& 4190
 \end{eqnarray}
 The rate of change of the total vegetative fuel mass is
@@ -3368,6 +3402,70 @@ The rate of change for the components of the vegetative mass during thermal degr
 \end{eqnarray}
 Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
 
+Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that each {\ct MATL} line contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
+
+\begin{figure}[p]
+\begin{lstlisting}
+&PART ID='pine needles', SURF_ID='vegetation', STATIC=.TRUE. /
+
+&SURF ID = 'vegetation'
+      MATL_ID = 'WET VEGETATION'
+      THICKNESS = 0.0005
+      LENGTH = 0.05
+      GEOMETRY = 'CYLINDRICAL' /
+      
+&MATL ID = 'WET VEGETATION'
+      VEGETATION = .TRUE.
+      DENSITY = 586.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      A = 600000.
+      E = 48200.
+      N_T = -0.5
+      NU_SPEC = 0.123
+      SPEC_ID = 'WATER VAPOR'
+      NU_MATL = 0.877
+      MATL_ID = 'DRY VEGETATION'
+      HEAT_OF_REACTION = 2259. /
+      
+&MATL ID = 'DRY VEGETATION'
+      VEGETATION = .TRUE.
+      DENSITY = 514.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      A = 36300.
+      E = 60300.
+      NU_MATL = 0.26
+      MATL_ID = 'CHAR'
+      NU_SPEC = 0.74
+      SPEC_ID = 'CELLULOSE'
+      HEAT_OF_REACTION = 418. /
+      
+&MATL ID = 'CHAR'
+      VEGETATION = .TRUE.
+      DENSITY  = 134.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      N_S = 0.
+      NU_O2 = 1.65
+      BETA_CHAR = 0.2
+      A = 430.
+      E = 74800.
+      NU_MATL = 0.5
+      MATL_ID  = 'ASH'
+      NU_SPEC = 2.15
+      SPEC_ID = 'CARBON DIOXIDE'
+      HEAT_OF_REACTION= -32000. /
+      
+&MATL ID = 'ASH'
+      VEGETATION = .TRUE.
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0 /
+\end{lstlisting}
+\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
+\label{vege_inputs}
+\end{figure}
 
 
 
@@ -4571,7 +4669,7 @@ Table~\ref{tau_table} lists the various quantities that can be controlled by {\c
 \hline
 Quantity            & Group       & Input Parameter(s)                                      & {\ct TAU}           & {\ct RAMP ID}       \\ \hline \hline
 Volume Flow   & {\ct HVAC}  & {\ct VOLUME\_FLOW}                                        & {\ct TAU\_FAN}      & {\ct RAMP\_ID}       \\ \hline
-Heating Rate   & {\ct HVAC}  & {\ct FIXED_Q}                                            & {\ct TAU\_AC}        & {\ct RAMP\_ID}       \\ \hline
+Heating Rate   & {\ct HVAC}  & {\ct FIXED\_Q}                                            & {\ct TAU\_AC}        & {\ct RAMP\_ID}       \\ \hline
 Heat Release Rate   & {\ct SURF}  & {\ct HRRPUA}                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
 Heat Flux           & {\ct SURF}  & {\ct NET\_HEAT\_FLUX}, etc.                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
 Temperature         & {\ct SURF}  & {\ct TMP\_FRONT}                                        & {\ct TAU\_T}        & {\ct RAMP\_T}       \\ \hline
