@@ -1292,7 +1292,7 @@ Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS h
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
 
-
+Note that in a case with sprinklers, changing {\ct GVEC} will change how droplets move in the gas but not how droplets move on solid sufaces. On solid surfaces droplet movement will always consider down to be the negative-z direction.
 
 \section{Special Topic: The Baroclinic Vorticity}
 \label{baroclinic_torque}
@@ -9656,7 +9656,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           & $^\circ$C     & 25.             \\ \hline
-{\ct HVAC\_LOCAL\_PRESSURE}                    & Logical       & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
+{\ct HVAC\_LOCAL\_PRESSURE}                    & Logical       & Section~\ref{info:HVAC}                               &              &  {\ct .TRUE.}     \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct HVAC\_PRES\_RELAX}                         & Real          & Section ~\ref{info:HVAC}                              &               & 0.5               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
