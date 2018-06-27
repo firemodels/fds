@@ -8662,6 +8662,7 @@ SUBROUTINE TIMINGS
 ! Print out detector activation times and total elapsed time into .out file.
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+REAL(EB) :: T_NOW
 INTEGER :: N
 LOGICAL :: WRITE_HEADER
 TYPE(CONTROL_TYPE), POINTER :: CF=>NULL()
@@ -8691,8 +8692,9 @@ ENDIF
 ! Printout elapsed wall clock time
 
 IF (ICYC>0) THEN
-   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',SUM(T_USED(1:N_TIMERS))
-   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',CURRENT_TIME()-WALL_CLOCK_START
+   T_NOW = CURRENT_TIME()
+   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',T_NOW - WALL_CLOCK_START_ITERATIONS
+   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',T_NOW - WALL_CLOCK_START
 ENDIF
 
 END SUBROUTINE TIMINGS

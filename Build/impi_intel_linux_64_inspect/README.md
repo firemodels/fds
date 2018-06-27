@@ -10,15 +10,13 @@ For details on the Intel Trace Collector, read the [manual](https://software.int
 
 The main consideration in tracing FDS is that the trace file can become enormous if you run a long job and trace each and every function and subroutine call. To prevent this, there is a configuration file called `fds_trace.conf` in this directory that contains a list of the main subroutines called in FDS. Only these subroutines are traced, keeping the trace file to a reasonable size and enabling you to more easily visualize the work flow. 
 
-To use the configuration file, add the line
+To use the configuration file, add the `-c <filepath>/<configfilename>.conf` flag to qfds.sh. If using a custom script, add
 ```
 export VT_CONFIG=<Full path to FDS repo>/Build/impi_intel_linux_64_inspect/fds_trace.conf
 ```
-to your PBS script that can be created using `qfds.sh`
-```
-qfds.sh -p N -T inspect -v job_name.fds
-```
-Submit the job into whatever queue you want
+to your PBS script.
+
+Submit the job into whatever queue you want with
 ```
 qsub -q whatever my_PBS_script
 ```
@@ -67,4 +65,13 @@ The [Intel Inspector](https://software.intel.com/en-us/node/622387) can help det
    inspxe-gui
    ```
 3. Create and configure the project through Inspector. If trying to inspect fds, use `qfds.sh` with the `-v` (verbose) flag in order to see which settings will be need to be configured in Inspector.
+
+
+## Intel Cluster Checker
+
+The Intel Cluster Checker is a diagnostic tool that checks the overall health of your compute cluster. To use it, first consult the [User's Guide](https://software.intel.com/en-us/cluster-checker-user-guide-2019-beta). In brief, do the following:
+
+   1. Install Intel Cluster Checker and run `source /opt/intel19/clck/2019b/bin/clckvars.sh`. Your path might be slightly different.
+   2. Create a `nodefile`, which is just a text file with a list of the cluster node names, one per line.
+   3. Run `clck -f nodefile`
 
