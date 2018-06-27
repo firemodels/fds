@@ -7582,13 +7582,13 @@ SELECT CASE(TRIM(SOLVER))
       IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'    ! Use Krylov default solver for SCARC
       IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'FFT'       ! Use FFT as default preconditioner for SCARC
 
-   CASE('GLMAT')
+   CASE('UGLMAT')
       PRES_METHOD = 'GLMAT'
       GLMAT_SOLVER = .TRUE.
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
-   CASE('GLMAT IBM')
+   CASE('GLMAT')
       PRES_METHOD = 'GLMAT'
       GLMAT_SOLVER = .TRUE.
       PRES_ON_WHOLE_DOMAIN = .TRUE.
