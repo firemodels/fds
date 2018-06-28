@@ -358,7 +358,7 @@ CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
 
 
-if [ "$INTEL_BIN_DIR" != "" ]; then
+if [[ "$INTEL_BIN_DIR" != "" ]] && [[ -e $INTEL_BIN_DIR ]]; then
   if [ "$MPI_VERSION" == "INTEL" ]; then
     echo ""
     echo "--- copying Intel exe's ---"
@@ -369,9 +369,11 @@ if [ "$INTEL_BIN_DIR" != "" ]; then
   echo ""
   echo "--- copying compiler run time libraries ---"
   echo ""
-  CP $INTEL_LIB_DIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
-  CP $INTEL_LIB_DIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
-  CP $INTEL_LIB_DIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
+  if [[ "$INTEL_LIB_DIR" != "" ]] && [[ -e $INTEL_LIB_DIR ]]; then
+    CP $INTEL_LIB_DIR libiomp5.so      $bundledir/bin/LIB64 libiomp5.so
+    CP $INTEL_LIB_DIR libmpifort.so.12 $bundledir/bin/LIB64 libmpifort.so.12
+    CP $INTEL_LIB_DIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
+  fi
 fi
 if [ "$OS_LIB_DIR" != "" ]; then
   echo ""
