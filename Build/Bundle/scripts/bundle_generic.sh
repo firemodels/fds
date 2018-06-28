@@ -333,14 +333,10 @@ echo ""
 echo "--- copying configuration files ---"
 echo ""
 
-CP $fds_bundle README_repo.html   $bundledir/Documentation README_repo.html
-
-CP $smv_bundle smokeview.ini $bundledir/bin smokeview.ini
-
-CP $smv_bundle volrender.ssf $bundledir/bin volrender.ssf
-
-CP $smv_bundle objects.svo   $bundledir/bin objects.svo
-
+CP $fds_bundle README_repo.html $bundledir/Documentation README_repo.html
+CP $smv_bundle smokeview.ini    $bundledir/bin smokeview.ini
+CP $smv_bundle volrender.ssf    $bundledir/bin volrender.ssf
+CP $smv_bundle objects.svo      $bundledir/bin objects.svo
 if [ "$MPI_VERSION" != "INTEL" ]; then
   CP $OPENMPI_DIR $openmpifile  $bundledir/bin $openmpifile
 fi
@@ -348,14 +344,14 @@ fi
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP2 $GUIDE_DIR FDS_Config_Management_Plan.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Config_Management_Plan.pdf    $bundledir/Documentation
 CP2 $GUIDE_DIR FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $GUIDE_DIR FDS_User_Guide.pdf $bundledir/Documentation
-CP2 $GUIDE_DIR FDS_Validation_Guide.pdf $bundledir/Documentation
-CP2 $GUIDE_DIR FDS_Verification_Guide.pdf $bundledir/Documentation
-CP2 $GUIDE_DIR SMV_User_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_User_Guide.pdf                $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Validation_Guide.pdf          $bundledir/Documentation
+CP2 $GUIDE_DIR FDS_Verification_Guide.pdf        $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_User_Guide.pdf                $bundledir/Documentation
 CP2 $GUIDE_DIR SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
-CP2 $GUIDE_DIR SMV_Verification_Guide.pdf $bundledir/Documentation
+CP2 $GUIDE_DIR SMV_Verification_Guide.pdf        $bundledir/Documentation
 
 
 if [[ "$INTEL_BIN_DIR" != "" ]] && [[ -e $INTEL_BIN_DIR ]]; then
@@ -385,9 +381,9 @@ fi
 echo ""
 echo "--- copying release notes ---"
 echo ""
-CP $fds_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
-CP $webpagesdir smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
+CP $fds_bundle  FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
+CP $webpagesdir smv_readme.html       $bundledir/Documentation SMV_Release_Notes.html
 
 
 # CP2 $fds_bundle readme_examples.html $bundledir/Examples
