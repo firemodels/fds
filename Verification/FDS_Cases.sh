@@ -270,7 +270,7 @@ $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
@@ -278,7 +278,7 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
