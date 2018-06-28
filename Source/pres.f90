@@ -510,6 +510,7 @@ WALL_WORK1 = 0._EB
 
 IF (EXTERNAL_BOUNDARY_CORRECTION) CALL LAPLACE_EXTERNAL_VELOCITY_CORRECTION(DT,NM)
 
+! Logical to define not to apply pressure gradient on external mesh boundaries for GLMAT.
 GLMAT_ON_WHOLE_DOMAIN = (PRES_METHOD=='GLMAT') .AND. PRES_ON_WHOLE_DOMAIN
 
 ! Loop over wall cells and check velocity error.
@@ -535,11 +536,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    DHFCT = 1._EB
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-      IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-         DHFCT = 0._EB ! This factor makes DH/DN=0.
-      ELSEIF(GLMAT_ON_WHOLE_DOMAIN .AND.  IW<=N_EXTERNAL_WALL_CELLS) THEN
-         DHFCT = 0._EB ! Make DH/DN=0. on solid external wall cells.
-      ENDIF
+      IF ( (.NOT.PRES_ON_WHOLE_DOMAIN) .OR. (GLMAT_ON_WHOLE_DOMAIN .AND.  IW<=N_EXTERNAL_WALL_CELLS) ) DHFCT = 0._EB
    ENDIF
 
    ! Update normal component of velocity at the mesh boundary
