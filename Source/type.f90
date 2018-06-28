@@ -381,7 +381,7 @@ END TYPE IBM_CUTEDGE_TYPE
 INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =1024 ! Size definition parameter. Max number of vertices per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =1024 ! Size definition parameter. Max segments per face.
 INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =1024 ! Size definition parameter. Max number of cut faces per Cartesian Face.
-INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 72  ! Size definition parameter.
+INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
    INTEGER :: IWC=0
