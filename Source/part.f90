@@ -829,6 +829,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          DO JJ=J1,J2
             II_LOOP: DO II=I1,I2
                IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
+               IF (IN%SHAPE=='CONE') THEN
+                  IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2) CYCLE II_LOOP
+               ENDIF
                INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN%X2)-MAX(X(II-1),IN%X1)) &
                                              * (MIN(Y(JJ),IN%Y2)-MAX(Y(JJ-1),IN%Y1)) &
                                              * (MIN(Z(KK),IN%Z2)-MAX(Z(KK-1),IN%Z1))
