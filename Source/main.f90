@@ -300,7 +300,10 @@ DO I=1,INITIAL_RADIATION_ITERATIONS
          CYCLE
       ENDIF
       CALL WALL_BC(T_BEGIN,DT,NM)
-      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
+      IF (RADIATION) THEN
+         CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
+         IF (CC_IBM) CALL CCCOMPUTE_RADIATION(T_BEGIN,NM,1)
+      ENDIF
    ENDDO
    DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
       CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
@@ -2750,14 +2753,14 @@ SUBROUTINE DUMP_TIMERS
 
 ! Write out the file CHID_cpu.csv containing the timing breakdown of each MPI process.
 
-INTEGER, PARAMETER :: LINE_LENGTH=159
+INTEGER, PARAMETER :: LINE_LENGTH = 5 + (N_TIMERS+1)*11
 CHARACTER(LEN=LINE_LENGTH) :: LINE
 CHARACTER(LEN=LINE_LENGTH), DIMENSION(0:N_MPI_PROCESSES-1) :: LINE_ARRAY
 
 ! T_USED(1) is the time spent in the main routine; i.e. the time not spent in a subroutine.
 
 T_USED(1) = CURRENT_TIME() - T_USED(1) - SUM(T_USED(2:N_TIMERS))
-WRITE(LINE,'(I5,14(",",ES10.3))') MYID,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS))
+WRITE(LINE,'(I5,15(",",ES10.3))') MYID,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS))
 
 ! All MPI processes except root send their timings to the root process. The root process then writes them out to a file.
 
@@ -2770,7 +2773,7 @@ ELSE
    ENDDO
    FN_CPU = TRIM(CHID)//'_cpu.csv'
    OPEN(LU_CPU,FILE=FN_CPU,STATUS='REPLACE',FORM='FORMATTED')
-   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,EVAC,HVAC,Total T_USED (s)'
+   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,EVAC,HVAC,GEOM,Total T_USED (s)'
    DO N=0,N_MPI_PROCESSES-1
       WRITE(LU_CPU,'(A)') LINE_ARRAY(N)
    ENDDO
