@@ -15,5 +15,7 @@ dem2fds=../../../../smv/Build/dem2fds/intel_linux_64/dem2fds_linux_64
 terraindir=/home/gforney/terrain
 
 
-$dem2fds -dir $terraindir/gatlinburg Gatlinburg_1000m.in
-$dem2fds -geom -dir $terraindir/gatlinburg Gatlinburg_1000m_g.in
+$dem2fds -fds Gatlinburg_1000m.fds -dir $terraindir/gatlinburg Gatlinburg_1000m.in
+$dem2fds -fds Gatlinburg_1000m_g.fds -geom -dir $terraindir/gatlinburg Gatlinburg_1000m.in
+
+cp Gatlinburg_1000m.png Gatlinburg_1000m_g.png
