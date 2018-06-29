@@ -61,9 +61,13 @@ we can convert the drag force expression in Eq.~(\ref{part_force_veg}) to its eq
 
 One further simplification of Eq.~(\ref{part_force_veg}) is made by lumping terms into a single {\em frontal area density}
 \be
-   \kappa_{\rm e} = C_{\rm s,e} \,  \beta_{\rm e} \, \sigma_{\rm e} = \frac{ n_{\rm p,e} \, A_{\rm p,c}}{V}
+   \kappa_{\rm e} = C_{\rm s,e} \,  \beta_{\rm e} \, \sigma_{\rm e} = \frac{ n_{\rm p,e} \, A_{\rm p,c}}{V} \label{kappa_eq}
 \ee
-$\kappa_{\rm e}$ can also be thought of as an {\em absorption coefficient} for the purpose of computing thermal radiation absorption.
+$\kappa_{\rm e}$ can also be thought of as an {\em absorption coefficient} for the purpose of computing thermal radiation absorption. In practice, $\kappa_{\rm e}$ is not determined from Eq.~(\ref{kappa_eq}). Rather, it is obtained by measuring the relative amount of sunlight that penetrates a slab of vegetation of thickness, $L$:
+\be
+   W = {\rm e}^{-\kappa_{\rm e} L}
+\ee
+Here, $W$ is the relative area of ``white'' of the shadowgraph formed by sunlight passing through the vegetation. It can also be thought of as the fraction of blue sky one sees when looking through a tree canopy of thickness $L$. It is often referred to as the {\em frontal area index} or {\em frontal area fraction}, not to be confused with the {\em frontal area density}, $\kappa_{\rm e}$.
 
 \subsection{Drag Reduction}
 \label{sec:threeway}
