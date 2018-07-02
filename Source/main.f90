@@ -104,6 +104,10 @@ IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
 CALL READ_DATA(DT)
 IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
+IF (SET_UP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) THEN
+   STOP_STATUS = SETUP_ONLY_STOP
+ENDIF
+
 CALL STOP_CHECK(1)
 
 ! Setup number of OPENMP threads
@@ -139,7 +143,7 @@ T = T_BEGIN
 
 ! Stop all the processes if this is just a set-up run
 
-IF (SET_UP_ONLY) THEN
+IF (CHECK_MESH_ALIGNMENT) THEN
    IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
    STOP_STATUS = SETUP_ONLY_STOP
    IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'

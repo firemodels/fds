@@ -991,10 +991,7 @@ Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='T
 \section{Computational Meshes: The \texorpdfstring{{\tt MESH}}{MESH} Namelist Group (Table \ref{tbl:MESH})}
 \label{info:MESH}
 
-All FDS calculations must be performed within a domain that is made up
-of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells},
-the number of which depends on the desired resolution of the flow dynamics.
-{\ct MESH} is the namelist group that defines the computational domain.
+All FDS calculations must be performed within a domain that is made up of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells}, the number of which depends on the desired resolution of the flow dynamics. {\ct MESH} is the namelist group that defines the computational domain.
 
 \subsection{Basics}
 \label{info:MESH_Basics}
@@ -1058,6 +1055,7 @@ Some parallel computing environments do not have a centralized file system, in w
 
 
 \subsection{Mesh Alignment}
+\label{info:mesh_alignment}
 
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
 \begin{figure}[p]
@@ -1125,6 +1123,7 @@ The following rules of thumb should also be followed when setting up a multiple 
 \item Be careful when using the shortcut convention of declaring an entire face of the domain to be an {\ct OPEN} vent. Every mesh takes on this attribute. See Section~\ref{info:VENT} for more details.
 \item If a planar obstruction is close to where two meshes abut, make sure that each mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one of the meshes, that mesh does not account for it, in which case information is not transferred properly between meshes.
 \end{itemize}
+If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct .TRUE.} on any {\ct MESH} line. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye.
 
 
 \subsubsection{Accuracy of the Multiple Mesh Calculation}
@@ -3413,7 +3412,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       THICKNESS = 0.0005
       LENGTH = 0.05
       GEOMETRY = 'CYLINDRICAL' /
-      
+
 &MATL ID = 'WET VEGETATION'
       VEGETATION = .TRUE.
       DENSITY = 586.
@@ -3427,7 +3426,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       NU_MATL = 0.877
       MATL_ID = 'DRY VEGETATION'
       HEAT_OF_REACTION = 2259. /
-      
+
 &MATL ID = 'DRY VEGETATION'
       VEGETATION = .TRUE.
       DENSITY = 514.
@@ -3440,7 +3439,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       NU_SPEC = 0.74
       SPEC_ID = 'CELLULOSE'
       HEAT_OF_REACTION = 418. /
-      
+
 &MATL ID = 'CHAR'
       VEGETATION = .TRUE.
       DENSITY  = 134.
@@ -3456,7 +3455,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       NU_SPEC = 2.15
       SPEC_ID = 'CARBON DIOXIDE'
       HEAT_OF_REACTION= -32000. /
-      
+
 &MATL ID = 'ASH'
       VEGETATION = .TRUE.
       DENSITY = 67.
@@ -9588,19 +9587,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR}                & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
-{\ct CYLINDRICAL}          & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVACUATION}           & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}         & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}      & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
-{\ct ID}                   & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
-{\ct IJK}                  & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
-{\ct LEVEL}                & Integer                       & For future use                            &    & 0                \\ \hline
-{\ct MPI\_PROCESS}         & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct N\_THREADS}           & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct MULT\_ID }            & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct RGB}                  & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
-{\ct XB(6)}                & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
+{\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}        &    & {\ct .FALSE.}    \\ \hline
+{\ct COLOR}                          & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL}                    & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}                     & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}                   & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}                & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
+{\ct ID}                             & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
+{\ct IJK}                            & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
+{\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
+{\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct XB(6)}                          & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
 
