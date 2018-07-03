@@ -15,7 +15,7 @@
 % dem2fds input script Gatlinburg_1000m.in. The script is
 % Make_Gatlinburg_fds_input.sh
 % This script runs dem2fds and produces both the OBST and GEOM version of
-% the tarrin of interest and also image data in .png format.
+% the terrain of interest and also image data in .png format.
 % For the Gatlinburg test case the name of the fds file using ZVALS (GEOM)
 % is Gatlinburg_1000mg.fds
 %
