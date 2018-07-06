@@ -1,7 +1,7 @@
 &HEAD CHID='ccibm_sphere_heat_flux', TITLE='Complex Geometry: Test heat flux bc and energy conservation.' /
 
 # 1 MESH:
-&MESH IJK=64,64,64, XB=-1.4,1.4,-1.4,1.4,-1.4,1.4 /
+&MESH IJK=32,32,32, XB=-1.4,1.4,-1.4,1.4,-1.4,1.4 /
 
 &TIME T_END=10 /
 &RADI RADIATION=.FALSE. /
