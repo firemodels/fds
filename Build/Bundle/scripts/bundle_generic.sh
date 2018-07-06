@@ -382,7 +382,7 @@ echo ""
 echo "--- copying release notes ---"
 echo ""
 
-CP $fds_bundle  FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
+CP $webpagesdir FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 CP $webpagesdir smv_readme.html       $bundledir/Documentation SMV_Release_Notes.html
 
 
