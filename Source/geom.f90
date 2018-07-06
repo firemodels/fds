@@ -3104,7 +3104,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 
-REAL(EB) :: DIVVOL, MINVOL, DUMMY
+REAL(EB) :: DIVVOL, MINVOL, DUMMY, RTRMVOL
 
 LOGICAL, PARAMETER :: DO_CONDUCTION_HEAT_FLUX=.TRUE.
 INTEGER :: DIFFHFLX_IND, JFLX_IND
@@ -3116,14 +3116,13 @@ LOGICAL, PARAMETER :: FIX_DIFF_FLUXES  = .TRUE.
 
 REAL(EB), PARAMETER :: FLX_EPS=1.E-15_EB
 
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIVRG_VOL , VOLDVRG
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIVRG_VOL , RTRM_VOL, VOLDVRG
 INTEGER :: INDZ
 
 ! Pressure sums re-integration vars:
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
-INTEGER :: IW,IPZ, IND1,IND2
-REAL(EB) :: VC, VC1
+INTEGER :: IW,IND1,IND2
 
 ! Shunn MMS test case vars:
 REAL(EB) :: XHAT, ZHAT, Q_Z, TT
@@ -3530,13 +3529,14 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
 ENDIF MMS_IF
 
 
-! Assign divergence on Cartesian Cells:
+! Assign divergence and 1/(rho*Cp*T) on Cartesian Cells:
 IF (AVERAGE_LINKDIV) THEN
 
    ! Average divergence on linked cells:
-   ALLOCATE ( DIVRG_VOL(1:NUNKZ_LOCAL) , VOLDVRG(1:NUNKZ_LOCAL) )
+   ALLOCATE ( DIVRG_VOL(1:NUNKZ_LOCAL) , VOLDVRG(1:NUNKZ_LOCAL), RTRM_VOL(1:NUNKZ_LOCAL) )
    DIVRG_VOL(:) = 0._EB
    VOLDVRG(:)   = 0._EB
+   RTRM_VOL(:)  = 0._EB
 
    ! Add div*vol for all cells and cut-cells on implicit region:
    ! Regular cells:
@@ -3547,6 +3547,7 @@ IF (AVERAGE_LINKDIV) THEN
             ! Unknown number:
             INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
             DIVRG_VOL(INDZ) =  DIVRG_VOL(INDZ) + DP(I,J,K)
+            RTRM_VOL(INDZ)  =  RTRM_VOL(INDZ)  + RTRM(I,J,K)*(DX(I)*DY(J)*DZ(K))
             VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + (DX(I)*DY(J)*DZ(K))
          ENDDO
       ENDDO
@@ -3560,6 +3561,7 @@ IF (AVERAGE_LINKDIV) THEN
          DO JCC=1,CUT_CELL(ICC)%NCELL
             INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
             DIVRG_VOL(INDZ) =  DIVRG_VOL(INDZ) + CUT_CELL(ICC)%DS(JCC)
+            RTRM_VOL(INDZ)  =  RTRM_VOL(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
             VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
       ENDDO
@@ -3571,6 +3573,7 @@ IF (AVERAGE_LINKDIV) THEN
          DO JCC=1,CUT_CELL(ICC)%NCELL
             INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
             DIVRG_VOL(INDZ) =  DIVRG_VOL(INDZ) + CUT_CELL(ICC)%D(JCC)
+            RTRM_VOL(INDZ)  =  RTRM_VOL(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
             VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
       ENDDO
@@ -3582,6 +3585,7 @@ IF (AVERAGE_LINKDIV) THEN
    ! Compute final divergence:
    DO INDZ=UNKZ_ILC(NM)+1,UNKZ_ILC(NM)+NUNKZ_LOC(NM)
       DIVRG_VOL(INDZ)=DIVRG_VOL(INDZ)/VOLDVRG(INDZ)
+      RTRM_VOL(INDZ) = RTRM_VOL(INDZ)/VOLDVRG(INDZ)
    ENDDO
 
    ! Finally load final thermodynamic divergence to corresponding cells:
@@ -3592,6 +3596,7 @@ IF (AVERAGE_LINKDIV) THEN
             IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
             INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START)
             DP(I,J,K) = DIVRG_VOL(INDZ)
+            RTRM(I,J,K) = RTRM_VOL(INDZ)
             DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES) = DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES)/(DX(I)*DY(J)*DZ(K))
          ENDDO
       ENDDO
@@ -3603,12 +3608,16 @@ IF (AVERAGE_LINKDIV) THEN
          J      = CUT_CELL(ICC)%IJK(JAXIS)
          K      = CUT_CELL(ICC)%IJK(KAXIS)
          DIVVOL = 0._EB
+         RTRMVOL= 0._EB
          DO JCC=1,CUT_CELL(ICC)%NCELL
             INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            CUT_CELL(ICC)%DS(JCC) = DIVRG_VOL(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%DS(JCC)  = DIVRG_VOL(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%RTRM(JCC)= RTRM_VOL(INDZ)
             DIVVOL = DIVVOL + CUT_CELL(ICC)%DS(JCC)
+            RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
-         DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
+         DP(I,J,K)  = DIVVOL/(DX(I)*DY(J)*DZ(K))
+         RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
       ENDDO
    ELSE ! CORRECTOR
       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -3616,15 +3625,19 @@ IF (AVERAGE_LINKDIV) THEN
          J      = CUT_CELL(ICC)%IJK(JAXIS)
          K      = CUT_CELL(ICC)%IJK(KAXIS)
          DIVVOL = 0._EB
+         RTRMVOL= 0._EB
          DO JCC=1,CUT_CELL(ICC)%NCELL
             INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            CUT_CELL(ICC)%D(JCC) = DIVRG_VOL(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%D(JCC)   = DIVRG_VOL(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+            CUT_CELL(ICC)%RTRM(JCC)= RTRM_VOL(INDZ)
             DIVVOL = DIVVOL + CUT_CELL(ICC)%D(JCC)
+            RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
          DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
+         RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
       ENDDO
    ENDIF
-   DEALLOCATE ( DIVRG_VOL , VOLDVRG )
+   DEALLOCATE ( DIVRG_VOL , VOLDVRG, RTRM_VOL )
 
 ELSE
 
@@ -3668,45 +3681,6 @@ ELSE
    ENDIF
 
 ENDIF
-
-! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
-
-IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
-
-   USUM(1:N_ZONE,NM) = 0._EB
-   DSUM(1:N_ZONE,NM) = 0._EB
-   PSUM(1:N_ZONE,NM) = 0._EB
-
-   IF (EVACUATION_ONLY(NM)) RTRM=1._EB
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         VC1 = DY(J)*DZ(K)
-         DO I=1,IBAR
-            IF (INTERPOLATED_MESH(I,J,K)>0) CYCLE
-            IPZ = PRESSURE_ZONE(I,J,K)
-            IF (IPZ<1) CYCLE
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            VC = DX(I)*RC(I)*VC1
-            DSUM(IPZ,NM) = DSUM(IPZ,NM) + VC*DP(I,J,K)
-            PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(R_PBAR(K,IPZ)-RTRM(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Calculate the volume flux to the boundary of the pressure zone (int u dot dA)
-
-   WALL_LOOP4: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC => WALL(IW)
-      IF (INTERPOLATED_MESH(WC%ONE_D%IIG,WC%ONE_D%JJG,WC%ONE_D%KKG)>0) CYCLE
-      IPZ = WC%ONE_D%PRESSURE_ZONE
-      IF (IPZ<1) CYCLE WALL_LOOP4
-      IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP4
-      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UWS*WALL(IW)%ONE_D%AREA
-      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UW *WALL(IW)%ONE_D%AREA
-   ENDDO WALL_LOOP4
-
-ENDIF IF_PRESSURE_ZONES
 
 DEALLOCATE(ZZ_GET)
 
