@@ -788,7 +788,7 @@ ENDIF
 
 IF (CFL_FILE) THEN
    OPEN(UNIT=LU_CFL,FILE=FN_CFL,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
-   WRITE(LU_CFL,'(A)') 'Cycle,t,dt,Mesh,i,j,k,CFL,u_i-1,u_i,v_j-1,v_j,w_k-1,w_k'
+   WRITE(LU_CFL,'(A)') 'Cycle,t,dt,CFL,Mesh,i,j,k,u_i-1,u_i,v_j-1,v_j,w_k-1,w_k,VN,Mesh,i,j,k'
 ENDIF
 
 
