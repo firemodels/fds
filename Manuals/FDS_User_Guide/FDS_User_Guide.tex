@@ -974,7 +974,7 @@ If something sudden is to happen right at the start of a simulation, like a spri
 
 At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
-The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains the time, time step, maximum CFL number, the mesh and mesh indices where the maximum value occurs, and the six velocity components on the six faces of this grid cell. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
+The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains the time, time step, maximum CFL number, maximum VN (Von Neumann) number, the mesh and mesh indices where these maximum values occur, and the six velocity components on the six faces of the grid cell where the maximum CFL number occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
 
 
 \subsection{Special Topic: Steady-State Applications}
@@ -6525,7 +6525,7 @@ Sometimes it is convenient to introduce Lagrangian particles within a particular
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
-The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE = (['BLOCK']\footnote{There is no need to specify {\ct SHAPE='BLOCK'}, just omit {\ct SHAPE} in this case.},'CONE','LINE','RING')}. For {\ct 'BLOCK'}, {\ct 'CONE'}, and {\ct 'RING'} the particle positions are randomly distributed by default.  For {\ct 'RING'} you can position the particles uniformly by setting {\ct UNIFORM=.TRUE.} on the {\ct INIT} line.  By default, the region is a rectangular {\ct 'BLOCK'} designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
 \begin{lstlisting}
 &INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
@@ -9485,6 +9485,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
 {\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
