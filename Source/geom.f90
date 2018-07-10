@@ -25463,7 +25463,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          END SELECT
       ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
          NOM = NM ! Use cut face data, same mesh.
-         ! MESHES(NOM)%CONNECTED_MESH(NM)=.TRUE.
+         MESHES(NOM)%CONNECTED_MESH(NM)=.TRUE.
          ! Define underlying Cartesian faces indexes:
          SELECT CASE(IOR)
          CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
