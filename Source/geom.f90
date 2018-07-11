@@ -255,7 +255,7 @@ INTEGER,  PARAMETER :: IBM_NVVARS = 1 ! Number of vertex variables in MESHES(N)%
 INTEGER,  PARAMETER :: IBM_EGSC   = 1 ! Edge media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
 INTEGER,  PARAMETER :: IBM_IDCE   = 2 ! MESHES(N)%CUT_EDGE data struct entry index location.
 INTEGER,  PARAMETER :: IBM_ECRS   = 3 ! MESHES(N)%EDGE_CROSS data struct entry index location.
-INTEGER,  PARAMETER :: IBM_NEVARS = 3 ! Number of edge variables in MESHES(N)%IBM_ECVAR.
+INTEGER,  PARAMETER :: IBM_NEVARS = 3 ! Number of edge variables in MESHES(N)%ECVAR.
 
 ! Cartesian Face centered variables:
 INTEGER,  PARAMETER :: IBM_FGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
@@ -264,20 +264,22 @@ INTEGER,  PARAMETER :: IBM_FGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID
 INTEGER,  PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%CUT_FACE data struct entry index location,
                                       ! IBM_INBOUNDCF type cut-faces.
 INTEGER,  PARAMETER :: IBM_FFNF   = 4 ! Flag that defines if face is to be IB forced or not.
-INTEGER,  PARAMETER :: IBM_NFVARS = 4 ! Number of face variables in MESHES(N)%IBM_FCVAR.
+INTEGER,  PARAMETER :: IBM_NFVARS = 4 ! Number of face variables in MESHES(N)%FCVAR.
 
 ! Cartesian Cell centered variables:
 INTEGER,  PARAMETER :: IBM_CGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
 !INTEGER, PARAMETER :: IBM_IDCE   = 2 ! MESHES(N)%CUT_EDGE data struct entry index location,
                                       ! cut edges in Cartesian cell.
 !INTEGER, PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%CUT_FACE data struct entry index location,
-                                      ! IBM_INBOUNDCC type cut-faces in Cartesian cell.
+                                      ! IBM_INBOUNDARY type cut-faces (and CFACEs) in Cartesian cell.
 INTEGER,  PARAMETER :: IBM_IDCC   = 4 ! MESHES(N)%CUT_CELL data struct entry index location,
                                       ! cut-cells in Cartesian cell.
 INTEGER,  PARAMETER :: IBM_CCNC   = 5 ! Entry for 2nd row of H Cartesian cell interpolation.
 INTEGER,  PARAMETER :: IBM_UNKZ   = 6 ! Scalar indexing.
 INTEGER,  PARAMETER :: IBM_UNKH   = 7 ! Pressure indexing.
-INTEGER,  PARAMETER :: IBM_NCVARS = 7 ! Number of face variables in MESHES(N)%IBM_CCVAR.
+INTEGER,  PARAMETER :: IBM_CFST   = 8 ! CFACE array start for the cell I,J,K is CCVAR(I,J,K,IBM_CFST)+1
+INTEGER,  PARAMETER :: IBM_NCFC   = 9 ! Number of CFACEs in cell I,J,K.
+INTEGER,  PARAMETER :: IBM_NCVARS = 9 ! Number of cell variables in MESHES(N)%CCVAR.
 
 ! Cut-faces types in FACE_LIST of CUT_CELL:
 INTEGER, PARAMETER :: IBM_FTYPE_RGGAS = 0 ! This face of a cut-cell is a regular GASPHASE face.
@@ -25270,6 +25272,7 @@ USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE
 
 ! Local Variables:
 INTEGER :: ICF, CFACE_INDEX_LOCAL, SURF_INDEX, IBOD, IWSEL
+INTEGER :: ICF_START, NCFACE
 
 ! GET_CUTCELLS_VERBOSE variables:
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NCFACE_BY_MESH
@@ -25351,6 +25354,31 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    MESHES(NM)%N_CFACE_CELLS = CFACE_INDEX_LOCAL
 
 ENDDO MESH_LOOP_1
+
+! Now add IBM_CFST, IBM_NCFC vars to CCVAR:
+MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   ! Now add IBM_CFST, IBM_NCFC vars to CCVAR:
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            CALL GET_CARTCELL_CFACE_LIST(I,J,K,ICF_START,NCFACE)
+            CCVAR(I,J,K,IBM_CFST) = ICF_START
+            CCVAR(I,J,K,IBM_NCFC) = NCFACE
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! DO K=1,KBAR
+   !    DO J=1,JBAR
+   !       DO I=1,IBAR
+   !          IF (CCVAR(I,J,K,IBM_NCFC) < 1) CYCLE
+   !          WRITE(LU_ERR,*) 'I,J,K, ICF_START, NCFACE=',I,J,K,CCVAR(I,J,K,IBM_CFST),CCVAR(I,J,K,IBM_NCFC)
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
+
+ENDDO MESH_LOOP_2
 
 IF (GET_CUTCELLS_VERBOSE) THEN
    CALL CPU_TIME(CPUTIME)
@@ -25435,7 +25463,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          END SELECT
       ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
          NOM = NM ! Use cut face data, same mesh.
-         ! MESHES(NOM)%CONNECTED_MESH(NM)=.TRUE.
+         MESHES(NOM)%CONNECTED_MESH(NM)=.TRUE.
          ! Define underlying Cartesian faces indexes:
          SELECT CASE(IOR)
          CASE( IAXIS) ! Lower X boundary for Mesh NM, Higher for mesh NOM.
