@@ -95,7 +95,7 @@ endif # OS test
 endif # MKLROOT test
 
 obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
-          ieva.o pois.o scrc.o radi.o evac.o gsmv.o geom.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
+          ieva.o pois.o scrc.o evac.o gsmv.o geom.o radi.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o velo.o pres.o init.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
