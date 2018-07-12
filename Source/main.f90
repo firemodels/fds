@@ -151,7 +151,7 @@ T = T_BEGIN
 
 IF (CHECK_MESH_ALIGNMENT) THEN
    IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
-   IF (SETUP_ONLY) STOP_STATUS = SETUP_ONLY_STOP
+   STOP_STATUS = SETUP_ONLY_STOP
    IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
 ENDIF
 
