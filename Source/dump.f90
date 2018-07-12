@@ -1362,7 +1362,7 @@ ENDIF
 
 MASTER_NODE_IF: IF (MYID==0) THEN
 
-IF (SET_UP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this only a setup run
+IF (SETUP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this only a setup run
 
 ! initialize the slice info file
 
