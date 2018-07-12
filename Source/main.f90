@@ -131,7 +131,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Shut down the run if it is only for checking the set up
 
-IF (SET_UP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) THEN
+IF (SETUP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) THEN
    STOP_STATUS = SETUP_ONLY_STOP
    CALL STOP_CHECK(1)
 ENDIF
@@ -151,7 +151,7 @@ T = T_BEGIN
 
 IF (CHECK_MESH_ALIGNMENT) THEN
    IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
-   STOP_STATUS = SETUP_ONLY_STOP
+   IF (SETUP_ONLY) STOP_STATUS = SETUP_ONLY_STOP
    IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
 ENDIF
 
@@ -650,7 +650,7 @@ MAIN_LOOP: DO
    ENDDO CHANGE_TIME_STEP_LOOP
 
    ! If detailed CFL info needed
- 
+
    IF (CFL_FILE) CALL WRITE_CFL_FILE
 
    ! Exchange velocity and pressures at interpolated boundaries
