@@ -6128,7 +6128,7 @@ ENDDO COUNT_SURF_LOOP
 
 ! Allocate the SURFACE derived type, leaving space for SURF entries not defined explicitly by the user
 
-N_SURF_RESERVED = 11
+N_SURF_RESERVED = 12
 ALLOCATE(SURFACE(0:N_SURF+N_SURF_RESERVED),STAT=IZERO)
 CALL ChkMemErr('READ','SURFACE',IZERO)
 
