@@ -7725,8 +7725,11 @@ SELECT CASE(TRIM(SOLVER))
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
-   CASE DEFAULT
+   CASE('FFT')
       ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+   CASE DEFAULT
+      ! Here the user added an unknown name to SOLVER, stop:
+      CALL SHUTDOWN('ERROR: Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
