@@ -7636,7 +7636,9 @@ For a particle, you must reference an {\ct INIT} line used to place the particle
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
-The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total ({\ct 'DENSITY'}) or the density of a particular solid material component, ({\ct '[MATL\_ID]'}), where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
+The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total {\ct 'DENSITY'} or the density of a particular solid material component, {\ct '[MATL\_ID]'}, where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ numbers are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface.
+
+There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
 
 
 
