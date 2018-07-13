@@ -1682,61 +1682,71 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       LP%RE  = RHO_G*QREL*2._EB*R_D/MU_AIR
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
 
-      ! Drag reduction model for liquid droplets
+      ! Primary break-up model
 
-      WAKE_VEL=1.0_EB
-      IF (LPC%LIQUID_DROPLET) THEN
-         DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
-         IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
-      ENDIF
+      PRIMARY_BREAKUP_IF: IF ((T-LP%T_INSERT)<LPC%PRIMARY_BREAKUP_TIME) THEN
 
-      ! Secondary break-up model
+         C_DRAG = C_DRAG * LPC%PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR
 
-      BREAKUP: IF (LPC%BREAKUP) THEN
-         ! Use undisturbed wake velocity for breakup calculations
-         WAKE_VEL    = WAKE_VEL*QREL
-         RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
-         WE_G        = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
-         ! Shape Deformation
-         C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-         ! Breakup conditions according to WAVE model by Reitz (1987)
-         T_BU_BAG    = T_END-T_BEGIN
-         T_BU_STRIP  = T_END-T_BEGIN
-         IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(LPC%DENSITY*R_D**3/(2._EB*LPC%SURFACE_TENSION))
-         IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(R_D/WAKE_VEL)*SQRT(LPC%DENSITY/RHO_G)
-         ! PARTICLE age is larger than smallest characteristic breakup time
-         AGE_IF: IF ((T-LP%T_INSERT) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
-            IF (LPC%MONODISPERSE) THEN
-               R_D = ONTHHALF*R_D
-            ELSE
-               DO WHILE (R_D >= R_D_0)
-                  BREAKUP_RADIUS = LPC%BREAKUP_RATIO*R_D_0*LPC%BREAKUP_R_CNF(:)
-                  CALL RANDOM_CHOICE(LPC%BREAKUP_CNF(:),BREAKUP_RADIUS,NDC,R_D)
-               END DO
-               R_D = MAX(R_D,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
-            ENDIF
-            LP%RE    = RHO_G*QREL*2._EB*R_D/MU_AIR
-            C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
-            LP%PWT   = LP%PWT*(R_D_0/R_D)**3
-            LP%T_INSERT = T
-            LP%ONE_D%X(1) = R_D
-            LP%ONE_D%LAYER_THICKNESS(1) = R_D
-            LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
-            ! Redo wake reduction and shape deformation for the new drop
-            ! Drag reduction, except for particles associated with a SURF line
-            WAKE_VEL = 1.0_EB
-            IF (LPC%LIQUID_DROPLET) THEN
-               DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
-               IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
-            ENDIF
-            ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
-            WAKE_VEL = WAKE_VEL*QREL
-            RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
-            WE_G     = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
+      ELSE PRIMARY_BREAKUP_IF
+
+         ! Drag reduction model for liquid droplets
+
+         WAKE_VEL=1.0_EB
+         IF (LPC%LIQUID_DROPLET) THEN
+            DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
+            IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+         ENDIF
+
+         ! Secondary break-up model
+
+         SECONDARY_BREAKUP_IF: IF (LPC%BREAKUP) THEN
+            ! Use undisturbed wake velocity for breakup calculations
+            WAKE_VEL    = WAKE_VEL*QREL
+            RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+            WE_G        = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
             ! Shape Deformation
-            C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-         ENDIF AGE_IF
-      ENDIF BREAKUP
+            C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            ! Breakup conditions according to WAVE model by Reitz (1987)
+            T_BU_BAG    = T_END-T_BEGIN
+            T_BU_STRIP  = T_END-T_BEGIN
+            IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(LPC%DENSITY*R_D**3/(2._EB*LPC%SURFACE_TENSION))
+            IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(R_D/WAKE_VEL)*SQRT(LPC%DENSITY/RHO_G)
+            ! PARTICLE age is larger than smallest characteristic breakup time
+            AGE_IF: IF ((T-LP%T_INSERT) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
+               IF (LPC%MONODISPERSE) THEN
+                  R_D = ONTHHALF*R_D
+               ELSE
+                  DO WHILE (R_D >= R_D_0)
+                     BREAKUP_RADIUS = LPC%BREAKUP_RATIO*R_D_0*LPC%BREAKUP_R_CNF(:)
+                     CALL RANDOM_CHOICE(LPC%BREAKUP_CNF(:),BREAKUP_RADIUS,NDC,R_D)
+                  END DO
+                  R_D = MAX(R_D,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
+               ENDIF
+               LP%RE    = RHO_G*QREL*2._EB*R_D/MU_AIR
+               C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
+               LP%PWT   = LP%PWT*(R_D_0/R_D)**3
+               LP%T_INSERT = T
+               LP%ONE_D%X(1) = R_D
+               LP%ONE_D%LAYER_THICKNESS(1) = R_D
+               LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
+               ! Redo wake reduction and shape deformation for the new drop
+               ! Drag reduction, except for particles associated with a SURF line
+               WAKE_VEL = 1.0_EB
+               IF (LPC%LIQUID_DROPLET) THEN
+                  DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
+                  IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+               ENDIF
+               ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
+               WAKE_VEL = WAKE_VEL*QREL
+               RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+               WE_G     = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
+               ! Shape Deformation
+               C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            ENDIF AGE_IF
+         ENDIF SECONDARY_BREAKUP_IF
+
+      ENDIF PRIMARY_BREAKUP_IF
 
 END SELECT DRAG_LAW_SELECT
 
