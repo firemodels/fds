@@ -39,6 +39,7 @@ $RUNSMV -d Scalar_Analytical_Solution move_slug
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1
 $RUNSMV -d Scalar_Analytical_Solution shunn3_256
 $RUNSMV -d Species propane_flame_deposition
+$RUNSMV -d Complex_Geometry sphere_radiate
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
