@@ -36,7 +36,7 @@ TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(REACTION_TYPE), POINTER :: RN=>NULL()
-LOGICAL :: RETURN_BEFORE_STOP_FILE=.FALSE.
+LOGICAL :: RETURN_BEFORE_STOP_FILE=.FALSE., RETURN_BEFORE_SIM_MODE=.FALSE.
 
 CONTAINS
 
@@ -153,12 +153,13 @@ END SUBROUTINE READ_DATA
 
 SUBROUTINE READ_CATF
 
-INTEGER :: N_CATF_LINES, OFI
-INTEGER, PARAMETER :: LU_CATF2 = 999
+INTEGER :: N_CATF_LINES, OFI, TFI
+INTEGER, PARAMETER :: LU_CATF2 = 999, LU_STOP1=998, LU_STOP2=997
 INTEGER, PARAMETER :: MAX_OTHER_FILES=20 ! Maximum number of fires in the OTHER_FILES namelist field.
 CHARACTER(LABEL_LENGTH), DIMENSION(MAX_OTHER_FILES) :: OTHER_FILES = 'null'
 CHARACTER(MESSAGE_LENGTH) :: BUFFER
 CHARACTER(250) :: FN_CATF='null'
+INTEGER :: IERR
 
 NAMELIST /CATF/ OTHER_FILES
 
@@ -204,48 +205,78 @@ ENDDO COUNT_OFILES_LOOP2
 ! Open CHID_cat.fds file which will concatenate all input files:
 FN_CATF = TRIM(CHID)//'_cat.fds'
 
+! Now check state of OVERWRITE:
+RETURN_BEFORE_SIM_MODE=.TRUE.
+CALL READ_MISC
+RETURN_BEFORE_SIM_MODE=.FALSE.
+
 ! Inquire if FN_CATF is present, if so stop to avoid overwriting the input file potentially used previously.
 INQUIRE(FILE=TRIM(FN_CATF),EXIST=EX)
-IF (EX) THEN
-   WRITE(BUFFER,'(A)') 'ERROR: Concatenated file '//TRIM(FN_CATF)//' already defined. Save or erase it before rerun.'
+IF (EX .AND. .NOT.OVERWRITE) THEN
+   WRITE(BUFFER,'(A)') &
+   'ERROR: OVERWRITE=.FALSE. and Concatenated file '//TRIM(FN_CATF)//' exists. Also remove '//TRIM(CHID)//'_cat.out'
    CALL SHUTDOWN(TRIM(BUFFER)) ; RETURN
 ENDIF
 
-OPEN(LU_CATF,FILE=FN_CATF,ACTION='WRITE')
+IF (MYID==0) THEN
+   OPEN(LU_CATF,FILE=FN_CATF,ACTION='WRITE')
+   ! Write new header for LU_CATF:
+   WRITE(LU_CATF,'(A)')&
+   "&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='Concatenated : "//TRIM(TITLE)//"', FYI='"//TRIM(FYI)//"' /"
 
-! Write new header for LU_CATF:
-WRITE(LU_CATF,'(A)')&
-"&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='Concatenated: "//TRIM(TITLE)//"', FYI='"//TRIM(FYI)//"' /"
+   ! Also, inquire if file TRIM(CHID)//'.stop' exists, if so make a TRIM(CHID)//'_cat.stop' with same contents.
+   INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
+   IF (EX) THEN
+      OPEN(LU_STOP1,FILE=TRIM(CHID)//'.stop',STATUS='OLD',ACTION='READ')
+      OPEN(LU_STOP2,FILE=TRIM(CHID)//'_cat.stop',STATUS='REPLACE',ACTION='WRITE')
+      DO
+         READ(LU_STOP1,'(A)',END=20,IOSTAT=IOS) BUFFER
+         IF(IOS/=0) EXIT
+         WRITE(LU_STOP2,'(A)') TRIM(BUFFER)
+      ENDDO
+20    CLOSE(LU_STOP1)
+      CLOSE(LU_STOP2)
+   ENDIF
+ENDIF
 
 ! Load CHID file into LU_CATF:
 CALL COPY_FILE_TO_CAT(LU_INPUT,LU_CATF)
 
 ! One &CATF line by one add the corresponding OTHER_FILES into LU_CATF:
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+TFI=0
 COPY_OFILES_LOOP: DO
    CALL CHECKREAD('CATF',LU_INPUT,IOS)
    IF (IOS==1) EXIT COPY_OFILES_LOOP
+   OTHER_FILES(:) = 'null'
    READ(LU_INPUT,NML=CATF,END=13,ERR=14,IOSTAT=IOS)
    14 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with CATF line') ; RETURN ; ENDIF
    ! OPEN and copy other files into LU_CATF:
    OFI=0
    CPY_LOOP: DO
+      TFI = TFI + 1
       OFI = OFI + 1
       IF(TRIM(OTHER_FILES(OFI))=='null') EXIT CPY_LOOP
       ! If it exists open it and copy its contents without the &HEAD line (if any) up to the first &TAIL /
       ! appearance or the EOF.
       OPEN(LU_CATF2,FILE=TRIM(OTHER_FILES(OFI)),ACTION='READ')
-      WRITE(LU_CATF,'(A)')
-      WRITE(LU_CATF,'(A)')'# Start of file '//TRIM(OTHER_FILES(OFI))//' :'
+      IF (MYID==0) THEN
+         IF (TFI>1) WRITE(LU_CATF,'(A)')
+         WRITE(LU_CATF,'(A)')'# Start of file '//TRIM(OTHER_FILES(OFI))//' :'
+      ENDIF
       CALL COPY_FILE_TO_CAT(LU_CATF2,LU_CATF)
       CLOSE(LU_CATF2)
    ENDDO CPY_LOOP
 ENDDO COPY_OFILES_LOOP
 13 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-WRITE(LU_CATF,'(A)')
-WRITE(LU_CATF,'(A)') '&TAIL /'
-CLOSE(LU_CATF)
+IF (MYID==0) THEN
+   WRITE(LU_CATF,'(A)')
+   WRITE(LU_CATF,'(A)') '&TAIL /'
+   CLOSE(LU_CATF)
+ENDIF
+
+IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Finally reopen FN_CATF as LU_INPUT:
 CLOSE(LU_INPUT)
@@ -265,7 +296,7 @@ COPY_IFILE_LOOP: DO
    IF (BUFFER(1:5)=='&HEAD') CYCLE COPY_IFILE_LOOP
    IF (BUFFER(1:5)=='&CATF') CYCLE COPY_IFILE_LOOP
    IF (BUFFER(1:5)=='&TAIL') EXIT COPY_IFILE_LOOP ! Do not copy the tail line to LU_CATF
-   WRITE(LU_OUTFILE,'(A)') TRIM(BUFFER)
+   IF(MYID==0) WRITE(LU_OUTFILE,'(A)') TRIM(BUFFER)
 ENDDO COPY_IFILE_LOOP
 10 RETURN
 END SUBROUTINE COPY_FILE_TO_CAT
@@ -1868,6 +1899,8 @@ MISC_LOOP: DO
    24 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with MISC line') ; RETURN ; ENDIF
 ENDDO MISC_LOOP
 23 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+
+IF (RETURN_BEFORE_SIM_MODE) RETURN
 
 ! Choose simulation mode
 
@@ -7734,8 +7767,11 @@ SELECT CASE(TRIM(SOLVER))
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
-   CASE DEFAULT
+   CASE('FFT')
       ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+   CASE DEFAULT
+      ! Here the user added an unknown name to SOLVER, stop:
+      CALL SHUTDOWN('ERROR: Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
 END SELECT
 
 ! Determine how many pressure iterations to perform per half time step.
