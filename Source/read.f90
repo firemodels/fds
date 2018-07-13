@@ -154,7 +154,7 @@ END SUBROUTINE READ_DATA
 SUBROUTINE READ_CATF
 
 INTEGER :: N_CATF_LINES, OFI, TFI
-INTEGER, PARAMETER :: LU_CATF2 = 999
+INTEGER, PARAMETER :: LU_CATF2 = 999, LU_STOP1=998, LU_STOP2=997
 INTEGER, PARAMETER :: MAX_OTHER_FILES=20 ! Maximum number of fires in the OTHER_FILES namelist field.
 CHARACTER(LABEL_LENGTH), DIMENSION(MAX_OTHER_FILES) :: OTHER_FILES = 'null'
 CHARACTER(MESSAGE_LENGTH) :: BUFFER
@@ -223,6 +223,20 @@ IF (MYID==0) THEN
    ! Write new header for LU_CATF:
    WRITE(LU_CATF,'(A)')&
    "&HEAD CHID='"//TRIM(CHID)//"_cat', TITLE='Concatenated : "//TRIM(TITLE)//"', FYI='"//TRIM(FYI)//"' /"
+
+   ! Also, inquire if file TRIM(CHID)//'.stop' exists, if so make a TRIM(CHID)//'_cat.stop' with same contents.
+   INQUIRE(FILE=TRIM(CHID)//'.stop',EXIST=EX)
+   IF (EX) THEN
+      OPEN(LU_STOP1,FILE=TRIM(CHID)//'.stop',STATUS='OLD',ACTION='READ')
+      OPEN(LU_STOP2,FILE=TRIM(CHID)//'_cat.stop',STATUS='REPLACE',ACTION='WRITE')
+      DO
+         READ(LU_STOP1,'(A)',END=20,IOSTAT=IOS) BUFFER
+         IF(IOS/=0) EXIT
+         WRITE(LU_STOP2,'(A)') TRIM(BUFFER)
+      ENDDO
+20    CLOSE(LU_STOP1)
+      CLOSE(LU_STOP2)
+   ENDIF
 ENDIF
 
 ! Load CHID file into LU_CATF:
