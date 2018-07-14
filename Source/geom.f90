@@ -567,6 +567,7 @@ NCFACE    = 0
 IF( CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE )THEN
    ICF=CCVAR(I,J,K,IBM_IDCF)
    IF (ICF==0) RETURN
+   IF (CUT_FACE(ICF)%NFACE==0) RETURN
    NCFACE   = CUT_FACE(ICF)%NFACE
    ICF_START= CUT_FACE(ICF)%CFACE_INDEX(1) - 1
 ENDIF
@@ -31582,6 +31583,25 @@ DO K=KLO,KHI
             ENDIF
          ENDDO ! ISEG.
 
+         ! Do Test for cycling when all body-triangle combinations produce two or less segments:
+         SEG_FLAG(1)=.TRUE.
+         DO ICF=1,NBODTRI
+            IBOD = BOD_TRI(1,ICF)
+            ITRI = BOD_TRI(2,ICF)
+            NSEG_FACE = 0
+            DO ISEG=1,NSEG
+               IF ((SEG_CELL(6,ISEG) == IBOD) .AND. &
+                  ((SEG_CELL(4,ISEG) == ITRI) .OR. (SEG_CELL(5,ISEG) == ITRI)) ) THEN
+                  NSEG_FACE = NSEG_FACE + 1
+               ENDIF
+            ENDDO
+            ! If only one or two seg => continue:
+            IF ( NSEG_FACE <= 2 ) CYCLE
+            SEG_FLAG(1)=.FALSE.
+            EXIT
+         ENDDO
+         IF (SEG_FLAG(1)) CYCLE ! CYCLES I,J,K loop.
+
          ! This is a cut-face, allocate space:
          NCUTFACE = MESHES(NM)%N_CUTFACE_MESH + MESHES(NM)%N_GCCUTFACE_MESH + 1
          IF (BNDINT_FLAG) THEN
@@ -31851,6 +31871,7 @@ DO K=KLO,KHI
             MESHES(NM)%CUT_FACE(NCUTFACE)%SURF_INDEX(NCF) = GEOMETRY(IBOD)%SURFS(ITRI)
 
          ENDDO ICF_LOOP
+
       ENDDO ! I
    ENDDO ! J
 ENDDO ! K

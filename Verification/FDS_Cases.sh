@@ -40,6 +40,7 @@ $QFDS -d Complex_Geometry geom_arch.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
+$QFDS -d Complex_Geometry sphere_radiate.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
@@ -111,6 +112,7 @@ $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
+$QFDS -p 2 -d Fires couch2.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
