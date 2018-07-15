@@ -33,7 +33,7 @@
 % [mnv@burn FDS_User_Guide]$ ./make_geom_notes.sh
 %
 % You should get the geom_notes.pdf in the same directory.
-
+/
 
 \chapter{Building the Model (FIXME UG Chapter 7)}
 
@@ -2665,8 +2665,86 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 
 \subsection{Immersed boundary method on manufactured solution around rotated cube}
 
+Consider the solution of the following constant density, incompressible flow, momentum and scalar transport equations:
+%
+\begin{eqnarray}
+  \frac{\partial \rho \mathbf{u}(\mathbf{x},t)}{\partial t} &=& -\left[ \mathbf{F_v}(\mathbf{u},\mathbf{x},t) + \boldsymbol{\nabla} p(\mathbf{x},t) + \mathbf{fe_v}(\mathbf{u},p) \right] \label{eq:mmsMom} \\
+  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right] 
+  \label{eq:mmsZ}
+\end{eqnarray}
+%
+which are extended by the manufactured solution (MMS) sources $\mathbf{fe_v}(\mathbf{u},p)$ and $\mathbf{fe_Z}(\mathbf{u},Z)$ respectively. The vectors $\mathbf{F_v}=-\mu \nabla^2(\mathbf{u}) + \nabla \cdot \left( \rho \mathbf{u} \otimes \mathbf{u} \right)$ and $\mathbf{F_z}= \nabla \cdot \left( \rho Z \mathbf{u} - \rho D_z \nabla Z \right) $ contain the corresponding advection and diffusion operators.
+
+Now, consider in figure~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ and a manufactured solution defined on the fluid region $\Omega - \Omega_1$ of the form:
+%
+\begin{eqnarray}
+   u'(\mathbf{x}_{Bp}',t) &=& -\sin(t) \; \sin(kx')^2 \; \sin(2ky') \label{eq:upmf} \\
+   v'(\mathbf{x}_{Bp}',t) &=&   \sin(t) \; \sin(2kx') \; \sin(ky')^2 \label{eq:vpmf} \\
+   p(\mathbf{x}_{Bp}',t) &=& \frac{\sin(t)}{4} \left( 2+\cos(2kx') \right) \left( 2+\cos(2ky') \right) - \sin(t) \label{eq:pmf} \\
+   Z(\mathbf{x}_{Bp}',t) &=& \frac{A_Z \sin(t)}{3} \left[ \left( 1-\cos(2k(x'-\frac{\pi}{2})) \right)
+                                                                                   \left( 1-\cos(2k(y'-\frac{\pi}{2})) \right) - 1 \right] + Z_{mean} \label{eq:qmf}
+\end{eqnarray}
+%
+which is similar on velocities and pressure to the functions given in reference~\cite{eliu2003}.  These functions imply zero initial conditions, a divergence free velocity field and the following
+%
+\begin{equation}
+   u'(\mathbf{x}',t)=v'(\mathbf{x}',t)=0, \; \; \frac{\partial p}{\partial n} = \frac{\partial Z}{\partial n}=0, \; \;
+   for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
+\end{equation}
+%
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside. 
+
+ The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.  
 
 
+
+We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis. 
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
+       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png} 
+      \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
+	\label{Fig:ManuSoln}
+\end{figure}
+%
+An angular parameter $\alpha$ defines the orientation of the local axes $x',y'$ respect to the Eulerian frame coordinates $x,y$. The center of $\Omega_1$ in the Eulerian frame is situated in position $\mathbf{x}_{Ec}=(\pi,\pi)$. The rotation matrix from Eulerian $E$ to local frame $B$ coordinates is
+%
+\begin{equation}
+  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c} 
+                                          \cos(\alpha) & \sin(\alpha) \\
+                                         -\sin(\alpha)  & \cos(\alpha) \end{array} \right]
+\end{equation}
+%
+In the local system, the center of the square in local coordinates is given by $\mathbf{x}_{Bc}'=(\pi/2,\pi/2)$. Then, the location of a general point $p$ in the local system is:
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +\mathbf{x}_{cp}'
+\end{equation}  
+%
+The same point $p$ location can be defined in terms of the $E$ frame as $\mathbf{x}_{Ep}= \mathbf{x}_{Ec} +\mathbf{x}_{cp}$ (Eulerian coordinates). Then
+%
+\begin{equation}
+    \mathbf{x}_{cp}'=[\mathbf{T}_{BE}] \mathbf{x}_{cp}=[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}
+%
+and finally
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}  
+%
+This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in the Eulerian frame (with Eulerian frame coordinates $x,y$) to the local frame coordinates where equations~\eqref{eq:upmf}-\eqref{eq:qmf} are defined. This transformation is used to define the initial conditions in the local frame, for points collocated in the Eulerian frame aligned fluid grid. Also, the manufactured variables can be defined at the final time to define error norms. Finally, the velocity components of interest are the ones defined in the Eulerian frame, and can be readily computed as
+%
+\begin{equation}
+  \left\{ \begin{array}{c}  u \\ v \end{array} \right\}_p = [\mathbf{T}_{BE}]^T \left\{ \begin{array}{c}  u' \\ v' \end{array} \right\}_p
+\end{equation}
+%
+We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field. 
+When $\alpha=0$, a domain $\Omega$ of size $L_x=L_y=2\pi$ centered in $\mathbf{x}_{Ec}$ is sufficient for application of periodic boundary conditions. Then, for $\alpha=\arctan(1/r)$, $r=1,2,3,...$ the periodicity lengths on the Eulerian reference frame are $L_x=L_y=2\pi \sqrt{1+r^2}$.
+That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\sqrt{8} \pi$. If $\alpha=\arctan(1/2)$, $L_x=L_y=\sqrt{20} \pi$.
+%See figures~\ref{}a-c.
 
 
 \subsection{Conservation test of isothermal helium plume around sphere}
@@ -2689,7 +2767,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is centered in a box that is 4~m on a side with a surface temperature of 0~K. The emissivity of all surfaces is 1, and there is no convective heat transfer to or from any surface. The heat flux from the hot sphere to the nearest cold wall surface 1~m away is expected to be $\sigma T^4/4=5.065$~kW/m$^2$. The results are shown in Fig.~\ref{sphere_radiate_fig}.
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_radiate.png}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_radiate.pdf}
+%\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_radiate.pdf}
 \caption[The {\ct sphere\_radiate} test case]{Left: a radiating hot sphere. Right: heat flux to the nearest wall surface.}
 \label{sphere_radiate_fig}
 \end{figure}
