@@ -3368,7 +3368,7 @@ ENDDO
 
 CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
-   DO N=1,N_TRACKED_SPECIES
+   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
       CALL CCSPECIES_ADVECTION ! Compute u dot grad rho Z_n
 
@@ -3415,12 +3415,9 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
          ENDDO
       ENDIF
 
-
-
-   ENDDO
+   ENDDO SPECIES_LOOP
 
 ENDIF CONST_GAMMA_IF_2
-
 
 ! Add contribution of reactions
 
@@ -3558,9 +3555,8 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
    ENDIF
 ENDIF MMS_IF
 
-
 ! Assign divergence and 1/(rho*Cp*T) on Cartesian Cells:
-IF (AVERAGE_LINKDIV) THEN
+AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
 
    ! Average divergence on linked cells:
    ALLOCATE ( DIVRG_VOL(1:NUNKZ_LOCAL) , VOLDVRG(1:NUNKZ_LOCAL), RTRM_VOL(1:NUNKZ_LOCAL) )
@@ -3669,7 +3665,7 @@ IF (AVERAGE_LINKDIV) THEN
    ENDIF
    DEALLOCATE ( DIVRG_VOL , VOLDVRG, RTRM_VOL )
 
-ELSE
+ELSE AVERAGE_LINKDIV_IF
 
    ! Regular cells:
    DO K=1,KBAR
@@ -3710,7 +3706,7 @@ ELSE
       WRITE(LU_ERR,*) 'MINVOL=',MINVOL
    ENDIF
 
-ENDIF
+ENDIF AVERAGE_LINKDIV_IF
 
 DEALLOCATE(ZZ_GET)
 
@@ -10245,12 +10241,13 @@ INTEGER, INTENT(IN) :: N
 ! Local Variables:
 INTEGER :: NM,I,J,K
 REAL(EB):: PRFCT
-INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ICF
+INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ICF,IND1,IND2
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,IROW,ICC,JCC,ISIDE,IW
 REAL(EB):: AF,KFACE(2,2),F_LOC(2),CIJP,CIJM,VELC,ALPHAP1,AM_P1,AP_P1
 REAL(EB), POINTER, DIMENSION(:,:,:)  :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:)::  ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 
 ! This routine computes RHS due to boundary conditions prescribed in immersed solids
 ! and domain boundaries.
@@ -10292,13 +10289,13 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ! First add advective fluxes to domain boundary regular and cut-cells:
    ! Boundary IAXIS faces:
    X1AXIS = IAXIS
-   DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
+   IFACE_LOOP_1: DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
 
       IW=MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IWC
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
+          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE IFACE_LOOP_1
 
       I  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(IAXIS)
       J  = MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
@@ -10344,17 +10341,17 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          F_Z(IROW) = F_Z(IROW) + KFACE(ILOC,1)*F_LOC(1) + KFACE(ILOC,2)*F_LOC(2)
       ENDDO
 
-   ENDDO
+   ENDDO IFACE_LOOP_1
 
    ! Boundary JAXIS faces:
    X1AXIS = JAXIS
-   DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
+   IFACE_LOOP_2: DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
 
       IW=MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IWC
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
+          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE IFACE_LOOP_2
 
       I  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(IAXIS)
       J  = MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
@@ -10400,17 +10397,17 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          F_Z(IROW) = F_Z(IROW) + KFACE(ILOC,1)*F_LOC(1) + KFACE(ILOC,2)*F_LOC(2)
       ENDDO
 
-   ENDDO
+   ENDDO IFACE_LOOP_2
 
    ! Boundary KAXIS faces:
    X1AXIS = KAXIS
-   DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
+   IFACE_LOOP_3: DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
 
       IW=MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IWC
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
+          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE IFACE_LOOP_3
 
       I  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(IAXIS)
       J  = MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
@@ -10456,16 +10453,16 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          F_Z(IROW) = F_Z(IROW) + KFACE(ILOC,1)*F_LOC(1) + KFACE(ILOC,2)*F_LOC(2)
       ENDDO
 
-   ENDDO
+   ENDDO IFACE_LOOP_3
 
    ! Boundary Regular faces connecting gasphase-gasphase or gasphase- cut-cells:
-   DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
+   IFACE_LOOP_RCF: DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
 
       IW=MESHES(NM)%IBM_RCFACE_Z(IFACE)%IWC
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
+          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE IFACE_LOOP_RCF
 
       I      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(IAXIS)
       J      = MESHES(NM)%IBM_RCFACE_Z(IFACE)%IJK(JAXIS)
@@ -10482,7 +10479,7 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Row ind(1),ind(2):
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
-      SELECT CASE(X1AXIS)
+      AXIS_SELECT: SELECT CASE(X1AXIS)
          CASE(IAXIS)
             AF = DY(J)*DZ(K)
             ! Advective Part: Velocity u
@@ -10525,7 +10522,7 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                F_LOC(1) = RHOP(I,J,K+FCELL-1)*ZZP(I,J,K+FCELL-1,N)
                F_LOC(2) = WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N) ! For high side use Wall values defined in wall.f90.
             ENDIF
-      ENDSELECT
+      ENDSELECT AXIS_SELECT
 
       ! Matrix coefficients, Next to domain boundary always Godunov:
       ALPHAP1 = SIGN( 1._EB, VELC)
@@ -10553,16 +10550,16 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          F_Z(IROW) = F_Z(IROW) + KFACE(ILOC,1)*F_LOC(1) + KFACE(ILOC,2)*F_LOC(2)
       ENDDO
 
-   ENDDO
+   ENDDO IFACE_LOOP_RCF
 
    ! Now Boundary Gasphase CUT_FACES:
-   DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
-      IF ( MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE
+   ICF_LOOP: DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
+      IF ( MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE ICF_LOOP
       IW=MESHES(NM)%CUT_FACE(ICF)%IWC
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
-          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
+          WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE ICF_LOOP
       I = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
       J = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
       K = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
@@ -10582,7 +10579,7 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
       ENDSELECT
 
-      DO IFACE=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
+      IFACE_LOOP_GCF: DO IFACE=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
 
          ! Unknowns on related cells:
          IND(LOW_IND)  = MESHES(NM)%CUT_FACE(ICF)%UNKZ(LOW_IND,IFACE)
@@ -10608,30 +10605,39 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          KFACE(1,1) = CIJM; KFACE(2,1) =-CIJM; KFACE(1,2) = CIJP; KFACE(2,2) =-CIJP
 
          F_LOC(:) = WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N) !Initialize both sides to face BC value.
-         DO ISIDE=1,2
+         ISIDE_LOOP: DO ISIDE=1,2
             SELECT CASE(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(1,ISIDE,IFACE))
             CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
                ! If cut-cell on guard-cell region, skip, will use BC value.
-               ICC = MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,ISIDE,IFACE); IF(ICC>MESHES(NM)%N_CUTCELL_MESH) CYCLE
+               ICC = MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,ISIDE,IFACE); IF(ICC>MESHES(NM)%N_CUTCELL_MESH) CYCLE ISIDE_LOOP
                JCC = MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(3,ISIDE,IFACE)
                F_LOC(ISIDE) =       PRFCT *CUT_CELL(ICC)% RHO(JCC)*CUT_CELL(ICC)% ZZ(N,JCC) + &
                              (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)*CUT_CELL(ICC)%ZZS(N,JCC)
             CASE DEFAULT
                WRITE(0,*) 'GET_ADVDIFFVECTOR_SCALAR_3D: MESHES(NM)%CUT_FACE face not connected to CC cell',NM,IFACE
             END SELECT
-        ENDDO
+         ENDDO ISIDE_LOOP
 
-        DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
+         DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
            IROW=IND_LOC(ILOC)     ! Process Local Unknown number.
            F_Z(IROW) = F_Z(IROW) + KFACE(ILOC,1)*F_LOC(1) + KFACE(ILOC,2)*F_LOC(2)
-        ENDDO
+         ENDDO
 
-      ENDDO
+      ENDDO IFACE_LOOP_GCF
 
-   ENDDO
+   ENDDO ICF_LOOP
 
    ! Advective mass fluxes through INBOUNDARY cut-faces (CFACE):
    ! TO DO.
+
+   ! ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
+   ! DO ICF=1,N_CFACE_CELLS
+   !    CFA  => CFACE(ICF)
+   !    IND1 = CFA%CUT_FACE_IND1;                         IND2 = CFA%CUT_FACE_IND2
+   !    ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
+   !    IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+   !    F_Z(IROW) = F_Z(IROW) - CFA%ONE_D%RHO_F*CFA%ONE_D%ZZ_F(N)*CFA%ONE_D%UW * CUT_FACE(IND1)%AREA(IND2)
+   ! ENDDO
 
    ! Then add diffusive fluxes through domain boundaries:
    ! Defined in CCREGION_DIVERGENCE_PART_1.
@@ -11713,15 +11719,12 @@ U_IBM = 0._EB ! Body doesn't move.
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-
-         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID ) THEN
-            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                 ! and solid Cartesian faces.
-         ENDIF
-
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+         FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
+                                                              ! and solid Cartesian faces.
       ENDDO
    ENDDO
 ENDDO
@@ -11731,15 +11734,12 @@ V_IBM = 0._EB ! Body doesn't move.
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
-
-         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) == IBM_SOLID ) THEN
-            IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-            IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-            FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                 ! and solid Cartesian faces.
-         ENDIF
-
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+         FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
+                                                              ! and solid Cartesian faces.
       ENDDO
    ENDDO
 ENDDO
@@ -11749,15 +11749,12 @@ W_IBM = 0._EB ! Body doesn't move.
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-
-         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID ) THEN
-            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-            IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
-                                                                 ! and solid Cartesian faces.
-         ENDIF
-
+         IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+         FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
+                                                              ! and solid Cartesian faces.
       ENDDO
    ENDDO
 ENDDO
