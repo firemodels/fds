@@ -1,5 +1,4 @@
 #!/bin/bash
-
 platform="linux"
 if [ "`uname`" == "Darwin" ]; then
   platform="osx"

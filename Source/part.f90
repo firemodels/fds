@@ -115,7 +115,7 @@ SUBROUTINE INSERT_ALL_PARTICLES(T,NM)
 ! Insert Lagrangian particles into the domain every time step
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,RANDOM_CHOICE
-USE GEOMETRY_FUNCTIONS, ONLY: RANDOM_RECTANGLE,RANDOM_CONE,RANDOM_RING,CONE_MESH_INTERSECTION_VOLUME
+USE GEOMETRY_FUNCTIONS, ONLY: RANDOM_RECTANGLE,RANDOM_CONE,RANDOM_RING,CONE_MESH_INTERSECTION_VOLUME,UNIFORM_RING
 USE TRAN, ONLY: GET_IJK
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
@@ -480,6 +480,7 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (T < WC%ONE_D%T_IGN)                     CYCLE WALL_INSERT_LOOP
    IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_INSERT_LOOP
    SF  => SURFACE(WC%SURF_INDEX)
+   IF (SF%PARTICLE_SURFACE_DENSITY>0._EB .AND. T>T_BEGIN) CYCLE WALL_INSERT_LOOP
    ILPC =  SF%PART_INDEX
    IF (ILPC < 1)    CYCLE WALL_INSERT_LOOP
    LPC  => LAGRANGIAN_PARTICLE_CLASS(ILPC)
@@ -511,6 +512,7 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ALLOCATE(LP_INDEX_LOOKUP(SF%NPPC))
    LP_INDEX_LOOKUP = 0
+
    PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
 
       ! Insert a single droplet at wall cell IW
@@ -616,6 +618,12 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             N = LP_INDEX_LOOKUP(I)
             LP => LAGRANGIAN_PARTICLE(N)
             LP%PWT = LP%PWT * FLOW_RATE*WALL(IW)%ONE_D%AREA_ADJUST*WALL(IW)%ONE_D%AREA*SF%DT_INSERT/MASS_SUM
+         ENDDO
+      ELSEIF (SF%PARTICLE_SURFACE_DENSITY > 0._EB) THEN
+         DO I=1,SF%NPPC
+            N = LP_INDEX_LOOKUP(I)
+            LP => LAGRANGIAN_PARTICLE(N)
+            LP%PWT = LP%PWT * SF%PARTICLE_SURFACE_DENSITY*WALL(IW)%ONE_D%AREA_ADJUST*WALL(IW)%ONE_D%AREA/MASS_SUM
          ENDDO
       ENDIF
    ENDIF
@@ -745,7 +753,11 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   LP_Z = IN%Z1
-                  CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+                  IF (IN%UNIFORM) THEN
+                     CALL UNIFORM_RING(NM,LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
+                  ELSE
+                     CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+                  ENDIF
                CASE('LINE')
                   LP_X = IN%X1 + (IP-1)*IN%DX
                   LP_Y = IN%Y1 + (IP-1)*IN%DY
@@ -821,6 +833,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          DO JJ=J1,J2
             II_LOOP: DO II=I1,I2
                IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
+               IF (IN%SHAPE=='CONE') THEN
+                  IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2) CYCLE II_LOOP
+               ENDIF
                INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN%X2)-MAX(X(II-1),IN%X1)) &
                                              * (MIN(Y(JJ),IN%Y2)-MAX(Y(JJ-1),IN%Y1)) &
                                              * (MIN(Z(KK),IN%Z2)-MAX(Z(KK-1),IN%Z1))
@@ -1360,7 +1375,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! If the particle is massless or does not move, go on to the next particle
 
-         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. LPC%STATIC) CYCLE PARTICLE_LOOP
+         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) CYCLE PARTICLE_LOOP
 
       ENDIF SOLID_GAS_MOVE
 
@@ -1390,7 +1405,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       CROSS_CELL_BOUNDARY: IF (IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG) THEN
 
          ! Calculate the STEP_FRACTION, which indicates the relative distance between the particles's old and new
-         ! position where the particle hits a cell boundary. 
+         ! position where the particle hits a cell boundary.
 
          HIT_SOLID = .FALSE.
          STEP_FRACTION = 1.1_EB
@@ -1402,7 +1417,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          IF (LP%ONE_D%KKG>KKG_OLD) STEP_FRACTION(-3) = (Z(KKG_OLD)  -Z_OLD)/(LP%Z-Z_OLD)
          IF (LP%ONE_D%KKG<KKG_OLD) STEP_FRACTION( 3) = (Z(KKG_OLD-1)-Z_OLD)/(LP%Z-Z_OLD)
 
-         ! The minimum value of STEP_FRACTION indicates the relative location along the particle path where it first crosses 
+         ! The minimum value of STEP_FRACTION indicates the relative location along the particle path where it first crosses
          ! a cell boundary. Test this location to see if the cell the particle crosses into is solid. If it is, indicate that
          ! that the particle has HIT_SOLID and EXIT. If not, cycle through the other cell boundary crossings. The particle can
          ! cross at most three cell boundaries in one sub-timestep.
@@ -1517,8 +1532,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ENDIF CROSS_CELL_BOUNDARY
 
       ! If the droplet was attached to a solid (LP%ONE_D%IOR/=0), but now it is not, change its course. If the droplet was
-      ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick 
-      ! to the underside or drip off. If the droplet moves off an upward facing horizontal surface (IOR=3), reverse its course 
+      ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
+      ! to the underside or drip off. If the droplet moves off an upward facing horizontal surface (IOR=3), reverse its course
       ! and drop it down the side of the solid obstruction. If the droplet moves off a downward facing horizontal obstruction
       ! (IOR=-3), do nothing and let it continue free-falling.
 
@@ -1582,9 +1597,9 @@ REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT,&
-            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)
+            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)=0._EB
 REAL(EB), SAVE :: FP_MASS,HALF_DT2,BETA,OBDT,ALPHA,OPA,DTOPA,BDTOA
-INTEGER :: IIX,JJY,KKZ
+INTEGER :: IIX,JJY,KKZ,SURF_INDEX
 
 ! Save current values of particle velocity components
 
@@ -1667,61 +1682,71 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       LP%RE  = RHO_G*QREL*2._EB*R_D/MU_AIR
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
 
-      ! Drag reduction model for liquid droplets
+      ! Primary break-up model
 
-      WAKE_VEL=1.0_EB
-      IF (LPC%LIQUID_DROPLET) THEN
-         DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
-         IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
-      ENDIF
+      PRIMARY_BREAKUP_IF: IF ((T-LP%T_INSERT)<LPC%PRIMARY_BREAKUP_TIME) THEN
 
-      ! Secondary break-up model
+         C_DRAG = C_DRAG * LPC%PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR
 
-      BREAKUP: IF (LPC%BREAKUP) THEN
-         ! Use undisturbed wake velocity for breakup calculations
-         WAKE_VEL    = WAKE_VEL*QREL
-         RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
-         WE_G        = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
-         ! Shape Deformation
-         C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-         ! Breakup conditions according to WAVE model by Reitz (1987)
-         T_BU_BAG    = T_END-T_BEGIN
-         T_BU_STRIP  = T_END-T_BEGIN
-         IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(LPC%DENSITY*R_D**3/(2._EB*LPC%SURFACE_TENSION))
-         IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(R_D/WAKE_VEL)*SQRT(LPC%DENSITY/RHO_G)
-         ! PARTICLE age is larger than smallest characteristic breakup time
-         AGE_IF: IF ((T-LP%T_INSERT) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
-            IF (LPC%MONODISPERSE) THEN
-               R_D = ONTHHALF*R_D
-            ELSE
-               DO WHILE (R_D >= R_D_0)
-                  BREAKUP_RADIUS = LPC%BREAKUP_RATIO*R_D_0*LPC%BREAKUP_R_CNF(:)
-                  CALL RANDOM_CHOICE(LPC%BREAKUP_CNF(:),BREAKUP_RADIUS,NDC,R_D)
-               END DO
-               R_D = MAX(R_D,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
-            ENDIF
-            LP%RE    = RHO_G*QREL*2._EB*R_D/MU_AIR
-            C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
-            LP%PWT   = LP%PWT*(R_D_0/R_D)**3
-            LP%T_INSERT = T
-            LP%ONE_D%X(1) = R_D
-            LP%ONE_D%LAYER_THICKNESS(1) = R_D
-            LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
-            ! Redo wake reduction and shape deformation for the new drop
-            ! Drag reduction, except for particles associated with a SURF line
-            WAKE_VEL = 1.0_EB
-            IF (LPC%LIQUID_DROPLET) THEN
-               DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
-               IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
-            ENDIF
-            ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
-            WAKE_VEL = WAKE_VEL*QREL
-            RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
-            WE_G     = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
+      ELSE PRIMARY_BREAKUP_IF
+
+         ! Drag reduction model for liquid droplets
+
+         WAKE_VEL=1.0_EB
+         IF (LPC%LIQUID_DROPLET) THEN
+            DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
+            IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+         ENDIF
+
+         ! Secondary break-up model
+
+         SECONDARY_BREAKUP_IF: IF (LPC%BREAKUP) THEN
+            ! Use undisturbed wake velocity for breakup calculations
+            WAKE_VEL    = WAKE_VEL*QREL
+            RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+            WE_G        = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
             ! Shape Deformation
-            C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-         ENDIF AGE_IF
-      ENDIF BREAKUP
+            C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            ! Breakup conditions according to WAVE model by Reitz (1987)
+            T_BU_BAG    = T_END-T_BEGIN
+            T_BU_STRIP  = T_END-T_BEGIN
+            IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(LPC%DENSITY*R_D**3/(2._EB*LPC%SURFACE_TENSION))
+            IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(R_D/WAKE_VEL)*SQRT(LPC%DENSITY/RHO_G)
+            ! PARTICLE age is larger than smallest characteristic breakup time
+            AGE_IF: IF ((T-LP%T_INSERT) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
+               IF (LPC%MONODISPERSE) THEN
+                  R_D = ONTHHALF*R_D
+               ELSE
+                  DO WHILE (R_D >= R_D_0)
+                     BREAKUP_RADIUS = LPC%BREAKUP_RATIO*R_D_0*LPC%BREAKUP_R_CNF(:)
+                     CALL RANDOM_CHOICE(LPC%BREAKUP_CNF(:),BREAKUP_RADIUS,NDC,R_D)
+                  END DO
+                  R_D = MAX(R_D,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
+               ENDIF
+               LP%RE    = RHO_G*QREL*2._EB*R_D/MU_AIR
+               C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
+               LP%PWT   = LP%PWT*(R_D_0/R_D)**3
+               LP%T_INSERT = T
+               LP%ONE_D%X(1) = R_D
+               LP%ONE_D%LAYER_THICKNESS(1) = R_D
+               LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
+               ! Redo wake reduction and shape deformation for the new drop
+               ! Drag reduction, except for particles associated with a SURF line
+               WAKE_VEL = 1.0_EB
+               IF (LPC%LIQUID_DROPLET) THEN
+                  DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
+                  IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+               ENDIF
+               ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
+               WAKE_VEL = WAKE_VEL*QREL
+               RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+               WE_G     = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
+               ! Shape Deformation
+               C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            ENDIF AGE_IF
+         ENDIF SECONDARY_BREAKUP_IF
+
+      ENDIF PRIMARY_BREAKUP_IF
 
 END SELECT DRAG_LAW_SELECT
 
@@ -1742,9 +1767,19 @@ IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
    ENDIF
 ENDIF
 
+! Experimental ember generation model
+
+IF (LPC%EMBER_PARTICLE .AND. .NOT.LP%EMBER) THEN
+   SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
+   SF => SURFACE(SURF_INDEX)
+   IF ( SUM(LP%ONE_D%RHO(1,1:SF%N_MATL)) < LPC%EMBER_DENSITY_THRESHOLD .AND. QREL > LPC%EMBER_VELOCITY_THRESHOLD ) THEN
+      LP%EMBER = .TRUE.
+   ENDIF
+ENDIF
+
 ! Move the particles unless they are STATIC
 
-PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationary particles
+PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne, non-stationary particles
 
    IF (ITER==1) THEN
       FP_MASS = (RHO_G/RVC)/NDPC(IIG_OLD,JJG_OLD,KKG_OLD) ! fluid parcel mass
@@ -2203,6 +2238,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ENDDO
                      MCBAR = RHOCBAR*WALL(IW)%ONE_D%AREA*(WALL(IW)%ONE_D%X(1)-WALL(IW)%ONE_D%X(0))
                      ARRAY_CASE = 3
+                     IF (MCBAR <= TWO_EPSILON_EB) THEN
+                        MCBAR = -1._EB
+                        ARRAY_CASE = 2
+                     ENDIF
                   ELSE
                      MCBAR = -1._EB
                      ARRAY_CASE = 2
@@ -2393,7 +2432,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,', Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
                         !RETURN
                      ELSE
@@ -2409,7 +2448,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,', Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
                         !RETURN
                      ELSE
@@ -2464,7 +2503,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,'Particle: ',IP
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,', Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
                      !RETURN
                   ELSE
@@ -2479,7 +2518,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,'Particle: ',IP
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,', Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
                      !RETURN
                   ELSE

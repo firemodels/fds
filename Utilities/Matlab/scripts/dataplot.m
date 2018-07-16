@@ -46,7 +46,7 @@
 %
 % Special switch_id tags:
 %
-%    'd' -- Proscess this data line as usual (exception: see 'o' below)
+%    'd' -- Process this data line as usual (exception: see 'o' below)
 %
 %    's' -- Skip this line
 %
@@ -68,7 +68,6 @@ end
 
 % Read in global plot options
 plot_style
-Font_Interpreter = 'LaTeX';
 
 % Read configuration file
 A = importdata(Dataplot_Inputs_File);

@@ -2789,7 +2789,7 @@ POINT_LOOP3: DO I=1,NWP
       K_S(I) = K_S(I)/VOLSUM
       IF (.NOT.E_FOUND) ONE_D%EMISSIVITY = ONE_D%EMISSIVITY/VOLSUM
    ENDIF
-   IF (ONE_D%EMISSIVITY>0._EB) E_FOUND = .TRUE.
+   IF (ONE_D%EMISSIVITY>=0._EB) E_FOUND = .TRUE.
 
    IF (K_S(I)<=TWO_EPSILON_EB)      K_S(I)      = 10000._EB
    IF (RHOCBAR(I)<=TWO_EPSILON_EB)  RHOCBAR(I)  = 0.001_EB
@@ -2929,9 +2929,8 @@ DEALLOCATE(TMP_W_NEW)
 
 ! If the surface temperature exceeds the ignition temperature, burn it
 
-IF (ONE_D%T_IGN > T ) THEN
-   IF (ONE_D%TMP_F >= SF%TMP_IGN) ONE_D%T_IGN = T
-ENDIF
+IF (ONE_D%T_IGN>T  .AND. ONE_D%TMP_F>=SF%TMP_IGN) ONE_D%T_IGN = T
+IF (SF%TMP_IGN<5000._EB .AND. ONE_D%TMP_F<SF%TMP_EXT .AND. ONE_D%T_IGN<T) ONE_D%T_IGN = HUGE(1._EB)
 
 ! Determine convective heat flux at the wall
 

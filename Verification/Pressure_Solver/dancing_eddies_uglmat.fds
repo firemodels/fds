@@ -1,4 +1,4 @@
-&HEAD CHID='dancing_eddies_glmat', TITLE='Simple 2D Tunnel test of GLMAT_SOLVER'/ 
+&HEAD CHID='dancing_eddies_uglmat', TITLE='Simple 2D Tunnel test of UGLMAT solver'/ 
 
 &MULT ID='mesh',DX=0.075,I_UPPER=3 /
 &MESH IJK=75,1,40, XB=0.0,0.075,-0.001,0.001,-0.02,0.020, MULT_ID='mesh' /
@@ -9,7 +9,7 @@
 
 &SPEC ID='AIR', VISCOSITY=1.2E-5, BACKGROUND=.TRUE. /
 
-&PRES SOLVER='GLMAT', MAX_PRESSURE_ITERATIONS=1 /
+&PRES SOLVER='UGLMAT', MAX_PRESSURE_ITERATIONS=1 /
 
 &SURF ID='WALL', FREE_SLIP=.TRUE., DEFAULT=.TRUE. /
 &SURF ID='PLATE', NO_SLIP=.TRUE. /

@@ -79,7 +79,6 @@ Volume 2: Verification\\
 
 \headerC{
 \today \\
-FDS Version \fdsversion \\
 Revision:~\gitrevision}
 
 
@@ -2003,7 +2002,7 @@ In order for species mass fractions to be physically realizable they must all be
 
 \section{Energy Conservation}
 
-FDS does not explicitly solve the energy conservation equation. Instead, mass transport equations are solved for the density and the $n-1$ independent gas species. Source terms from the energy equation are incorporated in the velocity  divergence, $\nabla \cdot \bu$, which is factored out of the sensible enthalpy transport equation, i.e.,
+FDS does not explicitly solve the energy conservation equation. Instead, mass transport equations are solved for the the $n$ independent gas species.  The density is found from summing the individual gas species densities, $\rho = \sum_\alpha \rho_\alpha$. Source terms from the energy equation are incorporated in the velocity  divergence, $\nabla \cdot \bu$, which is factored out of the sensible enthalpy transport equation, i.e.,
 \be
 \label{eqn_new_div}
 \nabla\cdot\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bar{p}-\rho h_{\rm s}) + \dot{q}^{\prime\prime\prime} + \nabla\cdot(k \nabla T) - \nabla\cdot\sum_\alpha h_{s,\alpha} \mathbf{J}_\alpha - \nabla\cdot\dot{\mathbf{q}}_r^{\prime\prime} + \dot{q}_b^{\prime\prime\prime} \right] \,\mbox{.}
@@ -2021,14 +2020,14 @@ Next, the same compartment with the same fire is now assumed to have cold (20~\s
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/energy_budget_adiabatic_walls}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_adiabatic_walls}
 \caption[The {\ct energy\_budget\_adiabatic\_walls} test case]{The energy budget for a simple compartment fire with adiabatic walls.}
 \label{energy_budget_adiabatic_walls_fig}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/energy_budget_cold_walls}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_cold_walls}
 \caption[The {\ct energy\_budget\_cold\_walls} test case]{The energy budget for a simple compartment fire with cold walls.}
 \label{energy_budget_cold_walls_fig}
 \end{figure}
@@ -2141,14 +2140,14 @@ To obtain tight mass and energy balances it is important to output the actual va
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2} \\
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
 \caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
 \label{mass_heat_wall_device}
@@ -2305,12 +2304,14 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
 \label{race_test}
 
-OpenMP is used in FDS to sub-divide the work of the do-loops among multiple cores belonging to the same processor. Figure~\ref{race_test_fig} displays two pairs of temperature traces from two calculations, one using one OpenMP thread and one using four. The results of the two calculations ought to be identical, in which case the respective pairs of temperature traces ought to completely overlap.
+OpenMP is used in FDS to sub-divide the work of the do-loops among multiple cores belonging to the same processor. Figure~\ref{race_test_fig} displays temperature and velocity traces from two calculations, one using one OpenMP thread and one using four. The results of the two calculations ought to be identical, in which case the respective pairs of temperature and velocity traces ought to completely overlap.
 
 \begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test}
-\caption[Result of the \textct{race\_test}]{Temperature time histories of two calculations that use different numbers of OpenMP threads. The pairs of temperature traces ought to be identical.}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test_tmp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/race_test_vel}
+\end{tabular*}
+\caption[Result of the \textct{race\_test}]{Temperature and velocity time histories of two calculations that use different numbers of OpenMP threads. The traces ought to be identical.}
 \label{race_test_fig}
 \end{figure}
 
@@ -2633,8 +2634,8 @@ The comparison of FDS and the exact solution is shown in Fig.~\ref{radiation_gas
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.2in]{FIGURES/radiation_gas_panel_configuration}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_gas_panel}
+\includegraphics[height=2.2in]{FIGURES/radiation_gas_panel_configuration}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_gas_panel}
 \caption[The \textct{radiation\_gas\_panel} case]{\emph{Left}: A radiant panel and target dA$_1$ located a distance $R$ from the panel on its center axis.  \emph{Right}: Comparison of FDS and the exact result.}
 \label{radiation_gas_panel_plot}
 \end{figure}
@@ -3227,15 +3228,16 @@ Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_O2_CO2_CO} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_Asphyxiants} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_Irritants} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_All_Gases} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_O2_CO2_CO} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_Asphyxiants} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_Irritants} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_All_Gases}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_O2_CO2_CO} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_Asphyxiants} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_Irritants} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_All_Gases} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_O2_CO2_CO} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_Asphyxiants} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_Irritants} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_All_Gases}
 \end{tabular*}
+\vskip-\baselineskip
 \caption[The FED and FIC values in \textct{FED\_FIC} test cases]{Comparison of FED and FIC predictions with expected values.}
 \label{FED_FIC_plot}
 \end{figure}
@@ -3243,15 +3245,16 @@ Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_O2_CO2_CO} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_Asphyxiants} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_Irritants} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_All_Gases} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_O2_CO2_CO} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_Asphyxiants} \\
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_Irritants} &
-\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_All_Gases}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_SMIX_O2_CO2_CO} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_SMIX_Asphyxiants} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_SMIX_Irritants} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_SMIX_All_Gases} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_SMIX_O2_CO2_CO} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_SMIX_Asphyxiants} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_SMIX_Irritants} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FIC_SMIX_All_Gases}
 \end{tabular*}
+\vskip-\baselineskip
 \caption[The FED and FIC values in \textct{FED\_FIC\_SMIX} test cases]{Comparison of FED and FIC predictions with expected values using \textct{SMIX}.}
 \label{FED_FIC_SMIX_plot}
 \end{figure}
@@ -3306,9 +3309,9 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 \begin{figure}[ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/propane_flame_deposition_gas}
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/propane_flame_deposition_wall} \\
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/propane_flame_deposition_total}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/propane_flame_deposition_gas}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/propane_flame_deposition_wall} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/propane_flame_deposition_total}
 \end{tabular}
 \caption[Soot mass conservation for \textct{propane\_flame\_deposition} case]{Time evolution of soot mass components for \textct{propane\_flame\_deposition} cases. (Top left) Mass of soot in gas phase. (Top right) Mass of soot deposited on walls. (Bottom) Total mass of soot in gas phase and deposited on walls.}
 \label{fig:deposition_mass}
@@ -3341,7 +3344,7 @@ where $C_0$ is the initial gas-phase soot concentration (100~mg/m$^3$). In this 
 \begin{figure}[ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/soot_gravitational_settling}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_gravitational_settling}
 \end{tabular}
 \caption[Soot mass concentration for \textct{soot\_gravitational\_settling} case]{Time evolution of soot mass concentration for the \textct{soot\_gravitational\_settling} case.}
 \label{fig:soot_gravitational_settling}
@@ -3352,7 +3355,7 @@ The second test case removes the HVAC system. This case tests the gravitational 
 \begin{figure}[ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/soot_gravitational_settling_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_gravitational_settling_2}
 \end{tabular}
 \caption[Soot concentration for \textct{soot\_gravitational\_settling\_2} case]{Time evolution of soot concentration for the \textct{soot\_gravitational\_settling\_2} case.}
 \label{fig:soot_gravitational_settling_2}
@@ -3965,7 +3968,7 @@ where $\delta$ is the thickness of the surface layer and $A$ is the area of the 
 Figure~\ref{cell_burn_away_fig} displays the computed and analytical burning rate. Note that the burning rate is proportional to the mass and the mass decays exponentially to zero in this case because we have specified the {\ct THICKNESS} to be $V/A$ and set the {\ct BULK\_DENSITY} to be 50~\si{kg/m^3} on the {\ct OBST} line defining the single solid grid cell.
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/cell_burn_away}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cell_burn_away}
 \caption[The {\ct cell\_burn\_away} test case.]{Burning rate of a single grid cell with fixed reaction rate.}
 \label{cell_burn_away_fig}
 \end{figure}
@@ -4261,7 +4264,7 @@ Note that {\ct REFERENCE\_RATE}, the FDS input parameter, represents the quantit
 This is an example of a comparison of a candidate solid phase model with TGA data that shows the effect of the sample heating rate. The sample cases called \textct{birch\_tga\_1step\_2} and \textct{birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood consists of only one reaction that converts virgin wood to char and fuel gases. There is also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/birch_tga}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/birch_tga}
 \caption[An example of TGA data]{\label{fig_birch_tga} Comparison of a solid phase model of birch wood with TGA data.}
 \end{figure}
 
@@ -4363,7 +4366,7 @@ This case is a replicate of the {\ct box\_burn\_away1} case used as verification
 \begin{figure}[!ht]
 	\centering
 	\includegraphics[height=2.2in]{SCRIPT_FIGURES/box_burn_away1_pyro3d_vs_pyro1d}
-	\caption[PYRO3D vs.~PYRO1D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
+	\caption[PYRO3D box burn away (the {\ct box\_burn\_away1\_pyro3d\_vs\_pyro1d} case)]{Comparison of burn away for 1D and 3D pyrolysis solvers.  Verification target is total mass.  Rate of pyrolysis varies between the methods due to the surface heat flux boundary condition and the difference in grid resolution.}
 	\label{fig:box_burn_away1_pyro3d_vs_pyro1d}
 \end{figure}
 
@@ -4378,7 +4381,7 @@ This case compares mass loss rates and material thickness for pyrolysis of black
        \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_mlr} &
        \includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_vs_pyro1d_thickness}
     \end{tabular*}
-	\caption[PYRO3D vs.~PYRO1D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
+	\caption[PYRO3D mass loss rate and material thickness (the {\ct pyro3d\_vs\_pyro1d} case)]{Comparison of thickness in 1D with burn away in 3D.  Verification targets are mass loss rate per unit area and material thickness curves.}
 	\label{fig:pyro3d_vs_pyro1d}
 \end{figure}
 
@@ -4666,6 +4669,27 @@ Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS so
 
 
 
+\clearpage
+
+\section{Radiation Absorption by Particles}
+
+\subsection{Radiation Absorption by Vegetation}
+\label{vegetation_absorb}
+
+In this example, six channels, each measuring 4~m by 1~m by 1~m, are filled with various amounts of particles that represent vegetation---shrubbery, for example. The vegetation occupies exactly one cubic meter within each channel. One end of each channel is a solid wall with temperature $T_{\rm hot}= 1273$~K, and the opposite end is a wall with temperature $T_{\rm cold}=0$~K. Each wall has an emissivity of 1 and a heat transfer coefficient of 0. The side walls of the channels are ``mirror'' boundaries which essentially means that the end walls and vegetation layer are infinitely wide, rendering the configuration one-dimensional. With no particles present, the radiative intensity, or {\em radiance}, in the axial direction at the hot wall is $I_0=\sigma T_{\rm hot}^4/\pi \approx 47.4$~kW/(m$^2 \cdot$sr). With particles present, the radiance is expected to attenuate according to the following:
+\be
+   I = I_0 \, \hbox{e}^{-C_{\rm s} \beta \sigma_{\rm p} L}
+\ee
+where $C_{\rm s}$ is the particle shape factor, $\beta$ is the ``packing ratio,'' $\sigma_{\rm p}$ is the particle surface area to volume ratio, and $L=1$~m is the depth of the vegetation layer. It is assumed that the vegetation in this case consists of uniformly sized cylinders that are 1~mm in diameter and 2~cm long. The shape factor is taken to be the ratio of the cylinder's cross sectional area to surface area when oriented normal to the central axis of the channel, or $1/\pi$. The packing ratio is $m'''/\rho_{\rm p}$, the vegetation mass per unit volume, or bulk density, divided by the density of the vegetation itself. $\rho_{\rm p}=500$~kg/m$^3$ in this example. The surface area to volume ratio of the cylinder is $2/r=4000$~m$^{-1}$, where $r$ is the radius of the cylinder. Figure~\ref{vegetation_absorb_fig} displays the comparison of the expected radiative heat flux versus that calculated by FDS.
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/vegetation_absorb}
+\caption[Results of the \textct{vegetation\_absorb} test case.]{Decrease in radiance caused by layers of vegetation of various densities.}
+\label{vegetation_absorb_fig}
+\end{figure}
+
+
+\clearpage
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\textct{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
@@ -4965,7 +4989,7 @@ The \textct{HVAC\_damper} example case is a simple duct network of three ducts c
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_damper}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_damper}
 \caption[Example case \textct{HVAC\_damper}]{Simple duct network with a damper, case \textct{HVAC\_damper}.}
 \label{fig:HVAC_damper}
 \end{figure}
@@ -5008,8 +5032,8 @@ The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). No
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Pressure} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fan_test_Pressure} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
 \end{tabular*}
 \caption[Results of the \textct{fan\_test} case]{Pressure and volume flow for the \textct{fan\_test}.}
 \label{fan_test_fig}
@@ -5039,7 +5063,7 @@ where $A_{\hbox{\scriptsize leak}}=0.002$~m$^2$ and $\rho$ is the density at the
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/leak_test}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test}
 \caption[The \textct{leak\_test} case]{Pressure difference between two compartments with leakage connected by a fan.}
 \label{leak_test_fig}
 \end{figure}
@@ -5069,7 +5093,7 @@ This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leak
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=3.5in]{SCRIPT_FIGURES/HVAC_leak_exponent}
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
 	\caption[The \textct{HVAC\_leak\_exponent} case]{Velocities through leakage with varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}}
 	\label{leak_exponent_fig}
 \end{figure}
@@ -5113,8 +5137,8 @@ We undertake a convergence study to demonstrate that the adopted numerical metho
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_2} } &
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_convergence_3} }
    \end{tabular*}
 \caption[\textct{HVAC\_mass\_transport\_conv\_x} L1 and L2 error results.]{L1 (left) and L2 (right) norm errors in mass fraction for the convergence study using various cell numbers (320, 160, 80, 40, 20 from left to right). The plot demonstrates errors decreasing for increasing cell numbers (i.e. decreasing cell size). L1 and L2 norm errors decay at \(O(\Delta x)\).}
 \label{fig_HVAC_mass_transport_conv_2}
@@ -5158,7 +5182,7 @@ The two compartments are connected by two ducts, A and B, each being \SI{10}{\me
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=4.48in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1b}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_conservation_1b}
 \caption[\textct{HVAC\_mass\_transport\_conservation\_1} test case.]{Species~1 and 2 masses in the left and right compartments.}
 \label{fig_HVAC_mass_transport_conservation_1b}
 \end{figure}
@@ -5209,17 +5233,17 @@ The left compartment is separated into two sub-compartments, A and B. These sub-
 
 \subsection{Energy conservation and pressure (\texorpdfstring{\textct{HVAC\_mass\_transport\_energy}}{HVAC\_mass\_transport\_energy})}
 \label{HVAC_mass_transport_energy}
-The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelsius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left the right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
+The left compartment is initialized with a temperature of \SI{100}{\degreeCelsius}, the right compartment remains at ambient (\SI{20}{\degreeCelsius}). Both compartments and the duct network are initialized with a single species. The species has a specific heat of \SI[per-mode=symbol]{1}{\kilo\joule\per\kilogram\per\kelvin}. The compartments are connected by two separate ducts, duct~A and duct~B, both with a length of \SI{1}{\meter}. Duct~A has a specified flow from left to right with a velocity of \SI[per-mode=symbol]{1}{\meter\per\second}, duct~B has no defined flow and a minor losses coefficient of \num{2}. Duct~A and B are initialized using gas data from the left and right compartment duct nodes respectively. Based on Eq.~\ref{eq_HVAC_mass_transport_energy} enthalpy in the FDS domain should be \SI{293.15}{\kilo\joule} and should remain constant. Based upon Eq.~\ref{HVAC_steady_state} the pressure difference between the upstream and downstream duct node of duct~B should be \SI{0.8928}{\pascal}. Duct node pressure difference and total enthalpy are presented in Fig.~\ref{fig_HVAC_mass_transport_energy}.
 
 \begin{equation}
-h_{\mbox{\tiny CFD}} = c_p V(T_{\mbox{\tiny left}} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
+h_{\mbox{\tiny CFD}} = c_p \frac{V(T_{\mbox{\tiny left}}}{2} \rho_{\mbox{\tiny left}}+T_{\mbox{\tiny right}} \rho_{\mbox{\tiny right}})
 \label{eq_HVAC_mass_transport_energy}
 \end{equation}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_p} } &
-      \scalebox{1}{ \includegraphics[width=3in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_e} }
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_p} } &
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_mass_transport_energy_e} }
    \end{tabular*}
 \caption[\textct{HVAC\_mass\_transport\_energy} $\Delta$ p and enthalpy results.]{Pressure difference between the inlet and outlet of duct~B (left). Total enthalpy in the CFD domain (right).}
 \label{fig_HVAC_mass_transport_energy}

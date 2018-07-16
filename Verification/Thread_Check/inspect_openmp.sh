@@ -46,7 +46,7 @@ case=$1
 
 # Perform OpenMP thread checking (locate deadlocks and data races)
 
-source /opt/intel/inspector/inspxe-vars.sh quiet
+source /opt/intel19/inspector_2019/inspxe-vars.sh quiet
 
 if [ "$OPENMPI" == "1" ]; then
   INSPECTDIR=$GITROOT/fds/Build/mpi_intel_linux_64_inspect

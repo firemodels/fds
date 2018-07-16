@@ -68,9 +68,6 @@ CALL ChkMemErr('RADI','DLN',IZERO)
 ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
 
-! For the time being shutdown if CC_IBM and RADIATION are .TRUE.:
-IF (CC_IBM) CALL SHUTDOWN('ERROR: Currently RADIATION should be set to .FALSE. when having &GEOMs.')
-
 ! Determine mean direction normals and sweeping orders
 ! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
 
@@ -636,10 +633,11 @@ SUBROUTINE RADIATION_FVM(T,NM,RAD_ITER)
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
+USE COMPLEX_GEOMETRY, ONLY : IBM_CFST,IBM_NCFC
 USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
-            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE
+            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ
 INTEGER  :: N,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -671,8 +669,10 @@ KFST4_PART   => WORK7
 IL_UP    => WORK8
 OUTRAD_W => WALL_WORK1
 INRAD_W  => WALL_WORK2
-OUTRAD_F => FACE_WORK1
-INRAD_F  => FACE_WORK2
+IF (CC_IBM) THEN
+   OUTRAD_F => FACE_WORK1
+   INRAD_F  => FACE_WORK2
+ENDIF
 
 ! Ratio of solid angle, used in scattering
 
@@ -771,7 +771,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
          IF (.NOT.LPC%SOLID_PARTICLE) CYCLE
          CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XID,YJD,ZKD,IID,JJD,KKD)
-         AREA_VOLUME_RATIO = 0.25_EB*LP%PWT*LP%ONE_D%AREA*RDX(IID)*RRN(IID)*RDY(JJD)*RDZ(KKD)
+         AREA_VOLUME_RATIO = LPC%SHAPE_FACTOR*LP%PWT*LP%ONE_D%AREA*RDX(IID)*RRN(IID)*RDY(JJD)*RDZ(KKD)
          KAPPA_PART(IID,JJD,KKD) = KAPPA_PART(IID,JJD,KKD) + AREA_VOLUME_RATIO
          KFST4_PART(IID,JJD,KKD) = KFST4_PART(IID,JJD,KKD) + FOUR_SIGMA*AREA_VOLUME_RATIO*LP%ONE_D%TMP_F**4
       ENDDO
@@ -901,7 +901,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),CFACE(ICF)%ONE_D%TMP_F)
          SF => SURFACE(CFACE(ICF)%SURF_INDEX)
          IF (.NOT. SF%INTERNAL_RADIATION) CFACE(ICF)%ONE_D%QRADOUT = CFACE(ICF)%ONE_D%EMISSIVITY*SIGMA*CFACE(ICF)%ONE_D%TMP_F**4
-         OUTRAD_F(IW) = BBF*RPI*CFACE(ICF)%ONE_D%QRADOUT
+         OUTRAD_F(ICF) = BBF*RPI*CFACE(ICF)%ONE_D%QRADOUT
       ENDDO
 
       ! Compute boundary condition term incoming radiation integral
@@ -999,6 +999,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDIF
             ENDDO WALL_LOOP1
             !$OMP END PARALLEL DO
+
+            CFACE_LOOP1: DO ICF=1,N_CFACE_CELLS
+               IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP1
+               CFACE(ICF)%ONE_D%ILW(N,IBND) = OUTRAD_F(ICF) + RPI*(1._EB-CFACE(ICF)%ONE_D%EMISSIVITY)*INRAD_F(ICF)
+            ENDDO CFACE_LOOP1
 
             ! Determine sweep direction in physical space
 
@@ -1158,6 +1163,22 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                        IW = WALL_INDEX(IC,-KSTEP*3)
                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
                    ENDIF
+                   IF (CC_IBM) THEN
+                      DO ICF=CCVAR(I,J,K,IBM_CFST)+1,CCVAR(I,J,K,IBM_CFST)+CCVAR(I,J,K,IBM_NCFC)
+                         IF (ISTEP*CFACE(ICF)%NVEC(1)>0._EB) THEN
+                            AFX = ABS(CFACE(ICF)%NVEC(1))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
+                            ILXU = ILXU*(1._EB-AFX) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
+                         ENDIF
+                         IF (JSTEP*CFACE(ICF)%NVEC(2)>0._EB) THEN
+                            AFY = ABS(CFACE(ICF)%NVEC(2))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
+                            ILYU = ILYU*(1._EB-AFY) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
+                         ENDIF
+                         IF (KSTEP*CFACE(ICF)%NVEC(3)>0._EB) THEN
+                            AFZ = ABS(CFACE(ICF)%NVEC(3))*CFACE(ICF)%AREA/(DX(I)*DY(J))
+                            ILZU = ILZU*(1._EB-AFZ) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
+                         ENDIF
+                      ENDDO
+                   ENDIF
                    A_SUM = AX + AY + AZ
                    AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
                    IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
@@ -1224,6 +1245,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             !$OMP END DO
             !$OMP END PARALLEL
 
+            CFACE_LOOP2: DO ICF=1,N_CFACE_CELLS
+               IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP2
+               DLA = (/DLX(N),DLY(N),DLZ(N)/)
+               DLF = DOT_PRODUCT(CFACE(ICF)%NVEC,DLA) ! face normal * radiation angle
+               IF (DLF>=0._EB) CYCLE CFACE_LOOP2      ! outgoing
+               II = CFACE(ICF)%ONE_D%II
+               JJ = CFACE(ICF)%ONE_D%JJ
+               KK = CFACE(ICF)%ONE_D%KK
+               INRAD_F(ICF) = INRAD_F(ICF) + DLF * CFACE(ICF)%ONE_D%ILW(N,IBND) ! update incoming radiation,step 1
+               CFACE(ICF)%ONE_D%ILW(N,IBND) = IL(II,JJ,KK)
+               INRAD_F(ICF) = INRAD_F(ICF) - DLF * CFACE(ICF)%ONE_D%ILW(N,IBND) ! update incoming radiation,step 2
+            ENDDO CFACE_LOOP2
+
 
             ! Calculate integrated intensity UIID
 
@@ -1287,6 +1321,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          SF  => SURFACE(WALL(IW)%SURF_INDEX)
          EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
          WALL(IW)%ONE_D%QRADIN  = WALL(IW)%ONE_D%QRADIN + WALL(IW)%ONE_D%EMISSIVITY*(INRAD_W(IW)+BBFA*EFLUX)
+      ENDDO
+
+      DO ICF=1,N_CFACE_CELLS
+         IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+         SF  => SURFACE(CFACE(ICF)%SURF_INDEX)
+         EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
+         CFACE(ICF)%ONE_D%QRADIN  = CFACE(ICF)%ONE_D%QRADIN + CFACE(ICF)%ONE_D%EMISSIVITY*(INRAD_F(ICF)+BBFA*EFLUX)
       ENDDO
 
    ENDIF INTENSITY_UPDATE

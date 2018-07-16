@@ -79,9 +79,9 @@ TestID(7,3)  = 165;
 TestID(7,4)  = 166;
 TestID(7,5)  = 170;
 
-Species{1} = 'O$_2$';
-Species{2} = 'CO$_2$';
-Species{3} = 'H$_2$O';
+Species{1} = 'O_2';
+Species{2} = 'CO_2';
+Species{3} = 'H_2O';
 Species{4} = 'CO';
 Species{5} = 'UHC';
 Species{6} = 'Soot';
@@ -126,7 +126,6 @@ marker{6} = '>';
 marker{7} = '<';
 
 plot_style
-Font_Interpreter='LaTeX';
 Marker_Size = 7;
 
 % Collect data

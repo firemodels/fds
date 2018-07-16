@@ -9,6 +9,8 @@ $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -p 8 -d Atmospheric_Effects wind_example.fds
 
+$QFDS -d Complex_Geometry geom_bad_intersection.fds
+$QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -d Complex_Geometry geom_simple.fds
 $QFDS -d Complex_Geometry geom_azim.fds
 $QFDS -d Complex_Geometry geom_elev.fds
@@ -38,6 +40,7 @@ $QFDS -d Complex_Geometry geom_arch.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
+$QFDS -d Complex_Geometry sphere_radiate.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
@@ -64,6 +67,12 @@ $QFDS -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
+
+$QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
+$QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
+$QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
+$QFDS -d Complex_Geometry geom_bad_open_surface.fds
+$QFDS -d Complex_Geometry geom_bad_self_intersection.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
@@ -103,6 +112,7 @@ $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
+$QFDS -p 2 -d Fires couch2.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
@@ -238,6 +248,7 @@ $QFDS -d Miscellaneous mesh_transformation.fds
 $QFDS -d Miscellaneous obst_sphere.fds
 $QFDS -d Miscellaneous obst_cylinder.fds
 $QFDS -d Miscellaneous obst_cone.fds
+$QFDS -d Miscellaneous obst_rotbox.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -261,7 +272,7 @@ $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_glmat.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
@@ -269,7 +280,7 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
-$QFDS -p 8 -d Pressure_Solver duct_flow_glmat.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
@@ -600,6 +611,7 @@ $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
+$QFDS -p 6 -d WUI vegetation_absorb.fds
 $QFDS -d WUI vegetation_drag_1.fds
 $QFDS -d WUI vegetation_drag_2.fds
 

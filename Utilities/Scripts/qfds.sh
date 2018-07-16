@@ -96,6 +96,7 @@ function usage {
     exit
   fi
   echo "Other options:"
+  echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
@@ -112,8 +113,9 @@ function usage {
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
+  echo " -r   - append trace flag to the mpiexec call generated"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
-  echo " -T type - run dv (development) or db (debug) version of fds"
+  echo " -T type - run dv (development), db (debug), inspect, advise, or vtune version of fds"
   echo "           if -T is not specified then the release version of fds is used"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
@@ -196,10 +198,15 @@ else
 max_processes_per_node=1
 fi
 n_openmp_threads=1
+trace=
 use_installed=
 use_debug=
 use_devel=
+use_inspect=
+use_advise=
+use_vtune=
 use_intel_mpi=1
+use_config=""
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
   use_intel_mpi=
@@ -231,11 +238,14 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'ACd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
+while getopts 'Ac:Cd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
    DUMMY=1
+   ;;
+  c)
+   use_config="$OPTARG"
    ;;
   C)
    FDS_MODULE_OPTION=
@@ -308,6 +318,9 @@ case $OPTION  in
   q)
    queue="$OPTARG"
    ;;
+  r)
+   trace="-trace"
+   ;;
   s)
    stopjob=1
    ;;
@@ -329,6 +342,15 @@ case $OPTION  in
    fi
    if [ "$TYPE" == "db" ]; then
      use_debug=1
+   fi
+   if [ "$TYPE" == "inspect" ]; then
+     use_inspect=1
+   fi
+   if [ "$TYPE" == "advise" ]; then
+     use_advise=1
+   fi
+   if [ "$TYPE" == "vtune" ]; then
+     use_vtune=1
    fi
    ;;
   v)
@@ -408,6 +430,15 @@ else
   fi
   if [ "$use_devel" == "1" ]; then
     DB=_dv
+  fi
+  if [ "$use_inspect" == "1" ]; then
+    DB=_inspect
+  fi
+  if [ "$use_advise" == "1" ]; then
+    DB=_advise
+  fi
+  if [ "$use_vtune" == "1" ]; then
+    DB=_vtune
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
@@ -505,7 +536,7 @@ fi
 # Report bindings in the .err or .log file
 
 if [ "$use_intel_mpi" == "1" ]; then
- REPORT_BINDINGS="-print-rank-map"
+ REPORT_BINDINGS=" "
 else
  REPORT_BINDINGS="--report-bindings"
 fi
@@ -532,7 +563,7 @@ if [ "$use_intel_mpi" == "1" ]; then
       echo "Intel MPI environment not setup. Run aborted."
       ABORTRUN=y
     else
-      MPIRUNEXE=$I_MPI_ROOT/bin64/mpiexec
+      MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
       if [ ! -e $MPIRUNEXE ]; then
         echo "Intel mpiexec, $MPIRUNEXE, not found at:"
         echo "$MPIRUNEXE"
@@ -563,7 +594,7 @@ else                                 # using OpenMPI
 fi
 
 TITLE="$infile"
-MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes $trace"
 
 cd $dir
 fulldir=`pwd`
@@ -740,6 +771,12 @@ fi
 if [ "$TCP" != "" ]; then
   cat << EOF >> $scriptfile
 export I_MPI_FABRICS=shm:tcp
+EOF
+fi
+
+if [ "$use_config" != "" ]; then
+  cat << EOF >> $scriptfile
+export VT_CONFIG=$use_config
 EOF
 fi
 

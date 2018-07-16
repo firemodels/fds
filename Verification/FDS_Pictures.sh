@@ -31,6 +31,7 @@ $RUNSMV -d Miscellaneous pyramid
 $RUNSMV -d Miscellaneous obst_sphere
 $RUNSMV -d Miscellaneous obst_cylinder
 $RUNSMV -d Miscellaneous obst_cone
+$RUNSMV -d Miscellaneous obst_rotbox
 $RUNSMV -d NS_Analytical_Solution ns2d_64
 $RUNSMV -d Pressure_Effects pressure_boundary
 $RUNSMV -d Pressure_Solver dancing_eddies_tight
@@ -38,6 +39,7 @@ $RUNSMV -d Scalar_Analytical_Solution move_slug
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1
 $RUNSMV -d Scalar_Analytical_Solution shunn3_256
 $RUNSMV -d Species propane_flame_deposition
+$RUNSMV -d Complex_Geometry sphere_radiate
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64

@@ -78,7 +78,6 @@ User's Guide\\
 
 \headerC{
 \today \\
-FDS Version \fdsversion \\
 Revision:~\gitrevision}
 
 
@@ -110,7 +109,7 @@ This Guide describes how to use the Fire Dynamics Simulator (FDS). Because new f
 the current version number on the inside front jacket of this manual.
 
 Note that this Guide does not provide the background theory for FDS. A four volume set of companion documents, referred to
-collectively as the FDS Technical Reference Guide~\cite{FDS_Math_Guide}, contains details about the governing
+collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}, contains details about the governing
 equations and numerical methods, model verification, experimental validation, and configuration management.
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
 visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
@@ -431,11 +430,11 @@ If you ever want to keep an older version of FDS and Smokeview, copy the install
 
 \section{Computer Hardware Requirements}
 
-The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 4~GB RAM per processor. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
+The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 2 to 4~GB RAM per core. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 10~GB of storage space.
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
-The MPI version of FDS requires shared disk access to each computer where cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the MPI version of FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of MPI FDS running the parallel cases.
+Running FDS using MPI requires shared disk access to each computer where cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or Mac~OS~X system this involves NFS cross mounted files systems with ssh keys setup for passwordless login. For Multi-Mesh calculations, the FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of FDS running the parallel cases.
 
 
 \section{Computer Operating System (OS) and Software Requirements}
@@ -564,7 +563,7 @@ There are different implementations of MPI, much like there are different Fortra
 
 The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
-To run the MPI version of FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
+To run an MPI calculation with FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
 
 First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
 
@@ -653,7 +652,7 @@ In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 
 
 \subsection{Running Very Large Jobs}
 
-Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one to one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
+Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one-to-one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
 \begin{enumerate}
 \item Use MPI only. OpenMP will probably not speed up the run time appreciably, and it will consume cores that could be put to better use running more MPI processes.
 \item For jobs using thousands of meshes/processes, add the parameter {\ct SHARED\_FILE\_SYSTEM=.FALSE.} to the {\ct MISC} line. This directs FDS to break up the Smokeview ({\ct .smv}) file according to MPI process. This will greatly speed up the preliminary part of the simulation because the Smokeview file is written serially, not in parallel. For a modest number of meshes, this serial write is not a problem, but for thousands of meshes, the initialization routines can take hours. When the job completes, you can reconstruct the Smokeview file by appending the numbered files, {\ct CHID\_n.smv}, to the main Smokeview file, {\ct CHID.smv}.
@@ -694,7 +693,7 @@ Along with the FDS User's Guide, there are resources available on the Internet. 
 
 \section{The Version Number}
 
-If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like \fdsversion, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number, for example 6.7.2, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should affect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
 
 Get in the habit of checking the version number of your executable, periodically checking for new releases which might already have addressed your problem, and telling us what version you are using if you report a problem.
 
@@ -718,7 +717,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
     \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Section~\ref{info:PRES} for details.
     \end{itemize}
     There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. It is difficult for anyone but the originator of the input file to diagnose the problem.
-\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky. In fact, for a typical 32~bit Windows PC with 4~GB RAM, only 2~GB will be available to FDS, based on user feedback. If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the calculation into multiple meshes and use the MPI version of FDS. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
+\item[{\bf Inadequate Computer Resources}:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky; using MPI and mulitple machines would be better. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
 \item[{\bf File Writing Errors}:] Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
 \begin{lstlisting}
@@ -881,6 +880,7 @@ table containing all of the keywords for each group.
 \hline
 Group Name  & Namelist Group Description& Reference Section & Parameter Table  \\ \hline
 {\ct BNDF}  & Boundary File Output         & \ref{info:BNDF} & \ref{tbl:BNDF}  \\ \hline
+{\ct CATF}  & Concatenate Input Files         & \ref{info:CATF} & \ref{tbl:CATF}  \\ \hline
 {\ct CLIP}  & Clipping Parameters          & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct COMB}  & Combustion Parameters        & \ref{info:COMB} & \ref{tbl:COMB}  \\ \hline
 {\ct CSVF}  & Velocity Input File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
@@ -918,6 +918,55 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \end{table}
 
 
+\section{Concatenating input files}
+\label{info:CATF}
+
+The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an 
+FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains 
+%
+\begin{lstlisting}
+&HEAD CHID='couch2', TITLE='Single Couch Test Case using two meshes & CATF files.'  /
+&MESH IJK=12,10,24, XB=1.1,2.3,3.6,4.6,0.0,2.4, MULT_ID='mesh' /
+&MULT ID='mesh', DX=1.2, I_UPPER=1 /
+&TIME T_END=600. /
+...
+&CATF OTHER_FILES='upholstery_matl.tpl','gypsum_walls.tpl' / #Upholstery & gypsum.
+
+# Couch OBSTS:
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 / 
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
+&OBST XB= 1.30, 1.50, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
+&OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
+&OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
+
+&CATF OTHER_FILES='couch2_devices.dat' / # Devices generated by script.
+...
+&TAIL/
+\end{lstlisting}
+%
+We note that the {\ct \&CATF} group is defined in two lines. In the first line, two files {\ct upholstery\_matl.tpl}, {\ct gypsum\_walls.tpl} are defined on 
+the namelist {\ct OTHER\_FILES} field. These contain information in the form of templates, on a typical upholstery material for the couch, and gypsum wall defined for the back wall and roof of the case. Up to 20 files can be listed in one {\ct \&CATF} line. For example, for the gypsum wall template, the material and surface information is provided in FDS input format as:
+%
+\begin{lstlisting}
+&MATL ID            = 'GYPSUM PLASTER'
+      FYI           = 'Quintiere, Fire Behavior'
+      CONDUCTIVITY  = 0.48
+      SPECIFIC_HEAT = 0.84
+      DENSITY       = 1440. /
+
+&SURF ID             = 'WALL'
+      DEFAULT        = .TRUE.
+      RGB            = 200,200,200
+      MATL_ID        = 'GYPSUM PLASTER'
+      THICKNESS      = 0.012 /
+\end{lstlisting}
+%
+In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an 
+automated script. 
+
+When FDS is invoked with the {\ct couch2.fds} input file, it will concatenate the input contents of this file and all files defined in its {\ct \&CATF} lines,
+into a simulation input file called {\ct couch2\_cat.fds} (here {\ct CHID='couch2'} is the case ID in the original {\ct couch2.fds} input file).
+Then FDS will proceed to run the case defined by the concatenated input file generated.
 
 
 \chapter{Setting the Bounds of Time and Space}
@@ -975,6 +1024,8 @@ If something sudden is to happen right at the start of a simulation, like a spri
 
 At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
+The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains the time, time step, maximum CFL number, maximum VN (Von Neumann) number, the mesh and mesh indices where these maximum values occur, and the six velocity components on the six faces of the grid cell where the maximum CFL number occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
+
 
 \subsection{Special Topic: Steady-State Applications}
 \label{info:steady_state}
@@ -992,10 +1043,7 @@ Note that when {\ct TIME\_SHRINK\_FACTOR} is used a device with {\ct QUANTITY='T
 \section{Computational Meshes: The \texorpdfstring{{\tt MESH}}{MESH} Namelist Group (Table \ref{tbl:MESH})}
 \label{info:MESH}
 
-All FDS calculations must be performed within a domain that is made up
-of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells},
-the number of which depends on the desired resolution of the flow dynamics.
-{\ct MESH} is the namelist group that defines the computational domain.
+All FDS calculations must be performed within a domain that is made up of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells}, the number of which depends on the desired resolution of the flow dynamics. {\ct MESH} is the namelist group that defines the computational domain.
 
 \subsection{Basics}
 \label{info:MESH_Basics}
@@ -1029,7 +1077,7 @@ The governing equations solved in FDS are written in terms of a three dimensiona
 
 The term ``multiple meshes'' means that the computational domain consists of more than one computational mesh, usually connected although this is not required. If more than one mesh is used, there should be a {\ct MESH} line for each. The order in which these lines are entered in the input file matters. In general, the meshes should be entered from finest to coarsest. FDS assumes that a mesh listed first in the input file has precedence over a mesh listed second if the two meshes overlap. Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate calculations are performed with no communication at all between them. Obstructions and vents are entered in terms of the overall coordinate system and need not apply to any one particular mesh. Each mesh checks the coordinates of all the geometric entities and decides whether or not they are to be included.
 
-To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases with the MPI version of FDS if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the MPI version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the non-MPI version of FDS, in which case one CPU will serially process each mesh, one by one.
+To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases using MPI if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For MPI to work well, there has to be a comparable number of cells assigned to each MPI process, or otherwise most of the processes will sit idle waiting for the one with the largest number of cells to finish processing each time step. You can use multiple meshes on a single processor without using MPI , in which case one CPU will serially process each mesh, one by one.
 
 Usually in a MPI calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 \begin{lstlisting}
@@ -1059,6 +1107,7 @@ Some parallel computing environments do not have a centralized file system, in w
 
 
 \subsection{Mesh Alignment}
+\label{info:mesh_alignment}
 
 Whether the calculation is to be run using MPI or not, the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
 \begin{figure}[p]
@@ -1126,6 +1175,7 @@ The following rules of thumb should also be followed when setting up a multiple 
 \item Be careful when using the shortcut convention of declaring an entire face of the domain to be an {\ct OPEN} vent. Every mesh takes on this attribute. See Section~\ref{info:VENT} for more details.
 \item If a planar obstruction is close to where two meshes abut, make sure that each mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one of the meshes, that mesh does not account for it, in which case information is not transferred properly between meshes.
 \end{itemize}
+If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct .TRUE.} on any {\ct MESH} line. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye.
 
 
 \subsubsection{Accuracy of the Multiple Mesh Calculation}
@@ -1256,7 +1306,7 @@ Key Parameter                          & Section                        & {\ct '
 \section{Stopping and Restarting Calculations}
 \label{info:restart}
 
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you wil also need to delete the file {\ct CHID.stop} so that FDS does not immeadiately stop the calculation. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
 
 There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
 It is also possible to use the new control function feature (see Section~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
@@ -1293,7 +1343,7 @@ Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS h
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
 
-
+Note that in a case with sprinklers, changing {\ct GVEC} will change how droplets move in the gas but not how droplets move on solid sufaces. On solid surfaces droplet movement will always consider down to be the negative-z direction.
 
 \section{Special Topic: The Baroclinic Vorticity}
 \label{baroclinic_torque}
@@ -1461,7 +1511,7 @@ One additional parameter might be useful in some special cases. The numerical tr
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
+Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
 
@@ -1509,7 +1559,7 @@ When you run a job that has been run previously, FDS will automatically overwrit
 \section{Turning off the Flow Field}
 \label{info:freeze_velocity}
 
-For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
+For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation or particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
 
 
 
@@ -1630,17 +1680,17 @@ If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the 
 \section{Optional Pressure Solver}
 \label{optional_pressure_solver}
 
-The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='GLMAT'} on {\ct PRES}. GLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='GLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solve is now ``unstructured.'' If the solver is defined as {\ct SOLVER='GLMAT IBM'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As GLMAT is based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, it requires computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
+The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='UGLMAT'} on {\ct PRES}. UGLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='UGLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured''. If the solver is defined as {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
 
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the GLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the UGLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
 \begin{lstlisting}
-&PRES SOLVER='GLMAT' /
+&PRES SOLVER='UGLMAT' /
 \end{lstlisting}
-As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the GLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the UGLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1655,20 +1705,20 @@ As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the n
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 \label{dancing_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='GLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='GLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the GLMAT solver is threaded, whereas the FFT solver (FDS default) is not.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the UGLMAT solver is threaded, whereas currently the FFT solver (FDS default) is not.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_glmat}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the GLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the UGLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies_figure}
 \end{figure}
 
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the GLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the UGLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
@@ -1949,7 +1999,7 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 
 \label{info:Special_VENTS}
 
-There are three reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'}, {\ct 'MIRROR'}, and {\ct 'PERIODIC'}. The term {\em reserved} means that these {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
+There are four reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'}, {\ct 'MIRROR'}, {\ct 'PERIODIC'}, and {\ct HVAC}. The term {\em reserved} means that these {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
 \subsubsection{Open Vents}
 
@@ -1989,6 +2039,10 @@ For additional information related to periodic boundaries and the pressure solve
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
 Note that, by default, particles are not recycled at periodic boundaries.  See Section~\ref{info:periodic-particles} if periodic particles are desired.
+
+\subsubsection{HVAC Vents}
+
+A {\ct VENT} with {\ct SURF\_ID='HVAC'} denotes that the vent is connected to an HVAC system. See Section~\ref{info:HVAC} for a description of inputs for HVAC systems.
 
 \subsubsection{Circular Vents}
 \label{sec:circvents}
@@ -2062,7 +2116,7 @@ Colors for many items within FDS can be prescribed in two ways; a triplet of int
 &OBST XB=..., COLOR='BLUE' /
 \end{lstlisting}
 will color all {\ct UPHOLSTERY} green and this particular obstruction blue. Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names for a variety of colors\footnote{A complete listing of all 500+ colors can be found by searching the FDS source code file {\ct data.f90}.}.
-It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the room or building under study.
+It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line. As the geometries of FDS simulations become more complex, it is very useful to use color as a spot check to determine if the desired surface properties have been assigned throughout the geometry.
 
 Obstructions and vents may be colored individually, over-riding the color designated by the {\ct SURF} line. The special case {\ct COLOR='INVISIBLE'} causes the vent or obstruction not to be drawn by Smokeview. Another special case {\ct COLOR='RAINBOW'} causes the color of the vent, obstruction or mesh to be randomly selected from the full range of RGB values; this can be useful if you are using the {\ct MULT} namelist group and want to differentiate between the multiplied obstruction, vent or mesh.
 
@@ -2289,9 +2343,9 @@ Note that objects and meshes in the {\ct MULT} array may be skipped using {\ct I
 \subsection{Special Topic: Using {\ct MULT} to make shapes out of obstructions}
 \label{info:multobst}
 
-Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of three basic shapes: sphere, cylinder, or cone.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
+Block obstructions made using an {\ct OBST} line are constrained to the box defined {\ct XB}.  However, if you create a block out of an array of obstructions---each of which can be as small as a single grid cell---then that block can be manipulated into one of four basic shapes: sphere, cylinder, cone or box.  The flow obstruction is created from the intersection of the {\ct OBST} array, created using a {\ct MULT\_ID}, and the {\ct SHAPE} defined on the {\ct OBST} line.  Note that this method may be memory intensive since each grid cell can be its own {\ct OBST}, similar to the way {\ct OBST} are decomposed when using {\ct BURN\_AWAY} for pyrolysis.
 
-With regard to the {\ct SURF\_ID},
+%With regard to the {\ct SURF\_ID},
 
 The first step in carving out the shape is to create a {\ct MULT} line that defines the replication of the {\ct OBST}.  Then a {\ct SHAPE} is entered on the {\ct OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
 
@@ -2304,7 +2358,8 @@ The first step in carving out the shape is to create a {\ct MULT} line that defi
 {\ct SHAPE} \hfill   & Parameters (default values in Table~\ref{tbl:OBST})    \hfill    \\ \hline
 {\ct 'SPHERE'}       & {\ct XYZ}, {\ct RADIUS}                                  \\
 {\ct 'CYLINDER'}     & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
-{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\ \hline
+{\ct 'CONE'}         & {\ct XYZ}, {\ct RADIUS}, {\ct HEIGHT}, {\ct ORIENTATION} \\
+{\ct 'BOX'}            & {\ct XYZ}, {\ct LENGTH}, {\ct WIDTH}, {\ct HEIGHT}, {\ct ORIENTATION}, {\ct THETA} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -2350,7 +2405,7 @@ To create a cylinder we need a height and orientation in addition to the radius.
 \label{fig:obst_cylinder}
 \end{figure}
 
-A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig X.
+A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using {\ct XYZ} and the {\ct RADIUS} of the bottom face, the {\ct HEIGHT}, and the {\ct ORIENTATION} must be specified.  An example is shown below in Fig~\ref{fig:obst_cone}.
 
 \begin{lstlisting}
 &SURF ID='shape', COLOR='FOREST GREEN'/
@@ -2372,6 +2427,31 @@ A cone needs basically the same input parameters as a cylinder.  The position of
 \label{fig:obst_cone}
 \end{figure}
 
+Finally, the box shape allows to define rotated cuboids. A box shape is defined locally by its {\ct HEIGHT}, {\ct WIDTH} and {\ct LENGTH}. The location of the box center is provided in {\ct XYZ}. The angle {\ct THETA} in degrees specifies a rotation of the box respect to the global $z$ axis, following right hand rule.
+Subsequently, the {\ct ORIENTATION} direction vector allows for an orientation change respect to the {\ct THETA} rotated reference frame. This direction vector changes the box orientation such that the local {\ct HEIGHT} direction matches it.
+A simple example is shown Fig~\ref{fig:obst_rotbox}.
+
+\begin{lstlisting}
+&SURF ID='shape', COLOR='GRAY'/
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='BOX'
+      LENGTH=0.075
+      WIDTH=0.025
+      HEIGHT=0.05
+      XYZ=0,0,0.01
+      ORIENTATION=0.5,0,1
+      THETA = 45. /
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
+\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
+\label{fig:obst_rotbox}
+\end{figure}
 
 
 \chapter{Fire and Thermal Boundary Conditions}
@@ -2462,7 +2542,7 @@ Instead of altering the convective heat transfer coefficient, you may specify a 
 
 \subsubsection{Logarithmic Law of the Wall}
 
-Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
+Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of the near-wall flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
 
 By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{\rm w})/T_\tau$, where $T_{\rm g}$ is the gas temperature of the first off-wall grid cell and $T_\tau$ is defined with the wall heat flux, $\dot{q}''_{\rm w}$, as $T_\tau = \dot{q}''_{\rm w}/\rho_{\rm w} u_\tau c_{\rm p}$. The local heat transfer coefficient is then obtained from
 \begin{equation}
@@ -2511,7 +2591,7 @@ Material layers and components are specified on the {\ct SURF} line via the arra
 \end{lstlisting}
 Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
-When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
+When a set of {\ct SURF} parameters is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} defines the first layer of solid material. The other {\ct MATL\_ID}s are applied in succession. If {\ct BACKING='EXPOSED'}, the last {\ct MATL\_ID} is applied to the opposite face of the {\ct OBST}, assuming that the {\ct OBST} is zero or one grid cells thick. If the {\ct OBST} is thicker than one grid cell, then {\ct BACKING='EXPOSED'} is not defined, and it will be treated as if the condition {\ct BACKING='VOID'} was set. If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the $+x$ face to the $-x$ face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
 calculation from the $-x$ face to the $+x$ face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 
 Mixtures of solid materials within the same layer can be defined using the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same two indices as the {\ct MATL\_ID} keyword. For example, if the brick layer contains some additional water, the input could look like this:
@@ -2566,11 +2646,11 @@ The solid material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allo
 \subsection{Back Side Boundary Conditions}
 \label{info:BACKING}
 
-The layers of a solid boundary are listed in order from the surface. By default, if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, it is assumed to back up to an air gap at ambient temperature. For example a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
+The layers of a solid boundary are listed in order from the surface. By default, if the obstruction is less than or equal to one cell thick, then the innermost layer will be exposed to the air temperature on the back side.  If the obstruction is on the boundary of the domain or is more than one cell thick, then it is assumed to back up to an air gap at ambient temperature. For example, a thin steel plate (i.e. thickness less than or equal to the grid) would use the FDS predicted temperatures on either side of the plate for predicting heat transfer.
 
 There are other back side boundary conditions that can be applied. One is to assume that the wall backs up to an insulated material in which case no heat is lost to the backing material. The expression {\ct BACKING='INSULATED'} on the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition means that you  do not have to specify properties of the inner insulating material because it is assumed to be perfectly insulated.
 
-If the wall is assumed to back up to the room on the other side of the wall and you want FDS to calculate the heat transfer through the wall into the space behind the wall, the attribute {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume of computational domain on the other side of the wall. Obviously, if the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side gas cell cannot be found (in which case, the wall would not be one cell thick).  This is the default boundary conditions.
+If the wall is assumed to back up to the room on the other side of the wall and you want FDS to calculate the heat transfer through the wall into the space behind the wall, the attribute {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works if the wall {\ct OBST} is less than or equal to one mesh cell thick, and if there is a non-zero volume of computational domain on the other side of the wall {\ct OBST}. Obviously, if the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side gas cell cannot be found (i.e. the wall {\ct OBST} is greater than one cell thick).  This is the default boundary conditions.
 
 If the wall is assumed to always back up to the ambient, then the attribute {\ct BACKING='VOID'} should be set.
 
@@ -2821,12 +2901,7 @@ If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware th
 \subsection{Solid Fuels that Burn at a Specified Rate}
 \label{info:specified_burning}
 
-Real objects, like furnishings, office equipment, and so on, are
-often difficult to describe via the {\ct SURF} and {\ct MATL}
-parameters. Sometimes the only information about a given object is its
-bulk thermal properties, its ``ignition'' temperature, and its
-subsequent burning rate as a function of time from ignition. For
-this situation, add lines similar to the following:
+Real objects, like furnishings, office equipment, and so on, are often difficult to describe via the {\ct SURF} and {\ct MATL} parameters. Sometimes the only information about a given object is its bulk thermal properties, its ``ignition'' temperature, and its subsequent burning rate as a function of time from ignition. For this situation, add lines similar to the following:
 \begin{lstlisting}
 &MATL ID                   = 'stuff'
       CONDUCTIVITY         = 0.1
@@ -2846,22 +2921,9 @@ this situation, add lines similar to the following:
 &RAMP ID='fire_ramp', T=310.0, F=1.0 /
 &RAMP ID='fire_ramp', T=320.0, F=0.0 /
 \end{lstlisting}
-An object with surface properties defined by {\ct 'my surface'} shall
-burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
-following its ``ignition'' when its surface temperature reaches
-500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down
-in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
-ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface
-property, not material property.
+An object with surface properties defined by {\ct 'my surface'} shall burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s following its ``ignition'' when its surface temperature reaches 500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface property, not material property.
 
-After the surface has ignited, the heat transfer into the solid is
-still calculated, but there is no coupling between the burning rate
-and the surface temperature. As a result, the surface temperature may
-increase too much. To account for the energy loss due to the
-vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
-specified for the surface. For example, when using the lines below,
-the net heat flux at the material surface is reduced by a factor
-1000~kJ/kg times the instantaneous burning rate.
+After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the net heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
 \begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
@@ -2872,14 +2934,9 @@ the net heat flux at the material surface is reduced by a factor
       RAMP_Q               = 'fire_ramp'
       THICKNESS            = 0.01 /
 \end{lstlisting}
-The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, and {\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the
-burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they
-are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
-an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION}
-tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing
-a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like
-those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
-the conditions of the surrounding environment.
+Finally, if you desire that the burning stop if the surface temperature drops below a specified value, set {\ct EXTINCTION\_TEMPERATURE} on the {\ct SURF} line. This value should be less than or equal to the \linebreak[4]{\ct IGNITION\_TEMPERATURE}.
+
+The parameters {\ct HRRPUA}, {\ct IGNITION\_TEMPERATURE}, {\ct EXTINCTION\_TEMPERATURE}, and \linebreak[4]{\ct HEAT\_OF\_VAPORIZATION} are all telling FDS that you want to control the burning rate yourself, but you still want to simulate the heating up and ``ignition'' of the fuel. When these parameters appear on the {\ct SURF} line, they are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION} tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on the conditions of the surrounding environment. Also note that this simple model assumes that the solid acts like a typical {\em thermoplastic} material, i.e. it pyrolyzes near the surface leaving relatively little char.
 
 
 
@@ -2891,8 +2948,8 @@ the conditions of the surrounding environment.
 
 This section describes the parameters that describe the reactions that occur within solid
 materials when they are burning. It is strongly recommended before reading this section that you read some background material on
-solid phase pyrolysis, for example ``Thermal Decomposition of Polymers,'' by Hirschler and Morgan, or
-``Flaming Ignition of Solid Fuels,'' by Torero, both of which are in the 4th edition of the
+solid phase pyrolysis, for example ``Thermal Decomposition of Polymeric Materials,'' by Witkowski, Stec, and Hull, or
+``Flaming Ignition of Solid Fuels,'' by Torero, both of which are in the 5th edition of the
 {\em SFPE Handbook of Fire Protection Engineering}.
 
 \subsection{Reaction Mechanism}
@@ -3017,8 +3074,8 @@ produces fuel gas using the appropriate {\ct SPEC\_ID}.
 Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
 per unit mass of fuel gas that mixes with oxygen and combusts.  This
 has nothing to do with the pyrolysis process, so why is it specified
-here? The answer is that there can be only one {\em gas phase}
-reaction of fuel and oxygen in FDS, but there can be dozens of
+here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase}
+reaction of fuel and oxygen, but there can be dozens of
 different materials and dozens of {\em solid phase} reactions. To
 ensure that the fuel vapors from different materials combust to
 produce the proper amount of energy, it is very important to specify a
@@ -3307,28 +3364,35 @@ When using 3D mass transport, view the fuel gas density inside the solid using
 All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
 
+\clearpage
 
 \section{Thermal Degradation Model for Vegetation}
 
-The working model for the thermal degradation of a vegetative fuel is similar to that employed by others~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process has three reactions:
+FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+
+\vspace{\baselineskip}
 
 \noindent 1. Endothermic drying
 \be
- {\rm Wet Vegetation} \rightarrow M_{\rm dw} \, {\rm H_2O} + (1-M_{\rm dw}) \, {\rm Dry\ Vegetation}
+ {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
 \ee
 
 \noindent 2. Endothermic pyrolysis
 \be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, ({\rm Fuel\ Gas + Soot})
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
 \ee
 
 \noindent 3. Exothermic char oxidation
 \be
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \ee
-$M_{\rm dw}$ is the fuel (i.e., vegetation) moisture mass fraction on a dry weight basis;  $\chi_{\rm char}$ is the mass fraction of dry fuel that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ = 1.65~\cite{Porterie:2006};  $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
+$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
+\be
+  Y_{\rm w} = \frac{M}{1+M}
+\ee
+$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
 
-In the equations that follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
+In the equations to follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
 
 The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
 \begin{eqnarray}
@@ -3337,7 +3401,7 @@ The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
   r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
   \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
 \end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder, where $\sigma_{\rm v}$ is the surface area to volume ratio of the cylinder. $\beta_{\rm v}$ is the {\em packing ratio}; that is, the ratio of the vegetation volume to the overall volume containing the vegetation. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
@@ -3346,13 +3410,14 @@ where $T_{\rm v}$ is the temperature of the vegetation. The default values of th
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-Constant                 &   Default Value  \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )          & 600,000 \\ \hline
-$E_{\rm H_2O}/R$ (K)         & 5,800 \\ \hline
-$A_{\rm pyr}$ (1/s)           & 36,300 \\ \hline
-$E_{\rm pyr}/R$ (K)            & 7,250  \\ \hline
-$A_{\rm char}$ (m/s)          & 430 \\ \hline
-$E_{\rm char}/R$ (K)           & 9,000 \\ \hline
+Constant                        &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
+$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
+$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
+$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
+$A_{\rm char}$ (m/s)            & 430              \\ \hline
+$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
+$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -3362,7 +3427,7 @@ The equation governing the temperature of a thermally thin fuel element is
 \label{eq:Tv_thermally_thin}
 \rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
 \ee
-The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2.259 \times 10^3$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32 \times 10^3$~kJ/kg~\cite{Dahale:2013}.
+The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2259$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32000$~kJ/kg~\cite{Dahale:2013}.
 
 In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
 \begin{eqnarray}
@@ -3371,9 +3436,9 @@ In the condensed phase model, the bulk density and specific heat have contributi
 \end{eqnarray}
 where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
 \begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
-c_{\rm p, char} &=& 420 + 2.09 T_{\rm v} + 6.85 \times 10^{-4}\ T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
-c_{\rm p, ash} &=& 1244 (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm p, dry} &=& 10 + 3.7 \, T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
+c_{\rm p, char} &=& 420 + 2.09 \, T_{\rm v} + 6.85 \times 10^{-4} \, T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
+c_{\rm p, ash} &=& 1244 \, (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
 c_{\rm p,H_2O} &=& 4190
 \end{eqnarray}
 The rate of change of the total vegetative fuel mass is
@@ -3388,6 +3453,70 @@ The rate of change for the components of the vegetative mass during thermal degr
 \end{eqnarray}
 Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
 
+Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that each {\ct MATL} line contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
+
+\begin{figure}[p]
+\begin{lstlisting}
+&PART ID='pine needles', SURF_ID='vegetation', STATIC=.TRUE. /
+
+&SURF ID = 'vegetation'
+      MATL_ID = 'WET VEGETATION'
+      THICKNESS = 0.0005
+      LENGTH = 0.05
+      GEOMETRY = 'CYLINDRICAL' /
+
+&MATL ID = 'WET VEGETATION'
+      VEGETATION = .TRUE.
+      DENSITY = 586.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      A = 600000.
+      E = 48200.
+      N_T = -0.5
+      NU_SPEC = 0.123
+      SPEC_ID = 'WATER VAPOR'
+      NU_MATL = 0.877
+      MATL_ID = 'DRY VEGETATION'
+      HEAT_OF_REACTION = 2259. /
+
+&MATL ID = 'DRY VEGETATION'
+      VEGETATION = .TRUE.
+      DENSITY = 514.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      A = 36300.
+      E = 60300.
+      NU_MATL = 0.26
+      MATL_ID = 'CHAR'
+      NU_SPEC = 0.74
+      SPEC_ID = 'CELLULOSE'
+      HEAT_OF_REACTION = 418. /
+
+&MATL ID = 'CHAR'
+      VEGETATION = .TRUE.
+      DENSITY  = 134.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0
+      N_S = 0.
+      NU_O2 = 1.65
+      BETA_CHAR = 0.2
+      A = 430.
+      E = 74800.
+      NU_MATL = 0.5
+      MATL_ID  = 'ASH'
+      NU_SPEC = 2.15
+      SPEC_ID = 'CARBON DIOXIDE'
+      HEAT_OF_REACTION= -32000. /
+
+&MATL ID = 'ASH'
+      VEGETATION = .TRUE.
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 2.0 /
+\end{lstlisting}
+\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
+\label{vege_inputs}
+\end{figure}
 
 
 
@@ -3409,7 +3538,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
 \item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
-Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
+Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
 &HEAD CHID='pmma_example', TITLE='Black PMMA at 50 kW/m2' /
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
@@ -3433,7 +3562,7 @@ Compare your results to measurements made in a bench-scale device, like the cone
       BACKING='INSULATED'
       MATL_ID='BLACKPMMA'
       THICKNESS=0.0085
-      EXTERNAL_FLUX=52 /
+      EXTERNAL_FLUX=50 /
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
 &DUMP DT_DEVC=5. /
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
@@ -3508,7 +3637,7 @@ create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an 
 \end{lstlisting}
 dictates that the forward $x$-facing surface of the obstruction is to have a velocity equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the computational domain.
 
-Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flux is desired.
+Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flow is desired.
 
 Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the specified {\ct VOLUME\_FLOW} will be recomputed in each mesh so that the desired volume flow is achieved. This was not the case in FDS version 6.3 and earlier. The sample cases called {\ct volume\_flow\_1.fds} and {\ct volume\_flow\_2.fds} in the {\ct Flowfields} folder demonstrate that a {\ct VENT} or an {\ct OBST} can be divided among several meshes. In both cases, air is drawn from a 1~m by 1~m by 1~m box at a rate of 0.01~m$^3$/s. These cases also ensure that the {\ct VENT} or {\ct OBST} need not be aligned with the mesh to yield the desired flow rate. Figure~\ref{volume_flow} displays the volume flow drawn though an {\ct OPEN} boundary on an opposite face of the box with either a {\ct VENT} (left) or {\ct OBST} (right) with a specified volume flow.
 
@@ -3673,7 +3802,7 @@ If the ability to transport heat and combustion products through a duct network 
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
 
-By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
+By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
@@ -3700,7 +3829,7 @@ P_{node}^{n+1}=P_{FDS} \; (1-{\mathtt{HVAC\_PRES\_RELAX}}) \; + \; P_{node}^n \;
 \ee
 Setting this parameter closer to 1 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
 
-The second method is setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
+The second method is setting the keyword {\ct HVAC\_LOCAL\_PRESSURE} on the {\ct MISC} line. When set, this will cause FDS to use the {\ct ZONE} pressure at a vent plus the stagnation pressure of any flow normal to the vent to determine the pressure boundary condition for a node connected to the FDS domain rather than the {\ct ZONE} pressure plus the the pressure derived from the local value of $\cH$. Note this means a sealed room must have a {\ct ZONE} assigned to it.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3723,12 +3852,12 @@ where:
 \item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct. The state of the damper is controlled by either a device or a control function (see Section~\ref{info:HVACdamper}).
 \item[{\ct DIAMETER}] is the diameter of the duct in m.  If only {\ct DIAMETER} is specified, the {\ct AREA} will be computed assuming a round duct.  Do not specify both {\ct DIAMETER} and {\ct PERIMETER}.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. An alternative is {\ct CTRL\_ID}.
-\item[{\ct DUCT\_INTERP\_TYPE}] sets whether the duct is initialized with data from the first node ({\ct NODE1}) or the second node ({\ct NODE2}). Continuous runs of ducts cannot have a mix of interpolation methods (refer to Section~\ref{info:hvacmasstransport}).
+\item[{\ct DUCT\_INTERP\_TYPE}] Used when {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}. It determines whether the duct is initialized with data from the first node ({\ct NODE1}) or the second node ({\ct NODE2}). Continuous runs of ducts cannot have a mix of interpolation methods (refer to Section~\ref{info:hvacmasstransport}).
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LENGTH}] is the {\ct LENGTH} of the duct in m.  Note that {\ct LENGTH} is not computed automatically as the difference between the {\ct XYZ} of the duct's endpoints.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse dimensionless "minor losses" loss coefficient (\(K_{\mbox{\tiny minor}}\)) in the duct. Minor losses are pressure losses through components such as tees, valves and bends. However, you can use {\ct LOSS} to represent wall friction losses if you want - in this case ensure you leave {\ct ROUGHNESS} unset so that the HVAC solver does not compute a friction factor. The forward direction is defined as flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
-\item[{\ct N\_CELLS}] defines the number of cells used in a discretized duct.
+\item[{\ct N\_CELLS}] Used when {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}. It defines the number of cells used in a discretized duct.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
 \item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
@@ -3805,12 +3934,12 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 \noindent
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=.TRUE.} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.
 
-Note, do not split an HVAC {\ct VENT} over multiple-meshes. It is permissible to have individual {\ct VENT} lines for an HVAC system in different meshes, but any single HVAC {\ct VENT} needs to be contained within a single mesh. This restriction does not apply to surfaces with leakage flows.
+It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
 
-Below are given sample inputs for the three types of fans supported by FDS.
+Below are sample inputs for the three types of fans supported by FDS.
 
 \begin{lstlisting}
 &HVAC TYPE_ID='FAN', ID='constant volume', VOLUME_FLOW=1.0, LOSS=2./
@@ -3886,7 +4015,7 @@ Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  
 
 Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
 If you just want to blow gases in a particular direction, create an
-obstruction {\ct OBST} and apply to it {\ct VENT} lines that are
+obstruction {\ct OBST}, at least one cell thick, and apply to it {\ct VENT} lines that are
 associated with a simple HVAC system.
 This allows hot, smokey gases to pass through the
 obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds} which places a louvered fan (blowing diagonally down) near a fire (see Fig.~\ref{fig:Jet_Fan}).
@@ -4100,12 +4229,12 @@ for two reasons. First, the leakage area rarely corresponds neatly to the area o
 flow speeds through the hole can be large and cause numerical instabilities.
 
 A better way to handle leakage is by exploiting the HVAC model. The compartment surface that is leaking can be thought of as a large HVAC vent that connects via a very small duct to the outside. This allows the leakage to be removed over a large area in the domain (just as it would be in reality) while correctly capturing the actual area of the leakage path. There are two approaches to this.  The first approach is by exploiting only pressure zones.  A pressure zone is a user-specified volume within the computational domain that is
-entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. In this approach surfaces within a pressure zone are denoted as leaking and those surfaces can be considered an HVAC vent that connects to the outside via a tiny duct whose area is the leakage area. This leakage approach will prevent a compartment from seeing large pressure changes as fires grow and decay, but it cannot account for effects like exterior wind or the stack effect. The second approach is intended for leaks with well defined locations (a cracked open door where the crack size is subgrid) or for leaks where the stack effect is important. It uses the local pressure (which includes the zone pressure), which allows for leakage to vary in magnitude.
+entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. In this approach surfaces within a pressure zone are denoted as leaking, and those surfaces can be considered an HVAC vent that connects to the outside via a tiny duct whose area is the leakage area. This leakage approach will prevent a compartment from seeing large pressure changes as fires grow and decay, but it cannot account for effects like exterior wind or the stack effect. The second approach is intended for leaks with well defined locations (a cracked open door where the crack size is subgrid) or for leaks where the stack effect is important. It uses the local pressure (which includes the zone pressure), which allows for leakage to vary in magnitude.
 
 \subsubsection{Pressure Zone Leakage}
 \label{info:zone_leakage}
 
-The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface. With this approach the pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path. The first step is to define pressure zones, leakage areas, and a description of the surfaces through which leaking occurs:
+The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small, and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface. With this approach the pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path. The first step is to define pressure zones, leakage areas, and a description of the surfaces through which leaking occurs:
 \begin{lstlisting}
 &ZONE XB=..., LEAK_AREA(0)=0.0001 /
 &ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
@@ -4590,6 +4719,8 @@ Table~\ref{tau_table} lists the various quantities that can be controlled by {\c
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Quantity            & Group       & Input Parameter(s)                                      & {\ct TAU}           & {\ct RAMP ID}       \\ \hline \hline
+Volume Flow   & {\ct HVAC}  & {\ct VOLUME\_FLOW}                                        & {\ct TAU\_FAN}      & {\ct RAMP\_ID}       \\ \hline
+Heating Rate   & {\ct HVAC}  & {\ct FIXED\_Q}                                            & {\ct TAU\_AC}        & {\ct RAMP\_ID}       \\ \hline
 Heat Release Rate   & {\ct SURF}  & {\ct HRRPUA}                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
 Heat Flux           & {\ct SURF}  & {\ct NET\_HEAT\_FLUX}, etc.                                            & {\ct TAU\_Q}        & {\ct RAMP\_Q}       \\ \hline
 Temperature         & {\ct SURF}  & {\ct TMP\_FRONT}                                        & {\ct TAU\_T}        & {\ct RAMP\_T}       \\ \hline
@@ -4670,7 +4801,9 @@ Note that {\ct V} indicates the velocity component normal to the surface.  You c
 FDS was designed primarily to study fire phenomena, and much of the basic chemistry of combustion is handled with a minimum of user inputs. However, there are many applications in which you might want to simulate the movement of gases in the absence of fire, or additional chemical species might be added to a simulation that involves fire.  Gas species are defined with the input group
 {\ct SPEC}.  This input group is used to define both {\em primitive} gas species and {\em lumped} species (mixtures of one or more primitive {\ct SPEC}).
 
-There are different roles that a gas species might play in a simulation. A gas species might be explicitly tracked. In other words, a transport equation is solved for it. A gas species might just serve as the ``background'' species.  Note that no transport equation is needed for the background species as it is whatever mass remains after all other tracked species have been accounted for. Or, a gas species might be one component of a mixture of gases that are transported together. For example, FDS exploits the idea that the products of combustion from a fire mix and travel together; you only need to solve one transport equation for this ``lumped species.'' The default combustion model in FDS assumes that the reaction is mixing-controlled, and transport equations for only the lumped species---Fuel and Products---are solved (the lumped species Air is the default background).  There is no reason to solve individual (and costly) transport equations for the major reactants and products of combustion---Fuel, O$_2$, CO$_2$, H$_2$O, N$_2$, CO and soot---because they are all pre-tabulated functions of the three lumped species. More detail on combustion is given in Chapter~\ref{chap:combustion}. For the moment, just realize that you need not, {\em and should not}, explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel.
+There are different roles that a gas species might play in a simulation. A gas species might be explicitly tracked. In other words, a transport equation is solved for it. A gas species might be one component of a mixture of gases that are transported together. For example, FDS exploits the idea that the products of combustion from a fire mix and travel together; you only need to solve one transport equation for this ``lumped species.'' Or, a gas species might do both such as H$_2$O which could be both part of a lumped species for combustion products as well as an explicitly tracked species tracking H$_2$O from sprinkler droplet evaporation.
+
+The default combustion model in FDS assumes that the reaction is mixing-controlled, and transport equations are solved for three species: the two lumped species of Products and Air (the default backgroun) and the species Fuel (as defined on {\ct REAC}. There is no reason to solve individual (and costly) transport equations for the major reactants and products of combustion---Fuel, O$_2$, CO$_2$, H$_2$O, N$_2$, CO and soot---because they are all pre-tabulated functions of the three species. More detail on combustion is given in Chapter~\ref{chap:combustion}. For the moment, just realize that you need not, {\em and should not}, explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel.
 
 
 
@@ -4679,7 +4812,7 @@ There are different roles that a gas species might play in a simulation. A gas s
 
 The {\ct SPEC} namelist group is used to define a gas species in FDS. Once defined the species can be tracked as a single species (i.e., a primitive species) and/or the species can be used as part of one or more lumped species, also defined with {\ct SPEC}.  It is possible for a species to be both part of a lumped species and tracked separately. Often an extra gas introduced into a calculation is the same as a product of combustion, like water vapor from a sprinkler or carbon dioxide from an extinguisher. These gases are tracked separately. Thus, water vapor generated by the combustion is tracked via the {\ct PRODUCTS} lumped species variable and water vapor generated by evaporating sprinkler droplets is tracked via its own transport equation.
 
-If a species is only to be used as part of one or more lumped species, {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} must be added to the {\ct SPEC} line.  This tells FDS not to allocate space for the species in the array of tracked gases. If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set on the {\ct SPEC} line. This also tells FDS not to allocate space for the species in the array of tracked gases. A species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species, and it cannot be used as the background species.  However, a primitive species with {\ct BACKGROUND=.TRUE.} can also be used as part of a lumped species definition.  Note that the default background species is {\ct AIR} which is defined as a lumped species consisting of N$_2$, O$_2$, CO$_2$, and H$_2$O.  If no background species is defined in the input file, then FDS will create the background species of {\ct AIR} by internally creating the input lines shown in Example 2 in Section~\ref{info:lumped}.
+If a species is only to be used as part of one or more lumped species, {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} must be added to the {\ct SPEC} line.  This tells FDS not to allocate space for the species in the array of tracked gases. If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set on the {\ct SPEC} line. A species with {\ct LUMPED\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species, and it cannot be used as the background species.  However, a primitive species with {\ct BACKGROUND=.TRUE.} can also be used as part of a lumped species definition.  Note that the default background species is {\ct AIR} which is defined as a lumped species consisting of N$_2$, O$_2$, CO$_2$, and H$_2$O.  If no background species is defined in the input file, then FDS will create the background species of {\ct AIR} by internally creating the input lines shown in Example 2 in Section~\ref{info:lumped}.
 
 Note that while you can define as many species using {\ct SPEC} as you wish in an input file, any namelist input tied to a list of species, such as any {\ct SPEC\_ID} input or {\ct MASS\_FRACTION} input, is limited to using no more than 20 species.
 
@@ -4833,7 +4966,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommened that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommened that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
 The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
@@ -5105,7 +5238,7 @@ If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\c
 
 The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release
 rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.},
-the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}
+the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}. Note that predefine fuel species have their heat of formation defined; therefore, the heat of combustion for those species will be appropriately adjsuted for soot and CO production.
 
 Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
 
@@ -5917,6 +6050,8 @@ since {\ct MASSLESS} particles are for visualization only.
 Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.  To properly account for subgrid-scale (unresolved) turbulent motions, add the parameter {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  For further information, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
 
 
+\clearpage
+
 \section{Liquid Droplets}
 
 Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
@@ -6076,8 +6211,13 @@ If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo sec
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
 {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
+\subsection{Dense Clouds of Droplets}
+\label{info:DENSE_VOLUME_FRACTION}
+
+If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
 
 
+\clearpage
 
 \section{Solid Particles}
 \label{info:PART_SURF}
@@ -6115,9 +6255,8 @@ By default, particles are not recycled at a periodic boundary. To recycle the pa
 \subsection{Drag}
 \label{info:particle_drag}
 
-For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke a different drag law, that of a cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+The drag force exerted by moving or stationary particles is detailed in the FDS Technical Reference Guide, chapter ``Lagrangian Particles''~\cite{FDS_Math_Guide}. For solid particles, the default drag law is that of a solitary sphere. To invoke a different drag law, that of a solitary cylinder for example, set {\ct DRAG\_LAW = 'CYLINDER'} on the {\ct PART} line. A summary of the available drag laws is given in table~\ref{tbl:draglaws}. If none of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
-\vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
 \caption{Drag laws available in FDS}
@@ -6132,6 +6271,20 @@ For solid particles, the default drag law (i.e., the drag coefficient correlatio
 \end{tabular}
 \end{center}
 \end{table}
+
+If you are modeling a relatively dense collection of solid particles, like vegetation, you should set the {\ct DRAG\_COEFFICIENT} explicitly and not rely on the correlations for spheres and cylinders which were developed for relatively independent bodies, not clusters.
+
+
+\subsection{Radiation Absorption and Emission}
+\label{info:particle_radiation_absorption}
+
+The absorption and emission of thermal radiation by a group of solid particles is controlled by the absorption coefficient:
+\be
+   \kappa_{\rm p} = \frac{\sum C_{\rm s} \, A_{\rm p,s}}{V}
+\ee
+where $C_{\rm s}$ is the shape factor (ratio of cross sectional area to surface area) of the class of particles, $A_{\rm p,s}$ is the surface area of the particle, and $V$ is the volume of the grid cell. You can specify the {\ct SHAPE\_FACTOR} of a class of particles on the {\ct PART} line. The default value is that of a sphere, 0.25.
+
+
 
 \subsection{Splitting Particles}
 \label{info:particle_split}
@@ -6359,6 +6512,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The second argument indicates that there can be more than one {\ct ORIENTATION}. {\ct STATIC=.TRUE.} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
+\clearpage
 
 \section{Particle Insertion}
 \label{info:controlling_droplets}
@@ -6376,6 +6530,10 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \subsection{Particles Introduced at a Solid Surface}
 \label{info:particle_flux}
 \label{particle_flux}
+
+There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation.
+
+\subsubsection{Particles specified using a mass flux}
 
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
@@ -6395,6 +6553,10 @@ creates an obstruction that ejects particles out of its sides at a rate of 0.1~\
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
 
+\subsubsection{Particles specified using a surface density}
+
+Instead of a mass flux, you can specify the {\ct PARTICLE\_SURFACE\_DENSITY} (kg/m$^2$) for particles introduced at the start of a simulation. You can introduce {\ct NPPC} particles per cell, although 1 is sufficient to represent the specified surface density. This feature is useful for creating subgrid-scale dry vegetative fuels.
+
 
 \subsection{Particles or Droplets Introduced at a Sprinkler or Nozzle}
 \label{info:sprinkler_droplets}
@@ -6413,7 +6575,7 @@ Sometimes it is convenient to introduce Lagrangian particles within a particular
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
-The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE = (['BLOCK']\footnote{There is no need to specify {\ct SHAPE='BLOCK'}, just omit {\ct SHAPE} in this case.},'CONE','LINE','RING')}. For {\ct 'BLOCK'}, {\ct 'CONE'}, and {\ct 'RING'} the particle positions are randomly distributed by default.  For {\ct 'RING'} you can position the particles uniformly by setting {\ct UNIFORM=.TRUE.} on the {\ct INIT} line.  By default, the region is a rectangular {\ct 'BLOCK'} designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
 \begin{lstlisting}
 &INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
@@ -6479,6 +6641,7 @@ If you want to introduce particles within a given region periodically in time an
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
 
 
+\clearpage
 
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
@@ -6550,7 +6713,7 @@ over a span of the domain, like a beam smoke detector. For example, a sprinkler 
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
 \end{lstlisting}
-The physical coordinates of the device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. The properties of the device are contained on the {\ct PROP} line designated by {\ct PROP\_ID}, which will be explained below for each of the special devices included in FDS. The character string {\ct ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation.
+The physical coordinates of the device are given by a triplet of real numbers, {\ct XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. Devices are evaluated using cell centered or face centered values of the cell the device is located in; no interpolation is done. The properties of the device are contained on the {\ct PROP} line designated by {\ct PROP\_ID}, which will be explained below for each of the special devices included in FDS. The character string {\ct ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation.
 
 Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise output quantities are specified with a single {\ct DEVC} line, like
 \begin{lstlisting}
@@ -6570,9 +6733,9 @@ The delivered density to the floor from a sprinkler depends upon where the sprin
 \section{Device Output}
 \label{info:out:DEVC}
 
-Each device has a {\ct QUANTITY} associated with it. The time history of each {\ct DEVC} quantity is output to a comma-delimited ASCII file called {\ct CHID\_devc.csv} (see Section~\ref{out:DEVC} for output file format). This file can be imported into most spreadsheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line. Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254.
+Each device has a {\ct QUANTITY} associated with it. The time history of each {\ct DEVC} quantity is output to a comma-delimited ASCII file called {\ct CHID\_devc.csv} (see Section~\ref{out:DEVC} for output file format). This file can be imported into most spreadsheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then set {\ct COLUMN\_DUMP\_LIMIT} equal to {\ct .TRUE.} on the {\ct DUMP} line. Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254. If more devices or controls are present than the limit, then multiple output files will be written. The file name will have a number appended to it. For example, if two device file are required, they will be named {\ct CHID\_1\_devc.csv} and {\ct CHID\_2\_devc.csv}.
 
-By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default, a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
+By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default, a time-averaged value over the interval {\ct DT\_DEVC} is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
 
 A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
@@ -6621,7 +6784,7 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
 \item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
-Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor the domain like liquid droplets.
+Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor of the domain like liquid droplets.
 
 Do not locate a sprinkler or nozzle within {\ct OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
 
@@ -6911,6 +7074,8 @@ domain (accounts for portions of the sampling network lying outside the domain d
 \ee
 where $\dm_i$ is the mass {\ct FLOWRATE} at sampling location $i$, $\rho_{{\rm s},i}( t-t_{{\rm d},i})$ is the soot density at sampling location $i$, $t_{{\rm d},i}$~s prior ({\ct DELAY}) to the current time $t$, and $K_{\rm m}$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
 
+Note that FDS doesn't actually remove gas from the computational domain based upon the {\ct FLOWRATE}; the {\ct FLOWRATE} is just a weighting factor.
+
 \subsubsection{Example Case: aspiration\_detector}
 \label{aspiration_detector}
 
@@ -7012,7 +7177,7 @@ There are sometimes circumstances when you might want to create or remove obstru
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
 \label{info:CTRL}
 
-There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.'' Consider for example, a typical HVAC system.  It is controlled by a thermostat that is given a temperature setpoint. The system turns on when the temperature goes below the setpoint by some amount and then turns off when the temperature rises above that same setpoint by some amount. This behavior cannot be defined by merely specifying a single setpoint. You must also define the range or ``deadband'' around the setpoint, and whether an increasing or decreasing temperature activates the system.  For the HVAC example, crossing the lower edge of the deadband activates heating; crossing the upper edge activates cooling.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
+There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.'' Consider for example, a typical HVAC system used for heat.  It is controlled by a thermostat that is given a temperature setpoint. The system turns on when the temperature goes below the setpoint by some amount and then turns off when the temperature rises above that same setpoint by some amount. This behavior cannot be defined by merely specifying a single setpoint. You must also define the range or ``deadband'' around the setpoint, and whether an increasing or decreasing temperature activates the system.  For the HVAC example, crossing the lower edge of the deadband activates heating; crossing the upper edge deactivates heating.  These more complicated behaviors can be modeled in FDS using {\ct CTRL}s.  The following parameters dictate how a control function will behave:
 \begin{description}
 \item[{\ct ID}] A name for the control function that is unique over all control functions.
 \item[{\ct FUNCTION\_TYPE}] The type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
@@ -7044,11 +7209,11 @@ specified instead.
 {\ct TIME\_DELAY}                 & Changes state {\ct DELAY} s after {\ct INPUT} becomes {\ct .TRUE.} \\ \hline
 {\ct CUSTOM}                      & Changes state based on evaluating a {\ct RAMP} of the function's input \\ \hline
 {\ct DEADBAND}                    & Behaves like a thermostat  \\ \hline
-{\ct KILL}                        & Terminates code execution if its sole {\ct INPUT} is {\ct .TRUE.}  \\ \hline
-{\ct RESTART}                     & Dumps restart files if its sole {\ct INPUT} is {\ct .TRUE.} \\ \hline
+{\ct KILL}                        & Terminates code execution if {\ct INPUT} is {\ct .TRUE.}  \\ \hline
+{\ct RESTART}                     & Dumps restart files if {\ct INPUT} is {\ct .TRUE.} \\ \hline
 {\ct SUM}                         & Sums the outputs of the {\ct INPUT}s \\ \hline
 {\ct SUBTRACT}                    & Subtracts the second {\ct INPUT} from the first \\ \hline
-{\ct MULTIPLY}                    & Multiplies the outputs of the {\ct INPUT}s \\ \hline
+{\ct MULTIPLY}                    & Multiplies the {\ct INPUT}s \\ \hline
 {\ct DIVIDE}                      & Divides the first {\ct INPUT} by the second \\ \hline
 {\ct POWER}                       & The first {\ct INPUT} to the power of the second \\ \hline
 {\ct EXP}                         & The exponential of the {\ct INPUT} \\ \hline
@@ -7059,7 +7224,7 @@ specified instead.
 {\ct ASIN}                        & The arcsine of the {\ct INPUT} \\ \hline
 {\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
-{\ct PID}                         & A Proportional-Integral-Derivative control function \\ \hline
+{\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -7221,9 +7386,9 @@ The PID controller can be used to time integrate the mass loss from a pyrolyzing
 Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}.
 
 
-\subsection{Combining Control Functions: A Pre-Action Sprinkler System}
+\subsection{Combining Control Functions: A Deluge System}
 
-For a pre-action sprinkler system, the normally
+For a deluge sprinkler system, the normally
 dry sprinkler pipes are flooded when a detection event occurs. For this example, the detection event is
 when two of four smoke detectors alarm.  It takes 30~s to flood the piping network.
 The nozzle is a {\ct DEVC} named {\ct 'NOZZLE 1'} controlled by the {\ct CTRL} named {\ct 'nozzle trigger'}.
@@ -7521,7 +7686,9 @@ For a particle, you must reference an {\ct INIT} line used to place the particle
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
-The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total ({\ct 'DENSITY'}) or the density of a particular solid material component, ({\ct '[MATL\_ID]'}), where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
+The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total {\ct 'DENSITY'} or the density of a particular solid material component, {\ct '[MATL\_ID]'}, where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ numbers are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface.
+
+There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
 
 
 
@@ -8955,6 +9122,25 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \vspace{\baselineskip}
 
+\section{\texorpdfstring{{\tt CATF}}{CATF} (Concatenate Input Files Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Concatenate Input Files parameters ({\ct CATF} namelist group)]{For more information see Section~\ref{info:CATF}.}
+\label{tbl:CATF} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CATF} (Concatenate Input Files Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CATF} (Concatenate Input Files Parameters)} \\
+\hline \hline
+\endhead
+{\ct OTHER\_FILES}    & Character Array  & Section \ref{info:CATF}                 &           &   \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
+
 \section{\texorpdfstring{{\tt CLIP}}{CLIP} (Clipping Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9162,6 +9348,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
+{\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct .FALSE.}                  \\ \hline
 {\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct .TRUE.}                   \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct .FALSE.}                  \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
@@ -9291,7 +9478,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               & {\ct .FALSE.}  \\ \hline
 {\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}      &               &                \\ \hline
 {\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
+{\ct DUCT\_ID}                  & Char.~Array       & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
 {\ct DUCT\_INTERP\_TYPE}        & Character         & Section~\ref{info:hvacmasstransport}                                          &               & {\ct 'NODE1'}  \\ \hline
 {\ct EFFICIENCY}                & Real Array        & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                        &               & 1.0            \\ \hline
 {\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
@@ -9307,13 +9494,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
 {\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)  \\ \hline
-{\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
+{\ct NODE\_ID}                  & Char.~Doublet     & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
 {\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                           &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
-{\ct SPEC\_ID}                  & Character Array   & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
+{\ct SPEC\_ID}                  & Char.~Array       & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
 {\ct TAU\_AC}                   & Real              & Section ~\ref{info:HVACaircoil}                                               & s             & 1.0            \\ \hline
 {\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                                   & s             & 1.0            \\ \hline
 {\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0            \\ \hline
@@ -9369,6 +9556,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
 {\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
@@ -9474,19 +9662,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR}                & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
-{\ct CYLINDRICAL}          & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVACUATION}           & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}         & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}      & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
-{\ct ID}                   & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
-{\ct IJK}                  & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
-{\ct LEVEL}                & Integer                       & For future use                            &    & 0                \\ \hline
-{\ct MPI\_PROCESS}         & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct N\_THREADS}           & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct MULT\_ID }            & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct RGB}                  & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
-{\ct XB(6)}                & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
+{\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}        &    & {\ct .FALSE.}    \\ \hline
+{\ct COLOR}                          & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL}                    & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}                     & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}                   & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}                & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
+{\ct ID}                             & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
+{\ct IJK}                            & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
+{\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
+{\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct XB(6)}                          & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
 
@@ -9530,11 +9719,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
-{\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
+%{\ct POSITIVE\_ERROR\_TEST}                     & Logical       & Replace 'ERROR' with 'SUCCESS' label in stderr        &               &  {\ct .FALSE.}    \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Section~\ref{info:flux_limiters}                      &               & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Section~\ref{info:freeze_velocity}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
@@ -9542,6 +9731,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           & $^\circ$C     & 25.             \\ \hline
+{\ct HVAC\_LOCAL\_PRESSURE}                    & Logical       & Section~\ref{info:HVAC}                               &              &  {\ct .TRUE.}     \\ \hline
 {\ct HVAC\_MASS\_TRANSPORT}                     & Logical       & Section ~\ref{info:hvacmasstransport}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct HVAC\_PRES\_RELAX}                         & Real          & Section ~\ref{info:HVAC}                              &               & 0.5               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
@@ -9727,12 +9917,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                              & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-{\ct DENSE\_VOLUME\_FRACTION}            & Real            & Section~\ref{info:particle_drag}        &           & $1\times 10^{-5}$ \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}            & Real            & Section~\ref{info:DENSE_VOLUME_FRACTION}&           & $1\times 10^{-5}$ \\ \hline
 {\ct DEVC\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                           & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
 {\ct DISTRIBUTION}                       & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
 {\ct DRAG\_COEFFICIENT(3)}               & Real Array      & Section~\ref{info:particle_drag}        &           &               \\ \hline
 {\ct DRAG\_LAW}                          & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
+% {\ct EMBER\_DENSITY\_THRESHOLD}          & Real            & experimental                            & \si{kg/m^3} & 0.0         \\ \hline
+% {\ct EMBER\_PARTICLE}                    & Logical         & experimental                            &           & {\ct .FALSE.} \\ \hline
+% {\ct EMBER\_VELOCITY\_THRESHOLD}         & Real            & experimental                            & m/s       & Infinite      \\ \hline
 {\ct FREE\_AREA\_FRACTION}               & Real            & Section~\ref{info:particle_screen}      &           &               \\ \hline
 {\ct GAMMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real            & Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
@@ -9759,6 +9952,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_radiation_absorption}&   & 0.25          \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
@@ -10147,8 +10341,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY}                        & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                  & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                     & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
-{\ct EXTERNAL\_FLUX}                    & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
 {\ct E\_COEFFICIENT}                    & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
+{\ct EXTERNAL\_FLUX}                    & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
+{\ct EXTINCTION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & -273.                   \\ \hline
 {\ct FREE\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                          & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}            & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
@@ -10178,6 +10373,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct PARTICLE\_SURFACE\_DENSITY}        & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
 {\ct PLE}                               & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
 {\ct PROFILE}                           & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
@@ -10579,7 +10775,7 @@ T(2) , VAL(1,2) , VAL(2,2) , ... , VAL(N_DEVC,2)
                       .
 \end{lstlisting}
 where {\ct N\_DEVC} is the number of devices, {\ct ID(I)} is the user-defined ID of the {\ct I}th device, {\ct UNITS(I)} the units, {\ct T(J)} the time of the {\ct J}th dump, and
-{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+{\ct VAL(I,J)} the value at the {\ct I}th device at the {\ct J}th time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of device columns exceeds {\ct DEVC\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
 
 \section{Control Output Data}
 \label{out:CTRL}
@@ -10592,7 +10788,7 @@ T(1) , -001   , 001    , ... , -001
             .
             .
 \end{lstlisting}
-where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
+where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of control columns exceeds {\ct CTRL\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
 
 \section{CPU Usage Data}
 \label{out:CPU}

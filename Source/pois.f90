@@ -815,8 +815,8 @@ IF (L>1) THEN
       FCTRD(1,K,J) = 1._EB/ (B(1)+D(1)*CFY(J)+ZRT(K))
     END DO
   END DO
-  DO  I = 2,L
-    DO  K = 2,N
+  DO  K = 2,N
+    DO  I = 2,L
       DO  J = 2,M
         FCTRD(I,K,J) = 1._EB/ (B(I)+D(I)*CFY(J)+ZRT(K)-  &
             A(I)*C(I-1)*FCTRD(I-1,K,J))
@@ -3294,7 +3294,6 @@ DO  M=1,MP
 END DO
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
-!$OMP PARALLEL DO PRIVATE(ic) SCHEDULE(STATIC)
 DO  K=1,L1
    DO  I=3,IDO,2
       IC = IDP2-I
@@ -3324,7 +3323,6 @@ DO  K=1,L1
       END DO
    END DO
 END DO
-!$OMP END PARALLEL DO
 RETURN
 END SUBROUTINE VRADF3
 
@@ -3642,7 +3640,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 121
-115 DO  J=2,IPPH
+115 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     DO  K=1,L1
@@ -3656,12 +3655,14 @@ GO TO 121
   END DO
 END DO
 GO TO 121
-119 DO  IK=1,IDL1
+119 CONTINUE
+DO  IK=1,IDL1
   DO  M=1,MP
     C2(M,IK,1) = CH2(M,IK,1)
   END DO
 END DO
-121 DO  J=2,IPPH
+121 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  K=1,L1
     DO  M=1,MP
@@ -3701,9 +3702,9 @@ DO  L=2,IPPH
     END DO
   END DO
 END DO
-DO  J=2,IPPH
+DO  M=1,MP
   DO  IK=1,IDL1
-    DO  M=1,MP
+    DO  J=2,IPPH
       CH2(M,IK,1) = CH2(M,IK,1)+C2(M,IK,J)
     END DO
   END DO
@@ -3718,14 +3719,16 @@ DO  K=1,L1
   END DO
 END DO
 GO TO 135
-132 DO  I=1,IDO
+132 CONTINUE
+DO  I=1,IDO
   DO  K=1,L1
     DO  M=1,MP
       CC(M,I,1,K) = CH(M,I,K,1)
     END DO
   END DO
 END DO
-135 DO  J=2,IPPH
+135 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  K=1,L1
@@ -3753,7 +3756,8 @@ DO  J=2,IPPH
   END DO
 END DO
 RETURN
-141 DO  J=2,IPPH
+141 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  I=3,IDO,2
@@ -4267,14 +4271,16 @@ DO  K=1,L1
   END DO
 END DO
 GO TO 106
-103 DO  I=1,IDO
+103 CONTINUE
+DO  I=1,IDO
   DO  K=1,L1
     DO  M=1,MP
       CH(M,I,K,1) = CC(M,I,1,K)
     END DO
   END DO
 END DO
-106 DO  J=2,IPPH
+106 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  K=1,L1
@@ -4301,7 +4307,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 116
-112 DO  J=2,IPPH
+112 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     IC = IDP2-I
@@ -4345,9 +4352,9 @@ DO  L=2,IPPH
     END DO
   END DO
 END DO
-DO  J=2,IPPH
+DO  M=1,MP
   DO  IK=1,IDL1
-    DO  M=1,MP
+    DO  J=2,IPPH
       CH2(M,IK,1) = CH2(M,IK,1)+CH2(M,IK,J)
     END DO
   END DO
@@ -4377,7 +4384,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 132
-128 DO  J=2,IPPH
+128 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     DO  K=1,L1
@@ -4405,9 +4413,8 @@ DO  J=2,IP
   END DO
 END DO
 IF (NBD > L1) GO TO 139
-IS = -IDO
 DO  J=2,IP
-  IS = IS+IDO
+  IS = (J-2)*IDO
   IDIJ = IS
   DO  I=3,IDO,2
     IDIJ = IDIJ+2
@@ -4420,9 +4427,9 @@ DO  J=2,IP
   END DO
 END DO
 GO TO 143
-139 IS = -IDO
+139 CONTINUE
 DO  J=2,IP
-  IS = IS+IDO
+  IS = (J-2)*IDO
   DO  K=1,L1
     IDIJ = IS
     DO  I=3,IDO,2
@@ -5137,9 +5144,9 @@ ISING = 1
 DO  I = 1,L
   W(I) = 0._EB
 END DO
-DO  K = 1,N
+DO  I = 1,L
   DO  J = 1,M
-    DO  I = 1,L
+    DO  K = 1,N
 !MCG              W(I) = W(I) + SAVE(ISM+J)*F(I,J,K)
       W(I) = W(I) + HY(J)*SAVE(ISM+J)*F(I,J,K)
     END DO

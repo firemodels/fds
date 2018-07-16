@@ -26,9 +26,11 @@ echo pass 2
 pdflatex -interaction nonstopmode %paper% > %paper%.err
 echo pass 3
 pdflatex -interaction nonstopmode %paper% > %paper%.err
+echo pass 4
+pdflatex -interaction nonstopmode %paper% > %paper%.err
 
 if not exist %PDFUSER% goto endif2
-  copy %PDFUSER% 
+  copy %PDFUSER%
 fi
 
 find "! LaTeX Error:" %paper%.err

@@ -556,6 +556,11 @@ IF (VELOCITY_ERROR_FILE) THEN
    FN_VELOCITY_ERROR = TRIM(CHID)//'_pressit.csv'
 ENDIF
 
+IF (CFL_FILE) THEN
+   LU_CFL = GET_FILE_NUMBER()
+   FN_CFL = TRIM(CHID)//'_cfl.csv'
+ENDIF
+
 IF (N_INIT>0) THEN
    DO N=1,N_INIT
       INITIALIZATION(N)%LU_PARTICLE = GET_FILE_NUMBER()
@@ -778,6 +783,14 @@ IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
    WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step,Iteration,Total,Mesh,I,J,K,Velocity Error,Mesh,I,J,K,Pressure Error'
 ENDIF
+
+! Special output for detailed CFL info
+
+IF (CFL_FILE) THEN
+   OPEN(UNIT=LU_CFL,FILE=FN_CFL,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
+   WRITE(LU_CFL,'(A)') 'Cycle,t,dt,CFL,Mesh,i,j,k,u_i-1,u_i,v_j-1,v_j,w_k-1,w_k,VN,Mesh,i,j,k'
+ENDIF
+
 
 ! Check particle sample distribution
 
@@ -1349,7 +1362,7 @@ ENDIF
 
 MASTER_NODE_IF: IF (MYID==0) THEN
 
-IF (SET_UP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this only a setup run
+IF (SETUP_ONLY) CALL WRITE_GEOM_ALL ! write out all geometry frames if this only a setup run
 
 ! initialize the slice info file
 
@@ -2738,10 +2751,10 @@ MATL_LOOP: DO N=1,N_MATL
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
    IF (ML%C_S>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.2)') '     Specific Heat (kJ/kg/K)      ',ML%C_S*0.001_EB
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',ML%C_S*0.001_EB
    ELSE
       NR = -NINT(ML%C_S)
-      WRITE(LU_OUTPUT,'(A,F8.2)') '     Specific Heat (kJ/kg/K)      ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
    ENDIF
    IF (ML%K_S>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.4)') '     Conductivity (W/m/K)         ',ML%K_S
@@ -5209,6 +5222,7 @@ SUBROUTINE UPDATE_DEVICES(T,DT,NM)
 
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS,GET_LAGRANGIAN_PARTICLE_INDEX
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EMESH_INDEX
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: VALUE,VALUE2,STAT_VALUE,SUM_VALUE,VOL,WGT_LINE,T_TMP,DVAL,DVAL2,DEV2,WGT_LINE_UNBIASED,WGT
 INTEGER, INTENT(IN) :: NM
@@ -5397,6 +5411,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         IF (SOLID(CELL_INDEX(I,J,K))) THEN
                             OB => OBSTRUCTION(OBST_INDEX_C(CELL_INDEX(I,J,K)))
                             IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
+                        ENDIF
+                        IF (CC_IBM) THEN
+                            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE I_DEVICE_CELL_LOOP
                         ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         NOT_FOUND = .FALSE.
@@ -8547,6 +8564,11 @@ IF (VELOCITY_ERROR_FILE) THEN
    IF (OPN) FLUSH(LU_VELOCITY_ERROR)
 ENDIF
 
+IF (CFL_FILE) THEN
+   INQUIRE(UNIT=LU_CFL,OPENED=OPN)
+   IF (OPN) FLUSH(LU_CFL)
+ENDIF
+
 DO N=1,N_BNDE
    INQUIRE(UNIT=LU_BNDE(N),OPENED=OPN)
    IF (OPN) FLUSH(LU_BNDE(N))
@@ -8662,6 +8684,7 @@ SUBROUTINE TIMINGS
 ! Print out detector activation times and total elapsed time into .out file.
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+REAL(EB) :: T_NOW
 INTEGER :: N
 LOGICAL :: WRITE_HEADER
 TYPE(CONTROL_TYPE), POINTER :: CF=>NULL()
@@ -8691,8 +8714,9 @@ ENDIF
 ! Printout elapsed wall clock time
 
 IF (ICYC>0) THEN
-   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',SUM(T_USED(1:N_TIMERS))
-   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',CURRENT_TIME()-WALL_CLOCK_START
+   T_NOW = CURRENT_TIME()
+   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',T_NOW - WALL_CLOCK_START_ITERATIONS
+   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',T_NOW - WALL_CLOCK_START
 ENDIF
 
 END SUBROUTINE TIMINGS

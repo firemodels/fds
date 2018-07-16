@@ -679,6 +679,7 @@ LP%DUCT_CELL_INDEX     => OS%INTEGERS( 9,STORAGE_INDEX) ; IF (NEW) LP%DUCT_CELL_
 
 LP%SHOW              => OS%LOGICALS( 1,STORAGE_INDEX) ; IF (NEW) LP%SHOW  = .FALSE.
 LP%SPLAT             => OS%LOGICALS( 2,STORAGE_INDEX) ; IF (NEW) LP%SPLAT = .FALSE.
+LP%EMBER             => OS%LOGICALS( 3,STORAGE_INDEX) ; IF (NEW) LP%EMBER = .FALSE.
 
 ! Assign real pointers and values
 
@@ -1684,6 +1685,27 @@ ENDDO SEARCH_LOOP
 END SUBROUTINE RANDOM_RING
 
 
+SUBROUTINE UNIFORM_RING(NM,XX,YY,X0,Y0,RR0,NP,NP_TOTAL)
+
+! Choose a point (XX,YY) uniformly on a horizontally-oriented ring
+
+INTEGER, INTENT(IN) :: NM,NP,NP_TOTAL
+REAL(EB), INTENT(IN) :: X0,Y0,RR0
+REAL(EB), INTENT(OUT) :: XX,YY
+REAL(EB) :: THETA
+TYPE (MESH_TYPE), POINTER :: M
+
+M => MESHES(NM)
+SEARCH_LOOP: DO
+   THETA = TWOPI*REAL(NP,EB)/REAL(NP_TOTAL,EB)
+   XX = X0 + RR0*COS(THETA)
+   YY = Y0 + RR0*SIN(THETA)
+   IF (XX>=M%XS .AND. XX<=M%XF .AND. YY>=M%YS .AND. YY<=M%YF) EXIT SEARCH_LOOP
+ENDDO SEARCH_LOOP
+
+END SUBROUTINE UNIFORM_RING
+
+
 REAL(EB) FUNCTION CIRCLE_CELL_INTERSECTION_AREA(X0,Y0,RAD,X1,X2,Y1,Y2)
 
 ! Estimate area of intersection of circle with origin (X0,Y0), radius, RAD, and rectangle (X1,Y1,X2,Y2)
@@ -1727,9 +1749,9 @@ Y_MAX = MIN(M%YF,Y0+RR0)
 Z_MIN = MAX(M%ZS,Z0)
 Z_MAX = MIN(M%ZF,Z0+HH0)
 IF (X_MAX<=X_MIN .OR. Y_MAX<=Y_MIN .OR. Z_MAX<=Z_MIN) RETURN
-NX = CEILING(500*(X_MAX-X_MIN))
-NY = CEILING(500*(Y_MAX-Y_MIN))
-NZ = CEILING(500*(Z_MAX-Z_MIN))
+NX = CEILING(10*(X_MAX-X_MIN))
+NY = CEILING(10*(Y_MAX-Y_MIN))
+NZ = CEILING(10*(Z_MAX-Z_MIN))
 DX = (X_MAX-X_MIN)/REAL(NX,EB)
 DY = (Y_MAX-Y_MIN)/REAL(NY,EB)
 DZ = (Z_MAX-Z_MIN)/REAL(NZ,EB)
@@ -3089,6 +3111,32 @@ THETA = THETA_0 + (THETA_STAR/KAPPA)*(LOG(Z/Z_0)-PSI_H)
 TMP = THETA*(P_0/(P_0-RHOA*GRAV*Z))**(-0.286_EB)
 
 END SUBROUTINE MONIN_OBUKHOV_SIMILARITY
+
+
+SUBROUTINE TURBULENT_VISCOSITY_INTERP1D(NU_OUT,NU_2,NU_3,DX_1,DX_2,DX_3)
+
+! quadratic interpolation of the turbulent viscosity (MU_SGS) to the first off-wall gas phase cell center
+! using 2nd and 3rd gas values
+! assumes NU(z=0)=0, allows for non-uniform grid
+!
+!        NU_OUT         NU_2                 NU_3
+! /////|    o    |        o        |           o           |
+!         DX_1          DX_2                 DX_3
+
+REAL(EB), INTENT(IN) :: NU_2,NU_3,DX_1,DX_2,DX_3
+REAL(EB), INTENT(OUT) :: NU_OUT
+REAL(EB) :: B,C,L_1,L_2,L_3
+
+L_1 = 0.5_EB*DX_1
+L_2 = DX_1 + 0.5_EB*DX_2
+L_3 = DX_1 + DX_2 + 0.5_EB*DX_3
+
+C = ( NU_3 - NU_2*L_3/L_2 ) / ( L_3**2 - L_2*L_3 )
+B = ( NU_2 - C*L_2**2 ) / L_2
+
+NU_OUT = MAX(0._EB,B*L_1 + C*L_1**2)
+
+END SUBROUTINE TURBULENT_VISCOSITY_INTERP1D
 
 
 END MODULE PHYSICAL_FUNCTIONS
