@@ -46,7 +46,7 @@
 %
 % Special switch_id tags:
 %
-%    'd' -- Proscess this data line as usual (exception: see 'o' below)
+%    'd' -- Process this data line as usual (exception: see 'o' below)
 %
 %    's' -- Skip this line
 %
