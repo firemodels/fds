@@ -10630,14 +10630,16 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ! Advective mass fluxes through INBOUNDARY cut-faces (CFACE):
    ! TO DO.
 
-   ! ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
-   ! DO ICF=1,N_CFACE_CELLS
-   !    CFA  => CFACE(ICF)
-   !    IND1 = CFA%CUT_FACE_IND1;                         IND2 = CFA%CUT_FACE_IND2
-   !    ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
-   !    IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-   !    F_Z(IROW) = F_Z(IROW) - CFA%ONE_D%RHO_F*CFA%ONE_D%ZZ_F(N)*CFA%ONE_D%UW * CUT_FACE(IND1)%AREA(IND2)
-   ! ENDDO
+   IF (.FALSE.) THEN
+      ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
+      DO ICF=1,N_CFACE_CELLS
+         CFA  => CFACE(ICF)
+         IND1 = CFA%CUT_FACE_IND1;                         IND2 = CFA%CUT_FACE_IND2
+         ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
+         IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+         F_Z(IROW) = F_Z(IROW) - CFA%ONE_D%RHO_F*CFA%ONE_D%ZZ_F(N)*CFA%ONE_D%UW * CUT_FACE(IND1)%AREA(IND2)
+      ENDDO
+   ENDIF
 
    ! Then add diffusive fluxes through domain boundaries:
    ! Defined in CCREGION_DIVERGENCE_PART_1.
