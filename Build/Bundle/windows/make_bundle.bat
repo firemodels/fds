@@ -140,9 +140,9 @@ copy %in_for_bundle%\textures\*.png          %out_textures%\.>Nul
 echo.
 echo --- copying uninstaller ---
 echo.
-CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall_base.bat"
+CALL :COPY  "%bundleinfo%\uninstall_fds.bat"  "%out_uninstall%\uninstall_base.bat"
 CALL :COPY  "%bundleinfo%\uninstall_fds2.bat" "%out_uninstall%\uninstall_base2.bat"
-CALL :COPY  "%bundleinfo%\uninstall.bat"     "%out_uninstall%\uninstall.bat"
+CALL :COPY  "%bundleinfo%\uninstall.bat"      "%out_uninstall%\uninstall.bat"
 echo @echo off > "%out_uninstall%\uninstall.vbs"
 
 CALL :COPY  "%svn_root%\smv\Build\set_path\intel_win_64\set_path64.exe"      "%out_uninstall%\set_path.exe"
@@ -151,36 +151,27 @@ echo.
 echo --- copying FDS documentation ---
 echo.
 
-CALL :COPY  "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
-
-CALL :COPY  %in_pdf%\FDS_Config_Management_Plan.pdf %out_guides%\.
-
-CALL :COPY  %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
-
-CALL :COPY  %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
-
-CALL :COPY  %in_pdf%\FDS_Validation_Guide.pdf %out_guides%\.
-
-CALL :COPY  %in_pdf%\FDS_Verification_Guide.pdf %out_guides%\.
+CALL :COPY  "%svn_root%\webpages\FDS_Release_Notes.htm"  %out_guides%\FDS_Release_Notes.htm
+CALL :COPY  %in_pdf%\FDS_Config_Management_Plan.pdf      %out_guides%\.
+CALL :COPY  %in_pdf%\FDS_User_Guide.pdf                  %out_guides%\.
+CALL :COPY  %in_pdf%\FDS_Technical_Reference_Guide.pdf   %out_guides%\.
+CALL :COPY  %in_pdf%\FDS_Validation_Guide.pdf            %out_guides%\.
+CALL :COPY  %in_pdf%\FDS_Verification_Guide.pdf          %out_guides%\.
 
 echo.
 echo --- copying Smokeview documentation ---
 echo.
 
-CALL :COPY %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
-
+CALL :COPY %in_pdf%\SMV_User_Guide.pdf                %out_guides%\.
 CALL :COPY %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
-
-CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf %out_guides%\.
+CALL :COPY %in_pdf%\SMV_Verification_Guide.pdf        %out_guides%\.
 
 echo.
 echo --- copying startup shortcuts ---
 echo.
  
-CALL :COPY "%svn_root%\webpages\smv_readme.html" "%out_guides%\Smokeview_release_notes.html"
-
+CALL :COPY "%svn_root%\webpages\smv_readme.html"       "%out_guides%\Smokeview_release_notes.html"
 CALL :COPY "%bundleinfo%\Overview.html"                "%out_doc%\Overview.html"
-
 CALL :COPY "%bundleinfo%\FDS_Web_Site.url"             "%out_web%\Official_Web_Site.url"
 
 echo.
