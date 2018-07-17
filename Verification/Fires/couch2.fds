@@ -8,8 +8,6 @@ The case is meant as a teaching tool and to test functionality.
 
 &TIME T_END=600. /
 
-&MISC OVERWRITE=F /
-
 &REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
 
 &VENT MB='XMIN', SURF_ID='OPEN' /  
