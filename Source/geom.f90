@@ -3134,7 +3134,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 
-REAL(EB) :: DIVVOL, MINVOL, DUMMY, RTRMVOL
+REAL(EB) :: DIVVOL, MINVOL, DUMMY, RTRMVOL, DIVVOL_BC
 
 LOGICAL, PARAMETER :: DO_CONDUCTION_HEAT_FLUX=.TRUE.
 INTEGER :: DIFFHFLX_IND, JFLX_IND
@@ -3152,7 +3152,7 @@ INTEGER :: INDZ
 ! Pressure sums re-integration vars:
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
-INTEGER :: IW,IND1,IND2
+INTEGER :: IW,IND1,IND2,JCF,ICFACE
 
 ! Shunn MMS test case vars:
 REAL(EB) :: XHAT, ZHAT, Q_Z, TT
@@ -3628,7 +3628,7 @@ AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
       ENDDO
    ENDDO
 
-   If (PREDICTOR) THEN
+   IF (PREDICTOR) THEN
       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
          I      = CUT_CELL(ICC)%IJK(IAXIS)
          J      = CUT_CELL(ICC)%IJK(JAXIS)
@@ -3642,7 +3642,17 @@ AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
             DIVVOL = DIVVOL + CUT_CELL(ICC)%DS(JCC)
             RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
-         DP(I,J,K)  = DIVVOL/(DX(I)*DY(J)*DZ(K))
+
+         ! Now get sum(un*ACFace) and add to divergence:
+         DIVVOL_BC=0._EB
+         ICF = CCVAR(I,J,K,IBM_IDCF) ! Get CUT_FACE array index which contains INBOUNDARY cut-faces inside cell I,J,K.
+         IF(ICF>0) THEN
+            DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
+               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
+               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%UW * CFACE(ICFACE)%AREA ! Add flux to BC divergence.
+            ENDDO
+         ENDIF
+         DP(I,J,K)  = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K)) ! Now push Divergence to underlying Cartesian cell.
          RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
       ENDDO
    ELSE ! CORRECTOR
@@ -3659,7 +3669,17 @@ AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
             DIVVOL = DIVVOL + CUT_CELL(ICC)%D(JCC)
             RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO
-         DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
+
+         ! Now get sum(un*ACFace) and add to divergence:
+         DIVVOL_BC=0._EB
+         ICF = CCVAR(I,J,K,IBM_IDCF)
+         IF(ICF>0) THEN
+            DO JCF=1,CUT_FACE(ICF)%NFACE
+               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
+               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%UWS * CFACE(ICFACE)%AREA
+            ENDDO
+         ENDIF
+         DP(I,J,K) = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K))
          RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
       ENDDO
    ENDIF
@@ -10627,19 +10647,15 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ENDDO ICF_LOOP
 
-   ! Advective mass fluxes through INBOUNDARY cut-faces (CFACE):
-   ! TO DO.
-
-   IF (.FALSE.) THEN
-      ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
-      DO ICF=1,N_CFACE_CELLS
-         CFA  => CFACE(ICF)
-         IND1 = CFA%CUT_FACE_IND1;                         IND2 = CFA%CUT_FACE_IND2
-         ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
-         IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-         F_Z(IROW) = F_Z(IROW) - CFA%ONE_D%RHO_F*CFA%ONE_D%ZZ_F(N)*CFA%ONE_D%UW * CUT_FACE(IND1)%AREA(IND2)
-      ENDDO
-   ENDIF
+   ! INBOUNDARY cut-faces, loop on CFACE to add BC defined at SOLID phase:
+   DO ICF=1,N_CFACE_CELLS
+      CFA  => CFACE(ICF)
+      IND1 = CFA%CUT_FACE_IND1;                         IND2 = CFA%CUT_FACE_IND2
+      ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
+      IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+      F_Z(IROW) = F_Z(IROW) + CFA%ONE_D%RHO_F*CFA%ONE_D%ZZ_F(N)* &
+      (PRFCT*CFA%ONE_D%UW+ (1._EB-PRFCT)*CFA%ONE_D%UWS) * CUT_FACE(IND1)%AREA(IND2)
+   ENDDO
 
    ! Then add diffusive fluxes through domain boundaries:
    ! Defined in CCREGION_DIVERGENCE_PART_1.
