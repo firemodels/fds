@@ -8595,32 +8595,30 @@ The quality of a particular simulation is most directly tied to grid resolution.
 
 \subsubsection{Measure of Turbulence Resolution}
 
-A scalar quantity referred to as the \emph{measure of turbulence resolution} \cite{Pope:2004} is defined locally as
+A scalar quantity referred to as the \emph{measure of turbulence resolution} \cite{Pope:2004} is defined locally as:
 \begin{eqnarray}
 M(\mathbf{x}) = \frac{\left\langle k_{\rm sgs} \right\rangle}{\left\langle \mbox{TKE} \right\rangle + \left\langle k_{\rm sgs} \right\rangle}
 \end{eqnarray}
-where the resolved turbulent kinetic energy per unit mass is
+where the resolved turbulent kinetic energy per unit mass is:
 \vskip-.6cm
 \begin{align}
-\mbox{TKE} &= \mbox{$\frac{1}{2}$}(\tilde{u}_i - \left\langle \tilde{u}_i \right\rangle) (\tilde{u}_i - \left\langle \tilde{u}_i \right\rangle)
+\mbox{TKE} &= \mbox{$\frac{1}{2}$}(\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle) (\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle)
 \end{align}
-TKE must be output via {\ct DEVC} for each velocity component and its mean:
+Where $\textbf{u}$ is the cell centered velocity vector from the velocity components at cell faces (i.e. $ \tilde{\textbf{u}}=\left( \bar{u},\bar{v},\bar{w} \right) $), angled brackets denote time-averaged values and subscript $i$ indicate grid indices. To output resolved TKE use the following {\ct DEVC}s to output the three velocity components:
 
 \begin{lstlisting}
 &DEVC ..., QUANTITY='U-VELOCITY' /
-&DEVC ..., QUANTITY='U-VELOCITY', STATISTICS='MEAN' /
 &DEVC ..., QUANTITY='V-VELOCITY' /
-&DEVC ..., QUANTITY='V-VELOCITY', STATISTICS='MEAN' /
 &DEVC ..., QUANTITY='W-VELOCITY' /
-&DEVC ..., QUANTITY='W-VELOCITY', STATISTICS='MEAN' /
 \end{lstlisting}
-You must post-process these outputs to obtain TKE.
+
+The output of these {\ct DEVC}s must be post-processed to obtain resolved TKE. First, output the velocity vector $\textbf{u}$ using the velocity components, choose a suitable time-averaging period (which will be case-specific), output a mean velocity $\left\langle \textbf{u} \right\rangle$ and hence the fluctuation in velocity $(\textbf{u} - \left\langle \textbf{u} \right\rangle)$.
 
 The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
 \begin{align}
 k_{\rm sgs} &\approx \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i) = ( \mu_t/(\rho C_\nu \Delta) )^2
 \end{align}
-Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  In the bulk flow region, the model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored.  Keep in the mind, however, that the test filter operation is ill-defined near walls, and so FDS employs constant Smagorinsky in these cells to compute the eddy viscosity.
+Here, $C_\nu$ is the Deardorff eddy viscosity model constant, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  In the bulk flow region, the model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored.  Keep in the mind, however, that the test filter operation is ill-defined near walls, and so FDS employs constant Smagorinsky in these cells to compute the eddy viscosity.
 
 To output an estimate of the subgrid kinetic energy per unit mass use
 \begin{lstlisting}
