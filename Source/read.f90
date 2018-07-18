@@ -8729,6 +8729,13 @@ MESH_LOOP: DO NM=1,NMESHES
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
                   ENDIF
+                  ! For now, we have to adjust the specified OBST box positions so that INPUT_AREA will be reasonable for SHAPE.
+                  OB%X1=X(OB%I1)
+                  OB%X2=X(OB%I2)
+                  OB%Y1=Y(OB%J1)
+                  OB%Y2=Y(OB%J2)
+                  OB%Z1=Z(OB%K1)
+                  OB%Z2=Z(OB%K2)
                ENDIF
 
                ! Check to see if obstruction is completely embedded in another
