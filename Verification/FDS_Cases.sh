@@ -4,6 +4,9 @@
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
+$QFDS -d Aerosols soot_gravitational_settling.fds
+$QFDS -d Aerosols soot_gravitational_settling_2.fds
+
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
@@ -460,8 +463,6 @@ $QFDS -d Species reactionrate_lumped_two_air.fds
 $QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
-$QFDS -d Species soot_gravitational_settling.fds
-$QFDS -d Species soot_gravitational_settling_2.fds
 $QFDS -d Species hrrpuv_reac_simple.fds
 $QFDS -d Species hrrpuv_reac_extinction.fds
 $QFDS -d Species hrrpuv_reac_single.fds
