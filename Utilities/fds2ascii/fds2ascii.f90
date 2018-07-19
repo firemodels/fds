@@ -67,6 +67,7 @@ CHARACTER(256), DIMENSION(FILE_DIM) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,SLCF_TEXT,B
 CHARACTER(256), DIMENSION(FILE_DIM) :: SLICE_LABELS
 CHARACTER(20), DIMENSION(FILE_DIM) :: BNDF_TYPE
 CHARACTER(20) :: BNDF_TYPE_CHOSEN
+CHARACTER(256) :: PLOT3D_FILE
 INTEGER :: NSLICE_LABELS, SLICE_EXIST
 REAL(FB), DIMENSION(FILE_DIM) :: X1, X2, Y1, Y2, Z1, Z2
 INTEGER,  DIMENSION(60) :: IB,IS
@@ -290,7 +291,11 @@ EXTRA_PLOT3D_FILES: DO
       READ(11,*)
       READ(11,'(A)') SLCF_UNIT(II)
       ENDDO
-      OPEN(12,FILE=TRIM(PL3D_FILE(I)),FORM='UNFORMATTED',STATUS='OLD',IOSTAT=RCODE)
+
+      PLOT3D_FILE = PL3D_FILE(I)
+      CALL StripSpaces(PLOT3D_FILE)
+
+      OPEN(12,FILE=TRIM(PLOT3D_FILE),FORM='UNFORMATTED',STATUS='OLD',IOSTAT=RCODE)
       CLOSE(12)
       FILE_EXISTS(I)=.TRUE.
       IF(RCODE.NE.0)THEN
@@ -319,8 +324,11 @@ EXTRA_PLOT3D_FILES: DO
         ENDIF
       ENDIF
       IF (I.EQ.0) STOP
- 
-      QFILE = PL3D_FILE(I)
+
+      PLOT3D_FILE = PL3D_FILE(I)
+      CALL StripSpaces(PLOT3D_FILE)
+
+      QFILE = PLOT3D_FILE
       NM = PL3D_MESH(I)
       M=>MESH(NM)
  
@@ -953,7 +961,48 @@ EXTRA_PLOT3D_FILES: DO
         enddo
         enddo
         endif
- 
+
+        OPEN(UNIT = 45, FILE = TRIM(OUTFILE)//'.vtk', STATUS = 'NEW')
+        ! HEADER
+        WRITE(45,"(A26)") '# vtk DataFile Version 3.0'
+        WRITE(45,'(A)') CHID
+        WRITE(45,'(A5)') 'ASCII'
+        WRITE(45,'(A24)') 'DATASET RECTILINEAR_GRID'
+
+        ! MESH
+        WRITE(45,'(A11,I4,A,I4,A,I4)') 'DIMENSIONS ', I2-I1+1, ' ', J2-J1+1, ' ', K2-K1+1
+
+        ! COORDINATES
+        WRITE(45,'(A14,I4,A7)') 'X_COORDINATES ', I2-I1+1,' DOUBLE'
+        WRITE(45,*) (M%X(I),I=I1,I2)
+        WRITE(45,'(A14,I4,A7)') 'Y_COORDINATES ', J2-J1+1,' DOUBLE'
+        WRITE(45,*) (M%Y(J),J=J1,J2)
+        WRITE(45,'(A14,I4,A7)') 'Z_COORDINATES ', K2-K1+1,' DOUBLE'
+        WRITE(45,*) (M%Z(K),K=K1,K2)
+
+        ! NUMBER OF POINTS
+        WRITE(45,'(A11,I7)') 'POINT_DATA ', (I2-I1+1)*(J2-J1+1)*(K2-K1+1)
+
+        ! DATA
+        DO L=1,NV
+            WRITE(45,*)
+            WRITE(45,"(A7)") 'SCALARS'
+            WRITE(45,'(A,A)') TRIM(SLCF_TEXT(IS(L))) ,'  DOUBLE'
+            WRITE(45,"(A20)") 'LOOKUP_TABLE DEFAULT'
+            DO K=K1,K2
+                DO J=J1,J2
+                    DO I=I1,I2
+                        WRITE(45,*) Q(I,J,K,L)
+                    ENDDO
+                ENDDO
+            ENDDO
+        ENDDO
+
+        CLOSE(UNIT = 45)
+
+
+
+
       CASE(3)  ! Write out boundary file output
  
          PATCHES: DO II=1,NPATCH
@@ -1176,3 +1225,29 @@ DO I = 1, LENBUF
 END DO
 
 END SUBROUTINE TOUPPER
+
+!********************StripSpaces*********************************
+
+SUBROUTINE StripSpaces(string)
+IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(INOUT) :: string
+INTEGER :: stringLen
+INTEGER :: last, actual
+
+stringLen = LEN (string)
+last = 1
+actual = 1
+
+DO WHILE (actual < stringLen)
+    IF (string(last:last) == ' ') THEN
+        actual = actual + 1
+        string(last:last) = string(actual:actual)
+        string(actual:actual) = ' '
+    ELSE
+        last = last + 1
+        IF (actual < last) actual = last
+    ENDIF
+ENDDO
+
+END SUBROUTINE StripSpaces
+
