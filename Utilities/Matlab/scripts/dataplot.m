@@ -53,6 +53,8 @@
 %    'o' -- Add 'o' in the switch_id column (first column) of FDS_validation_dataplot_inputs.csv to process "only" these lines.
 %
 %    'f' -- Follow the previous line and "hold on" the figure window, adding this line to the current plot.
+%
+%    'g' -- Generate plot, but ignore in scatplot.  Good for cases under development.
 
 function [saved_data,drange] = dataplot(varargin)
 
@@ -82,10 +84,10 @@ else
     drange = 2:n_plots;
 end
 
+drange_index = 0;
 if ~isnumeric(drange)
     dataname_col = strcmp(headers,'Dataname');
     dstring = drange;
-    drange_index = 0;
     clear drange
 else
     dstring = 'null';
@@ -124,14 +126,15 @@ for i=2:n_plots
     parameters = P{:}';
 
     % Check for shortname specification instead of numeric drange
+
     if strcmp(dstring,'null')
         itest = ismember(i,drange);
     else
         itest = strcmp(parameters(dataname_col),dstring);
-        if any(itest)
-            drange_index = drange_index + 1;
-            drange(drange_index) = i;
-        end
+    end
+    if any(itest)
+        drange_index = drange_index + 1;
+        drange(drange_index) = i;
     end
 
     % Check to see if d line has been activated in configuration file
@@ -143,7 +146,15 @@ for i=2:n_plots
     % Check to see if f line has been activated in configuration file
     ftest = strcmp(parameters(strcmp(headers,'switch_id')),'f'); % used for multiple lines on same plot
 
-    if any(itest) && (dtest || otest || ftest)
+    % Check to see if g line has been activated in configuration file
+    gtest = strcmp(parameters(strcmp(headers,'switch_id')),'g'); % used to ignore scatplot
+
+    % remove this plot from drange if gtest
+    if (gtest)
+        drange(drange_index)=[];
+    end
+
+    if any(itest) && (dtest || otest || ftest || gtest)
 
         if ~ftest
             if exist('K')
