@@ -1820,7 +1820,7 @@ prescribed by referencing the appropriate {\ct SURF} line(s) whose
 parameters are described in this section.
 
 The default boundary condition for all solid surfaces is that of a smooth
-inert wall with the surface temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. Do not confuse this with a surface for which heat transfer does not occur (this is an adiabatic surface which will change in temperature to maintain zero heat transfer, refer to Section~\ref{info:adiabatic}). To maintain the surface temperature at {\ct TMPA} when exposed to a gas temperature, which may be above or below {ct TMPA}, FDS calculates the required heat transfer coefficient, and hence the heat transfer between the surface and the gas phase. You can think of {\ct INERT} as the ultimate ambient temperature heat sink; such as a water-cooled panel.
+inert wall with the surface temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. Do not confuse this with a surface for which heat transfer does not occur (this is an adiabatic surface which will change in temperature to maintain zero heat transfer, refer to Section~\ref{info:adiabatic}). To maintain the surface temperature at {\ct TMPA} when exposed to a gas temperature, which may be above or below {\ct TMPA}, FDS calculates the required heat transfer coefficient, and hence the heat transfer between the surface and the gas phase. You can think of {\ct INERT} as the ultimate ambient temperature heat sink; such as a water-cooled panel.
 
 If only this boundary condition is needed, there is no need to add any {\ct SURF} lines
 to the input file. If additional boundary conditions are desired,
