@@ -6209,8 +6209,7 @@ If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will wri
 \label{info:secondary_breakup}
 
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
-In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
-{\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
+In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the median volumetric diameter, $D_{\rm v,0.5}$, {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}. These parameters are defined the same as {\ct GAMMA\_D} and {\ct SIGMA\_D} in section~\ref{info:particle_size} but instead apply after breakup.
 
 \subsection{Dense Clouds of Droplets}
 \label{info:DENSE_VOLUME_FRACTION}
