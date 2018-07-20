@@ -152,6 +152,7 @@ for i=2:n_plots
     % remove this plot from drange if gtest
     if (gtest)
         drange(drange_index)=[];
+        drange_index=drange_index-1;
     end
 
     if any(itest) && (dtest || otest || ftest || gtest)
