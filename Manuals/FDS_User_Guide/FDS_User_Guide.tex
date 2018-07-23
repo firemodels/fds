@@ -1820,8 +1820,9 @@ prescribed by referencing the appropriate {\ct SURF} line(s) whose
 parameters are described in this section.
 
 The default boundary condition for all solid surfaces is that of a smooth
-inert wall with the temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. If only this
-boundary condition is needed, there is no need to add any {\ct SURF} lines
+inert wall with the surface temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. Do not confuse this with a surface for which heat transfer does not occur (this is an adiabatic surface which will change in temperature to maintain zero heat transfer, refer to Section~\ref{info:adiabatic}). To maintain the surface temperature at {\ct TMPA} when exposed to a gas temperature, which may be above or below {\ct TMPA}, FDS calculates the required heat transfer coefficient, and hence the heat transfer between the surface and the gas phase. You can think of {\ct INERT} as the ultimate ambient temperature heat sink; such as a water-cooled panel.
+
+If only this boundary condition is needed, there is no need to add any {\ct SURF} lines
 to the input file. If additional boundary conditions are desired,
 they are to be listed one boundary condition at a time.
 Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
@@ -3839,7 +3840,7 @@ A typical input line specifying a duct is as follows:
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{lstlisting}
-Or, if you are using {\ct MASS\_TRANSPORT=.TRUE.}, as follows:
+Or, if you are using {\ct HVAC\_MASS\_TRANSPORT=.TRUE.}, as follows:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
       LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
@@ -5849,7 +5850,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 \subsection{Soot Surface Oxidation}
 
-If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of 4.7x10$^{12}$ and an activation energy of 211,000~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler ~\cite{Hartman_2012}.
+If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of 4.7x10$^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler ~\cite{Hartman_2012}.
 
 
 
@@ -6208,8 +6209,7 @@ If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will wri
 \label{info:secondary_breakup}
 
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
-In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
-{\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
+In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the median volumetric diameter, $D_{\rm v,0.5}$, {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters \linebreak[4]{\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}. These parameters are defined the same as {\ct GAMMA\_D} and {\ct SIGMA\_D} in section~\ref{info:particle_size} but instead apply after breakup.
 
 \subsection{Dense Clouds of Droplets}
 \label{info:DENSE_VOLUME_FRACTION}
