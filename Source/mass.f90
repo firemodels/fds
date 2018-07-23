@@ -250,7 +250,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    IF (FIRST_PASS) THEN
       ! This IF is required because DEL_RHO_D_DEL_Z is updated to the next time level in divg within
       ! the CHANGE_TIME_STEP loop in main while we are determining the appropriate stable DT.
-      IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_SETTLING) CALL SETTLING_VELOCITY(NM)
+      IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. (GRAVITATIONAL_SETTLING .OR. THERMOPHORETIC_SETTLING)) CALL SETTLING_VELOCITY(NM)
       DEL_RHO_D_DEL_Z__0 = DEL_RHO_D_DEL_Z
    ENDIF
 
