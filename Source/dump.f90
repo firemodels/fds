@@ -4497,6 +4497,8 @@ INTEGER :: ICF, NVF, IFACECF, IVCF, IFACECUT
 INTEGER :: X1AXIS, IEXIM, II, JJ, KK, ICC, JCC, NFC, ICCF, ICF2, IFACE2
 REAL(EB):: VAL_CF
 
+LOGICAL :: IS_RCFACE
+
 SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
 IF (SLICETYPE=='INCLUDE_GEOM' .AND. .NOT.CC_IBM) SLICETYPE_LOCAL='IGNORE_GEOM'
 
@@ -4569,11 +4571,24 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                IFACE = IFACE + 1
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
-               IFACE = IFACE + 1  ! is a gas cell
-               VALS(IFACE) = QQ(SLICE,J,K,1)
+               ! Check if FACE is TYPE RC face:
+               IS_RCFACE = (CCVAR(SLICE,J,K,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(SLICE+1,J,K,IBM_CGSC)==IBM_CUTCFE)
+               IF (IS_RCFACE) THEN
+                  ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
+                  ! ..
+                  IFACE = IFACE + 1  ! is a gas cell
+                  VALS(IFACE) = QQ(SLICE,J,K,1)
 
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(SLICE,J,K,1)
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(SLICE,J,K,1)
+
+               ELSE
+                  IFACE = IFACE + 1  ! is a gas cell
+                  VALS(IFACE) = QQ(SLICE,J,K,1)
+
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(SLICE,J,K,1)
+               ENDIF
             ENDIF
          END DO
       END DO
@@ -4608,11 +4623,23 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                IFACE = IFACE + 1
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,SLICE,K,1)
+               ! Check if FACE is TYPE RC face:
+               IS_RCFACE = (CCVAR(I,SLICE,K,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(I,SLICE+1,K,IBM_CGSC)==IBM_CUTCFE)
+               IF (IS_RCFACE) THEN
+                  ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
+                  ! ..
+                  IFACE = IFACE + 1  ! is a gas cell
+                  VALS(IFACE) = QQ(I,SLICE,K,1)
 
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,SLICE,K,1)
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,SLICE,K,1)
+               ELSE
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,SLICE,K,1)
+
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,SLICE,K,1)
+               ENDIF
             ENDIF
          END DO
       END DO
@@ -4647,11 +4674,23 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN ! INTERP_C2F_FIELD
                IFACE = IFACE + 1
                VALS(IFACE) = REAL(VAL_CF,FB)
             ELSE
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,J,SLICE,1)
+               ! Check if FACE is TYPE RC face:
+               IS_RCFACE = (CCVAR(I,J,SLICE,IBM_CGSC)==IBM_CUTCFE) .OR. (CCVAR(I,J,SLICE+1,IBM_CGSC)==IBM_CUTCFE)
+               IF (IS_RCFACE) THEN
+                  ! TO DO: Place holder to interpolate Slice Variable to RCFACE:
+                  ! ..
+                  IFACE = IFACE + 1  ! is a gas cell
+                  VALS(IFACE) = QQ(I,J,SLICE,1)
 
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,J,SLICE,1)
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,J,SLICE,1)
+               ELSE
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,J,SLICE,1)
+
+                  IFACE = IFACE + 1
+                  VALS(IFACE) = QQ(I,J,SLICE,1)
+               ENDIF
             ENDIF
          END DO
       END DO
