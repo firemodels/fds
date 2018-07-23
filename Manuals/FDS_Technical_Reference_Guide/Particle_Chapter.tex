@@ -76,29 +76,34 @@ Typically, Lagrangian particle models only consider two-way coupling between the
 
 In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle can be modeled by the following~\cite{Ramirez:1}:
 \be
-  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0} \label{eq:dragred}
+  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0}, \label{eq:dragred}
 \ee
 where $C_{\rm d,0}$ is the single particle drag coefficient and $F / F_0$ is the hydrodynamic force ratio of the trailing particle to an isolated particle:
 \be
   \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / D - 1
   / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1
-  / 2 \right)^{}} \right) \right] \label{eq:dragredfact}
+  / 2 \right)^{}} \right) \right]. \label{eq:dragredfact}
 \ee
-where Re is the single particle Reynolds number, L is the distance between the particles, and W is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
+where $\RE$ is the single particle Reynolds number, $L$ is the distance between the particles, and $W$ is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
 \be
   W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
-  \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right] \label{eq:Wake-Vel}
+  \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right]. \label{eq:Wake-Vel}
 \ee
-This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The separation distance $L/D$ between particle centers is calculated from the local particle volume fraction and local average particle diameter $\bar{D}$
+This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The average separation distance $L/D$ between particle centers is calculated from the local particle volume fraction and local average particle diameter $\bar{D}$ via
 \be
-  L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}
+  L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}.
 \ee
-Here, local quantities are averaged over a single computational cell.
+This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}.
 
 In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}. The drag reduction model is turned on by default.
 
-An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above correlation under-estimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
+As $L/D$ approaches zero, the drag coefficient approaches
+\be
+  C_{\rm d} = C_{\rm d,0} \left(1 - \frac{C_{\rm d,0}}{2}\right),
+\ee
+which is 78\% of that for an isolated spherical particle.
 
+An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above equation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
 
 \newpage
 \section{Liquid Droplet Size Distribution}
