@@ -574,5 +574,12 @@ Gravitational agglomeration results from heavier particle falling onto larger pa
 u_g(m) = g m {\rm B}(m)
 \ee
 Shear agglomeration results from particles of different speeds moving along streamlines that bring them into contact with one another~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm Sh} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^3 \left(r_m+r_{\omega} \right)^3 \sqrt{ \frac{8 \rho \pi \epsilon} {15 \mu} }
+\ee
+where $\chi_{\rm C}$ is a shape factor, assumed to be one, and $\epsilon$ is the turbulent kinetic energy dissipation rate.
 
 Inertial agglomeration results from particles departing from the flow streamlines due to their inertia and coming into contact with other particles~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm In} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^2 \left(r_m+r_{\omega} \right)^2 \left( \frac{512 \rho \pi^3 \epsilon^3} {15 \mu} \right) ^{1/4} \frac{\left| u_g(m)-u_g(\omega) \right|}{g}
+\ee
