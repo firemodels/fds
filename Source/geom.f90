@@ -12084,16 +12084,35 @@ REAL(EB),INTENT(IN) :: XYZ_PP(IAXIS:KAXIS)
 REAL(EB),INTENT(OUT):: VELX1
 
 ! Local Variables
-REAL(EB) :: VEL_PP(MAX_DIM)
-INTEGER  :: DUMMY(3)
+REAL(EB) :: DUMMY
+INTEGER  :: IND1,IND2,ICF
+
+VELX1 = 0._EB
 ! This routine computes boundary velocity of a boundary point on INBFC_CFCEN(1:3) INBOUNDARY cut-face
 ! with coordinates XYZ_PP. Will make use of velocity field defined on GEOMETRY.
-! For now Set to zero:
-DUMMY(1:3) = INBFC_CFCEN(1:3)
-VEL_PP(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS) ! S.T. XYZ_PP is used and debug compilation does not throw warning.
-VEL_PP(IAXIS:KAXIS) = 0._EB
 
-VELX1 = VEL_PP(X1AXIS)
+! For now Set to CFACEs UW or UWS depending on predictor or corrector:
+DUMMY = XYZ_PP(X1AXIS) ! Dummy to avoid compilation warning on currently unused point location within cut-face.
+
+! Inboundary cut-face indexes:
+! INBFC_CFCEN(1) is either a point inside the Cartesian cell IBM_FTYPE_CFINB, or a point in a Cartesian cell
+! vertex IBM_FTYPE_SVERT:
+IND1=INBFC_CFCEN(2)
+IND2=INBFC_CFCEN(3)
+IF(IND1<=0 .OR. IND2<=0) RETURN ! If boundary cut-face undefined, with VELX1 set to 0._EB.
+IF(CUT_FACE(IND1)%STATUS/=IBM_INBOUNDARY) RETURN ! Return if face is not inboundary face.
+
+ICF = CUT_FACE(IND1)%CFACE_INDEX(IND2)
+
+IF (ICF <=0) RETURN ! This uses VELX1 = 0._EB when the inboundary cut-face used in the interpolation is located on
+                    ! a ghost cell (no CFACEs are defined in ghost cells).
+
+! Velocity into Gas Region, component along X1AXIS:
+IF (PREDICTOR) THEN
+   VELX1 = -CFACE(ICF)%ONE_D%UW * CFACE(ICF)%NVEC(X1AXIS)
+ELSE
+   VELX1 = -CFACE(ICF)%ONE_D%UWS* CFACE(ICF)%NVEC(X1AXIS)
+ENDIF
 
 RETURN
 END SUBROUTINE GET_BOUND_VEL
