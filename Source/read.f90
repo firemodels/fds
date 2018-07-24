@@ -8752,8 +8752,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   OB%X2 = X(OB%I2)
                   OB%Y1 = Y(OB%J1)
                   OB%Y2 = Y(OB%J2)
-                  OB%Z1 = X(OB%K1)
-                  OB%Z2 = X(OB%K2)
+                  OB%Z1 = Z(OB%K1)
+                  OB%Z2 = Z(OB%K2)
                   ! Store SHAPE_AREA for area adjustment
                   OB%SHAPE_TYPE = SHAPE_TYPE
                   OB%SHAPE_AREA = SHAPE_AREA
