@@ -921,8 +921,8 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \section{Concatenating input files}
 \label{info:CATF}
 
-The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an 
-FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains 
+The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an
+FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
 %
 \begin{lstlisting}
 &HEAD CHID='couch2', TITLE='Single Couch Test Case using two meshes & CATF files.'  /
@@ -933,7 +933,7 @@ FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\
 &CATF OTHER_FILES='upholstery_matl.tpl','gypsum_walls.tpl' / #Upholstery & gypsum.
 
 # Couch OBSTS:
-&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 / 
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
 &OBST XB= 1.30, 1.50, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
@@ -944,7 +944,7 @@ FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\
 &TAIL/
 \end{lstlisting}
 %
-We note that the {\ct \&CATF} group is defined in two lines. In the first line, two files {\ct upholstery\_matl.tpl}, {\ct gypsum\_walls.tpl} are defined on 
+We note that the {\ct \&CATF} group is defined in two lines. In the first line, two files {\ct upholstery\_matl.tpl}, {\ct gypsum\_walls.tpl} are defined on
 the namelist {\ct OTHER\_FILES} field. These contain information in the form of templates, on a typical upholstery material for the couch, and gypsum wall defined for the back wall and roof of the case. Up to 20 files can be listed in one {\ct \&CATF} line. For example, for the gypsum wall template, the material and surface information is provided in FDS input format as:
 %
 \begin{lstlisting}
@@ -961,8 +961,8 @@ the namelist {\ct OTHER\_FILES} field. These contain information in the form of 
       THICKNESS      = 0.012 /
 \end{lstlisting}
 %
-In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an 
-automated script. 
+In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an
+automated script.
 
 When FDS is invoked with the {\ct couch2.fds} input file, it will concatenate the input contents of this file and all files defined in its {\ct \&CATF} lines,
 into a simulation input file called {\ct couch2\_cat.fds} (here {\ct CHID='couch2'} is the case ID in the original {\ct couch2.fds} input file).
@@ -5850,19 +5850,18 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 \subsection{Soot Surface Oxidation}
 
-If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of 4.7x10$^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler ~\cite{Hartman_2012}.
+If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
 
+\section{Special Topic: Aerosol Agglomeration}
+\label{info:agglomeration}
 
+Aerosol particles will, over time, collide with one another and stick together to form larger particles. This process is called agglomeration. The agglomeration model in FDS is automatically invoked by defining an aerosol species with size bins. The agglomeration model can be disabled the logical flag {\ct AGGLOMERATION} on the {\ct MISC} input. Particle bins are defined by giving a minimum particle diameter, {\ct MIN\_DIAMETER} in $\mu$m, a maximum particle diameter, {\ct MAX\_DIAMETER} in $\mu$m, and the desired number of size bins, {\ct N\_BINS}, on the {\ct SPEC} line for an aerosol species. Note that if multiple aerosol species are defined, the agglomeration model will agglomerate each species independently, that is particles of different species do not agglomerate together into a larger mixed-species particle. The following input defines a soot species as an aerosol with 10 bins between 1 and 100~$\mu$m. Each bin will be created as its own lumped species with names {\ct SOOT\_1} through {\ct SOOT\_10}. A summary of the particle bins will be written to the {\ct CHID.out} file.
 
-
-
-
-
-
-
-
-
+\begin{lstlisting}
+&SPEC ID='SOOT', AEROSOL=.TRUE.,MIN_DIAMETER=1.E-6,MAX_DIAMETER=100.E-6,
+      N_BINS=10,LUMPED_COMPONENT_ONLY=.TRUE./
+\end{lstlisting}
 
 \chapter{Radiation}
 
@@ -9697,6 +9696,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 %{\ct AEROSOL\_AL2O3}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
+{\ct AGGLOMERATION}                             & Logical       & Section~\ref{info:agglomeration}                      &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                & $^\circ$C     &                   \\ \hline
@@ -10279,9 +10279,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array  & Section~\ref{info:lumped}               &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MAX\_DIAMETER}                 & Real        & Section~\ref{info:agglomeration}        &    m              &               \\ \hline
 {\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
+{\ct MIN\_DIAMETER}                 & Real        & Section~\ref{info:agglomeration}        & m                 &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct N\_BINS}                       & Integer     & Section~\ref{info:agglomeration}        &                   &               \\ \hline
 {\ct PR\_GAS}                       & Real        & Section~\ref{gas_species_props}         &                   & {\ct PR}      \\ \hline
 {\ct PRIMITIVE}                     & Logical     & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline

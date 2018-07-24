@@ -1,4 +1,4 @@
-% !TEX root = FDS_Technical_Reference_Guide.tex
+	% !TEX root = FDS_Technical_Reference_Guide.tex
 
 \typeout{new file: Solid_Chapter.tex}
 
@@ -520,3 +520,66 @@ computed by the wall model, and $\tau^+$ is the dimensionless stopping distance 
  \tau^+=\frac{\rho_{\rm a} \, (2 r_{\rm a})^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_{\rm g}
 \ee
 
+\newpage
+\section{Aerosol Agglomeration}
+
+Agglomeration is the process via which small aerosol particles become larger aerosol particles due to collisions that cause the smaller particles to stick together and become larger particles. The FDS implemenation of aerosol agglomeration is based on the agglomeration model in VICTORIA~\cite{NRC:VICTORIA}, a US NRC software package for modeling radioactive aerosol transport during severe accidents. The agglomeration mechanisms in FDS include Brownian, graviational, and turbulent (sheer and inertial). The agglomeration is governed by the equation below.
+\be
+\frac{\d N}{\d t} = \frac{1}{2} \int_{0}^{m} \Phi (\omega,m-\omega) N(\omega) N(m-\omega) \d \omega - N(m) \int_{0}^{\infty} \Phi (\omega,m) N(\omega) \d \omega - R(m) + S(m)
+\ee
+In the above equation $\Phi$ is an agglomeration kernel, $N(m)$ is the number density of particles of size $m$, $R$ is a removal term (e.g. outflow, oxidation), and $S$ is a source term (e.g. from combustion). The equation states that the rate of formation of particles of size $m$ is the rate that two particles whose combined size is $m$ collide, minus the rate at which particles of size $m$ collide with other particles and become a larger size, minus removal of particles of size $m$, and plus the generation of particles of size $m$. The selected approach for solving the agglomeration equation is to bin the particle sizes into multiple bins and transform the integrals over particle size into summations over particle bins. By defining the maximum, $m_{max}$, and minimum, $m_{min}$, particle mass and the number of bins, $M$, one can define the average bin mass, $x$, as shown below~\cite{Higgins_Davidson}.
+\be
+s = \left( \frac{m_{max}}/{m_{min}} \right) ^{1/M} \; , \; m_i =s \; m_{i-1} \; , \; x_i = \frac{2 m_i}{1+s}
+\ee
+Using this binning, the agglomeration equation becomes:
+\be
+\frac{\d N_i}{\d t} = \sum_{k=1}^{M} \sum_{j=k}^{M} \left( 1- \frac{1}{2} \delta_{j,k} \right) \eta \Phi(j,k) N_j N_k - N_i \sum_{k=1}^M \Phi(j,k) N_k - R_i + S_i
+\ee
+where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
+\be
+\eta = \begin{cases}
+	\frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq= x_{i+1} \\
+    \frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
+	\end{cases}
+\ee
+The agglomeration kernel is given by the sum of the Brownian (Br), gravitational (Gr), shear (Sh), and inertial (In) agglomeration  terms.
+\be
+\Phi (m,\omega)= \Phi_{\rm Br}(m,\omega) + \Phi_{\rm Gr}(m,\omega) + \sqrt{\Phi_{\rm Sh}(m,\omega)^2 + \Phi_{\rm In}(m,\omega)^2}
+\ee
+Browian agglomeration occurs when the random walks of particles brings them into contact with one another. It is computed as~\cite{NRC:VICTORIA}:
+\be 
+\Phi_{\rm Br}= 4 \pi k_{\rm b} T \left({\rm B} (m) + {\rm B} (\omega) \right) \left(r_m+r_{\omega} \right) {\rm Fu} (m,\omega)
+\ee
+where Fu is the Fuchs factor and B is the particle mobility.
+\be
+{\rm B}(m) = \frac {\rm Cn}{6 \pi \mu r_m}
+\ee
+\be \frac{1}{{\rm Fu}(m,\omega)} = \epsilon_s \frac{r_m + r_{\omega}}{k_{\rm b} T \left({\rm B}(m) + {\rm B}(\omega) \right)} \sqrt {\frac{8 k_{\rm b} T}{\pi} \left(\frac{1}{m}-\frac{1}{\omega} \right)} +
+		 1+\frac{2 \sqrt{(\tilde{a}_m^2+\tilde{a}_{\omega}^2)}}{r_m+r_{\omega}}
+\ee
+\be
+\tilde{a}_m = \frac { \left(r_m + a_m \right)^3 - \left(r_m^2 + a_m^2 \right)^{3/2}} {3 r_m a_m} - r_m  
+\ee
+\be
+a_m= {\rm B} (m) \sqrt{ \frac{2 k_{\rm b} T m} {\pi}}
+\ee
+Gravitational agglomeration results from heavier particle falling onto larger particles. The efficiency of these collisions are governed by a sticking factor, $\epsilon_{\rm S}$ assumed to be one, and a collision efficiency, $\epsilon_{\rm PK}$~\cite{NRC:VICTORIA}
+\be
+\Phi_{\rm Gr} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \left(r_m+r_{\omega} \right)^2 \left| u_g(m)+u_g(\omega) \right|
+\ee
+\be
+\epsilon_{\rm PK}(m,\omega) = \frac {{\rm min} \left(r_m,r_{\omega} \right)^2}{2 \left( r_m^2+r_{\omega}^2 \right)}
+\ee
+\be
+u_g(m) = g m {\rm B}(m)
+\ee
+Shear agglomeration results from particles of different speeds moving along streamlines that bring them into contact with one another~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm Sh} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^3 \left(r_m+r_{\omega} \right)^3 \sqrt{ \frac{8 \rho \pi \epsilon} {15 \mu} }
+\ee
+where $\chi_{\rm C}$ is a shape factor, assumed to be one, and $\epsilon$ is the turbulent kinetic energy dissipation rate.
+
+Inertial agglomeration results from particles departing from the flow streamlines due to their inertia and coming into contact with other particles~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm In} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^2 \left(r_m+r_{\omega} \right)^2 \left( \frac{512 \rho \pi^3 \epsilon^3} {15 \mu} \right) ^{1/4} \frac{\left| u_g(m)-u_g(\omega) \right|}{g}
+\ee
