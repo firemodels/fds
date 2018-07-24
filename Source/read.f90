@@ -8747,6 +8747,13 @@ MESH_LOOP: DO NM=1,NMESHES
                      N_OBST = N_OBST-1
                      CYCLE I_MULT_LOOP
                   ENDIF
+                  ! Snap OBST to mesh, special AREA_ADJUST required for SHAPE (see init.90)
+                  OB%X1 = X(OB%I1)
+                  OB%X2 = X(OB%I2)
+                  OB%Y1 = Y(OB%J1)
+                  OB%Y2 = Y(OB%J2)
+                  OB%Z1 = Z(OB%K1)
+                  OB%Z2 = Z(OB%K2)
                   ! Store SHAPE_AREA for area adjustment
                   OB%SHAPE_TYPE = SHAPE_TYPE
                   OB%SHAPE_AREA = SHAPE_AREA
