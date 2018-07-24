@@ -921,8 +921,8 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \section{Concatenating input files}
 \label{info:CATF}
 
-The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an 
-FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains 
+The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an
+FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
 %
 \begin{lstlisting}
 &HEAD CHID='couch2', TITLE='Single Couch Test Case using two meshes & CATF files.'  /
@@ -933,7 +933,7 @@ FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\
 &CATF OTHER_FILES='upholstery_matl.tpl','gypsum_walls.tpl' / #Upholstery & gypsum.
 
 # Couch OBSTS:
-&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 / 
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
 &OBST XB= 1.30, 1.50, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=... /
@@ -944,7 +944,7 @@ FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\
 &TAIL/
 \end{lstlisting}
 %
-We note that the {\ct \&CATF} group is defined in two lines. In the first line, two files {\ct upholstery\_matl.tpl}, {\ct gypsum\_walls.tpl} are defined on 
+We note that the {\ct \&CATF} group is defined in two lines. In the first line, two files {\ct upholstery\_matl.tpl}, {\ct gypsum\_walls.tpl} are defined on
 the namelist {\ct OTHER\_FILES} field. These contain information in the form of templates, on a typical upholstery material for the couch, and gypsum wall defined for the back wall and roof of the case. Up to 20 files can be listed in one {\ct \&CATF} line. For example, for the gypsum wall template, the material and surface information is provided in FDS input format as:
 %
 \begin{lstlisting}
@@ -961,8 +961,8 @@ the namelist {\ct OTHER\_FILES} field. These contain information in the form of 
       THICKNESS      = 0.012 /
 \end{lstlisting}
 %
-In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an 
-automated script. 
+In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an
+automated script.
 
 When FDS is invoked with the {\ct couch2.fds} input file, it will concatenate the input contents of this file and all files defined in its {\ct \&CATF} lines,
 into a simulation input file called {\ct couch2\_cat.fds} (here {\ct CHID='couch2'} is the case ID in the original {\ct couch2.fds} input file).
@@ -5850,7 +5850,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 \subsection{Soot Surface Oxidation}
 
-If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of 4.7x10$^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler ~\cite{Hartman_2012}.
+If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
 
 
