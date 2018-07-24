@@ -5853,16 +5853,15 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
 
+\section{Special Topic: Aerosol Agglomeration}
+\label{info:agglomeration}
 
+Aerosol particles will, over time, collide with one another and stick together to form larger particles. This process is called agglomeration. The agglomeration model in FDS is automatically invoked by defining an aerosol species with size bins. The agglomeration model can be disabled the logical flag {\ct AGGLOMERATION} on the {\ct MISC} input. Particle bins are defined by giving a minimum particle diameter, {\ct MIN\_DIAMETER} in $\mu$m, a maximum particle diameter, {\ct MAX\_DIAMETER} in $\mu$m, and the desired number of size bins, {\ct N\_BINS}, on the {\ct SPEC} line for an aerosol species. Note that if multiple aerosol species are defined, the agglomeration model will agglomerate each species independently, that is particles of different species do not agglomerate together into a larger mixed-species particle. The following input defines a soot species as an aerosol with 10 bins between 1 and 100~$\mu$m. Each bin will be created as its own lumped species with names {\ct SOOT\_1} through {\ct SOOT\_10}. A summary of the particle bins will be written to the {\ct CHID.out} file.
 
-
-
-
-
-
-
-
-
+\begin{lstlisting}
+&SPEC ID='SOOT', AEROSOL=.TRUE.,MIN_DIAMETER=1.E-6,MAX_DIAMETER=100.E-6,
+      N_BINS=10,LUMPED_COMPONENT_ONLY=.TRUE./
+\end{lstlisting}
 
 \chapter{Radiation}
 
@@ -9697,6 +9696,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 %{\ct AEROSOL\_AL2O3}                            & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
+{\ct AGGLOMERATION}                             & Logical       & Section~\ref{info:agglomeration}                      &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                & $^\circ$C     &                   \\ \hline
@@ -10279,9 +10279,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array  & Section~\ref{info:lumped}               &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MAX\_DIAMETER}                 & Real        & Section~\ref{info:agglomeration}        &    m              &               \\ \hline
 {\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
+{\ct MIN\_DIAMETER}                 & Real        & Section~\ref{info:agglomeration}        & m                 &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct N\_BINS}                       & Integer     & Section~\ref{info:agglomeration}        &                   &               \\ \hline
 {\ct PR\_GAS}                       & Real        & Section~\ref{gas_species_props}         &                   & {\ct PR}      \\ \hline
 {\ct PRIMITIVE}                     & Logical     & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct RADCAL\_ID}                    & Character   & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
