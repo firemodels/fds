@@ -12104,6 +12104,9 @@ IF(CUT_FACE(IND1)%STATUS/=IBM_INBOUNDARY) RETURN ! Return if face is not inbound
 
 ICF = CUT_FACE(IND1)%CFACE_INDEX(IND2)
 
+IF (ICF <=0) RETURN ! This uses VELX1 = 0._EB when the inboundary cut-face used in the interpolation is located on
+                    ! a ghost cell (no CFACEs are defined in ghost cells).
+
 ! Velocity into Gas Region, component along X1AXIS:
 IF (PREDICTOR) THEN
    VELX1 = -CFACE(ICF)%ONE_D%UW * CFACE(ICF)%NVEC(X1AXIS)
