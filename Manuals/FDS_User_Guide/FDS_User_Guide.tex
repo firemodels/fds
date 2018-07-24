@@ -2386,6 +2386,8 @@ An example of a sphere is given below.  By default, the center of the sphere is 
 
 To create a cylinder we need a height and orientation in addition to the radius.  The position of the center of the bottom face of the cylinder {\ct XYZ} defaults to (0,0,0).  An example of a vertically oriented (default) cylinder is shown below in Fig.~\ref{fig:obst_cylinder}.  Note that the magnitude of the orientation vector is not important; the vector is only used to specify the direction.
 
+A word of caution when using {\ct ORIENTATION} with the {\ct SHAPE} feature: Changing the orientation from the default (0,0,1) voids the area adjustment algorithm.  As a result, FDS cannot achieve the exact mass flux out of the surface as prescribed by the {\ct SURF} line and the precise area given by the geometry parameters for the {\ct SHAPE} on the {\ct OBST} line.  The mass flux FDS generates will be determined by {\ct SURF} line and the size of the grid cells the {\ct OBST} snaps to.  If reorientation is required, first run a sample case to see what total flow rate the surface is achieving (usually found in the {\ct CHID\_hrr.csv} file).  Then manually adjust your mass flux (or {\ct HRRPUA}) on the appropriate {\ct SURF} line.
+
 \begin{lstlisting}
 &SURF ID='shape', COLOR='DARK GRAY'/
 &MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
