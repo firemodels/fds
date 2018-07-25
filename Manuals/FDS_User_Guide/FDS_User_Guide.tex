@@ -878,9 +878,9 @@ table containing all of the keywords for each group.
 \label{tbl:namelistgroups}
 \begin{tabular}{|c|l|c|c|}
 \hline
-Group Name  & Namelist Group Description& Reference Section & Parameter Table  \\ \hline
+Group Name  & Namelist Group Description   & Reference Section & Parameter Table  \\ \hline
 {\ct BNDF}  & Boundary File Output         & \ref{info:BNDF} & \ref{tbl:BNDF}  \\ \hline
-{\ct CATF}  & Concatenate Input Files         & \ref{info:CATF} & \ref{tbl:CATF}  \\ \hline
+{\ct CATF}  & Concatenate Input Files      & \ref{info:CATF} & \ref{tbl:CATF}  \\ \hline
 {\ct CLIP}  & Clipping Parameters          & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct COMB}  & Combustion Parameters        & \ref{info:COMB} & \ref{tbl:COMB}  \\ \hline
 {\ct CSVF}  & Velocity Input File          & \ref{info:CSVF} & \ref{tbl:CSVF}  \\ \hline
@@ -901,6 +901,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct PRES}  & Pressure Solver Parameters   & \ref{info:PRES} & \ref{tbl:PRES}  \\ \hline
 {\ct PROF}  & Profile Output               & \ref{info:PROF} & \ref{tbl:PROF}  \\ \hline
 {\ct PROP}  & Device Property              & \ref{info:PROP} & \ref{tbl:PROP}  \\ \hline
+{\ct RADF}  & Radiation Output File        & \ref{info:RADF} & \ref{tbl:RADF}  \\ \hline
 {\ct RADI}  & Radiation                    & \ref{info:RADI} & \ref{tbl:RADI}  \\ \hline
 {\ct RAMP}  & Ramp Profile                 & \ref{info:RAMP} & \ref{tbl:RAMP}  \\ \hline
 {\ct REAC}  & Reaction Parameters          & \ref{info:REAC} & \ref{tbl:REAC}  \\ \hline
@@ -8079,6 +8080,58 @@ The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radia
 \end{figure}
 
 
+\subsection{Extracting Detailed Radiation Data}
+\label{info:RADF}
+
+FDS solves the radiation transport equation (RTE) using a finite volume method in which the radiation intensity is computed over a discrete number of solid angles. Because there are approximately 100 angles by default, the angle-specific intensity values are not saved in the gas phase cells---only at boundaries. However, there is a way to save these values into a file, which might be useful for transferring data to another model or diagnosing problems with the RTE. Data is saved within rectangular blocks of cells using one or more input lines of the form:
+\begin{lstlisting}
+&RADF XB=..., I_STEP=2, J_STEP=3, K_STEP=1 /
+\end{lstlisting}
+This line directs FDS to write out the radiation intensity, $I_{ijk}^l$, for each cell with indices $ijk$ that is bounded by {\ct XB} and for each solid angle $l$. You can skip cells using the parameters {\ct I\_STEP}, {\ct J\_STEP}, and {\ct K\_STEP}, each of which default to 1. The print outs are done every {\ct DT\_RADF}~s starting at {\ct T\_RADF\_BEGIN} and ending at {\ct T\_RADF\_END}, where these three parameters are listed on the {\ct DUMP} line. By default, {\ct T\_RADF\_BEGIN} is set to the start time of the simulation, {\ct T\_BEGIN}, and {\ct T\_RADF\_END} is set to {\ct T\_END}. The time interval, {\ct DT\_RADF}, is the end time minus the start time divided by 5, by default.
+
+Each output file is in text, not binary, format. The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB}. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$.
+
+\begin{figure}[p]
+\label{radf_file_format}
+\begin{lstlisting}
+NSTEPS
+   2
+
+TIMES
+    0.00
+   10.00
+
+NP
+    3150
+
+XYZ_INTENSITIES
+   2.350   1.350   0.050
+   .
+   .
+   .
+
+NI
+ 104
+
+XYZ_DIRECTIONS
+  0.138  0.138  0.981
+ -0.138  0.138  0.981
+ .
+ .
+ .
+
+TIME
+   0.00
+
+INTENSITIES
+ 293.15  0.00      133.17      133.17      133.17      133.17      133.17  ...
+ .
+ .
+ .
+\end{lstlisting}
+\caption[Format of {\ct RADF} output file]{Format of {\ct RADF} output file.}
+\end{figure}
+
 
 \subsection{Detailed Spray Properties}
 \label{PDPA}
@@ -10095,6 +10148,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPRAY\_PATTERN\_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &           \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
+
+\section{\texorpdfstring{{\tt RADF}}{RADF} (Radiation Output File Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Radiation output file parameters ({\ct RADF} namelist group)]{For more information see Section~\ref{info:RADF}.}
+\label{tbl:RADF} \\
+\hline
+\multicolumn{5}{|c|}{{\ct RADF} (Radiation Output File Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct RADF} (Radiation Output File Parameters)} \\
+\hline \hline
+\endhead
+{\ct I\_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
+{\ct J\_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
+{\ct K\_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
+{\ct XB}                            & Real Sextuplet       & Section~\ref{info:RADF}            & m                 &        \\ \hline
 \end{longtable}
 
 
