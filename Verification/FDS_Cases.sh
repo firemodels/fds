@@ -252,6 +252,10 @@ $QFDS -d Miscellaneous obst_sphere.fds
 $QFDS -d Miscellaneous obst_cylinder.fds
 $QFDS -d Miscellaneous obst_cone.fds
 $QFDS -d Miscellaneous obst_rotbox.fds
+$QFDS -d Miscellaneous obst_sphere_mass_flux.fds
+$QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
+$QFDS -d Miscellaneous obst_cone_mass_flux.fds
+$QFDS -d Miscellaneous obst_box_mass_flux.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
