@@ -941,10 +941,14 @@ OBST_SHAPE_IF: IF (OBST_SHAPE_AREA_ADJUST) THEN
                CASE(-3);          MR%FDS_AREA(2) = MR%FDS_AREA(2) + WC%ONE_D%AREA
             END SELECT
          CASE(OBST_BOX_TYPE)
-            SELECT CASE(ABS(IOR))
-               CASE(1); MR%FDS_AREA(1) = MR%FDS_AREA(1) + WC%ONE_D%AREA
-               CASE(2); MR%FDS_AREA(2) = MR%FDS_AREA(2) + WC%ONE_D%AREA
-               CASE(3); MR%FDS_AREA(3) = MR%FDS_AREA(3) + WC%ONE_D%AREA
+            ! Follows sextuplet ordering from SURF_ID6
+            SELECT CASE(IOR)
+               CASE(-1); MR%FDS_AREA(1) = MR%FDS_AREA(1) + WC%ONE_D%AREA
+               CASE( 1); MR%FDS_AREA(2) = MR%FDS_AREA(2) + WC%ONE_D%AREA
+               CASE(-2); MR%FDS_AREA(3) = MR%FDS_AREA(3) + WC%ONE_D%AREA
+               CASE( 2); MR%FDS_AREA(4) = MR%FDS_AREA(4) + WC%ONE_D%AREA
+               CASE(-3); MR%FDS_AREA(5) = MR%FDS_AREA(5) + WC%ONE_D%AREA
+               CASE( 3); MR%FDS_AREA(6) = MR%FDS_AREA(6) + WC%ONE_D%AREA
             END SELECT
       END SELECT SHAPE_SELECT_1
    ENDDO SHAPE_LOOP_1
@@ -977,10 +981,13 @@ OBST_SHAPE_IF: IF (OBST_SHAPE_AREA_ADJUST) THEN
                CASE(-3);          WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(2)/MR%FDS_AREA(2)
             END SELECT
          CASE(OBST_BOX_TYPE)
-            SELECT CASE(ABS(IOR))
-               CASE(1); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(1)/MR%FDS_AREA(1)
-               CASE(2); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(2)/MR%FDS_AREA(2)
-               CASE(3); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(3)/MR%FDS_AREA(3)
+            SELECT CASE(IOR)
+               CASE(-1); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(1)/MR%FDS_AREA(1)
+               CASE( 1); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(2)/MR%FDS_AREA(2)
+               CASE(-2); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(3)/MR%FDS_AREA(3)
+               CASE( 2); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(1)/MR%FDS_AREA(4)
+               CASE(-3); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(2)/MR%FDS_AREA(5)
+               CASE( 3); WC%ONE_D%AREA_ADJUST = OB%SHAPE_AREA(3)/MR%FDS_AREA(6)
             END SELECT
       END SELECT SHAPE_SELECT_2
    ENDDO SHAPE_LOOP_2
