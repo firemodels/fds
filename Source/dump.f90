@@ -5425,7 +5425,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         STAT_COUNT = STAT_COUNT + 1
                      CASE('SURFACE INTEGRAL')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + VALUE*WC%ONE_D%AREA
+                           STAT_VALUE = STAT_VALUE + VALUE*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                            STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA
