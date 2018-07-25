@@ -49,8 +49,8 @@
 &SLCF QUANTITY='TEMPERATURE', PBX=3.25, FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM'/
 
 
-&CATF OTHER_FILES='../../../../out/FAA_Cargo_Compartments/FAA_B747_geometry.dat' /
-&CATF OTHER_FILES='../../../../out/FAA_Cargo_Compartments/FAA_B747_thermocouples.dat' /
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_geometry.dat' /
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_thermocouples.dat' /
 
 
 &TAIL /
