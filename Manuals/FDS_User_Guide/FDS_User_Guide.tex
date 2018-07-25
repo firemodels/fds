@@ -4796,7 +4796,7 @@ Similar to using {\ct PROFILE=`ATMOSPHERIC'} on {\ct SURF}, it is possible to sp
 
 Note that {\ct V} indicates the velocity component normal to the surface.  You can also specify {\ct RAMP\_V\_X} and {\ct RAMP\_V\_Y} and add these to the {\ct SURF}.  Note that only profiles in the planar directions will affect a given surface.  That is, if the surface is oriented in the $y-z$ plane, only {\ct RAMP\_V\_Y} and {\ct RAMP\_V\_Z} apply.  In the {\ct RAMP} definition {\ct T} is the independent variable and {\ct F} is the dependent variable.  In this example, {\ct T} is the $z$ coordinate in meters and {\ct F} is the factor multiplying {\ct VEL} on the {\ct SURF} line.  Two ramps may be applied to a surface.
 
-{\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case can be seen in the section, ``Flow Over a Backward Facing Step'', in the FDS Verification Guide \cite{FDS_Verification_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
+{\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case are included under the heading ``Backward Facing Step'' in the FDS Validation Guide~\cite{FDS_Validation_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
 
 
 \chapter{Chemical Species}
@@ -4807,7 +4807,7 @@ FDS was designed primarily to study fire phenomena, and much of the basic chemis
 
 There are different roles that a gas species might play in a simulation. A gas species might be explicitly tracked. In other words, a transport equation is solved for it. A gas species might be one component of a mixture of gases that are transported together. For example, FDS exploits the idea that the products of combustion from a fire mix and travel together; you only need to solve one transport equation for this ``lumped species.'' Or, a gas species might do both such as H$_2$O which could be both part of a lumped species for combustion products as well as an explicitly tracked species tracking H$_2$O from sprinkler droplet evaporation.
 
-The default combustion model in FDS assumes that the reaction is mixing-controlled, and transport equations are solved for three species: the two lumped species of Products and Air (the default backgroun) and the species Fuel (as defined on {\ct REAC}. There is no reason to solve individual (and costly) transport equations for the major reactants and products of combustion---Fuel, O$_2$, CO$_2$, H$_2$O, N$_2$, CO and soot---because they are all pre-tabulated functions of the three species. More detail on combustion is given in Chapter~\ref{chap:combustion}. For the moment, just realize that you need not, {\em and should not}, explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel.
+The default combustion model in FDS assumes that the reaction is mixing-controlled, and transport equations are solved for three species: the two lumped species of Products and Air (the default background) and the species Fuel (as defined on {\ct REAC}). There is no reason to solve individual (and costly) transport equations for the major reactants and products of combustion---Fuel, O$_2$, CO$_2$, H$_2$O, N$_2$, CO and soot---because they are all pre-tabulated functions of the three species. More detail on combustion is given in Chapter~\ref{chap:combustion}. For the moment, just realize that you need not, {\em and should not}, explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel.
 
 
 
@@ -5242,7 +5242,7 @@ If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\c
 
 The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release
 rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.},
-the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}. Note that predefine fuel species have their heat of formation defined; therefore, the heat of combustion for those species will be appropriately adjsuted for soot and CO production.
+the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}. Note that predefine fuel species have their heat of formation defined; therefore, the heat of combustion for those species will be appropriately adjusted for soot and CO production.
 
 Note: If you specify a heat of combustion on the {\ct REAC} line, FDS will calculate the enthalpy of formation of the fuel such that the user-specified heat of combustion is maintained. This is important to recognize for cases where a heat of combustion is measured experimentally or if you want to model impurities in the fuel that would not be realized using the standard heat of formation of the fuel.
 
@@ -5971,8 +5971,7 @@ There are several considerations with regard to RadCal:
 
 \subsubsection{Path Length}
 
-Because RadCal computes effective absorption coefficients over a range of wavelengths, it requires a user-specified {\ct PATH\_LENGTH} (m).
-Its default value is five times the width of a single grid cell.
+Because RadCal computes effective absorption coefficients over a range of wavelengths, it requires a user-specified {\ct PATH\_LENGTH} (m). Its default value is 0.1~m.
 
 \subsubsection{Fuel Species}
 
@@ -6198,7 +6197,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 \end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
-As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
+As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet diameter range is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
 To prevent FDS from generating a distribution of droplets altogether, set {\ct MONODISPERSE} to {\ct .TRUE.} on the {\ct PART} line, in which case every droplet will be assigned the same {\ct DIAMETER}.
 
@@ -10109,7 +10108,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
-{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 0.9       \\ \hline
+{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 1.        \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
 {\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &           \\ \hline
@@ -10201,7 +10200,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MIE\_NDG}                      & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 50                \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
-{\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
+{\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               & 0.1               \\ \hline
 {\ct QR\_CLIP                  }    & Real          & Section~\ref{info:CHI_R}                  & kW/m$^3$          & 10                \\ \hline
 {\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
 {\ct RADIATION\_ITERATIONS}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 1                 \\ \hline
