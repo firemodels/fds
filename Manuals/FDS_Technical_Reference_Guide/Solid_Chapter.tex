@@ -249,11 +249,14 @@ This section describes how solid phase reactions and the chemical source term in
 
 \subsection{Specified Heat Release Rate}
 
-Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired HRR is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
+Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired heat release rate is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
 \be
    \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H_{\si{c}}}
 \ee
-Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the mass loss rate is computed accordingly.
+Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the gas phase heat of combustion, $\Delta H_{\si{c}}$. The mass flux of fuel from the surface to the gas, $\dm_{\rm f}''$, can then be computed. A special subset of this approach is where the user also specifies a heat of combustion, density, and thickness for the burning material. If the default simple chemistry model described in Section~\ref{sec:simplechemistry}, with its single combustion reaction, is being used and there are multiple materials burning, one or more materials might have a different heat of combustion, $\Delta H_{\si{c}{\rm ,solid}}$, than the gas-phase combustion reaction. To account for this, FDS adjusts $\dm_{\rm f}''$ so that the solid phase has the appropriate mass loss rate, $\dm_{\rm f,solid}''$. 
+\be
+\dm_{\rm f,solid}'' = \dm_{\rm f}'' \frac{\Delta H_{\si{c}}}{\Delta H_{\si{c}{\rm ,solid}}}
+\ee
 
 \subsection{Solid Fuels}
 
@@ -529,7 +532,7 @@ Agglomeration is the process via which small aerosol particles become larger aer
 \ee
 In the above equation $\Phi$ is an agglomeration kernel, $N(m)$ is the number density of particles of size $m$, $R$ is a removal term (e.g. outflow, oxidation), and $S$ is a source term (e.g. from combustion). The equation states that the rate of formation of particles of size $m$ is the rate that two particles whose combined size is $m$ collide, minus the rate at which particles of size $m$ collide with other particles and become a larger size, minus removal of particles of size $m$, and plus the generation of particles of size $m$. The selected approach for solving the agglomeration equation is to bin the particle sizes into multiple bins and transform the integrals over particle size into summations over particle bins. By defining the maximum, $m_{max}$, and minimum, $m_{min}$, particle mass and the number of bins, $M$, one can define the average bin mass, $x$, as shown below~\cite{Higgins_Davidson}.
 \be
-s = \left( \frac{m_{max}}/{m_{min}} \right) ^{1/M} \; , \; m_i =s \; m_{i-1} \; , \; x_i = \frac{2 m_i}{1+s}
+s = \left( \frac{m_{max}}{m_{min}} \right) ^{1/M} \; , \; m_i =s \; m_{i-1} \; , \; x_i = \frac{2 m_i}{1+s}
 \ee
 Using this binning, the agglomeration equation becomes:
 \be
@@ -538,7 +541,7 @@ Using this binning, the agglomeration equation becomes:
 where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
 \be
 \eta = \begin{cases}
-	\frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq= x_{i+1} \\
+	\frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
     \frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
 	\end{cases}
 \ee
