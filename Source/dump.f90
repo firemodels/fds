@@ -2796,7 +2796,7 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
       ENDDO
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NR)/1000.
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol): ',ML%E(NR)/1000.
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000.
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
       IF (ML%N_O2(NR)>0._EB) THEN
