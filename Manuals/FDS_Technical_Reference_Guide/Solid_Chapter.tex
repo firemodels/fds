@@ -249,11 +249,14 @@ This section describes how solid phase reactions and the chemical source term in
 
 \subsection{Specified Heat Release Rate}
 
-Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired HRR is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
+Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired heat release rate is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
 \be
    \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H_{\si{c}}}
 \ee
-Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the mass loss rate is computed accordingly.
+Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the gas phase heat of combustion, $\Delta H_{\si{c}}$. The mass flux of fuel from the surface to the gas, $\dm_{\rm f}''$, can then be computed. A special subset of this approach is where the user also specifies a heat of combustion, density, and thickness for the burning material. If the default simple chemistry model described in Section~\ref{sec:simplechemistry}, with its single combustion reaction, is being used and there are multiple materials burning, one or more materials might have a different heat of combustion, $\Delta H_{\si{c}{\rm ,solid}}$, than the gas-phase combustion reaction. To account for this, FDS adjusts $\dm_{\rm f}''$ so that the solid phase has the appropriate mass loss rate, $\dm_{\rm f,solid}''$. 
+\be
+\dm_{\rm f,solid}'' = \dm_{\rm f}'' \frac{\Delta H_{\si{c}}}{\Delta H_{\si{c}{\rm ,solid}}}
+\ee
 
 \subsection{Solid Fuels}
 
