@@ -4258,7 +4258,7 @@ In the FDS input file, {\ct tga\_sample.fds}, this information is conveyed via t
 Note that {\ct REFERENCE\_RATE}, the FDS input parameter, represents the quantity, $r_{\alpha,{\rm p}}/Y_{\alpha,0}$. Note also that both material components have the same residue yield, {\ct NU\_MATL}. Solely from TGA data, it is not possible to determine how many unique material components there are, or what the reaction sequence is. The point of this exercise is simply to get FDS to mimic the total mass loss rate curve.
 
 
-\subsection{Effect of the TGA Heating Rata (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}
+\subsection{Effect of the TGA Heating Rate (\texorpdfstring{\textct{birch\_tga}}{birch\_tga})}
 \label{birch_tga}
 
 This is an example of a comparison of a candidate solid phase model with TGA data that shows the effect of the sample heating rate. The sample cases called \textct{birch\_tga\_1step\_2} and \textct{birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood consists of only one reaction that converts virgin wood to char and fuel gases. There is also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
