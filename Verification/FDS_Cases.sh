@@ -4,8 +4,18 @@
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
-$QFDS -d Aerosols soot_gravitational_settling.fds
-$QFDS -d Aerosols soot_gravitational_settling_2.fds
+$QFDS -d Aerosols aerosol_agglomeration.fds
+$QFDS -d Aerosols aerosol_agglomeration_2.fds
+$QFDS -d Aerosols aerosol_gravitational_deposition.fds
+$QFDS -d Aerosols aerosol_gravitational_deposition_2.fds
+$QFDS -d Aerosols aerosol_thermophoretic_deposition.fds
+$QFDS -d Aerosols aerosol_thermophoretic_deposition_2.fds
+$QFDS -d Aerosols aerosol_turbulent_deposition.fds
+$QFDS -d Aerosols propane_flame_deposition.fds
+$QFDS -d Aerosols propane_flame_deposition_gravitational.fds
+$QFDS -d Aerosols propane_flame_deposition_none.fds
+$QFDS -d Aerosols propane_flame_deposition_thermophoretic.fds
+$QFDS -d Aerosols propane_flame_deposition_turbulent.fds
 
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds

@@ -1,6 +1,6 @@
 Propane burner test case to check basic chemistry model and soot deposition
 
-&HEAD CHID='propane_flame_deposition_thermophoretic', TITLE='Verification of simple chemistry flame with soot deposition'/
+&HEAD CHID='propane_flame_deposition_gravitational', TITLE='Verification of simple chemistry flame with soot deposition'/
 
 &MESH IJK=10,10,20, XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
@@ -8,9 +8,8 @@ Propane burner test case to check basic chemistry model and soot deposition
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5, DT_MASS=0.5 /
 
 &MISC SUPPRESSION=.FALSE.
-      GRAVITATIONAL_DEPOSITION  = .FALSE.
-      GRAVITATIONAL_SETTLING  = .FALSE.
-      THERMOPHORETIC_DEPOSITION = .TRUE.
+      GRAVITATIONAL_DEPOSITION  = .TRUE.
+      THERMOPHORETIC_DEPOSITION = .FALSE.
       TURBULENT_DEPOSITION      = .FALSE. /
 
 &OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10, SURF_IDS = 'BURNER','INERT','INERT' /
@@ -42,6 +41,6 @@ Propane burner test case to check basic chemistry model and soot deposition
 
 &BNDF QUANTITY='SURFACE DEPOSITION', SPEC_ID='SOOT' /
 
-&DEVC XB=0,1,0,1,0,2, QUANTITY='SURFACE DEPOSITION', ID='depo', STATISTICS='SURFACE INTEGRAL', SPEC_ID='SOOT' /
+&DEVC XB=0,1,0,1,0,2, QUANTITY='SURFACE DEPOSITION', ID='depo', STATISTICS='SURFACE INTEGRAL', SPEC_ID='SOOT' ,TIME_AVERAGED=.FALSE./
 
 &TAIL /

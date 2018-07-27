@@ -8871,7 +8871,7 @@ MESH_LOOP: DO NM=1,NMESHES
                CALL SEARCH_CONTROLLER('OBST',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
                IF (DEVC_ID /='null' .OR. CTRL_ID /='null') OB%REMOVABLE = .TRUE.
 
-               IF (OB%CONSUMABLE .AND..NOT.EVACUATION_ONLY(NM)) OB%REMOVABLE = .TRUE.
+               IF (OB%CONSUMABLE .AND. .NOT.EVACUATION_ONLY(NM)) OB%REMOVABLE = .TRUE.
 
                ! Choose obstruction color index
 

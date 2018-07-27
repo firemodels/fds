@@ -8091,7 +8091,6 @@ This line directs FDS to write out the radiation intensity, $I_{ijk}^l$, for eac
 Each output file is in text, not binary, format. The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB}. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$.
 
 \begin{figure}[p]
-\label{radf_file_format}
 \begin{lstlisting}
 NSTEPS
    2
@@ -8129,6 +8128,7 @@ INTENSITIES
  .
 \end{lstlisting}
 \caption[Format of {\ct RADF} output file]{Format of {\ct RADF} output file.}
+\label{radf_file_format}
 \end{figure}
 
 
@@ -9038,6 +9038,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
 {\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
+{\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}              & m$^2$/s$^3$    & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline

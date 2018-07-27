@@ -557,8 +557,8 @@ where Fu is the Fuchs factor and B is the particle mobility.
 \be
 {\rm B}(m) = \frac {\rm Cn}{6 \pi \mu r_m}
 \ee
-\be \frac{1}{{\rm Fu}(m,\omega)} = \epsilon_s \frac{r_m + r_{\omega}}{k_{\rm b} T \left({\rm B}(m) + {\rm B}(\omega) \right)} \sqrt {\frac{8 k_{\rm b} T}{\pi} \left(\frac{1}{m}-\frac{1}{\omega} \right)} +
-		 1+\frac{2 \sqrt{(\tilde{a}_m^2+\tilde{a}_{\omega}^2)}}{r_m+r_{\omega}}
+\be \frac{1}{{\rm Fu}(m,\omega)} = \left( \epsilon_s \frac{r_m + r_{\omega}}{k_{\rm b} T \left({\rm B}(m) + {\rm B}(\omega) \right)} \sqrt {\frac{8 k_{\rm b} T}{\pi} \left(\frac{1}{m}+\frac{1}{\omega} \right)} \right)^{-1} +
+	\left( 1+\frac{2 \sqrt{(\tilde{a}_m^2+\tilde{a}_{\omega}^2)}}{r_m+r_{\omega}} \right)^{-1}
 \ee
 \be
 \tilde{a}_m = \frac { \left(r_m + a_m \right)^3 - \left(r_m^2 + a_m^2 \right)^{3/2}} {3 r_m a_m} - r_m  
@@ -568,10 +568,10 @@ a_m= {\rm B} (m) \sqrt{ \frac{2 k_{\rm b} T m} {\pi}}
 \ee
 Gravitational agglomeration results from heavier particle falling onto larger particles. The efficiency of these collisions are governed by a sticking factor, $\epsilon_{\rm S}$ assumed to be one, and a collision efficiency, $\epsilon_{\rm PK}$~\cite{NRC:VICTORIA}
 \be
-\Phi_{\rm Gr} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \left(r_m+r_{\omega} \right)^2 \left| u_g(m)+u_g(\omega) \right|
+\Phi_{\rm Gr} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \left(r_m+r_{\omega} \right)^2 \left| u_g(m)-u_g(\omega) \right|
 \ee
 \be
-\epsilon_{\rm PK}(m,\omega) = \frac {{\rm min} \left(r_m,r_{\omega} \right)^2}{2 \left( r_m^2+r_{\omega}^2 \right)}
+\epsilon_{\rm PK}(m,\omega) = \frac {{\rm min} \left(r_m,r_{\omega} \right)^2}{2 \left( r_m+r_{\omega} \right)^2}
 \ee
 \be
 u_g(m) = g m {\rm B}(m)

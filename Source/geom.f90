@@ -33454,82 +33454,40 @@ SUBROUTINE READ_GEOM
 USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 
-! input &GEOM lines
-
-CHARACTER(LABEL_LENGTH) :: ID, MATL_ID
-CHARACTER(LABEL_LENGTH) :: BNDC_FILENAME, GEOC_FILENAME
-CHARACTER(LABEL_LENGTH) :: TEXTURE_MAPPING
-CHARACTER(MESSAGE_LENGTH) :: MESSAGE, BUFFER
-
-INTEGER :: MAX_IDS=0
-CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: GEOM_IDS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: DAZIM, DELEV
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSCALE, DXYZ0, DXYZ
-
-INTEGER :: MAX_SURF_IDS=0
-CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID
-INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND
-
-INTEGER :: MAX_ZVALS=0
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS
-
-INTEGER :: MAX_VERTS=0
+CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,BNDC_FILENAME,GEOC_FILENAME,TEXTURE_MAPPING,DEVC_ID,PROP_ID,CTRL_ID
+CHARACTER(MESSAGE_LENGTH) :: MESSAGE,BUFFER
+CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: GEOM_IDS,SURF_ID
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DAZIM,DELEV,ZVALS,TFACES
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSCALE,DXYZ0,DXYZ
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND
+INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES,VOLUS,OFACES,SURFS
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL,DEFAULT_COMPONENT_ONLY
 
-INTEGER :: MAX_FACES=0, MAX_VOLUS=0
-INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES, VOLUS, OFACES, SURFS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: TFACES
+REAL(EB) :: AZIM,ELEV,SCALE(3),XYZ0(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GROTATE,GROTATE_DOT,GAXIS(3),&
+            SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),XB(6),DX,BOX_XYZ(3),&
+            ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/),ZMIN,VOLUME,TXMIN,TXMAX,TYMIN,TYMAX,TX,TY,DV1(MAX_DIM),DV2(MAX_DIM),&
+            NVECI(MAX_DIM),DXCEN(MAX_DIM),DOTI,X1V(NOD1:NOD3),TRANSPARENCY
 
-REAL(EB) :: AZIM, ELEV, SCALE(3), XYZ0(3), XYZ(3)
-REAL(EB) :: AZIM_DOT, ELEV_DOT, SCALE_DOT(3), XYZ_DOT(3)
-REAL(EB) :: GROTATE, GROTATE_DOT, GAXIS(3)
+INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLUS=0,N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,&
+           N_ZVALS,N_SURF_ID,MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,NSUB_GEOMS,GEOM_INDEX,FIRST_FACE_INDEX,I1,I2,I3,I4,I5,I6,I7,I8,&
+           GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
+           WSELEM(NOD1:NOD3),X1AXIS
+
+LOGICAL :: AUTO_TEXTURE,COMPONENT_ONLY,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE
 REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
-REAL(EB) :: SPHERE_ORIGIN(3), SPHERE_RADIUS
-REAL(EB) :: TEXTURE_ORIGIN(3), TEXTURE_SCALE(2)
-LOGICAL :: AUTO_TEXTURE
-REAL(EB) :: XB(6), DX
-INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS, N_SURF_ID
-INTEGER :: MATL_INDEX
-INTEGER :: IOS,IZERO,N, I, J, K, IJ, NSUB_GEOMS, GEOM_INDEX, FIRST_FACE_INDEX
-INTEGER :: I1, I2, I3, I4, I5, I6, I7, I8
-INTEGER :: GEOM_TYPE, NXB, IJK(3)
-REAL(EB), POINTER, DIMENSION(:) :: VNEW, VOLD
+REAL(EB), POINTER, DIMENSION(:) :: VNEW,VOLD,V1,V2,V3,V4
+INTEGER, POINTER, DIMENSION(:) :: FACEI,FACEJ,FACE_FROM,FACE_TO,VOL
+TYPE(MESH_TYPE), POINTER :: M=>NULL()
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(),GSUB=>NULL()
 
-INTEGER :: N_LEVELS, N_LAT, N_LONG, SPHERE_TYPE
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
-INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
-REAL(EB) :: BOX_XYZ(3)
-INTEGER :: BOXVERTLIST(8), NI, NIJ
-REAL(EB) :: ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/)
-REAL(EB) :: ZMIN
-INTEGER, POINTER, DIMENSION(:) :: VOL
-INTEGER :: IVOL
-REAL(EB) :: VOLUME
-REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, V4
-LOGICAL :: HAVE_SURF, HAVE_MATL, IN_LIST
-INTEGER :: SORT_FACES
-REAL(EB) :: TXMIN, TXMAX, TYMIN, TYMAX, TX, TY
-
-LOGICAL COMPONENT_ONLY
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: DEFAULT_COMPONENT_ONLY
-TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(), GSUB=>NULL()
-
-LOGICAL :: SURF_INDEX_PER_FACE
-
-INTEGER :: II,II1,II2,II3
-REAL(EB):: DV1(MAX_DIM),DV2(MAX_DIM),NVECI(MAX_DIM),DXCEN(MAX_DIM),DOTI
-
-INTEGER  :: WSELEM(NOD1:NOD3),X1AXIS
-REAL(EB) :: X1V(NOD1:NOD3)
-
-NAMELIST /GEOM/ AUTO_TEXTURE, AZIM, AZIM_DOT, COMPONENT_ONLY, CUTCELLS, DAZIM, DELEV, DSCALE, DT_BNDC, DT_GEOC, DXYZ0, DXYZ, &
-                ELEV, ELEV_DOT, FACES, GAXIS, GEOM_IDS, GROTATE, GROTATE_DOT, ID, IJK, &
-                MATL_ID, N_LAT, N_LEVELS, N_LONG, SCALE, SCALE_DOT, &
-                SPHERE_ORIGIN, SPHERE_RADIUS, SPHERE_TYPE, SURF_ID,  &
-                TEXTURE_MAPPING, TEXTURE_ORIGIN, TEXTURE_SCALE, &
-                VERTS, VOLUS, XB, XYZ0, XYZ, XYZ_DOT, ZMIN, ZVALS, &
-                BNDC_FILENAME, GEOC_FILENAME
+NAMELIST /GEOM/ AUTO_TEXTURE,AZIM,AZIM_DOT,BNDC_FILENAME,COMPONENT_ONLY,CTRL_ID,CUTCELLS,&
+                DAZIM,DELEV,DEVC_ID,DSCALE,DT_BNDC,DT_GEOC,DXYZ0,DXYZ,&
+                ELEV,ELEV_DOT,FACES,GAXIS,GEOC_FILENAME,GEOM_IDS,GROTATE,GROTATE_DOT,ID,IJK,&
+                MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,SCALE,SCALE_DOT,&
+                SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,&
+                TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
+                VERTS,VOLUS,XB,XYZ0,XYZ,XYZ_DOT,ZMIN,ZVALS
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -33544,7 +33502,6 @@ COUNT_GEOM_LOOP: DO
 ENDDO COUNT_GEOM_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_GEOMETRY==0) RETURN
-
 
 ! Allocate temporary buffers used when reading &GEOM namelists
 
@@ -33587,6 +33544,7 @@ READ_GEOM_LOOP0: DO N=1,N_GEOMETRY
    IF (IOS==1) EXIT READ_GEOM_LOOP0
 
    ! Set defaults
+
    GEOM_IDS = ''
    BNDC_FILENAME = 'null'
    GEOC_FILENAME = 'null'
@@ -33697,17 +33655,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
       ENDDO
 
-! define terrain faces
-!        8 ---- 7
-!       /|     /|
-!     5 ----- 6 |
-!     |  |    | |
-!     |  |    | |
-!     |  |    | |
-!     |  4 ---- 3
-!     | /     |/
-!     1 ----  2
-
+      ! define terrain faces
+      !        8 ---- 7
+      !       /|     /|
+      !     5 ----- 6 |
+      !     |  |    | |
+      !     |  |    | |
+      !     |  |    | |
+      !     |  4 ---- 3
+      !     | /     |/
+      !     1 ----  2
 
       IJ = 1
       DO J = 1, IJK(2) - 1
@@ -33751,16 +33708,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             I7 = I3 + N_VERTS/2
             I8 = I4 + N_VERTS/2
 
-!     8-------7
-!   / .     / |
-! 5-------6   |
-! |   .   |   |
-! |   .   |   |
-! |   4-------3
-! | /     | /
-! 1-------2
+            !     8-------7
+            !   / .     / |
+            ! 5-------6   |
+            ! |   .   |   |
+            ! |   .   |   |
+            ! |   4-------3
+            ! | /     | /
+            ! 1-------2
 
-! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
+            ! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
 
             VOLUS(4*IJ-3) = I1
             VOLUS(4*IJ-2) = I2
@@ -33809,7 +33766,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    DO I = 1, 6
       IF (XB(I)<MAX_VAL) NXB=NXB+1
    ENDDO
-   IF (NXB==6 .AND. N_ZVALS==0) THEN
+   NXB_IF: IF (NXB==6 .AND. N_ZVALS==0) THEN
       GEOM_TYPE = 1
       CALL CHECK_XB(XB)
       G%XB=XB
@@ -33822,7 +33779,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       IF (IJK(2)<2) IJK(2) = MAX(2,INT((XB(4)-XB(3)/DX)+1))
       IF (IJK(3)<2) IJK(3) = MAX(2,INT((XB(6)-XB(5)/DX)+1))
 
-! define verts in box
+      ! define verts in box
 
       N_VERTS = 0
       DO K = 0, IJK(3)-1
@@ -33837,7 +33794,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
       ENDDO
 
-! define tetrahedrons in box
+      ! define tetrahedrons in box
 
       N_VOLUS = 0
       NI = IJK(1)
@@ -33846,14 +33803,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          DO J = 0, IJK(2)-2
             DO I = 0, IJK(1)-2
 
-!     8-------7
-!   / .     / |
-! 5-------6   |
-! |   .   |   |
-! |   .   |   |
-! |   4-------3
-! | /     | /
-! 1-------2
+               !     8-------7
+               !   / .     / |
+               ! 5-------6   |
+               ! |   .   |   |
+               ! |   .   |   |
+               ! |   4-------3
+               ! | /     | /
+               ! 1-------2
                BOXVERTLIST(1) = K*NIJ + J*NI + I + 1
                BOXVERTLIST(2) = BOXVERTLIST(1) + 1
                BOXVERTLIST(3) = BOXVERTLIST(2) + NI
@@ -33868,7 +33825,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
       ENDDO
       N_FACES=0
-   ENDIF
+   ENDIF NXB_IF
 
    ! setup a sphere object (SPHERE_RADIUS and SPHERE_ORIGIN keywords)
 
@@ -34036,7 +33993,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    ! setup volumes
 
-   IF (N_VOLUS>0) THEN
+   N_VOLUS_IF: IF (N_VOLUS>0) THEN
       ALLOCATE(G%VOLUS(4*N_VOLUS),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%VOLUS',IZERO)
       DO I = 0, N_VOLUS-1
@@ -34084,23 +34041,22 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
          IS_EXTERNAL(0:N_FACES-1)=.TRUE.  ! start off by assuming all faces are external
 
-! reorder face indices so the the first index is always the smallest
+         ! reorder face indices so the the first index is always the smallest
 
-
-!              1
-!             /|\                       .
-!            / | \                      .
-!           /  |  \                     .
-!          /   |   \                    .
-!         /    |    \                   .
-!        /     4     \                  .
-!       /     . .     \                 .
-!      /     .    .    \                .
-!     /    .        .   \               .
-!    /   .            .  \              .
-!   /  .               .  \             .
-!  / .                    .\            .
-! 2-------------------------3
+         !              1
+         !             /|\                       .
+         !            / | \                      .
+         !           /  |  \                     .
+         !          /   |   \                    .
+         !         /    |    \                   .
+         !        /     4     \                  .
+         !       /     . .     \                 .
+         !      /     .    .    \                .
+         !     /    .        .   \               .
+         !    /   .            .  \              .
+         !   /  .               .  \             .
+         !  / .                    .\            .
+         ! 2-------------------------3
 
          DO I = 0, N_VOLUS-1
             FACES(12*I+1) = VOLUS(4*I+1)
@@ -34129,7 +34085,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          SORT_FACES=2
          IF (GEOM_TYPE == 2) SORT_FACES = 3 ! Case of sphere.
 
-         IF (SORT_FACES==1 ) THEN  ! o(n*log(n)) algorithm for determining external faces
+         SORT_FACES_IF: IF (SORT_FACES==1 ) THEN  ! o(n*log(n)) algorithm for determining external faces
             ALLOCATE(OFACES(N_FACES),STAT=IZERO)
             CALL ChkMemErr('READ_GEOM','OFACES',IZERO)
             CALL ORDER_FACES(OFACES,N_FACES)
@@ -34186,7 +34142,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                        IS_EXTERNAL(I) = .FALSE.
                ENDDO
             ENDDO
-         ENDIF
+         ENDIF SORT_FACES_IF
 
          ! create new FACES index array keeping only external faces
 
@@ -34241,9 +34197,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             SURFS(:) = 0 ! All external faces point to default surf ID.
          ENDIF
       ENDIF
-   ENDIF
+   ENDIF N_VOLUS_IF
 
-   IF (N_FACES>0) THEN
+   N_FACES_IF: IF (N_FACES>0) THEN
       ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%FACES',IZERO)
       G%FACES(1:3*N_FACES) = FACES(1:3*N_FACES)
@@ -34279,7 +34235,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDDO
          G%SURFS(1:N_FACES) = DEFAULT_SURF_INDEX
       ENDIF
-   ENDIF
+   ENDIF N_FACES_IF
 
    IF (N_VERTS>0) THEN
       ALLOCATE(G%VERTS_BASE(3*N_VERTS),STAT=IZERO)
@@ -34424,12 +34380,10 @@ ENDDO
 
 CALL CONVERTGEOM(T_BEGIN)
 
-
 ! Here: there are GEOMs and PROCESS_CUTCELLS, set CC_IBM=.TRUE. to engage
 ! cut-cell definition and discretization scheme around GEOMs.
 IF(.NOT.PROCESS_CUTCELLS) RETURN
 CC_IBM = .TRUE.
-
 
 IF (CC_IBM) CALL GET_GEOM_TRIBIN
 
@@ -34677,12 +34631,16 @@ SUBROUTINE SET_GEOM_DEFAULTS
    ID = 'geom'
    SURF_ID(:)= 'null'
    MATL_ID = 'null'
+   DEVC_ID = 'null'
+   CTRL_ID = 'null'
+   PROP_ID = 'null'
    HAVE_SURF = .TRUE.
    HAVE_MATL = .TRUE.
    TEXTURE_ORIGIN = 0.0_EB
    TEXTURE_MAPPING = 'RECTANGULAR'
    TEXTURE_SCALE = 1.0_EB
    AUTO_TEXTURE = .FALSE.
+   TRANSPARENCY = 1._EB
    VERTS=1.001_EB*MAX_VAL
    ZVALS=1.001_EB*MAX_VAL
    XB=1.001_EB*MAX_VAL
@@ -34719,7 +34677,8 @@ SUBROUTINE SET_GEOM_DEFAULTS
    N_LAT=-1
    N_LONG=-1
    SPHERE_TYPE=-1
-   GEOM_TYPE = 0
+   GEOM_TYPE=0
+
 END SUBROUTINE SET_GEOM_DEFAULTS
 
 ! ---------------------------- EXTRUDE_SPHERE ----------------------------------------
