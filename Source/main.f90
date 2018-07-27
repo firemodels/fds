@@ -3140,15 +3140,20 @@ IF (N_FACE>0 .AND. T>=GEOM_CLOCK) THEN
    GEOM_CLOCK = GEOM_CLOCK + DT_GEOM
 ENDIF
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This block is deprecated, but needs to be removed just prior to FDS 7 release
+! to avoid RESTART issues in v6
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 IF (N_GEOM>0 .AND. T>=BNDC_CLOCK) THEN
-   IF (MYID==0) CALL DUMP_BNDC(T)
+   !IF (MYID==0) CALL DUMP_BNDC(T)
    BNDC_CLOCK = BNDC_CLOCK + DT_BNDC
 ENDIF
 
 IF (N_BNDE>0 .AND. T>=BNDE_CLOCK) THEN
-   IF (MYID==0) CALL DUMP_BNDE(T)
+   !IF (MYID==0) CALL DUMP_BNDE(T)
    BNDE_CLOCK = BNDE_CLOCK + DT_BNDE
 ENDIF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Dump out Evac info
 
