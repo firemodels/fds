@@ -1,4 +1,5 @@
 $RUNSMV -d Adaptive_Mesh_Refinement random_meshes
+$RUNSMV -d Aerosols propane_flame_deposition
 $RUNSMV -d Controls activate_vents
 $RUNSMV -d Detectors beam_detector
 $RUNSMV -d Detectors objects_static
@@ -38,7 +39,6 @@ $RUNSMV -d Pressure_Solver dancing_eddies_tight
 $RUNSMV -d Scalar_Analytical_Solution move_slug
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1
 $RUNSMV -d Scalar_Analytical_Solution shunn3_256
-$RUNSMV -d Species propane_flame_deposition
 $RUNSMV -d Complex_Geometry sphere_radiate
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64

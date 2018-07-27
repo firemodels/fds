@@ -2,13 +2,13 @@
 % 6-13-2012
 % cat_propane_depo.m
 %
-% Concatenates columns from Propane flame deposition FDS cases (/Verification/Species)
+% Concatenates columns from Propane flame deposition FDS cases (/Verification/Aerosols)
 
 % Condensed phase aerosol
 
 clear all
 
-FDS_Output_Files = '../../Verification/Species/';
+FDS_Output_Files = '../../Verification/Aerosols/';
 
 skip_case = 0;
 if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
