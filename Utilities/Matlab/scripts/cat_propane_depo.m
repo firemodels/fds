@@ -15,19 +15,19 @@ if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc_none.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc_gravitational.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc_thermophoretic.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_devc_turbulent.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_turbulent_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
