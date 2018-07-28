@@ -455,11 +455,6 @@ $QFDS -d Species methane_flame_lumped_fuel.fds
 $QFDS -d Species methane_flame_lumped_ox.fds
 $QFDS -d Species propane_flame_2reac.fds
 $QFDS -d Species propane_flame_2reac_simple.fds
-$QFDS -d Species propane_flame_deposition.fds
-$QFDS -d Species propane_flame_deposition_none.fds
-$QFDS -d Species propane_flame_deposition_gravitational.fds
-$QFDS -d Species propane_flame_deposition_thermophoretic.fds
-$QFDS -d Species propane_flame_deposition_turbulent.fds
 $QFDS -d Species reactionrate_arrhenius_0order_1step.fds
 $QFDS -d Species reactionrate_arrhenius_2order_1step.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2step.fds
