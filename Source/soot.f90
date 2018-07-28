@@ -448,7 +448,7 @@ GEOMETRY_LOOP:DO K=1,KBAR
             ENDDO AGGLOMERATE_LOOP
             N3 = N1 + N2
             N3 = N3 + N0
-            TOL = MAXVAL((N0-N3)/N0)
+            TOL = MAXVAL((N0-N3)/(N0+TINY_EB))
             IF (TOL > 0.3_EB) THEN
                DT_SUBSTEP = DT_SUBSTEP * 0.3_EB/ TOL
             ELSE
