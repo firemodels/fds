@@ -5577,6 +5577,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
          VALUE = ZC(LOCATION_INDICES(3))
    END SELECT
 
+   ! Optional absolute value
+
+   IF (DV%ABSOLUTE_VALUE) VALUE = ABS(VALUE)
+
    ! Convert units of device quantity
 
    VALUE = DV%CONVERSION_FACTOR*VALUE + DV%CONVERSION_ADDEND
