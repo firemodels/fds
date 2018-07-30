@@ -42,6 +42,7 @@ LNG_Dispersion
 LNG_wind_profiles
 FM_Vertical_Wall_Flames
 umd_line_burner_process
+FM_Burner
 
 % Dataplot and scatplot options
 
