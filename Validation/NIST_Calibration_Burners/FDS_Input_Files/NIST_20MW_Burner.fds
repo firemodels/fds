@@ -1,4 +1,4 @@
-&HEAD CHID='NFRL_20MW_Burner', TITLE='NFRL 20 MW calibration burner, ramp up to 20 MW HRR' /
+&HEAD CHID='NIST_20MW_Burner', TITLE='NIST 20 MW calibration burner' /
 
 &MESH IJK=128,128,128, XB=-8,8,-8,8,-1,15/ single coarse mesh
 
@@ -66,6 +66,6 @@
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
-&CATF OTHER_FILES='../../../../cad/NFRL_Burners/NFRL_20MW_Burner.geom' /
+&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner.geom' /
 
 &TAIL /
