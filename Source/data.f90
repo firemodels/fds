@@ -432,6 +432,12 @@ OUTPUT_QUANTITY(75)%ISOF_APPROPRIATE = .FALSE.
 OUTPUT_QUANTITY(75)%PART_APPROPRIATE = .FALSE.
 OUTPUT_QUANTITY(75)%TIME_AVERAGED    = .FALSE.
 
+! Radial velocity pointing towards the vertical z axis (cylindrical coordinates)
+
+OUTPUT_QUANTITY(76)%NAME  = 'RADIAL VELOCITY'
+OUTPUT_QUANTITY(76)%UNITS  = 'm/s'
+OUTPUT_QUANTITY(76)%SHORT_NAME  = 'U_R'
+
 ! Cell indices (for Smokeview debugging)
 
 OUTPUT_QUANTITY(80)%NAME = 'CELL INDEX I'
