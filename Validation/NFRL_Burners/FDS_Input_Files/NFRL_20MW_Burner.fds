@@ -1,0 +1,71 @@
+&HEAD CHID='NFRL_20MW_Burner', TITLE='NFRL 20 MW calibration burner, ramp up to 20 MW HRR' /
+
+&MESH IJK=128,128,128, XB=-8,8,-8,8,-1,15/ single coarse mesh
+
+! # 4x8x8-24 meshes = 232 :
+! &MESH IJK=46,20,26, XB=-1.8,-0.9,-1.6,-1.2,-0.9,-0.4, MULT_ID='mesh' /
+! &MULT ID='mesh', DX=0.9, DY=0.4, DZ=0.5, I_LOWER_SKIP=1, I_UPPER_SKIP=2, I_UPPER=3,
+! J_LOWER_SKIP=2, J_UPPER_SKIP=5, J_UPPER=7,
+! K_LOWER_SKIP=1, K_UPPER_SKIP=3, K_UPPER=7 /
+
+! # 192 meshes: Total 424 meshes.
+! &MESH IJK=46,20,26, XB=-1.8,-1.35,-1.6,-1.4,-0.9,-0.65, MULT_ID='mesh2' /
+! &MULT ID='mesh2', DX=0.45, DY=0.2, DZ=0.25, I_LOWER=2, I_UPPER=5, J_LOWER=4, J_UPPER=11, K_LOWER=2, K_UPPER=7 /
+
+&TIME T_END=65./
+
+&DUMP NFRAMES=10000, VELOCITY_ERROR_FILE=T/
+
+&REAC FUEL='METHANE'/
+&COMB RADIATIVE_FRACTION=0.0
+      N_SIMPLE_CHEMISTRY_REACTIONS=2 /
+
+! Ramp roughly follows NFRL commissioning test video
+&RAMP ID='rampq', T= 0.00, F=0.00 /
+&RAMP ID='rampq', T= 1.00, F=1.00 /
+&RAMP ID='rampq', T= 9.00, F=1.00 /
+&RAMP ID='rampq', T=10.00, F=5.00 /
+&RAMP ID='rampq', T=19.00, F=5.00 /
+&RAMP ID='rampq', T=20.00, F=10.0 /
+&RAMP ID='rampq', T=29.00, F=10.0 /
+&RAMP ID='rampq', T=30.00, F=15.0 /
+&RAMP ID='rampq', T=39.00, F=15.0 /
+&RAMP ID='rampq', T=40.00, F=20.0 /
+&RAMP ID='rampq', T=59.00, F=20.0 /
+&RAMP ID='rampq', T=60.00, F=1.00 /
+&RAMP ID='rampq', T=65.00, F=1.00 /
+
+! Area for 1/8 inch fuel port is pi*(0.125*0.0254/2)**2 = 7.917304360898401e-06 m2
+! Fuel pipe arrangement is 20 pipes * 75 ports/pipe + 2 pilots * 172 ports/pilot = 1844 total ports
+! Total area is num ports * area/port = 0.014599509241496653 m2
+! HRRPUA = 1000 kW / 0.014599509241496653 m2 = 68495.45306342682 kW/m2
+&SURF ID='Burner'
+      FYI='HRRPUA for 1 MW'
+      RGB=204,0,0
+      HRRPUA=68495.45306342682
+      RAMP_Q='rampq'
+      /
+
+&SURF ID='Corrug Steel'
+      RGB=207,207,207
+      /
+&SURF ID='Steel'
+      RGB=35,35,35
+      /
+
+&VENT PBX=-8, SURF_ID='OPEN'/
+&VENT PBX= 8, SURF_ID='OPEN'/
+&VENT PBY=-8, SURF_ID='OPEN'/
+&VENT PBY= 8, SURF_ID='OPEN'/
+&VENT PBZ=15, SURF_ID='OPEN'/
+
+! Slice Export:
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='METHANE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+
+! --- Geometric entities (from Blender Objects)
+! Use CATF line, concatenate geometry file from cad repo:
+&CATF OTHER_FILES='../../../../cad/NFRL_Burners/NFRL_20MW_Burner.geom' /
+
+&TAIL /
