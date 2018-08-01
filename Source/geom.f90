@@ -558,7 +558,7 @@ REAL(EB), INTENT(OUT) :: CFA_X,CFA_Y,CFA_Z
 
 ! Local Variables:
 INTEGER :: IND1, IND2, ITRI, N_TRI, INOD_2, INOD_3
-REAL(EB):: RN, E1, E2, E3
+REAL(EB):: RN, RN_I, E1, E2, E3, V12(IAXIS:KAXIS), V13(IAXIS:KAXIS)
 
 IND1 = CFA%CUT_FACE_IND1
 IND2 = CFA%CUT_FACE_IND2
@@ -566,17 +566,33 @@ IND2 = CFA%CUT_FACE_IND2
 ! Number of triangles that will cover the boundary cut-face convex polygon is same as NVERT for the cut-face:
 N_TRI= CUT_FACE(IND1)%CFELEM(1,IND2)
 
-! First pick randomly one triangle:
+! First pick randomly one triangle weighting by area:
 CALL RANDOM_NUMBER(RN)
-ITRI = FLOOR(REAL(N_TRI,EB)*RN)+1
+RN_I  = 0._EB
+CFTRI_LOOP : DO ITRI=1,N_TRI
+   ! Compute triangle Area:
+   ! INOD_1 is polygon centroid, CFA%X, CFA%Y, CFA%Z
+   ! VERTEX locations:
+   ! Vertex 2 and 3 of triangle in local CFELEM indexing
+   INOD_2 = ITRI
+   INOD_3 = 1; IF (ITRI /= N_TRI) INOD_3 = ITRI+1
+   ! Vertex 2 and 3 of traingle in XYZVERT indexing
+   INOD_2 = CUT_FACE(IND1)%CFELEM(1+INOD_2,IND2)
+   INOD_3 = CUT_FACE(IND1)%CFELEM(1+INOD_3,IND2)
 
-! VERTEX locations:
-! Vertex 2 and 3 of triangle in local CFELEM indexing
-INOD_2 = ITRI
-INOD_3 = 1; IF (ITRI /= N_TRI) INOD_3 = ITRI+1
-! Vertex 2 and 3 of traingle in XYZVERT indexing
-INOD_2 = CUT_FACE(IND1)%CFELEM(1+INOD_2,IND2)
-INOD_3 = CUT_FACE(IND1)%CFELEM(1+INOD_3,IND2)
+   ! Compute triangles Area / AreaTOT for CFACE polygon:
+   V12(IAXIS:KAXIS) = (/ CUT_FACE(IND1)%XYZVERT(IAXIS,INOD_2)-CFA%X, &
+                         CUT_FACE(IND1)%XYZVERT(JAXIS,INOD_2)-CFA%Y, &
+                         CUT_FACE(IND1)%XYZVERT(KAXIS,INOD_2)-CFA%Z /)
+   V13(IAXIS:KAXIS) = (/ CUT_FACE(IND1)%XYZVERT(IAXIS,INOD_3)-CFA%X, &
+                         CUT_FACE(IND1)%XYZVERT(JAXIS,INOD_3)-CFA%Y, &
+                         CUT_FACE(IND1)%XYZVERT(KAXIS,INOD_3)-CFA%Z /)
+
+   RN_I = RN_I + 0.5_EB/CFA%AREA * SQRT( (V12(JAXIS)*V13(KAXIS)-V12(KAXIS)*V13(JAXIS))**2 + &
+                                         (V12(KAXIS)*V13(IAXIS)-V12(IAXIS)*V13(KAXIS))**2 + &
+                                         (V12(IAXIS)*V13(JAXIS)-V12(JAXIS)*V13(IAXIS))**2 )
+   IF (RN_I > RN) EXIT CFTRI_LOOP
+ENDDO CFTRI_LOOP
 
 ! Randomly define natural coordinates for the triangle:
 CALL RANDOM_NUMBER(E2)
