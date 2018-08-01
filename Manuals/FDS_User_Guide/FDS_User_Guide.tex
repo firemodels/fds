@@ -6738,7 +6738,7 @@ Each device has a {\ct QUANTITY} associated with it. The time history of each {\
 
 By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default, a time-averaged value over the interval {\ct DT\_DEVC} is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
 
-A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
+A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies. You can also output the absolute value of the device quantity by setting {\ct ABSOLUTE\_VALUE} to {\ct .TRUE.} on the {\ct DEVC} line.
 
 You can change the values of the output {\ct QUANTITY} by multiplying by {\ct CONVERSION\_FACTOR} and/or adding {\ct CONVERSION\_ADDEND}. For example, to change temperature output from the default $^\circ$C to $^\circ$F, the {\ct CONVERSION\_FACTOR} should be set to 1.8 and the {\ct CONVERSION\_ADDEND} to 32. You can then change the units that appear in the output files by setting {\ct UNITS='F'} or whatever the case may be. If you do not convert the output {\ct QUANTITY} from its default value, you need not set the {\ct UNITS}.
 
@@ -8082,13 +8082,17 @@ The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radia
 \subsection{Extracting Detailed Radiation Data}
 \label{info:RADF}
 
-FDS solves the radiation transport equation (RTE) using a finite volume method in which the radiation intensity is computed over a discrete number of solid angles. Because there are approximately 100 angles by default, the angle-specific intensity values are not saved in the gas phase cells---only at boundaries. However, there is a way to save these values into a file, which might be useful for transferring data to another model or diagnosing problems with the RTE. Data is saved within rectangular blocks of cells using one or more input lines of the form:
+FDS solves the radiation transport equation (RTE) using a finite volume method in which the radiation intensity is computed over a discrete number of solid angles. Because there are approximately 100 angles by default, the angle-specific intensity values are not saved in the gas phase cells---only at boundaries. However, there is a way to save these values into a file, which might be useful for transferring data to another model or diagnosing problems with the RTE. This form of output is only appropriate when the default gray gas radiation model is used, not the narrow-band model.
+
+Data is saved within rectangular blocks of cells using one or more input lines of the form:
 \begin{lstlisting}
 &RADF XB=..., I_STEP=2, J_STEP=3, K_STEP=1 /
 \end{lstlisting}
 This line directs FDS to write out the radiation intensity, $I_{ijk}^l$, for each cell with indices $ijk$ that is bounded by {\ct XB} and for each solid angle $l$. You can skip cells using the parameters {\ct I\_STEP}, {\ct J\_STEP}, and {\ct K\_STEP}, each of which default to 1. The print outs are done every {\ct DT\_RADF}~s starting at {\ct T\_RADF\_BEGIN} and ending at {\ct T\_RADF\_END}, where these three parameters are listed on the {\ct DUMP} line. By default, {\ct T\_RADF\_BEGIN} is set to the start time of the simulation, {\ct T\_BEGIN}, and {\ct T\_RADF\_END} is set to {\ct T\_END}. The time interval, {\ct DT\_RADF}, is the end time minus the start time divided by 5, by default.
 
-Each output file is in text, not binary, format. The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB}. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$.
+Each output file is in text, not binary, format. The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB} on the {\ct RADF} line of the input file. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. A direction vector is a normalized form of the discretized solid angle vector, $(D^l_x,D^l_y,D^l_z)$, that is described in the Radiation chapter of the FDS Technical Reference Guide, Volume 1~\cite{FDS_Math_Guide}.
+
+Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$.
 
 \begin{figure}[p]
 \begin{lstlisting}
@@ -9038,10 +9042,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
 {\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
-{\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}              & m$^2$/s$^3$    & D,I,P,S      \\ \hline
+{\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$    & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
-%{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS DENSITY}                               & Gas Density near wall                             & \si{kg/m^3}    & B,D          \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
@@ -9068,6 +9071,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^1$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
+{\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s            & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
@@ -9327,6 +9331,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
+{\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct CONVERSION\_ADDEND}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
