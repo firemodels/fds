@@ -33,19 +33,6 @@ function install_fdssmv(platform){
 <a href="../../smv/Build/build_guides.html"><font size=5>Guides</font></a>
 <hr>
 
-<h3>Bundle Steps</h3>
-
-<ol>
-<li><button onclick="run_script('\\smv\\scripts\\webUPDATErepos.bat')">Update all repos</button>
-<li><button onclick="run_script('\\smv\\scripts\\webEDIT_setup.bat')">Edit script settings</button> labeling the bundle name (version string for both FDS and Smokeview)
-<li>Run firebot and smokebot
-<li>Build <a href="../Build/build_fds.html">FDS</a>
-<li>Build <a href="../../smv/Build/build_smokeview.html">Smokeview and utilities</a>
-<li><a href="../../smv/Build/build_guides.html">Copy FDS and Smokeview manuals</a> to FDS_Guides directories on all three platforms
-<li>Update FDS release notes, <button onclick="run_script('\\fds\\Build\\Bundle\\windows\get_fds_release.bat')">Convert FDS wiki</button>  to html, then commit
-<li>Update and commit Smokeview release
-<li>Build bundle
-</ol>
 
 <h3>Bundles</h3>
 <table border=on>
@@ -74,6 +61,7 @@ function install_fdssmv(platform){
 
 <h3>Other</h3>
 <ul>
+<li><button onclick="run_script('\\fds\\Build\\Bundle\\windows\get_fds_release.bat')">FDS wiki->html</button>
 <li><button onclick="run_script('\\fds\\Utilities\\Scripts\\webEDIT_bundle.bat')">Edit this page</button>
 <li><a href="../../smv/Build/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>

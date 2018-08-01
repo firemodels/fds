@@ -33,7 +33,7 @@
 % [mnv@burn FDS_User_Guide]$ ./make_geom_notes.sh
 %
 % You should get the geom_notes.pdf in the same directory.
-
+/
 
 \chapter{Building the Model (FIXME UG Chapter 7)}
 
@@ -1729,7 +1729,7 @@ where the trapezoidal approximations to time level $t_{n+1/2}$ for advection and
 %
 \end{enumerate}
 %
-In the corrector discretization the lagged in time $\dot{m}_\alpha'''^{n}$ has been used, as defined in the new MOL (method of lines: advection diffusion discretized with SSPRK2, reaction uses forward Euler.) time integration scheme implemented in FDS. The mid-step values for the advection and diffusion factors~\eqref{eq:ad12}-\eqref{eq:df12} are approximated from the predicted unknowns, and values at step $n$. This stepping scheme combination is found to be second order time accurate in the numerical tests section. 
+In the corrector discretization the lagged in time $\dot{m}_\alpha'''^{n}$ has been used, as defined in the new MOL (method of lines: advection diffusion discretized with SSPRK2, reaction uses forward Euler.) time integration scheme implemented in FDS. The mid-step values for the advection and diffusion factors~\eqref{eq:ad12}-\eqref{eq:df12} are approximated from the predicted unknowns, and values at step $n$. This stepping scheme combination is found to be second order time accurate in the numerical tests section.
 
 
 
@@ -1750,7 +1750,7 @@ As a first approximation, consider the Newtonian flow problem defined by the fol
 \end{eqnarray}
 %
 where equation~\eqref{eq:LowMachMom} in the momentum equation, $\mathbf{u}(\mathbf{x},t)$ is the spatial velocity field, $\mathbf{F}(\mathbf{u},\mathbf{x},t)$ is a vector containing convective, diffusive and possibly other force terms, and $H(\mathbf{x},t)$ is a potential scalar field (physically the head field in this case, commonly called pressure). For sake of argument here, to represent the low Mach approximation employed in FDS, it suffices to consider a specified divergence field $\left(\nabla \cdot \mathbf{u} \right)^{th} (\mathbf{x},t)$ (thermodynamic divergence). This divergence field in the thermally buoyant flow model used in FDS is a proxy for the energy equation.
-The domain $\Omega - \sum{\Omega_i}$ represents the fluid region, and boundary conditions are prescribed for $\mathbf{u}(\mathbf{x},t)$ on $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$. 
+The domain $\Omega - \sum{\Omega_i}$ represents the fluid region, and boundary conditions are prescribed for $\mathbf{u}(\mathbf{x},t)$ on $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$.
 
 Classical fractional step methods for time integration of incompressible or low Mach flow are based on two operations: First, momentum transport to obtain intermediate velocities, and second, projection of velocities into divergence free space. Consider the Forward Euler update of the governing equations from $t_n$ to $t_{n+1}=t_n + \Delta t$ of the form: Given $ \mathbf{u}^n=\mathbf{u}(\mathbf{x},t_n)$, $\nabla \cdot \mathbf{u}^{n+1} = \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$ known
 %
@@ -1762,33 +1762,33 @@ Classical fractional step methods for time integration of incompressible or low 
 where as time has been discretized, $\mathbf{u}^{n+1}$ represents a numerical approximation to the solution in~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} at time $t_{n+1}$. As the potential field $H(\mathbf{x},t)$ does not have a time evolution equation, it is assumed responsible of enforcing the divergence condition and used on the projection step. Taking the divergence of equation~\eqref{eq:LowMachMomEu} and considering  the constraint~\eqref{eq:LowMachDivEu}, the two steps of the method are
 %
 \begin{enumerate}
-  \item Solve Poisson equation for $H^n$: 
-  
+  \item Solve Poisson equation for $H^n$:
+
 \begin{equation}
    \nabla \cdot \boldsymbol{\nabla} H^n = - \left[ \frac{\left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th} - \nabla \cdot \mathbf{u}^{n}}{\Delta t} \right] - \nabla \cdot \mathbf{F}^n \label{it:FSPoisson}
 \end{equation}
 
-  \item Obtain final velocity for step: 
-  
+  \item Obtain final velocity for step:
+
   \begin{equation}
      \mathbf{u}^{n+1} = \mathbf{u}^{n} - \Delta t \left[ \mathbf{F}^n +  \boldsymbol{\nabla} H^n \right] \label{it:FSProject}
-   \end{equation} 
-   
-   The term $\hat{\mathbf{u}}^{n+1}=\mathbf{u}^{n} - \Delta t \mathbf{F}^n$ is known as intermediate velocity, and is a non matching divergence approximation to $\mathbf{u}^{n+1}$ (i.e. $\nabla \cdot \hat{\mathbf{u}}^{n+1} \neq \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$). 
+   \end{equation}
+
+   The term $\hat{\mathbf{u}}^{n+1}=\mathbf{u}^{n} - \Delta t \mathbf{F}^n$ is known as intermediate velocity, and is a non matching divergence approximation to $\mathbf{u}^{n+1}$ (i.e. $\nabla \cdot \hat{\mathbf{u}}^{n+1} \neq \left( \nabla \cdot \mathbf{u}^{n+1} \right)^{th}$).
 \end{enumerate}
 %
-Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no boundary condition is required for $H(\mathbf{x},t)$, a consequence of the projection scheme is that boundary conditions are required on the Poisson equation of step~\eqref{it:FSPoisson}. For explicit methods and stationary \textit{solid} boundaries, the corresponding boundary condition is \textit{homogeneous} Neumann for $H^n$, $\partial H^n / \partial x_n =0$ in $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$ (i.e.~\cite{Perot:1993}). 
+Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no boundary condition is required for $H(\mathbf{x},t)$, a consequence of the projection scheme is that boundary conditions are required on the Poisson equation of step~\eqref{it:FSPoisson}. For explicit methods and stationary \textit{solid} boundaries, the corresponding boundary condition is \textit{homogeneous} Neumann for $H^n$, $\partial H^n / \partial x_n =0$ in $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$ (i.e.~\cite{Perot:1993}).
 
-%Indeed, when the velocity boundary condition is applied to the intermediate velocity $u^*=\mathbf{u}^{n} - \Delta t\mathbf{F}^n$, mass conservation on step~\ref{it:FSProject} requires that at the boundary $(\mathbf{u}^{n+1} -u^*) \cdot \mathbf{\hat{n}} =0$, from which the previously defined condition for $H^n$ arises. 
+%Indeed, when the velocity boundary condition is applied to the intermediate velocity $u^*=\mathbf{u}^{n} - \Delta t\mathbf{F}^n$, mass conservation on step~\ref{it:FSProject} requires that at the boundary $(\mathbf{u}^{n+1} -u^*) \cdot \mathbf{\hat{n}} =0$, from which the previously defined condition for $H^n$ arises.
 
-%Another approach to projection schemes is based on the method of lines~\cite{schiesser1991numerical}. It assumes initially a spatial discretization of equations~\eqref{eq:insMom}-\eqref{eq:insDiv}, and as second step temporal discretization of the resulting system of ODEs, employing discrete projection. 
+%Another approach to projection schemes is based on the method of lines~\cite{schiesser1991numerical}. It assumes initially a spatial discretization of equations~\eqref{eq:insMom}-\eqref{eq:insDiv}, and as second step temporal discretization of the resulting system of ODEs, employing discrete projection.
 %
 %We consider first a rectangular domain with no immersed boundaries. When using a regular uniform staggered mesh and a central finite difference method with second order spatial accuracy for discretization the spatially discrete version of~\eqref{eq:insMom}-\eqref{eq:insDiv} is:
 %%
 %\begin{eqnarray}
-%  [\mathbf{M}_{FD}] \{\mathbf{\dot{U}}\} &=& - \left( [\mathbf{C}_{FD(\{\mathbf{U}\})}] \{\mathbf{U}\} + 
+%  [\mathbf{M}_{FD}] \{\mathbf{\dot{U}}\} &=& - \left( [\mathbf{C}_{FD(\{\mathbf{U}\})}] \{\mathbf{U}\} +
 %  [\mathbf{L}_{FD}] \{\mathbf{U}\} + [\mathbf{G}_{FD}] \{\mathbf{H}\} \right) + \{\mathbf{f}_{bcFD}\} \label{eq:momspdisc}\\
-%                                                                         \left[\mathbf{D}_{FD}\right]     \{\mathbf{U}\} & = & \{\mathbf{0}\} + \{\mathbf{d}_{bcFD}\}      \label{eq:divspdisc}                                                                  
+%                                                                         \left[\mathbf{D}_{FD}\right]     \{\mathbf{U}\} & = & \{\mathbf{0}\} + \{\mathbf{d}_{bcFD}\}      \label{eq:divspdisc}
 %\end{eqnarray}
 %%
 %here $[\mathbf{M}_{FD}]=[\mathbf{I}]$  of size $n_u \times n_u$ where $n_u$ is the number of velocity unknowns, is the mass matrix for the finite difference discretization, and $[\mathbf{C}_{FD(\{\mathbf{U}\})}],[\mathbf{L}_{FD}]$ are momentum convection and diffusion matrices. The scalar gradient matrix $[\mathbf{G}_{FD}]$ is of size $n_u \times n_h$ where $n_h$ is the number of scalar $H$ unknows, and the divergence matrix $\left[\mathbf{D}_{FD}\right]$ is of size   $n_h \times n_u$. At this point boundary conditions have been applied modifying the named matrices and adding vectors $\{\mathbf{f}_{bcFD}\},\{\mathbf{d}_{bcFD}\}$ in case of nonhomogeneous conditions.
@@ -1796,21 +1796,21 @@ Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no 
 %%
 %\begin{equation}
 %  \left[ \begin{array}{cc} \mathbf{A}_{FD} & \mathbf{G}_{FD} \\
-%                                     \mathbf{D}_{FD}& \mathbf{0} \end{array} \right] 
-%  \left\{ \begin{array}{c}  \mathbf{U}^{n+1}  \\  \mathbf{H}^n \end{array} \right\}   = 
+%                                     \mathbf{D}_{FD}& \mathbf{0} \end{array} \right]
+%  \left\{ \begin{array}{c}  \mathbf{U}^{n+1}  \\  \mathbf{H}^n \end{array} \right\}   =
 %  \left\{ \begin{array}{c}  \mathbf{A}_{FD}\mathbf{U}^{n} - \mathbf{F}^{n}_{FD}  \\ \mathbf{0}  \end{array} \right\} +
-%  \left\{ \begin{array}{c} \mathbf{f}_{bcFD}  \\ \mathbf{d}_{bcFD}   \end{array} \right\} \label{eq:saddle}                                                                     
+%  \left\{ \begin{array}{c} \mathbf{f}_{bcFD}  \\ \mathbf{d}_{bcFD}   \end{array} \right\} \label{eq:saddle}
 %\end{equation}
 %%
 %where $[\mathbf{A}_{FD}] =1/\Delta t [\mathbf{M}_{FD}]$ is invertible, $\{\mathbf{F}^{n}_{FD}\}=[\mathbf{C}_{FD(\{\mathbf{U^n}\})}] \{\mathbf{U^n}\} +[\mathbf{L}_{FD}] \{\mathbf{U^n}\}$. The matrix on the right hand side is block LU decomposed as~\cite{Perot199351}
 %%
 %\begin{equation}
 %   \left[ \begin{array}{cc} \mathbf{A}_{FD} & \mathbf{G}_{FD} \\
-%                                     \mathbf{D}_{FD}& \mathbf{0} \end{array} \right]  \simeq 
+%                                     \mathbf{D}_{FD}& \mathbf{0} \end{array} \right]  \simeq
 %  \left[ \begin{array}{cc} \mathbf{A}_{FD} & \mathbf{0} \\
 %                                     \mathbf{D}_{FD}& - \mathbf{D}_{FD} \mathbf{B}_{FD} \mathbf{G}_{FD} \end{array} \right]
 %  \left[ \begin{array}{cc} \mathbf{I} &  \mathbf{B}_{FD} \mathbf{G}_{FD} \\
-%                                     \mathbf{0}& \mathbf{I} \end{array} \right]    \label{eq:fslu}                                 
+%                                     \mathbf{0}& \mathbf{I} \end{array} \right]    \label{eq:fslu}
 %\end{equation}
 %%
 %For the previous factorization to be exact $[\mathbf{B}_{FD}]=[\mathbf{A}_{FD}]^{-1}$ (i.e. Uzawa method~\cite{Chang2002183}). Classic fractional step schemes use a first order approximation for  $[\mathbf{B}]=\Delta t [\mathbf{I}]$, which in general results in loss of temporal accuracy for velocities when high order implicit methods are used for time integration~\cite{Perot199351,Chang2002183}. For explicit time integration, and finite difference or difference finite volume spatial discretizations, matrix $[\mathbf{M}]$ is lumped (i.e. \textit{diagonal}) as is the case of lumped element finite volume discretizations. Then,  $[\mathbf{B}]=[\mathbf{A}]^{-1}=\Delta t [\mathbf{M}]^{-1}$ is easily obtained. Indeed, $[\mathbf{B}_{FD}]=\Delta t [\mathbf{I}]$ and $[\mathbf{B}_{FV}]=\Delta t / V_{cell} [\mathbf{I}]$ for finite differences and uniform grid difference finite volume respectively ($V_{cell}$ uniform cell volume).
@@ -1820,7 +1820,7 @@ Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no 
 %\begin{eqnarray}
 %  [\mathbf{A}_{FD}] \{ \mathbf{U}^*\} &=& [\mathbf{A}_{FD}] \{\mathbf{U}^{n}\} - \{\mathbf{F}^{n}_{FD}\} + \{\mathbf{f}_{bcFD}\} \\
 %  \left[ \mathbf{D}_{FD} \mathbf{B}_{FD} \mathbf{G}_{FD} \right] \{\mathbf{H}^n\} &=&  [\mathbf{D}_{FD}] \{ \mathbf{U}^*\} - \{\mathbf{d}_{bcFD}\} \\
-%  \{\mathbf{U}^{n+1}\} &=& \{ \mathbf{U}^*\} - [\mathbf{B}_{FD}] [\mathbf{G}_{FD}] \{\mathbf{H}^n\} 
+%  \{\mathbf{U}^{n+1}\} &=& \{ \mathbf{U}^*\} - [\mathbf{B}_{FD}] [\mathbf{G}_{FD}] \{\mathbf{H}^n\}
 %\end{eqnarray}
 %Considering homogenous boundary conditions, the zero discrete divergence of $\{\mathbf{U}^{n}\}$ and $[\mathbf{M}_{FD}]=[\mathbf{I}]$ we recover the FD spatially discretized version of steps~\ref{it:FSPoisson}-\ref{it:FSProject}:
 %%
@@ -1829,7 +1829,7 @@ Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no 
 %  \{\mathbf{U}^{n+1}\} &=& \{\mathbf{U}^{n}\} - \Delta t \left( \{\mathbf{F}^{n}_{FD}\} + [\mathbf{G}_{FD}] \{\mathbf{H}^n\} \right)
 %\end{eqnarray}
 %%
-The next component of our scheme is used to approximate the no slip boundary condition for immersed solid boundaries. We employ a direct forcing immersed boundary method for the momentum equations~\cite{Fadlun:2000}. In order to do this, a force field is devised on the discrete momentum equations on grid faces crossed by the immersed surfaces, to approximate the no-slip boundary condition on said surfaces. We describe some preliminary concepts before introducing our IBM+CC momentum-pressure coupling scheme. 
+The next component of our scheme is used to approximate the no slip boundary condition for immersed solid boundaries. We employ a direct forcing immersed boundary method for the momentum equations~\cite{Fadlun:2000}. In order to do this, a force field is devised on the discrete momentum equations on grid faces crossed by the immersed surfaces, to approximate the no-slip boundary condition on said surfaces. We describe some preliminary concepts before introducing our IBM+CC momentum-pressure coupling scheme.
 
 \subsubsection{Velocity interpolation:}
 
@@ -1839,8 +1839,8 @@ Immersed boundary forcing requires estimates for velocities at time step $n+1$ o
    u_d = \sum_{e=0}^{ne} \phi (\mathbf{x}_d - \mathbf{x}_e) u_e \label{eq:interpu}
 \end{equation}
 %
-where $u_0=u_B$ and $\mathbf{x}_0=\mathbf{x}_B$, and the rest of points in the interpolation stencil are \textit{fluid} points. 
-Note: Fluid points are in this case, velocity points in regular fluid faces which are not being forced by the immersed boundary scheme. 
+where $u_0=u_B$ and $\mathbf{x}_0=\mathbf{x}_B$, and the rest of points in the interpolation stencil are \textit{fluid} points.
+Note: Fluid points are in this case, velocity points in regular fluid faces which are not being forced by the immersed boundary scheme.
 
 We describe a simple interpolation method for $u_d$ in the two dimensional case of figure~\ref{Fig:IBCart}, using a variant of the normal probe approach~\cite{Balaras:2004}. In this case, boundary point $B$ is defined as the closest point to forcing point $d$, and is either a point within a triangle whose normal $x_n$ direction is parallel to segment $\overline{B\mbox{-} d}$, or an edge or vertex point defining a direction $x_n$ into the fluid domain.
 Define a point $\overline{e_x}$ by the intersection of line $\mathbf{l}(x_n)=\mathbf{x}_B+ x_n \mathbf{\hat{n}}$ and the first grid line containing two fluid points $e=1,2$ which surround said intersection point. The grid line in 2D chosen is the one defining a Cartesian plane with normal most aligned with $\mathbf{\hat{n}}$. See figure~\ref{Fig:IBCart}.
@@ -1849,7 +1849,7 @@ The procedure to obtain an approximation for $\hat{u}_d$ at step $n+1$ is as fol
 %
 \begin{enumerate}
 
-  \item Approximate velocity at $t_{n+1}$ on \textit{fluid points} $e=1,2$ as: $\hat{u}_e^{n+1}= u_e^{n} - 
+  \item Approximate velocity at $t_{n+1}$ on \textit{fluid points} $e=1,2$ as: $\hat{u}_e^{n+1}= u_e^{n} -
   \Delta t \left[ F_e^n + (\partial H^{n,k-1} / \partial x)_e \right]$. Here, the head gradients $(\partial H^{n,k-1} / \partial x)_e$ are assumed known.
   Use linear interpolation on grid line $L$ to estimate $\hat{u}_{ex}^{n+1}$:
   \begin{equation}
@@ -1859,18 +1859,18 @@ The procedure to obtain an approximation for $\hat{u}_d$ at step $n+1$ is as fol
 
   \item Surface velocity $u_B^{n+1}$ is known.
 
-  \item Apply linear interpolation for cut-face velocity approximation at $n+1$: 
+  \item Apply linear interpolation for cut-face velocity approximation at $n+1$:
   \begin{equation}
      \hat{u}_d^{n+1}=D_B u_B^{n+1} + D_{ex} \hat{u}_{ex}^{n+1} \label{eq:intd}
   \end{equation}
-   where $D_B=||\mathbf{x}_{ex}-\mathbf{x}_{d}||/||\mathbf{x}_{ex}-\mathbf{x}_{B}||$, $D_{ex}=||\mathbf{x}_{B}-\mathbf{x}_{d}||/||\mathbf{x}_{ex}-\mathbf{x}_{B}||$. 
-  
+   where $D_B=||\mathbf{x}_{ex}-\mathbf{x}_{d}||/||\mathbf{x}_{ex}-\mathbf{x}_{B}||$, $D_{ex}=||\mathbf{x}_{B}-\mathbf{x}_{d}||/||\mathbf{x}_{ex}-\mathbf{x}_{B}||$.
+
   Note that $D_B+D_{ex}=1$.  Using equation~\eqref{eq:intex} in equation~\eqref{eq:intd} we have:
   \begin{equation}
       \hat{u}_d^{n+1}=D_B \; u_B^{n+1} + D_{ex} C_1 \; \hat{u}_1^{n+1} + D_{ex} C_2 \; \hat{u}_2^{n+1}  \label{eq:interpu2}
   \end{equation}
-  where by the previous the sum of the interpolation coefficients $D_{B} + D_{ex} C_1 + D_{ex} C_2 = 1$. Equation~\eqref{eq:interpu2} is a specialized version of the general expression~\eqref{eq:interpu} for the interpolation scheme described. 
-  
+  where by the previous the sum of the interpolation coefficients $D_{B} + D_{ex} C_1 + D_{ex} C_2 = 1$. Equation~\eqref{eq:interpu2} is a specialized version of the general expression~\eqref{eq:interpu} for the interpolation scheme described.
+
 \end{enumerate}
 %
 Similar expressions are used for velocity components on other directions (i.e. $\hat{v}_g^{n+1}$ in figure~\ref{Fig:IBCart}). This interpolation procedure can be naturally be expanded to three dimensions, where a set of velocity fluid points in an outer Cartesian grid plane can be used, such that a two dimensional interpolation on the plane is performed.
@@ -1879,7 +1879,7 @@ Similar expressions are used for velocity components on other directions (i.e. $
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 30mm 22mm 40mm 22mm, clip,
-       width=0.75\linewidth]{../../../fig/fds/CutCellsIBSketchNormal.png} 
+       width=0.75\linewidth]{../../../fig/fds/CutCellsIBSketchNormal.png}
       \caption{Velocity interpolation along normal through cut-face centroid $d$: \texttt{GASPHASE} cut-cells,  corresponding \texttt{GASPHASE} regular and cut-faces (in red), and underlying Eulerian staggered mesh are shown. Velocity points used for linear IB interpolation to cut-face centroids (in red) are shown. }
 	\label{Fig:IBCart}
 \end{figure}
@@ -1900,17 +1900,17 @@ Referring to figure~\ref{Fig:IBCart}, and using the divergence theorem for each 
 \begin{eqnarray}
   \int_{\Omega_{i,j}}{ \nabla \cdot \mathbf{u}} \; d\Omega_{i,j} &=& \sum_{k \in \partial \Omega_{i,j}}{(\mathbf{u} \cdot \mathbf{\hat{n}})_k A_k} = (u_E-u_W) \Delta y + (v_N-v_S) \Delta x \label{eq:intij}\\
   \int_{\Omega_{ii}}{ \nabla \cdot \mathbf{u}} \; d\Omega_{ii}  &=& u_d \alpha_y \Delta y + v_d \alpha_x \Delta x -
-  \gamma_{B1} A_1 - \gamma_{B2} A_2   \label{eq:intii} 
+  \gamma_{B1} A_1 - \gamma_{B2} A_2   \label{eq:intii}
 \end{eqnarray}
 %
-where $\alpha_y=A_3/\Delta y$, $\alpha_x=A_4/\Delta x$ are the corresponding  \texttt{GASPHASE} area factors. The components $ \gamma_{B1}, \gamma_{B2}$ are the average normal velocities into the gas region for  \texttt{INBOUNDARY} cut-faces $\mathbf{1},\mathbf{2}$. Noting that for a stationary body all face velocities on solid region are zero (i.e. $u_W=v_S=\gamma_{B1}=\gamma_{B2}=0$) and equating~\eqref{eq:intii} with~\eqref{eq:intij} we find that 
+where $\alpha_y=A_3/\Delta y$, $\alpha_x=A_4/\Delta x$ are the corresponding  \texttt{GASPHASE} area factors. The components $ \gamma_{B1}, \gamma_{B2}$ are the average normal velocities into the gas region for  \texttt{INBOUNDARY} cut-faces $\mathbf{1},\mathbf{2}$. Noting that for a stationary body all face velocities on solid region are zero (i.e. $u_W=v_S=\gamma_{B1}=\gamma_{B2}=0$) and equating~\eqref{eq:intii} with~\eqref{eq:intij} we find that
 %
 \begin{eqnarray}
   u_E = \alpha_y \: u_d  \label{eq:uE} \\
   v_N  = \alpha_x \: v_d  \label{eq:vN}
 \end{eqnarray}
 %
-which express the velocities in the Eulerian cell faces in terms of velocities on fluid and solid cut-faces for matching flux and discrete divergence integrals. Therefore, knowing the velocities on the fluid (and solid) portion of cut-faces we can define the flux matched corresponding velocities on the underlying Eulerian grid face, such that the discrete divergence integral on this zone is preserved. 
+which express the velocities in the Eulerian cell faces in terms of velocities on fluid and solid cut-faces for matching flux and discrete divergence integrals. Therefore, knowing the velocities on the fluid (and solid) portion of cut-faces we can define the flux matched corresponding velocities on the underlying Eulerian grid face, such that the discrete divergence integral on this zone is preserved.
 These expressions allow for the transfer of velocity among cut-faces and underlying Eulerian grid faces in a discrete divergence preserving manner.
 Knowing the geometry parameters for all cut-faces, this equivalence can be extended for all cut-cells in a straightforward manner.
 
@@ -1920,17 +1920,17 @@ This method uses a combination of finite difference discretization on regular \t
 %
 \begin{enumerate}
 
-  \item Compute $\mathbf{F}^{n}$ on fluid points, using finite difference approximations. 
+  \item Compute $\mathbf{F}^{n}$ on fluid points, using finite difference approximations.
 
   \item IBM: On fluid points required for interpolation (i.e. stencil points $e=1,2$ used to define $ex$ interpolation in figure~\ref{Fig:IBCart}) compute the approximation to velocity at time $t_{n+1}$, as defined in the velocity interpolation section. Obtain by interpolation target velocities $\hat{u}_d^{n+1},\hat{v}_d^{n+1}$ on cut-face centroids. Obtain underlying Eulerian face velocities (i.e. $\hat{u}_W^{n+1},\hat{v}_S^{n+1}$ in figure~\ref{Fig:IBCart}) by flux matched averaging, as in equations~\eqref{eq:uE}-\eqref{eq:vN}.
 
-  \item Compute the force $x$ component 
+  \item Compute the force $x$ component
   \begin{equation}
     F_x^n = -\frac{\hat{u}_{W}^{n+1}-u_W^n}{\Delta t}  %- \left( \frac{\partial H^{n-1}}{\partial x} \right)_W
-  \end{equation} 
+  \end{equation}
    at Eulerian locations and assign to vector $\mathbf{F}^{n}$. Same process for $y$ velocity  points.
 
-  \item Solve Poisson equation~\eqref{it:FSPoisson} for $H^{n}$ on Eulerian grid composed of regular and cut-cell underlying Eulerian cells. 
+  \item Solve Poisson equation~\eqref{it:FSPoisson} for $H^{n}$ on Eulerian grid composed of regular and cut-cell underlying Eulerian cells.
   \item Do projection to final velocities~\eqref{it:FSProject}. These velocities respect discretely the divergence constraint on \texttt{GASPHASE} regular and Eulerian cut-cells. Finally, recompute final velocities at cut-face centroids using flux matched averaging.
 \end{enumerate}
 %
@@ -1949,8 +1949,8 @@ This method uses a combination of finite difference discretization on regular \t
 Starting from the sensible enthalpy evolution equation, the divergence of the velocity field can be factored as:
 %
 \begin{eqnarray}
-    ( \nabla \cdot \mathbf{u} )^{th} &=& 
-    \left[ \frac{1}{\rho c_p T} - \frac{1}{\bar{p}} \right] 
+    ( \nabla \cdot \mathbf{u} )^{th} &=&
+    \left[ \frac{1}{\rho c_p T} - \frac{1}{\bar{p}} \right]
     \frac{\partial \bar{p}}{\partial t} + \frac{w \rho_0 g_z}{\rho c_p T} \nonumber \\
     &+& \frac{1}{\rho c_p T} \left[ \dot{q}''' - \nabla \cdot \dot{\mathbf{q}}'' - \mathbf{u} \cdot \nabla (\rho h_s) \right] \nonumber \\
     &+& \frac{1}{\rho} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left[ \dot{m}_\alpha''' - \nabla \cdot \mathbf{J}_\alpha - \mathbf{u} \cdot \nabla (\rho Y_\alpha) \right] \label{eq:divth}
@@ -1974,13 +1974,13 @@ Integrating over the volume of cell $ii$
 %
 \begin{equation}
     \int_{\Omega_{ii}} {\mathbf{u} \cdot \nabla(\phi)} d\Omega =
-    \int_{\Omega_{ii}} \nabla \cdot ({\phi} \mathbf{u}) d\Omega - 
+    \int_{\Omega_{ii}} \nabla \cdot ({\phi} \mathbf{u}) d\Omega -
     \int_{\Omega_{ii}} \phi \nabla \cdot \mathbf{u} d\Omega \label{eq:flxlim1} \\
 \end{equation}
 Assuming a flux limited interpolation of the scalar $\phi$ at the cell boundaries, the discrete counterpart is
 %
 \begin{equation}
-    \overline{\mathbf{u} \cdot \nabla(\phi)} \; V_{ii} = 
+    \overline{\mathbf{u} \cdot \nabla(\phi)} \; V_{ii} =
     \sum_{k=1}^{nf_c} (\overline{\phi} \mathbf{u})_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k} \: A_k -
     [\phi]_{ii} \sum_{k=1}^{nf_c} \mathbf{u}_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:flxlim2}
 \end{equation}
@@ -1992,14 +1992,14 @@ Here the over line states that the cell-centered scalar quantity $\phi \in \{\rh
 For cut-cell $ii$ the corresponding discrete volume integrated expression is:
 %
 \begin{eqnarray}
-    ( \nabla \cdot \mathbf{u} )_{ii}^{th} \; V_{ii} &=& 
-    \left[ \frac{1}{(\rho c_p T)_{ii}} - \frac{1}{\bar{p}_{ii}} \right] 
-    \frac{\partial \bar{p}_{ii}}{\partial t} \; V_{ii} + 
+    ( \nabla \cdot \mathbf{u} )_{ii}^{th} \; V_{ii} &=&
+    \left[ \frac{1}{(\rho c_p T)_{ii}} - \frac{1}{\bar{p}_{ii}} \right]
+    \frac{\partial \bar{p}_{ii}}{\partial t} \; V_{ii} +
     \frac{w_{ii} \: \rho_0 g_z}{(\rho c_p T)_{ii}} \nonumber \\
-    &+& \frac{1}{(\rho c_p T)_{ii}} \left[ \dot{q}''' V_{ii} - 
+    &+& \frac{1}{(\rho c_p T)_{ii}} \left[ \dot{q}''' V_{ii} -
     \sum_{k=1}^{nf_c} \dot{\mathbf{q}}''_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k} \: A_k
     - \overline{\mathbf{u} \cdot \nabla (\rho h_s)} V_{ii} \right] \nonumber \\
-    &+& \frac{1}{\rho_{ii}} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right)_{ii} \left[ \dot{m}_\alpha''' V_{ii} - 
+    &+& \frac{1}{\rho_{ii}} \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right)_{ii} \left[ \dot{m}_\alpha''' V_{ii} -
     \sum_{k=1}^{nf_c} \mathbf{J}_{\alpha,ii,k} \cdot \hat{\mathbf{n}}_{ii,k} \: A_k
     - \overline{\mathbf{u} \cdot \nabla (\rho Y_\alpha)} V_{ii} \right] \label{eq:divth2}
 \end{eqnarray}
@@ -2014,9 +2014,9 @@ Given the species diffusion model adopted the diffusive heat flux vector field i
 \end{equation}
 where $\left(-h_s \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k}$ is the mean heat flux defined on boundary surface $k$ of cell $ii$.We employ the same diffusive flux definition as was done on the implicit discretization for scalar transport. Therefore:
 \begin{equation}
-    \sum_{k=1}^{nf_c} \left(-h_{s,\alpha} \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k}  \: A_k = 
+    \sum_{k=1}^{nf_c} \left(-h_{s,\alpha} \rho D_\alpha \nabla(Y_\alpha) \right)_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k}  \: A_k =
     \sum_{k=1}^{nf_c} -h_{s,\alpha} \left(D_\alpha \nabla(\rho Y_\alpha) -
-    \frac{D_\alpha}{\rho} \nabla \rho \; (\rho Y_\alpha) \right)_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k}  \: A_k 
+    \frac{D_\alpha}{\rho} \nabla \rho \; (\rho Y_\alpha) \right)_{ii,k} \cdot \hat{\mathbf{n}}_{ii,k}  \: A_k
 \end{equation}
 
 
@@ -2665,8 +2665,86 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 
 \subsection{Immersed boundary method on manufactured solution around rotated cube}
 
+Consider the solution of the following constant density, incompressible flow, momentum and scalar transport equations:
+%
+\begin{eqnarray}
+  \frac{\partial \rho \mathbf{u}(\mathbf{x},t)}{\partial t} &=& -\left[ \mathbf{F_v}(\mathbf{u},\mathbf{x},t) + \boldsymbol{\nabla} p(\mathbf{x},t) + \mathbf{fe_v}(\mathbf{u},p) \right] \label{eq:mmsMom} \\
+  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right] 
+  \label{eq:mmsZ}
+\end{eqnarray}
+%
+which are extended by the manufactured solution (MMS) sources $\mathbf{fe_v}(\mathbf{u},p)$ and $\mathbf{fe_Z}(\mathbf{u},Z)$ respectively. The vectors $\mathbf{F_v}=-\mu \nabla^2(\mathbf{u}) + \nabla \cdot \left( \rho \mathbf{u} \otimes \mathbf{u} \right)$ and $\mathbf{F_z}= \nabla \cdot \left( \rho Z \mathbf{u} - \rho D_z \nabla Z \right) $ contain the corresponding advection and diffusion operators.
+
+Now, consider in figure~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ and a manufactured solution defined on the fluid region $\Omega - \Omega_1$ of the form:
+%
+\begin{eqnarray}
+   u'(\mathbf{x}_{Bp}',t) &=& -\sin(t) \; \sin(kx')^2 \; \sin(2ky') \label{eq:upmf} \\
+   v'(\mathbf{x}_{Bp}',t) &=&   \sin(t) \; \sin(2kx') \; \sin(ky')^2 \label{eq:vpmf} \\
+   p(\mathbf{x}_{Bp}',t) &=& \frac{\sin(t)}{4} \left( 2+\cos(2kx') \right) \left( 2+\cos(2ky') \right) - \sin(t) \label{eq:pmf} \\
+   Z(\mathbf{x}_{Bp}',t) &=& \frac{A_Z \sin(t)}{3} \left[ \left( 1-\cos(2k(x'-\frac{\pi}{2})) \right)
+                                                                                   \left( 1-\cos(2k(y'-\frac{\pi}{2})) \right) - 1 \right] + Z_{mean} \label{eq:qmf}
+\end{eqnarray}
+%
+which is similar on velocities and pressure to the functions given in reference~\cite{Weinan:1}.  These functions imply zero initial conditions, a divergence free velocity field and the following
+%
+\begin{equation}
+   u'(\mathbf{x}',t)=v'(\mathbf{x}',t)=0, \; \; \frac{\partial p}{\partial n} = \frac{\partial Z}{\partial n}=0, \; \;
+   for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
+\end{equation}
+%
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside. 
+
+ The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.  
 
 
+
+We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis. 
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
+       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png} 
+      \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
+	\label{Fig:ManuSoln}
+\end{figure}
+%
+An angular parameter $\alpha$ defines the orientation of the local axes $x',y'$ respect to the Eulerian frame coordinates $x,y$. The center of $\Omega_1$ in the Eulerian frame is situated in position $\mathbf{x}_{Ec}=(\pi,\pi)$. The rotation matrix from Eulerian $E$ to local frame $B$ coordinates is
+%
+\begin{equation}
+  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c} 
+                                          \cos(\alpha) & \sin(\alpha) \\
+                                         -\sin(\alpha)  & \cos(\alpha) \end{array} \right]
+\end{equation}
+%
+In the local system, the center of the square in local coordinates is given by $\mathbf{x}_{Bc}'=(\pi/2,\pi/2)$. Then, the location of a general point $p$ in the local system is:
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +\mathbf{x}_{cp}'
+\end{equation}  
+%
+The same point $p$ location can be defined in terms of the $E$ frame as $\mathbf{x}_{Ep}= \mathbf{x}_{Ec} +\mathbf{x}_{cp}$ (Eulerian coordinates). Then
+%
+\begin{equation}
+    \mathbf{x}_{cp}'=[\mathbf{T}_{BE}] \mathbf{x}_{cp}=[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}
+%
+and finally
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}  
+%
+This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in the Eulerian frame (with Eulerian frame coordinates $x,y$) to the local frame coordinates where equations~\eqref{eq:upmf}-\eqref{eq:qmf} are defined. This transformation is used to define the initial conditions in the local frame, for points collocated in the Eulerian frame aligned fluid grid. Also, the manufactured variables can be defined at the final time to define error norms. Finally, the velocity components of interest are the ones defined in the Eulerian frame, and can be readily computed as
+%
+\begin{equation}
+  \left\{ \begin{array}{c}  u \\ v \end{array} \right\}_p = [\mathbf{T}_{BE}]^T \left\{ \begin{array}{c}  u' \\ v' \end{array} \right\}_p
+\end{equation}
+%
+We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field. 
+When $\alpha=0$, a domain $\Omega$ of size $L_x=L_y=2\pi$ centered in $\mathbf{x}_{Ec}$ is sufficient for application of periodic boundary conditions. Then, for $\alpha=\arctan(1/r)$, $r=1,2,3,...$ the periodicity lengths on the Eulerian reference frame are $L_x=L_y=2\pi \sqrt{1+r^2}$.
+That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\sqrt{8} \pi$. If $\alpha=\arctan(1/2)$, $L_x=L_y=\sqrt{20} \pi$.
+%See figures~\ref{}a-c.
 
 
 \subsection{Conservation test of isothermal helium plume around sphere}
@@ -2683,12 +2761,23 @@ Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the
 \subsection{Consistency test for OBST and GEOM of flow around heated cubes}
 
 
+\subsection{Radiating Sphere}
+\label{sphere_radiate}
+
+A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is centered in a box that is 4~m on a side with a surface temperature of 0~K. The emissivity of all surfaces is 1, and there is no convective heat transfer to or from any surface. The heat flux from the hot sphere to the nearest cold wall surface 1~m away is expected to be $\sigma T^4/4=5.065$~kW/m$^2$. The results are shown in Fig.~\ref{sphere_radiate_fig}.
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_radiate.png}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_radiate.pdf}
+\caption[The {\ct sphere\_radiate} test case]{Left: a radiating hot sphere. Right: heat flux to the nearest wall surface.}
+\label{sphere_radiate_fig}
+\end{figure}
+
 
 
 %\subsection{Flow around heated curved pipe or something like that}
 
 
-
+\clearpage
 
 \section{Validation Tests}
 

@@ -17,5 +17,3 @@ terraindir=/home/gforney/terrain
 
 $dem2fds -fds Gatlinburg_1000m.fds -dir $terraindir/gatlinburg Gatlinburg_1000m.in
 $dem2fds -fds Gatlinburg_1000m_g.fds -geom -dir $terraindir/gatlinburg Gatlinburg_1000m.in
-
-cp Gatlinburg_1000m.png Gatlinburg_1000m_g.png

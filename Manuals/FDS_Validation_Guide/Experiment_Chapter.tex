@@ -407,6 +407,19 @@ were placed in front of, and to the side of, burners with dimensions of 0.3~m by
 rates were set to 100~kW, 150~kW, 200~kW, 250~kW, and 300~kW. The gauges were mounted at heights of 0~m, 0.5~m, 1.0~m, and 1.5~m relative to the top edge of the burner.
 
 
+\section{FM Burner Experiments}
+\label{FM_Burner_Description}
+
+A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a 15.2~cm round steel burner was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
+
+\subsubsection{Modeling Notes}
+
+The FDS simulations of these experiments are run for 65~s, in which time the oxygen concentration in the co-flow stream is ramped down linearly from 21~\% to 8~\%. The volume flow of the co-flow stream has been increased tenfold compared to the experiments to prevent a downwash of ambient air into the sealed compartment.
+
+The combustion scheme employed is very similar as that used for the UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}.
+
+
+
 \section{FM/FPRF Data Center Experiments}
 \label{FM_FPRF_Datacenter_Description}
 

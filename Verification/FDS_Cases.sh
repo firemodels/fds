@@ -4,6 +4,19 @@
 
 $QFDS -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
+$QFDS -d Aerosols aerosol_agglomeration.fds
+$QFDS -d Aerosols aerosol_agglomeration_2.fds
+$QFDS -d Aerosols aerosol_gravitational_deposition.fds
+$QFDS -d Aerosols aerosol_gravitational_deposition_2.fds
+$QFDS -d Aerosols aerosol_thermophoretic_deposition.fds
+$QFDS -d Aerosols aerosol_thermophoretic_deposition_2.fds
+$QFDS -d Aerosols aerosol_turbulent_deposition.fds
+$QFDS -d Aerosols propane_flame_deposition.fds
+$QFDS -d Aerosols propane_flame_deposition_gravitational.fds
+$QFDS -d Aerosols propane_flame_deposition_none.fds
+$QFDS -d Aerosols propane_flame_deposition_thermophoretic.fds
+$QFDS -d Aerosols propane_flame_deposition_turbulent.fds
+
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
@@ -40,6 +53,7 @@ $QFDS -d Complex_Geometry geom_arch.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
+$QFDS -d Complex_Geometry sphere_radiate.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
@@ -111,6 +125,7 @@ $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
+$QFDS -p 2 -d Fires couch2.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
@@ -247,6 +262,10 @@ $QFDS -d Miscellaneous obst_sphere.fds
 $QFDS -d Miscellaneous obst_cylinder.fds
 $QFDS -d Miscellaneous obst_cone.fds
 $QFDS -d Miscellaneous obst_rotbox.fds
+$QFDS -d Miscellaneous obst_sphere_mass_flux.fds
+$QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
+$QFDS -d Miscellaneous obst_cone_mass_flux.fds
+$QFDS -d Miscellaneous obst_box_mass_flux.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -436,11 +455,6 @@ $QFDS -d Species methane_flame_lumped_fuel.fds
 $QFDS -d Species methane_flame_lumped_ox.fds
 $QFDS -d Species propane_flame_2reac.fds
 $QFDS -d Species propane_flame_2reac_simple.fds
-$QFDS -d Species propane_flame_deposition.fds
-$QFDS -d Species propane_flame_deposition_none.fds
-$QFDS -d Species propane_flame_deposition_gravitational.fds
-$QFDS -d Species propane_flame_deposition_thermophoretic.fds
-$QFDS -d Species propane_flame_deposition_turbulent.fds
 $QFDS -d Species reactionrate_arrhenius_0order_1step.fds
 $QFDS -d Species reactionrate_arrhenius_2order_1step.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2step.fds
@@ -458,8 +472,6 @@ $QFDS -d Species reactionrate_lumped_two_air.fds
 $QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
-$QFDS -d Species soot_gravitational_settling.fds
-$QFDS -d Species soot_gravitational_settling_2.fds
 $QFDS -d Species hrrpuv_reac_simple.fds
 $QFDS -d Species hrrpuv_reac_extinction.fds
 $QFDS -d Species hrrpuv_reac_single.fds

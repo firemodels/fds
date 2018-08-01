@@ -1,0 +1,70 @@
+&HEAD CHID='ccibm_sphere_mass_flux', TITLE='Complex Geometry: Test mass flux bc and mass conservation.' /
+
+# 1 MESH:
+&MESH IJK=32,32,32, XB=-1.4,1.4,-1.4,1.4,-1.4,1.4 /
+
+&TIME T_END=5 /
+
+&DUMP MASS_FILE=T /
+
+&MISC PROJECTION=.TRUE., STRATIFICATION=.FALSE. /
+
+&RADI RADIATION=.FALSE. /
+
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+
+&SPEC ID='AIR', BACKGROUND=T /
+&SPEC ID='PROPANE' /
+&SPEC ID='TRACER', SPEC_ID(1)='PROPANE', MASS_FRACTION(1)=1.0 /
+
+&SURF ID='WALLS', COLOR='GRAY', ADIABATIC=T, DEFAULT=T /
+
+&SURF ID='SPHERE1', COLOR='RED', MASS_FLUX(1)=10, SPEC_ID(1)='TRACER', TAU_MF(1)=0 /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='TRACER', CELL_CENTERED=T /
+&SLCF PBY=0, QUANTITY='BACKGROUND PRESSURE', CELL_CENTERED=T /
+&SLCF PBY=0, QUANTITY='PRESSURE', CELL_CENTERED=T /
+&SLCF PBY=0, QUANTITY='DIVERGENCE', CELL_CENTERED=T /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='TRACER', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='DIVERGENCE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+
+
+&BNDF QUANTITY='MASS FLUX', SPEC_ID='TRACER' /
+&BNDF QUANTITY='NORMAL VELOCITY' /
+
+&DEVC XB=-1.4,1.4,-1.4,1.4,-1.4,1.4, QUANTITY='DENSITY', SPEC_ID='TRACER', ID='RHO_TRACER',
+      STATISTICS='VOLUME INTEGRAL', RELATIVE=T /
+
+# Geometries:
+&GEOM ID='sphere1', SURF_ID='SPHERE1', SPHERE_ORIGIN=0,0,0, SPHERE_RADIUS=1.0, N_LEVELS=3 /
+! &OBST XB=-0.7,0.7,-0.7,0.7,-0.7,0.7, SURF_ID='SPHERE1'/ equivalent surface area (11.76 m2) OBST
+! &GEOM ID='CUBE', SURF_ID='SPHERE1'
+! VERTS=
+!    0.700,  -0.700,  -0.700,
+!    0.700,   0.700,  -0.700,
+!   -0.700,   0.700,  -0.700,
+!   -0.700,  -0.700,  -0.700,
+!    0.700,  -0.700,   0.700,
+!    0.700,   0.700,   0.700,
+!   -0.700,   0.700,   0.700,
+!   -0.700,  -0.700,   0.700,
+! FACES=
+!    1,     2,     5,     1,
+!    5,     2,     6,     1,
+!    2,     3,     7,     1,
+!    2,     7,     6,     1,
+!    3,     4,     7,     1,
+!    4,     8,     7,     1,
+!    4,     5,     8,     1,
+!    5,     4,     1,     1,
+!    1,     4,     2,     1,
+!    2,     4,     3,     1,
+!    5,     6,     8,     1,
+!    6,     7,     8,     1,
+! /
+
+&TAIL /

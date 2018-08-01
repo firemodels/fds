@@ -2,32 +2,32 @@
 % 6-13-2012
 % cat_propane_depo.m
 %
-% Concatenates columns from Propane flame deposition FDS cases (/Verification/Species)
+% Concatenates columns from Propane flame deposition FDS cases (/Verification/Aerosols)
 
 % Condensed phase aerosol
 
 clear all
 
-FDS_Output_Files = '../../Verification/Species/';
+FDS_Output_Files = '../../Verification/Aerosols/';
 
 skip_case = 0;
 if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_none_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_none_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_gravitational_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_thermophoretic_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])
+if ~exist([FDS_Output_Files,'propane_flame_deposition_turbulent_devc.csv'])
     display(['Error: File ',[FDS_Output_Files,'propane_flame_deposition_turbulent_devc.csv'],' does not exist. Skipping case.'])
     skip_case = 1;
 end
