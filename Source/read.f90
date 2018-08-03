@@ -11530,7 +11530,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             ENDIF
          ENDIF
       ELSE
-         IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null' .AND. INIT_ID=='null') THEN
+         IF (XYZ(1) < -1.E5_EB .AND. CTRL_ID=='null' .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null' .AND. INIT_ID=='null') THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
