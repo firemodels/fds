@@ -1195,9 +1195,9 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
          IF (Y_PLUS < Y_WERNER_WENGLE) THEN
             ! viscous sublayer
             TAU_W = ( U/Y_PLUS )**2
-            U_TAU = SQRT(ABS(TAU_W))
+            U_TAU = SQRT(TAU_W)
             DUDY = ABS(U)/Y_CELL_CENTER
-         !ELSE IF (Y_PLUS < Y2) THEN
+         ! ELSEIF (Y_PLUS < Y2) THEN
          !   ! buffer layer
          !   TAU_W = ( U/U_PLUS_BUFFER_SEMILOG(Y_PLUS) )**2
          !   U_TAU = SQRT(TAU_W)
@@ -1205,7 +1205,7 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
          ELSE
             ! log layer
             TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+B) )**2
-            U_TAU = SQRT(ABS(TAU_W))
+            U_TAU = SQRT(TAU_W)
             DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
          ENDIF
       ELSE
@@ -1219,7 +1219,7 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
          ENDIF
          Y_PLUS = Y_CELL_CENTER/S
          TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
-         U_TAU = SQRT(ABS(TAU_W))
+         U_TAU = SQRT(TAU_W)
          DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
       ENDIF
 
