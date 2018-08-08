@@ -5897,18 +5897,15 @@ Aerosol particles will, over time, collide with one another and stick together t
 
 \chapter{Radiation}
 
-For most FDS simulations, thermal radiation transport is computed by default and you need not set any parameters to make this happen. However, there are situations where it is important to be aware of issues related to the radiative transport solver.
-
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
 \label{info:RADI}
-
-{\ct RADI} is the namelist group that contains all of the parameters related to the radiation solver. There can be only one {\ct RADI} line in the input file. It is possible to turn off the radiation transport solver (saving roughly 20 \% in CPU time) by adding the statement {\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning is taking place and radiation is turned off, then the total heat release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is an input on the {\ct REAC} or {\ct COMB} line. This radiated energy completely disappears from the calculation. For fire scenarios it is not recommended that you turn off the radiation transport. This feature is used mainly for diagnostic purposes or when the changes in temperature are relatively small.
-
-\subsection{Radiative Fraction}
 \label{info:CHI_R}
-\label{ramp_chi_r}
 
-The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
+{\ct RADI} is the namelist group that contains parameters related to the radiation solver. There can be only one {\ct RADI} line in the input file.
+
+An important quantity in fire science is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and the chemical composition of the fuel and combustion products, neither of which is reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the average temperature of grid cells containing reacting gases cannot be relied upon when computing the source term in the radiation transport equation (RTE), especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation.  By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see Table~\ref{tab:chi_r}), and zero for DNS.
+
+The following subsections list four options for treating thermal radiation in FDS.
 
 \begin{table}[!ht]
 \caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
@@ -5937,23 +5934,58 @@ Species                 &   $\chi_{\rm r}$   \\ \hline \hline
 {\ct PROPANE}            & 0.30 \\ \hline
 {\ct PROPYLENE}          & 0.35 \\ \hline
 {\ct TOLUENE}            & 0.45 \\ \hline
-All other species        & 0.35 \\ \hline\end{tabular}
+All other species        & 0.35 \\ \hline
+\end{tabular}
 \end{center}
 \end{table}
 
-\paragraph{Fine-tuning the radiative fraction}
+\subsection{Radiation Option 1. No Radiation Transport}
+\label{info:radiation_off}
 
-The total radiative loss from the computational domain is reported as a function of time in the column {\ct Q\_RADI} in the output file {\ct CHID\_hrr.csv}. The absolute value of {\ct Q\_RADI} divided by the total heat release rate, {\ct HRR}, is typically greater than the specified {\ct RADIATIVE\_FRACTION}. There are two reasons for this. First, The the source term in the radiative transport equation is modified only in grid cells for which the radiative fraction, $\chi_{\rm r}$, times the local heat release rate per unit volume, $\dot{q}'''$, is greater than 10~kW/m$^3$
+It is possible to turn off the RTE solver (saving roughly 20 \% in CPU time) by adding the statement {\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning is taking place and radiation is turned off, then the total heat release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is an input on the {\ct REAC} or {\ct COMB} line. Default values for various pure fuels are listed in Table~\ref{tab:chi_r}. With {\ct RADIATION} set to {\ct .FALSE.}, the radiated energy from a fire simply disappears from the computational domain. For fire simulations or any scenario with temperature increases of hundreds of degrees Celsius, it is not recommended that you turn off the radiation transport. This feature is used mainly for diagnostic purposes or when the changes in temperature are relatively small.
+
+\subsection{Radiation Option 2. Optically-Thin Limit; Specified Radiative Fraction}
+
+There are some fire scenarios where you might want to set the absorption coefficient in the RTE, $\kappa$, to zero by setting {\ct OPTICALLY\_THIN} to {\ct .TRUE.} on the {\ct RADI} line, in which case reabsorption of thermal radiation by cold combustion product gases is neglected. Essentially, the fire radiates the user-specified {\ct RADIATIVE\_FRACTION} of energy, and this energy is transported to the domain boundaries without being reabsorbed by colder gases. This is not something you want to do for a compartment fire scenario, where absorption and emission of thermal radiation by hot and cold smoke is an important consideration. Rather, you might want to choose this option for scenarios where you have a fire outside of a compartment or in a relatively large open space and you want to explicitly dictate the net radiation energy that is transported to targets and solid boundaries. For example, the radiative fraction of very large hydrocarbon fuel fires can decrease with increasing diameter because of the re-absorption of radiated energy by the smoke and combustion products. This is why a large oil fire appears to be comprised mostly of smoke, and this smoke shields external objects from the thermal radiation. Predicting this phenomenon is difficult and can be grid-dependent. In such cases, you may want to just specify the {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line and then {\ct OPTICALLY\_THIN=.TRUE.} on the {\ct RADI} line, in which case the fire will radiate the given fraction of energy and FDS will not attempt to calculate the re-absorption of this energy by the combustion products.
+
+\subsection{Radiation Option 3. Optically-Thick; Specified Radiative Fraction (LES Default)}
+
+In its normal operation, the RTE transfers energy from hot, emitting gases, like flames, to colder, absorbing gases like water vapor or soot particulate. The absorption coefficient, $\kappa$, computed using RadCal, governs both the emission and absorption of thermal radiation. Because flame temperatures are not well-resolved for typically large-scale fire simulations, the source term in the RTE is adjusted in grid cells for which the radiative fraction, $\chi_{\rm r}$, times the local heat release rate per unit volume, $\dot{q}'''$, is greater than 10~kW/m$^3$
 \be
    \chi_{\rm r} \, \dot{q}''' > 10 \; \hbox{kW/m}^3 \label{clip}
 \ee
-Elsewhere, hot gases do radiate, adding to the overall radiative loss. Second, FDS applies a correction factor to increase the value of the source term in the radiative transport equation to compensate for the fact that flame temperatures are not resolved on relatively coarse meshes. This correction factor, by default, will only increase, not decrease, the value of the source term. You can change these two default behavior as follows. First, you can force the source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. Second, you can allow the source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
+The adjustment ensures that the net radiative emission from the combusting region (i.e. the fire) is the specified {\ct RADIATIVE\_FRACTION} multiplied by the total combustion energy generated in this region. Elsewhere, hot and cold gases emit and absorb thermal radiation according to their bulk temperature and radiative properties, in particular the absorption coefficient, $\kappa$.
+
+The net radiative loss from the computational domain is reported as a function of time in the column {\ct Q\_RADI} in the output file {\ct CHID\_hrr.csv}. The absolute value of {\ct Q\_RADI} divided by the total heat release rate, {\ct HRR}, is usually not exactly equal to the specified {\ct RADIATIVE\_FRACTION}. The reason for this is that the specified radiative fraction of the fire's energy can be reabsorbed by colder combustion products such as smoke and water vapor, thereby decreasing the absolute value of {\ct Q\_RADI}. Or, hot layer smoke and combustion products can heat up and emit thermal radiation, adding to the absolute value of {\ct Q\_RADI}.
+
+The correction factor that is applied to the RTE source term in the region defined by Eq.~(\ref{clip}) by default is bound between 1 and 100, meaning that the correction factor only increases the net radiative output of the combusting region, if necessary, to achieve the desired {\ct RADIATIVE\_FRACTION}. However, you can change the default behavior of the correction as follows. First, you can force the RTE source term to be modified in all grid cells by changing the 10 in Eq.~(\ref{clip}) to -1 via {\ct QR\_CLIP} on the {\ct RADI} line, in which case the solver will apply the radiative fraction to the entire domain, not just the cells where combustion occurs. This will essentially force the net radiative loss from the entire domain to obey the {\ct RADIATIVE\_FRACTION}. Second, you can allow the RTE source term to increase or decrease in value to achieve the desired {\ct RADIATIVE\_FRACTION} by changing the lower limit of the correction factor, {\ct C\_MIN}, from its default value of 1 to, say, 0.5 on the {\ct RADI} line. The corresponding parameter, {\ct C\_MAX}, limits the correction factor to 100.
+
+\subsection{Radiation Option 4. Optically-Thick; Unspecified Radiative Fraction (DNS Default)}
+
+If it can be assumed that the temperature field is well-resolved and the radiation absorption coefficient and RTE source term can be calculated without correction, then {\ct RADIATIVE\_FRACTION} ought to be set to zero. This is the default for a DNS (Direct Numerical Simulation), and you can set it for LES calculations that are highly resolved, like where the grid cells are a few millimeters in size. Of course, do a grid resolution study to determine if the resulting radiative fraction, i.e. {\ct -Q\_RAD/HRR}, is grid independent.
+
+
+\section{Spatial and Temporal Resolution of the Radiation Transport Solver}
+\label{info:RADI_Resolution}
+
+There are several ways to improve the spatial and temporal accuracy of the discrete radiation transport equation (RTE), but each typically increases the computation time. The spatial accuracy can be improved by increasing the number of angles from the default 100 with the integer parameter {\ct NUMBER\_RADIATION\_ANGLES}. A good way to determine if you need better spatial resolution is to add slice ({\ct SLCF}) files of the quantity {\ct 'INTEGRATED INTENSITY'}. Typically, you see high values of this quantity near sources of heat, and these values decrease farther away. Ideally, you should see a somewhat smooth and circular pattern far from the heat source, but because of the finite number of solid angles along which the radiation intensity is tracked, you will see in the far field a star-like pattern that is not physical. If there are no important ``targets'' far from the heat source, this nonphysical pattern can be ignored, but if there are important targets, then increase the number of angles until you see a relatively smooth pattern over the region of interest.
+
+The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}. If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps. Given the relatively small time steps dictated by the CFL constraint, 15 time steps is usually still a relatively short interval of time. Increasing the temporal resolution of the radiation solver rarely adds to the overall accuracy of the calculation. Spatial resolution is far more important.
+
+If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using {\ct RADIATION\_ITERATIONS}, which is 1 by default. You rarely need to do this, unless it is obvious from the animation of various slice files.
+
+The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated three times to establish thermal equilibrium. To change the number of iterations, set {\ct NUMBER\_INITIAL\_ITERATIONS} on the {\ct RADI} line.
+
+
+
+\section{Other Considerations}
 
 \paragraph{Multi-fuel radiative fraction}
 
 If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as  a reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
 
 \paragraph{Time variation of radiative fraction}
+\label{ramp_chi_r}
 
 Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line. The results of running the {\ct ramp\_chi\_r} test case containing the {\ct RAMP} given below is shown in Fig.~\ref{ramp_chi}.
 
@@ -5975,15 +6007,7 @@ Even for a single fuel species the global flame radiative fraction may depend on
 \end{center}
 \end{figure}
 
-\subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
-\label{info:RADI_Resolution}
-
-There are several ways to improve the spatial and temporal accuracy of the Finite Volume Method in solving the radiation transport equation (RTE), but these will increase the computation time. You can increase the number of angles from the default 100 with the integer parameter {\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}. If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps.
-
-If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using {\ct RADIATION\_ITERATIONS}, which is 1 by default.
-
-The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated 10 times to establish thermal equilibrium. To change the number of iterations, set {\ct NUMBER\_INITIAL\_ITERATIONS} on the {\ct RADI} line.
 
 
 
@@ -10235,9 +10259,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MIE\_NDG}                      & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 50                \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
+{\ct OPTICALLY\_THIN}               & Logical       & Section~\ref{info:CHI_R}                  &                   & {\ct .FALSE.}     \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               & 0.1               \\ \hline
 {\ct QR\_CLIP                  }    & Real          & Section~\ref{info:CHI_R}                  & kW/m$^3$          & 10                \\ \hline
-{\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
+{\ct RADIATION}                     & Logical       & Section~\ref{info:radiation_off}          &                   & {\ct .TRUE.}      \\ \hline
 {\ct RADIATION\_ITERATIONS}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 1                 \\ \hline
 {\ct RADTMP                   }     & Real          & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
 {\ct TIME\_STEP\_INCREMENT}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
