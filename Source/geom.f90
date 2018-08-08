@@ -525,7 +525,7 @@ REAL(EB) :: ROTANG, ROTMAT(2,2), TROTMAT(2,2)
 PRIVATE
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
-          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_NO_FLUX, &
+          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX, &
           CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CFACE_THERMAL_GASVARS,CFACE_PREDICT_NORMAL_VELOCITY,&
           CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
@@ -3253,13 +3253,17 @@ END SUBROUTINE INIT_CUTCELL_DATA
 
 ! ---------------------------- CCIBM_VELOCITY_NO_GRADH -----------------------------
 
-SUBROUTINE CCIBM_VELOCITY_NO_GRADH(DT)
+SUBROUTINE CCIBM_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
+LOGICAL, INTENT(IN)  :: STORE_UN
 
 ! Local Variables:
 INTEGER :: I,J,K
+INTEGER, SAVE :: N_SC_FACES
+REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_SOLID
 
+! Here return if PRES_ON_WHOLE_DOMAIN=.TRUE., i.e. 'FFT' or 'GLMAT', etc. solvers are defined at input.
 IF (.NOT.PRES_ON_CARTESIAN .OR. PRES_ON_WHOLE_DOMAIN) RETURN
 
 PREDICTOR_COND : IF (PREDICTOR) THEN
@@ -3293,32 +3297,110 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
 
 ELSE ! Corrector
 
+   STORE_COND : IF (STORE_UN) THEN
+
+      N_SC_FACES=0
+      ! X axis:
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+            ENDDO
+         ENDDO
+      ENDDO
+      ! Y axis:
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+            ENDDO
+         ENDDO
+      ENDDO
+      ! Z axis:
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+            ENDDO
+         ENDDO
+      ENDDO
+
+      IF(ALLOCATED(UN_SOLID)) DEALLOCATE(UN_SOLID)
+      ALLOCATE( UN_SOLID(1:N_SC_FACES) )
+      UN_SOLID(:) = 0._EB
+
+      N_SC_FACES=0
+      ! X axis:
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+               UN_SOLID(N_SC_FACES) = U(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      ! Y axis:
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+               UN_SOLID(N_SC_FACES) = V(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      ! Z axis:
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID) CYCLE
+               N_SC_FACES = N_SC_FACES + 1
+               UN_SOLID(N_SC_FACES) = W(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      RETURN
+
+   ENDIF STORE_COND
+
+   N_SC_FACES=0
+   ! X axis:
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
             IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID) CYCLE
-            U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*FVX(I,J,K) )
+            N_SC_FACES = N_SC_FACES + 1
+            U(I,J,K) = 0.5_EB*( UN_SOLID(N_SC_FACES) + US(I,J,K) - DT*FVX(I,J,K) )
          ENDDO
       ENDDO
    ENDDO
-
+   ! Y axis:
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
             IF (FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID) CYCLE
-            V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*FVY(I,J,K) )
+            N_SC_FACES = N_SC_FACES + 1
+            V(I,J,K) = 0.5_EB*( UN_SOLID(N_SC_FACES) + VS(I,J,K) - DT*FVY(I,J,K) )
          ENDDO
       ENDDO
    ENDDO
-
+   ! Z axis:
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID) CYCLE
-            W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*FVZ(I,J,K) )
+            N_SC_FACES = N_SC_FACES + 1
+            W(I,J,K) = 0.5_EB*( UN_SOLID(N_SC_FACES) + WS(I,J,K) - DT*FVZ(I,J,K) )
          ENDDO
       ENDDO
    ENDDO
+
+   DEALLOCATE(UN_SOLID)
 
 ENDIF PREDICTOR_COND
 
@@ -11408,7 +11490,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO ICC_LOOP
 
    ! Finally set HP to zero inside immersed solids:
-   !IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+   IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
    DO K=0,KBP1
      DO J=0,JBP1
         DO I=0,IBP1
@@ -11417,7 +11499,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
         ENDDO
      ENDDO
    ENDDO
-   !ENDIF
+   ENDIF
 
    ! In case of .NOT. PRES_ON_WHOLE_DOMAIN set velocities on solid faces to zero:
    IF (.NOT.PRES_ON_WHOLE_DOMAIN) THEN
@@ -11461,6 +11543,128 @@ ENDDO MESH_LOOP
 
 RETURN
 END SUBROUTINE CCIBM_H_INTERP
+
+
+! --------------------------- CCIBM_INTERP_FACE_VEL -----------------------------
+
+SUBROUTINE CCIBM_INTERP_FACE_VEL(DT,NM,STORE_FLG)
+
+! This routine is used to interpolate velocities in Cartesian Faces of type IBM_CUTCFE
+! (containing GASPHASE cut-faces), such that shear stresses used in momentum evorution
+! for surrounding regular cells are accurate.
+! It assumes POINT_TO_MESH(NM) has already been called, and that required previous step
+! velocities have been filled in CUT_FACE(ICF)%VEL_CARTCEN, CUT_FACE(ICF)%VELS_CARTCEN.
+! Viscosity in cut-cells underlaying Cartesian cells is assumed previously computed.
+
+REAL(EB),INTENT(IN) :: DT
+INTEGER, INTENT(IN) :: NM
+LOGICAL, INTENT(IN) :: STORE_FLG
+
+! Local Variables:
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
+REAL(EB):: U_IBM,VAL(1:5),DUMEB,XYZ_PP(IAXIS:KAXIS)
+INTEGER :: IPT,ICF,IW,I,J,K,X1AXIS,INBFC_CARTCEN(1:3)
+REAL(EB) :: TNOW
+
+
+IF ( FREEZE_VELOCITY ) RETURN
+IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
+TNOW = CURRENT_TIME()
+
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+ENDIF
+
+STORE_FLG_CND : IF (STORE_FLG) THEN
+
+   CUTFACE_LOOP_1 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_1
+      ! Do not interpolate in External Boundaries, type SOLID or MIRROR.
+      IW = CUT_FACE(ICF)%IWC
+      IF ( (IW > 0) .AND. (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY   .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY    .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==MIRROR_BOUNDARY) ) CYCLE CUTFACE_LOOP_1
+      I      = CUT_FACE(ICF)%IJK(IAXIS)
+      J      = CUT_FACE(ICF)%IJK(JAXIS)
+      K      = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      ! Interpolate Un approx to cartesian-face centroids:
+      VAL(1:5) = 0._EB
+      U_IBM = 0._EB
+      ! Get UBn:
+      INBFC_CARTCEN(1:3) = CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
+      XYZ_PP(IAXIS:KAXIS)= CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+      CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+      ! Loop stencil points and define Un approx, from info on previous step:
+      DO IPT=NOD1,NOD4
+         DUMEB = DT*(CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
+         ! Case CORRECTOR, use last PREDICTOR info => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+         IF (CORRECTOR) VAL(IPT+1) = CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+         ! Case PREDICTOR, use last CORRECTOR info => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+         IF (PREDICTOR) VAL(IPT+1) = 0.5_EB*(CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                             CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
+      ENDDO
+      ! Interpolate to Un approx on the cartesian face centroid:
+      DO IPT=1,5
+         U_IBM = U_IBM + CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+      ENDDO
+
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         ! Store UU value:
+         CUT_FACE(ICF)%VELINT_CRF = UU(I,J,K)
+         ! Assign U_IBM to UU for stress computation in VELOCITY_FLUX:
+         UU(I,J,K) = U_IBM
+      CASE(JAXIS)
+         ! Store VV value:
+         CUT_FACE(ICF)%VELINT_CRF = VV(I,J,K)
+         ! Assign U_IBM to VV for stress computation in VELOCITY_FLUX:
+         VV(I,J,K) = U_IBM
+      CASE(KAXIS)
+         ! Store WW value:
+         CUT_FACE(ICF)%VELINT_CRF = WW(I,J,K)
+         ! Assign U_IBM to WW for stress computation in VELOCITY_FLUX:
+         WW(I,J,K) = U_IBM
+      END SELECT
+   ENDDO CUTFACE_LOOP_1
+
+ELSE
+   ! Restore velocities to Cartesian faces:
+   CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
+      ! Do not interpolate in External Boundaries, type SOLID or MIRROR.
+      IW = CUT_FACE(ICF)%IWC
+      IF ( (IW > 0) .AND. (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY   .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY    .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==MIRROR_BOUNDARY) ) CYCLE CUTFACE_LOOP_2
+      I      = CUT_FACE(ICF)%IJK(IAXIS)
+      J      = CUT_FACE(ICF)%IJK(JAXIS)
+      K      = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         UU(I,J,K) = CUT_FACE(ICF)%VELINT_CRF
+      CASE(JAXIS)
+         VV(I,J,K) = CUT_FACE(ICF)%VELINT_CRF
+      CASE(KAXIS)
+         WW(I,J,K) = CUT_FACE(ICF)%VELINT_CRF
+      END SELECT
+   ENDDO CUTFACE_LOOP_2
+
+ENDIF STORE_FLG_CND
+
+T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
+
+RETURN
+END SUBROUTINE CCIBM_INTERP_FACE_VEL
 
 
 ! ---------------------------- CCIBM_VELOCITY_FLUX ------------------------------
@@ -24900,6 +25104,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       IBM_CUTCELLS_FOUND_MESH =  (NXB+2) / 2 * (NYB+1) * (NZB+1)
    ELSEIF(PERIODIC_TEST==7) THEN
       IBM_CUTCELLS_FOUND_MESH =  (NXB+1) * (NYB+1) * (NZB+1) / 4
+   ELSEIF(JBAR==1)THEN
+      IBM_CUTCELLS_FOUND_MESH =  (NXB+2*CCGUARD) * (NYB+3) * (NZB+2*CCGUARD)
    ELSE
       IBM_CUTCELLS_FOUND_MESH = 50 * NXB * NYB * NZB / (NXB + NYB + NZB) ! Beast approach. NEED TO REFINE THIS.
    ENDIF
