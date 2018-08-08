@@ -3011,6 +3011,8 @@ R_DX2  = 1.E-9_EB
 
 ! Determine max CFL number from all grid cells
 
+print *,CFL_VELOCITY_NORM
+
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
