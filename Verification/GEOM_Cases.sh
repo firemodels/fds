@@ -67,11 +67,11 @@ $QFDS -d Complex_Geometry geom_bad_self_intersection.fds
 # $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
 # $QFDS -p 1 -m 4 -o 4 -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
-# $QFDS -d Complex_Geometry geom_poiseuille_N10a_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N20a_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N40a_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N80a_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N10na_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N20na_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N40na_CC0.fds
-# $QFDS -d Complex_Geometry geom_poiseuille_N80na_CC0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N80a_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0.fds
+# $QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0.fds
