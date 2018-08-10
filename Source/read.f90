@@ -7908,7 +7908,7 @@ QR_CLIP = QR_CLIP*1000._EB  ! kW/m3 to W/m3
 
 ! Optically-thin limit
 
-IF (OPTICALLY_THIN .OR. KAPPA0>=0._EB) RTE_SOURCE_CORRECTION = .FALSE.
+IF (OPTICALLY_THIN .OR. KAPPA0==0._EB) RTE_SOURCE_CORRECTION = .FALSE.
 
 ! Define band parameters
 
