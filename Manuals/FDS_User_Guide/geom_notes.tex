@@ -2747,6 +2747,49 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 %See figures~\ref{}a-c.
 
 
+\subsection{Poiseuille flow in channel created by two GEOMs}
+
+Consider a gas with density $\rho=1.165$ kg/m$^3$, and molecular viscosity $\mu=0.025$ kg/m/s, being advected through a 2D channel of height $H=1$ m and length $L=10$ m, by means of a constant force field along the channel direction $F_x=1$ N/m$^3$. This force field is equivalent to a pressure drop $dp/dx=-1$ Pa/m. The analytical solution for the friction factor in this laminar flow is:
+%
+\begin{equation}
+   f_{an} = 24/Re_H
+\end{equation}
+%
+where in our case $Re_H= \rho \overline{u} H/ \mu \simeq 155$, being the analytical value for the bulk velocity $\overline{u}=3.\hat{3}$ m/s. The (Moody) friction factor formula for pressure losses is:
+%
+\begin{equation}
+   \Delta p / L = f \frac{L}{H}  \frac{1}{2} \rho \overline{u}^2
+\end{equation}
+%
+which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}. 
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
+       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png} 
+      \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
+	\label{Fig:PoiseSketch}
+\end{figure}
+%
+We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
+
+Friction factor errors computed as $|f-f_{an}|$ are shown in figures~\ref{Fig:PoiseConvg}a,b. Second order convergence of this error measure in all cases can be seen.
+There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the cut-cell size ratios and interpolation coefficients are changing from grid to grid. These error fluctuations are not seen when $h=\Delta z /3$, and cut-cells keep same sizes and interpolation coefficients respect to the Cartesian grids.
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf} 
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf} 
+      \caption{Poiseuille flow created by two geometries: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
+      \label{Fig:PoiseConvg}
+\end{figure}
+%
+
+
 \subsection{Conservation test of isothermal helium plume around sphere}
 
 
