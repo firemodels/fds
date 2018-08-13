@@ -2814,7 +2814,33 @@ ENDIF
 
 ! Calculate internal radiation for Cartesian geometry only
 
-IF (SF%INTERNAL_RADIATION) THEN
+IF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS>0)) THEN
+   ! Full spectrum k-distribution method
+   ! Loop over FSK quadrature points
+   ONE_D%QRADOUT = 0._EB
+   DO NR = 1,SF%NUMBER_FSK_POINTS
+      KAPPA_S = 0._EB
+      DO I=1,NWP
+         KAPPA_S(I) = 2._EB*SF%FSK_K(NR)/RDX_S(I) ! Kappa = 2*Kappa*dx
+      ENDDO 
+      ! solution inwards
+      RFLUX_UP = SF%FSK_A(NR)*ONE_D%QRADIN + (1._EB-ONE_D%EMISSIVITY)*ONE_D%QRADOUT/(ONE_D%EMISSIVITY+1.0E-10_EB)
+      DO I=1,NWP
+         RFLUX_DOWN =  ( RFLUX_UP + SF%FSK_A(NR)*KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+         Q_S(I) = Q_S(I) + SF%FSK_W(NR)*(RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
+         RFLUX_UP = RFLUX_DOWN
+      ENDDO
+      ! solution outwards
+      RFLUX_UP = SF%FSK_A(NR)*QRADINB + (1._EB-E_WALLB)*RFLUX_UP
+      DO I=NWP,1,-1
+         RFLUX_DOWN =  ( RFLUX_UP + SF%FSK_A(NR)*KAPPA_S(I)*SIGMA*ONE_D%TMP(I)**4 ) / (1._EB + KAPPA_S(I))
+         Q_S(I) = Q_S(I) + SF%FSK_W(NR)*(RFLUX_UP - RFLUX_DOWN)*RDX_S(I)
+         RFLUX_UP = RFLUX_DOWN
+      ENDDO
+      ONE_D%QRADOUT = ONE_D%QRADOUT + SF%FSK_W(NR)*ONE_D%EMISSIVITY*RFLUX_DOWN
+   ENDDO
+ELSEIF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS == 0)) THEN
+   ! Gray medium method
    KAPPA_S = 0._EB
    DO I=1,NWP
       VOLSUM = 0._EB
