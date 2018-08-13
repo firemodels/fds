@@ -89,6 +89,10 @@ $QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10nah_theta0.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20nah_theta0.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40nah_theta0.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80nah_theta0.fds
 
 $QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
