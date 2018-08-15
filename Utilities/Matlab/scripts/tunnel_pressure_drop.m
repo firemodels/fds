@@ -142,20 +142,22 @@ end
 % write friction factors to latex
 
 fid = fopen([pltdir,'tunnel_pressure_drop.tex'],'wt');
+fprintf(fid, '%s\n', '\scriptsize');
 fprintf(fid, '%s\n', '\caption[Friction factors in tunnels]{Friction factors for {\ct tunnel\_pressure\_drop} cases.}');
 fprintf(fid, '%s\n', '\label{tab:tunnel_pressure_drop}');
 fprintf(fid, '%s\n', '\centering');
-fprintf(fid, '%s\n', '\begin{tabular}{lcccccc}');
+fprintf(fid, '%s\n', '\begin{tabular}{lccccccc}');
 fprintf(fid, '%s\n', '\hline');
-fprintf(fid, '%s\n', 'Case   & Velocity (m/s) & Roughness (m) & $f$ Colebrook & $f$ FDS 10 & $f$ FDS 20 & Max Rel. Error (\%)\\');
+fprintf(fid, '%s\n', 'Case    & Velocity (m/s) & Roughness (m) & Hydraulic Dia. (m) & $f$ Colebrook & $f$ FDS 10 & $f$ FDS 20 & Max Rel. Error (\%)\\');
 fprintf(fid, '%s\n', '\hline');
-fprintf(fid, '%s\n', ['A      & ',num2str(VEL(1)),' & ',num2str(s(1)),' & ',num2str(f_save(1),3),' & ',num2str(f_fds_save(1,1),3),' & ',num2str(f_fds_save(2,1),3),' & ',num2str(max_error(1),2),' \\']);
-fprintf(fid, '%s\n', ['B      & ',num2str(VEL(2)),' & ',num2str(s(2)),' & ',num2str(f_save(2),3),' & ',num2str(f_fds_save(1,2),3),' & ',num2str(f_fds_save(2,2),3),' & ',num2str(max_error(2),2),' \\']);
-fprintf(fid, '%s\n', ['C      & ',num2str(VEL(3)),' & ',num2str(s(3)),' & ',num2str(f_save(3),3),' & ',num2str(f_fds_save(1,3),3),' & ',num2str(f_fds_save(2,3),3),' & ',num2str(max_error(3),2),' \\']);
-fprintf(fid, '%s\n', ['D      & ',num2str(VEL(4)),' & ',num2str(s(4)),' & ',num2str(f_save(4),3),' & ',num2str(f_fds_save(1,4),3),' & ',num2str(f_fds_save(2,4),3),' & ',num2str(max_error(4),2),' \\']);
-fprintf(fid, '%s\n', ['E      & ',num2str(VEL(5)),' & ',num2str(s(5)),' & ',num2str(f_save(5),3),' & ',num2str(f_fds_save(1,5),3),' & ',num2str(f_fds_save(2,5),3),' & ',num2str(max_error(5),2),' \\']);
+fprintf(fid, '%s\n', ['A      & ',num2str(VEL(1)),' & ',num2str(s(1)),' & ',num2str(H(1)),' & ',num2str(f_save(1),3),' & ',num2str(f_fds_save(1,1),3),' & ',num2str(f_fds_save(2,1),3),' & ',num2str(max_error(1),2),' \\']);
+fprintf(fid, '%s\n', ['B      & ',num2str(VEL(2)),' & ',num2str(s(2)),' & ',num2str(H(2)),' & ',num2str(f_save(2),3),' & ',num2str(f_fds_save(1,2),3),' & ',num2str(f_fds_save(2,2),3),' & ',num2str(max_error(2),2),' \\']);
+fprintf(fid, '%s\n', ['C      & ',num2str(VEL(3)),' & ',num2str(s(3)),' & ',num2str(H(3)),' & ',num2str(f_save(3),3),' & ',num2str(f_fds_save(1,3),3),' & ',num2str(f_fds_save(2,3),3),' & ',num2str(max_error(3),2),' \\']);
+fprintf(fid, '%s\n', ['D      & ',num2str(VEL(4)),' & ',num2str(s(4)),' & ',num2str(H(4)),' & ',num2str(f_save(4),3),' & ',num2str(f_fds_save(1,4),3),' & ',num2str(f_fds_save(2,4),3),' & ',num2str(max_error(4),2),' \\']);
+fprintf(fid, '%s\n', ['E      & ',num2str(VEL(5)),' & ',num2str(s(5)),' & ',num2str(H(5)),' & ',num2str(f_save(5),3),' & ',num2str(f_fds_save(1,5),3),' & ',num2str(f_fds_save(2,5),3),' & ',num2str(max_error(5),2),' \\']);
 fprintf(fid, '%s\n', '\hline');
 fprintf(fid, '%s\n', '\end{tabular}');
+fprintf(fid, '%s\n', '\normalsize');
 fclose(fid);
 
 
