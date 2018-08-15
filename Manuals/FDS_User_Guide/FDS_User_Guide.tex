@@ -1295,11 +1295,12 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \hline
 Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
 {\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
-{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 2            & 0             & 3              \\ \hline
+{\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 1            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
 {\ct PROJECTION}                       & \ref{pressure_solver}          & T           & T            & F             & F              \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}    & \ref{info:LES}                 & None        & WALE         & Van Driest    & Van Driest     \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1779,25 +1780,27 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short
 \subsubsection{Special Case: Pressure Drop in Long Tunnels}
 \label{sec:tunnel_pressure_drop}
 
-In this section, we develop a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide \cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here we force the flow from a {\ct VENT} and we monitor the pressure using planar averaged {\ct DEVC}s.  The tunnel section is 1.6 km (approximately one mile) with a square cross-section 10 m $\times$ 10 m. We push air from the entrance at 2 m/s and 10 m/s for sand-grain roughness heights of 0.0001 m and 0.1 m.  We run two grid resolutions with uniform cells in the vertical direction corresponding to 10 and 20 cells across the tunnel height.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation (see \cite{MYO}).  FDS results for the 10 and 20 resolution cases are also shown along with the max relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
+In this section, we develop a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide \cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here we force the flow from a {\ct VENT} and we monitor the pressure using planar averaged {\ct DEVC}s.  The tunnel is 1.6 km (approximately one mile) long with a square cross-section 10 m $\times$ 10 m for Cases A, B, C, and D.  The cross section for Case E is 12.8 m (width) $\times$ 5 m (height), giving a hydraulic diameter of 7.2 m. We push air from the entrance at 2, 4, or 10 m/s for sand-grain roughness heights of 0.0001, 0.01, or 0.1 m.  We run two grid resolutions with uniform cells in the vertical direction corresponding to 10 and 20 cells across the tunnel height.  Streamwise grid resolution is twice the wall-normal resolution.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation (see \cite{MYO}).  FDS results for the 10 and 20 resolution cases are also shown along with the max relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
 
 \begin{table}[ht]
 \input{SCRIPT_FIGURES/tunnel_pressure_drop}
 \end{table}
 
 \begin{figure}[ht]
+\centering
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_a}
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_b}\\
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_c}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d}
-\caption[The {\ct tunnel\_pressure\_drop} cases]{Tunnel pressure drop.}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d}\\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_e}
+\caption[The {\ct tunnel\_pressure\_drop} cases]{Tunnel pressure drop for cases listed in Table \ref{tab:tunnel_pressure_drop}.}
 \label{fig:tunnel_pressure_drop}
 \end{figure}
 
-A word of caution: To achieve sensible results for tunnel cases you must take care to eliminate any mesh-to-mesh mass conservation errors and you must ensure that the time step stability criterion is never violated.  For the first, you should simply use the {\ct 'GLMAT'} solver.  To remain stable, use {\ct CFL\_VELOCITY\_NORM=1}, which employs a more restrictive definition of the cell velocity magnitude.  Without this setting, even slight violations of the stability limits (which are precisely unknown for the Navier-Stokes equations, in general) may lead to dramatic spurious pressure oscillations.
+A word of caution: To achieve sensible results for tunnel cases you must take care to eliminate any mesh-to-mesh mass conservation errors and you must ensure that the time step stability criterion is never violated.  For the first, you should simply use the {\ct 'GLMAT'} solver.  To remain stable, use {\ct CFL\_VELOCITY\_NORM=1}, which employs a more restrictive definition of the cell velocity magnitude.  Without this setting, even slight violations of the stability limits (which are precisely unknown for the Navier-Stokes equations, in general) may lead to dramatic spurious pressure oscillations.  We also find that improved results for friction factor are obtained if the {\ct 'WALE'} near-wall eddy-viscosity is used.  Both these settings can be achieved using {\ct 'LES'} mode.
 
 \begin{lstlisting}
-&MISC CFL_VELOCITY_NORM=1/
+&MISC SIMULATION_MODE='LES'/
 &PRES SOLVER='GLMAT'/
 \end{lstlisting}
 
@@ -1806,7 +1809,7 @@ While reasonable grid resolution is important, as you can see, the wall models i
 Also, note that a roughness of 0.1 mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
 
 
-\section{Parameters Related to the Background Pressure when Breaking Pressure Zones}
+\section{Breaking Pressure Zones}
 \label{background_pressure}
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
