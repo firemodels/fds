@@ -49,10 +49,13 @@ $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_a_10.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_b_10.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_c_10.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_d_10.fds
+$QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_e_10.fds
+
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_a_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_b_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_c_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_d_20.fds
+$QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_e_20.fds
 
 echo FDS cases submitted
 
