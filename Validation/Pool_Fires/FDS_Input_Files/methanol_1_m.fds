@@ -22,7 +22,7 @@
       SPECIFIC_HEAT          = 2.48
       DENSITY                = 796
       ABSORPTION_COEFFICIENT = 1140
-      BOILING_TEMPERATURE    = 64.8 /
+      BOILING_TEMPERATURE    = 64.65 /
 
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
