@@ -75,6 +75,8 @@ cat << EOF > $INSTALLER
 #!/bin/bash
 
 OVERRIDE=\$1
+INSTALL_LOG=/tmp/fds_install.log
+echo "" > \$INSTALL_LOG
 echo ""
 echo "Installing FDS $FDSVERSION and Smokeview $SMVVERSION for $ostype2"
 echo ""
@@ -139,6 +141,7 @@ MKDIR()
           else
               read -p "Do you wish to overwrite it? (yes/no) " yn
           fi
+          echo \$yn >> \$INSTALL_LOG
           case \$yn in
               [Yy]* ) break;;
               [Nn]* ) echo "Installation cancelled";exit;;
@@ -201,6 +204,7 @@ then
 else
   read  option
 fi
+echo \$option >> \$INSTALL_LOG
 
 if [ "\$option" == "extract" ]
 then
@@ -211,6 +215,7 @@ then
     while true; do
       echo "The file, \$THAT, already exists."
       read -p "Do you wish to overwrite it? (yes/no) " yn
+      echo \$yn >> \$INSTALL_LOG
       case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Extraction cancelled";exit;;
@@ -263,6 +268,7 @@ then
 else
   read answer
 fi
+echo \$answer >> \$INSTALL_LOG
 EOF
 
 if [ "$ostype" == "OSX" ]
@@ -315,6 +321,7 @@ cat << EOF >> $INSTALLER
    else
      read -p "Proceed? (yes/no) " yn
    fi
+   echo \$yn >> \$INSTALL_LOG
    case \$yn in
       [Yy]* ) break;;
       [Nn]* ) echo "Installation cancelled";exit;;
