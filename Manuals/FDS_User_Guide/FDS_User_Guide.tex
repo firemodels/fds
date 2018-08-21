@@ -3922,13 +3922,20 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 Dampers can be modeled in one of two ways.
 
-The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
-Verification Guide.
+The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. 
 
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
       LENGTH=1.0,LOSS=0,0,DAMPER=.TRUE.,DEVC_ID='TIMER'/
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=.TRUE.,XYZ=0,0,0/
+\end{lstlisting}
+
+If you want the damper to start in the closed position and then open at a later time, the {\ct INITIAL_STATE} of the {\ct DEVC} should not be set to {\ct .TRUE.}. The following example shows a duct with a damper which starts closed and then opens at \SI{10}{\seconds}. For further details see the {\ct HVAC\_damper} example case, which is documented in the Verification Guide.
+
+\begin{lstlisting}
+&HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
+      LENGTH=1.0,LOSS=0,0,DAMPER=.TRUE.,DEVC_ID='TIMER'/
+&DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,XYZ=0,0,0/
 \end{lstlisting}
 
 The second method is to specify a {\ct RAMP\_LOSS} for the duct. This approach multiplies the {\ct LOSS} array for the duct by the output of the {\ct RAMP}. This allows for dampers that have leakage and/or dampers that have a variable position other than fully open or fully closed. An example is shown below where the {\ct LOSS} in the duct changes from 1,1 at 10~s to 2000,2000 at 11~s.
