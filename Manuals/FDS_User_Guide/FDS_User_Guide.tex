@@ -3930,7 +3930,7 @@ The first method is a simple binary (flow or no flow) damper. This can be placed
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=.TRUE.,XYZ=0,0,0/
 \end{lstlisting}
 
-If you want the damper to start in the closed position and then open at a later time, the {\ct INITIAL_STATE} of the {\ct DEVC} should not be set to {\ct .TRUE.}. The following example shows a duct with a damper which starts closed and then opens at \SI{10}{\seconds}. For further details see the {\ct HVAC\_damper} example case, which is documented in the Verification Guide.
+If you want the damper to start in the closed position and then open at a later time, the {\ct INITIAL\_STATE} of the {\ct DEVC} should not be set to {\ct .TRUE.}. The following example shows a duct with a damper which starts closed and then opens at \SI{10}{\seconds}. For further details see the {\ct HVAC\_damper} example case, which is documented in the Verification Guide.
 
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
