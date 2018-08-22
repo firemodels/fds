@@ -72,7 +72,7 @@ Mesh 3: 4x2 times 0.05 long cylinders, split in two
 	NU_MATL   	= 0.5
 	MATL_ID 	= 'CHAR'
 	HEAT_OF_REACTION= 1000.
-	HEAT_OF_COMBUSTION(1) = 12000. /
+	HEAT_OF_COMBUSTION = 12000. /
 	
 &SPEC ID = 'fuel_gas', MW = 50. /
 	
