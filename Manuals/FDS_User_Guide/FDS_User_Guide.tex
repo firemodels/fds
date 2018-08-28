@@ -3922,7 +3922,7 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 Dampers can be modeled in one of two ways.
 
-The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. 
+The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s.
 
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
@@ -5917,38 +5917,39 @@ Aerosol particles will, over time, collide with one another and stick together t
 
 {\ct RADI} is the namelist group that contains parameters related to the radiation solver. There can be only one {\ct RADI} line in the input file.
 
-An important quantity in fire science is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and the chemical composition of the fuel and combustion products, neither of which is reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the average temperature of grid cells containing reacting gases cannot be relied upon when computing the source term in the radiation transport equation (RTE), especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation.  By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see Table~\ref{tab:chi_r}), and zero for DNS.
+An important quantity in fire science is the fraction of the fire's heat release rate released in the form of thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of the fire size, flame temperature, and the chemical composition of the fuel and combustion products. The flame temperature, as opposed to the average cell temperature, is not reliably calculated in a large scale fire simulation because the flame sheet is not well-resolved on a relatively coarse numerical grid. Thus, the source term in the radiation transport equation (RTE), because of its $T^4$ dependence, cannot be reliably calculated. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} or {\ct COMB} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation.  By default, the {\ct RADIATIVE\_FRACTION} is set to a specific value that is based on the reaction's {\ct FUEL} for an LES calculation, and it is set to zero for DNS, in which case the amount of energy radiated by the fire is predicted rather than prescribed. Table~\ref{tab:chi_r} lists the default radiative fraction for some common pure fuels. Many of these values are based on measurements performed on relatively small flames by Tewarson~\cite{SFPE:Tewarson}. These values may change with increasing fire size; thus, the measurements cited by Beyler~\cite{Beyler2:SFPE} may be more appropriate for larger fires. If in doubt, select the value that is appropriate for your fire. There is no single value of radiative fraction for a given fuel.
 
-The following subsections list four options for treating thermal radiation in FDS.
+\vspace{\baselineskip}
+
+\noindent There are four ways of treating thermal radiation in FDS, as explained in the following sections. 
 
 \begin{table}[!ht]
-\caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
-\vspace{0.1in}
+\caption[Default radiative fraction for some common fuels]{Default radiative fraction for some common fuels.}
 \label{tab:chi_r}
 \begin{center}
-\begin{tabular}{|l|c|}
+\begin{tabular}{|l|c|c|}
 \hline
-Species                 &   $\chi_{\rm r}$   \\ \hline \hline
-{\ct ACETONE}            & 0.30 \\ \hline
-{\ct ACETYLENE}          & 0.45 \\ \hline
-{\ct BENZENE}            & 0.45 \\ \hline
-{\ct BUTANE}             & 0.35 \\ \hline
-{\ct DODECANE}           & 0.40 \\ \hline
-{\ct ETHANE}             & 0.25 \\ \hline
-{\ct ETHANOL}            & 0.20 \\ \hline
-{\ct ETHYLENE}           & 0.35 \\ \hline
-{\ct HYDROGEN}           & 0.10 \\ \hline
-{\ct ISOPROPANOL}        & 0.30 \\ \hline
-{\ct METHANE}            & 0.20 \\ \hline
-{\ct METHANOL}           & 0.20 \\ \hline
-{\ct N-DECANE}           & 0.40 \\ \hline
-{\ct N-HEPTANE}          & 0.40 \\ \hline
-{\ct N-HEXANE}           & 0.40 \\ \hline
-{\ct N-OCTANE}           & 0.40 \\ \hline
-{\ct PROPANE}            & 0.30 \\ \hline
-{\ct PROPYLENE}          & 0.35 \\ \hline
-{\ct TOLUENE}            & 0.45 \\ \hline
-All other species        & 0.35 \\ \hline
+Species                  & $\chi_{\rm r}$   & Reference                               \\ \hline \hline
+{\ct ACETONE}            & 0.27             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct ACETYLENE}          & 0.49             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct BENZENE}            & 0.60             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct BUTANE}             & 0.30             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct DODECANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct ETHANE}             & 0.25             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct ETHANOL}            & 0.25             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct ETHYLENE}           & 0.25             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct HYDROGEN}           & 0.20             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct ISOPROPANOL}        & 0.29             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct METHANE}            & 0.20             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct METHANOL}           & 0.16             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct N-DECANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct N-HEPTANE}          & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct N-HEXANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct N-OCTANE}           & 0.40             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct PROPANE}            & 0.30             & \cite{Beyler2:SFPE}                     \\ \hline
+{\ct PROPYLENE}          & 0.37             & \cite{SFPE:Tewarson}                    \\ \hline
+{\ct TOLUENE}            & 0.40             & \cite{Hamins:NISTIR7013}                \\ \hline
+All other species        & 0.35             &                                         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
