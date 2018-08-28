@@ -6140,6 +6140,39 @@ IND_SELECT: SELECT CASE(IND)
    CASE(82)  ! K
       GAS_PHASE_OUTPUT_RES = REAL(KK,EB)
 
+   CASE(83)  ! Q CRITERION : Q = 1/2 (tr(Dij)^2 - tr(Dij^2))
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      III=II; JJJ=JJ; KKK=KK
+      IF (II == 0   ) III = II+1
+      IF (II == IBP1) III = II-1
+      IF (JJ == 0   ) JJJ = JJ+1
+      IF (JJ == JBP1) JJJ = JJ-1
+      IF (KK == 0   ) KKK = KK+1
+      IF (KK == KBP1) KKK = KK-1
+      IM1 = III-1
+      JM1 = JJJ-1
+      KM1 = KKK-1
+      IIM1 = MAX(1,III-1)
+      JJM1 = MAX(1,JJJ-1)
+      KKM1 = MAX(1,KKK-1)
+      IP1 = III+1
+      JP1 = JJJ+1
+      KP1 = KKK+1
+      DUDX = RDX(III)*(U(III,JJJ,KKK)-U(IM1,JJJ,KKK))
+      DUDY = 0.25_EB*RDY(JJJ)*(U(III,JP1,KKK)-U(III,JJM1,KKK)+U(IM1,JP1,KKK)-U(IM1,JJM1,KKK))
+      DUDZ = 0.25_EB*RDZ(KKK)*(U(III,JJJ,KP1)-U(III,JJJ,KKM1)+U(IM1,JJJ,KP1)-U(IM1,JJJ,KKM1))
+      DVDX = 0.25_EB*RDX(III)*(V(IP1,JJJ,KKK)-V(IIM1,JJJ,KKK)+V(IP1,JM1,KKK)-V(IIM1,JM1,KKK))
+      DVDY = RDY(JJJ)*(V(III,JJJ,KKK)-V(III,JM1,KKK))
+      DVDZ = 0.25_EB*RDZ(KKK)*(V(III,JJJ,KP1)-V(III,JJJ,KKM1)+V(III,JM1,KP1)-V(III,JM1,KKM1))
+      DWDX = 0.25_EB*RDX(III)*(W(IP1,JJJ,KKK)-W(IIM1,JJJ,KKK)+W(IP1,JJJ,KM1)-W(IIM1,JJJ,KM1))
+      DWDY = 0.25_EB*RDY(JJJ)*(W(III,JP1,KKK)-W(III,JJM1,KKK)+W(III,JP1,KM1)-W(III,JJM1,KM1))
+      DWDZ = RDZ(KKK)*(W(III,JJJ,KKK)-W(III,JJJ,KM1))
+
+      ! Q = 1/2 (tr(Dij)^2 - tr(Dij^2))
+      GAS_PHASE_OUTPUT_RES = 0.5_EB*( (DUDX+DVDY+DWDZ)**2._EB            - &  ! tr(Dij)^2
+                                      (DUDX*DUDX + DUDY*DVDX + DUDZ*DWDX + &  ! tr(Dij^2) = Dik*Dki
+                                       DVDX*DUDY + DVDY*DVDY + DVDZ*DWDY + &
+                                       DWDX*DUDZ + DWDY*DVDZ + DWDZ*DWDZ))
    CASE(84)  ! STRAIN RATE
       IM1 = MAX(0,II-1)
       JM1 = MAX(0,JJ-1)
