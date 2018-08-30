@@ -42,6 +42,7 @@ LNG_Dispersion
 LNG_wind_profiles
 FM_Vertical_Wall_Flames
 umd_line_burner_process
+UWO_Wind_Tunnel
 FM_Burner
 
 % Dataplot and scatplot options
@@ -76,7 +77,6 @@ spray_attenuation
 flame_height2
 purdue_flames
 christifire
-pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
 mccaffrey_plume
