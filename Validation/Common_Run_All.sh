@@ -22,6 +22,8 @@ export STOPFDSMAXITER=
 DV=
 TCP=
 EXE=
+resource_manager=
+walltime=
 showcommandline=
 showscript=
 
@@ -63,17 +65,19 @@ echo "     default: Current_Results"
 echo "-O - run with Open MPI version of fds"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
+echo "-r resource_manager - default: PBS, other options: SLURM"
 echo "-s - stop FDS runs"
 echo "-u - use development version of FDS"
 echo "-v - show script run by qfds.sh for each validation case"
 echo "-V - show qfds.sh command line for each validation case"
+echo "-w walltime - default: empty, PBS: hh:mm:ss, SLURM: dd-hh:mm:ss"
 echo "-x - do not copy FDS input files"
 echo "-y - overwrite existing files"
 exit
 }
 
 DEBUG=$OPENMP
-while getopts 'be:EhIj:m:o:Oq:suvVxy' OPTION
+while getopts 'be:EhIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
@@ -111,6 +115,9 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
+  r)
+   resource_manager="$OPTARG"
+   ;;
   s)
    export STOPFDS=1
    ;;
@@ -122,6 +129,9 @@ case $OPTION in
    ;;
   v)
   showscript="-v"
+   ;;
+  w)
+   walltime="-w $OPTARG"
    ;;
   x)
    export DONOTCOPY=1
@@ -137,7 +147,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $showcommandline $showscript $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
@@ -145,6 +155,11 @@ fi
 DEBUG="$DEBUG $JOBPREFIX"
 DEBUG="$DEBUG $TCP"
 
+if [ "$resource_manager" == "SLURM" ]; then
+   export RESOURCE_MANAGER="SLURM"
+else
+   export RESOURCE_MANAGER="PBS"
+fi
 ##############################################################
 
 # Skip if STOPFDS (-s option) is specified
