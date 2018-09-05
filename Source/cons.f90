@@ -405,6 +405,10 @@ INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)
 
+! CELL_INDEX counter related to GEOMS.
+INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: N_EDGES_DIM_CC
+
 ! HVAC Parameters
 
 INTEGER :: N_DUCTNODES = 0, N_DUCTS = 0, N_FANS = 0, N_FILTERS = 0, N_AIRCOILS = 0,N_NETWORKS=0, N_DUCTRUNS=0

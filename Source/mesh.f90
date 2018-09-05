@@ -126,6 +126,10 @@ TYPE MESH_TYPE
    ! CFACE to be used in conjunction with solid side solvers:
    TYPE(CFACE_TYPE), ALLOCATABLE, DIMENSION(:) :: CFACE
 
+   ! Edges connected to regular Gas faces to receive wall model shear stress and vorticity.
+   INTEGER :: IBM_NRCEDGE=0
+   TYPE(IBM_RCEDGE_TYPE), ALLOCATABLE, DIMENSION(:) :: IBM_RCEDGE
+
    !---------------------- END: CC_IBM mesh Arrays ------------------------------------------
 
    INTEGER :: N_WALL_CELLS,N_WALL_CELLS_DIM,N_INTERNAL_WALL_CELLS,N_EXTERNAL_WALL_CELLS,WALL_COUNTER,WALL_COUNTER_HT3D

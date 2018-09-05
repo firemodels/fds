@@ -361,6 +361,12 @@ TYPE IBM_CUTEDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)             ::NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE IBM_CUTEDGE_TYPE
 
+! REGC_EDGE type, used for computation of wall model shear stress and vorticity.
+TYPE IBM_RCEDGE_TYPE
+   INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
+   INTEGER :: IE
+END TYPE IBM_RCEDGE_TYPE
+
 ! Cartesian Faces Cut-Faces data structure:
 INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =1024 ! Size definition parameter. Max number of vertices per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =1024 ! Size definition parameter. Max segments per face.
