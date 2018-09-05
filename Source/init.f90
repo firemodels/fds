@@ -1034,6 +1034,7 @@ IF (SOLID_PYRO3D) THEN
             DO J=OB%J1+1,OB%J2
                DO I=OB%I1+1,OB%I2
                   OB%RHO(I,J,K,NN) = SF%RHO_0(1,NN)
+                  IF (MATERIAL(NN)%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) OB%PYRO3D_LIQUID=.TRUE.
                ENDDO
             ENDDO
          ENDDO

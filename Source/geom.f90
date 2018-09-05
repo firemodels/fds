@@ -16491,6 +16491,7 @@ CASE(IAXIS)
             IF((SGN >  0._EB) .AND. (ABS(XX-M2%X(IIO)) <= M2%DX(IIO+1)/2._EB)) EXIT
             IF((SGN <  0._EB) .AND. (ABS(XX-M2%X(IIO)) <  M2%DX(IIO  )/2._EB)) EXIT
          ENDDO
+         IF (IIO > M2%IBAR) IIO = M2%IBAR ! Dial back.
          YJ  = MAX( 1._EB , MIN( REAL(M2%JBAR,EB)+ALMOST_ONE , M2%CELLSJ(FLOOR((YY-M2%YS)*M2%RDYINT)) + 1._EB ) )
          ZK  = MAX( 1._EB , MIN( REAL(M2%KBAR,EB)+ALMOST_ONE , M2%CELLSK(FLOOR((ZZ-M2%ZS)*M2%RDZINT)) + 1._EB ) )
          JJO = FLOOR(YJ)
@@ -16508,6 +16509,7 @@ CASE(JAXIS)
             IF((SGN >  0._EB) .AND. (ABS(YY-M2%Y(JJO)) <= M2%DY(JJO+1)/2._EB)) EXIT
             IF((SGN <  0._EB) .AND. (ABS(YY-M2%Y(JJO))  > M2%DY(JJO  )/2._EB)) EXIT
          ENDDO
+         IF (JJO > M2%JBAR) JJO = M2%JBAR ! Dial back.
          XI  = MAX( 1._EB , MIN( REAL(M2%IBAR,EB)+ALMOST_ONE , M2%CELLSI(FLOOR((XX-M2%XS)*M2%RDXINT)) + 1._EB ) )
          ZK  = MAX( 1._EB , MIN( REAL(M2%KBAR,EB)+ALMOST_ONE , M2%CELLSK(FLOOR((ZZ-M2%ZS)*M2%RDZINT)) + 1._EB ) )
          IIO = FLOOR(XI)
@@ -16525,6 +16527,7 @@ CASE(KAXIS)
             IF((SGN >  0._EB) .AND. (ABS(ZZ-M2%Z(KKO)) <= M2%DZ(KKO+1)/2._EB)) EXIT
             IF((SGN <  0._EB) .AND. (ABS(ZZ-M2%Z(KKO))  > M2%DZ(KKO  )/2._EB)) EXIT
          ENDDO
+         IF (KKO > M2%KBAR) KKO = M2%KBAR ! Dial back.
          XI  = MAX( 1._EB , MIN( REAL(M2%IBAR,EB)+ALMOST_ONE , M2%CELLSI(FLOOR((XX-M2%XS)*M2%RDXINT)) + 1._EB ) )
          YJ  = MAX( 1._EB , MIN( REAL(M2%JBAR,EB)+ALMOST_ONE , M2%CELLSJ(FLOOR((YY-M2%YS)*M2%RDYINT)) + 1._EB ) )
          IIO = FLOOR(XI)
@@ -25436,6 +25439,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       IF(MESHES(NM)%N_CUTCELL_MESH > 0) THEN
          MIN_FACES_PER_CUTCELL = 1000000 !HUGE(MIN_FACES_PER_CUTCELL)
          MAX_FACES_PER_CUTCELL = 0
+         MEAN_FACES_PER_CUTCELL= 0
          SUM_FACE = 0
          SUM_CCELL= 0
          IF( MYID == 0 ) THEN

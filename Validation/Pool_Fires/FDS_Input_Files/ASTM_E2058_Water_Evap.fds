@@ -1,0 +1,60 @@
+Vaporization rate of water versus time
+measured in the ASTM E2058 fire propagation apparatus
+using 99.69 g of water in a Pyrex dish with an area of
+0.0072 m2.
+
+SFPE 4th Ed. Figure 3-4.24. pg 3-132
+
+&HEAD CHID='ASTM_E2058_Water_Evap', TITLE='Water Evaporation in ASTM E2058 Fire propagation device' /
+
+&MESH IJK=6,6,8, XB = -0.15,0.15,-0.15,0.15,-0.1,0.3 /
+
+&TIME T_END=1200., WALL_INCREMENT=1, DT=0.01 /
+
+&MISC SIMULATION_MODE='LES' /
+
+&SPEC ID='WATER VAPOR' /
+
+&VENT XB = -0.05,0.05,-0.05,0.05,-0.1,-0.1, SURF_ID='SAMPLE' /
+
+&SURF ID                  = 'SAMPLE'
+      MATL_ID             = 'WATER','PYREX GLASS'
+      COLOR               = 'BLUE'
+      BACKING             = 'INSULATED'
+      THICKNESS           = 0.013845833,0.01
+      EXTERNAL_FLUX       = 50
+      CELL_SIZE_FACTOR    = 0.1
+      CONVECTION_LENGTH_SCALE = 0.025/
+
+&MATL ID                     = 'WATER'
+      EMISSIVITY             = 0.95
+      DENSITY                = 1000.
+      SPEC_ID                = 'WATER VAPOR'
+      NU_SPEC                = 1
+      HEAT_OF_REACTION       = 2260
+      CONDUCTIVITY           = 0.58
+      SPECIFIC_HEAT          = 4.181
+      BOILING_TEMPERATURE    = 100.
+      ABSORPTION_COEFFICIENT = 1345 /
+
+&MATL ID = 'PYREX GLASS'
+      DENSITY = 2200
+      CONDUCTIVITY= 1.1
+      ABSORPTION_COEFFICIENT = 20
+      SPECIFIC_HEAT = 0.75 /
+
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+
+&DEVC XB=-0.05,0.05,-0.05,0.05,-0.1,-0.1, IOR=3
+      QUANTITY='MASS FLUX WALL', SPEC_ID='WATER VAPOR', STATISTICS='MEAN', SURF_ID='SAMPLE', ID='MASS FLUX WATER' /
+
+&DEVC XB=-0.05,0.05,-0.05,0.05,-0.1,-0.1, IOR=3
+      QUANTITY='WALL TEMPERATURE', STATISTICS='MEAN', SURF_ID='SAMPLE', ID='TMP WALL' /
+
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR' /
+
+&TAIL /

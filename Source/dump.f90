@@ -2537,29 +2537,24 @@ IF (SIM_MODE/=DNS_MODE) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY)                         ',&
-            C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
       CASE(DYNSMAG)
          WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity:           Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF)                       ',&
-            C_DEARDORFF
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF = ',C_DEARDORFF,')'
       CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           Vreman Model (C_VREMAN)                             ',&
-            C_VREMAN
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Vreman Model (C_VREMAN = ',C_VREMAN,')'
       CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF)                      ',&
-            C_RNG,C_RNG_CUTOFF
+         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
       CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Eddy Viscosity:           WALE Model (C_WALE)                                 ',&
-            C_WALE
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           WALE Model (C_WALE = ',C_WALE,')'
    END SELECT TURB_MODEL_SELECT
    NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
       CASE DEFAULT
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Near-wall Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY) ',&
-            C_SMAGORINSKY
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Near-wall Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY = ',&
+            C_SMAGORINSKY,')'
       CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F7.2)')      '   Near-wall Eddy Viscosity: WALE Model (C_WALE)  ',C_WALE
+         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Near-wall Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
    END SELECT NEAR_WALL_SELECT
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
@@ -5421,6 +5416,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      CASE('MEAN')
                         STAT_VALUE = STAT_VALUE + VALUE
                         STAT_COUNT = STAT_COUNT + 1
+                     CASE('AREA INTEGRAL')
+                        STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA*VALUE
                      CASE('SURFACE INTEGRAL')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                            STAT_VALUE = STAT_VALUE + VALUE*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
@@ -6143,6 +6140,39 @@ IND_SELECT: SELECT CASE(IND)
    CASE(82)  ! K
       GAS_PHASE_OUTPUT_RES = REAL(KK,EB)
 
+   CASE(83)  ! Q CRITERION : Q = 1/2 (tr(Dij)^2 - tr(Dij^2))
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      III=II; JJJ=JJ; KKK=KK
+      IF (II == 0   ) III = II+1
+      IF (II == IBP1) III = II-1
+      IF (JJ == 0   ) JJJ = JJ+1
+      IF (JJ == JBP1) JJJ = JJ-1
+      IF (KK == 0   ) KKK = KK+1
+      IF (KK == KBP1) KKK = KK-1
+      IM1 = III-1
+      JM1 = JJJ-1
+      KM1 = KKK-1
+      IIM1 = MAX(1,III-1)
+      JJM1 = MAX(1,JJJ-1)
+      KKM1 = MAX(1,KKK-1)
+      IP1 = III+1
+      JP1 = JJJ+1
+      KP1 = KKK+1
+      DUDX = RDX(III)*(U(III,JJJ,KKK)-U(IM1,JJJ,KKK))
+      DUDY = 0.25_EB*RDY(JJJ)*(U(III,JP1,KKK)-U(III,JJM1,KKK)+U(IM1,JP1,KKK)-U(IM1,JJM1,KKK))
+      DUDZ = 0.25_EB*RDZ(KKK)*(U(III,JJJ,KP1)-U(III,JJJ,KKM1)+U(IM1,JJJ,KP1)-U(IM1,JJJ,KKM1))
+      DVDX = 0.25_EB*RDX(III)*(V(IP1,JJJ,KKK)-V(IIM1,JJJ,KKK)+V(IP1,JM1,KKK)-V(IIM1,JM1,KKK))
+      DVDY = RDY(JJJ)*(V(III,JJJ,KKK)-V(III,JM1,KKK))
+      DVDZ = 0.25_EB*RDZ(KKK)*(V(III,JJJ,KP1)-V(III,JJJ,KKM1)+V(III,JM1,KP1)-V(III,JM1,KKM1))
+      DWDX = 0.25_EB*RDX(III)*(W(IP1,JJJ,KKK)-W(IIM1,JJJ,KKK)+W(IP1,JJJ,KM1)-W(IIM1,JJJ,KM1))
+      DWDY = 0.25_EB*RDY(JJJ)*(W(III,JP1,KKK)-W(III,JJM1,KKK)+W(III,JP1,KM1)-W(III,JJM1,KM1))
+      DWDZ = RDZ(KKK)*(W(III,JJJ,KKK)-W(III,JJJ,KM1))
+
+      ! Q = 1/2 (tr(Dij)^2 - tr(Dij^2))
+      GAS_PHASE_OUTPUT_RES = 0.5_EB*( (DUDX+DVDY+DWDZ)**2._EB            - &  ! tr(Dij)^2
+                                      (DUDX*DUDX + DUDY*DVDX + DUDZ*DWDX + &  ! tr(Dij^2) = Dik*Dki
+                                       DVDX*DUDY + DVDY*DVDY + DVDZ*DWDY + &
+                                       DWDX*DUDZ + DWDY*DVDZ + DWDZ*DWDZ))
    CASE(84)  ! STRAIN RATE
       IM1 = MAX(0,II-1)
       JM1 = MAX(0,JJ-1)

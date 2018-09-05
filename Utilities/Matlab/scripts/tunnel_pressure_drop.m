@@ -10,6 +10,7 @@
 % Case B: Vel = 2 m/s, Roughness = 1.E-1 m
 % Case C: Vel = 10 m/s, Roughness = 1.E-4 m
 % Case D: Vel = 10 m/s, Roughness = 1.E-1 m
+% Case E: Vel = 4 m/s, Roughness = 1.E-2 m
 
 close all
 clear all
@@ -20,17 +21,16 @@ pltdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 plot_style
 
 chid='tunnel_pressure_drop';
-cases={'a','b','c','d'};
-CASES={'A','B','C','D'};
+cases={'a','b','c','d','e'};
+CASES={'A','B','C','D','E'};
 res={'10','20'};
 markers={'ko','k+'};
 lines={'k--','k:'};
 
-VEL = [2 2 10 10];
-s = [1.0E-4 1.0E-1 1.0E-4 1.0E-1];  % sand grain roughness (m) from input file
-H = 10;      % tunnel height (m) from input file
-L = 1600;    % tunnel length (m)
-x = [10:10:90,100:100:1600]';
+VEL = [2 2 10 10 4];
+s = [1.0E-4 1.0E-1 1.0E-4 1.0E-1 1.0E-2];  % sand grain roughness (m) from input file
+H = [10 10 10 10 7.2];      % tunnel height (m) from input file
+L = [1600 1600 1600 1600 1600];    % tunnel length (m)
 
 f_save = zeros(1,length(cases));
 f_fds_save = zeros(length(res),length(cases));
@@ -41,6 +41,8 @@ for i=1:length(cases)
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
     nh= 1; % legend handle index
+
+    x = [10:10:90,100:100:L(i)]';
 
     for j=1:length(res)
 
@@ -57,9 +59,9 @@ for i=1:length(cases)
         mu = M.data(end,find(strcmp(M.colheaders,'"MU"'))); % dynamic viscosity of AIR
         rho = M.data(end,find(strcmp(M.colheaders,'"RHO"'))); % density of AIR
 
-        Re = rho*H*VEL(i)/mu;
-        [f,error,iter] = colebrook(Re,s(i)/H,.001,1e-9);
-        dpdx_exact = -f/H * 0.5 * rho*VEL(i)^2;
+        Re = rho*H(i)*VEL(i)/mu;
+        [f,error,iter] = colebrook(Re,s(i)/H(i),.001,1e-9);
+        dpdx_exact = -f/H(i) * 0.5 * rho*VEL(i)^2;
         f_save(i) = f;
 
         % pressure drop
@@ -83,12 +85,12 @@ for i=1:length(cases)
         % compute friction factor from DEVC pressure drop
 
         dpdx = y(2); % pressure drop (Pa/m)
-        f_fds = 2*(-dpdx)*H/(rho*U(end)^2);  % f from FDS
+        f_fds = 2*(-dpdx)*H(i)/(rho*U(end)^2);  % f from FDS
         f_fds_save(j,i) = f_fds;
 
     end
 
-    hh(nh)=plot(x,[(x-L)*dpdx_exact],'k-');
+    hh(nh)=plot(x,[(x-L(i))*dpdx_exact],'k-');
 
     lh=legend(hh,'DEVC Pressure 10','Least squares fit 10','DEVC Pressure 20','Least squares fit 20','Exact pressure drop');
     set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
@@ -96,7 +98,7 @@ for i=1:length(cases)
     % add plot title
 
     Min_Ind = 0;
-    Max_Ind = L;
+    Max_Ind = L(i);
     YLimits = get(gca,'YLim');
     Min_Dep = YLimits(1);
     Max_Dep = 1.2*YLimits(2);
@@ -140,19 +142,22 @@ end
 % write friction factors to latex
 
 fid = fopen([pltdir,'tunnel_pressure_drop.tex'],'wt');
+fprintf(fid, '%s\n', '\scriptsize');
 fprintf(fid, '%s\n', '\caption[Friction factors in tunnels]{Friction factors for {\ct tunnel\_pressure\_drop} cases.}');
 fprintf(fid, '%s\n', '\label{tab:tunnel_pressure_drop}');
 fprintf(fid, '%s\n', '\centering');
-fprintf(fid, '%s\n', '\begin{tabular}{lcccccc}');
+fprintf(fid, '%s\n', '\begin{tabular}{lccccccc}');
 fprintf(fid, '%s\n', '\hline');
-fprintf(fid, '%s\n', 'Case   & Velocity (m/s) & Roughness (m) & $f$ Colebrook & $f$ FDS 10 & $f$ FDS 20 & Max Rel. Error (\%)\\');
+fprintf(fid, '%s\n', 'Case    & Velocity (m/s) & Roughness (m) & Hydraulic Dia. (m) & $f$ Colebrook & $f$ FDS 10 & $f$ FDS 20 & Max Rel. Error (\%)\\');
 fprintf(fid, '%s\n', '\hline');
-fprintf(fid, '%s\n', ['A      & ',num2str(VEL(1)),' & ',num2str(s(1)),' & ',num2str(f_save(1),3),' & ',num2str(f_fds_save(1,1),3),' & ',num2str(f_fds_save(2,1),3),' & ',num2str(max_error(1),2),' \\']);
-fprintf(fid, '%s\n', ['B      & ',num2str(VEL(2)),' & ',num2str(s(2)),' & ',num2str(f_save(2),3),' & ',num2str(f_fds_save(1,2),3),' & ',num2str(f_fds_save(2,2),3),' & ',num2str(max_error(2),2),' \\']);
-fprintf(fid, '%s\n', ['C      & ',num2str(VEL(3)),' & ',num2str(s(3)),' & ',num2str(f_save(3),3),' & ',num2str(f_fds_save(1,3),3),' & ',num2str(f_fds_save(2,3),3),' & ',num2str(max_error(3),2),' \\']);
-fprintf(fid, '%s\n', ['D      & ',num2str(VEL(4)),' & ',num2str(s(4)),' & ',num2str(f_save(4),3),' & ',num2str(f_fds_save(1,4),3),' & ',num2str(f_fds_save(2,4),3),' & ',num2str(max_error(4),2),' \\']);
+fprintf(fid, '%s\n', ['A      & ',num2str(VEL(1)),' & ',num2str(s(1)),' & ',num2str(H(1)),' & ',num2str(f_save(1),3),' & ',num2str(f_fds_save(1,1),3),' & ',num2str(f_fds_save(2,1),3),' & ',num2str(max_error(1),2),' \\']);
+fprintf(fid, '%s\n', ['B      & ',num2str(VEL(2)),' & ',num2str(s(2)),' & ',num2str(H(2)),' & ',num2str(f_save(2),3),' & ',num2str(f_fds_save(1,2),3),' & ',num2str(f_fds_save(2,2),3),' & ',num2str(max_error(2),2),' \\']);
+fprintf(fid, '%s\n', ['C      & ',num2str(VEL(3)),' & ',num2str(s(3)),' & ',num2str(H(3)),' & ',num2str(f_save(3),3),' & ',num2str(f_fds_save(1,3),3),' & ',num2str(f_fds_save(2,3),3),' & ',num2str(max_error(3),2),' \\']);
+fprintf(fid, '%s\n', ['D      & ',num2str(VEL(4)),' & ',num2str(s(4)),' & ',num2str(H(4)),' & ',num2str(f_save(4),3),' & ',num2str(f_fds_save(1,4),3),' & ',num2str(f_fds_save(2,4),3),' & ',num2str(max_error(4),2),' \\']);
+fprintf(fid, '%s\n', ['E      & ',num2str(VEL(5)),' & ',num2str(s(5)),' & ',num2str(H(5)),' & ',num2str(f_save(5),3),' & ',num2str(f_fds_save(1,5),3),' & ',num2str(f_fds_save(2,5),3),' & ',num2str(max_error(5),2),' \\']);
 fprintf(fid, '%s\n', '\hline');
 fprintf(fid, '%s\n', '\end{tabular}');
+fprintf(fid, '%s\n', '\normalsize');
 fclose(fid);
 
 

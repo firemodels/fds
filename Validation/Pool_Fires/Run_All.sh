@@ -11,5 +11,6 @@ $QFDS $DEBUG $QUEUE -d $INDIR methanol_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR butane_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR benzene_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR heptane_1_m.fds
+$QFDS $DEBUG $QUEUE -d $INDIR ASTM_E2058_Water_Evap.fds
 
 echo FDS cases submitted

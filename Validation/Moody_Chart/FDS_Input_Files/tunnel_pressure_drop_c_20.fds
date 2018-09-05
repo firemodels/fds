@@ -7,6 +7,7 @@
 ! Case B: Vel = 2 m/s, Roughness = 1.E-1 m
 ! Case C: Vel = 10 m/s, Roughness = 1.E-4 m
 ! Case D: Vel = 10 m/s, Roughness = 1.E-1 m
+! Case E: Vel = 4 m/s, Roughness = 1.E-2 m
 
 &HEAD CHID='tunnel_pressure_drop_c_20', TITLE='LES of flow through a rough tunnel'/
 
@@ -18,7 +19,7 @@
 &TIME T_END=320.0/
 &DUMP DT_DEVC=160, DT_BNDF=160, VELOCITY_ERROR_FILE=T/
 
-&MISC CFL_VELOCITY_NORM=1/
+&MISC SIMULATION_MODE='LES'/
 &PRES SOLVER='GLMAT'/
 
 &SURF ID='inflow', VEL=-10, COLOR='BLUE'/ ! Re=6.64e6

@@ -286,7 +286,7 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\si{mol/cm^3}) and mass fractions (kg $\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\si{mol-$\alpha$/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and combined with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
 A^{\prime}_{i} = A_{i} \, \bigg( \prod \, [W_{\alpha} \times 1000]^{\,-a_{\alpha,i}} \bigg) \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
@@ -380,7 +380,7 @@ Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler} includes $X_{\OI}$ and 
 The simple extinction model (referred to as Model~1 in FDS) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen mass fraction that is a simple linear function of the cell bulk temperature:
 \be
    Y_{\OTWO,\lim}(T) = Y_{\OI} \, \left( \frac{T_{\OI}-T}{T_{\OI}-T_\infty} \right)  \label{extinction_model}
-\ee 
+\ee
 If $Y_{\OTWO}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell for that time step. For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction is approximately 0.14.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
 
