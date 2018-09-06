@@ -34305,6 +34305,7 @@ END SUBROUTINE INSERT_POINT_2D
 
 ! ---------------------------- DEBUG_WAIT ---------------------------------------
 
+#if defined(DEBUG_IBM_INTERPOLATION) || defined(DEBUG_SET_CUTCELLS)
 SUBROUTINE DEBUG_WAIT
 
 INTEGER I
@@ -34323,6 +34324,7 @@ ENDDO
 
 RETURN
 END SUBROUTINE DEBUG_WAIT
+#endif /* defined(DEBUG_IBM_INTERPOLATION) || defined(DEBUG_SET_CUTCELLS) */
 
 
 ! -------------------------------------------------------------------------------
