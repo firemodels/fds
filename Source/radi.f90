@@ -1215,15 +1215,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                    ENDIF
                    IF (CC_IBM) THEN
                       DO ICF=CCVAR(I,J,K,IBM_CFST)+1,CCVAR(I,J,K,IBM_CFST)+CCVAR(I,J,K,IBM_NCFC)
-                         IF (ISTEP*CFACE(ICF)%NVEC(1)>0._EB) THEN
+                         IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(1)>0._EB) THEN
                             AFX = ABS(CFACE(ICF)%NVEC(1))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
                             ILXU = ILXU*(1._EB-AFX) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
                          ENDIF
-                         IF (JSTEP*CFACE(ICF)%NVEC(2)>0._EB) THEN
+                         IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(2)>0._EB) THEN
                             AFY = ABS(CFACE(ICF)%NVEC(2))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
                             ILYU = ILYU*(1._EB-AFY) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
                          ENDIF
-                         IF (KSTEP*CFACE(ICF)%NVEC(3)>0._EB) THEN
+                         IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(3)>0._EB) THEN
                             AFZ = ABS(CFACE(ICF)%NVEC(3))*CFACE(ICF)%AREA/(DX(I)*DY(J))
                             ILZU = ILZU*(1._EB-AFZ) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
                          ENDIF
