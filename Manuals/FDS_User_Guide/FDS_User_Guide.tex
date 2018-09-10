@@ -2846,27 +2846,27 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 
 The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
 
-The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick. The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces you will need to use {\ct SURF\_IDS} or {\ct SURF\_ID6}.
+\subsubsection*{Invoking the 3D Heat Transfer Model (HT3D)}
 
-Recall that the default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet condition for the surface temperature equivalent to {\ct TMP\_FRONT=TMPA}.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} face should have {\ct {HT3D=.TRUE.}} and, generally, no other specified thermal boundary condition.  For example,
+The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The material properties for the solid are obtained either from a {\ct {MATL\_ID}} on the {\ct {OBST}} line (simple heat transfer) or from a {\ct SURF\_ID} (typically used in conjunction with pyrolysis).
+
+The thermal properties of the material are uniform within a cell.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick.  Note the difference here between the 1D and 3D models---at present, each layer of a material must be explicitly resolved by the 3D model using the Eulerian grid.  That is, at present, lateral heat transfer is not possible with ``thin obstructions'' with zero thickness.
+
+The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces {\ct SURF\_IDS} or {\ct SURF\_ID6} must be used.
+
+\subsubsection*{Simple Heat Transfer}
+\label{sec:ht_only}
+
+The default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet condition for the surface temperature set to ambient.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} face should have {\ct {HT3D=.TRUE.}} and, generally, no other specified thermal boundary condition.  For example,
 \begin{lstlisting}
 &MATL ID='steel', .../
 &SURF ID='s1', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
 \end{lstlisting}
-The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  Make sure that the {\ct {SURF}} doesn't also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
+The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  The user should make sure that the {\ct {SURF}} does not also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
 
-An {\ct OBST} with {\ct HT3D} may cross {\ct MESH} boundaries.  If the {\ct OBST} abuts the computational domain, the boundary condition is equivalent to {\ct ADIABATIC=.TRUE.}, that is, a no flux boundary.  If something other than no flux is desired, then allow at least one gas phase cell between the {\ct OBST} and the domain boundary.  Note that you can use {\ct SOLID\_PHASE\_ONLY=.TRUE.} on {\ct MISC} together with {\ct HT3D} to avoid wasting CPU time in gas phase cells.
-
-{\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements.
-
-Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
-\begin{equation}
-\label{eq:vnht3d}
-\delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
-\end{equation}
-
-\subsubsection{Internal Heat Sources}
+\subsubsection*{Internal Heat Sources}
+\label{sec:heat_sources}
 
 Volumetric heat sources may be applied inside the solid.  Below is an example using an {\ct INIT} line, where {\ct HRRPUV} is in units of \si{kW/m^3}:
 \begin{lstlisting}
@@ -2879,6 +2879,15 @@ You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} l
 &SURF ID='SPHERE', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
+
+\subsubsection*{Internal Radiation}
+\label{sec:radiation_parameters}
+
+The parameters affecting in-depth radiation absorption are the material's refractive index and absorption coefficient.  They are specified on the MATL line:
+\begin{lstlisting}
+&MATL ID='...', REFRACTIVE_INDEX=1.33, ABSORPTION_COEFFICIENT=1000, .../
+\end{lstlisting}
+
 
 
 \section{Simple Pyrolysis Models}
@@ -3022,6 +3031,7 @@ HEAT_OF_COMBUSTION(4,1) = 14500. /
 Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can be multiple reactions with corresponding kinetic parameters and products.
 
 \subsection{Reaction Rates}
+\label{sec:reaction_rates}
 
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for a material undergoing one or more reactions is:
 \be
@@ -3357,7 +3367,7 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 \subsection{Solid Pyrolysis 3D (Beta)}
 \label{info:pyro3d}
 
-Pyrolysis may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, set {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
+Pyrolysis may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, set {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (see Sec.~\ref{sec:reaction_rates}) for details on kinetics parameters).  An example is given below:
 \begin{lstlisting}
 &SURF ID='PMMA SLAB 3D'
       MATL_ID='BLACKPMMA 3D'
@@ -3373,16 +3383,22 @@ By default, like the 1D model, the current 3D pyrolysis model uses a very simple
       SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
 \end{lstlisting}
 
-As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, add {\ct PYRO3D\_MASS\_TRANSPORT=T} on {\ct OBST} (this supercedes {\ct PYRO3D\_IOR}).  At present, only transport \emph{out} of the solid is possible.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used (see Sec.~\ref{gas_species_props}).
+As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, use
+\begin{lstlisting}
+&OBST XB=..., PYRO3D_MASS_TRANSPORT=T, .../ ! supersedes PYRO3D_IOR
+\end{lstlisting}
+\vskip-.5\baselineskip
+At present, fuel gases are transported \emph{out} of the solid.  Other species, such as oxidizer, may transport into the solid.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used.
 
 \subsubsection*{Useful Outputs}
+\label{sec:useful_outputs}
 
-With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with Alt + o]).  The solid cell temperatures can be viewed using the gas phase output
+With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with ALT + O]).  The solid cell temperatures can be viewed using the gas phase output
 \begin{lstlisting}
 &SLCF PBY=..., QUANTITY='TEMPERATURE', CELL_CENTERED=T /
 \end{lstlisting}
 
-With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid volume to gas phase cell volume ratio
+With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid-volume-to-cell-volume ratio:
 \begin{lstlisting}
 &SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', CELL_CENTERED=T / total material density (omit MATL_ID)
 &SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', MATL_ID='CHAR', CELL_CENTERED=T /
@@ -5921,7 +5937,7 @@ An important quantity in fire science is the fraction of the fire's heat release
 
 \vspace{\baselineskip}
 
-\noindent There are four ways of treating thermal radiation in FDS, as explained in the following sections. 
+\noindent There are four ways of treating thermal radiation in FDS, as explained in the following sections.
 
 \begin{table}[!ht]
 \caption[Default radiative fraction for some common fuels]{Default radiative fraction for some common fuels.}
