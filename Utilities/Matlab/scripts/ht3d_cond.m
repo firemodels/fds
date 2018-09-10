@@ -85,8 +85,8 @@ end
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel('{\it x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('{\it T} (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+xlabel('{\it x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('{\it T} (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 lh=legend(hh,'Initial Condition','Final Exact','FDS {\itnx}=10','FDS {\itnx}=20','FDS {\itnx}=40','FDS {\itnx}=80','FDS {\itnx}=160','location','northeast');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -133,8 +133,8 @@ hh(5)=loglog(dxx,500*dxx.^2,'k-');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('L2 error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('L2 error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 lh=legend(hh,'FDS {\itnx}','FDS {\itny}','FDS {\itnz}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
