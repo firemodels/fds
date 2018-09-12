@@ -427,7 +427,18 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
          ENDDO
       ENDDO
    ENDDO
-
+   IF (CONSTANT_SPECIFIC_HEAT_RATIO) THEN ! We have to compute CP, not done previously for constant CP ratio.
+      CP => WORK5
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
    DEALLOCATE(ZZ_GET)
 
    IF (SIM_MODE==LES_MODE) KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
