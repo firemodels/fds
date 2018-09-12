@@ -7,5 +7,6 @@ source $SVNROOT/Validation/Common_Run_All.sh
 
 #$QFDS -p 424 -n 12 $DEBUG $QUEUE -d $INDIR NIST_8MW_Burner.fds
 #$QFDS -p 400 -n 12 $DEBUG $QUEUE -d $INDIR NIST_20MW_Burner.fds
+#$QFDS -p 212 -n 12 $DEBUG $QUEUE -d $INDIR NIST_20MW_Ports.fds
 
 echo FDS cases submitted
