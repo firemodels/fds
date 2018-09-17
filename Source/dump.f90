@@ -41,6 +41,7 @@ TYPE (PROPERTY_TYPE), POINTER :: PY=>NULL()
 TYPE (DEVICE_TYPE), POINTER :: DV=>NULL(), DV2=>NULL()
 TYPE (SLICE_TYPE), POINTER :: SL=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE (BOUNDARY_ELEMENT_FILE_TYPE), POINTER :: BE=>NULL()
 TYPE (BOUNDARY_FILE_TYPE), POINTER :: BF=>NULL()
 TYPE (ISOSURFACE_FILE_TYPE), POINTER :: IS=>NULL()
@@ -5269,7 +5270,7 @@ END SUBROUTINE DUMP_SLCF
 
 SUBROUTINE UPDATE_DEVICES(T,DT,NM)
 
-! Update the value of all sensing DEVICEs,any control function outputs, and associated output quantities
+! Update the value of all sensing DEVICEs, any control function outputs, and associated output quantities
 
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS,GET_LAGRANGIAN_PARTICLE_INDEX
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EMESH_INDEX
@@ -5277,7 +5278,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: VALUE,VALUE2,STAT_VALUE,SUM_VALUE,VOL,WGT_LINE,T_TMP,DVAL,DVAL2,DEV2,WGT_LINE_UNBIASED,WGT
 INTEGER, INTENT(IN) :: NM
-INTEGER :: N,I,J,K,STAT_COUNT,IW,SURF_INDEX,I_STATE,IND,LP_INDEX,LOCATION_INDICES(3)
+INTEGER :: N,I,J,K,STAT_COUNT,IW,SURF_INDEX,I_STATE,IND,LP_INDEX,LOCATION_INDICES(3),ICF
 LOGICAL :: NOT_FOUND
 
 CALL POINT_TO_MESH(NM)
@@ -5376,8 +5377,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
                ELSEIF (DV%LP_TAG>0) THEN
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                              OPT_LP_INDEX=LP_INDEX)
-               ELSEIF (DV%FACE_INDEX>0) THEN
-                  VALUE = 1000._EB
+               ELSEIF (DV%CFACE_INDEX>0) THEN
+                  ! It should not be possible to tie a DEVC directly to a CFACE.
+                  ! If you want values from a specific CFACE, give it a unique SURF_ID and apply this SURF_ID to the DEVC output.
+                  VALUE = -1000._EB
                ENDIF
 
             CASE('TIME INTEGRAL') SOLID_STATS_SELECT
@@ -5426,6 +5429,45 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA
                   END SELECT
                ENDDO WALL_CELL_LOOP
+
+               CFACE_LOOP : DO ICF=1,N_CFACE_CELLS
+                  CFA => CFACE(ICF)
+                  SELECT CASE(WC%BOUNDARY_TYPE)
+                     CASE(SOLID_BOUNDARY)
+                     CASE(OPEN_BOUNDARY)
+                     CASE DEFAULT
+                        CYCLE CFACE_LOOP
+                  END SELECT
+                  SURF_INDEX = CFA%SURF_INDEX
+                  ! IF (DV%IOR/=0 .AND. DV%IOR/=CFA%ONE_D%IOR) CYCLE CFACE_LOOP
+                  IF (DV%SURF_ID/='null' .AND. SURFACE(SURF_INDEX)%ID/=DV%SURF_ID) CYCLE CFACE_LOOP
+                  IF (CFA%X<DV%X1-MICRON .OR. CFA%X>DV%X2+MICRON .OR. &
+                      CFA%Y<DV%Y1-MICRON .OR. CFA%Y>DV%Y2+MICRON .OR. &
+                      CFA%Z<DV%Z1-MICRON .OR. CFA%Z>DV%Z2+MICRON) CYCLE CFACE_LOOP
+                  NOT_FOUND = .FALSE.
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                     OPT_CFACE_INDEX=ICF)
+                  SELECT CASE(DV%STATISTICS)
+                     CASE('MAX')
+                        IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/CFA%ONE_D%II,CFA%ONE_D%JJ,CFA%ONE_D%KK/)
+                        STAT_VALUE = MAX(STAT_VALUE,VALUE)
+                     CASE('MIN')
+                        IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/CFA%ONE_D%II,CFA%ONE_D%JJ,CFA%ONE_D%KK/)
+                        STAT_VALUE = MIN(STAT_VALUE,VALUE)
+                     CASE('MEAN')
+                        STAT_VALUE = STAT_VALUE + VALUE
+                        STAT_COUNT = STAT_COUNT + 1
+                     CASE('AREA INTEGRAL')
+                        STAT_VALUE = STAT_VALUE + CFA%ONE_D%AREA*VALUE
+                     CASE('SURFACE INTEGRAL')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           STAT_VALUE = STAT_VALUE + VALUE*CFA%ONE_D%AREA*CFA%ONE_D%AREA_ADJUST
+                     CASE('SURFACE AREA')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           STAT_VALUE = STAT_VALUE + CFA%ONE_D%AREA
+                  END SELECT
+
+               ENDDO CFACE_LOOP
 
          END SELECT SOLID_STATS_SELECT
 
@@ -7459,14 +7501,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       IIG = ONE_D%IIG
       JJG = ONE_D%JJG
       KKG = ONE_D%KKG
-      SELECT CASE(DV%IOR)
-         CASE( 1); UN = U(IIG-1,JJG,KKG)
-         CASE(-1); UN = -U(IIG,JJG,KKG)
-         CASE( 2); UN = V(IIG,JJG-1,KKG)
-         CASE(-2); UN = -V(IIG,JJG,KKG)
-         CASE( 3); UN = W(IIG,JJG,KKG-1)
-         CASE(-3); UN = -W(IIG,JJG,KKG)
-      END SELECT
+      UN  = -ONE_D%UW
       IF (Z_INDEX > 0) THEN
          Y_SPECIES = ONE_D%ZZ_F(Z_INDEX)
          RHO_D_DYDN = ONE_D%RHO_D_DZDN_F(Z_INDEX)
@@ -7786,8 +7821,6 @@ REAL(EB) :: DEVC_TIME,CONST,CUMSUM,COORD_FACTOR
 
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 DEVC_TIME = STIME
-
-
 
 ! Load time and line device values into arrays
 
