@@ -5443,7 +5443,17 @@ The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the d
 &SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
 
-\newpage
+\subsection{Special Topic: Time Ramp of Ignition Temperature}
+\label{info:ramp_ait}
+
+The AIT for a given reaction may be ramped in time using {\ct RAMP\_AIT} on the {\ct REAC} line.  The ramp factor {\ct F} is applied to the AIT in Kelvins.  For example, to ramp AIT from -273 \si{\degreeCelsius} to 627 \si{\degreeCelsius} linearly over 10 s use
+\begin{lstlisting}
+&REAC ID='R1', FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627., RAMP_AIT='R1 AIT RAMP' /
+&RAMP ID='R1 AIT RAMP', T=0., F=0. /
+&RAMP ID='R1 AIT RAMP', T=10., F=1. /
+\end{lstlisting}
+
+
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
@@ -9112,7 +9122,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
-{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct AUTO IGNITION TEMPERATURE}$^5$             & Section \ref{info:ignition}                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
@@ -9150,8 +9160,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
-{\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
-{\ct Q CRITERION}                                  & $1/2 [Tr(\nabla \mathbf{u})^2 - Tr( (\nabla \mathbf{u})^2)]$  &    1/s$^2$            & D,I,P,S    \\ \hline
+{\ct PRESSURE ITERATIONS}                       & Number of pressure iterations                     &                & D            \\ \hline
+{\ct Q CRITERION} & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 {\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
@@ -9181,11 +9191,11 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \noindent
 \begin{tabbing}
-$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                     \> Omit {\ct SPEC\_ID} for total flux. \\
+$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. Omit {\ct SPEC\_ID} for total flux. \\
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
-$^4$                 \> Allows for an optional {\ct MATL\_ID}.
+$^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
+$^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1.
 \end{tabbing}
 
 
@@ -10368,6 +10378,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct PRIORITY}                            & Integer     & Section~\ref{info:priority}               &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct RAMP\_AIT}                           & Character   & Section~\ref{info:ramp_ait}               &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
