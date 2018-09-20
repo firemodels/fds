@@ -1,0 +1,28 @@
+&HEAD CHID='uniform_shear_dudz', TITLE='Uniform shear flow test of stress output' / /
+
+&MESH IJK=16,16,16, XB=0,1,0,1,0,1/
+
+&TIME T_END=3./
+
+&SPEC ID='AIR', VISCOSITY=1., BACKGROUND=.TRUE./
+
+&SURF ID='bot', COLOR='BLUE' /
+&SURF ID='top', COLOR='RED', VEL=-0, VEL_T(1)=1., TAU_V=0. /
+
+&VENT PBX=0, SURF_ID='PERIODIC'/
+&VENT PBX=1, SURF_ID='PERIODIC'/
+&VENT PBY=0, SURF_ID='MIRROR'/
+&VENT PBY=1, SURF_ID='MIRROR'/
+&VENT PBZ=0, SURF_ID='bot'/
+&VENT PBZ=1, SURF_ID='top'/
+
+&SLCF PBX=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE./
+
+&BNDF QUANTITY='VISCOUS STRESS WALL', CELL_CENTERED=T /
+
+! By default 'VISCOUS STRESS WALL' gives the force component in the streamwise direction.
+! If a force integral in a specific direction is required, say x, add ORIENTATION=1,0,0.
+&DEVC XB=0,1,0,1,0,0, QUANTITY='VISCOUS STRESS WALL', SURF_ID='bot', STATISTICS='SURFACE INTEGRAL', ID='FMU_bot'/
+&DEVC XB=0,1,0,1,1,1, QUANTITY='VISCOUS STRESS WALL', SURF_ID='top', STATISTICS='SURFACE INTEGRAL', ID='FMU_top'/
+
+&TAIL/
