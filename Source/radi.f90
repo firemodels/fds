@@ -682,7 +682,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CFST,IBM_NCFC
 USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
-            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ
+            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ,ILXU_AUX,ILYU_AUX,ILZU_AUX,AFX_AUX,AFY_AUX,AFZ_AUX
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -1187,7 +1187,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                  !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
-                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP)
+                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP, AFX, AFY, AFZ, &
+                 !$OMP& AFX_AUX, AFY_AUX, AFZ_AUX, ILXU_AUX, ILYU_AUX, ILZU_AUX )
                  SLICELOOP: DO IJK = 1, M_IJK
                    I = IJK_SLICE(1,IJK)
                    J = IJK_SLICE(2,IJK)
@@ -1214,20 +1215,28 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
                    ENDIF
                    IF (CC_IBM) THEN
+                      AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
+                      ILXU_AUX = 0._EB; ILYU_AUX = 0._EB; ILZU_AUX = 0._EB
                       DO ICF=CCVAR(I,J,K,IBM_CFST)+1,CCVAR(I,J,K,IBM_CFST)+CCVAR(I,J,K,IBM_NCFC)
                          IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(1)>0._EB) THEN
-                            AFX = ABS(CFACE(ICF)%NVEC(1))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
-                            ILXU = ILXU*(1._EB-AFX) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
+                            AFX      = ABS(CFACE(ICF)%NVEC(1))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
+                            AFX_AUX  = AFX_AUX  + AFX
+                            ILXU_AUX = ILXU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
                          ENDIF
                          IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(2)>0._EB) THEN
-                            AFY = ABS(CFACE(ICF)%NVEC(2))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
-                            ILYU = ILYU*(1._EB-AFY) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
+                            AFY      = ABS(CFACE(ICF)%NVEC(2))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
+                            AFY_AUX  = AFY_AUX  + AFY
+                            ILYU_AUX = ILYU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
                          ENDIF
                          IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(3)>0._EB) THEN
-                            AFZ = ABS(CFACE(ICF)%NVEC(3))*CFACE(ICF)%AREA/(DX(I)*DY(J))
-                            ILZU = ILZU*(1._EB-AFZ) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
+                            AFZ      = ABS(CFACE(ICF)%NVEC(3))*CFACE(ICF)%AREA/(DX(I)*DY(J))
+                            AFZ_AUX  = AFZ_AUX  + AFZ
+                            ILZU_AUX = ILZU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
                          ENDIF
                       ENDDO
+                      ILXU = ILXU*(1._EB-AFX_AUX) + ILXU_AUX
+                      ILYU = ILYU*(1._EB-AFY_AUX) + ILYU_AUX
+                      ILZU = ILZU*(1._EB-AFZ_AUX) + ILZU_AUX
                    ENDIF
                    A_SUM = AX + AY + AZ
                    AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
