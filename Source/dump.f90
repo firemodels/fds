@@ -7018,10 +7018,12 @@ REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL
 
 USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY,GET_MASS_FRACTION,GET_SENSIBLE_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE TURBULENCE, ONLY: TAU_WALL_IJ
 INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX,OPT_CFACE_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
-REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S,RHO_D_DYDN
-REAL(EB) :: AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL
+REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S,RHO_D_DYDN,U_CELL,V_CELL,W_CELL,&
+            AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL,DN,&
+            NVEC(3),PVEC(3),TAU_IJ(3,3),VEL_CELL(3),VEL_WALL(3),MU_WALL,RHO_WALL,FVEC(3),SVEC(3),TVEC1(3),TVEC2(3)
 INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
@@ -7515,6 +7517,94 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
       ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
       SOLID_PHASE_OUTPUT = Y_SPECIES*ONE_D%RHO_F*UN - RHO_D_DYDN
+
+   CASE(65) ! WALL PRESSURE (takes optional IOR or ORIENTATION vector)
+      IF (PRESENT(OPT_WALL_INDEX)) THEN
+         SELECT CASE(ONE_D%IOR)
+            CASE( 1); NVEC=(/ 1._EB,0._EB,0._EB/)
+            CASE(-1); NVEC=(/-1._EB,0._EB,0._EB/)
+            CASE( 2); NVEC=(/0._EB, 1._EB,0._EB/)
+            CASE(-2); NVEC=(/0._EB,-1._EB,0._EB/)
+            CASE( 3); NVEC=(/0._EB,0._EB, 1._EB/)
+            CASE(-3); NVEC=(/0._EB,0._EB,-1._EB/)
+         END SELECT
+      ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
+         NVEC = CFA%NVEC
+      ENDIF
+      IIG = ONE_D%IIG
+      JJG = ONE_D%JJG
+      KKG = ONE_D%KKG
+
+      PVEC = ONE_D%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG)) * NVEC ! surface normal pressure force
+      SOLID_PHASE_OUTPUT = DOT_PRODUCT(PVEC,NVEC)
+      IF (ASSOCIATED(DV)) THEN
+         IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
+            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(PVEC,DV%OVEC)
+         ENDIF
+      ENDIF
+
+   CASE(66) ! VISCOUS STRESS WALL (takes optional IOR or ORIENTATION vector)
+      IF (PRESENT(OPT_WALL_INDEX)) THEN
+         SELECT CASE(ONE_D%IOR)
+            ! note: VEL_T does not follow a right hand rule, see user guide
+            CASE( 1); NVEC=(/ 1._EB,0._EB,0._EB/); TVEC1=(/ 0._EB,1._EB,0._EB/); TVEC2=(/ 0._EB,0._EB,1._EB/)
+            CASE(-1); NVEC=(/-1._EB,0._EB,0._EB/); TVEC1=(/ 0._EB,1._EB,0._EB/); TVEC2=(/ 0._EB,0._EB,1._EB/)
+            CASE( 2); NVEC=(/0._EB, 1._EB,0._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,0._EB,1._EB/)
+            CASE(-2); NVEC=(/0._EB,-1._EB,0._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,0._EB,1._EB/)
+            CASE( 3); NVEC=(/0._EB,0._EB, 1._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,1._EB,0._EB/)
+            CASE(-3); NVEC=(/0._EB,0._EB,-1._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,1._EB,0._EB/)
+         END SELECT
+      ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
+         NVEC = CFA%NVEC
+         ! right now VEL_T not defined for CFACEs
+         TVEC1=(/ 0._EB,0._EB,0._EB/)
+         TVEC2=(/ 0._EB,0._EB,0._EB/)
+      ENDIF
+      IIG = ONE_D%IIG
+      JJG = ONE_D%JJG
+      KKG = ONE_D%KKG
+      DN  = 1._EB/ONE_D%RDN
+      SF => SURFACE(SURF_INDEX)
+
+      ! velocity vector in the centroid of the gas (cut) cell
+      U_CELL = 0.5_EB*(U(IIG-1,JJG,KKG)+U(IIG,JJG,KKG))
+      V_CELL = 0.5_EB*(V(IIG,JJG-1,KKG)+V(IIG,JJG,KKG))
+      W_CELL = 0.5_EB*(W(IIG,JJG,KKG-1)+W(IIG,JJG,KKG))
+      VEL_CELL = (/U_CELL,V_CELL,W_CELL/)
+
+      ! velocity vector of the surface
+      VEL_WALL = -ONE_D%UW*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
+
+      MU_WALL = MU_DNS(IIG,JJG,KKG)
+      RHO_WALL = ONE_D%RHO_F
+
+      CALL TAU_WALL_IJ(TAU_IJ,SVEC,VEL_CELL,VEL_WALL,NVEC,DN,D(IIG,JJG,KKG),MU_WALL,RHO_WALL,SF%ROUGHNESS)
+
+      ! ! test symmetry, etc.
+      ! print *,TAU_IJ(1,:)
+      ! print *,TAU_IJ(2,:)
+      ! print *,TAU_IJ(3,:)
+      ! print *
+      ! print *,SVEC
+      ! print *
+
+      DO I=1,3
+         FVEC(I) = DOT_PRODUCT(TAU_IJ(I,:),NVEC(:))
+      ENDDO
+      ! print *,FVEC
+      ! print *
+
+      SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,SVEC)
+      ! print *,'FS: ', SOLID_PHASE_OUTPUT
+      ! print *
+
+      IF (ASSOCIATED(DV)) THEN
+         IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
+            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(FVEC,DV%OVEC)
+            ! print *,'FO: ', SOLID_PHASE_OUTPUT
+            ! print *
+         ENDIF
+      ENDIF
 
 END SELECT SOLID_PHASE_SELECT
 
