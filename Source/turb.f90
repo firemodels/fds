@@ -1734,41 +1734,41 @@ USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 
 REAL(EB), INTENT(OUT) :: TAU_IJ(3,3),SS(3)
 REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,MU,RHO,ROUGHNESS
-REAL(EB) :: C(3,3),PP(3),U_RELA(3),SLIP_COEF,Y_PLUS,U_STRM,U_ORTH,U_NORM,TBAR(3,3),U_TAU
-INTEGER :: I,J,K,L
+REAL(EB) :: C(3,3),TT(3),U_RELA(3),SLIP_COEF,Y_PLUS,U_STRM,U_ORTH,U_NORM,TAUBAR_IJ(3,3),U_TAU
+INTEGER :: K,L,M,N
 
 ! Cartesian grid coordinate system orthonormal basis vectors
 REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
 
-! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
+! find a vector TT in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
 U_RELA = U_VELO-U_SURF
-CALL CROSS_PRODUCT(PP,NN,U_RELA) ! PP = NN x U_RELA
-IF (ABS(NORM2(PP))<=TWO_EPSILON_EB) THEN
+CALL CROSS_PRODUCT(TT,NN,U_RELA) ! TT = NN x U_RELA
+IF (ABS(NORM2(TT))<=TWO_EPSILON_EB) THEN
    ! tangent vector is completely arbitrary, just perpendicular to NN
-   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) PP = (/NN(2),-NN(1),0._EB/)
-   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) PP = (/NN(3),0._EB,-NN(1)/)
+   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) TT = (/NN(2),-NN(1),0._EB/)
+   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) TT = (/NN(3),0._EB,-NN(1)/)
 ENDIF
-PP = PP/NORM2(PP) ! normalize to unit vector
-CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
+TT = TT/NORM2(TT) ! normalize to unit vector
+CALL CROSS_PRODUCT(SS,TT,NN) ! define the streamwise unit vector SS
 
 !! check unit normal vectors
 !print *,DOT_PRODUCT(SS,SS) ! should be 1
-!print *,DOT_PRODUCT(SS,PP) ! should be 0
+!print *,DOT_PRODUCT(SS,TT) ! should be 0
 !print *,DOT_PRODUCT(SS,NN) ! should be 0
-!print *,DOT_PRODUCT(PP,PP) ! should be 1
-!print *,DOT_PRODUCT(PP,NN) ! should be 0
+!print *,DOT_PRODUCT(TT,TT) ! should be 1
+!print *,DOT_PRODUCT(TT,NN) ! should be 0
 !print *,DOT_PRODUCT(NN,NN) ! should be 1
 !print *                    ! blank line
 
 ! directional cosines (see Pope, Eq. A.11)
 C(1,1) = DOT_PRODUCT(E1,SS)
-C(1,2) = DOT_PRODUCT(E1,PP)
+C(1,2) = DOT_PRODUCT(E1,TT)
 C(1,3) = DOT_PRODUCT(E1,NN)
 C(2,1) = DOT_PRODUCT(E2,SS)
-C(2,2) = DOT_PRODUCT(E2,PP)
+C(2,2) = DOT_PRODUCT(E2,TT)
 C(2,3) = DOT_PRODUCT(E2,NN)
 C(3,1) = DOT_PRODUCT(E3,SS)
-C(3,2) = DOT_PRODUCT(E3,PP)
+C(3,2) = DOT_PRODUCT(E3,TT)
 C(3,3) = DOT_PRODUCT(E3,NN)
 
 ! transform velocity (see Pope, Eq. A.17)
@@ -1776,33 +1776,35 @@ U_STRM = C(1,1)*U_RELA(1) + C(2,1)*U_RELA(2) + C(3,1)*U_RELA(3)
 U_ORTH = C(1,2)*U_RELA(1) + C(2,2)*U_RELA(2) + C(3,2)*U_RELA(3)
 U_NORM = C(1,3)*U_RELA(1) + C(2,3)*U_RELA(2) + C(3,3)*U_RELA(3)
 
-!! check U_ORTH, should be zero
-!print *, U_ORTH
+! ! check U_ORTH, should be zero
+! print *, 'U_STRM: ',U_STRM
+! print *, 'U_ORTH: ',U_ORTH
+! print *, 'U_NORM: ',U_NORM
 
 ! in the streamwise coordinate system, the stress tensor simplifies to the symmetric tensor
 ! T = [0      0 T(1,3)]
 !     [0      0      0]
 !     [T(3,1) 0 T(3,3)]
 
-TBAR      = 0._EB
-TBAR(3,3) = -FOTH*MU*DIVU
+TAUBAR_IJ      = 0._EB
+TAUBAR_IJ(3,3) = -2._EB*MU*(U_NORM*2._EB/DN - ONTH*DIVU)
 
 IF (SIM_MODE==DNS_MODE) THEN
-   TBAR(1,3) = -MU*U_STRM/DN
+   TAUBAR_IJ(1,3) = MU*U_STRM*2._EB/DN
 ELSE
    CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,U_STRM,MU/RHO,DN,ROUGHNESS)
-   TBAR(1,3) = -RHO*U_TAU**2 ! tau_w should be negative based on definition of streamwise velocity.
+   TAUBAR_IJ(1,3) = RHO*U_TAU**2
 ENDIF
-TBAR(3,1) = TBAR(1,3)
+TAUBAR_IJ(3,1) = TAUBAR_IJ(1,3)
 
 ! transform tensors (Pope A.23)
 TAU_IJ = 0._EB
-DO J=1,3
-   DO I=1,3
-      ! inner summation for component i,j ---------------------
+DO M=1,3
+   DO N=1,3
+      ! inner summation for component m,n ---------------------
       DO L=1,3
          DO K=1,3
-            TAU_IJ(I,J) = TAU_IJ(I,J) + C(K,I)*C(L,J)*TBAR(K,L)
+            TAU_IJ(M,N) = TAU_IJ(M,N) + C(M,K)*C(N,L)*TAUBAR_IJ(K,L)
          ENDDO
       ENDDO
       !--------------------------------------------------------

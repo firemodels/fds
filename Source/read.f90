@@ -13252,16 +13252,16 @@ READ_BNDF_LOOP: DO N=1,N_BNDF
    READ(LU_INPUT,BNDF)
 
    IF (TRIM(QUANTITY)=='AMPUA_Z' .OR. TRIM(QUANTITY)=='CPUA_Z' .OR. TRIM(QUANTITY)=='MPUA_Z') THEN
-         IF (N_LP_ARRAY_INDICES == 0) THEN
-            WRITE(MESSAGE,'(A,I0)') 'ERROR: CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets. BNDF line ',N
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ELSE
-            IF (.NOT. ALL(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
+      IF (N_LP_ARRAY_INDICES == 0) THEN
+         WRITE(MESSAGE,'(A,I0)') 'ERROR: CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets. BNDF line ',N
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ELSE
+         IF (.NOT. ALL(LAGRANGIAN_PARTICLE_CLASS%LIQUID_DROPLET)) THEN
                WRITE(MESSAGE,'(A,I0)') 'ERROR: CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets. BNDF line ',N
                CALL SHUTDOWN(MESSAGE) ; RETURN
-            ENDIF
          ENDIF
-       ENDIF
+      ENDIF
+   ENDIF
 
    ! Look to see if output QUANTITY exists
 
