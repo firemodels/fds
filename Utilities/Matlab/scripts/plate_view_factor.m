@@ -60,7 +60,7 @@ set(gca,'Position',[Plot_X Plot_Y 1.3*Plot_Width Plot_Height])
 h=plot(NRA,Exact_Flux_2D*[1 1 1],'r-',NRA,Flux_2D,'ro');
 hold on
 h=plot(NRA,Exact_Flux_cart*[1 1 1],'b-',NRA,Flux_cart,'bs');
-h=plot(NRA,Flux_ibm,'bd');
+%h=plot(NRA,Flux_ibm,'bd'); % Hold for FDS 7
 h=plot(NRA,Exact_Flux_cyl*[1 1 1],'g-',NRA,Flux_cyl,'gd');
 
 set(gca,'FontName',Font_Name)
@@ -71,7 +71,8 @@ xlabel('Number of Radiation Angles','Interpreter',Font_Interpreter,'FontSize',La
 ylabel('Heat Flux (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 Plot_Title='Radiative Heat Flux (plate\_view\_factor)';
 text(30,113,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-leg=legend('Exact 2D','FDS 2D','Exact 3D','FDS 3D','FDS 3D IBM','Exact cyl.','FDS cyl.','Location','EastOutside');
+%leg=legend('Exact 2D','FDS 2D','Exact 3D','FDS 3D','FDS 3D IBM','Exact cyl.','FDS cyl.','Location','EastOutside');
+leg=legend('Exact 2D','FDS 2D','Exact 3D','FDS 3D','Exact cyl.','FDS cyl.','Location','EastOutside');
 set(leg,'FontSize',Key_Font_Size);
 
 % add version string if file is available
