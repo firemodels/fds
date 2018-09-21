@@ -7024,7 +7024,7 @@ INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S,RHO_D_DYDN,U_CELL,V_CELL,W_CELL,&
             AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL,DN,&
             NVEC(3),PVEC(3),TAU_IJ(3,3),VEL_CELL(3),VEL_WALL(3),MU_WALL,RHO_WALL,FVEC(3),SVEC(3),TVEC1(3),TVEC2(3)
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX,ICC,IND1,IND2
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
@@ -7528,12 +7528,19 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
             CASE( 3); NVEC=(/0._EB,0._EB, 1._EB/)
             CASE(-3); NVEC=(/0._EB,0._EB,-1._EB/)
          END SELECT
+         IIG = ONE_D%IIG
+         JJG = ONE_D%JJG
+         KKG = ONE_D%KKG
       ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
          NVEC = CFA%NVEC
+         ! find cut-cell adjacent to CFACE
+         IND1 = CFA%CUT_FACE_IND1
+         IND2 = CFA%CUT_FACE_IND2
+         ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+         IIG = CUT_CELL(ICC)%IJK(1)
+         JJG = CUT_CELL(ICC)%IJK(2)
+         KKG = CUT_CELL(ICC)%IJK(3)
       ENDIF
-      IIG = ONE_D%IIG
-      JJG = ONE_D%JJG
-      KKG = ONE_D%KKG
 
       PVEC = ONE_D%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG)) * NVEC ! surface normal pressure force
       SOLID_PHASE_OUTPUT = DOT_PRODUCT(PVEC,NVEC)
@@ -7554,15 +7561,23 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
             CASE( 3); NVEC=(/0._EB,0._EB, 1._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,1._EB,0._EB/)
             CASE(-3); NVEC=(/0._EB,0._EB,-1._EB/); TVEC1=(/ 1._EB,0._EB,0._EB/); TVEC2=(/ 0._EB,1._EB,0._EB/)
          END SELECT
+         IIG = ONE_D%IIG
+         JJG = ONE_D%JJG
+         KKG = ONE_D%KKG
       ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
          NVEC = CFA%NVEC
          ! right now VEL_T not defined for CFACEs
          TVEC1=(/ 0._EB,0._EB,0._EB/)
          TVEC2=(/ 0._EB,0._EB,0._EB/)
+         ! find cut-cell adjacent to CFACE
+         IND1 = CFA%CUT_FACE_IND1
+         IND2 = CFA%CUT_FACE_IND2
+         ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+         IIG = CUT_CELL(ICC)%IJK(1)
+         JJG = CUT_CELL(ICC)%IJK(2)
+         KKG = CUT_CELL(ICC)%IJK(3)
       ENDIF
-      IIG = ONE_D%IIG
-      JJG = ONE_D%JJG
-      KKG = ONE_D%KKG
+
       DN  = 1._EB/ONE_D%RDN
       SF => SURFACE(SURF_INDEX)
 
@@ -7570,7 +7585,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       U_CELL = 0.5_EB*(U(IIG-1,JJG,KKG)+U(IIG,JJG,KKG))
       V_CELL = 0.5_EB*(V(IIG,JJG-1,KKG)+V(IIG,JJG,KKG))
       W_CELL = 0.5_EB*(W(IIG,JJG,KKG-1)+W(IIG,JJG,KKG))
-      VEL_CELL = (/U_CELL,V_CELL,W_CELL/)
+      VEL_CELL = (/U_CELL,V_CELL,W_CELL/) ! (/1._EB,0._EB,0._EB/) ! test
 
       ! velocity vector of the surface
       VEL_WALL = -ONE_D%UW*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
@@ -7580,27 +7595,30 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
 
       CALL TAU_WALL_IJ(TAU_IJ,SVEC,VEL_CELL,VEL_WALL,NVEC,DN,D(IIG,JJG,KKG),MU_WALL,RHO_WALL,SF%ROUGHNESS)
 
-      ! ! test symmetry, etc.
-      ! print *,TAU_IJ(1,:)
-      ! print *,TAU_IJ(2,:)
-      ! print *,TAU_IJ(3,:)
-      ! print *
-      ! print *,SVEC
-      ! print *
-
       DO I=1,3
          FVEC(I) = DOT_PRODUCT(TAU_IJ(I,:),NVEC(:))
       ENDDO
-      ! print *,FVEC
-      ! print *
 
       SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,SVEC)
+
+      ! print *,'I,J,K: ',IIG,JJG,KKG
+      ! print *,'V CELL: ',VEL_CELL
+      ! print *,'V WALL: ',VEL_WALL
+      ! print *,TAU_IJ(1,:)
+      ! print *,TAU_IJ(2,:)
+      ! print *,TAU_IJ(3,:)
+      ! print *,TAU_IJ(1,1)+TAU_IJ(2,2)+TAU_IJ(3,3)
+      ! print *
+      ! print *,'NVEC: ',NVEC
+      ! print *,'SVEC: ',SVEC
+      ! print *,'FVEC: ',FVEC
+      ! print *
       ! print *,'FS: ', SOLID_PHASE_OUTPUT
       ! print *
 
       IF (ASSOCIATED(DV)) THEN
          IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
-            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(FVEC,DV%OVEC)
+            SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,DV%OVEC)
             ! print *,'FO: ', SOLID_PHASE_OUTPUT
             ! print *
          ENDIF
