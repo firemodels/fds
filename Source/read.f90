@@ -8962,7 +8962,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                IF (EVACUATION_ONLY(NM)) BULK_DENSITY = -1._EB
                OB%BULK_DENSITY = BULK_DENSITY
-               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
+               IF (VOL_ADJUSTED<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
 
                ! Error traps and warnings for HT3D
 
@@ -8982,7 +8982,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   OB%HT3D = HT3D
                   SOLID_HT3D = .TRUE. ! global parameter
 
-                  IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB) THEN
+                  IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
                      ! test if OB is on boundary
                      WARN_HT3D = .TRUE.
                      IF (OB%I1==OB%I2 .AND. (OB%I1==0 .OR. OB%I2==IBAR)) WARN_HT3D = .FALSE.
