@@ -1102,10 +1102,13 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                      VN_HT3D = MAX( VN_HT3D, 2._EB*K_S_MAX/RHOCBAR_S*( RDX(I)**2 + RDY(J)**2 + RDZ(K)**2 ) )
                   ENDIF
 
+                  RAMP_FACTOR = 1._EB
+                  IF (OB%RAMP_Q_INDEX>0) RAMP_FACTOR = EVALUATE_RAMP(T,0._EB,OB%RAMP_Q_INDEX)
+
                   TMP_NEW(I,J,K) = TMP(I,J,K) + DT_SUB/RHOCBAR_S * ( (KDTDX(I,J,K)*R(I)-KDTDX(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) + &
                                                                      (KDTDY(I,J,K)     -KDTDY(I,J-1,K)       )*RDY(J) + &
                                                                      (KDTDZ(I,J,K)     -KDTDZ(I,J,K-1)       )*RDZ(K) + &
-                                                                     Q(I,J,K) + Q_DOT_PPP_S(I,J,K) )
+                                                                     Q(I,J,K) + Q_DOT_PPP_S(I,J,K)*RAMP_FACTOR )
 
                   TMP_NEW(I,J,K) = MIN(TMPMAX,MAX(TMPMIN,TMP_NEW(I,J,K)))
                ENDDO
