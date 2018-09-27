@@ -264,7 +264,8 @@ INTEGER,  PARAMETER :: IBM_FGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID
 INTEGER,  PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%CUT_FACE data struct entry index location,
                                       ! IBM_INBOUNDCF type cut-faces.
 INTEGER,  PARAMETER :: IBM_FFNF   = 4 ! Flag that defines if face is to be IB forced or not.
-INTEGER,  PARAMETER :: IBM_NFVARS = 4 ! Number of face variables in MESHES(N)%FCVAR.
+INTEGER,  PARAMETER :: IBM_IDRA   = 5 ! Integer ICF that defines RAD_FACE(ICF) position for radiation FVM.
+INTEGER,  PARAMETER :: IBM_NFVARS = 5 ! Number of face variables in MESHES(N)%FCVAR.
 
 ! Cartesian Cell centered variables:
 INTEGER,  PARAMETER :: IBM_CGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
@@ -277,9 +278,9 @@ INTEGER,  PARAMETER :: IBM_IDCC   = 4 ! MESHES(N)%CUT_CELL data struct entry ind
 INTEGER,  PARAMETER :: IBM_CCNC   = 5 ! Entry for 2nd row of H Cartesian cell interpolation.
 INTEGER,  PARAMETER :: IBM_UNKZ   = 6 ! Scalar indexing.
 INTEGER,  PARAMETER :: IBM_UNKH   = 7 ! Pressure indexing.
-INTEGER,  PARAMETER :: IBM_CFST   = 8 ! CFACE array start for the cell I,J,K is CCVAR(I,J,K,IBM_CFST)+1
-INTEGER,  PARAMETER :: IBM_NCFC   = 9 ! Number of CFACEs in cell I,J,K.
-INTEGER,  PARAMETER :: IBM_NCVARS = 9 ! Number of cell variables in MESHES(N)%CCVAR.
+! INTEGER,  PARAMETER :: IBM_CFST   = 8 ! CFACE array start for the cell I,J,K is CCVAR(I,J,K,IBM_CFST)+1
+! INTEGER,  PARAMETER :: IBM_NCFC   = 9 ! Number of CFACEs in cell I,J,K.
+INTEGER,  PARAMETER :: IBM_NCVARS = 7 ! Number of cell variables in MESHES(N)%CCVAR.
 
 ! Cut-faces types in FACE_LIST of CUT_CELL:
 INTEGER, PARAMETER :: IBM_FTYPE_RGGAS = 0 ! This face of a cut-cell is a regular GASPHASE face.
@@ -529,7 +530,7 @@ PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,&
           CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CFACE_THERMAL_GASVARS,CFACE_PREDICT_NORMAL_VELOCITY,&
           CHECK_SPEC_TRANSPORT_CONSERVE,FINISH_CCIBM, &
-          TRILINEAR,GET_CARTCELL_CFACE_LIST,GET_CC_MATRIXGRAPH_H,GET_CC_IROW,GET_CC_UNKH,GET_CUTCELL_FH,GET_CUTCELL_HP,&
+          TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CC_IROW,GET_CC_UNKH,GET_CUTCELL_FH,GET_CUTCELL_HP,&
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
@@ -540,11 +541,11 @@ PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,&
           SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D, &
           WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA, &
           FCELL,IBM_SOLID,IBM_VGSC,IBM_CGSC,IBM_FGSC,IBM_IDCF,IBM_UNKZ,IBM_GASPHASE,IBM_CUTCFE,IBM_FTYPE_CFGAS, &
-          IBM_FTYPE_CFINB,IBM_FTYPE_RGGAS,IBM_IDCC, &
+          IBM_FTYPE_CFINB,IBM_FTYPE_RGGAS,IBM_IDCC,IBM_IDRA, &
           IBM_NCVARS, IBM_UNKH,NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
           NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
           JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, CCCOMPUTE_RADIATION, &
-          COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, MESH_CC_EXCHANGE, TRIANGULATE, VALID_TRIANGLE, IBM_CFST, IBM_NCFC
+          COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, MESH_CC_EXCHANGE, TRIANGULATE, VALID_TRIANGLE
 
 
 CONTAINS
@@ -743,29 +744,29 @@ END SUBROUTINE CFACE_PREDICT_NORMAL_VELOCITY
 
 ! ----------------------------- GET_CARTCELL_CFACE_LIST ----------------------------
 
-SUBROUTINE GET_CARTCELL_CFACE_LIST(I,J,K,ICF_START,NCFACE)
-
-! Provides CFACE indexes for Cartesian cell I,J,K.
-! IF NCFACE > 0, indexes range from ICF_START+1 to ICF_START+NCFACE.
-
-INTEGER, INTENT(IN) :: I,J,K
-INTEGER, INTENT(OUT):: ICF_START,NCFACE
-
-! Local variables:
-INTEGER :: ICF
-
-ICF_START = IBM_UNDEFINED
-NCFACE    = 0
-IF( CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE )THEN
-   ICF=CCVAR(I,J,K,IBM_IDCF)
-   IF (ICF==0) RETURN
-   IF (CUT_FACE(ICF)%NFACE==0) RETURN
-   NCFACE   = CUT_FACE(ICF)%NFACE
-   ICF_START= CUT_FACE(ICF)%CFACE_INDEX(1) - 1
-ENDIF
-
-RETURN
-END SUBROUTINE GET_CARTCELL_CFACE_LIST
+! SUBROUTINE GET_CARTCELL_CFACE_LIST(I,J,K,ICF_START,NCFACE)
+!
+! ! Provides CFACE indexes for Cartesian cell I,J,K.
+! ! IF NCFACE > 0, indexes range from ICF_START+1 to ICF_START+NCFACE.
+!
+! INTEGER, INTENT(IN) :: I,J,K
+! INTEGER, INTENT(OUT):: ICF_START,NCFACE
+!
+! ! Local variables:
+! INTEGER :: ICF
+!
+! ICF_START = IBM_UNDEFINED
+! NCFACE    = 0
+! IF( CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE )THEN
+!    ICF=CCVAR(I,J,K,IBM_IDCF)
+!    IF (ICF==0) RETURN
+!    IF (CUT_FACE(ICF)%NFACE==0) RETURN
+!    NCFACE   = CUT_FACE(ICF)%NFACE
+!    ICF_START= CUT_FACE(ICF)%CFACE_INDEX(1) - 1
+! ENDIF
+!
+! RETURN
+! END SUBROUTINE GET_CARTCELL_CFACE_LIST
 
 
 ! ---------------------------- ROTATED_CUBE_VELOCITY_FLUX --------------------------
@@ -26440,7 +26441,19 @@ USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE
 
 ! Local Variables:
 INTEGER :: ICF, CFACE_INDEX_LOCAL, SURF_INDEX, IBOD, IWSEL
-INTEGER :: ICF_START, NCFACE
+! INTEGER :: ICF_START, NCFACE
+INTEGER, PARAMETER, DIMENSION(3,3) :: ADD_MAT = RESHAPE( (/1,0,0,0,1,0,0,0,1 /), (/3,3/))
+INTEGER :: IADD,JADD,KADD,FTY_LO,FTY_HI,ICR_LO,ICR_HI,N_RAD_CFACE
+REAL(EB):: X1LO, X1HI
+
+INTEGER, PARAMETER :: RAD_GOTO_GASPHASE       = 1
+INTEGER, PARAMETER :: RAD_USE_CCVOLUS         = 2
+INTEGER, PARAMETER :: RAD_USE_AVGCFACES_CEN   = 3
+INTEGER, PARAMETER :: RAD_CFACE_SNAPTO_METHOD = RAD_USE_CCVOLUS
+
+LOGICAL :: GAS_VOL_RATIO_FLAG,LOHI_X1_FLAG
+INTEGER :: ICC, JCC
+REAL(EB):: AREAT,CC_VOL,X1AREA
 
 ! GET_CUTCELLS_VERBOSE variables:
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NCFACE_BY_MESH
@@ -26529,7 +26542,6 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ! Assign normal velocity to CFACE from SURF input:
          MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%UW0 = SURFACE(SURF_INDEX)%VEL
 
-
       ENDDO
    ENDDO
    MESHES(NM)%N_CFACE_CELLS = CFACE_INDEX_LOCAL
@@ -26538,17 +26550,19 @@ ENDDO MESH_LOOP_1
 
 ! Now add IBM_CFST, IBM_NCFC vars to CCVAR:
 MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
    CALL POINT_TO_MESH(NM)
+
    ! Now add IBM_CFST, IBM_NCFC vars to CCVAR:
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            CALL GET_CARTCELL_CFACE_LIST(I,J,K,ICF_START,NCFACE)
-            CCVAR(I,J,K,IBM_CFST) = ICF_START
-            CCVAR(I,J,K,IBM_NCFC) = NCFACE
-         ENDDO
-      ENDDO
-   ENDDO
+   ! DO K=1,KBAR
+   !    DO J=1,JBAR
+   !       DO I=1,IBAR
+   !          CALL GET_CARTCELL_CFACE_LIST(I,J,K,ICF_START,NCFACE)
+   !          CCVAR(I,J,K,IBM_CFST) = ICF_START
+   !          CCVAR(I,J,K,IBM_NCFC) = NCFACE
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
 
    ! DO K=1,KBAR
    !    DO J=1,JBAR
@@ -26558,6 +26572,204 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    !       ENDDO
    !    ENDDO
    ! ENDDO
+
+   ! Count size of RAD_CFACE for this mesh:
+   N_RAD_CFACE = 0
+   DO X1AXIS=IAXIS,KAXIS
+      IADD=ADD_MAT(X1AXIS,IAXIS); ILO=1-IADD
+      JADD=ADD_MAT(X1AXIS,JAXIS); JLO=1-JADD
+      KADD=ADD_MAT(X1AXIS,KAXIS); KLO=1-KADD
+      DO K=KLO,KBAR
+         DO J=JLO,JBAR
+            DO I=ILO,IBAR
+               IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID    .AND. CCVAR(I+IADD,J+JADD,K+KADD,IBM_CGSC)==IBM_SOLID   ) CYCLE
+               IF(CCVAR(I,J,K,IBM_CGSC)==IBM_GASPHASE .AND. CCVAR(I+IADD,J+JADD,K+KADD,IBM_CGSC)==IBM_GASPHASE) CYCLE
+               N_RAD_CFACE = N_RAD_CFACE + 1
+               FCVAR(I,J,K,IBM_IDRA,X1AXIS) = N_RAD_CFACE
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Allocate RAD_CFACE for this matrix:
+   MESHES(NM)%N_RAD_CFACE_CELLS_DIM = N_RAD_CFACE
+   IF(ALLOCATED(MESHES(NM)%RAD_CFACE)) DEALLOCATE(MESHES(NM)%RAD_CFACE)
+   ALLOCATE(MESHES(NM)%RAD_CFACE(0:N_RAD_CFACE)) ! RAD_FACE(0) is used to jump loops when ICR not defined.
+
+   ! Finally, assign CFACES to neighboring GASPHASE cut-face underlying Cartesian faces.
+   ! Avoid double counting, for use in Radiation FVM.
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            ! If there are no CFACES to distribute cycle:
+            ICF=CCVAR(I,J,K,IBM_IDCF)
+            IF (ICF<1) CYCLE
+            IF (CUT_FACE(ICF)%NFACE==0) CYCLE
+            DO X1AXIS=IAXIS,KAXIS
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  FTY_LO = FCVAR(I-1,J  ,K  ,IBM_FGSC,IAXIS)
+                  FTY_HI = FCVAR(I  ,J  ,K  ,IBM_FGSC,IAXIS)
+                  ICR_LO = FCVAR(I-1,J  ,K  ,IBM_IDRA,IAXIS)
+                  ICR_HI = FCVAR(I  ,J  ,K  ,IBM_IDRA,IAXIS)
+                  X1LO   = X(I-1)
+                  X1HI   = X(I  )
+               CASE(JAXIS)
+                  FTY_LO = FCVAR(I  ,J-1,K  ,IBM_FGSC,JAXIS)
+                  FTY_HI = FCVAR(I  ,J  ,K  ,IBM_FGSC,JAXIS)
+                  ICR_LO = FCVAR(I  ,J-1,K  ,IBM_IDRA,JAXIS)
+                  ICR_HI = FCVAR(I  ,J  ,K  ,IBM_IDRA,JAXIS)
+                  X1LO   = Y(J-1)
+                  X1HI   = Y(J  )
+               CASE(KAXIS)
+                  FTY_LO = FCVAR(I  ,J  ,K-1,IBM_FGSC,KAXIS)
+                  FTY_HI = FCVAR(I  ,J  ,K  ,IBM_FGSC,KAXIS)
+                  ICR_LO = FCVAR(I  ,J  ,K-1,IBM_IDRA,KAXIS)
+                  ICR_HI = FCVAR(I  ,J  ,K  ,IBM_IDRA,KAXIS)
+                  X1LO   = Z(K-1)
+                  X1HI   = Z(K  )
+               ENDSELECT
+
+               ! IF FTY_LO == IBM_SOLID    and FTY_HI == IBM_SOLID, do not assign.
+               IF (FTY_LO==IBM_SOLID .AND. FTY_HI==IBM_SOLID) CYCLE
+
+               ! If FTY_LO == IBM_CUTCFE and FTY_HI /= IBM_CUTCFE assign all CFACES of this cell to
+               ! RAD_CFACE(ICF_LO)%ASSIGNED_CFACES_RADI.
+               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI/=IBM_CUTCFE) ) THEN
+                  CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                  CYCLE
+               ENDIF
+
+               ! If FTY_LO /= IBM_CUTCFE and FTY_HI == IBM_CUTCFE assign all CFACES of this cell to
+               ! RAD_CFACE(ICF_HI)%ASSIGNED_CFACES_RADI
+               IF ( (FTY_LO/=IBM_CUTCFE .AND. FTY_HI==IBM_CUTCFE  ) ) THEN
+                  CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                  CYCLE
+               ENDIF
+
+               ! If (FTY_LO == IBM_CUTCFE and FTY_HI == IBM_CUTCFE) .OR.
+               !    (FTY_LO == IBM_GASPHASE and FTY_HI == IBM_GASPHASE) assign CFACES with centriods on low
+               ! X1AXIS side of cell to RAD_CFACE(ICF_LO)%ASSIGNED_CFACES_RADI, and CFACE with centroids
+               ! on high X1AXIS side to RAD_CFACE(ICF_HI)%ASSIGNED_CFACES_RADI.
+               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI==IBM_CUTCFE  ) .OR. &
+                    (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_GASPHASE)       ) THEN
+                  CALL ASSIGN_CFACE_CARTFCS(NM,0,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                  CYCLE
+               ENDIF
+
+               ! Now, what to do when:
+               ! If FTY_LO == IBM_SOLID    and FTY_HI == IBM_GASPHASE,
+               ! If FTY_LO == IBM_GASPHASE and FTY_HI == IBM_SOLID.
+               CFACE_SNAP_IF : IF (RAD_CFACE_SNAPTO_METHOD==RAD_GOTO_GASPHASE) THEN
+
+                  ! If FTY_LO == IBM_GASPHASE and FTY_HI == IBM_SOLID, assign to the GASPHASE side.
+                  IF ( (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_SOLID )       ) THEN
+                     CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     CYCLE
+                  ENDIF
+                  ! If FTY_LO == IBM_SOLID    and FTY_HI == IBM_GASPHASE, assign to the GASPHASE side.
+                  IF ( (FTY_LO==IBM_SOLID  .AND. FTY_HI==IBM_GASPHASE)       ) THEN
+                     CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     CYCLE
+                  ENDIF
+
+               ELSEIF (RAD_CFACE_SNAPTO_METHOD==RAD_USE_CCVOLUS) THEN ! CFACE_SNAP_IF
+
+                  ICC=CCVAR(I,J,K,IBM_IDCC); IF(ICC<1) CYCLE
+                  CC_VOL=0._EB
+                  DO JCC=1,CUT_CELL(ICC)%NCELL
+                     CC_VOL=CC_VOL+CUT_CELL(ICC)%VOLUME(JCC)
+                  ENDDO
+                  GAS_VOL_RATIO_FLAG = CC_VOL < 0.5_EB*(DX(I)*DY(J)*DZ(K))
+
+                  ! If FTY_LO == IBM_GASPHASE and FTY_HI == IBM_SOLID, assign depending on GAS_VOL_RATIO_FLAG.
+                  ! IF GAS_VOL_RATIO_FLAG = .TRUE. we assume GEOM surface closer to gas face -> Assign to GASPHASE.
+                  ! IF GAS_VOL_RATIO_FLAG =.FALSE. we assume GEOM surface closer to solid face-> Assign to SOLID.
+                  IF ( (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_SOLID )       ) THEN
+                     IF(GAS_VOL_RATIO_FLAG) THEN
+                        CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ELSE
+                        CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ENDIF
+                     CYCLE
+                  ENDIF
+                  ! If FTY_LO == IBM_SOLID    and FTY_HI == IBM_GASPHASE, assign to the GASPHASE side.
+                  IF ( (FTY_LO==IBM_SOLID  .AND. FTY_HI==IBM_GASPHASE)       ) THEN
+                     IF(GAS_VOL_RATIO_FLAG) THEN
+                        CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ELSE
+                        CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ENDIF
+                     CYCLE
+                  ENDIF
+
+               ELSEIF (RAD_CFACE_SNAPTO_METHOD==RAD_USE_AVGCFACES_CEN) THEN ! CFACE_SNAP_IF
+
+                  X1AREA=0._EB
+                  AREAT =0._EB
+                  DO IFACE=1,CUT_FACE(ICF)%NFACE
+                     AREAT = AREAT + CUT_FACE(ICF)%AREA(IFACE)
+                     X1AREA=X1AREA + CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)*CUT_FACE(ICF)%AREA(IFACE)
+                  ENDDO
+                  IF (AREAT > TWO_EPSILON_EB) THEN
+                     LOHI_X1_FLAG = X1AREA/AREAT-X1LO < 0.5_EB*(X1HI-X1LO) ! If .TRUE. average CFACE centroid in the
+                                                                           ! cell is closer to X1LO side.
+                  ELSE
+                     CYCLE ! No need to add these CFACES.
+                  ENDIF
+                  ! IF LOHI_X1_FLAG = .TRUE., assign to low X1AXIS face, if .FALSE. assign to high X1AXIS face.
+                  IF ( (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_SOLID ) .OR. &
+                       (FTY_LO==IBM_SOLID  .AND. FTY_HI==IBM_GASPHASE)       ) THEN
+                     IF(LOHI_X1_FLAG) THEN
+                        CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ELSE
+                        CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+                     ENDIF
+                  ENDIF
+
+               ENDIF CFACE_SNAP_IF
+
+
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! WRITE(LU_ERR,*) 'NM,N_CFACE_CELLS=',NM,MESHES(NM)%N_CFACE_CELLS
+   ! X1AXIS=IAXIS
+   ! N_RAD_CFACE = 0
+   ! DO K=1,KBAR
+   !    DO J=1,JBAR
+   !       DO I=0,IBAR
+   !          ICF=FCVAR(I,J,K,IBM_IDRA,X1AXIS)
+   !          N_RAD_CFACE = N_RAD_CFACE + MESHES(NM)%RAD_CFACE(ICF)%N_ASSIGNED_CFACES_RADI
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
+   ! WRITE(LU_ERR,*) 'IAXIS N_CFACE_CELLS=',N_RAD_CFACE
+   ! X1AXIS=JAXIS
+   ! N_RAD_CFACE = 0
+   ! DO K=1,KBAR
+   !    DO J=0,JBAR
+   !       DO I=1,IBAR
+   !          ICF=FCVAR(I,J,K,IBM_IDRA,X1AXIS)
+   !          N_RAD_CFACE = N_RAD_CFACE + MESHES(NM)%RAD_CFACE(ICF)%N_ASSIGNED_CFACES_RADI
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
+   ! WRITE(LU_ERR,*) 'JAXIS N_CFACE_CELLS=',N_RAD_CFACE
+   ! X1AXIS=KAXIS
+   ! N_RAD_CFACE = 0
+   ! DO K=0,KBAR
+   !    DO J=1,JBAR
+   !       DO I=1,IBAR
+   !          ICF=FCVAR(I,J,K,IBM_IDRA,X1AXIS)
+   !          N_RAD_CFACE = N_RAD_CFACE + MESHES(NM)%RAD_CFACE(ICF)%N_ASSIGNED_CFACES_RADI
+   !       ENDDO
+   !    ENDDO
+   ! ENDDO
+   ! WRITE(LU_ERR,*) 'KAXIS N_CFACE_CELLS=',N_RAD_CFACE
+
 
 ENDDO MESH_LOOP_2
 
@@ -26569,6 +26781,135 @@ ENDIF
 
 RETURN
 END SUBROUTINE GET_INBCUTFACES_TO_CFACE
+
+
+! ------------------------ ASSIGN_CFACE_CARTFCS ----------------------------------
+
+SUBROUTINE ASSIGN_CFACE_CARTFCS(NM,LOHI_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
+
+! This routine assumes ICF is not zero, terefore there are CFACES in cell I,J,K.
+
+INTEGER, INTENT(IN) :: NM,LOHI_IND,ICF,ICR_LO,ICR_HI,X1AXIS
+REAL(EB),INTENT(IN) :: X1LO,X1HI
+
+IF ( LOHI_IND == LOW_IND ) THEN ! Add cface indexes of boundary faces in cell I,J,K to RAD_CFACE(ICR_LO)
+   CALL ASSIGN_ONE_FACE_RADI(NM,ICR_LO,ICF)
+ELSEIF ( LOHI_IND == HIGH_IND ) THEN ! ADD cface indexes of boundary faces in cell I,J,K to RAD_CFACE(ICR_HI)
+   CALL ASSIGN_ONE_FACE_RADI(NM,ICR_HI,ICF)
+ELSE ! Distribute among ICR_LO and ICR_HI:
+   CALL ASSIGN_TWO_FACE_RADI(NM,ICR_LO,ICR_HI,ICF,X1LO,X1HI,X1AXIS)
+ENDIF
+
+RETURN
+END SUBROUTINE ASSIGN_CFACE_CARTFCS
+
+
+! ------------------------ ASSIGN_TWO_FACE_RADI ---------------------------------
+
+SUBROUTINE ASSIGN_TWO_FACE_RADI(NM,ICR_LO,ICR_HI,ICF,X1LO,X1HI,X1AXIS)
+
+INTEGER, INTENT(IN) :: NM,ICF,ICR_LO,ICR_HI,X1AXIS
+REAL(EB),INTENT(IN) :: X1LO,X1HI
+
+! Local veriables:
+REAL(EB) :: DX1O2
+INTEGER  :: NCFACE(LOW_IND:HIGH_IND),ICR2(LOW_IND:HIGH_IND),ICR,IFACE,NCFACES,NASSIGN,IDUM,IND
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CFACES_RADI_AUX
+
+DX1O2 = 0.5_EB*(X1HI-X1LO)
+NCFACE(LOW_IND:HIGH_IND) = 0
+ICR2(LOW_IND:HIGH_IND) = (/ ICR_LO, ICR_HI /)
+
+! First count how many CFACES each Cartesian face on the X1AXIS will receive.
+! A CFACE is assigned to the cartesian face that lays closer to its centroid in the X1AXIS direction.
+DO IFACE=1,CUT_FACE(ICF)%NFACE
+   IF(ABS(CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)-X1LO) < DX1O2) THEN
+      NCFACE(LOW_IND)  = NCFACE(LOW_IND)  + 1
+   ELSE
+      NCFACE(HIGH_IND) = NCFACE(HIGH_IND) + 1
+   ENDIF
+ENDDO
+
+! Allocate RAD_CFACE(ICR2(IND)):
+DO IND=LOW_IND,HIGH_IND
+   NCFACES = NCFACE(IND)
+   ICR     = ICR2(IND)
+   NASSIGN = MESHES(NM)%RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+   IF (NCFACES > 0) THEN
+      IF (NASSIGN==0) THEN
+         ! Allocate for first time RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI:
+         ALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(NCFACES))
+      ELSE
+         ! Reallocate and add NCFACES:
+         ALLOCATE(CFACES_RADI_AUX(NASSIGN));
+         CFACES_RADI_AUX(1:NASSIGN) = MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1:NASSIGN)
+         DEALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI)
+         ALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(NASSIGN+NCFACES))
+         MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1:NASSIGN)=CFACES_RADI_AUX(1:NASSIGN)
+         DEALLOCATE(CFACES_RADI_AUX)
+      ENDIF
+   ENDIF
+   NCFACE(IND) = NASSIGN
+ENDDO
+
+! Add to RAD_CFACE ICR_LO, ICR_HI:
+DO IFACE=1,CUT_FACE(ICF)%NFACE
+   IF(ABS(CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)-X1LO) < DX1O2) THEN
+      IND = LOW_IND
+   ELSE
+      IND = HIGH_IND
+   ENDIF
+   NCFACE(IND) = NCFACE(IND)  + 1
+   IDUM        = NCFACE(IND)
+   ICR         =   ICR2(IND)
+   MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IDUM)=CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+ENDDO
+
+DO IND=LOW_IND,HIGH_IND
+   MESHES(NM)%RAD_CFACE(ICR2(IND))%N_ASSIGNED_CFACES_RADI = NCFACE(IND)
+ENDDO
+
+
+RETURN
+END SUBROUTINE ASSIGN_TWO_FACE_RADI
+
+
+! ------------------------ ASSIGN_ONE_FACE_RADI ---------------------------------
+
+SUBROUTINE ASSIGN_ONE_FACE_RADI(NM,ICR,ICF)
+
+! Assign all CFACES in CUT_FACE(ICF)%CFACE_INDEX to RAD_CFACE(ICR)
+
+INTEGER, INTENT(IN) :: NM, ICR, ICF
+
+! Local Variables:
+INTEGER :: NASSIGN, NCFACES, IDUM, IFACE
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CFACES_RADI_AUX
+
+NASSIGN = MESHES(NM)%RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+NCFACES = CUT_FACE(ICF)%NFACE
+
+IF (NASSIGN==0) THEN
+   ! Allocate for first time RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI:
+   ALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(NCFACES))
+ELSE
+   ! Reallocate and add NCFACES:
+   ALLOCATE(CFACES_RADI_AUX(NASSIGN));
+   CFACES_RADI_AUX(1:NASSIGN) = MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1:NASSIGN)
+   DEALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI)
+   ALLOCATE(MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(NASSIGN+NCFACES))
+   MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1:NASSIGN)=CFACES_RADI_AUX(1:NASSIGN)
+   DEALLOCATE(CFACES_RADI_AUX)
+ENDIF
+IDUM = NASSIGN
+DO IFACE=1,NCFACES
+   IDUM=IDUM+1
+   MESHES(NM)%RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IDUM)=CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+ENDDO
+MESHES(NM)%RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI = NASSIGN + NCFACES
+
+RETURN
+END SUBROUTINE ASSIGN_ONE_FACE_RADI
 
 
 ! ------------------------- SET_GC_CUTCELLS_3D -----------------------------------
@@ -28443,6 +28784,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ENDIF
         WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
+        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD2),' are not equal.'
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V23(IAXIS)**2._EB + V23(JAXIS)**2._EB + V23(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
@@ -28452,6 +28794,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ENDIF
         WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
+        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD2),', ',WSELEM(NOD3),' are not equal.'
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V31(IAXIS)**2._EB + V31(JAXIS)**2._EB + V31(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
@@ -28461,6 +28804,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
           WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
         ENDIF
         WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
+        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD3),' are not equal.'
         CALL SHUTDOWN("") ; RETURN
       END IF
 
