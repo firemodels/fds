@@ -235,6 +235,12 @@ $QFDS -d Heat_Transfer ht3d_sphere_51.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n10.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n20.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n10.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n20.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n40.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
