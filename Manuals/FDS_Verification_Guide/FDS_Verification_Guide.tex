@@ -3759,7 +3759,7 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{ht3d_sphere_51}
 \label{ht3d_sphere_25}
 
-\textbf{Salah Benkorichi, Ulster University}\\
+\textbf{Salah Benkorichi, Omega Fire Engineering Ltd.}\\
 
 In this example, a solid sphere of radius 0.1 m with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
@@ -3792,6 +3792,20 @@ The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the te
 \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
 \caption[The \textct{ht3d\_sphere} convergence]{$L_{\infty}$ error in sphere temperature at $t=180$ s with different cell numbers [102, 51, 25] from left to right.}
 \label{fig:ht3d_sphere_conv}
+\end{figure}
+
+\subsection{3D Internal Radiation (\texorpdfstring{\textct{ht3d\_radiation}}{ht3d\_radiation})}
+\label{ht3d_radiation}
+
+\textbf{Morgan Bruns, Virginia Military Institute}\\
+
+This is a 1D problem set up in the 3D heat transfer solver.  The hot surface of a block of material is held at 700 \si{\degreeCelsius}.  The cold side is held at 20 \si{\degreeCelsius}.  The thermal conductivity is set to 0.1 \si{W/(m.K)}.  The refractive index $n$ is set to 1.5 and two values of absorption coefficient $\kappa = [100, 2000]$ 1/m are used.  If there where no internal radiation, the temperature solution would, of course, just be linear.  For a thermally thick material, the radiative conductivity $k_{\mathrm{r}} = 16 n^2 \sigma T^3 / 3 \kappa$ is added to the thermal conductivity.  Figure \ref{fig:ht3d_radiation} shows FDS results compared to the analytical solution from \cite{Modest:2003}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_radiation}
+\caption[The \textct{ht3d\_radiation} solution]{Steady-state temperature profiles inside a solid.  We consider two values of absorption coefficient, $\kappa = [100, 2000]$ 1/m and look at FDS solutions at three grid resolutions.}
+\label{fig:ht3d_radiation}
 \end{figure}
 
 
