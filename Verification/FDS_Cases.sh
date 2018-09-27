@@ -235,6 +235,12 @@ $QFDS -d Heat_Transfer ht3d_sphere_51.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n10.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n20.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n10.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n20.fds
+$QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n40.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -405,6 +411,9 @@ $QFDS -d Radiation plate_view_factor_cart_100.fds
 $QFDS -d Radiation plate_view_factor_cyl_30.fds
 $QFDS -d Radiation plate_view_factor_cyl_60.fds
 $QFDS -d Radiation plate_view_factor_cyl_100.fds
+$QFDS -d Radiation plate_view_factor_ibm_30.fds
+$QFDS -d Radiation plate_view_factor_ibm_60.fds
+$QFDS -d Radiation plate_view_factor_ibm_100.fds
 $QFDS -d Radiation radiating_polygon_square_20.fds
 $QFDS -d Radiation radiating_polygon_square_40.fds
 $QFDS -d Radiation radiating_polygon_square_80.fds

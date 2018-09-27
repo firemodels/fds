@@ -1,0 +1,83 @@
+&HEAD CHID='plate_view_factor_ibm_60', TITLE='View factor from 2 m by 2 m plate' /
+
+The RADIATIVE HEAT FLUX should be 81.8 kW/m2
+
+&MESH IJK=100,100,100, XB=-1.0,2.0,-0.5,2.5,-0.5,2.5 /
+
+&TIME T_END=.01 DT=0.001 / 
+
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0., HUMIDITY=0. / 
+
+&RADI NUMBER_RADIATION_ANGLES=60 /
+
+&SURF ID='HOT'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&SURF ID='COLD'
+      DEFAULT = .TRUE.
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = -273.
+      TAU_T = 0.0 /
+
+&GEOM ID='Hot Block', SURF_ID='HOT','COLD'
+      VERTS= 0.0     , 0.0, 0.0
+             1.414214, 0.0, 1.414214
+             1.414214, 2.0, 1.414214
+             0.0     , 2.0, 0.0     
+            -0.07071 , 0.0, 0.07071
+             1.343503, 0.0, 1.484924
+             1.343503, 2.0, 1.484924
+            -0.07071 , 2.0, 0.07071
+      FACES=1,2,6, 2
+            1,6,5, 2
+            2,3,7, 2
+            2,7,6, 2
+            3,4,8, 2
+            3,8,7, 2
+            4,1,5, 2
+            4,5,8, 2
+            1,3,2, 2
+            1,4,3, 2
+            5,6,7, 1
+            5,7,8, 1 /
+
+&GEOM ID='Cold Block', SURF_ID='COLD'
+      VERTS=-0.77782 , 0.0, 0.777817
+             0.636396, 0.0, 2.192031
+             0.636396, 2.0, 2.192031
+            -0.77782 , 2.0, 0.777817
+            -0.84853 , 0.0, 0.84853 
+             0.565685, 0.0, 2.262742
+             0.565685, 2.0, 2.262742
+            -0.84853 , 2.0, 0.84853 
+      FACES=1,2,6, 1
+            1,6,5, 1
+            2,3,7, 1
+            2,7,6, 1
+            3,4,8, 1
+            3,8,7, 1
+            4,1,5, 1
+            4,5,8, 1
+            1,3,2, 1
+            1,4,3, 1
+            5,6,7, 1
+            5,7,8, 1 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DEVC ID='HF', XYZ=-0.07,1.0,1.48422, QUANTITY='RADIATIVE HEAT FLUX GAS', ORIENTATION=0.7071,0,-0.7071 /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='RADIATIVE HEAT FLUX' /
+&SLCF PBY=1, QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=.TRUE. /
+
+&TAIL /

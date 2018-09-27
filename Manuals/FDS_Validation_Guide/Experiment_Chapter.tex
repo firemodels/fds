@@ -1864,11 +1864,7 @@ The propane reaction is:
 \be
 (\text{Products 1}) + 2.7935 \; (\text{Air}) \longrightarrow  \underbrace{\mathrm{(3 \; CO_2 +  4 \; H_2O  + 5(0.79/0.21) \; N_2)}}_\text{Products 2}
 \ee
-The stoichiometry is dictated by the composition of the fuel molecule except for the stoichiometric coefficients of CO and soot in the first step. For propane, the choice is based on an empirical correlation for {\em post-flame} CO and soot yields developed by K\"{o}yl\"{u} and Faeth~\cite{Koylu:1}:
-\be
-   y_{\rm {\tiny CO}} = 0.0014 + 0.37 \, y_{\rm {\tiny s}}
-\ee
-However, this correlation does not hold for methane which is sometimes characterized as ``non-sooting'' even though the unsuppressed line burner fire has a distinct yellow-orange color rather than blue. As the co-flow is diluted with nitrogen, the color changes from yellow to blue as the in-flame soot volume fraction decreases. The simple two-step reaction scheme cannot predict the distribution of soot and CO in the first step; thus, the stoichiometric coefficients for CO and soot (C) in Eq.~(\ref{CH4_step_1}) are chosen somewhat arbitrarily. The choice does affect the predicted radiative fraction of the fire and the heat flux to the radiometer.
+The stoichiometry is dictated by the composition of the fuel molecule except for the stoichiometric coefficients of CO and soot in the first step. By default, 2/3 of the carbon in the fuel molecule is converted to CO, and 1/3 to soot. No better strategy has yet emerged for determining this. For both methane and propane, soot is generated in the first step, and as the co-flow is diluted with nitrogen, the flame color changes from yellow to blue as the in-flame soot volume fraction decreases. The simple two-step reaction scheme cannot predict the distribution of soot and CO in the first step; thus, the stoichiometric coefficients for CO and soot (C) in Eq.~(\ref{CH4_step_1}) are chosen somewhat arbitrarily. The choice {\em does} affect the predicted radiative fraction of the fire and the heat flux to the radiometer.
 
 Extinction of the fire is achieved using the {\em critical flame temperature} concept, which is the default extinction model in FDS. The CFT is 1507~$^\circ$C for methane and 1447~$^\circ$C for propane~\cite{SFPE:Beyler}. In addition, combustion is suppressed below the auto-ignition temperatures of 540~$^\circ$C and 450~$^\circ$C for methane and propane, respectively, except in a small volume just above the burner where the fuel is allowed to burn on contact with oxygen. This is a simple way to simulate the effect of a spark igniter.
 
@@ -1898,7 +1894,7 @@ Wind tunnel measurements were conducted at the University of Western Ontario (UW
 
 \subsubsection{Modeling Notes}
 
-The 1:100 scale model of the building is approximately 14~cm long, 9~cm wide, and 4~cm tall. The simulations use 1~mm, 2~mm, and 4~mm cubic grid cells, uniformly spanning the computational domain of dimensions 1.12~m $\times$ 0.56~m $\times$ 0.28~m. The grid resolution was assessed by checking that the values of $y^+$, a non-dimensional distance, never exceed 150 for any mesh resolution. $y^+$ values are dependent on turbulence model wall laws and a value of 150 means that the first grid point is well within the logarithmic region. 
+The 1:100 scale model of the building is approximately 14~cm long, 9~cm wide, and 4~cm tall. The simulations use 5.0~mm, 2.5~mm, and 1.25~mm cubic grid cells, uniformly spanning the computational domain of dimensions 1.12~m $\times$ 0.56~m $\times$ 0.28~m. The 4~cm height of the scale model is spanned by 8, 16, and 32 grid cells. The grid resolution was assessed by checking that the values of $y^+$, a non-dimensional distance, never exceed 150 for any mesh resolution. $y^+$ values are dependent on turbulence model wall laws and a value of 150 means that the first grid point is well within the logarithmic region.
 
 Only two wind directions are chosen for validation, 180\si{\degree} and 270\si{\degree}, representing right angles formed with the long and short sides of the building. For each angle, 3 lines of pressure measurements running up the windward side, along the roof, and down the leeward side are used for comparison to the simulation. One line of pressure measurements along the side of the scale model is also used.
 

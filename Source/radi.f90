@@ -678,16 +678,17 @@ SUBROUTINE RADIATION_FVM(T,NM,RAD_ITER)
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
-USE COMPLEX_GEOMETRY, ONLY : IBM_CFST,IBM_NCFC
+USE COMPLEX_GEOMETRY, ONLY : IBM_IDRA,IBM_CGSC,IBM_SOLID
 USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
-            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ
+            AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ,ILXU_AUX,ILYU_AUX,ILZU_AUX,AFX_AUX,AFY_AUX,AFZ_AUX
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, ARRAY_INDEX,NRA, &
             IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL
+INTEGER  :: IADD,ICR,IFA
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
 REAL(EB) :: XID,YJD,ZKD,AREA_VOLUME_RATIO,DLF,DLA(3),TSI,TMP_EXTERIOR,DUMMY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
@@ -703,7 +704,6 @@ TYPE(RAD_FILE_TYPE), POINTER :: RF
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 CHARACTER(20) :: FORMT
-
 ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
 
 KFST4_GAS => WORK1
@@ -719,6 +719,7 @@ INRAD_W  => WALL_WORK2
 IF (CC_IBM) THEN
    OUTRAD_F => FACE_WORK1
    INRAD_F  => FACE_WORK2
+   INRAD_F  = 0._EB
 ENDIF
 
 ! Ratio of solid angle, used in scattering
@@ -1187,7 +1188,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                  !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
-                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP)
+                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP, AFX, AFY, AFZ, &
+                 !$OMP& AFX_AUX, AFY_AUX, AFZ_AUX, ILXU_AUX, ILYU_AUX, ILZU_AUX, &
+                 !$OMP& ICF, IADD, ICR, IFA )
                  SLICELOOP: DO IJK = 1, M_IJK
                    I = IJK_SLICE(1,IJK)
                    J = IJK_SLICE(2,IJK)
@@ -1214,20 +1217,45 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
                    ENDIF
                    IF (CC_IBM) THEN
-                      DO ICF=CCVAR(I,J,K,IBM_CFST)+1,CCVAR(I,J,K,IBM_CFST)+CCVAR(I,J,K,IBM_NCFC)
-                         IF (ISTEP*CFACE(ICF)%NVEC(1)>0._EB) THEN
-                            AFX = ABS(CFACE(ICF)%NVEC(1))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
-                            ILXU = ILXU*(1._EB-AFX) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
-                         ENDIF
-                         IF (JSTEP*CFACE(ICF)%NVEC(2)>0._EB) THEN
-                            AFY = ABS(CFACE(ICF)%NVEC(2))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
-                            ILYU = ILYU*(1._EB-AFY) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
-                         ENDIF
-                         IF (KSTEP*CFACE(ICF)%NVEC(3)>0._EB) THEN
-                            AFZ = ABS(CFACE(ICF)%NVEC(3))*CFACE(ICF)%AREA/(DX(I)*DY(J))
-                            ILZU = ILZU*(1._EB-AFZ) + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
+                      IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE SLICELOOP
+                      AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
+                      ILXU_AUX = 0._EB; ILYU_AUX = 0._EB; ILZU_AUX = 0._EB
+                      ! X axis
+                      IADD= -(1+ISTEP)/2
+                      ICR = FCVAR(I+IADD,J,K,IBM_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
+                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                         IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(IAXIS)>0._EB) THEN
+                            AFX      = ABS(CFACE(ICF)%NVEC(IAXIS))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
+                            AFX_AUX  = AFX_AUX  + AFX
+                            ILXU_AUX = ILXU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFX
                          ENDIF
                       ENDDO
+                      ! Y axis
+                      IADD= -(1+JSTEP)/2
+                      ICR = FCVAR(I,J+IADD,K,IBM_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
+                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                         IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(JAXIS)>0._EB) THEN
+                            AFY      = ABS(CFACE(ICF)%NVEC(JAXIS))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
+                            AFY_AUX  = AFY_AUX  + AFY
+                            ILYU_AUX = ILYU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFY
+                         ENDIF
+                      ENDDO
+                      ! Z axis
+                      IADD= -(1+KSTEP)/2
+                      ICR = FCVAR(I,J,K+IADD,IBM_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
+                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                         IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(KAXIS)>0._EB) THEN
+                            AFZ      = ABS(CFACE(ICF)%NVEC(KAXIS))*CFACE(ICF)%AREA/(DX(I)*DY(J))
+                            AFZ_AUX  = AFZ_AUX  + AFZ
+                            ILZU_AUX = ILZU_AUX + CFACE(ICF)%ONE_D%ILW(N,IBND)*AFZ
+                         ENDIF
+                      ENDDO
+                      ILXU = ILXU*(1._EB-AFX_AUX) + ILXU_AUX
+                      ILYU = ILYU*(1._EB-AFY_AUX) + ILYU_AUX
+                      ILZU = ILZU*(1._EB-AFZ_AUX) + ILZU_AUX
                    ENDIF
                    A_SUM = AX + AY + AZ
                    AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU

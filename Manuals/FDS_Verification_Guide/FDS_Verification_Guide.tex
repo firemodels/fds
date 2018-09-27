@@ -2321,10 +2321,10 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 
 There are numerous examples in the heat transfer literature of exact solutions, for simple configurations of hot and cold objects, of the radiation transport equation. This chapter presents a number of these examples, plus others aimed at assessing the influence of absorptive media.
 
-\section{Radiation from an Infinitely Long Plate (\texorpdfstring{\textct{plate\_view\_factor}}{plate\_view\_factor}) }
+\section{Radiation View Factors (\texorpdfstring{\textct{plate\_view\_factor}}{plate\_view\_factor}) }
 \label{plate_view_factor}
 
-This verification case tests the computation of radiative heat flux from a hot plate to a target surface 1~m away in different coordinate systems. The radiating surface is at 1000~\si{\degree C} and has an emissivity of 1.0.  The exact values are calculated using the analytical expressions for the view factors.
+These verification cases test the computation of radiative heat flux from a hot plate to a target surface 1~m away in different coordinate systems. The radiating surface is at 1000~\si{\degree C} and has an emissivity of 1.0.  The exact values are calculated using the analytical expressions for the view factors.
 \begin{center}
 \begin{tabular}{|l|l|c|}
 \hline Co-ordinates & Radiation source & Heat flux (kW/m$^2$)  \\ \hline \hline
@@ -3300,7 +3300,7 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 \section{Aerosol Behavior}
 \subsection{Gravitational Settling and Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_gravitational\_deposition}}{aerosol\_gravitational\_deposition})}
 	\label{aerosol_gravitational_deposition}
-	
+
 This verification test consists of two test cases. The second case, {\ct aerosol\_gravitational\_deposition\_2}, reverses the z-component of gravity. The case consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct GRAVITATIONAL\_SETTLING} and {\ct GRAVITATIONAL\_DEPOSITION} are turned off. Since the box has a constant density over its height, a uniform settling rate over time is expected.
 
 \begin{figure}[ht]
@@ -3317,7 +3317,7 @@ This verification test consists of two test cases. The second case, {\ct aerosol
 
 \subsection{Thermophoretic Settling and Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_thermophoretic\_deposition}}{aerosol\_thermophoretic\_deposition})}
 	\label{aerosol_thermophoretic_deposition}
-	
+
 This verification test consists of two test cases. The second case, {\ct aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 10~cm on side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. The gas temperature is initialized to its steady-state temperature gradient. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct THERMOPHORETIC\_SETTLING} and {\ct THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settlings rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically
 
 \begin{figure}[ht]
@@ -3334,13 +3334,13 @@ This verification test consists of two test cases. The second case, {\ct aerosol
 
 \subsection{Turbulent Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_turbulent\_deposition}}{aerosol\_turbulent\_deposition})}
 	\label{aerosol_turbulent_deposition}
-	
+
 This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is {\ct OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct TURBULENT\_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
 
 \begin{figure}[ht]
 	\centering
 	\begin{tabular}{c}
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_turbulent_deposition_1_wall} 
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_turbulent_deposition_1_wall}
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_turbulent_deposition_2_wall} \\
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_turbulent_deposition_3_wall}
 	\end{tabular}
@@ -3368,10 +3368,10 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 \subsection{Agglomeration of Aerosols (\texorpdfstring{\textct{aerosol\_agglomeration}}{aerosol\_agglomeration})}
 	\label{aerosol_agglomeration}
-	
+
 This verification case consists of two test cases.
 
-The first case to be discussed consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with two particle size bins with a minimum diameter of 1~$\mu$m and a maximum diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the first size bin of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct AGGLOMERATION} are turned off. In this case the only mechanisms operating are Brownian and gravitational agglomeration. The case is run for 60 s. 
+The first case to be discussed consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with two particle size bins with a minimum diameter of 1~$\mu$m and a maximum diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the first size bin of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct AGGLOMERATION} are turned off. In this case the only mechanisms operating are Brownian and gravitational agglomeration. The case is run for 60 s.
 
 \begin{figure}[ht]
 	\centering
@@ -3383,7 +3383,7 @@ The first case to be discussed consists of a box 10~cm on side with adiabatic, f
 	\label{fig:agglomeration}
 \end{figure}
 
-In the second case three pairs of small (3~mm by 3~mm) vents are placed on opposite corners of the the walls, floor, and ceiling of the box. Each pair is connected by an HVAC duct that blows air at 1~m/s at the face of the vents. The average dissipation rate in the box is 0.0204~m$^2$/s$^3$. Using the average dissipation rate, the agglomeration rate is computed and the resulting mass fractions are compared against the volume averaged mass fractions computed by FDS.  
+In the second case three pairs of small (3~mm by 3~mm) vents are placed on opposite corners of the the walls, floor, and ceiling of the box. Each pair is connected by an HVAC duct that blows air at 1~m/s at the face of the vents. The average dissipation rate in the box is 0.0204~m$^2$/s$^3$. Using the average dissipation rate, the agglomeration rate is computed and the resulting mass fractions are compared against the volume averaged mass fractions computed by FDS.
 
 \begin{figure}[ht]
 	\centering
@@ -3759,7 +3759,7 @@ This set of cases tests the ability of the 3D heat conduction solver to transfer
 \label{ht3d_sphere_51}
 \label{ht3d_sphere_25}
 
-\textbf{Salah Benkorichi, Ulster University}\\
+\textbf{Salah Benkorichi, Omega Fire Engineering Ltd.}\\
 
 In this example, a solid sphere of radius 0.1 m with internal heat generated at $\dot{q}^{\prime\prime\prime}$ = 200 \si{kW/m^3} is studied. The initial temperature at the boundary is set to \SI{20}{\degreeCelsius}. The objective of the test is to ensure that the heat conduction through the sphere and across the radius is computed properly. The heat conduction can be written as
 \begin{equation}
@@ -3792,6 +3792,20 @@ The solution is run for 180 s. In Fig.~\ref{fig:ht3d_sphere_time} we show the te
 \includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphere_convergence1}
 \caption[The \textct{ht3d\_sphere} convergence]{$L_{\infty}$ error in sphere temperature at $t=180$ s with different cell numbers [102, 51, 25] from left to right.}
 \label{fig:ht3d_sphere_conv}
+\end{figure}
+
+\subsection{3D Internal Radiation (\texorpdfstring{\textct{ht3d\_radiation}}{ht3d\_radiation})}
+\label{ht3d_radiation}
+
+\textbf{Morgan Bruns, Virginia Military Institute}\\
+
+This is a 1D problem set up in the 3D heat transfer solver.  The hot surface of a block of material is held at 700 \si{\degreeCelsius}.  The cold side is held at 20 \si{\degreeCelsius}.  The thermal conductivity is set to 0.1 \si{W/(m.K)}.  The refractive index $n$ is set to 1.5 and two values of absorption coefficient $\kappa = [100, 2000]$ 1/m are used.  If there where no internal radiation, the temperature solution would, of course, just be linear.  For a thermally thick material, the radiative conductivity $k_{\mathrm{r}} = 16 n^2 \sigma T^3 / 3 \kappa$ is added to the thermal conductivity.  Figure \ref{fig:ht3d_radiation} shows FDS results compared to the analytical solution from \cite{Modest:2003}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_radiation}
+\caption[The \textct{ht3d\_radiation} solution]{Steady-state temperature profiles inside a solid.  We consider two values of absorption coefficient, $\kappa = [100, 2000]$ 1/m and look at FDS solutions at three grid resolutions.}
+\label{fig:ht3d_radiation}
 \end{figure}
 
 
@@ -4422,7 +4436,7 @@ This case compares mass loss rates and material thickness for pyrolysis of black
 \subsection{Mass Transport (\texorpdfstring{\textct{pyro3d\_transport}}{pyro3d\_transport})}
 \label{pyro3d_transport}
 
-This case is a 3D version of the {\ct FAA\_Polymers\_PMMA} validation case.  A block of ``black'' PMMA 0.1 m $\times$ 0.1 m $\times$ 0.009 m, giving $9 \times 10^{-5} \;\si{m^3}$, with a bulk density of 1100 \si{kg/m^3}, giving 0.099 kg of total mass, is heated from above with 52 \si{kW/m^2}, generating methane as a pyrolysis gas.  The verification target to confirm that as the PMMA is consumed the correct amount of methane gets produced.  The results are shown below in Fig.~\ref{fig:pyro3d_transport}.
+This case is a 3D version of the {\ct FAA\_Polymers\_PMMA} validation case.  A block of ``black'' PMMA 0.096 m $\times$ 0.096 m $\times$ 0.009 m, giving $8.294 \times 10^{-5} \;\si{m^3}$, with a bulk density of 1100 \si{kg/m^3}, giving 0.0912 kg of total mass, is heated from above with 52 \si{kW/m^2}, generating methane as a pyrolysis gas.  The verification target to confirm that as the PMMA is consumed the correct amount of methane gets produced.  The results are shown below in Fig.~\ref{fig:pyro3d_transport}.
 
 \begin{figure}[!ht]
     \centering
