@@ -442,38 +442,55 @@ ENDIF
 
 ! Initialize pressure ZONEs
 
-ALLOCATE(M%PRESSURE_ZONE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-CALL ChkMemErr('INIT','PRESSURE_ZONE',IZERO)
+ALLOCATE(M%PRESSURE_ZONE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) ; CALL ChkMemErr('INIT','PRESSURE_ZONE',IZERO)
+
 M%PRESSURE_ZONE = 0
+
 ZONE_LOOP: DO N=1,N_ZONE
    PZ => P_ZONE(N)
    IF (EVACUATION_ONLY(NM) .OR. PZ%EVACUATION) CYCLE ZONE_LOOP
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            IF (M%PRESSURE_ZONE(I,J,K)==N) CYCLE
-            IF (M%XC(I) > PZ%X1 .AND. M%XC(I) < PZ%X2 .AND. &
-                M%YC(J) > PZ%Y1 .AND. M%YC(J) < PZ%Y2 .AND. &
-                M%ZC(K) > PZ%Z1 .AND. M%ZC(K) < PZ%Z2) THEN
-                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K)) .AND. M%PRESSURE_ZONE(I,J,K)>0) THEN
-                   WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',M%PRESSURE_ZONE(I,J,K)
-                   STOP_STATUS = SETUP_STOP
-                   RETURN
-                ENDIF
-                M%PRESSURE_ZONE(I,J,K) = N
-                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) THEN
-                   CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N,N_OVERLAP)
-                   IF (N_OVERLAP>0) THEN
-                      WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',N_OVERLAP
+
+   BLOCK_IF: IF (PZ%PROCESS_XB) THEN
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               IF (M%PRESSURE_ZONE(I,J,K)==N) CYCLE
+               IF (M%XC(I) > PZ%X1 .AND. M%XC(I) < PZ%X2 .AND. &
+                   M%YC(J) > PZ%Y1 .AND. M%YC(J) < PZ%Y2 .AND. &
+                   M%ZC(K) > PZ%Z1 .AND. M%ZC(K) < PZ%Z2) THEN
+                   IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K)) .AND.  M%PRESSURE_ZONE(I,J,K)>0) THEN
+                      WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',M%PRESSURE_ZONE(I,J,K)
                       STOP_STATUS = SETUP_STOP
                       RETURN
                    ENDIF
-                ENDIF
-            ENDIF
+                   M%PRESSURE_ZONE(I,J,K) = N
+                   IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) THEN
+                      CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N,N_OVERLAP)
+                      IF (N_OVERLAP>0) THEN
+                         WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',N_OVERLAP
+                         STOP_STATUS = SETUP_STOP
+                         RETURN
+                      ENDIF
+                   ENDIF
+               ENDIF
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF BLOCK_IF
+
+   POINT_LOOP: DO NN=1,PZ%N_XYZ
+      CALL ASSIGN_PRESSURE_ZONE(NM,PZ%X(NN),PZ%Y(NN),PZ%Z(NN),N,N_OVERLAP)
+      IF (N_OVERLAP>0) THEN
+         WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',N_OVERLAP
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ENDIF
+   ENDDO POINT_LOOP
+
 ENDDO ZONE_LOOP
+
+! Evacuation only
+
 EVACUATION_ZONE_LOOP: DO N=1,N_ZONE
    PZ => P_ZONE(N)
    IF (.NOT.PZ%EVACUATION .OR. .NOT.EVACUATION_ONLY(NM)) CYCLE EVACUATION_ZONE_LOOP

@@ -5116,7 +5116,7 @@ where $A_{\hbox{\scriptsize leak}}=0.002$~m$^2$ and $\rho$ is the density at the
 \label{leak_test_fig}
 \end{figure}
 
-\subsection{Multiple zone leakage (\texorpdfstring{\textct{leak\_test\_2}}{leak\_test\_2})}
+\subsection{Multiple Zone Leakage (\texorpdfstring{\textct{leak\_test\_2}}{leak\_test\_2})}
 \label{leak_test_2}
 
 This case starts with the same input as \textct{leak\_test}.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan pushes air from one compartment to the other. As the pressure rises, the leakage increases until the leakage flow rate is equal to the fan flow rate. Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments decreases until the pressure of the interior compartment is equal to that of the ambient. At this point in time, there is no more leakage to the outside and the fan flow rate equals the leakage flow rate between the two compartments.  Given the leakage area and the fan curve, this occurs when the pressure difference between the two compartments is the same as the pressure difference from \textct{leak\_test}, only now the discharge side should be at 0~Pa.
@@ -5129,6 +5129,24 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
    \caption[The \textct{leak\_test\_2} test case]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and a plot of zone pressures (right).}
    \label{fig_HVAC_leak_fan}
 \end{figure}
+
+\subsection{Multiple Zone, Multiple Mesh Leakage (\texorpdfstring{\textct{zone\_shape\_2}}{zone\_shape\_2})}
+\label{zone_shape_2}
+
+A duct with a square 1~m cross section winds its way through a 2 by 2 by 2 array of meshes that span a sealed 6.2~m cubic domain. A fan forces air into one end of the duct at a rate of $\dot{V}=0.1$~m$^3$/s. The other end of the duct has a leak with effective area $A_\mathrm{L}=0.007746$~m$^2$. The expected pressure difference between the interior and exterior of the duct is
+\be
+   \Delta p = \frac{\rho}{2} \left( \frac{\dot{V}}{A_\mathrm{L}} \right)^2 \approx 100 \; \mathrm{Pa}
+\ee
+The overall mass in the domain should not change. Figure~\ref{fig_zone_shape_2} displays the pressure difference and overall mass.
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/zone_shape_2_pres} } &
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/zone_shape_2_mass} }
+   \end{tabular*}
+   \caption[The \textct{zone\_shape\_2} test case]{(Left) Pressure difference between interior and exterior of the duct. (Right) Overall mass.}
+   \label{fig_zone_shape_2}
+\end{figure}
+
 
 \subsection{Leak Pressure Exponent (\texorpdfstring{\textct{HVAC\_leak\_exponent}}{HVAC\_leak\_exponent})}
 \label{HVAC_leak_exponent}
