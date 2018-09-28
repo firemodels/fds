@@ -4184,42 +4184,26 @@ If you are using {\ct DEVC}s to output spatially-integrated statistics as per Se
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
-FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most
-often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation.
-You can specify any number of sealed compartments within the computational
-domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
-flow rates are tied to the pressure of the adjacent zones.
+FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. You can specify any number of sealed compartments within the computational domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose flow rates are tied to the pressure of the adjacent zones.
 
 
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
 
-A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior,
-by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
-necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
+A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
 &ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
 \end{lstlisting}
-This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
-declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
-By default, the exterior of the computational
-domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
+This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
-domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
-conform to the non-rectangular region. It is possible to ``break'' pressure zones by removing
-obstructions between them. An example of how to break pressure zones is given below.
-Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
-meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
-mesh.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to conform to the non-rectangular region. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each mesh. If the pressure zone has a non-rectangular shape such that it winds its way in and out of multiple meshes and you cannot create a single rectangular region to span it, you may use a series of points, one in each mesh touched by the pressure zone:
+\begin{lstlisting}
+&ZONE XYZ=1.0,2.0,2.3, 3.1,4.2,5.6, ... /
+\end{lstlisting}
+Each point should be clear of solid obstructions. A search algorithm will determine all other grid cells within the particular mesh belonging to that pressure zone.
 
-Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
-zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
-two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
-of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
-gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
-which point the zones will merge and no longer have distinct background pressures.
+Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at which point the zones will merge and no longer have distinct background pressures.
 
 For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
 
@@ -10800,12 +10784,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                    & Character         & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
-{\ct LEAK\_AREA(N)}         & Real              & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
-{\ct LEAK\_PRESSURE\_EXPONENT(N)} & Real              & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
-{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real              & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
-{\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
-{\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
+{\ct ID}                           & Character             & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
+{\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
+{\ct PERIODIC}                     & Logical               & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
+{\ct XB(6)}                        & Real Sextuplet        & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
+{\ct XYZ(3:N)}                     & Real Triplet Array    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
 
 
