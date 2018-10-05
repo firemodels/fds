@@ -16,10 +16,8 @@ SUBROUTINE PRESSURE_SOLVER(T,NM)
 
 USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP, AFILL2
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE GLOBAL_CONSTANTS
-USE TRAN, ONLY: GET_IJK
-USE TURBULENCE, ONLY: NS_H_EXACT
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -429,7 +427,8 @@ IF (CHECK_POISSON) THEN
    POIS_ERR = MAXVAL(RESIDUAL)
 ENDIF
 
-! Mandatory check of the accuracy of the inseparable pressure solution, del dot (1/rho) del p + del^K = -del dot F - dD/dt
+! Mandatory check of how well the computed pressure satisfies the inseparable Poisson equation:
+! LHSS = del dot (1/rho) del p + del K = -del dot F - dD/dt = RHSS
 
 IF (ITERATE_BAROCLINIC_TERM) THEN
    P => WORK7
@@ -450,18 +449,9 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
                     (P(I,J,K)-P(I,J-1,K))*RDYN(J-1)       *2._EB/(RHOP(I,J-1,K)+RHOP(I,J,K)))*RDY(J)        &
                  + ((P(I,J,K+1)-P(I,J,K))*RDZN(K)         *2._EB/(RHOP(I,J,K+1)+RHOP(I,J,K)) - &
                     (P(I,J,K)-P(I,J,K-1))*RDZN(K-1)       *2._EB/(RHOP(I,J,K-1)+RHOP(I,J,K)))*RDZ(K)        &
-   !        LHSS = ((P(I+1,J,K)/RHOP(I+1,J,K)-P(I,J,K)/RHOP(I,J,K))*RDXN(I)*R(I)    - &
-   !                (P(I,J,K)/RHOP(I,J,K)-P(I-1,J,K)/RHOP(I-1,J,K))*RDXN(I-1)*R(I-1))*RDX(I)*RRN(I) &
-   !             + ((P(I,J+1,K)/RHOP(I,J+1,K)-P(I,J,K)/RHOP(I,J,K))*RDYN(J)         - &
-   !                (P(I,J,K)/RHOP(I,J,K)-P(I,J-1,K)/RHOP(I,J-1,K))*RDYN(J-1)       )*RDY(J)        &
-   !             + ((P(I,J,K+1)/RHOP(I,J,K+1)-P(I,J,K)/RHOP(I,J,K))*RDZN(K)         - &
-   !                (P(I,J,K)/RHOP(I,J,K)-P(I,J,K-1)/RHOP(I,J,K-1))*RDZN(K-1)       )*RDZ(K)        &
                  + ((KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)*R(I) - (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)      - (KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
-            !    + (FVX_B(I,J,K)*R(I) - FVX_B(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
-            !    + (FVY_B(I,J,K)      - FVY_B(I,J-1,K)       )*RDY(J)        &
-            !    + (FVZ_B(I,J,K)      - FVZ_B(I,J,K-1)       )*RDZ(K)
             RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
