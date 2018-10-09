@@ -2346,11 +2346,10 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       !> Determine boundary type for IW
       IF (MESHES(NM)%EXTERNAL_WALL(IWG)%NOM /= 0) THEN
          L%WALL(IWG)%BTYPE = INTERNAL
-      !ELSE IF (MESHES(NM)%WALL(IWG)%PRESSURE_BC_INDEX == DIRICHLET) THEN
-      ELSE IF (MESHES(NM)%WALL(IWG)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
+      ELSE IF (MESHES(NM)%WALL(IWG)%PRESSURE_BC_INDEX == DIRICHLET) THEN
          L%WALL(IWG)%BTYPE = DIRICHLET
          L%N_DIRIC = L%N_DIRIC + 1
-      ELSE
+      ELSE 
          L%WALL(IWG)%BTYPE = NEUMANN
          L%N_NEUMANN = L%N_NEUMANN + 1
       ENDIF
@@ -5286,10 +5285,10 @@ WALL_CELLS_LOOP2: DO IW = 1, NW
    IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
 
       IP = A%ROW(IC)
-      BOUNDARY_TYPE_SELECT: SELECT CASE (L%WALL(IW)%BOUNDARY_TYPE)
-          CASE (OPEN_BOUNDARY)                                !> set Dirichlet BC's at open boundaries
+      BOUNDARY_TYPE_SELECT: SELECT CASE (L%WALL(IW)%BTYPE)
+          CASE (DIRICHLET)                                !> set Dirichlet BC's at open boundaries
               A%VAL(IP) = A%VAL(IP) - DBC
-          CASE (SOLID_BOUNDARY, MIRROR_BOUNDARY)              !> set Neumann BC's elsewhere
+          CASE (NEUMANN)
               IF (NOM > 0 .AND. PRES_ON_WHOLE_DOMAIN) CYCLE
               A%VAL(IP) = A%VAL(IP) + DBC
       END SELECT BOUNDARY_TYPE_SELECT
@@ -11464,9 +11463,9 @@ SELECT CASE (TYP%TYPE_SOLVER)
             !> Dirichlet BC's
             IF_DIRICHLET: IF (WC%BTYPE == DIRICHLET) THEN
 
-               IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
-                   WC%BOUNDARY_TYPE == NULL_BOUNDARY         .OR. &
-                   WC%BOUNDARY_TYPE == SOLID_BOUNDARY) CYCLE
+               !IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
+               !    WC%BOUNDARY_TYPE == NULL_BOUNDARY         .OR. &
+               !    WC%BOUNDARY_TYPE == SOLID_BOUNDARY) CYCLE
  
                SELECT CASE (IOR0)
                   CASE (1)
@@ -11488,7 +11487,7 @@ SELECT CASE (TYP%TYPE_SOLVER)
             ENDIF IF_DIRICHLET
 
             !> Neumann BC's
-            IF_NEUMANN: IF (WC%BTYPE == NEUMANN) THEN
+            IF_NEUMANN: IF (WC%BTYPE == NEUMANN.AND.WC%NOM==0) THEN
 
                SELECT CASE (IOR0)
                   CASE (1)
