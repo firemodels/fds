@@ -17,12 +17,9 @@ fi
 indir=.
 outdir=.
 moviename=
-while getopts 'fi:o:m:' OPTION
+while getopts 'i:o:m:' OPTION
 do
 case $OPTION in
-  f)
-  FFMPEG=1
-  ;;
   i)
   indir="$OPTARG"
   ;;
@@ -44,14 +41,9 @@ outdir=`pwd`
 cd $CURDIR
 cd $indir
 
-FFMPEG=
 base=$1
 underscore=_
-if [ "$FFMPEG" == "" ]; then
-  EXT=.m1v
-else
-  EXT=.mp4
-fi
+EXT=.mp4
 if [ "$moviename" == "" ] ; then
   moviename=$base$EXT
 else
@@ -60,9 +52,5 @@ fi
 
 echoerr() { echo "$@" 1>&2; }
 echoerr Creating the movie file $outdir/$moviename
-if [ "$FFMPEG" == "" ]; then
-  png2yuv -f 25 -I p -j $base$underscore%04d.png | mpeg2enc -o $outdir/$moviename
-else
-  ffmpeg -y -r 30 -i $base$underscore%04d.png -vcodec libx264 -crf 17 -pix_fmt yuv420p $outdir/$moviename
-fi
+ffmpeg -y -r 30 -i $base$underscore%04d.png -vcodec libx264 -crf 17 -pix_fmt yuv420p $outdir/$moviename
 echoerr The movie file $outdir/$moviename has been created.
