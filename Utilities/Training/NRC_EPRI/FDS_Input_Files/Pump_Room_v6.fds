@@ -48,6 +48,8 @@ Cable
       BACKING        = 'EXPOSED'
       THICKNESS      = 0.05 /
 
+&ZONE XB= 1.0, 1.8, 1.5, 4.6, 4.5, 4.7 /
+
 &OBST XB= 1.0, 1.8, 1.5, 4.6, 4.5, 4.5, SURF_ID='BLANKET' /
 &OBST XB= 1.0, 1.8, 1.5, 4.6, 4.7, 4.7, SURF_ID='BLANKET' /
 &OBST XB= 1.0, 1.0, 1.5, 4.6, 4.5, 4.7, SURF_ID='BLANKET' /
@@ -100,10 +102,10 @@ Ventilation
       COLOR          = 'BROWN'
       MATL_ID        = 'STEEL'
       BACKING        = 'EXPOSED'
-      LEAK_PATH      = 1,0 
+      LEAK_PATH      = 2,0 
       THICKNESS      = 0.05 /
 
-&ZONE XB= 0.0, 7.6, 1.5, 4.6, 0.0, 4.9, LEAK_AREA(0)=0.014 /
+&ZONE XB= 2.0, 7.6, 1.5, 4.6, 0.0, 4.9, LEAK_AREA(0)=0.014 /
 
 &OBST XB= 0.0, 5.7, 1.4, 1.5, 0.0, 4.9, SURF_ID='CONCRETE WALL' /
 &OBST XB= 5.6, 5.7, 0.0, 1.4, 0.0, 4.9, SURF_ID='CONCRETE WALL' /
