@@ -7,8 +7,8 @@ set fdsversion=%FDSEDITION%
 set smvversion=%SMVEDITION%
 
 :: files from Intel version 18 update 2
-set      in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL18
-set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL18
+set      in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_%INTELVERSION%
+set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\%INTELVERSION%
 
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64
