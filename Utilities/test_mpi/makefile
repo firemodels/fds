@@ -37,7 +37,7 @@ setup_win:
 .f90.obj:
 	$(FCOMPL) -c $(FFLAGS) $<
 
-#Compiler Rules
+# windows
 
 impi_intel_win: MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win: MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
@@ -47,8 +47,24 @@ impi_intel_win: obj = test_mpi
 impi_intel_win: setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
-	
-	
+# Linux
+
+impi_intel_linux: FFLAGS = -m64 -O2 -mt_mpi -traceback -no-wrap-margin
+impi_intel_linux: LFLAGS = -static-intel
+impi_intel_linux: FCOMPL = mpiifort
+impi_intel_linux: obj = test_mpi
+impi_intel_linux: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
+# OSX
+
+mpi_intel_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
+mpi_intel_osx: LFLAGS = -static-intel
+mpi_intel_osx: FCOMPL = mpifort
+mpi_intel_osx: obj = test_mpi
+mpi_intel_osx: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
 #*** Clean Target to remove Object and Module files ***
 
 .PHONY : clean
