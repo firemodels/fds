@@ -1,4 +1,5 @@
 #!/bin/bash
 
 echo Building with Intel MPI
-make -j4 VPATH=".." -f ../makefile impi_intel_linux
+make -f ../makefile clean
+make VPATH=".." -f ../makefile impi_intel_linux

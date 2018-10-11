@@ -54,7 +54,16 @@ impi_intel_linux: LFLAGS = -static-intel
 impi_intel_linux: FCOMPL = mpiifort
 impi_intel_linux: obj = test_mpi
 impi_intel_linux: $(obj_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFAGS) $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
+# OSX
+
+mpi_intel_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
+mpi_intel_osx: LFLAGS = -static-intel
+mpi_intel_osx: FCOMPL = mpifort
+mpi_intel_osx: obj = test_mpi
+mpi_intel_osx: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
 
 #*** Clean Target to remove Object and Module files ***
 
