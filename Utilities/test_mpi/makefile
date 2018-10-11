@@ -39,7 +39,7 @@ setup_win:
 
 # windows
 
-impi_intel_win: MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+impi_intel_win: MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win: MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE)
 impi_intel_win: FCOMPL = mpiifort

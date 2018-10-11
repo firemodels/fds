@@ -17,13 +17,11 @@ cd Hamins_Gas_Burners; ./Run_All.sh -y; cd ..
 cd Heskestad_Flame_Height; ./Run_All.sh -y; cd ..
 cd LEMTA_Spray; ./Run_All.sh -y; cd ..
 cd LLNL_Enclosure; ./Run_All.sh -y; cd ..
-cd Moody_Chart; ./Run_All.sh -y; cd ..
 cd NIST_He_2009; ./Run_All.sh -y; cd ..
 cd NIST_Smoke_Alarms; ./Run_All.sh -y; cd ..
 cd NIST_NRC; ./Run_All.sh -y; cd ..
 cd NRCC_Facade; ./Run_All.sh -y; cd ..
 cd NRL_HAI; ./Run_All.sh -y; cd ..
-cd Pool_Fires; ./Run_All.sh -y; cd ..
 cd PRISME; ./Run_All.sh -y; cd ..
 cd Restivo_Experiment; ./Run_All.sh -y; cd ..
 cd Sippola_Aerosol_Deposition; ./Run_All.sh -y; cd ..
