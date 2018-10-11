@@ -79,7 +79,7 @@ echo.
 
 copy %in_for_bundle%\*.po                                                     %out_bin%\.>Nul
 
-if %fds_debug% == 1 (
+if "%fds_debug%" == "1" (
   CALL :COPY  %fdsmpidirdb%\fds_impi_win_64_db.exe                            %out_bin%\fds_db.exe
 )
 CALL :COPY  %fdsmpidir%\fds_impi_win_64.exe                                   %out_bin%\fds.exe
