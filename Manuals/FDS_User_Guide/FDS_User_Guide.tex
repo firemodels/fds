@@ -1783,7 +1783,7 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short
 In this section, we develop a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide \cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here we force the flow from a {\ct VENT} and we monitor the pressure using planar averaged {\ct DEVC}s.  The tunnel is 1.6 km (approximately one mile) long with a square cross-section 10 m $\times$ 10 m for Cases A, B, C, and D.  The cross section for Case E is 12.8 m (width) $\times$ 5 m (height), giving a hydraulic diameter of 7.2 m. We push air from the entrance at 2, 4, or 10 m/s for sand-grain roughness heights of 0.0001, 0.01, or 0.1 m.  We run two grid resolutions with uniform cells in the vertical direction corresponding to 10 and 20 cells across the tunnel height.  Streamwise grid resolution is twice the wall-normal resolution.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation (see \cite{MYO}).  FDS results for the 10 and 20 resolution cases are also shown along with the max relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
 
 \begin{table}[ht]
-%%%%\input{SCRIPT_FIGURES/tunnel_pressure_drop}
+\input{SCRIPT_FIGURES/tunnel_pressure_drop}
 \end{table}
 
 \begin{figure}[ht]
@@ -2484,7 +2484,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 
 \begin{figure}[ht]
 \centering
-%%%%\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
+\includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
 \caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_rotbox}
 \end{figure}
@@ -3659,12 +3659,12 @@ Details of the output quantities are discussed in Section~\ref{info:material_com
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass} &
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass_components} \\
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr} &
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr_components} \\
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mcc} &
-%%%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_dsc}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass_components} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr_components} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mcc} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_dsc}
 \end{tabular*}
 \caption[Sample results of a {\ct tga\_analysis}]{Sample results of a {\ct tga\_analysis}.}
 \label{tga_results}
