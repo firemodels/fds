@@ -2694,7 +2694,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                          Molar'
    DO NN=1,N_SPECIES
       IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(3X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),')'
+      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(3X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
       WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
    ENDDO
 
