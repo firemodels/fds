@@ -59,15 +59,12 @@ K_LOWER_SKIP=1, K_UPPER_SKIP=3, K_UPPER=7 /
       RGB=204,0,0
       HRRPUA=2.050415e+05
       RAMP_Q='rampq'
-      EMISSIVITY=1.
       /
 &SURF ID='Plate'
       RGB=204,204,204
-      EMISSIVITY=1.
       /
 &SURF ID='Steel'
       RGB=44,44,44
-      EMISSIVITY=1.
       /
 
 ! Flame height:
@@ -92,6 +89,6 @@ K_LOWER_SKIP=1, K_UPPER_SKIP=3, K_UPPER=7 /
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
-&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner.geom' /
+&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Metric.geom' /
 
 &TAIL /

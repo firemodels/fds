@@ -103,6 +103,6 @@ K_UPPER=3 /
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
-&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner.geom' /
+&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Metric.geom' /
 
 &TAIL /
