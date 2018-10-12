@@ -8989,12 +8989,12 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
                      ! test if OB is on boundary
                      WARN_HT3D = .TRUE.
-                     IF (OB%I1==OB%I2 .AND. (OB%I1==0 .OR. OB%I2==IBAR)) WARN_HT3D = .FALSE.
-                     IF (OB%J1==OB%J2 .AND. (OB%J1==0 .OR. OB%J2==IBAR)) WARN_HT3D = .FALSE.
-                     IF (OB%K1==OB%K2 .AND. (OB%K1==0 .OR. OB%K2==IBAR)) WARN_HT3D = .FALSE.
+                     ! IF (OB%I1==OB%I2 .AND. (OB%I1==0 .OR. OB%I2==IBAR)) WARN_HT3D = .FALSE.
+                     ! IF (OB%J1==OB%J2 .AND. (OB%J1==0 .OR. OB%J2==IBAR)) WARN_HT3D = .FALSE.
+                     ! IF (OB%K1==OB%K2 .AND. (OB%K1==0 .OR. OB%K2==IBAR)) WARN_HT3D = .FALSE.
                      IF (WARN_HT3D) THEN
                         WRITE(LU_ERR,'(A,I0,A,I0,A)') 'WARNING: OBST ',N,' on MESH ',NM,&
-                           ' has zero volume, consider THICKEN=T, HT3D set to F.'
+                           ' has zero volume, consider THICKEN=T or move mesh boundary, HT3D set to F.'
                         OB%HT3D=.FALSE. ! later add capability for 2D lateral ht on thin obst
                      ENDIF
                   ENDIF
