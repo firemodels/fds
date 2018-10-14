@@ -18,10 +18,14 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
   IF NOT DEFINED IFORT_COMPILER (
     echo "*** Error: Intel compiler environment variable not defined."
+    exit /b
   )
-  IF DEFINED IFORT_COMPILER (
-    echo Setting up compiler environment
-    call "%IFORT_COMPILER%\bin\compilervars" intel64
-    call "%IFORT_COMPILER%\mpi\intel64\bin\mpivars" release
-  )
+
+  set STARTUP="%IFORT_COMPILER%\bin\compilervars"
+  IF DEFINED IFORT_COMPILER19 set STARTUP="%IFORT_COMPILER19%\..\..\parallel_studio_xe_2019\bin\psxevars.bat"
+
+  echo Setting up compiler environment
+  call %STARTUP% intel64
+  call "%IFORT_COMPILER%\mpi\intel64\bin\mpivars" release
+
 :envexist
