@@ -15,7 +15,7 @@ IMPLICIT NONE
 REAL(EB), ALLOCATABLE, DIMENSION(:):: NODE_AREA_EX,NODE_TMP_EX,DUCT_MF
 REAL(EB), ALLOCATABLE, DIMENSION(:,:):: NODE_AREA,NODE_H,NODE_P,NODE_RHO,NODE_X,NODE_Y,NODE_Z,NODE_TMP,NODE_ZZ_EX
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:):: NODE_ZZ
-REAL(EB) :: DT_HV
+REAL(EB) :: DT_HV,DT_MT
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: NODE_ZONE
 CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: NODE_DUCT_A,DUCT_NODE_A
 CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: NODE_FILTER_A,DUCT_FAN_A,DUCT_AIRCOIL_A
@@ -863,6 +863,7 @@ LOGICAL, INTENT(IN):: FIRST_PASS
 TYPE(NETWORK_TYPE), POINTER:: NE=>NULL()
 
 DT_HV = DT
+DT_MT = DT
 
 IF (CORRECTOR) THEN
    DUCT%VEL(OLD) = DUCT%VEL(NEW)
@@ -928,7 +929,7 @@ ENDDO
 
 DUCTNODE%P = DUCTNODE%P + P_INF
 
-IF (HVAC_MASS_TRANSPORT) CALL UPDATE_HVAC_MASS_TRANSPORT(DT)
+IF (HVAC_MASS_TRANSPORT) CALL UPDATE_HVAC_MASS_TRANSPORT(DT_MT)
 CALL UPDATE_NODE_BC
 
 IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
@@ -966,11 +967,11 @@ SUBROUTINE HVAC_UPDATE(NNE,DT)
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT,GET_ENTHALPY
 REAL(EB) :: CP,CP2,CPTSUM,DCPDT,DU_DX,ETOT,MFLOW,MSUM,MTOT,TGUESS,TNOW,VFLOW,ZZ_GET(1:N_TRACKED_SPECIES),&
-            ZZSUM(1:N_TRACKED_SPECIES),ZZTOT(1:N_TRACKED_SPECIES),HGAS
+            ZZSUM(1:N_TRACKED_SPECIES),ZZTOT(1:N_TRACKED_SPECIES),HGAS,DT_CFL
 REAL(EB),INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NNE
-INTEGER :: NN,ND,NC,NS,ITMP,ITCOUNT
-LOGICAL :: CYCLE_FLAG
+INTEGER :: NN,ND,NC,NS,NSS,ITMP,ITCOUNT,N_SUBSTEPS,N_SUBSTEPS_DUCT
+LOGICAL :: CYCLE_FLAG,SUB_CYCLE_FLAG
 TYPE (DUCTNODE_TYPE), POINTER :: DN=>NULL(),DN2=>NULL()
 TYPE (DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE (NETWORK_TYPE), POINTER :: NE=>NULL()
@@ -991,162 +992,189 @@ DO ND = 1,NE%N_DUCTS
    DUCT(NE%DUCT_INDEX(ND))%UPDATED = .FALSE.
 ENDDO
 
-ITER_LOOP: DO
-   CYCLE_FLAG = .FALSE.
-   DUCT_LOOP:DO ND = 1,NE%N_DUCTS
-      DU=>DUCT(NE%DUCT_INDEX(ND))
-      IF (DU%UPDATED) CYCLE DUCT_LOOP
-      CYCLE_FLAG = .TRUE.
-      IF (DU%VEL(NEW) > TWO_EPSILON_EB) THEN
-         DN => DUCTNODE(DU%NODE_INDEX(1))
-      ELSEIF (DU%VEL(NEW) < -TWO_EPSILON_EB) THEN
-         DN => DUCTNODE(DU%NODE_INDEX(2))
-      ELSE
-         DU%UPDATED = .TRUE.
-         DU%VEL(NEW) = 0._EB
-         DU%RHO_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%RHO+DUCTNODE(DU%NODE_INDEX(2))%RHO)
-         DU%TMP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%TMP+DUCTNODE(DU%NODE_INDEX(2))%TMP)
-         CYCLE DUCT_LOOP
+! Outputs number of substeps required to maintain CFL for mass transport
+N_SUBSTEPS = 1
+DO ND = 1,NE%N_DUCTS
+   DU=>DUCT(NE%DUCT_INDEX(ND))
+   IF (DU%N_CELLS > 1 .AND. ABS(DU%VEL(NEW)) > 0._EB) THEN
+      DT_CFL = DU%LENGTH/ABS(DU%VEL(NEW)) ! relevant CFL is all mass leaving a duct within one DT
+      N_SUBSTEPS_DUCT = MAX(1,CEILING(DT/DT_CFL))
+      IF (N_SUBSTEPS_DUCT > N_SUBSTEPS) THEN
+         N_SUBSTEPS = N_SUBSTEPS_DUCT
       ENDIF
-      IF (DN%UPDATED) THEN
-         DU%RHO_D  = DN%RHO
-         DU%TMP_D  = DN%TMP
-         DU%CP_D   = DN%CP
-         DU%UPDATED = .TRUE.
-         DU%ZZ(:) = DN%ZZ(:)
-         ZZ_GET = DU%ZZ
-      ENDIF
-   ENDDO DUCT_LOOP
+   ENDIF
+ENDDO
+DT_MT = DT/REAL(N_SUBSTEPS,EB)
+SUB_CYCLE_FLAG = .TRUE.
 
-   NODE_LOOP:DO NN = 1,NE%N_DUCTNODES
-      DN=>DUCTNODE(NE%NODE_INDEX(NN))
-      IF(DN%UPDATED) CYCLE NODE_LOOP
-      CYCLE_FLAG = .TRUE.
-      MTOT = 0._EB
-      ETOT = 0._EB
-      ZZTOT = 0._EB
-      TGUESS = 0._EB
-      CPTSUM = 0
-      DO ND = 1,DN%N_DUCTS
-         DU => DUCT(DN%DUCT_INDEX(ND))
-         IF (DU%AREA<=TWO_EPSILON_EB) CYCLE
-         IF (DU%VEL(NEW)*DN%DIR(ND) <= TWO_EPSILON_EB) CYCLE
-         IF (.NOT. DU%UPDATED) CYCLE NODE_LOOP
-
-         MASS_TRANSPORT_IF: IF (DU%N_CELLS==1) THEN
-            ! Duct is not discretized
-            VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
-            MTOT = MTOT + VFLOW * DU%RHO_D
-            ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
-            TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
-            IF (STRATIFICATION) THEN
-               IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                  DN2=>DUCTNODE(DU%NODE_INDEX(2))
-               ELSE
-                  DN2=>DUCTNODE(DU%NODE_INDEX(1))
-               ENDIF
-               ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-            ENDIF
-            ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
-         ELSE MASS_TRANSPORT_IF
-            ! Duct is discretized
-            MFLOW = ABS(DU%VEL(NEW)*DU%RHO_D)*DT
-            MSUM = 0
-            ZZSUM = 0
-            CPTSUM = 0
-            DU_DX = DU%LENGTH/REAL(DU%N_CELLS,EB)
-            IF (DU%VEL(NEW) > 0._EB) THEN
-               DO NC = DU%N_CELLS,1,-1
-                  IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
-                     DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                     EXIT
-                  ELSE
-                     MSUM = MSUM + DU%RHO_C(NC)*DU_DX
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                  ENDIF
-               ENDDO
-            ELSE
-               DO NC = 1,DU%N_CELLS
-                  IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
-                     DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                     EXIT
-                  ELSE
-                     MSUM = MSUM + DU%RHO_C(NC)*DU_DX
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                  ENDIF
-               ENDDO
-            ENDIF
-            ETOT = ETOT + CPTSUM * DU%AREA / DT
-            MTOT = MTOT + MFLOW * DU%AREA / DT
-            ZZTOT = ZZTOT + ZZSUM * DU%AREA / DT
-            TGUESS = TGUESS + MFLOW * DU%AREA / DT * DU%TMP_D
-         ENDIF MASS_TRANSPORT_IF
-         ETOT = ETOT + DU%COIL_Q
-      ENDDO
-
-      IF (DN%FILTER_INDEX > 0) THEN
-         MTOT = MTOT - SUM(DN%FILTER_LOADING(:,3))
-         ZZTOT = ZZTOT - DN%FILTER_LOADING(:,3)
-         ITMP = MIN(5000,NINT(DU%TMP_D))
-         DO NS = 1,N_TRACKED_SPECIES
-            ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
-            !*** CHECK THIS
-            IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
-               IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                  DN2=>DUCTNODE(DU%NODE_INDEX(2))
-               ELSE
-                  DN2=>DUCTNODE(DU%NODE_INDEX(1))
-               ENDIF
-               ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-            ENDIF
-         ENDDO
-      ENDIF
-
-      DN%UPDATED = .TRUE.
-      IF (ABS(MTOT)<=TWO_EPSILON_EB) CYCLE NODE_LOOP
-      ZZ_GET = 0._EB
-      DN%ZZ(:)  = ZZTOT/MTOT
-      ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ(1:N_TRACKED_SPECIES)
-      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,DN%RSUM)
-      ETOT = ETOT/ MTOT
-      TGUESS = TGUESS/MTOT
-      ITCOUNT = 0
-      CP_LOOP: DO
-         ITCOUNT = ITCOUNT + 1
-         CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
-         IF (TGUESS>1._EB) THEN
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
-            DCPDT = CP - CP2
+SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
+   ITER_LOOP: DO
+      IF (NSS == N_SUBSTEPS) SUB_CYCLE_FLAG = .FALSE. ! Stops the final substep run of HVAC_MASS_... and UPDATE_NODE...
+      CYCLE_FLAG = .FALSE.
+      DUCT_LOOP:DO ND = 1,NE%N_DUCTS
+         DU=>DUCT(NE%DUCT_INDEX(ND))
+         IF (DU%UPDATED) CYCLE DUCT_LOOP
+         CYCLE_FLAG = .TRUE.
+         IF (DU%VEL(NEW) > TWO_EPSILON_EB) THEN
+            DN => DUCTNODE(DU%NODE_INDEX(1))
+         ELSEIF (DU%VEL(NEW) < -TWO_EPSILON_EB) THEN
+            DN => DUCTNODE(DU%NODE_INDEX(2))
          ELSE
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
-            DCPDT = CP2- CP
+            DU%UPDATED = .TRUE.
+            DU%VEL(NEW) = 0._EB
+            DU%RHO_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%RHO+DUCTNODE(DU%NODE_INDEX(2))%RHO)
+            DU%TMP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%TMP+DUCTNODE(DU%NODE_INDEX(2))%TMP)
+            CYCLE DUCT_LOOP
          ENDIF
-         CP = HGAS / TGUESS
-         DN%TMP =TGUESS+(ETOT-HGAS)/(CP+TGUESS*DCPDT)
-         IF (ABS(DN%TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
-         IF (ABS(DN%TMP - TGUESS)/DN%TMP < 0.0005_EB) EXIT CP_LOOP
-         IF (ITCOUNT > 10) THEN
-            DN%TMP = 0.5_EB*(DN%TMP+TGUESS)
-            EXIT CP_LOOP
+         IF (DN%UPDATED) THEN
+            DU%RHO_D  = DN%RHO
+            DU%TMP_D  = DN%TMP
+            DU%CP_D   = DN%CP
+            DU%UPDATED = .TRUE.
+            DU%ZZ(:) = DN%ZZ(:)
+            ZZ_GET = DU%ZZ
          ENDIF
-         TGUESS = MAX(0._EB,DN%TMP)
-      ENDDO CP_LOOP
+      ENDDO DUCT_LOOP
 
-      CALL GET_ENTHALPY(ZZ_GET,HGAS,DN%TMP)
-      DN%CP = HGAS/DN%TMP
-      DN%RHO = (DN%P+P_INF)/(DN%RSUM*DN%TMP)
-   ENDDO NODE_LOOP
+      NODE_LOOP:DO NN = 1,NE%N_DUCTNODES
+         DN=>DUCTNODE(NE%NODE_INDEX(NN))
+         IF(DN%UPDATED) CYCLE NODE_LOOP
+         CYCLE_FLAG = .TRUE.
+         MTOT = 0._EB
+         ETOT = 0._EB
+         ZZTOT = 0._EB
+         TGUESS = 0._EB
+         CPTSUM = 0
+         DO ND = 1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            IF (DU%AREA<=TWO_EPSILON_EB) CYCLE
+            IF (DU%VEL(NEW)*DN%DIR(ND) <= TWO_EPSILON_EB) CYCLE
+            IF (.NOT. DU%UPDATED) CYCLE NODE_LOOP
 
-   IF (.NOT. CYCLE_FLAG) EXIT ITER_LOOP
+            MASS_TRANSPORT_IF: IF (DU%N_CELLS==1) THEN
+               ! Duct is not discretized
+               VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
+               MTOT = MTOT + VFLOW * DU%RHO_D
+               ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
+               TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
+               IF (STRATIFICATION) THEN
+                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
+                  ELSE
+                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
+                  ENDIF
+                  ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               ENDIF
+               ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
+            ELSE MASS_TRANSPORT_IF
+               ! Duct is discretized: we need to find the end of the lump of mass advected within a (sub)step
+               MFLOW = ABS(DU%VEL(NEW)*DU%RHO_D)*DT_MT ! Duct mass flow corrected for any substepping
+               MSUM = 0
+               ZZSUM = 0
+               CPTSUM = 0
+               DU_DX = DU%LENGTH/REAL(DU%N_CELLS,EB)
+               ! Sums cumulative mass, species and energy from the final cell, to locate end of advected lump of mass
+               IF (DU%VEL(NEW) > 0._EB) THEN
+                  DO NC = DU%N_CELLS,1,-1
+                     IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
+                        DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                        EXIT
+                     ELSE
+                        MSUM = MSUM + DU%RHO_C(NC)*DU_DX
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                     ENDIF
+                  ENDDO
+               ELSE
+                  DO NC = 1,DU%N_CELLS
+                     IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
+                        DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                        EXIT
+                     ELSE
+                        MSUM = MSUM + DU%RHO_C(NC)*DU_DX
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                     ENDIF
+                  ENDDO
+               ENDIF
+               ! Cumulative sums of energy, mass, species passing through duct node from ducts
+               ETOT = ETOT + CPTSUM * DU%AREA / DT_MT
+               MTOT = MTOT + MFLOW * DU%AREA / DT_MT
+               ZZTOT = ZZTOT + ZZSUM * DU%AREA / DT_MT
+               TGUESS = TGUESS + MFLOW * DU%AREA / DT_MT * DU%TMP_D
+            ENDIF MASS_TRANSPORT_IF
+            ETOT = ETOT + DU%COIL_Q
+         ENDDO
 
-ENDDO ITER_LOOP
+         IF (DN%FILTER_INDEX > 0) THEN
+            MTOT = MTOT - SUM(DN%FILTER_LOADING(:,3))
+            ZZTOT = ZZTOT - DN%FILTER_LOADING(:,3)
+            ITMP = MIN(5000,NINT(DU%TMP_D))
+            DO NS = 1,N_TRACKED_SPECIES
+               ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
+               !*** CHECK THIS
+               IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
+                  ELSE
+                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
+                  ENDIF
+                  ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               ENDIF
+            ENDDO
+         ENDIF
+
+         DN%UPDATED = .TRUE.
+         IF (ABS(MTOT)<=TWO_EPSILON_EB) CYCLE NODE_LOOP
+         ZZ_GET = 0._EB
+         DN%ZZ(:)  = ZZTOT/MTOT
+         ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ(1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,DN%RSUM)
+         ETOT = ETOT/ MTOT
+         TGUESS = TGUESS/MTOT
+         ITCOUNT = 0
+         CP_LOOP: DO ! Newton method to find solution of T (and hence cpbar) from enthalpy
+            ITCOUNT = ITCOUNT + 1
+            CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
+            IF (TGUESS>1._EB) THEN
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
+               DCPDT = CP - CP2
+            ELSE
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
+               DCPDT = CP2- CP
+            ENDIF
+            CP = HGAS / TGUESS
+            DN%TMP =TGUESS+(ETOT-HGAS)/(CP+TGUESS*DCPDT)
+            IF (ABS(DN%TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
+            IF (ABS(DN%TMP - TGUESS)/DN%TMP < 0.0005_EB) EXIT CP_LOOP
+            IF (ITCOUNT > 10) THEN
+               DN%TMP = 0.5_EB*(DN%TMP+TGUESS)
+               EXIT CP_LOOP
+            ENDIF
+            TGUESS = MAX(0._EB,DN%TMP)
+         ENDDO CP_LOOP
+
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,DN%TMP)
+         DN%CP = HGAS/DN%TMP
+         DN%RHO = (DN%P+P_INF)/(DN%RSUM*DN%TMP)
+      ENDDO NODE_LOOP
+
+      IF (.NOT. CYCLE_FLAG) EXIT ITER_LOOP
+
+   ENDDO ITER_LOOP
+
+! If there are substeps remaining, we must advance mass transport and update node BCs to ensure we're conserving mass, energy
+   IF (SUB_CYCLE_FLAG) THEN
+      CALL UPDATE_HVAC_MASS_TRANSPORT(DT_MT)
+      CALL UPDATE_NODE_BC
+   ENDIF
+
+ENDDO SUBSTEP_LOOP
 
 T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
 
@@ -2208,21 +2236,22 @@ DO ND=1,NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%AREA < TWO_EPSILON_EB) CYCLE
    IF (ABS(DU%VEL(PREVIOUS)) < 1.E-5_EB .AND. ABS(DU%VEL(NEW)) < 1.E-5_EB) CYCLE
-   IF (DU%VEL(PREVIOUS) < 0._EB .EQV. DU%VEL(NEW) < 0._EB) THEN
-        IF (ABS(DU%VEL(PREVIOUS))<=TWO_EPSILON_EB) THEN
-           CONVERGED = .FALSE.
-           EXIT
-        ELSE
-         IF (ABS(1._EB-DU%VEL(NEW)/DU%VEL(PREVIOUS)) > 0.05_EB) THEN
+   IF (DU%VEL(PREVIOUS) < 0._EB .EQV. DU%VEL(NEW) < 0._EB) THEN ! check for flow reversal
+         IF (ABS(DU%VEL(PREVIOUS))<=TWO_EPSILON_EB) THEN
+            CONVERGED = .FALSE.
+            EXIT
+         ELSE
+            IF (ABS(1._EB-DU%VEL(NEW)/DU%VEL(PREVIOUS)) > 0.05_EB) THEN
             CONVERGED = .FALSE.
             CYCLE
+            ENDIF
          ENDIF
-        ENDIF
    ELSE
       CONVERGED = .FALSE.
    ENDIF
 ENDDO
-IF (.NOT. CONVERGED) RETURN
+
+IF (.NOT. CONVERGED) RETURN ! if velocity convergence passes, continue
 
 ! Check node mass conservation convergence
 DO NN=1,NE%N_DUCTNODES
@@ -2767,7 +2796,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
          ZZ_GET = DU%ZZ_C(NC,:) ! Single dimension to be used with GET_AVERAGE_...
          TGUESS = DU%TMP_C(NC)
          ITCOUNT = 0
-         CP_LOOP: DO ! Uses Newton method to iterate on temperature to get new TMP_C and CP_C
+         CP_LOOP: DO ! Uses Newton method to iterate to find solution of TMP_C from enthalpy
             ITCOUNT = ITCOUNT + 1
             CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
