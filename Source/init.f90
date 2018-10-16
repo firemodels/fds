@@ -1248,7 +1248,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
    ! Special case where an HT3D solid abuts a mesh boundary and needs temperature and heat flux from the other mesh.
 
-   IF (M%OBST_INDEX_C(ICG)/=0 .AND. M%OBSTRUCTION(OBST_INDEX_C(ICG))%HT3D .AND. IW<=M%N_EXTERNAL_WALL_CELLS) THEN
+   IF (M%OBST_INDEX_C(ICG)/=0 .AND. M%OBSTRUCTION(M%OBST_INDEX_C(ICG))%HT3D .AND. IW<=M%N_EXTERNAL_WALL_CELLS) THEN
       EWC => M%EXTERNAL_WALL(IW)
       NOM = EWC%NOM
       IF (NOM/=NM .AND. NOM>0) THEN
