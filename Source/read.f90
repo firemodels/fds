@@ -12394,7 +12394,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL GET_QUANTITY_INDEX(DV%SMOKEVIEW_LABEL,DV%SMOKEVIEW_BAR_LABEL,QUANTITY_INDEX,I_DUM(1),DV%Y_INDEX,DV%Z_INDEX,&
                                  DV%PART_CLASS_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX(2),I_DUM(2),I_DUM(3),'DEVC', &
                                  DV%QUANTITY,'null',DV%SPEC_ID,DV%PART_ID,DV%DUCT_ID,DV%NODE_ID(2),'null','null',I_DUM(4),&
-                                 I_DUM(5)
+                                 I_DUM(5))
          IF (DV%NODE_INDEX(1)==DV%NODE_INDEX(2)) THEN
             WRITE(MESSAGE,'(A,A)') 'ERROR: NODE PRESSURE DIFFERENCE node 1 = node 2 ',TRIM(DV%ID)
             CALL SHUTDOWN(MESSAGE) ; RETURN
