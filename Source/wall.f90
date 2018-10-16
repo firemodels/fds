@@ -914,6 +914,11 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
 
          ! build fluxes on boundaries of INTERNAL WALL CELLS
 
+         ! If the HT3D OBST abuts a mesh boundary, the gas cell temperature and
+         ! radiant heat flux from the other mesh are:
+         ! TMP_G   = OMESH(WC%BACK_MESH)%EXPOSED_WALL(WC%BACK_INDEX)%TMP_GAS
+         ! QRADINB = OMESH(WC%BACK_MESH)%EXPOSED_WALL(WC%BACK_INDEX)%QRADIN
+
          HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
             WC => WALL(IW)
