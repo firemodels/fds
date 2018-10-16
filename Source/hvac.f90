@@ -273,6 +273,10 @@ DO NN=1,N_HVAC_READ
                   WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID: ',TRIM(DU%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
             END SELECT
+            ALLOCATE(DU%RHO_C(DU%N_CELLS))
+            ALLOCATE(DU%TMP_C(DU%N_CELLS))
+            ALLOCATE(DU%CP_C(DU%N_CELLS))
+            ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
          ENDIF
 
          IF (SURF_ID/='null') THEN
@@ -2464,10 +2468,6 @@ DUCTRUN_LOOP:DO NR = 1, N_DUCTRUNS
       DU => DUCT(DR%DUCT_INDEX(ND))
       IF (DU%LEAKAGE) CYCLE
       IF (DU%N_CELLS==1) CYCLE
-      ALLOCATE(DU%RHO_C(DU%N_CELLS))
-      ALLOCATE(DU%TMP_C(DU%N_CELLS))
-      ALLOCATE(DU%CP_C(DU%N_CELLS))
-      ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
       SELECT CASE (DU%DUCT_INTERP_TYPE_INDEX)
          CASE (NODE1) ! duct cells and ductnodes adopt values from node 1 of lowest duct_index duct in ductrun
             DU%RHO_C(:) = DUCTNODE(DUCT(DR%DUCT_INDEX(1))%NODE_INDEX(1))%RHO_V
