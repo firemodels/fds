@@ -7,6 +7,7 @@ if [ $# -lt 1 ] ; then
   echo "where xxxx is a frame number."
   echo ""
   echo "-i dir - directory where movie frames are located (default: .)"
+  echo "-f     - use ffmpeg"
   echo "-o dir - directory where movie will be placed (default: .)"
   echo "-m movie name - name of movie generated (default: input_base.m1v)"
   echo ""
@@ -42,14 +43,14 @@ cd $indir
 
 base=$1
 underscore=_
+EXT=.mp4
 if [ "$moviename" == "" ] ; then
-  moviename=$base.m1v
+  moviename=$base$EXT
 else
-  moviename=$moviename.m1v
+  moviename=$moviename$EXT
 fi
 
 echoerr() { echo "$@" 1>&2; }
 echoerr Creating the movie file $outdir/$moviename
-png2yuv -f 25 -I p -j $base$underscore%04d.png | mpeg2enc -o $outdir/$moviename
-#ffmpeg -f image2 -i $base$underscore%04d.png $outdir/$moviename
+ffmpeg -y -r 30 -i $base$underscore%04d.png -vcodec libx264 -crf 17 -pix_fmt yuv420p $outdir/$moviename
 echoerr The movie file $outdir/$moviename has been created.

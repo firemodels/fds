@@ -2130,11 +2130,13 @@ INTEGER :: MESH_NEIGHBORS(6*NSCARC_MAX_FACE_NEIGHBORS)
 INTEGER :: NUM_FACE_NEIGHBORS(-3:3)
 INTEGER :: NUM_MESH_NEIGHBORS
 INTEGER :: FACE_ORDER_XYZ(6) = (/1,-1,2,-2,3,-3/)           !> Coordinate direction related order of mesh faces
-LOGICAL :: BKNOWN(-3:3)
+LOGICAL :: BKNOWN(-3:3), IS_BC_DIRICHLET, IS_OPEN_BOUNDARY
 TYPE (SCARC_TYPE)        , POINTER :: S
 TYPE (SCARC_LEVEL_TYPE)  , POINTER :: L, OL, LF, OLF, LC, OLC
 TYPE (SCARC_COORD_TYPE)  , POINTER :: C
 TYPE (SCARC_MAPPING_TYPE), POINTER :: M, MC
+TYPE (WALL_TYPE)         , POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 
 CALL SCARC_ENTER_ROUTINE('SCARC_SETUP_WALLS')
 
@@ -2209,12 +2211,15 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    !> process external wall cells
    EXTERNAL_WALL_CELLS_LOOP1: DO IWG = 1, L%N_WALL_CELLS_EXT
 
+      WC  => MESHES(NM)%WALL(IWG)
+      EWC => MESHES(NM)%EXTERNAL_WALL(IWG)
+
       !> Determine and store neighbors, orientation and number of couplings for a single wall cell
-      NOM  =  MESHES(NM)%EXTERNAL_WALL(IWG)%NOM
-      IOR0 =  MESHES(NM)%WALL(IWG)%ONE_D%IOR
-      NCPL = (MESHES(NM)%EXTERNAL_WALL(IWG)%IIO_MAX - MESHES(NM)%EXTERNAL_WALL(IWG)%IIO_MIN + 1) * &
-             (MESHES(NM)%EXTERNAL_WALL(IWG)%JJO_MAX - MESHES(NM)%EXTERNAL_WALL(IWG)%JJO_MIN + 1) * &
-             (MESHES(NM)%EXTERNAL_WALL(IWG)%KKO_MAX - MESHES(NM)%EXTERNAL_WALL(IWG)%KKO_MIN + 1)
+      NOM  =  EWC%NOM
+      IOR0 =  WC%ONE_D%IOR
+      NCPL = (EWC%IIO_MAX - EWC%IIO_MIN + 1) * &
+             (EWC%JJO_MAX - EWC%JJO_MIN + 1) * &
+             (EWC%KKO_MAX - EWC%KKO_MIN + 1)
 
       L%WALL(IWG)%NOM  = NOM                            !> store number of neighbor in wall cell
       L%WALL(IWG)%IOR  = IOR0                           !> store orientation of that cell
@@ -2277,19 +2282,21 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    !> Then process internal wall cells
    INTERNAL_WALL_CELLS_LOOP1: DO IWG = L%N_WALL_CELLS_EXT+1, L%N_WALL_CELLS_EXT+L%N_WALL_CELLS_INT
 
+      WC => MESHES(NM)%WALL(IWG)
+
       L%WALL(IWG)%IOR  = MESHES(NM)%WALL(IWG)%ONE_D%IOR
       L%WALL(IWG)%NOM  = 0
 
       L%WALL(IWG)%BTYPE  = NEUMANN
       L%WALL(IWG)%BOUNDARY_TYPE  = MESHES(NM)%WALL(IWG)%BOUNDARY_TYPE
 
-      L%WALL(IWG)%IXG =  MESHES(NM)%WALL(IWG)%ONE_D%II                        !> ghost cell indices
-      L%WALL(IWG)%IYG =  MESHES(NM)%WALL(IWG)%ONE_D%JJ
-      L%WALL(IWG)%IZG =  MESHES(NM)%WALL(IWG)%ONE_D%KK
+      L%WALL(IWG)%IXG =  WC%ONE_D%II                        !> ghost cell indices
+      L%WALL(IWG)%IYG =  WC%ONE_D%JJ
+      L%WALL(IWG)%IZG =  WC%ONE_D%KK
 
-      L%WALL(IWG)%IXW =  MESHES(NM)%WALL(IWG)%ONE_D%IIG                       !> (internal) wall cell indices
-      L%WALL(IWG)%IYW =  MESHES(NM)%WALL(IWG)%ONE_D%JJG
-      L%WALL(IWG)%IZW =  MESHES(NM)%WALL(IWG)%ONE_D%KKG
+      L%WALL(IWG)%IXW =  WC%ONE_D%IIG                       !> (internal) wall cell indices
+      L%WALL(IWG)%IYW =  WC%ONE_D%JJG
+      L%WALL(IWG)%IZW =  WC%ONE_D%KKG
 
    ENDDO INTERNAL_WALL_CELLS_LOOP1
 
@@ -2343,11 +2350,24 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       IOR0 = L%WALL(IWG)%IOR
       NCPL = L%WALL(IWG)%NCPL
 
-      !> Determine boundary type for IW
-      IF (MESHES(NM)%EXTERNAL_WALL(IWG)%NOM /= 0) THEN
+      WC  => MESHES(NM)%WALL(IWG)
+      EWC => MESHES(NM)%EXTERNAL_WALL(IWG)
+
+      !>
+      !> Preset ScaRC's boundary type indicator BTYPE
+      !> INTERNAL  : the global Poisson problem is solved, no need to impose BC's along mesh interfaces
+      !> DIRICHLET : in the structured case face-wise BC-settings are used ccording to FFT-settings
+      !>             (this also allows to use FFT as local preconditioner)
+      !>             in the unstructured case Dirichlet BCs are only used for open boundary cells 
+      !> NEUMANN   : is used for the rest
+      !>
+      IS_BC_DIRICHLET  = WC%PRESSURE_BC_INDEX == DIRICHLET
+      IS_OPEN_BOUNDARY = WC%BOUNDARY_TYPE     == OPEN_BOUNDARY
+
+      IF (EWC%NOM /= 0) THEN
          L%WALL(IWG)%BTYPE = INTERNAL
-      !ELSE IF (MESHES(NM)%WALL(IWG)%PRESSURE_BC_INDEX == DIRICHLET) THEN
-      ELSE IF (MESHES(NM)%WALL(IWG)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
+      ELSE IF ((    PRES_ON_WHOLE_DOMAIN .AND. IS_BC_DIRICHLET) .OR. &
+              (.NOT.PRES_ON_WHOLE_DOMAIN .AND. IS_OPEN_BOUNDARY)) THEN
          L%WALL(IWG)%BTYPE = DIRICHLET
          L%N_DIRIC = L%N_DIRIC + 1
       ELSE
@@ -2355,24 +2375,21 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          L%N_NEUMANN = L%N_NEUMANN + 1
       ENDIF
 
-      L%WALL(IWG)%BOUNDARY_TYPE  = MESHES(NM)%WALL(IWG)%BOUNDARY_TYPE
+      L%WALL(IWG)%BOUNDARY_TYPE  = WC%BOUNDARY_TYPE
 
-      L%WALL(IWG)%IXG =  MESHES(NM)%WALL(IWG)%ONE_D%II                                 !> ghost cell indices
-      L%WALL(IWG)%IYG =  MESHES(NM)%WALL(IWG)%ONE_D%JJ
-      L%WALL(IWG)%IZG =  MESHES(NM)%WALL(IWG)%ONE_D%KK
+      L%WALL(IWG)%IXG =  WC%ONE_D%II                                 !> ghost cell indices
+      L%WALL(IWG)%IYG =  WC%ONE_D%JJ
+      L%WALL(IWG)%IZG =  WC%ONE_D%KK
 
-      L%WALL(IWG)%IXW =  MESHES(NM)%WALL(IWG)%ONE_D%IIG                                !> (internal) wall cell indices
-      L%WALL(IWG)%IYW =  MESHES(NM)%WALL(IWG)%ONE_D%JJG
-      L%WALL(IWG)%IZW =  MESHES(NM)%WALL(IWG)%ONE_D%KKG
+      L%WALL(IWG)%IXW =  WC%ONE_D%IIG                                !> (internal) wall cell indices
+      L%WALL(IWG)%IYW =  WC%ONE_D%JJG
+      L%WALL(IWG)%IZW =  WC%ONE_D%KKG
 
       !> If there exists a neighbor for that wall cell, setup corresponding neighborship information
       IF (NOM /= 0) THEN
-         CALL SCARC_SETUP_WALLCELL_NEIGHBOR(MESHES(NM)%EXTERNAL_WALL(IWG)%IIO_MIN, &
-                                            MESHES(NM)%EXTERNAL_WALL(IWG)%IIO_MAX, &
-                                            MESHES(NM)%EXTERNAL_WALL(IWG)%JJO_MIN, &
-                                            MESHES(NM)%EXTERNAL_WALL(IWG)%JJO_MAX, &
-                                            MESHES(NM)%EXTERNAL_WALL(IWG)%KKO_MIN, &
-                                            MESHES(NM)%EXTERNAL_WALL(IWG)%KKO_MAX, &
+         CALL SCARC_SETUP_WALLCELL_NEIGHBOR(EWC%IIO_MIN, EWC%IIO_MAX, &
+                                            EWC%JJO_MIN, EWC%JJO_MAX, &
+                                            EWC%KKO_MIN, EWC%KKO_MAX, &
                                             IWG, IOR0, NM, NOM, NLEVEL_MIN)
       ENDIF
 
@@ -5280,23 +5297,18 @@ WALL_CELLS_LOOP2: DO IW = 1, NW
          DBC= C%DZI2
    END SELECT
 
-   !> 
-   !> SPD-matrix with mixture of Dirichlet and Neumann BC's
-   !> 
+   !> SPD-matrix with mixture of Dirichlet and Neumann BC's according to the settings of BTYPE 
    IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
 
       IP = A%ROW(IC)
-      BOUNDARY_TYPE_SELECT: SELECT CASE (L%WALL(IW)%BOUNDARY_TYPE)
-          CASE (OPEN_BOUNDARY)                                !> set Dirichlet BC's at open boundaries
-              A%VAL(IP) = A%VAL(IP) - DBC
-          CASE (SOLID_BOUNDARY, MIRROR_BOUNDARY)              !> set Neumann BC's elsewhere
-              IF (NOM > 0 .AND. PRES_ON_WHOLE_DOMAIN) CYCLE
-              A%VAL(IP) = A%VAL(IP) + DBC
-      END SELECT BOUNDARY_TYPE_SELECT
+      SELECT CASE (L%WALL(IW)%BTYPE)
+         CASE (DIRICHLET)
+            A%VAL(IP) = A%VAL(IP) - DBC
+         CASE (NEUMANN)
+            A%VAL(IP) = A%VAL(IP) + DBC
+      END SELECT
 
-   !> 
    !> purely Neumann matrix 
-   !> 
    ELSE
       IP = A%ROW(IC)
       IF (L%WALL(IW)%BTYPE == NEUMANN) A%VAL(IP) = A%VAL(IP) + DBC
@@ -11461,13 +11473,13 @@ SELECT CASE (TYP%TYPE_SOLVER)
             IOR0 = WC%IOR
             IC   = L%CELL%DOF(I,J,K)
 
-            !> Dirichlet BC's
+            !> Dirichlet BC's:
+            !> these are based on the settings in BTYPE
+            !> in the structured case this corresponds to the face-wise settings according to the FFT
+            !> (this allows to use local FFT's as preconditioners)
+            !> in the unstructured case only open boundary cells lead to Dirichlet BC's
             IF_DIRICHLET: IF (WC%BTYPE == DIRICHLET) THEN
 
-               IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
-                   WC%BOUNDARY_TYPE == NULL_BOUNDARY         .OR. &
-                   WC%BOUNDARY_TYPE == SOLID_BOUNDARY) CYCLE
- 
                SELECT CASE (IOR0)
                   CASE (1)
                      VAL = - 2.0_EB * L%COORD%DXI2 * M%BXS(J,K) 
@@ -11487,8 +11499,15 @@ SELECT CASE (TYP%TYPE_SOLVER)
 
             ENDIF IF_DIRICHLET
 
-            !> Neumann BC's
+            !> Neumann BC's:
+            !> Note for the unstructured case only:
+            !> Here, the matrix also contains Neumann BC's for those cells which have a
+            !> PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
+            !> because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
+            !> excluding them corresponds to a homogeneous Neumann condition for these cells
             IF_NEUMANN: IF (WC%BTYPE == NEUMANN) THEN
+
+               IF (.NOT.PRES_ON_WHOLE_DOMAIN .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
 
                SELECT CASE (IOR0)
                   CASE (1)
@@ -14143,5 +14162,3 @@ MSG%NCURRENT = MSG%NCURRENT - 1
 END SUBROUTINE SCARC_LEAVE_ROUTINE
 
 END MODULE SCRC
-
-

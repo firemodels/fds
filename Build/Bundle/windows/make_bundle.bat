@@ -7,8 +7,8 @@ set fdsversion=%FDSEDITION%
 set smvversion=%SMVEDITION%
 
 :: files from Intel version 18 update 2
-set      in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_INTEL18
-set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\INTEL18
+set      in_impi=%userprofile%\fire-notes\INSTALL\LIBS\RUNTIME\MPI_%INTELVERSION%
+set in_intel_dll=%userprofile%\fire-notes\INSTALL\LIBS\WINDOWS\%INTELVERSION%
 
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\fds\Build\intel_win_64
@@ -79,7 +79,7 @@ echo.
 
 copy %in_for_bundle%\*.po                                                     %out_bin%\.>Nul
 
-if %fds_debug% == 1 (
+if "%fds_debug%" == "1" (
   CALL :COPY  %fdsmpidirdb%\fds_impi_win_64_db.exe                            %out_bin%\fds_db.exe
 )
 CALL :COPY  %fdsmpidir%\fds_impi_win_64.exe                                   %out_bin%\fds.exe

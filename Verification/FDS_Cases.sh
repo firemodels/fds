@@ -133,6 +133,8 @@ $QFDS -d Fires box_burn_away1.fds
 $QFDS -d Fires box_burn_away2.fds
 $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds
+$QFDS -d Fires box_burn_away5.fds
+$QFDS -d Fires box_burn_away6.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
@@ -306,6 +308,7 @@ $QFDS -d Pressure_Effects pressure_rise.fds
 $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
+$QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds

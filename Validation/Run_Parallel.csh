@@ -16,6 +16,7 @@ cd Harrison_Spill_Plumes;  ./Run_All.sh -y; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh -y; cd ..
 cd LNG_Dispersion;  ./Run_All.sh -y; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh -y; cd ..
+cd Moody_Chart; ./Run_All.sh -y; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh -y; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh -y; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh -y; cd ..
@@ -23,6 +24,7 @@ cd NIST_NRC_Corner_Effects;  ./Run_All.sh -y; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh -y; cd ..
 cd NIST_RSE_2007;  ./Run_All.sh -y; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh -y; cd ..
+cd Pool_Fires;  ./Run_All.sh -y; cd ..
 cd Purdue_Flames;  ./Run_All.sh -y; cd ..
 cd Sandia_Plumes;  ./Run_All.sh -y; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh -y; cd ..
