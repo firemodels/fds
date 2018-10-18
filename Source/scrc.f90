@@ -105,8 +105,8 @@ CHARACTER(40) :: SCARC_MULTIGRID_INTERPOL   = 'CONSTANT'    !> Interpolation str
 
 !> Parameters for Krylov-type methods
 CHARACTER(40) :: SCARC_KRYLOV            = 'CG'             !> Type of Krylov-method (CG/BICG)
-INTEGER       :: SCARC_KRYLOV_ITERATIONS = 500              !> Max number of iterations
-REAL (EB)     :: SCARC_KRYLOV_ACCURACY   = 1.E-10_EB        !> Requested accuracy for convergence
+INTEGER       :: SCARC_KRYLOV_ITERATIONS = 1000             !> Max number of iterations
+REAL (EB)     :: SCARC_KRYLOV_ACCURACY   = 1.E-8_EB         !> Requested accuracy for convergence
 CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'CONSTANT'       !> twolevel-interpolation (CONSTANT/BILINEAR)
 
 !> Parameters for smoothing method (used in multigrids-methods)
