@@ -4,7 +4,7 @@
 
 # The variable VPATH defines where the source code is relative to the current directory
 
-VPATH = cd
+VPATH = ..
 
 # Definition of the non-MPI object variables
 
@@ -39,6 +39,7 @@ setup_win:
 
 # windows
 
+impi_intel_win: SHELL=C:/Windows/System32/cmd.exe
 impi_intel_win: MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win: MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE)
