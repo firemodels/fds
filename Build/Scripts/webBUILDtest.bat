@@ -38,7 +38,7 @@ if "%platform%" == "linux" (
 )
 if "%platform%" == "osx" (
   plink %linux_logon% %linux_svn_root%/smv/scripts/clean.sh fds/Utilities/test_mpi/mpi_intel_osx
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx make_test_mpi.sh
+  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/test_mpi/mpi_intel_osx make_test_mpi.sh
   pause
   goto eof
 )
