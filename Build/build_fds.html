@@ -21,6 +21,9 @@ function build_fds(args){
 function build_fds_debug(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDfdsdebug.bat ",args));
 }
+function build_test(args){
+  MyObject.Run(get_fullpath("Scripts/webBUILDtest.bat ",args));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -65,9 +68,15 @@ function build_fds_debug(args){
 
 <p><table border=on>
 
-<tr><th>Windows</th></tr>
+<tr>
+<th>Windows</th>
+<th>Linux</th>
+<th>OSX</th>
+</tr>
 <tr align="center">
-<td><button onclick="run_script('\\fds\\Build\\Scripts\\webBUILDtestmpiwin64.bat')">Build</button></td>
+<td><button onclick="build_test('windows')">Build</button></td>
+<td><button onclick="build_test('linux')">Build</button></td>
+<td><button onclick="build_test('osx')">Build</button></td>
 </tr>
 </table>
 
