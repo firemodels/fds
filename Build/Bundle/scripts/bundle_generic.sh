@@ -383,7 +383,7 @@ if [[ "$INTEL_BIN_DIR" != "" ]] && [[ -e $INTEL_BIN_DIR ]]; then
     CP $INTEL_LIB_DIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
-if [ "$OS_LIB_DIR" != "" ]; then
+if [[ "$OS_LIB_DIR" != "" ]] && [[ -e $OS_LIB_DIR ]]; then
   echo ""
   echo "--- copying run time libraries ---"
   echo ""
