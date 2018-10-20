@@ -39,7 +39,7 @@ if NOT exist %hashfile% (
 
 set in_pdf=%userprofile%\.bundle\pubs
 set in_shortcut=%userprofile%\fire-notes\INSTALL\repoexes
-set in_for_bundle=%svn_root%\smv\for_bundle
+set in_for_bundle=%svn_root%\smv\Build\Bundle\for_bundle
 
 
 set uploads=%svn_root%\fds\Build\Bundle\uploads
@@ -69,7 +69,7 @@ set wui_casesbat=%svn_root%\smv\Verification\scripts\WUI_Cases.bat
 set copyFDScases=%svn_root%\fds\Utilities\Scripts\copyFDScases.bat
 set copyCFASTcases=%svn_root%\fds\Utilities\Scripts\copyCFASTcases.bat
 
-set bundleinfo=%svn_root%\fds\Utilities\Scripts\for_bundle
+set bundleinfo=%svn_root%\fds\Build\Bundle\for_bundle
 
 :: erase the temporary bundle directory if it already exists
 
