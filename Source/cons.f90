@@ -92,7 +92,7 @@ LOGICAL :: RADIATION=.TRUE.,RADIATION_COMPLETED=.TRUE.,EXCHANGE_RADIATION=.FALSE
            SIMPLE_CHEMISTRY=.FALSE.,FIRST_PASS,REIGNITION_MODEL=.FALSE.,VERBOSE=.FALSE.,&
            SOLID_HT3D=.FALSE.,SOLID_MT3D=.FALSE.,SOLID_PYRO3D=.FALSE.,HVAC_MASS_TRANSPORT=.FALSE., &
            EXTERNAL_BOUNDARY_CORRECTION=.FALSE.,DUCT_HT=.FALSE.,DUCT_HT_INSERTED,PROCESS_ALL_MESHES=.FALSE.,&
-           STORE_Q_DOT_PPP_S=.FALSE.,CORRECT_SUBGRID_TEMPERATURE=.FALSE.,STORE_OLD_VELOCITY=.FALSE.,&
+           STORE_Q_DOT_PPP_S=.FALSE.,STORE_OLD_VELOCITY=.FALSE.,&
            USE_ATMOSPHERIC_INTERPOLATION=.FALSE.,TWO_REAC_EXTINCT_TEST=.FALSE.,&
            POSITIVE_ERROR_TEST=.FALSE.,OBST_SHAPE_AREA_ADJUST=.FALSE.
 
@@ -404,6 +404,9 @@ INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL =360  ! Up to 360 wstriangles related
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)
+
+! Outer Geometric entity to use for interpolation to velocity/stress normal probe external points:
+LOGICAL :: IBM_USE_OUTER_PLANE=.TRUE. ! If .TRUE. use external plane, if .FALSE. use external cubic volume.
 
 ! CELL_INDEX counter related to GEOMS.
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC

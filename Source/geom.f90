@@ -486,13 +486,33 @@ INTEGER, SAVE :: N_CUTCELLS_PROC=0, N_INB_CUTFACES_PROC=0, N_REG_CUTFACES_PROC=0
 
 ! Velocity interpolation stencil threshold. Interpolation stencils will be defined if distance
 ! from body to face centroid is greater than DIST_THRES of the minimum local cell size.
-REAL(EB), PARAMETER :: DIST_THRES = 0.005_EB
+REAL(EB), PARAMETER :: DIST_THRES = 0.0001_EB
 
 ! Local arrays allocation variables:
 INTEGER, PARAMETER :: DELTA_VERT = 24
 INTEGER, PARAMETER :: DELTA_EDGE = 24
 INTEGER, PARAMETER :: DELTA_FACE = 24
 INTEGER, PARAMETER :: DELTA_CELL = 5
+
+! Wall model volume interpolation variables:
+INTEGER, PARAMETER :: INDEX_UNDEFINED = -1000
+INTEGER, SAVE :: INT_N_EXT_PTS = 1 ! Default is one external point in normal probe.
+INTEGER, PARAMETER :: MAX_INTERP_POINTS_VOL_LIN = 8 ! 8 stencil points for trilinear interpolation.
+INTEGER, PARAMETER :: MAX_INTERP_POINTS_VOL_QUAD=27 !27 stencil points for quadratic interpolation.
+INTEGER, SAVE :: MAX_INTERP_POINTS = MAX_INTERP_POINTS_VOL_LIN ! Default linear interpolation.
+INTEGER, SAVE :: DELTA_INT = 1*MAX_DIM*MAX_INTERP_POINTS_VOL_LIN ! The 1 is for INT_N_EXT_PTS
+INTEGER, PARAMETER :: INT_VEL_IND=1, INT_VELS_IND=2, INT_FV_IND=3, INT_DHDX_IND=4, N_INT_FVARS=4
+INTEGER, PARAMETER :: INT_H_IND=1, INT_RHO_IND=2, INT_TMP_IND=3, INT_RSUM_IND=4, INT_MU_IND=5, INT_KRES_IND=6, &
+                      INT_D_IND=7, INT_P_IND=8
+INTEGER, SAVE :: N_INT_CVARS
+
+! Types of interpolation:
+INTEGER, PARAMETER :: IBM_LINEAR_INTERPOLATION    = 1
+INTEGER, PARAMETER :: IBM_QUADRATIC_INTERPOLATION = 2
+INTEGER, PARAMETER :: IBM_WLS_INTERPOLATION       = 3
+INTEGER, SAVE :: STENCIL_INTERPOLATION        = IBM_LINEAR_INTERPOLATION ! Set to linear by default.
+
+LOGICAL, PARAMETER :: CFACE_INTERPOLATE = .TRUE.
 
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
@@ -533,6 +553,7 @@ PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,&
           TRILINEAR,GET_CC_MATRIXGRAPH_H,GET_CC_IROW,GET_CC_UNKH,GET_CUTCELL_FH,GET_CUTCELL_HP,&
           GETU,GET_GASCUTFACE_SCALAR_SLICE,GETGRAD,GET_BOUNDFACE_GEOM_INFO_H, &
           GET_H_CUTFACES,GET_H_MATRIX_CC,GET_CRTCFCC_INTERPOLATION_STENCILS,GET_RCFACES_H, &
+          GET_PRES_CFACE, GET_UVWGAS_CFACE, GET_MUDNS_CFACE, &
           GET_EXIMFACE_SCALAR_SLICE,GET_SOLIDCUTFACE_SCALAR_SLICE,GET_SOLIDREGFACE_SCALAR_SLICE, &
           INIT_CUTCELL_DATA,INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_OBB_AABB,INTERSECT_SPHERE_AABB, &
           LINEARFIELDS_INTERP_TEST,MASS_CONSERVE_INIT,NUMBER_UNKH_CUTCELLS,POTENTIAL_FLOW_INIT,RANDOM_CFACE_XYZ,&
@@ -1297,6 +1318,106 @@ END SUBROUTINE ROTATED_CUBE_NEUMN_FZ
 ! RETURN
 ! END SUBROUTINE ROTATED_CUBE_DIRIC_FZ
 
+! ---------------------------------- GET_MUDNS_CFACE --------------------------------
+
+SUBROUTINE GET_MUDNS_CFACE(MU_WALL,IND1,IND2)
+
+USE PHYSICAL_FUNCTIONS, ONLY : GET_VISCOSITY
+
+REAL(EB), INTENT(OUT)::  MU_WALL
+INTEGER, INTENT(IN) :: IND1,IND2
+
+! Local Variables:
+INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
+REAL(EB):: MU_DNS_EP, TMP_EP, ZZ_GET(1:N_TRACKED_SPECIES)
+
+! Cell-centered variables:
+VIND=0;  EP  =1
+INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+IF (INT_NPE_HI > 0) THEN
+   MU_WALL=0._EB
+   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+      ! Compute MU_DNS for INPE:
+      ZZ_GET(1:N_TRACKED_SPECIES) = CUT_FACE(IND1)%INT_CVARS(INT_P_IND+1:INT_P_IND+N_TRACKED_SPECIES,INPE)
+      TMP_EP = CUT_FACE(IND1)%INT_CVARS( INT_TMP_IND,INPE)
+      CALL GET_VISCOSITY(ZZ_GET,MU_DNS_EP,TMP_EP)
+      ! Add to MU_WALL:
+      MU_WALL = MU_WALL + CUT_FACE(IND1)%INT_COEF(INPE)*MU_DNS_EP
+   ENDDO
+ELSE
+   ! Underlying cell approximate value:
+   ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+   IIG = CUT_CELL(ICC)%IJK(1)
+   JJG = CUT_CELL(ICC)%IJK(2)
+   KKG = CUT_CELL(ICC)%IJK(3)
+   MU_WALL = MU_DNS(IIG,JJG,KKG)
+ENDIF
+
+RETURN
+END SUBROUTINE GET_MUDNS_CFACE
+
+! ---------------------------------- GET_UVWGAS_CFACE --------------------------------
+
+SUBROUTINE GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2)
+
+INTEGER, INTENT(IN) :: IND1,IND2
+REAL(EB),INTENT(OUT):: U_CELL,V_CELL,W_CELL
+
+
+! Local Variables:
+INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE
+REAL(EB):: VVEL(IAXIS:KAXIS)
+
+EP =1
+VVEL(IAXIS:KAXIS) = 0._EB
+DO VIND=IAXIS,KAXIS
+   INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+   INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+      VVEL(VIND) = VVEL(VIND) + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_FVARS(INT_VEL_IND,INPE)
+   ENDDO
+ENDDO
+
+U_CELL = VVEL(IAXIS)
+V_CELL = VVEL(JAXIS)
+W_CELL = VVEL(KAXIS)
+
+RETURN
+END SUBROUTINE GET_UVWGAS_CFACE
+
+! ----------------------------------- GET_PRES_CFACE ---------------------------------
+
+SUBROUTINE GET_PRES_CFACE(PRESS,IND1,IND2,ONE_D)
+
+INTEGER,  INTENT( IN) :: IND1, IND2
+REAL(EB), INTENT(OUT) :: PRESS
+TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(IN), POINTER :: ONE_D
+
+! Local Variables:
+INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
+
+! Cell-centered variables:
+VIND=0;  EP  =1
+INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+IF (INT_NPE_HI > 0) THEN
+   PRESS=0._EB
+   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+      PRESS = PRESS + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_P_IND,INPE)
+   ENDDO
+ELSE
+   ! Underlying cell approximate value:
+   ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
+   IIG = CUT_CELL(ICC)%IJK(1)
+   JJG = CUT_CELL(ICC)%IJK(2)
+   KKG = CUT_CELL(ICC)%IJK(3)
+   PRESS=ONE_D%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
+ENDIF
+
+RETURN
+END SUBROUTINE GET_PRES_CFACE
+
 ! ------------------------------- CFACE_THERMAL_GASVARS ------------------------------
 
 SUBROUTINE CFACE_THERMAL_GASVARS(ICF,ONE_D)
@@ -1310,18 +1431,8 @@ TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(INOUT), POINTER :: ONE_D
 INTEGER :: IND1, IND2, ICC, JCC, I ,J ,K, IFACE, IFC2, IFACE2, NFCELL, ICCF, X1AXIS, LOWHIGH, ILH, IBOD, IWSEL
 REAL(EB):: PREDFCT,U_CAVG(IAXIS:KAXIS),AREA_TANG(IAXIS:KAXIS),AF,VELN,NVEC(IAXIS:KAXIS),ABS_NVEC(IAXIS:KAXIS),K_G
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
-
-IF (PREDICTOR) THEN
-   PREDFCT=1._EB
-   UP => U ! Corrector final velocities.
-   VP => V
-   WP => W
-ELSE
-   PREDFCT=0._EB
-   UP => US ! Predictor final velocities.
-   VP => VS
-   WP => WS
-ENDIF
+REAL(EB):: VVEL(IAXIS:KAXIS)
+INTEGER :: VIND,EP,INPE,INT_NPE_LO,INT_NPE_HI
 
 ! ONE_D%TMP_G, ONE_D%RHO_G, ONE_D%ZZ_G(:), ONE_D%RSUM_G, ONE_D%U_TANG
 
@@ -1337,8 +1448,78 @@ ABS_NVEC(IAXIS:KAXIS) = ABS(NVEC(IAXIS:KAXIS))
 X1AXIS = MAXLOC(ABS_NVEC(IAXIS:KAXIS),DIM=1)
 ONE_D%IOR = INT(SIGN(1._EB,NVEC(X1AXIS)))*X1AXIS
 
+IF(CFACE_INTERPOLATE) THEN
+
+   ! Cell-centered variables:
+   VIND=0;  EP  =1
+   INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+   INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+
+   IF (INT_NPE_HI > 0) THEN
+      ONE_D%TMP_G = 0._EB
+      ONE_D%RSUM_G= 0._EB
+      ONE_D%RHO_G = 0._EB
+      ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = 0._EB
+      ! Viscosity, Use MU from bearing cartesian cell:
+      ONE_D%MU_G = 0._EB
+
+      DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+         ONE_D%TMP_G = ONE_D%TMP_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_TMP_IND,INPE)
+         ONE_D%RSUM_G= ONE_D%RSUM_G+ CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(INT_RSUM_IND,INPE)
+         ONE_D%RHO_G = ONE_D%RHO_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_RHO_IND,INPE)
+         ONE_D%MU_G  = ONE_D%MU_G  + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_MU_IND,INPE)
+         ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES) + &
+                                           CUT_FACE(IND1)%INT_COEF(INPE)*    &
+                                           CUT_FACE(IND1)%INT_CVARS(INT_P_IND+1:INT_P_IND+N_TRACKED_SPECIES,INPE)
+      ENDDO
+
+      ! Gas conductivity:
+      K_G = ONE_D%MU_G*CPOPR
+      IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
+      ONE_D%K_G = K_G
+
+      ! Finally U_TANG velocity:
+      ! U_TANG use the norm of interpolated velocity to EP gas point:
+      VVEL(IAXIS:KAXIS) = 0._EB
+      DO VIND=IAXIS,KAXIS
+         INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+         INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+         DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+            VVEL(VIND) = VVEL(VIND) + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_FVARS(INT_VEL_IND,INPE)
+         ENDDO
+      ENDDO
+      ONE_D%U_TANG = SQRT(VVEL(IAXIS)**2._EB+VVEL(JAXIS)**2._EB+VVEL(KAXIS)**2._EB)
+
+   ELSE
+      CALL CFACE_THVARS_CC
+   ENDIF
+
+ELSE
+   CALL CFACE_THVARS_CC
+ENDIF
+
+RETURN
+
+CONTAINS
+
+SUBROUTINE CFACE_THVARS_CC
+
+IF (PREDICTOR) THEN
+   PREDFCT=1._EB
+   UP => U ! Corrector final velocities.
+   VP => V
+   WP => W
+ELSE
+   PREDFCT=0._EB
+   UP => US ! Predictor final velocities.
+   VP => VS
+   WP => WS
+ENDIF
+
+
 SELECT CASE(CUT_FACE(IND1)%CELL_LIST(1,LOW_IND,IND2))
 CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
+
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
    JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
 
@@ -1431,10 +1612,12 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ! U_TANG use the norm of CC centroid area averaged velocity:
    ONE_D%U_TANG = SQRT( U_CAVG(IAXIS)**2._EB + U_CAVG(JAXIS)**2._EB + U_CAVG(KAXIS)**2._EB )
 
-
 END SELECT
 
+
 RETURN
+END SUBROUTINE CFACE_THVARS_CC
+
 END SUBROUTINE CFACE_THERMAL_GASVARS
 
 ! --------------------------- GET_SOLIDREGFACE_SCALAR_SLICE --------------------------
@@ -1845,6 +2028,8 @@ TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 INTEGER :: IW,II,JJ,KK
 
+INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,IFACE_START
+
 ! In case of initialization code from main return.
 ! Initialization of cut-cell communications needs to be done later in the main.f90 sequence and will be done using
 ! INITIALIZE_CC_SCALARS/VELOCITY logicals.
@@ -1932,8 +2117,8 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          M3=>MESHES(NM)%OMESH(NOM)
          IF (M3%NFCC_R(2)==0) CYCLE OTHER_MESH_LOOP_13
          SNODE = PROCESS(NOM)
-         ! Cell centered variables H, RHO_0, Wc:
-         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*3))
+         ! Cell centered variables:
+         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(10+N_TRACKED_SPECIES)))
          IF (RNODE/=SNODE) THEN
             N_REQ13 = N_REQ13 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG13(1),SIZE(M3%REAL_RECV_PKG13),MPI_DOUBLE_PRECISION, &
@@ -1987,7 +2172,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(2)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*3))
+            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(10+N_TRACKED_SPECIES)))
             N_REQ13 = N_REQ13 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG13(1),SIZE(M3%REAL_SEND_PKG13),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ13(N_REQ13),IERR)
@@ -2061,6 +2246,54 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ENDDO
                ENDDO
             ENDDO PACK_REAL_RECV_PKG11
+         ENDIF
+      ENDIF
+
+      IF (CODE==1 .AND. M3%NFCC_S(2)>0) THEN
+         NQT2 = 10+N_TOTAL_SCALARS
+         LL = 0
+         IF (RNODE/=SNODE) THEN
+            PACK_REAL_SEND_PKG213 : DO ICC=1,M3%NFCC_S(2)
+               I     = M3%IIO_CC_S(ICC)
+               J     = M3%JJO_CC_S(ICC)
+               K     = M3%KKO_CC_S(ICC)
+               LL = LL + 1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+1) = M%HS(I,J,K)                            ! Prev H in cell I,J,K
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen^n in I,J,K.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+4) = M%RHOS(I,J,K)                          ! RHO^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^n
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%D(I,J,K)                             ! DIV^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               DO NN=1,N_TOTAL_SCALARS
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+10+NN)= M%ZZS(I,J,K,NN)
+               ENDDO
+            ENDDO PACK_REAL_SEND_PKG213
+         ELSE
+            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
+            M2=>MESHES(NOM)%OMESH(NM)
+            PACK_REAL_RECV_PKG213: DO ICC=1,M3%NFCC_S(2)
+               I     = M3%IIO_CC_S(ICC)
+               J     = M3%JJO_CC_S(ICC)
+               K     = M3%KKO_CC_S(ICC)
+               LL = LL + 1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%HS(I,J,K)                            ! Prev H in cell I,J,K
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen^n in I,J,K.
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHOS(I,J,K)                          ! RHO^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^n
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%D(I,J,K)                             ! DIV^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               DO NN=1,N_TOTAL_SCALARS
+                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)= M%ZZS(I,J,K,NN)
+               ENDDO
+            ENDDO PACK_REAL_RECV_PKG213
          ENDIF
       ENDIF
 
@@ -2167,6 +2400,55 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO PACK_REAL_RECV_PKG111
          ENDIF
       ENDIF
+
+      IF (CODE==4 .AND. M3%NFCC_S(2)>0) THEN
+         NQT2 = 10+N_TOTAL_SCALARS
+         LL = 0
+         IF (RNODE/=SNODE) THEN
+            PACK_REAL_SEND_PKG313 : DO ICC=1,M3%NFCC_S(2)
+               I     = M3%IIO_CC_S(ICC)
+               J     = M3%JJO_CC_S(ICC)
+               K     = M3%KKO_CC_S(ICC)
+               LL = LL + 1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+1) = M%H(I,J,K)                             ! Prev H in cell I,J,K
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+4) = M%RHO(I,J,K)                           ! RHO^n+1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%DS(I,J,K)                            ! DIV^n+1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               DO NN=1,N_TOTAL_SCALARS
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+10+NN)= M%ZZ(I,J,K,NN)
+               ENDDO
+            ENDDO PACK_REAL_SEND_PKG313
+         ELSE
+            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
+            M2=>MESHES(NOM)%OMESH(NM)
+            PACK_REAL_RECV_PKG313: DO ICC=1,M3%NFCC_S(2)
+               I     = M3%IIO_CC_S(ICC)
+               J     = M3%JJO_CC_S(ICC)
+               K     = M3%KKO_CC_S(ICC)
+               LL = LL + 1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%H(I,J,K)                             ! Prev H in cell I,J,K
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHO(I,J,K)                           ! RHO^n+1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%DS(I,J,K)                            ! DIV^n+1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               DO NN=1,N_TOTAL_SCALARS
+                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)= M%ZZ(I,J,K,NN)
+               ENDDO
+            ENDDO PACK_REAL_RECV_PKG313
+         ENDIF
+      ENDIF
+
 
       ! Exchange velocity, momentum rhs and previous substep dH/Dx1 for faces, in CORRECTOR, IBM forcing:
 
@@ -2297,8 +2579,8 @@ IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ12>0) THEN
    CALL CC_TIMEOUT('REQ12',N_REQ12,REQ12(1:N_REQ12))
 ENDIF
 
-! Exchange End of step cell-centered data:
-IF (N_MPI_PROCESSES>1 .AND. (CODE==3.OR.CODE==6) .AND. N_REQ13>0) THEN
+! Exchange scalar data for CFACES, or End of step cell-centered data:
+IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4.OR.CODE==3.OR.CODE==6) .AND. N_REQ13>0) THEN
    CALL MPI_STARTALL(N_REQ13,REQ13(1:N_REQ13),IERR)
    CALL CC_TIMEOUT('REQ13',N_REQ13,REQ13(1:N_REQ13))
 ENDIF
@@ -2339,42 +2621,131 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ENDIF
 
-      ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in PREDICTOR, IBM forcing:
-
-      IF (CODE==1 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 3
+      IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
+         NQT2 = 10+N_TOTAL_SCALARS
+         VIND = 0 ! Cell centered variables.
          ! First loop cut-faces:
          DO ICF=1,M%N_CUTFACE_MESH
-            IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-            ! First Cartesian center:
-            DO IPT=1,MAX_INTERP_POINTS_PLANE
-               NOOM   = M%CUT_FACE(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-               LL     = M%CUT_FACE(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
-               M%CUT_FACE(ICF)%VEL_CARTCEN(   IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-               M%CUT_FACE(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-               M%CUT_FACE(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Predictor dH/dx1^n-1/2
-            ENDDO
-            ! Then cut-faces centers:
+            IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
             DO IFACE=1,M%CUT_FACE(ICF)%NFACE
-               DO IPT=1,MAX_INTERP_POINTS_PLANE
-                  NOOM   = M%CUT_FACE(ICF)%NOMIND_CFCEN( LOW_IND,IPT,IFACE); IF (NOOM /= NM) CYCLE
-                  LL     = M%CUT_FACE(ICF)%NOMIND_CFCEN(HIGH_IND,IPT,IFACE)
-                  M%CUT_FACE(ICF)%VEL_CFCEN(   IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-                  M%CUT_FACE(ICF)%FV_CFCEN(    IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-                  M%CUT_FACE(ICF)%DHDX1_CFCEN( IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Pred dH/dx1^n-1/2
+               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                  INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                  INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                     NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                     LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                     M%CUT_FACE(ICF)%INT_CVARS(   INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+                     M%CUT_FACE(ICF)%INT_CVARS( INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
+                     M%CUT_FACE(ICF)%INT_CVARS( INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
+                     M%CUT_FACE(ICF)%INT_CVARS(INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
+                     M%CUT_FACE(ICF)%INT_CVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
+                     M%CUT_FACE(ICF)%INT_CVARS(INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
+                     M%CUT_FACE(ICF)%INT_CVARS(   INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
+                     M%CUT_FACE(ICF)%INT_CVARS(   INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
+                     DO NN=1,N_TOTAL_SCALARS
+                        M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)
+                     ENDDO
+                  ENDDO
                ENDDO
             ENDDO
          ENDDO
-         ! Then regular forced faces:
-         DO ICF=1,M%IBM_NRCFACE_VEL
-            DO IPT=1,MAX_INTERP_POINTS_PLANE
-               NOOM   = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-               LL     = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
-               M%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN(   IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-               M%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-               M%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Predictor dH/dx1^n-1/2
-            ENDDO
-         ENDDO
+      ENDIF
+
+      ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in PREDICTOR, IBM forcing:
+
+      IF (CODE==1 .AND. M2%NFCC_R(1)>0) THEN
+         NQT2 = 3 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
+         IF(IBM_USE_OUTER_PLANE) THEN
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+              ! First Cartesian center:
+              DO IPT=1,MAX_INTERP_POINTS_PLANE
+                 NOOM   = M%CUT_FACE(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                 LL     = M%CUT_FACE(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                 M%CUT_FACE(ICF)%VEL_CARTCEN(   IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                 M%CUT_FACE(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
+                 M%CUT_FACE(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Predictor dH/dx1^n-1/2
+              ENDDO
+              ! Then cut-faces centers:
+              DO IFACE=1,M%CUT_FACE(ICF)%NFACE
+                 DO IPT=1,MAX_INTERP_POINTS_PLANE
+                    NOOM   = M%CUT_FACE(ICF)%NOMIND_CFCEN( LOW_IND,IPT,IFACE); IF (NOOM /= NM) CYCLE
+                    LL     = M%CUT_FACE(ICF)%NOMIND_CFCEN(HIGH_IND,IPT,IFACE)
+                    M%CUT_FACE(ICF)%VEL_CFCEN(   IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                    M%CUT_FACE(ICF)%FV_CFCEN(    IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
+                    M%CUT_FACE(ICF)%DHDX1_CFCEN( IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Pred dH/dx1^n-1/2
+                 ENDDO
+              ENDDO
+           ENDDO
+           ! Then regular forced faces:
+           DO ICF=1,M%IBM_NRCFACE_VEL
+              DO IPT=1,MAX_INTERP_POINTS_PLANE
+                 NOOM   = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                 LL     = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                 M%IBM_RCFACE_VEL(ICF)%VEL_CARTCEN(   IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                 M%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
+                 M%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Pred dH/dx1^n-1/2
+              ENDDO
+           ENDDO
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+              DO IFACE=1,M%CUT_FACE(ICF)%NFACE
+                 DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                    DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                       INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                       INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                          NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                          LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                          M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                          M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
+                       ENDDO
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+         ELSE ! IBM_USE_OUTER_PLANE
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IFACE_START=1
+              IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
+              DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
+                 DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                    DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                       INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                       INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                          NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                          LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                          M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                          M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
+                       ENDDO
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+           ! Then regular forced faces:
+           IFACE = 0
+           DO ICF=1,M%IBM_NRCFACE_VEL
+              DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                 DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                    INT_NPE_LO = M%IBM_RCFACE_VEL(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                    INT_NPE_HI = M%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                       NOOM   = M%IBM_RCFACE_VEL(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                       LL     = M%IBM_RCFACE_VEL(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS( INT_VEL_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS(  INT_FV_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Pred FV
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_DHDX_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) !dH/dx1^n-1/2
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+         ENDIF  ! IBM_USE_OUTER_PLANE
       ENDIF
 
       ! Unpack densities and species mass fractions following CORRECTOR exchange
@@ -2404,101 +2775,160 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in CORRECTOR, IBM forcing:
 
       IF (CODE==4 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 3
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-            ! First Cartesian center:
-            DO IPT=1,MAX_INTERP_POINTS_PLANE
-               NOOM   = M%CUT_FACE(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-               LL     = M%CUT_FACE(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
-               M%CUT_FACE(ICF)%VELS_CARTCEN(  IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-               M%CUT_FACE(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
-               M%CUT_FACE(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corrector dH/dx1^n-1/2
-            ENDDO
-            ! Then cut-faces centers:
-            DO IFACE=1,M%CUT_FACE(ICF)%NFACE
-               DO IPT=1,MAX_INTERP_POINTS_PLANE
-                  NOOM   = M%CUT_FACE(ICF)%NOMIND_CFCEN( LOW_IND,IPT,IFACE); IF (NOOM /= NM) CYCLE
-                  LL     = M%CUT_FACE(ICF)%NOMIND_CFCEN(HIGH_IND,IPT,IFACE)
-                  M%CUT_FACE(ICF)%VELS_CFCEN(  IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-                  M%CUT_FACE(ICF)%FV_CFCEN(    IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
-                  M%CUT_FACE(ICF)%DHDX1_CFCEN( IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corr dH/dx1^n-1/2
-               ENDDO
-            ENDDO
-         ENDDO
-         ! Then regular forced faces:
-         DO ICF=1,M%IBM_NRCFACE_VEL
-            DO IPT=1,MAX_INTERP_POINTS_PLANE
-               NOOM   = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-               LL     = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
-               M%IBM_RCFACE_VEL(ICF)%VELS_CARTCEN(  IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-               M%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
-               M%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corrector dH/dx1^n-1/2
-            ENDDO
-         ENDDO
-      ENDIF
-
-     ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
-
-     IF ( (CODE==3 .OR. CODE==6) .AND. M2%NFCC_R(2)>0) THEN
-        NQT2 = 3
-        IF(CALL_FROM_HINTERP)THEN
-           IF(M2%NCC_INT_R==M2%NFCC_R(2)) CYCLE
-           LL = M2%NCC_INT_R
-           ! Now loop INTERPOLATED WALL_CELLs:
-           EXT_WALL_LOOP : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-              WC=>M%WALL(IW)
-              EWC=>M%EXTERNAL_WALL(IW)
-              IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
-              II  = WC%ONE_D%II
-              JJ  = WC%ONE_D%JJ
-              KK  = WC%ONE_D%KK
-              NOOM = EWC%NOM
-              IF (NOOM /= NM) CYCLE EXT_WALL_LOOP
-              IF(.NOT.ANY(M%CCVAR(II-1:II+1,JJ-1:JJ+1,KK-1:KK+1,IBM_CGSC)==IBM_CUTCFE)) CYCLE EXT_WALL_LOOP
-              LL=LL+1
-              IF (CODE==3)THEN ! END of PREDICTOR
-                 M%H(II,JJ,KK) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-              ELSE ! END of CORRECTOR
-                 M%HS(II,JJ,KK)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-              ENDIF
-           ENDDO EXT_WALL_LOOP
-
-        ELSE
-           ! First loop cut-cells:
-           DO ICC=1,M%N_CUTCELL_MESH
+         NQT2 = 3 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
+         IF(IBM_USE_OUTER_PLANE) THEN
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
               ! First Cartesian center:
               DO IPT=1,MAX_INTERP_POINTS_PLANE
-                 NOOM   = M%CUT_CELL(ICC)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-                 LL     = M%CUT_CELL(ICC)%NOMIND_CARTCEN(HIGH_IND,IPT)
-                 M%CUT_CELL(ICC)%H_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
-                 M%CUT_CELL(ICC)%RHO_0_CARTCEN( IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
-                 M%CUT_CELL(ICC)%W_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+                 NOOM   = M%CUT_FACE(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                 LL     = M%CUT_FACE(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                 M%CUT_FACE(ICF)%VELS_CARTCEN(  IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                 M%CUT_FACE(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
+                 M%CUT_FACE(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corrector dH/dx1^n-1/2
               ENDDO
-              ! Then cut-cells:
-              DO JCC=1,M%CUT_CELL(ICC)%NCELL
+              ! Then cut-faces centers:
+              DO IFACE=1,M%CUT_FACE(ICF)%NFACE
                  DO IPT=1,MAX_INTERP_POINTS_PLANE
-                    NOOM   = M%CUT_CELL(ICC)%NOMIND_CCCEN( LOW_IND,IPT,JCC); IF (NOOM /= NM) CYCLE
-                    LL     = M%CUT_CELL(ICC)%NOMIND_CCCEN(HIGH_IND,IPT,JCC)
-                    M%CUT_CELL(ICC)%H_CCCEN(     IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
-                    M%CUT_CELL(ICC)%RHO_0_CCCEN( IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
-                    M%CUT_CELL(ICC)%W_CCCEN(     IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+                    NOOM   = M%CUT_FACE(ICF)%NOMIND_CFCEN( LOW_IND,IPT,IFACE); IF (NOOM /= NM) CYCLE
+                    LL     = M%CUT_FACE(ICF)%NOMIND_CFCEN(HIGH_IND,IPT,IFACE)
+                    M%CUT_FACE(ICF)%VELS_CFCEN(  IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                    M%CUT_FACE(ICF)%FV_CFCEN(    IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
+                    M%CUT_FACE(ICF)%DHDX1_CFCEN( IPT+1,IFACE) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corr dH/dx1^n-1/2
                  ENDDO
               ENDDO
            ENDDO
-           ! Then regular cells:
-           DO ICC=1,M%IBM_NRCELL_H
+           ! Then regular forced faces:
+           DO ICF=1,M%IBM_NRCFACE_VEL
               DO IPT=1,MAX_INTERP_POINTS_PLANE
-                 NOOM   = M%IBM_RCELL_H(ICC)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
-                 LL     = M%IBM_RCELL_H(ICC)%NOMIND_CARTCEN(HIGH_IND,IPT)
-                 M%IBM_RCELL_H(ICC)%H_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
-                 M%IBM_RCELL_H(ICC)%RHO_0_CARTCEN( IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
-                 M%IBM_RCELL_H(ICC)%W_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+                 NOOM   = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                 LL     = M%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                 M%IBM_RCFACE_VEL(ICF)%VELS_CARTCEN(  IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                 M%IBM_RCFACE_VEL(ICF)%FV_CARTCEN(    IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
+                 M%IBM_RCFACE_VEL(ICF)%DHDX1_CARTCEN( IPT+1) = M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! Corrector dH/dx1^n-1/2
               ENDDO
            ENDDO
-        ENDIF
-     ENDIF
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+              DO IFACE=1,M%CUT_FACE(ICF)%NFACE
+                 DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                    DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                       INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                       INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                          NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                          LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                          M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
+                       ENDDO
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+         ELSE ! IBM_USE_OUTER_PLANE
+           ! First loop cut-faces:
+           DO ICF=1,M%N_CUTFACE_MESH
+              IFACE_START=1
+              IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
+              DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
+                 DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                    DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                       INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                       INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                          NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                          LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                          M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
+                          M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
+                       ENDDO
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+           ! Then regular forced faces:
+           IFACE = 0
+           DO ICF=1,M%IBM_NRCFACE_VEL
+              DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                 DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                    INT_NPE_LO = M%IBM_RCFACE_VEL(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                    INT_NPE_HI = M%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                       NOOM   = M%IBM_RCFACE_VEL(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                       LL     = M%IBM_RCFACE_VEL(ICF)%INT_NOMIND(HIGH_IND,INPE)
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_VELS_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS(  INT_FV_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corr FV
+                       M%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_DHDX_IND,INPE)=M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) !dH/dx1^n-1/2
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+         ENDIF ! IBM_USE_OUTER_PLANE
+      ENDIF
+
+      ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
+
+      IF ( (CODE==3 .OR. CODE==6) .AND. M2%NFCC_R(2)>0) THEN
+         NQT2 = 3
+         IF(CALL_FROM_HINTERP)THEN
+            IF(M2%NCC_INT_R==M2%NFCC_R(2)) CYCLE
+            LL = M2%NCC_INT_R
+            ! Now loop INTERPOLATED WALL_CELLs:
+            EXT_WALL_LOOP : DO IW=1,M%N_EXTERNAL_WALL_CELLS
+               WC=>M%WALL(IW)
+               EWC=>M%EXTERNAL_WALL(IW)
+               IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
+               II  = WC%ONE_D%II
+               JJ  = WC%ONE_D%JJ
+               KK  = WC%ONE_D%KK
+               NOOM = EWC%NOM
+               IF (NOOM /= NM) CYCLE EXT_WALL_LOOP
+               IF(.NOT.ANY(M%CCVAR(II-1:II+1,JJ-1:JJ+1,KK-1:KK+1,IBM_CGSC)==IBM_CUTCFE)) CYCLE EXT_WALL_LOOP
+               LL=LL+1
+               IF (CODE==3)THEN ! END of PREDICTOR
+                  M%H(II,JJ,KK) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+               ELSE ! END of CORRECTOR
+                  M%HS(II,JJ,KK)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+               ENDIF
+            ENDDO EXT_WALL_LOOP
+
+         ELSE
+            ! First loop cut-cells:
+            DO ICC=1,M%N_CUTCELL_MESH
+               ! First Cartesian center:
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  NOOM   = M%CUT_CELL(ICC)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                  LL     = M%CUT_CELL(ICC)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                  M%CUT_CELL(ICC)%H_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
+                  M%CUT_CELL(ICC)%RHO_0_CARTCEN( IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
+                  M%CUT_CELL(ICC)%W_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+               ENDDO
+               ! Then cut-cells:
+               DO JCC=1,M%CUT_CELL(ICC)%NCELL
+                  DO IPT=1,MAX_INTERP_POINTS_PLANE
+                     NOOM   = M%CUT_CELL(ICC)%NOMIND_CCCEN( LOW_IND,IPT,JCC); IF (NOOM /= NM) CYCLE
+                     LL     = M%CUT_CELL(ICC)%NOMIND_CCCEN(HIGH_IND,IPT,JCC)
+                     M%CUT_CELL(ICC)%H_CCCEN(     IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
+                     M%CUT_CELL(ICC)%RHO_0_CCCEN( IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
+                     M%CUT_CELL(ICC)%W_CCCEN(     IPT+1,JCC) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+                  ENDDO
+               ENDDO
+            ENDDO
+            ! Then regular cells:
+            DO ICC=1,M%IBM_NRCELL_H
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  NOOM   = M%IBM_RCELL_H(ICC)%NOMIND_CARTCEN( LOW_IND,IPT); IF (NOOM /= NM) CYCLE
+                  LL     = M%IBM_RCELL_H(ICC)%NOMIND_CARTCEN(HIGH_IND,IPT)
+                  M%IBM_RCELL_H(ICC)%H_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) ! H^n, or H^s
+                  M%IBM_RCELL_H(ICC)%RHO_0_CARTCEN( IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) ! RHO_0
+                  M%IBM_RCELL_H(ICC)%W_CARTCEN(     IPT+1) = M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) ! Wcen^*, or Wcen^n+1
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDIF
 
    ENDDO SEND_MESH_LOOP
 ENDDO RECV_MESH_LOOP
@@ -2807,133 +3237,154 @@ SUBROUTINE SET_CFACES_ONE_D_RDN
 ! Local Variables:
 INTEGER :: ICF, IFACE, CFACE_INDEX_LOCAL
 INTEGER :: ICC, JCC, IBOD, IWSEL, I, J, K
-INTEGER :: ILO, IHI, JLO, JHI, KLO, KHI, IFACE_CELL, ICF_CELL, IROW, NCELL
+INTEGER :: ILO, IHI, JLO, JHI, KLO, KHI, IFACE_CELL, ICF_CELL, IROW, NCELL, ICF1, ICF2
 REAL(EB):: DXCF(IAXIS:KAXIS), NVEC(IAXIS:KAXIS), DCFXN, DCFXN2, DCFXNI, AREAI
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: DXN_UNKZ_LOC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOL_UNKZ_LOC
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: IJK_UNKZ_LOC
-! ALLOCATE local arrays
-ALLOCATE(DXN_UNKZ_LOC(1:NUNKZ_LOCAL)); DXN_UNKZ_LOC(:) = 0._EB
-ALLOCATE(VOL_UNKZ_LOC(1:NUNKZ_LOCAL)); VOL_UNKZ_LOC(:) = 0._EB
-ALLOCATE(IJK_UNKZ_LOC(IAXIS:KAXIS+1,1:NUNKZ_LOCAL)); IJK_UNKZ_LOC(:,:) = IBM_UNDEFINED
 
-! Main Loop:
-MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
-   CALL POINT_TO_MESH(NM)
+IF (.NOT.CFACE_INTERPOLATE) THEN
 
-   ! Do a volume weighted average of distance to wall from linked cells, if one of them is a regular cell use 1/2 the
-   ! distance of corner to corner sqrt(DX^2+DY^2+DZ^2).
-   ! 1. Regular GASPHASE cells within the cc-region:
-   ILO = 1; IHI = IBAR
-   JLO = 1; JHI = JBAR
-   KLO = 1; KHI = KBAR
-   DO K=KLO,KHI
-      DO J=JLO,JHI
-         DO I=ILO,IHI
-            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0 ) CYCLE ! Drop if regular GASPHASE cell has not been assigned unknown number.
-            IROW = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
-            DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + 1._EB/3._EB*(DX(I)+DY(J)+DZ(K))*(DX(I)*DY(J)*DZ(K)) ! Avg Delta.
-            VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + (DX(I)*DY(J)*DZ(K))
+   ! ALLOCATE local arrays
+   ALLOCATE(DXN_UNKZ_LOC(1:NUNKZ_LOCAL)); DXN_UNKZ_LOC(:) = 0._EB
+   ALLOCATE(VOL_UNKZ_LOC(1:NUNKZ_LOCAL)); VOL_UNKZ_LOC(:) = 0._EB
+   ALLOCATE(IJK_UNKZ_LOC(IAXIS:KAXIS+1,1:NUNKZ_LOCAL)); IJK_UNKZ_LOC(:,:) = IBM_UNDEFINED
+
+   ! Main Loop:
+   MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+      CALL POINT_TO_MESH(NM)
+
+      ! Do a volume weighted average of distance to wall from linked cells, if one of them is a regular cell use 1/2 the
+      ! distance of corner to corner sqrt(DX^2+DY^2+DZ^2).
+      ! 1. Regular GASPHASE cells within the cc-region:
+      ILO = 1; IHI = IBAR
+      JLO = 1; JHI = JBAR
+      KLO = 1; KHI = KBAR
+      DO K=KLO,KHI
+         DO J=JLO,JHI
+            DO I=ILO,IHI
+               IF (CCVAR(I,J,K,IBM_UNKZ) <= 0 ) CYCLE ! Drop if regular gas cell has not been assigned unknown number.
+               IROW = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+               DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + 1._EB/3._EB*(DX(I)+DY(J)+DZ(K))*(DX(I)*DY(J)*DZ(K)) !Avg Delta.
+               VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + (DX(I)*DY(J)*DZ(K))
+               IJK_UNKZ_LOC(IAXIS:KAXIS+1,IROW) = (/ I,J,K,NM /)
+            ENDDO
+         ENDDO
+      ENDDO
+      ! 2. Number cut-cells:
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I = CUT_CELL(ICC)%IJK(IAXIS)
+         J = CUT_CELL(ICC)%IJK(JAXIS)
+         K = CUT_CELL(ICC)%IJK(KAXIS)
+         NCELL = CUT_CELL(ICC)%NCELL
+         DO JCC=1,NCELL
+            IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+            ! Mean INBOUNDARY cut-face distance to this cut-cell center, projected to cut-face normal:
+            AREAI = 0._EB
+            DCFXNI= 0._EB
+            DO ICF_CELL=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+               IFACE_CELL = CUT_CELL(ICC)%CCELEM(ICF_CELL+1,JCC)
+               IF (CUT_CELL(ICC)%FACE_LIST(1,IFACE_CELL) /= IBM_FTYPE_CFINB) CYCLE
+
+               ! Indexes of INBOUNDARY cutface on CUT_FACE:
+               ICF   = CUT_CELL(ICC)%FACE_LIST(4,IFACE_CELL)
+               IFACE = CUT_CELL(ICC)%FACE_LIST(5,IFACE_CELL)
+
+               ! DXN:
+               ! Xcc - Xcf:
+               DXCF(IAXIS:KAXIS) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC) - CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
+
+               ! Normal to cut-face:
+               IBOD =CUT_FACE(ICF)%BODTRI(1,IFACE)
+               IWSEL=CUT_FACE(ICF)%BODTRI(2,IFACE)
+               NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
+
+               ! Dot product gives normal distance from Xcf to Xcc:
+               DCFXN = ABS(DXCF(IAXIS)*NVEC(IAXIS) + DXCF(JAXIS)*NVEC(JAXIS) + DXCF(KAXIS)*NVEC(KAXIS))
+               IF (DCFXN < GEOMEPS) DCFXN=SQRT(DXCF(IAXIS)**2._EB+DXCF(JAXIS)**2._EB+DXCF(KAXIS)**2._EB) ! Norm Xcc-Xcf
+               IF (DCFXN < GEOMEPS) DCFXN=0.5_EB*ABS(NVEC(IAXIS)*DX(I)+NVEC(JAXIS)*DY(J)+NVEC(KAXIS)*DZ(K)) ! CRT cell
+
+               ! Area sum:
+               AREAI = AREAI + CUT_FACE(ICF)%AREA(IFACE)
+               ! DXN*Area sume:
+               DCFXNI= DCFXNI+ DCFXN*CUT_FACE(ICF)%AREA(IFACE)
+            ENDDO
+
+            IF (AREAI < GEOMEPS) THEN ! This cut cell has the size and geometry of a regular cell.
+               DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + 1._EB/3._EB*(DX(I)+DY(J)+DZ(K))*(DX(I)*DY(J)*DZ(K))
+               VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + (DX(I)*DY(J)*DZ(K))
+            ELSE
+               ! INBOUNDARY cut-face area Average:
+               DCFXNI= DCFXNI / AREAI
+               ! Center to center distance:
+               DCFXN2 = 2._EB*(DCFXNI)
+               DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + DCFXN2*CUT_CELL(ICC)%VOLUME(JCC)
+               VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + CUT_CELL(ICC)%VOLUME(JCC)
+            ENDIF
             IJK_UNKZ_LOC(IAXIS:KAXIS+1,IROW) = (/ I,J,K,NM /)
          ENDDO
       ENDDO
+
+   ENDDO MESH_LOOP_1
+
+   ! Compute volume average for all linked cells:
+   DO IROW=1,NUNKZ_LOCAL
+      IF ( VOL_UNKZ_LOC(IROW) < GEOMEPS ) THEN
+         I  = IJK_UNKZ_LOC(IAXIS,IROW)
+         J  = IJK_UNKZ_LOC(JAXIS,IROW)
+         K  = IJK_UNKZ_LOC(KAXIS,IROW)
+         NM = IJK_UNKZ_LOC(KAXIS+1,IROW)
+         DXN_UNKZ_LOC(IROW) = 1._EB/3._EB*( MESHES(NM)%DX(I) + MESHES(NM)%DY(J) + MESHES(NM)%DZ(K) )
+         CYCLE
+      ENDIF
+      DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) / VOL_UNKZ_LOC(IROW)
    ENDDO
-   ! 2. Number cut-cells:
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      I = CUT_CELL(ICC)%IJK(IAXIS)
-      J = CUT_CELL(ICC)%IJK(JAXIS)
-      K = CUT_CELL(ICC)%IJK(KAXIS)
-      NCELL = CUT_CELL(ICC)%NCELL
-      DO JCC=1,NCELL
-         IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-         ! Mean INBOUNDARY cut-face distance to this cut-cell center, projected to cut-face normal:
-         AREAI = 0._EB
-         DCFXNI= 0._EB
-         DO ICF_CELL=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-            IFACE_CELL = CUT_CELL(ICC)%CCELEM(ICF_CELL+1,JCC)
-            IF (CUT_CELL(ICC)%FACE_LIST(1,IFACE_CELL) /= IBM_FTYPE_CFINB) CYCLE
 
-            ! Indexes of INBOUNDARY cutface on CUT_FACE:
-            ICF   = CUT_CELL(ICC)%FACE_LIST(4,IFACE_CELL)
-            IFACE = CUT_CELL(ICC)%FACE_LIST(5,IFACE_CELL)
 
-            ! DXN:
-            ! Xcc - Xcf:
-            DXCF(IAXIS:KAXIS) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC) - CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
+   ! Finally Define ONE_D%RDN:
+   MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
-            ! Normal to cut-face:
-            IBOD =CUT_FACE(ICF)%BODTRI(1,IFACE)
-            IWSEL=CUT_FACE(ICF)%BODTRI(2,IFACE)
-            NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
+      CALL POINT_TO_MESH(NM)
 
-            ! Dot product gives normal distance from Xcf to Xcc:
-            DCFXN = ABS(DXCF(IAXIS)*NVEC(IAXIS) + DXCF(JAXIS)*NVEC(JAXIS) + DXCF(KAXIS)*NVEC(KAXIS))
-            IF (DCFXN < GEOMEPS) DCFXN=SQRT(DXCF(IAXIS)**2._EB+DXCF(JAXIS)**2._EB+DXCF(KAXIS)**2._EB) ! Norm of Xcc-Xcf
-            IF (DCFXN < GEOMEPS) DCFXN=0.5_EB*ABS(NVEC(IAXIS)*DX(I)+NVEC(JAXIS)*DY(J)+NVEC(KAXIS)*DZ(K)) ! Use CRT cell
-
-            ! Area sum:
-            AREAI = AREAI + CUT_FACE(ICF)%AREA(IFACE)
-            ! DXN*Area sume:
-            DCFXNI= DCFXNI+ DCFXN*CUT_FACE(ICF)%AREA(IFACE)
+      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            ! Index in CFACE for cut-face in (ICF,IFACE) of CUT_FACE.
+            CFACE_INDEX_LOCAL = CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+            ! Compute CFACE(:)%ONE_D%RDN:
+            IF (CUT_FACE(ICF)%CELL_LIST(1,LOW_IND,IFACE) /= IBM_FTYPE_CFGAS) CYCLE
+            ICC = CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,IFACE)
+            JCC = CUT_FACE(ICF)%CELL_LIST(3,LOW_IND,IFACE)
+            IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+            CFACE(CFACE_INDEX_LOCAL)%ONE_D%RDN = 1._EB/DXN_UNKZ_LOC(IROW)
          ENDDO
+      ENDDO
 
-         IF (AREAI < GEOMEPS) THEN ! This cut cell has the size and geometry of a regular cell.
-            DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + 1._EB/3._EB*(DX(I)+DY(J)+DZ(K))*(DX(I)*DY(J)*DZ(K))
-            VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + (DX(I)*DY(J)*DZ(K))
+      DO ICF=1,N_CFACE_CELLS
+         CFACE(ICF)%ONE_D%RDN = 1._EB/DX(1)
+      ENDDO
+
+   ENDDO MESH_LOOP_2
+   DEALLOCATE(DXN_UNKZ_LOC, VOL_UNKZ_LOC, IJK_UNKZ_LOC)
+
+ELSE ! CFACE_INTERPOLATE
+
+   MESH_LOOP_3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL POINT_TO_MESH(NM)
+      DO ICF=1,N_CFACE_CELLS
+         ICF1 = CFACE(ICF)%CUT_FACE_IND1
+         ICF2 = CFACE(ICF)%CUT_FACE_IND2
+         IF(CUT_FACE(ICF1)%INT_XN(1,ICF2) < TWO_EPSILON_EB) THEN
+            CFACE(ICF)%ONE_D%RDN = 1._EB/DX(1)
          ELSE
-            ! INBOUNDARY cut-face area Average:
-            DCFXNI= DCFXNI / AREAI
-            ! Center to center distance:
-            DCFXN2 = 2._EB*(DCFXNI)
-            DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) + DCFXN2*CUT_CELL(ICC)%VOLUME(JCC)
-            VOL_UNKZ_LOC(IROW) = VOL_UNKZ_LOC(IROW) + CUT_CELL(ICC)%VOLUME(JCC)
+            CFACE(ICF)%ONE_D%RDN = 0.5_EB/CUT_FACE(ICF1)%INT_XN(1,ICF2)
          ENDIF
-         IJK_UNKZ_LOC(IAXIS:KAXIS+1,IROW) = (/ I,J,K,NM /)
       ENDDO
-   ENDDO
+   ENDDO MESH_LOOP_3
 
-ENDDO MESH_LOOP_1
-
-! Compute volume average for all linked cells:
-DO IROW=1,NUNKZ_LOCAL
-   IF ( VOL_UNKZ_LOC(IROW) < GEOMEPS ) THEN
-      I  = IJK_UNKZ_LOC(IAXIS,IROW)
-      J  = IJK_UNKZ_LOC(JAXIS,IROW)
-      K  = IJK_UNKZ_LOC(KAXIS,IROW)
-      NM = IJK_UNKZ_LOC(KAXIS+1,IROW)
-      DXN_UNKZ_LOC(IROW) = 1._EB/3._EB*( MESHES(NM)%DX(I) + MESHES(NM)%DY(J) + MESHES(NM)%DZ(K) )
-      CYCLE
-   ENDIF
-   DXN_UNKZ_LOC(IROW) = DXN_UNKZ_LOC(IROW) / VOL_UNKZ_LOC(IROW)
-ENDDO
-
-
-! Finally Define ONE_D%RDN:
-MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-
-   CALL POINT_TO_MESH(NM)
-
-   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
-      DO IFACE=1,CUT_FACE(ICF)%NFACE
-         ! Index in CFACE for cut-face in (ICF,IFACE) of CUT_FACE.
-         CFACE_INDEX_LOCAL = CUT_FACE(ICF)%CFACE_INDEX(IFACE)
-         ! Compute CFACE(:)%ONE_D%RDN:
-         IF (CUT_FACE(ICF)%CELL_LIST(1,LOW_IND,IFACE) /= IBM_FTYPE_CFGAS) CYCLE
-         ICC = CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,IFACE)
-         JCC = CUT_FACE(ICF)%CELL_LIST(3,LOW_IND,IFACE)
-         IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-         CFACE(CFACE_INDEX_LOCAL)%ONE_D%RDN = 1._EB/DXN_UNKZ_LOC(IROW)
-      ENDDO
-   ENDDO
-
-   DO ICF=1,N_CFACE_CELLS
-      CFACE(ICF)%ONE_D%RDN = 1._EB/DX(1)
-   ENDDO
-
-ENDDO MESH_LOOP_2
-DEALLOCATE(DXN_UNKZ_LOC, VOL_UNKZ_LOC, IJK_UNKZ_LOC)
+ENDIF
 
 RETURN
 END SUBROUTINE SET_CFACES_ONE_D_RDN
@@ -3247,6 +3698,10 @@ MESH_LOOP : DO NM=1,NMESHES
 ENDDO MESH_LOOP
 
 DEALLOCATE( ZZ_CC )
+
+CALL MESH_CC_EXCHANGE(1,.FALSE.)
+CALL MESH_CC_EXCHANGE(4,.FALSE.)
+CALL MESH_CC_EXCHANGE(6,.FALSE.)
 
 T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 RETURN
@@ -4569,7 +5024,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    K  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
    IOR = WC%ONE_D%IOR
-   ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
+   ! This expression is such that when sign of IOR is -1 ->G use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
    RHOPV(ISIDE)    = RHOP(I,J,K+FCELL+ISIDE)
@@ -11565,6 +12020,13 @@ LOGICAL, INTENT(IN) :: STORE_FLG
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB):: U_IBM,VAL(1:5),DUMEB,XYZ_PP(IAXIS:KAXIS)
 INTEGER :: IPT,ICF,IW,I,J,K,X1AXIS,INBFC_CARTCEN(1:3)
+
+REAL(EB) :: UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:0)
+REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM)
+REAL(EB) :: NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_ORTH,U_STRM,U_STRM2,VAL_EP
+INTEGER :: IFACE, EP, VIND, INPE, ICF1, ICF2, ICFA, INT_NPE_LO, INT_NPE_HI
+REAL(EB):: DXN_STRM, DXN_STRM2, COEF
+
 REAL(EB) :: TNOW
 
 
@@ -11596,26 +12058,91 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
       K      = CUT_FACE(ICF)%IJK(KAXIS)
       X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
-      ! Interpolate Un approx to cartesian-face centroids:
-      VAL(1:5) = 0._EB
-      U_IBM = 0._EB
-      ! Get UBn:
-      INBFC_CARTCEN(1:3) = CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
-      XYZ_PP(IAXIS:KAXIS)= CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
-      CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
-      ! Loop stencil points and define Un approx, from info on previous step:
-      DO IPT=NOD1,NOD4
-         DUMEB = DT*(CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
-         ! Case CORRECTOR, use last PREDICTOR info => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
-         IF (CORRECTOR) VAL(IPT+1) = CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
-         ! Case PREDICTOR, use last CORRECTOR info => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
-         IF (PREDICTOR) VAL(IPT+1) = 0.5_EB*(CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
-                                             CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
-      ENDDO
-      ! Interpolate to Un approx on the cartesian face centroid:
-      DO IPT=1,5
-         U_IBM = U_IBM + CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
-      ENDDO
+
+      IF(IBM_USE_OUTER_PLANE) THEN
+         ! Interpolate Un approx to cartesian-face centroids:
+         VAL(1:5) = 0._EB
+         U_IBM = 0._EB
+         ! Get UBn:
+         INBFC_CARTCEN(1:3) = CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
+         XYZ_PP(IAXIS:KAXIS)= CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
+         CALL GET_BOUND_VEL(X1AXIS,INBFC_CARTCEN,XYZ_PP,VAL(1))
+         ! Loop stencil points and define Un approx, from info on previous step:
+         DO IPT=NOD1,NOD4
+            DUMEB = DT*(CUT_FACE(ICF)%FV_CARTCEN(IPT+1)+CUT_FACE(ICF)%DHDX1_CARTCEN(IPT+1))
+            ! Case CORRECTOR, use last PREDICTOR info => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+            IF (CORRECTOR) VAL(IPT+1) = CUT_FACE(ICF)%VEL_CARTCEN(IPT+1) - DUMEB
+            ! Case PREDICTOR, use last CORRECTOR info => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+            IF (PREDICTOR) VAL(IPT+1) = 0.5_EB*(CUT_FACE(ICF)%VEL_CARTCEN( IPT+1)+ &
+                                                CUT_FACE(ICF)%VELS_CARTCEN(IPT+1)) - 0.5_EB*DUMEB
+         ENDDO
+         ! Interpolate to Un approx on the cartesian face centroid:
+         DO IPT=1,5
+            U_IBM = U_IBM + CUT_FACE(ICF)%INTCOEF_CARTCEN(IPT)*VAL(IPT)
+         ENDDO
+
+      ELSE ! Case of using INT_ 3D interpolation.
+
+
+         UVW_EP = 0._EB
+         ! Interpolate Un+1 approx to External Points:
+         IFACE=0
+         DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+            DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+               INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+               INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+               DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                  ! Value of velocity component VIND, for stencil point INPE of external normal point EP.
+                  DUMEB = DT*(CUT_FACE(ICF)%INT_FVARS(INT_FV_IND,INPE)+CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE))
+                  ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                  IF (PREDICTOR) VAL_EP = CUT_FACE(ICF)%INT_FVARS(INT_VEL_IND,INPE) - DUMEB
+                  ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                  IF (CORRECTOR) VAL_EP = 0.5_EB*(CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)+ &
+                                                  CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)) - 0.5_EB*DUMEB
+                  ! Interpolation coefficient from INPE to EP.
+                  COEF = CUT_FACE(ICF)%INT_COEF(INPE)
+                  ! Add to Velocity component VIND of EP:
+                  UVW_EP(VIND,EP,IFACE) = UVW_EP(VIND,EP,IFACE) + COEF*VAL_EP
+               ENDDO
+            ENDDO
+         ENDDO
+
+         IF(INT_N_EXT_PTS==1) THEN
+            ! Transform External points velocities into local coordinate system, defined by the velocity vector in
+            ! the first external point, and the surface:
+            EP = 1
+            U_VELO(IAXIS:KAXIS) = UVW_EP(IAXIS:KAXIS,EP,IFACE)
+            VELN = 0._EB
+            IF( CUT_FACE(ICF)%INT_INBFC(1,IFACE)== IBM_FTYPE_CFINB) THEN
+               ICF1 = CUT_FACE(ICF)%INT_INBFC(2,IFACE)
+               ICF2 = CUT_FACE(ICF)%INT_INBFC(3,IFACE)
+               ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
+               IF (ICFA>0) VELN = -CFACE(ICFA)%ONE_D%UW
+            ENDIF
+            NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
+            TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB
+            IF (NORM2(NN) > TWO_EPSILON_EB) THEN
+               U_SURF(IAXIS:KAXIS) = VELN*NN
+               U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
+               ! Gives local velocity components U_STRM , U_ORTH , U_NORM in terms of unit vectors
+               ! SS,TT,NN
+               CALL GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+
+               ! Apply wall model to define streamwise velocity at interpolation point:
+               DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
+               DXN_STRM2=2._EB*CUT_FACE(ICF)%INT_XN(0,IFACE)  ! Interpolation point position from Boundary in NOUT dir.
+                                                        ! Note if this is a -ve number (i.e. case of Cartesian Faces),
+                                                        ! Linear velocity variation should be used be used.
+               ! Linear variation:
+               U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
+            ENDIF
+
+            ! Velocity U_ORTH is zero by construction. Surface velocity is added to get absolute vel.
+            U_IBM = U_NORM*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+
+         ENDIF
+
+      ENDIF
 
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
@@ -11667,6 +12194,491 @@ T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 RETURN
 END SUBROUTINE CCIBM_INTERP_FACE_VEL
 
+! --------------------------- CCIBM_VELOCITY_FLUX2 ------------------------------
+
+SUBROUTINE CCIBM_VELOCITY_FLUX2(T,DT)
+
+USE TURBULENCE, ONLY : WALL_MODEL
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
+
+REAL(EB), INTENT(IN) :: T,DT
+
+! Local Variables:
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
+INTEGER :: NM,I,J,K,ICF,IFACE,X1AXIS,NFACE,IW,EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UVW_EP
+REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM)
+REAL(EB) :: NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_ORTH,U_STRM
+INTEGER :: ICC, JCC, ICF1, ICF2, ICFA, ISIDE
+REAL(EB):: X1F, IDX, CCM1, CCP1, TMPV(-1:0), RHOV(-1:0), MUV(-1:0), NU, MU_FACE, RHO_FACE,PRFCT
+REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), DXN_STRM, DXN_STRM2, SLIP_FACTOR, SRGH, U_STRM2, U_TAU, Y_PLUS
+REAL(EB):: DUUDT, DVVDT, DWWDT, U_IBM, V_IBM, W_IBM
+
+
+REAL(EB):: VAL_EP, DUMEB, COEF
+
+REAL(EB) :: TNOW
+
+REAL(EB):: MTIME
+
+TNOW = CURRENT_TIME()
+
+! Force T to be used var:
+MTIME=T
+
+! First of all exchange fresh FV guard cell information
+IF (PREDICTOR) THEN
+   CALL MESH_CC_EXCHANGE( 1,.FALSE.) ! this exchange is such that FVX, Y and Z are the latest computed in the sub-step.
+ELSE
+   CALL MESH_CC_EXCHANGE( 4,.FALSE.) ! same for corrector.
+ENDIF
+
+! Now apply mesh loop:
+MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   IF (PREDICTOR) THEN
+      UU => U
+      VV => V
+      WW => W
+      DP => D
+      RHOP => RHOS
+      ZZP  => ZZS
+      HP => HS ! Previous substep H
+      PRFCT = 0._EB
+   ELSE
+      UU => US
+      VV => VS
+      WW => WS
+      DP => DS
+      RHOP => RHO
+      ZZP  =>  ZZ
+      HP => H ! Previous substep H
+      PRFCT = 1._EB
+   ENDIF
+
+
+   IF (FORCE_GAS_FACE) THEN
+      ! For mesh NM loop through CUT_FACE field and interpolate value of Un+1 approx
+      ! to centroids:
+      ! If PRES_ON_CARTESIAN=.FALSE. compute momentum flux forcing on cut-faces,
+      ! if PRES_ON_CARTESIAN= .TRUE. average cut-face velocities to Cartesian face centroid
+      ! and compute momentum flux forcing on face centroid using Cartesian discretization.
+      CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+
+         IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+         IW = CUT_FACE(ICF)%IWC
+         IF ( (IW > 0) .AND. (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY   .OR. &
+                              WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY    .OR. &
+                              WALL(IW)%BOUNDARY_TYPE==MIRROR_BOUNDARY) ) CYCLE ! Here force Open boundaries.
+
+         I      = CUT_FACE(ICF)%IJK(IAXIS)
+         J      = CUT_FACE(ICF)%IJK(JAXIS)
+         K      = CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+
+         NFACE  = CUT_FACE(ICF)%NFACE
+
+         ALLOCATE(UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); UVW_EP = 0._EB
+         ! UVW_EP(IAXIS:KAXIS,0,0:NFACE) is the boundary value of velocity, taken as = 0._EB now.
+         ! Interpolate Un+1 approx to External Points:
+         IFACE_LOOP : DO IFACE=1,NFACE
+
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                  INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                  INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                     ! Value of velocity component VIND, for stencil point INPE of external normal point EP.
+                     DUMEB = DT*(CUT_FACE(ICF)%INT_FVARS(INT_FV_IND,INPE)+CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE))
+                     ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+                     IF (PREDICTOR) VAL_EP = CUT_FACE(ICF)%INT_FVARS(INT_VEL_IND,INPE) - DUMEB
+                     ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+                     IF (CORRECTOR) VAL_EP = 0.5_EB*(CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)+ &
+                                                     CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)) - 0.5_EB*DUMEB
+                     ! Interpolation coefficient from INPE to EP.
+                     COEF = CUT_FACE(ICF)%INT_COEF(INPE)
+                     ! Add to Velocity component VIND of EP:
+                     UVW_EP(VIND,EP,IFACE) = UVW_EP(VIND,EP,IFACE) + COEF*VAL_EP
+                  ENDDO
+               ENDDO
+            ENDDO
+
+
+            IF(INT_N_EXT_PTS==1) THEN
+               ! Transform External points velocities into local coordinate system, defined by the velocity vector in
+               ! the first external point, and the surface:
+               EP = 1
+               U_VELO(IAXIS:KAXIS) = UVW_EP(IAXIS:KAXIS,EP,IFACE)
+               VELN = 0._EB
+               SRGH = 0._EB
+               IF( CUT_FACE(ICF)%INT_INBFC(1,IFACE)== IBM_FTYPE_CFINB) THEN
+                  ICF1 = CUT_FACE(ICF)%INT_INBFC(2,IFACE)
+                  ICF2 = CUT_FACE(ICF)%INT_INBFC(3,IFACE)
+                  ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
+                  IF (ICFA>0) THEN
+                     VELN = -CFACE(ICFA)%ONE_D%UW
+                     SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
+                  ENDIF
+               ENDIF
+               NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
+               TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB
+               IF (NORM2(NN) > TWO_EPSILON_EB) THEN
+                  U_SURF(IAXIS:KAXIS) = VELN*NN
+                  U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
+                  ! Gives local velocity components U_STRM , U_ORTH , U_NORM
+                  ! in terms of unit vectors SS,TT,NN:
+                  CALL GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+
+                  ! Apply wall model to define streamwise velocity at interpolation point:
+                  DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
+                  DXN_STRM2=2._EB*CUT_FACE(ICF)%INT_XN(0,IFACE)  ! Interp point position from Boundary in NOUT dir.
+                                                           ! Note if this is a -ve number (i.e. Cartesian Faces),
+                                                           ! Linear velocity variation should be used be used.
+                  IF(DXN_STRM2 < 0._EB) THEN
+                     ! Linear variation:
+                     U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
+                  ELSE
+                     X1F= MESHES(NM)%CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
+                     IDX= 1._EB/ ( MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
+                                   MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
+                     CCM1= IDX*(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F)
+                     CCP1= IDX*(X1F-MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE))
+                     ! For NU use interpolation of values on neighboring cut-cells:
+                     TMPV(-1:0) = -1._EB; RHOV(-1:0) = 0._EB
+                     DO ISIDE=-1,0
+                        ZZ_GET = 0._EB
+                        SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
+                        CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                           ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
+                           JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
+                           TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                           ZZ_GET(1:N_TRACKED_SPECIES) =  &
+                                  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                           (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                           RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + &
+                                  (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                        END SELECT
+                        CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                     ENDDO
+                     MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
+                     RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
+                     NU      = MU_FACE/RHO_FACE
+                     CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,DXN_STRM2,U_STRM2)
+                  ENDIF
+               ENDIF
+               ! Velocity U_ORTH is zero by construction.
+               CUT_FACE(ICF)%VELINT(IFACE) = U_NORM*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+#ifdef DEBUG_IBM_INTERPOLATION
+               IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
+                  WRITE(LU_ERR,*) 'VELINT CUTFACE IN FLUX2=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,X1AXIS
+                  WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)
+                  CALL DEBUG_WAIT
+               ENDIF
+#endif
+            ENDIF
+
+         ENDDO IFACE_LOOP
+
+         ! Project Un+1 approx to cut-face centroids in X1AXIS direction:
+
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+
+            ! Flux average velocities to Cartesian face center:
+            ! This assumes zero velocity of solid part of Cartesian Face - !!
+            U_IBM = 0._EB
+            DO IFACE=1,NFACE
+               U_IBM = U_IBM + CUT_FACE(ICF)%AREA(IFACE)* &
+                               CUT_FACE(ICF)%VELINT(IFACE)
+            ENDDO
+            U_IBM = U_IBM/(DY(J)*DZ(K))
+            CUT_FACE(ICF)%VELINT_CRF = U_IBM
+
+            ! Compute Forcing:
+            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+            ! FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+            FVX(I,J,K) = - DUUDT
+
+         CASE(JAXIS)
+
+            ! Flux average velocities to Cartesian face center:
+            ! This assumes zero velocity of solid part of Cartesian Face - !!
+            V_IBM = 0._EB
+            DO IFACE=1,NFACE
+               V_IBM = V_IBM + CUT_FACE(ICF)%AREA(IFACE)*&
+                               CUT_FACE(ICF)%VELINT(IFACE)
+            ENDDO
+            V_IBM = V_IBM/(DX(I)*DZ(K))
+            CUT_FACE(ICF)%VELINT_CRF = V_IBM
+
+            ! Compute Forcing:
+            IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+            IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+            ! FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+            FVY(I,J,K) = - DVVDT
+
+         CASE(KAXIS)
+
+            ! Flux average velocities to Cartesian face center:
+            ! This assumes zero velocity of solid part of Cartesian Face - !!
+            W_IBM = 0._EB
+            DO IFACE=1,NFACE
+               W_IBM = W_IBM + CUT_FACE(ICF)%AREA(IFACE)*&
+                               CUT_FACE(ICF)%VELINT(IFACE)
+            ENDDO
+            W_IBM = W_IBM/(DX(I)*DY(J))
+            CUT_FACE(ICF)%VELINT_CRF = W_IBM
+
+            ! Compute Forcing:
+            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+            ! FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+            FVZ(I,J,K) = - DWWDT
+
+         END SELECT
+
+         DEALLOCATE(UVW_EP)
+
+      ENDDO CUTFACE_LOOP
+
+   ENDIF ! FORCE_GAS_FACE
+
+
+   ! For mesh NM loop through REGC_FACE_VEL field, interpolate Un+1 approx to Cartesian centroids,
+   ! and compute momentum flux forcing on face.
+   IF (FORCE_REGC_FACE) THEN
+   NFACE = 0
+   IFACE = 0
+   REGCFACE_LOOP : DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
+
+      IF ((ICF > MESHES(NM)%IBM_NRCFACE_VEL_CC) .AND. (.NOT.FORCE_REGC_FACE_NXT)) CYCLE
+
+      IW = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IWC
+      IF ( (IW > 0) .AND. (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY   .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY    .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==MIRROR_BOUNDARY  .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) ) CYCLE
+
+      I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS)
+      J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(JAXIS)
+      K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS)
+      X1AXIS = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS+1)
+
+      ALLOCATE(UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); UVW_EP = 0._EB
+
+      DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+         DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+            INT_NPE_LO = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+            INT_NPE_HI = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+            DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+               ! Value of velocity component VIND, for stencil point INPE of external normal point EP.
+               DUMEB = DT*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_FV_IND,INPE)+ &
+                           MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_DHDX_IND,INPE))
+               ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
+               IF (PREDICTOR) VAL_EP = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_VEL_IND,INPE) - DUMEB
+               ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
+               IF (CORRECTOR) VAL_EP = 0.5_EB*(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS( INT_VEL_IND,INPE)+ &
+                                               MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS(INT_VELS_IND,INPE))-0.5_EB*DUMEB
+               ! Interpolation coefficient from INPE to EP.
+               COEF = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(INPE)
+               ! Add to Velocity component VIND of EP:
+               UVW_EP(VIND,EP,IFACE) = UVW_EP(VIND,EP,IFACE) + COEF*VAL_EP
+            ENDDO
+         ENDDO
+      ENDDO
+
+
+      IF(INT_N_EXT_PTS==1) THEN
+         ! Transform External points velocities into local coordinate system, defined by the velocity vector in
+         ! the first external point, and the surface:
+         EP = 1
+         U_VELO(IAXIS:KAXIS) = UVW_EP(IAXIS:KAXIS,EP,IFACE)
+         VELN = 0._EB
+         SRGH = 0._EB
+         IF( MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(1,IFACE)== IBM_FTYPE_CFINB) THEN
+            ICF1 = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(2,IFACE)
+            ICF2 = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(3,IFACE)
+            ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
+            IF (ICFA>0) THEN
+               VELN = -CFACE(ICFA)%ONE_D%UW
+               SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
+            ENDIF
+         ENDIF
+         NN(IAXIS:KAXIS)     = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
+         TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB
+         IF (NORM2(NN) > TWO_EPSILON_EB) THEN
+            U_SURF(IAXIS:KAXIS) = VELN*NN
+            U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
+            ! Gives local velocity components U_STRM , U_ORTH , U_NORM in terms of unit vectors
+            ! SS,TT,NN
+            CALL GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+
+            ! Apply wall model to define streamwise velocity at interpolation point:
+            DXN_STRM =2._EB*MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_XN(EP,IFACE) ! EP Position from Bodry in NOUT direction
+            DXN_STRM2=2._EB*MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_XN(0,IFACE)  ! Interp pt position from Bodry in NOUT dir.
+                                                     ! Note if this is a -ve number (i.e. case of Cartesian Faces),
+                                                     ! Linear velocity variation should be used be used.
+            IF(DXN_STRM2 < 0._EB) THEN
+               ! Linear variation:
+               U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
+            ELSE
+               CCM1=0.5_EB; CCP1=0.5_EB
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  RHOV(-1:0)       =   RHOP(I+FCELL-1:I+FCELL,J,K)
+                  TMPV(-1:0)       =    TMP(I+FCELL-1:I+FCELL,J,K)
+                  DO ISIDE=-1,0
+                     ZZ_GET = 0._EB
+                     SELECT CASE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(1,ISIDE+2,1))
+                     CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
+                     CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                        ICC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(2,ISIDE+2,1)
+                        JCC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(3,ISIDE+2,1)
+                        TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                        RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                        ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                                                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                     END SELECT
+                     CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                  ENDDO
+               CASE(JAXIS)
+                  RHOV(-1:0)       =   RHOP(I,J+FCELL-1:J+FCELL,K)
+                  TMPV(-1:0)       =    TMP(I,J+FCELL-1:J+FCELL,K)
+                  DO ISIDE=-1,0
+                     ZZ_GET = 0._EB
+                     SELECT CASE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(1,ISIDE+2,1))
+                     CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
+                     CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                        ICC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(2,ISIDE+2,1)
+                        JCC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(3,ISIDE+2,1)
+                        TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                        RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                        ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                                                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                     END SELECT
+                     CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                  ENDDO
+               CASE(KAXIS)
+                  RHOV(-1:0)       =   RHOP(I,J,K+FCELL-1:K+FCELL)
+                  TMPV(-1:0)       =    TMP(I,J,K+FCELL-1:K+FCELL)
+                  DO ISIDE=-1,0
+                     ZZ_GET = 0._EB
+                     SELECT CASE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(1,ISIDE+2,1))
+                     CASE(IBM_FTYPE_RGGAS) ! Regular cell -> use stored TMPV from TMP array.
+                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
+                     CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                        ICC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(2,ISIDE+2,1)
+                        JCC = MESHES(NM)%IBM_RCFACE_VEL(ICF)%CELL_LIST(3,ISIDE+2,1)
+                        TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                        RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                        ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                                                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                     END SELECT
+                     CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                  ENDDO
+               END SELECT
+               MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
+               RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
+               NU      = MU_FACE/RHO_FACE
+               CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,DXN_STRM2,U_STRM2)
+            ENDIF
+         ENDIF
+         ! Velocity U_ORTH is zero by construction.
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT = U_NORM*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+#ifdef DEBUG_IBM_INTERPOLATION
+         IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
+            WRITE(LU_ERR,*) 'VELINT RCFACE VEL IN FLUX2=', &
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,X1AXIS
+            WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)
+            CALL DEBUG_WAIT
+         ENDIF
+#endif
+      ENDIF
+
+      ! Interpolate Un+1 approx to cut-face centroids:
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         ! Compute Forcing:
+         U_IBM = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT
+         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+         ! FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+         FVX(I,J,K) = - DUUDT
+      CASE(JAXIS)
+         ! Compute Forcing:
+         V_IBM = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT
+         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+         ! FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+         FVY(I,J,K) = - DVVDT
+      CASE(KAXIS)
+         ! Compute Forcing:
+         W_IBM = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT
+         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+         ! FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+         FVZ(I,J,K) = - DWWDT
+      END SELECT
+
+      DEALLOCATE(UVW_EP)
+
+   ENDDO REGCFACE_LOOP
+   ENDIF
+
+
+ENDDO MESH_LOOP
+
+
+RETURN
+END SUBROUTINE CCIBM_VELOCITY_FLUX2
+
+! ---------------------------- GET_LOCAL_VELOCITY ------------------------------
+
+SUBROUTINE GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+
+REAL(EB), INTENT(IN) :: NN(IAXIS:KAXIS), U_RELA(IAXIS:KAXIS)
+REAL(EB), INTENT(OUT):: TT(IAXIS:KAXIS), SS(IAXIS:KAXIS), U_NORM, U_ORTH, U_STRM
+
+! Local Variables:
+REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
+REAL(EB), DIMENSION(3,3) :: C
+
+! find a vector TT in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
+CALL CROSS_PRODUCT(TT,NN,U_RELA) ! TT = NN x U_RELA
+IF (ABS(NORM2(TT))<=TWO_EPSILON_EB) THEN
+   ! tangent vector is completely arbitrary, just perpendicular to NN
+   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) TT = (/NN(2),-NN(1),0._EB/)
+   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) TT = (/NN(3),0._EB,-NN(1)/)
+ENDIF
+TT = TT/NORM2(TT) ! normalize to unit vector
+CALL CROSS_PRODUCT(SS,TT,NN) ! define the streamwise unit vector SS
+
+! directional cosines (see Pope, Eq. A.11)
+C(1,1) = DOT_PRODUCT(E1,SS)
+C(1,2) = DOT_PRODUCT(E1,TT)
+C(1,3) = DOT_PRODUCT(E1,NN)
+C(2,1) = DOT_PRODUCT(E2,SS)
+C(2,2) = DOT_PRODUCT(E2,TT)
+C(2,3) = DOT_PRODUCT(E2,NN)
+C(3,1) = DOT_PRODUCT(E3,SS)
+C(3,2) = DOT_PRODUCT(E3,TT)
+C(3,3) = DOT_PRODUCT(E3,NN)
+
+! transform velocity (see Pope, Eq. A.17)
+U_STRM = C(1,1)*U_RELA(1) + C(2,1)*U_RELA(2) + C(3,1)*U_RELA(3)
+U_ORTH = C(1,2)*U_RELA(1) + C(2,2)*U_RELA(2) + C(3,2)*U_RELA(3)
+U_NORM = C(1,3)*U_RELA(1) + C(2,3)*U_RELA(2) + C(3,3)*U_RELA(3)
+
+RETURN
+END SUBROUTINE GET_LOCAL_VELOCITY
+
 
 ! ---------------------------- CCIBM_VELOCITY_FLUX ------------------------------
 
@@ -11687,6 +12699,11 @@ REAL(EB):: MTIME
 
 IF ( FREEZE_VELOCITY ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
+
+IF (.NOT.IBM_USE_OUTER_PLANE) THEN ! New Volume interpolation on set of external points.
+   CALL CCIBM_VELOCITY_FLUX2(T,DT)
+   RETURN
+ENDIF
 
 TNOW = CURRENT_TIME()
 
@@ -13976,7 +14993,7 @@ INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 LOGICAL :: INLIST, FOUND_POINT, INSEG, FOUNDPT
 REAL(EB):: XYZ(MAX_DIM),XYZ_PP(MAX_DIM),XYZ_IP(MAX_DIM),DV(MAX_DIM),NVEC(MAX_DIM)
 INTEGER :: PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE)
-REAL(EB):: P0(MAX_DIM),P1(MAX_DIM),CI,CII,CIII,CIV,CV,DIST,DISTANCE,DIR_FCT,NORM_DV,LASTDOTNVEC,DOTNVEC
+REAL(EB):: P0(MAX_DIM),P1(MAX_DIM),CI,CII,CIII,CIV,CV,DIST,DISTANCE,DIR_FCT,NORM_DV,LASTDOTNVEC,DOTNVEC,A_TOT
 INTEGER :: IND_CC(IAXIS:KAXIS+1),FOUND_INBFC(1:3), BODTRI(1:2)
 INTEGER :: CCFC,NFC_CC,ICFC,INBFC,INBFC_LOC,IFCPT,IFCPT_LOC,IBOD,IWSEL,ICELL,NCFACE
 INTEGER, PARAMETER :: ADDVEC(1:2,1:4) = RESHAPE( (/1,0,-1,0,0,1,0,-1/), (/2,4/) )
@@ -14002,6 +15019,21 @@ INTEGER :: SIZE_REC
 INTEGER, PARAMETER :: DELTA_FC = 200
 
 INTEGER, PARAMETER :: OZPOS=0, ICPOS=1, JCPOS=2, IFPOS=3, IWPOS=4
+
+INTEGER :: VIND,EP,INPE,INT_NPE_LO,INT_NPE_HI,NPE_LIST_START,NPE_LIST_COUNT,SZ_1,SZ_2,NPE_COUNT
+INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:) :: INT_NPE
+INTEGER,  ALLOCATABLE, DIMENSION(:,:)     :: INT_IJK, INT_NOMIND
+REAL(EB), ALLOCATABLE, DIMENSION(:)       :: INT_COEF
+REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: INT_NOUT
+REAL(EB) :: DELN,INT_XN(0:INT_N_EXT_PTS),INT_CN(0:INT_N_EXT_PTS)
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INT_IJK_AUX
+REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_COEF_AUX
+INTEGER :: N_CVAR_START, N_CVAR_COUNT, N_FVAR_START, N_FVAR_COUNT
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: EP_TAG
+
+
+! Total number of cell centered variables to be exchanges into external normal probe points of CFACES.
+N_INT_CVARS = INT_P_IND + N_TRACKED_SPECIES
 
 DO_GASNXT_CUTFACE = .FALSE.
 DO_GASNXT_CARTCELL= .FALSE.
@@ -14544,6 +15576,55 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDIF ! DO_GASNXT_CUTFACE
    MESHES(NM)%IBM_NRCFACE_VEL = IRC
 
+   ! Allocate interpolation containers for IBM_RCFACE_VEL:
+   IF(IBM_USE_OUTER_PLANE) THEN
+      DO IRC=1,MESHES(NM)%IBM_NRCFACE_VEL
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%IJK_CARTCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%XYZ_BP_CARTCEN(MAX_DIM))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INBFC_CARTCEN(3))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INTCOEF_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%VEL_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%VELS_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%FV_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%DHDX1_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE))
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%IJK_CARTCEN     = IBM_UNDEFINED
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%XYZ_BP_CARTCEN  = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INBFC_CARTCEN   = IBM_UNDEFINED
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INTCOEF_CARTCEN = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%VEL_CARTCEN     = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%VELS_CARTCEN    = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%FV_CARTCEN      = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%DHDX1_CARTCEN   = 0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%NOMIND_CARTCEN  = IBM_UNDEFINED
+      ENDDO
+   ELSE
+      DO IRC=1,MESHES(NM)%IBM_NRCFACE_VEL
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_IJK(IAXIS:KAXIS,DELTA_INT))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_COEF(DELTA_INT))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_XYZBF(IAXIS:KAXIS,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NOUT(IAXIS:KAXIS,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_INBFC(1:3,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NPE(LOW_IND:HIGH_IND,IAXIS:KAXIS,1:INT_N_EXT_PTS,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_XN(0:INT_N_EXT_PTS,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_CN(0:INT_N_EXT_PTS,0:0))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_FVARS(1:N_INT_FVARS,DELTA_INT))
+         ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NOMIND(LOW_IND:HIGH_IND,DELTA_INT))
+
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_IJK   =  IBM_UNDEFINED
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_COEF  =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_XYZBF =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NOUT  =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_INBFC =  IBM_UNDEFINED
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NPE   =  0
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_XN    =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_CN    =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_FVARS  =  0._EB
+         MESHES(NM)%IBM_RCFACE_VEL(IRC)%INT_NOMIND=  IBM_UNDEFINED
+      ENDDO
+
+   ENDIF
+
    DEALLOCATE(IJKFACE)
 
    ! Now Cartesian GASPHASE Cells that get interpolated H:
@@ -14759,238 +15840,476 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ! face centered fluid points:
    CUT_FACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
 
-      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-
       I = CUT_FACE(ICF)%IJK(IAXIS)
       J = CUT_FACE(ICF)%IJK(JAXIS)
       K = CUT_FACE(ICF)%IJK(KAXIS)
-      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-
       IJK(IAXIS:KAXIS) = (/ I, J, K /)
 
-      ! First, underlying cartesian face centroid:
-      ! Centroid location in 3D:
-      SELECT CASE (X1AXIS)
-      CASE(IAXIS)
-          XYZ(IAXIS:KAXIS) = (/ XFACE(I), YCELL(J), ZCELL(K) /)
-          MIN_DIST_VEL = DIST_THRES*MIN(DXFACE(I),DYCELL(J),DZCELL(K))
-          ! x2, x3 axes:
-          X2AXIS = JAXIS; X3AXIS = KAXIS
+      CUTFACE_STATUS_IF : IF (CUT_FACE(ICF)%STATUS == IBM_GASPHASE) THEN
 
-          X1LO_FACE = ILO_FACE-CCGUARD; X1LO_CELL = ILO_CELL-CCGUARD
-          X1HI_FACE = IHI_FACE+CCGUARD; X1HI_CELL = IHI_CELL+CCGUARD
-          X2LO_FACE = JLO_FACE-CCGUARD; X2LO_CELL = JLO_CELL-CCGUARD
-          X2HI_FACE = JHI_FACE+CCGUARD; X2HI_CELL = JHI_CELL+CCGUARD
-          X3LO_FACE = KLO_FACE-CCGUARD; X3LO_CELL = KLO_CELL-CCGUARD
-          X3HI_FACE = KHI_FACE+CCGUARD; X3HI_CELL = KHI_CELL+CCGUARD
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
-          ! location in I,J,K od x2,x2,x3 axes:
-          XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
+         ! First, underlying cartesian face centroid:
+         ! Centroid location in 3D:
+         SELECT CASE (X1AXIS)
+         CASE(IAXIS)
+             XYZ(IAXIS:KAXIS) = (/ XFACE(I), YCELL(J), ZCELL(K) /)
+             MIN_DIST_VEL = DIST_THRES*MIN(DXFACE(I),DYCELL(J),DZCELL(K))
+             ! x2, x3 axes:
+             X2AXIS = JAXIS; X3AXIS = KAXIS
 
-          ! Face coordinates in x1,x2,x3 axes:
-          X1FACEP => XFACE;
-          X2FACEP => YFACE; X2CELLP => YCELL
-          X3FACEP => ZFACE; X3CELLP => ZCELL
+             X1LO_FACE = ILO_FACE-CCGUARD; X1LO_CELL = ILO_CELL-CCGUARD
+             X1HI_FACE = IHI_FACE+CCGUARD; X1HI_CELL = IHI_CELL+CCGUARD
+             X2LO_FACE = JLO_FACE-CCGUARD; X2LO_CELL = JLO_CELL-CCGUARD
+             X2HI_FACE = JHI_FACE+CCGUARD; X2HI_CELL = JHI_CELL+CCGUARD
+             X3LO_FACE = KLO_FACE-CCGUARD; X3LO_CELL = KLO_CELL-CCGUARD
+             X3HI_FACE = KHI_FACE+CCGUARD; X3HI_CELL = KHI_CELL+CCGUARD
 
-      CASE(JAXIS)
-          XYZ(IAXIS:KAXIS) = (/ XCELL(I), YFACE(J), ZCELL(K) /)
-          MIN_DIST_VEL = DIST_THRES*MIN(DXCELL(I),DYFACE(J),DZCELL(K))
-          ! x2, x3 axes:
-          X2AXIS = KAXIS;  X3AXIS = IAXIS
+             ! location in I,J,K od x2,x2,x3 axes:
+             XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
 
-          X1LO_FACE = JLO_FACE-CCGUARD; X1LO_CELL = JLO_CELL-CCGUARD
-          X1HI_FACE = JHI_FACE+CCGUARD; X1HI_CELL = JHI_CELL+CCGUARD
-          X2LO_FACE = KLO_FACE-CCGUARD; X2LO_CELL = KLO_CELL-CCGUARD
-          X2HI_FACE = KHI_FACE+CCGUARD; X2HI_CELL = KHI_CELL+CCGUARD
-          X3LO_FACE = ILO_FACE-CCGUARD; X3LO_CELL = ILO_CELL-CCGUARD
-          X3HI_FACE = IHI_FACE+CCGUARD; X3HI_CELL = IHI_CELL+CCGUARD
+             ! Face coordinates in x1,x2,x3 axes:
+             X1FACEP => XFACE;
+             X2FACEP => YFACE; X2CELLP => YCELL
+             X3FACEP => ZFACE; X3CELLP => ZCELL
 
-          ! location in I,J,K od x2,x2,x3 axes:
-          XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
+         CASE(JAXIS)
+             XYZ(IAXIS:KAXIS) = (/ XCELL(I), YFACE(J), ZCELL(K) /)
+             MIN_DIST_VEL = DIST_THRES*MIN(DXCELL(I),DYFACE(J),DZCELL(K))
+             ! x2, x3 axes:
+             X2AXIS = KAXIS;  X3AXIS = IAXIS
 
-          ! Face coordinates in x1,x2,x3 axes:
-          X1FACEP => YFACE;
-          X2FACEP => ZFACE; X2CELLP => ZCELL
-          X3FACEP => XFACE; X3CELLP => XCELL
+             X1LO_FACE = JLO_FACE-CCGUARD; X1LO_CELL = JLO_CELL-CCGUARD
+             X1HI_FACE = JHI_FACE+CCGUARD; X1HI_CELL = JHI_CELL+CCGUARD
+             X2LO_FACE = KLO_FACE-CCGUARD; X2LO_CELL = KLO_CELL-CCGUARD
+             X2HI_FACE = KHI_FACE+CCGUARD; X2HI_CELL = KHI_CELL+CCGUARD
+             X3LO_FACE = ILO_FACE-CCGUARD; X3LO_CELL = ILO_CELL-CCGUARD
+             X3HI_FACE = IHI_FACE+CCGUARD; X3HI_CELL = IHI_CELL+CCGUARD
 
-      CASE(KAXIS)
-          XYZ(IAXIS:KAXIS) = (/ XCELL(I), YCELL(J), ZFACE(K) /)
-          MIN_DIST_VEL = DIST_THRES*MIN(DXCELL(I),DYCELL(J),DZFACE(K))
-          ! x2, x3 axes:
-          X2AXIS = IAXIS;  X3AXIS = JAXIS
+             ! location in I,J,K od x2,x2,x3 axes:
+             XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
 
-          X1LO_FACE = KLO_FACE-CCGUARD; X1LO_CELL = KLO_CELL-CCGUARD
-          X1HI_FACE = KHI_FACE+CCGUARD; X1HI_CELL = KHI_CELL+CCGUARD
-          X2LO_FACE = ILO_FACE-CCGUARD; X2LO_CELL = ILO_CELL-CCGUARD
-          X2HI_FACE = IHI_FACE+CCGUARD; X2HI_CELL = IHI_CELL+CCGUARD
-          X3LO_FACE = JLO_FACE-CCGUARD; X3LO_CELL = JLO_CELL-CCGUARD
-          X3HI_FACE = JHI_FACE+CCGUARD; X3HI_CELL = JHI_CELL+CCGUARD
+             ! Face coordinates in x1,x2,x3 axes:
+             X1FACEP => YFACE;
+             X2FACEP => ZFACE; X2CELLP => ZCELL
+             X3FACEP => XFACE; X3CELLP => XCELL
 
-          ! location in I,J,K od x2,x2,x3 axes:
-          XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
+         CASE(KAXIS)
+             XYZ(IAXIS:KAXIS) = (/ XCELL(I), YCELL(J), ZFACE(K) /)
+             MIN_DIST_VEL = DIST_THRES*MIN(DXCELL(I),DYCELL(J),DZFACE(K))
+             ! x2, x3 axes:
+             X2AXIS = IAXIS;  X3AXIS = JAXIS
 
-          ! Face coordinates in x1,x2,x3 axes:
-          X1FACEP => ZFACE;
-          X2FACEP => XFACE; X2CELLP => XCELL
-          X3FACEP => YFACE; X3CELLP => YCELL
+             X1LO_FACE = KLO_FACE-CCGUARD; X1LO_CELL = KLO_CELL-CCGUARD
+             X1HI_FACE = KHI_FACE+CCGUARD; X1HI_CELL = KHI_CELL+CCGUARD
+             X2LO_FACE = ILO_FACE-CCGUARD; X2LO_CELL = ILO_CELL-CCGUARD
+             X2HI_FACE = IHI_FACE+CCGUARD; X2HI_CELL = IHI_CELL+CCGUARD
+             X3LO_FACE = JLO_FACE-CCGUARD; X3LO_CELL = JLO_CELL-CCGUARD
+             X3HI_FACE = JHI_FACE+CCGUARD; X3HI_CELL = JHI_CELL+CCGUARD
 
-      END SELECT
+             ! location in I,J,K od x2,x2,x3 axes:
+             XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
 
-      DO IFACE=0,CUT_FACE(ICF)%NFACE
+             ! Face coordinates in x1,x2,x3 axes:
+             X1FACEP => ZFACE;
+             X2FACEP => XFACE; X2CELLP => XCELL
+             X3FACEP => YFACE; X3CELLP => YCELL
 
-         ! do cut-face centroid for IFACE > 0:
-         IF (IFACE > 0) XYZ(IAXIS:KAXIS) = CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
+         END SELECT
 
-         ! Initialize closest inboundary point data:
-         DISTANCE            = 1._EB / GEOMEPS
-         LASTDOTNVEC         =-1._EB / GEOMEPS
-         FOUND_POINT         = .FALSE.
-         XYZ_PP(IAXIS:KAXIS) = 0._EB
-         FOUND_INBFC(1:3)    = 0
+         IF(.NOT.IBM_USE_OUTER_PLANE) THEN
+            NPE_LIST_START = 0
+            ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,IAXIS:KAXIS,1:INT_N_EXT_PTS,0:CUT_FACE(ICF)%NFACE), &
+                     INT_IJK(IAXIS:KAXIS,(CUT_FACE(ICF)%NFACE+1)*DELTA_INT),                      &
+                     INT_COEF((CUT_FACE(ICF)%NFACE+1)*DELTA_INT),INT_NOUT(IAXIS:KAXIS,0:CUT_FACE(ICF)%NFACE))
+         ENDIF
+         DO IFACE=0,CUT_FACE(ICF)%NFACE
 
-         ! Now LOW side list of INBOUNDARY cut faces, search for closest point to xyz:
-         DO LOWHIGH=LOW_IND,HIGH_IND
+            ! do cut-face centroid for IFACE > 0:
+            IF (IFACE > 0) XYZ(IAXIS:KAXIS) = CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
 
-            DO ICF2=1,CUT_FACE(ICF)%NFACE
+            ! Initialize closest inboundary point data:
+            DISTANCE            = 1._EB / GEOMEPS
+            LASTDOTNVEC         =-1._EB / GEOMEPS
+            FOUND_POINT         = .FALSE.
+            XYZ_PP(IAXIS:KAXIS) = 0._EB
+            FOUND_INBFC(1:3)    = 0
 
-               IND_CC(IAXIS:KAXIS+1) = CUT_FACE(ICF)%CELL_LIST(IAXIS:KAXIS+1,LOWHIGH,ICF2)
+            ! Now LOW side list of INBOUNDARY cut faces, search for closest point to xyz:
+            DO LOWHIGH=LOW_IND,HIGH_IND
 
-               IF (IND_CC(1) == IBM_FTYPE_RGGAS) CYCLE ! Cell regular gasphase
+               DO ICF2=1,CUT_FACE(ICF)%NFACE
 
-               ICC = IND_CC(2)
-               JCC = IND_CC(3)
+                  IND_CC(IAXIS:KAXIS+1) = CUT_FACE(ICF)%CELL_LIST(IAXIS:KAXIS+1,LOWHIGH,ICF2)
 
-               ! Find closest point and Inboundary cut-face:
-               NFC_CC = MESHES(NM)%CUT_CELL(ICC)%CCELEM(1,JCC)
-               DO CCFC=1,NFC_CC
+                  IF (IND_CC(1) == IBM_FTYPE_RGGAS) CYCLE ! Cell regular gasphase
 
-                  ICFC = MESHES(NM)%CUT_CELL(ICC)%CCELEM(CCFC+1,JCC)
-                  IF ( MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(1,ICFC) /= IBM_FTYPE_CFINB) CYCLE
+                  ICC = IND_CC(2)
+                  JCC = IND_CC(3)
 
-                  ! Inboundary face number in CUT_FACE:
-                  INBFC     = MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(4,ICFC)
-                  INBFC_LOC = MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(5,ICFC)
+                  ! Find closest point and Inboundary cut-face:
+                  NFC_CC = MESHES(NM)%CUT_CELL(ICC)%CCELEM(1,JCC)
+                  DO CCFC=1,NFC_CC
 
-                  CALL GET_CLSPT_INBCF(NM,XYZ,INBFC,INBFC_LOC,XYZ_IP,DIST,FOUNDPT,INSEG)
-                  IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
-                      IF (INSEG) THEN
-                          BODTRI(1:2)  = CUT_FACE(INBFC)%BODTRI(1:2,INBFC_LOC)
-                          ! normal vector to boundary surface triangle:
-                          IBOD    = BODTRI(1)
-                          IWSEL   = BODTRI(2)
-                          NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
-                          DV(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS) - XYZ_IP(IAXIS:KAXIS)
-                          NORM_DV = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
-                          IF(NORM_DV > GEOMEPS) THEN ! Point in segment not same as pt to interp to.
-                             DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS)
-                             DOTNVEC = NVEC(IAXIS)*DV(IAXIS) + NVEC(JAXIS)*DV(JAXIS) + NVEC(KAXIS)*DV(KAXIS)
-                             IF (DOTNVEC <= LASTDOTNVEC) CYCLE
-                             LASTDOTNVEC = DOTNVEC
-                          ENDIF
+                     ICFC = MESHES(NM)%CUT_CELL(ICC)%CCELEM(CCFC+1,JCC)
+                     IF ( MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(1,ICFC) /= IBM_FTYPE_CFINB) CYCLE
+
+                     ! Inboundary face number in CUT_FACE:
+                     INBFC     = MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(4,ICFC)
+                     INBFC_LOC = MESHES(NM)%CUT_CELL(ICC)%FACE_LIST(5,ICFC)
+
+                     CALL GET_CLSPT_INBCF(NM,XYZ,INBFC,INBFC_LOC,XYZ_IP,DIST,FOUNDPT,INSEG)
+                     IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
+                         IF (INSEG) THEN
+                             BODTRI(1:2)  = CUT_FACE(INBFC)%BODTRI(1:2,INBFC_LOC)
+                             ! normal vector to boundary surface triangle:
+                             IBOD    = BODTRI(1)
+                             IWSEL   = BODTRI(2)
+                             NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
+                             DV(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS) - XYZ_IP(IAXIS:KAXIS)
+                             NORM_DV = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
+                             IF(NORM_DV > GEOMEPS) THEN ! Point in segment not same as pt to interp to.
+                                DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS)
+                                DOTNVEC = NVEC(IAXIS)*DV(IAXIS) + NVEC(JAXIS)*DV(JAXIS) + NVEC(KAXIS)*DV(KAXIS)
+                                IF (DOTNVEC <= LASTDOTNVEC) CYCLE
+                                LASTDOTNVEC = DOTNVEC
+                             ENDIF
+                         ENDIF
+                         DISTANCE = DIST
+                         XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
+                         FOUND_INBFC(1:3) = (/ IBM_FTYPE_CFINB, INBFC, INBFC_LOC /) ! Inbound cut-face in CUT_FACE.
+                         FOUND_POINT = .TRUE.
+                     ENDIF
+
+                  ENDDO
+
+                  ! If point not found, all cut-faces boundary of the icc, jcc volume
+                  ! are GASPHASE. There must be a SOLID point in the boundary of the
+                  ! underlying Cartesian cell. this is the closest point:
+                  IF (.NOT.FOUND_POINT) THEN
+                      ! Search for for CUT_CELL(icc) vertex points or other solid points:
+                      CALL GET_CLOSEPT_CCVT(NM,XYZ,ICC,XYZ_IP,DIST,FOUNDPT,IFCPT,IFCPT_LOC)
+                      IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
+                         DISTANCE = DIST
+                         XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
+                         FOUND_INBFC(1:3) = (/ IBM_FTYPE_SVERT, IFCPT, IFCPT_LOC /) ! SOLID vertex in CUT_FACE.
+                         FOUND_POINT = .TRUE.
                       ENDIF
-                      DISTANCE = DIST
-                      XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
-                      FOUND_INBFC(1:3) = (/ IBM_FTYPE_CFINB, INBFC, INBFC_LOC /) ! Inbound cut-face in CUT_FACE.
-                      FOUND_POINT = .TRUE.
                   ENDIF
 
-               ENDDO
+               ENDDO ! ICF2
 
-               ! If point not found, all cut-faces boundary of the icc, jcc volume
-               ! are GASPHASE. There must be a SOLID point in the boundary of the
-               ! underlying Cartesian cell. this is the closest point:
-               IF (.NOT.FOUND_POINT) THEN
-                   ! Search for for CUT_CELL(icc) vertex points or other solid points:
-                   CALL GET_CLOSEPT_CCVT(NM,XYZ,ICC,XYZ_IP,DIST,FOUNDPT,IFCPT,IFCPT_LOC)
-                   IF (FOUNDPT .AND. ((DIST-DISTANCE) < GEOMEPS)) THEN
-                      DISTANCE = DIST
-                      XYZ_PP(IAXIS:KAXIS)   = XYZ_IP(IAXIS:KAXIS)
-                      FOUND_INBFC(1:3) = (/ IBM_FTYPE_SVERT, IFCPT, IFCPT_LOC /) ! SOLID vertex in CUT_FACE.
-                      FOUND_POINT = .TRUE.
-                   ENDIF
+            ENDDO ! Loop over LOW side and HIGH side cut-cells of GASPHASE cut-face.
+
+            IF (.NOT.FOUND_POINT) PRINT*, 'CF: Havent found closest point. ICF, IFACE=',ICF,IFACE
+
+            ! Here test if point in boundary and interpolation point coincide:
+            IF (DISTANCE <= MIN_DIST_VEL) THEN
+
+               IF(IBM_USE_OUTER_PLANE) THEN
+
+                  ! Dummy values for external interpolation nodes:
+                  PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
+                  PTS2(JAXIS,1:MAX_INTERP_POINTS_PLANE) = J
+                  PTS2(KAXIS,1:MAX_INTERP_POINTS_PLANE) = K
+
+                  ! Interpolation coeff s.t. interpolated value = boundary value:
+                  CI  = 1.0_EB
+                  CII = 0.0_EB
+                  CIII= 0.0_EB
+                  CIV = 0.0_EB
+                  CV  = 0.0_EB
+
+               ELSE
+
+                  INT_NOUT(IAXIS:KAXIS,IFACE) = 0._EB
+                  INT_XN(0:INT_N_EXT_PTS) = 0._EB
+                  INT_CN(0:INT_N_EXT_PTS) = 0._EB; INT_CN(0) = 1._EB ! Boundary point coefficient:
+                  DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                     DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                        NPE_LIST_COUNT = 0
+                        INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+                        INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+                        NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+                     ENDDO
+                  ENDDO
+
                ENDIF
 
-            ENDDO ! ICF2
+            ELSE
 
-         ENDDO ! LOWHIGH
+               ! After this loop we have the closest boundary point to xyz and the
+               ! cut-face it belongs. We need to use the normal out of the face (or the
+               ! vertex to xyz direction to find fluid points on the stencil:
+               ! The fluid points are points that lay on the plane outside in the
+               ! largest Cartesian component direction of the normal.
+               DIR_FCT = 1._EB
+               IF (FOUND_INBFC(1) == IBM_FTYPE_CFINB) THEN ! closest point in INBOUNDARY cut-face.
+                   BODTRI(1:2) = CUT_FACE(FOUND_INBFC(2))%BODTRI(1:2,FOUND_INBFC(3))
+                   ! normal vector to boundary surface triangle:
+                   IBOD    = BODTRI(1)
+                   IWSEL   = BODTRI(2)
+                   NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
+                   DV(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS) - XYZ_PP(IAXIS:KAXIS)
+                   DOTNVEC = NVEC(IAXIS)*DV(IAXIS) + NVEC(JAXIS)*DV(JAXIS) + NVEC(KAXIS)*DV(KAXIS)
 
-         IF (.NOT.FOUND_POINT) PRINT*, 'CF: Havent found closest point. ICF, IFACE=',ICF,IFACE
+                   IF (DOTNVEC < 0._EB) DIR_FCT = -1._EB ! if normal to triangle has opposite dir change
+                                                         ! search direction.
+               ENDIF
+               !print*, 'DIR_FCT=',DIR_FCT
+               !print*, 'XYZ=',XYZ(IAXIS:KAXIS)
+               !print*, 'XYZ_PP=',XYZ_PP(IAXIS:KAXIS)
+               DV(IAXIS:KAXIS)   = DIR_FCT * ( XYZ(IAXIS:KAXIS) - XYZ_PP(IAXIS:KAXIS) )
+               NORM_DV           = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
+               DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS) ! NOUT
 
-         ! Here test if point in boundary and interpolation point coincide:
-         IF (DISTANCE <= MIN_DIST_VEL) THEN
+               IF(IBM_USE_OUTER_PLANE) THEN
 
-            ! Dummy values for external interpolation nodes:
-            PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
-            PTS2(JAXIS,1:MAX_INTERP_POINTS_PLANE) = J
-            PTS2(KAXIS,1:MAX_INTERP_POINTS_PLANE) = K
+                  ! Versor to GASPHASE:
+                  IF (DIR_FCT > 0._EB) THEN ! Versor from boundary point to centroid
+                      P0(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)
+                      P1(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS)
+                  ELSE ! Viceversa
+                      P0(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS)
+                      P1(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)
+                  ENDIF
+                  ! Call routine that defines stencils:
+                  CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,     &
+                                              P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP, &
+                                              DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
 
-            ! Interpolation coeff s.t. interpolated value = boundary value:
-            CI  = 1.0_EB
-            CII = 0.0_EB
-            CIII= 0.0_EB
-            CIV = 0.0_EB
-            CV  = 0.0_EB
+               ELSE
 
-         ELSE
+                  SELECT CASE (X1AXIS)
+                  CASE(IAXIS)
+                     CALL GET_DELN(DELN,DXFACE(I),DYCELL(J),DZCELL(K),NVEC=DV)
+                  CASE(JAXIS)
+                     CALL GET_DELN(DELN,DXCELL(I),DYFACE(J),DZCELL(K),NVEC=DV)
+                  CASE(KAXIS)
+                     CALL GET_DELN(DELN,DXCELL(I),DYCELL(J),DZFACE(K),NVEC=DV)
+                  END SELECT
 
-            ! After this loop we have the closest boundary point to xyz and the
-            ! cut-face it belongs. We need to use the normal out of the face (or the
-            ! vertex to xyz direction to find fluid points on the stencil:
-            ! The fluid points are points that lay on the plane outside in the
-            ! largest Cartesian component direction of the normal.
-            DIR_FCT = 1._EB
-            IF (FOUND_INBFC(1) == IBM_FTYPE_CFINB) THEN ! closest point in INBOUNDARY cut-face.
-                BODTRI(1:2) = CUT_FACE(FOUND_INBFC(2))%BODTRI(1:2,FOUND_INBFC(3))
-                ! normal vector to boundary surface triangle:
-                IBOD    = BODTRI(1)
-                IWSEL   = BODTRI(2)
-                NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
-                DV(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS) - XYZ_PP(IAXIS:KAXIS)
-                DOTNVEC = NVEC(IAXIS)*DV(IAXIS) + NVEC(JAXIS)*DV(JAXIS) + NVEC(KAXIS)*DV(KAXIS)
-
-                IF (DOTNVEC < 0._EB) DIR_FCT = -1._EB ! if normal to triangle has opposite dir change
-                                                      ! search direction.
+                  ! Location of interpolation point XYZ(IAXIS:KAXIS) along the DV direction, origin in
+                  ! boundary point XYZ_PP(IAXIS:KAXIS):
+                  INT_NOUT(IAXIS:KAXIS,IFACE) = DV(IAXIS:KAXIS)
+                  INT_XN(0)               = DIR_FCT * NORM_DV
+                  INT_XN(1:INT_N_EXT_PTS) = 0._EB
+                  ! Initialize interpolation coefficients along the normal probe direction DV
+                  INT_CN(0) = 0._EB; ! Boundary point interpolation coefficient
+                  INT_CN(1:INT_N_EXT_PTS) = 0._EB;
+                  DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                     INT_XN(EP) = REAL(EP,EB)*DELN
+                     DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point, masked interpolation.
+                        CALL GET_INTSTENCILS_EP(.TRUE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                                                NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
+                        ! Start position for interpolation stencil related to velocity component VIND, of external
+                        ! point EP related to cut-face IFACE:
+                        INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+                        ! Number of stencil points on stencil for said velocity component.
+                        INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+                        NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+                     ENDDO
+                  ENDDO
+               ENDIF
             ENDIF
 
-            ! Versor to GASPHASE:
-            IF (DIR_FCT > 0._EB) THEN ! Versor from boundary point to centroid
-                P0(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)
-                P1(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS)
-            ELSE ! Viceversa
-                P0(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS)
-                P1(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)
+            ! Add coefficients to CUT_FACE fields:
+            IF(IBM_USE_OUTER_PLANE) THEN
+
+               IF (IFACE == 0) THEN
+                 CUT_FACE(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) = &
+                                                     PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK triangle nodes
+                 CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)  ! xyz of boundary pt
+                 CUT_FACE(ICF)%INBFC_CARTCEN(1:3)   = FOUND_INBFC(1:3)  ! which INB cut-face boundary pt belongs to.
+                 CUT_FACE(ICF)%INTCOEF_CARTCEN(1:5) = (/ CI, CII, CIII, CIV, CV /)
+               ELSE
+                 CUT_FACE(ICF)%IJK_CFCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE,IFACE) = &
+                                                   PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK triangle nodes
+                 CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE) = XYZ_PP(IAXIS:KAXIS)!xyz of boundary pt
+                 CUT_FACE(ICF)%INBFC_CFCEN(1:3,IFACE) = FOUND_INBFC(1:3) ! which INB cut-face boundary pt belongs to.
+                 CUT_FACE(ICF)%INTCOEF_CFCEN(1:5,IFACE) = (/ CI, CII, CIII, CIV, CV /)
+               ENDIF
+
+            ELSE
+
+               CUT_FACE(ICF)%INT_XYZBF(IAXIS:KAXIS,IFACE) = XYZ_PP(IAXIS:KAXIS) ! xyz of boundary pt.
+               CUT_FACE(ICF)%INT_INBFC(1:3,IFACE)         = FOUND_INBFC(1:3)  ! which INB cut-face bndry pt belongs to.
+               CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)  = INT_NOUT(IAXIS:KAXIS,IFACE)
+               CUT_FACE(ICF)%INT_XN(0:INT_N_EXT_PTS,IFACE)= INT_XN(0:INT_N_EXT_PTS)
+               CUT_FACE(ICF)%INT_CN(0:INT_N_EXT_PTS,IFACE)= INT_CN(0:INT_N_EXT_PTS)
+               ! If size of CUT_FACE(ICF)%INT_IJK,DIM=2 is less than the size of INT_IJK, reallocate:
+               SZ_1 = SIZE(CUT_FACE(ICF)%INT_IJK,DIM=2)
+               SZ_2 = SIZE(INT_IJK,DIM=2)
+               IF(SZ_2 > SZ_1) THEN
+                  ALLOCATE(INT_IJK_AUX(IAXIS:KAXIS,SZ_1),INT_COEF_AUX(1:SZ_1))
+                  INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1) = CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1)
+                  INT_COEF_AUX(1:SZ_1)          = CUT_FACE(ICF)%INT_COEF(1:SZ_1)
+                  DEALLOCATE(CUT_FACE(ICF)%INT_IJK, CUT_FACE(ICF)%INT_COEF)
+                  ALLOCATE(CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,SZ_2)); CUT_FACE(ICF)%INT_IJK = IBM_UNDEFINED
+                  ALLOCATE(CUT_FACE(ICF)%INT_COEF(1:SZ_2)); CUT_FACE(ICF)%INT_COEF = 0._EB
+                  CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1) = INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1)
+                  CUT_FACE(ICF)%INT_COEF(1:SZ_1)            = INT_COEF_AUX(1:SZ_1)
+                  DEALLOCATE(INT_IJK_AUX,INT_COEF_AUX)
+                  DEALLOCATE(CUT_FACE(ICF)%INT_FVARS,CUT_FACE(ICF)%INT_NOMIND)
+                  ALLOCATE(CUT_FACE(ICF)%INT_FVARS(1:N_INT_FVARS,SZ_2)); CUT_FACE(ICF)%INT_FVARS=0._EB
+                  ALLOCATE(CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,SZ_2)); CUT_FACE(ICF)%INT_NOMIND = IBM_UNDEFINED
+               ENDIF
+               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                     INT_NPE_LO = INT_NPE(LOW_IND,VIND,EP,IFACE)
+                     INT_NPE_HI = INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                     CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE) = INT_NPE_LO
+                     CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)= INT_NPE_HI
+                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                        CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,INPE) = INT_IJK(IAXIS:KAXIS,INPE)
+                        CUT_FACE(ICF)%INT_COEF(INPE)            = INT_COEF(INPE)
+                     ENDDO
+                  ENDDO
+               ENDDO
+
             ENDIF
-            !print*, 'DIR_FCT=',DIR_FCT
-            !print*, 'XYZ=',XYZ(IAXIS:KAXIS)
-            !print*, 'XYZ_PP=',XYZ_PP(IAXIS:KAXIS)
-            DV(IAXIS:KAXIS)   = DIR_FCT * ( XYZ(IAXIS:KAXIS) - XYZ_PP(IAXIS:KAXIS) )
-            NORM_DV           = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
-            DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS) ! NOUT
 
-            ! Call routine that defines stencils:
-            CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,               &
-                                        P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP,&
-                                        DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
+         ENDDO ! IFACE loop
+         NULLIFY(X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP)
 
+         IF(.NOT.IBM_USE_OUTER_PLANE) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
+
+
+      ELSEIF(CUT_FACE(ICF)%STATUS == IBM_INBOUNDARY) THEN ! CUTFACE_STATUS_IF
+
+         ! Here we define interpolation stencils that will be used to populate ONE_D%H_G, TMP_G, RHO_G,
+         ! ZZ_G, MU_G, U_TANG and U_VEL, V_VEL, W_VEL, KRES of corresponding CFACES.
+         ! These variables are to be used to compute heat transfer, species BCs and to compute stresses and pressure
+         ! at the CFACE wall.
+
+         MIN_DIST_VEL = DIST_THRES*MIN(DXCELL(I),DYCELL(J),DZCELL(K))
+         ! Define average normal vector for boundary cut-faces in CUT_FACE(ICF):
+         DV(IAXIS:KAXIS) = 0._EB
+         A_TOT = 0._EB
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            ICF1 = CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+            DV(IAXIS:KAXIS) = DV(IAXIS:KAXIS) + CFACE(ICF1)%AREA*CFACE(ICF1)%NVEC(IAXIS:KAXIS)
+            A_TOT = A_TOT + CFACE(ICF1)%AREA
+         ENDDO
+         DV(IAXIS:KAXIS) = DV(IAXIS:KAXIS)/(A_TOT+TWO_EPSILON_EB)
+         CALL GET_DELN(DELN,DXCELL(I),DYCELL(J),DZCELL(K),NVEC=DV)
+
+         NPE_LIST_START = 0
+         ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,1:CUT_FACE(ICF)%NFACE), &
+                  INT_IJK(IAXIS:KAXIS,(CUT_FACE(ICF)%NFACE+1)*DELTA_INT),                      &
+                  INT_COEF((CUT_FACE(ICF)%NFACE+1)*DELTA_INT),INT_NOUT(IAXIS:KAXIS,1:CUT_FACE(ICF)%NFACE))
+         ! Fill cell centered stencils first:
+         N_CVAR_START = NPE_LIST_START
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            ! Origin in boundary point XYZ_PP(IAXIS:KAXIS):
+            XYZ_PP(IAXIS:KAXIS)         = CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
+            ICF1 = CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+            DV(IAXIS:KAXIS) = CFACE(ICF1)%NVEC(IAXIS:KAXIS)
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               INT_XN(EP) = REAL(EP,EB)*DELN
+               ! First cell centered variables:
+               VIND=0
+               CALL GET_INTSTENCILS_EP(.FALSE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                                       NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
+               ! Start position for interpolation stencil related to velocity component VIND, of external
+               ! point EP related to cut-face IFACE:
+               INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+               ! Number of stencil points on stencil for said velocity component.
+               INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+               NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+            ENDDO
+         ENDDO
+         ! Number of cell centered stencil points:
+         N_CVAR_COUNT = NPE_LIST_START
+
+         ! Now face centered stencils:
+         N_FVAR_START = N_CVAR_START + N_CVAR_COUNT
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            ! Origin in boundary point XYZ_PP(IAXIS:KAXIS):
+            XYZ_PP(IAXIS:KAXIS)         = CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
+            FOUND_INBFC(1:3) = (/ IBM_FTYPE_CFINB, ICF, IFACE /)
+            ICF1 = CUT_FACE(ICF)%CFACE_INDEX(IFACE)
+            DV(IAXIS:KAXIS) = CFACE(ICF1)%NVEC(IAXIS:KAXIS)
+            INT_NOUT(IAXIS:KAXIS,IFACE) = DV(IAXIS:KAXIS)
+            INT_XN(0:INT_N_EXT_PTS) = 0._EB
+            ! Initialize interpolation coefficients along the normal probe direction DV
+            INT_CN(0) = 0._EB; ! Boundary point interpolation coefficient
+            INT_CN(1:INT_N_EXT_PTS) = 0._EB;
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               INT_XN(EP) = REAL(EP,EB)*DELN
+               ! Then face variables:
+               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point, masked interpolation.
+                  CALL GET_INTSTENCILS_EP(.FALSE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                                          NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
+                  ! Start position for interpolation stencil related to velocity component VIND, of external
+                  ! point EP related to cut-face IFACE:
+                  INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+                  ! Number of stencil points on stencil for said velocity component.
+                  INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+                  NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+               ENDDO
+            ENDDO
+            CUT_FACE(ICF)%INT_XYZBF(IAXIS:KAXIS,IFACE) = XYZ_PP(IAXIS:KAXIS) ! xyz of boundary pt.
+            CUT_FACE(ICF)%INT_INBFC(1:3,IFACE)         = FOUND_INBFC(1:3)  ! which INB cut-face boundary pt belongs to.
+            CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)  = INT_NOUT(IAXIS:KAXIS,IFACE)
+            CUT_FACE(ICF)%INT_XN(0:INT_N_EXT_PTS,IFACE)= INT_XN(0:INT_N_EXT_PTS)
+            CUT_FACE(ICF)%INT_CN(0:INT_N_EXT_PTS,IFACE)= INT_CN(0:INT_N_EXT_PTS)
+         ENDDO
+         N_FVAR_COUNT = NPE_LIST_START - N_FVAR_START
+
+
+         ! Finally Define IJK and interp coeffs for EPs:
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               DO VIND=0,KAXIS ! Centered and face variables for external point EP
+                  INT_NPE_LO = INT_NPE(LOW_IND,VIND,EP,IFACE)
+                  INT_NPE_HI = INT_NPE(HIGH_IND,VIND,EP,IFACE)
+               ENDDO
+            ENDDO
+         ENDDO
+
+         ! If size of CUT_FACE(ICF)%INT_IJK,DIM=2 is less than the size of INT_IJK, reallocate:
+         SZ_1 = SIZE(CUT_FACE(ICF)%INT_IJK,DIM=2)
+         SZ_2 = SIZE(INT_IJK,DIM=2)
+         IF(SZ_2 > SZ_1) THEN
+            ALLOCATE(INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1),INT_COEF_AUX(1:SZ_1))
+            INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1) = CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1)
+            INT_COEF_AUX(1:SZ_1)            = CUT_FACE(ICF)%INT_COEF(1:SZ_1)
+            DEALLOCATE(CUT_FACE(ICF)%INT_IJK, CUT_FACE(ICF)%INT_COEF)
+            ALLOCATE(CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_2)); CUT_FACE(ICF)%INT_IJK = IBM_UNDEFINED
+            ALLOCATE(CUT_FACE(ICF)%INT_COEF(1:SZ_2)); CUT_FACE(ICF)%INT_COEF = 0._EB
+            CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1) = INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1)
+            CUT_FACE(ICF)%INT_COEF(1:SZ_1)            = INT_COEF_AUX(1:SZ_1)
+            DEALLOCATE(INT_IJK_AUX,INT_COEF_AUX)
+            DEALLOCATE(CUT_FACE(ICF)%INT_NOMIND)
+            ALLOCATE(CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,1:SZ_2)); CUT_FACE(ICF)%INT_NOMIND = IBM_UNDEFINED
          ENDIF
+         ! Reallocate INT_CVARS, INT_FVARS:
+         IF (ALLOCATED(CUT_FACE(ICF)%INT_CVARS)) DEALLOCATE(CUT_FACE(ICF)%INT_CVARS)
+         ALLOCATE(CUT_FACE(ICF)%INT_CVARS(1:N_INT_CVARS,N_CVAR_START+1:N_CVAR_START+N_CVAR_COUNT))
+         IF (ALLOCATED(CUT_FACE(ICF)%INT_FVARS)) DEALLOCATE(CUT_FACE(ICF)%INT_FVARS)
+         ALLOCATE(CUT_FACE(ICF)%INT_FVARS(1:N_INT_FVARS,N_FVAR_START+1:N_FVAR_START+N_FVAR_COUNT))
+         CUT_FACE(ICF)%INT_CVARS=0._EB; CUT_FACE(ICF)%INT_FVARS=0._EB
 
-         ! Add coefficients to CUT_FACE fields:
-         IF (IFACE == 0) THEN
-           CUT_FACE(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) = &
-                                               PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK triangle nodes
-           CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)  ! xyz of boundary pt
-           CUT_FACE(ICF)%INBFC_CARTCEN(1:3)   = FOUND_INBFC(1:3)  ! which INB cut-face boundary pt belongs to.
-           CUT_FACE(ICF)%INTCOEF_CARTCEN(1:5) = (/ CI, CII, CIII, CIV, CV /)
-         ELSE
-           CUT_FACE(ICF)%IJK_CFCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE,IFACE) = &
-                                             PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK triangle nodes
-           CUT_FACE(ICF)%XYZ_BP_CFCEN(IAXIS:KAXIS,IFACE) = XYZ_PP(IAXIS:KAXIS)!xyz of boundary pt
-           CUT_FACE(ICF)%INBFC_CFCEN(1:3,IFACE) = FOUND_INBFC(1:3) ! which INB cut-face boundary pt belongs to.
-           CUT_FACE(ICF)%INTCOEF_CFCEN(1:5,IFACE) = (/ CI, CII, CIII, CIV, CV /)
-         ENDIF
+         ! Finally Define IJK and interp coeffs for EPs:
+         DO IFACE=1,CUT_FACE(ICF)%NFACE
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               DO VIND=0,KAXIS ! Centered and face variables for external point EP
+                  INT_NPE_LO = INT_NPE(LOW_IND,VIND,EP,IFACE)
+                  INT_NPE_HI = INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                  CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE) = INT_NPE_LO
+                  CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)= INT_NPE_HI
+                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                     CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,INPE) = INT_IJK(IAXIS:KAXIS,INPE)
+                     CUT_FACE(ICF)%INT_COEF(INPE)            = INT_COEF(INPE)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
 
-      ENDDO ! IFACE loop
-      NULLIFY(X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP)
+         DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
+
+      ENDIF CUTFACE_STATUS_IF
 
    ENDDO CUT_FACE_LOOP
 
@@ -15081,6 +16400,12 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       XYZ_PP(IAXIS:KAXIS) = 0._EB
       FOUND_INBFC(1:3)    = 0
 
+      IF(.NOT.IBM_USE_OUTER_PLANE) THEN
+         NPE_LIST_START = 0
+         ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,IAXIS:KAXIS,1:INT_N_EXT_PTS,0:0), &
+                  INT_IJK(IAXIS:KAXIS,DELTA_INT),                            &
+                  INT_COEF(DELTA_INT),INT_NOUT(IAXIS:KAXIS,0:0))
+      ENDIF
       ! Now LOW:HIGH side list of RCVEL faces, search for closest point to xyz:
       DO ICFACE=1,MESHES(NM)%IBM_RCFACE_VEL(ICF)%NCFACE
       DO LOWHIGH=LOW_IND,HIGH_IND
@@ -15148,25 +16473,42 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Here test if point in boundary and interpolation point coincide:
       IF (DISTANCE <= MIN_DIST_VEL) THEN
 
-         ! Dummy values for external interpolation nodes:
-         PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
-         PTS2(JAXIS,1:MAX_INTERP_POINTS_PLANE) = J
-         PTS2(KAXIS,1:MAX_INTERP_POINTS_PLANE) = K
+         IF(IBM_USE_OUTER_PLANE) THEN
 
-         ! Interpolation coeff s.t. interpolated value = boundary value:
-         CI  = 1.0_EB
-         CII = 0.0_EB
-         CIII= 0.0_EB
-         CIV = 0.0_EB
-         CV  = 0.0_EB
+            ! Dummy values for external interpolation nodes:
+            PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
+            PTS2(JAXIS,1:MAX_INTERP_POINTS_PLANE) = J
+            PTS2(KAXIS,1:MAX_INTERP_POINTS_PLANE) = K
+
+            ! Interpolation coeff s.t. interpolated value = boundary value:
+            CI  = 1.0_EB
+            CII = 0.0_EB
+            CIII= 0.0_EB
+            CIV = 0.0_EB
+            CV  = 0.0_EB
+
+         ELSE
+
+            IFACE = 0
+            INT_NOUT(IAXIS:KAXIS,IFACE) = 0._EB
+            INT_XN(0:INT_N_EXT_PTS) = 0._EB
+            INT_CN(0:INT_N_EXT_PTS) = 0._EB; INT_CN(0) = 1._EB
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                  NPE_LIST_COUNT = 0
+                  INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+                  INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+                  NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+               ENDDO
+            ENDDO
+
+         ENDIF
 
       ELSE
 
          ! After this loop we have the closest boundary point to xyz and the
          ! cut-face it belongs. We need to use the normal out of the face (or the
          ! vertex to xyz direction to find fluid points on the stencil:
-         ! The fluid points are points that lay on the plane outside in the
-         ! largest Cartesian component direction of the normal.
          DIR_FCT = 1._EB
          P0(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)
          P1(IAXIS:KAXIS) = XYZ(IAXIS:KAXIS)
@@ -15174,21 +16516,103 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          NORM_DV         = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
          DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS) ! NOUT
 
-         ! Call routine that defines stencils:
-         CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,    &
-                                     P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP,&
-                                     DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
+         IF(IBM_USE_OUTER_PLANE) THEN
+
+            ! The fluid points are points that lay on the plane outside in the
+            ! largest Cartesian component direction of the normal.
+            ! Call routine that defines stencils:
+            CALL GET_INTSTENCILS_FACE3D(NM,X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,    &
+                                        P0,P1,DV,X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP,&
+                                        DIR_FCT,CI,CII,CIII,CIV,CV,PTS2)
+
+         ELSE
+
+            SELECT CASE (X1AXIS)
+            CASE(IAXIS)
+               CALL GET_DELN(DELN,DXFACE(I),DYCELL(J),DZCELL(K),NVEC=DV)
+            CASE(JAXIS)
+               CALL GET_DELN(DELN,DXCELL(I),DYFACE(J),DZCELL(K),NVEC=DV)
+            CASE(KAXIS)
+               CALL GET_DELN(DELN,DXCELL(I),DYCELL(J),DZFACE(K),NVEC=DV)
+            END SELECT
+
+            ! In this case the fluid points depend on the number of external points to interpolate to.
+            IFACE = 0
+            ! Location of interpolation point XYZ(IAXIS:KAXIS) along the DV direction, origin in XYZ_PP(IAXIS:KAXIS):
+            INT_NOUT(IAXIS:KAXIS,IFACE) = DV(IAXIS:KAXIS)
+            INT_XN(0)               = DIR_FCT * NORM_DV
+            INT_XN(1:INT_N_EXT_PTS) = 0._EB
+            ! Initialize interpolation coefficients along the normal probe direction DV
+            INT_CN(0) = 0._EB; ! Boundary point interpolation coefficient
+            INT_CN(1:INT_N_EXT_PTS) = 0._EB;
+            DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               INT_XN(EP) = NORM_DV + REAL(EP,EB)*DELN
+               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point, masked interpolation.
+                  CALL GET_INTSTENCILS_EP(.TRUE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                                          NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
+                  INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
+                  INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
+                  NPE_LIST_START = NPE_LIST_START + NPE_LIST_COUNT
+               ENDDO
+            ENDDO
+
+         ENDIF
 
       ENDIF
 
       ! Add coefficients to REGC_FACE_VEL fields:
-      MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) =  &
-                                            PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK ot triangle nodes
-      MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)  ! xyz of boundary pt
-      MESHES(NM)%IBM_RCFACE_VEL(ICF)%INBFC_CARTCEN(1:3)   = FOUND_INBFC(1:3)            ! which INB cut-face boundary pt belongs to.
-      MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(1:5)= (/ CI, CII, CIII, CIV, CV /)
+      IF(IBM_USE_OUTER_PLANE) THEN
+
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) =  &
+                                               PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK ot triangle nodes
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS)  ! xyz of boundary pt
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INBFC_CARTCEN(1:3)   = FOUND_INBFC(1:3) ! which INB cut-face bnd pt belongs to.
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INTCOEF_CARTCEN(1:5)= (/ CI, CII, CIII, CIV, CV /)
+
+      ELSE
+
+         IFACE = 0
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_XYZBF(IAXIS:KAXIS,IFACE) = XYZ_PP(IAXIS:KAXIS) ! xyz of boundary pt.
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(1:3,IFACE)         = FOUND_INBFC(1:3)  ! INB cut-face for boundary pt.
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)  = INT_NOUT(IAXIS:KAXIS,IFACE)
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_XN(0:INT_N_EXT_PTS,IFACE)= INT_XN(0:INT_N_EXT_PTS)
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_CN(0:INT_N_EXT_PTS,IFACE)= INT_CN(0:INT_N_EXT_PTS)
+         SZ_1 = SIZE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK,DIM=2)
+         SZ_2 = SIZE(INT_IJK,DIM=2)
+         IF(SZ_2 > SZ_1) THEN
+            ALLOCATE(INT_IJK_AUX(IAXIS:KAXIS,SZ_1),INT_COEF_AUX(1:SZ_1))
+            INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1)
+            INT_COEF_AUX(1:SZ_1)            = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(1:SZ_1)
+            DEALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF)
+            ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,SZ_2));
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK = IBM_UNDEFINED
+            ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(1:SZ_2)); MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF = 0._EB
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,1:SZ_1) = INT_IJK_AUX(IAXIS:KAXIS,1:SZ_1)
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(1:SZ_1)            = INT_COEF_AUX(1:SZ_1)
+            DEALLOCATE(INT_IJK_AUX,INT_COEF_AUX)
+            DEALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS,MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND)
+            ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS(1:N_INT_FVARS,SZ_2));
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_FVARS=0._EB
+            ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,SZ_2));
+            MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND = IBM_UNDEFINED
+         ENDIF
+         DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+            DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+               INT_NPE_LO = INT_NPE(LOW_IND,VIND,EP,IFACE)
+               INT_NPE_HI = INT_NPE(HIGH_IND,VIND,EP,IFACE)
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE) = INT_NPE_LO
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)= INT_NPE_HI
+               DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                  MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,INPE) = INT_IJK(IAXIS:KAXIS,INPE)
+                  MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(INPE)            = INT_COEF(INPE)
+               ENDDO
+            ENDDO
+         ENDDO
+
+      ENDIF
 
       NULLIFY(X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP)
+      IF(.NOT.IBM_USE_OUTER_PLANE) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
 
    ENDDO RCVEL_FACE_LOOP
 
@@ -15615,65 +17039,17 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! Figure out which other meshes this mesh will receive face centered variables from:
    ! Cut-faces stencils:
-   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-
-      SELECT CASE(X1AXIS)
-      CASE(IAXIS)
-         ! First undelaying Cartesian:
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
-               FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
-               FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
-                  ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-               ENDIF
-            ENDIF
-            CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
-         ENDDO
-         ! Then gasphase cut-faces:
-         DO IFACE=1,CUT_FACE(ICF)%NFACE
+   IF(IBM_USE_OUTER_PLANE) THEN
+      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            ! First undelaying Cartesian:
             DO IPT=1,MAX_INTERP_POINTS_PLANE
-               I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-               J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-               K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+               I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
                ! If face not counted yet:
                IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
                   FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
@@ -15685,93 +17061,39 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ELSE
                      CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                    ! and add 1 to NFC_R for OMESH(NOM).
-                     ! Use Automatic reallocation:
-                     OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
-                     ENDIF
-                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                     IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-                  ENDIF
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-               CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
             ENDDO
-         ENDDO
-
-      CASE(JAXIS)
-         ! First undelaying Cartesian:
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
-               FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
-               FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+            ! Then gasphase cut-faces:
+            DO IFACE=1,CUT_FACE(ICF)%NFACE
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+                  J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+                  K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+                  ! If face not counted yet:
+                  IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                     FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
+                     FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                     FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                     INNM = FLGX .AND. FLGY .AND. FLGZ
+                     IF (INNM) THEN
+                        NOM=NM; IIO=I; JJO=J; KKO=K
+                     ELSE
+                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     ENDIF
+                     CALL ASSIGN_TO_FC_R
                   ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-               ENDIF
-            ENDIF
-            CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
-         ENDDO
-         ! Then gasphase cut-faces:
-         DO IFACE=1,CUT_FACE(ICF)%NFACE
+                  CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               ENDDO
+            ENDDO
+
+         CASE(JAXIS)
+            ! First undelaying Cartesian:
             DO IPT=1,MAX_INTERP_POINTS_PLANE
-               I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-               J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-               K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+               I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
                ! If face not counted yet:
                IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
                   FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
@@ -15783,93 +17105,39 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ELSE
                      CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                    ! and add 1 to NFC_R for OMESH(NOM).
-                     ! Use Automatic reallocation:
-                     OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
-                     ENDIF
-                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                     IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-                  ENDIF
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-               CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
             ENDDO
-         ENDDO
-
-      CASE(KAXIS)
-         ! First undelaying Cartesian:
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
-               FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
-               FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+            ! Then gasphase cut-faces:
+            DO IFACE=1,CUT_FACE(ICF)%NFACE
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+                  J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+                  K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+                  ! If face not counted yet:
+                  IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                     FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                     FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
+                     FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                     INNM = FLGX .AND. FLGY .AND. FLGZ
+                     IF (INNM) THEN
+                        NOM=NM; IIO=I; JJO=J; KKO=K
+                     ELSE
+                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     ENDIF
+                     CALL ASSIGN_TO_FC_R
                   ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-               ENDIF
-            ENDIF
-            CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
-         ENDDO
-         ! Then gasphase cut-faces:
-         DO IFACE=1,CUT_FACE(ICF)%NFACE
+                  CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               ENDDO
+            ENDDO
+
+         CASE(KAXIS)
+            ! First undelaying Cartesian:
             DO IPT=1,MAX_INTERP_POINTS_PLANE
-               I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
-               J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
-               K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+               I = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J = CUT_FACE(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K = CUT_FACE(ICF)%IJK_CARTCEN(KAXIS,IPT)
                ! If face not counted yet:
                IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
                   FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
@@ -15881,199 +17149,325 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ELSE
                      CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                    ! and add 1 to NFC_R for OMESH(NOM).
-                     ! Use Automatic reallocation:
-                     OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                     SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                     IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                         ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                         ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                         IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                         JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                         KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                         AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                         OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                         DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
-                     ENDIF
-                     OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                     OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                     OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                     OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                     IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
-                  ENDIF
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-               CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
             ENDDO
-         ENDDO
+            ! Then gasphase cut-faces:
+            DO IFACE=1,CUT_FACE(ICF)%NFACE
+               DO IPT=1,MAX_INTERP_POINTS_PLANE
+                  I = CUT_FACE(ICF)%IJK_CFCEN(IAXIS,IPT,IFACE)
+                  J = CUT_FACE(ICF)%IJK_CFCEN(JAXIS,IPT,IFACE)
+                  K = CUT_FACE(ICF)%IJK_CFCEN(KAXIS,IPT,IFACE)
+                  ! If face not counted yet:
+                  IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                     FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                     FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                     FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
+                     INNM = FLGX .AND. FLGY .AND. FLGZ
+                     IF (INNM) THEN
+                        NOM=NM; IIO=I; JJO=J; KKO=K
+                     ELSE
+                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                     ENDIF
+                     CALL ASSIGN_TO_FC_R
+                  ENDIF
+                  CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,IPT,IFACE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               ENDDO
+            ENDDO
 
-      END SELECT
+         END SELECT
 
-   ENDDO
+      ENDDO
+
+  ELSE ! IBM_USE_OUTER_PLANE for cut-faces.
+
+      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+
+            ! Underlying Cartesian and cut-faces:
+            DO IFACE=0,CUT_FACE(ICF)%NFACE
+               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                     INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                     INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                     X1AXIS = VIND
+                     ALLOCATE(EP_TAG(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)); EP_TAG(:)=.FALSE.
+                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                        I = CUT_FACE(ICF)%INT_IJK(IAXIS,INPE)
+                        J = CUT_FACE(ICF)%INT_IJK(JAXIS,INPE)
+                        K = CUT_FACE(ICF)%INT_IJK(KAXIS,INPE)
+                        SELECT CASE(X1AXIS)
+                        CASE(IAXIS)
+                           IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                              FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
+                              FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                              FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                              INNM = FLGX .AND. FLGY .AND. FLGZ
+                              IF (INNM) THEN
+                                 NOM=NM; IIO=I; JJO=J; KKO=K
+                              ELSE
+                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                              ENDIF
+                              IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                              CALL ASSIGN_TO_FC_R
+                           ENDIF
+                        CASE(JAXIS)
+                           IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                              FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                              FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
+                              FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                              INNM = FLGX .AND. FLGY .AND. FLGZ
+                              IF (INNM) THEN
+                                 NOM=NM; IIO=I; JJO=J; KKO=K
+                              ELSE
+                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                              ENDIF
+                              IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                              CALL ASSIGN_TO_FC_R
+                           ENDIF
+                        CASE(KAXIS)
+                           IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                              FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                              FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                              FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
+                              INNM = FLGX .AND. FLGY .AND. FLGZ
+                              IF (INNM) THEN
+                                 NOM=NM; IIO=I; JJO=J; KKO=K
+                              ELSE
+                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                              ENDIF
+                              IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                              CALL ASSIGN_TO_FC_R
+                           ENDIF
+                        END SELECT
+                        CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+                     ENDDO
+                     ! Now restrict count on cut-face :
+                     IF(ANY(EP_TAG .EQV. .TRUE.)) CALL RESTRICT_EP(.TRUE.)
+                     DEALLOCATE(EP_TAG)
+                  ENDDO
+               ENDDO
+            ENDDO
+      ENDDO
+
+   ENDIF ! IBM_USE_OUTER_PLANE
 
    ! RC faces stencils:
-   DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
-      X1AXIS = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS+1)
-      SELECT CASE(X1AXIS)
-      CASE(IAXIS)
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
-               FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
-               FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+   IF(IBM_USE_OUTER_PLANE) THEN
+
+      DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
+         X1AXIS = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            DO IPT=1,MAX_INTERP_POINTS_PLANE
+               I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+               ! If face not counted yet:
+               IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                  FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
+                  FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                  FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                  INNM = FLGX .AND. FLGY .AND. FLGZ
+                  IF (INNM) THEN
+                     NOM=NM; IIO=I; JJO=J; KKO=K
+                  ELSE
+                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-            ENDIF
-            MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
-            IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
-         ENDDO
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
+               IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+            ENDDO
 
-      CASE(JAXIS)
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
-               FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
-               FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+         CASE(JAXIS)
+            DO IPT=1,MAX_INTERP_POINTS_PLANE
+               I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+               ! If face not counted yet:
+               IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                  FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                  FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
+                  FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                  INNM = FLGX .AND. FLGY .AND. FLGZ
+                  IF (INNM) THEN
+                     NOM=NM; IIO=I; JJO=J; KKO=K
+                  ELSE
+                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-            ENDIF
-            MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
-            IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
-         ENDDO
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
+               IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+            ENDDO
 
-      CASE(KAXIS)
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
-            J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
-            K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
-            ! If face not counted yet:
-            IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
-               FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
-               FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
-               FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
-               INNM = FLGX .AND. FLGY .AND. FLGZ
-               IF (INNM) THEN
-                  NOM=NM; IIO=I; JJO=J; KKO=K
-               ELSE
-                  CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
-               ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
-                      ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
-                      ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
-                      IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
-                      JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
-                      KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
-                      AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+         CASE(KAXIS)
+            DO IPT=1,MAX_INTERP_POINTS_PLANE
+               I      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS,IPT)
+               J      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(JAXIS,IPT)
+               K      = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(KAXIS,IPT)
+               ! If face not counted yet:
+               IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                  FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                  FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                  FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
+                  INNM = FLGX .AND. FLGY .AND. FLGZ
+                  IF (INNM) THEN
+                     NOM=NM; IIO=I; JJO=J; KKO=K
+                  ELSE
+                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                   ENDIF
-                  OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
-                  OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
-                  OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
-                  OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
-                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
+                  CALL ASSIGN_TO_FC_R
                ENDIF
-            ENDIF
-            MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
-            IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               MESHES(NM)%IBM_RCFACE_VEL(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = &
+               IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+            ENDDO
+
+         END SELECT
+
+      ENDDO
+
+   ELSE ! IBM_USE_OUTER_PLANE for RC faces.
+
+      IFACE = 0
+      DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
+         DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+            DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+               INT_NPE_LO = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+               INT_NPE_HI = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+               X1AXIS = VIND
+               ALLOCATE(EP_TAG(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)); EP_TAG(:)=.FALSE.
+               DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                  I = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS,INPE)
+                  J = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(JAXIS,INPE)
+                  K = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(KAXIS,INPE)
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
+                        FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                        FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  CASE(JAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                        FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
+                        FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  CASE(KAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                        FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                        FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  END SELECT
+                  MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE) = &
+                  IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               ENDDO
+               ! Now restrict count on cut-face :
+               IF(ANY(EP_TAG .EQV. .TRUE.)) CALL RESTRICT_EP(.FALSE.)
+               DEALLOCATE(EP_TAG)
+            ENDDO
          ENDDO
+      ENDDO
 
-      END SELECT
+   ENDIF
 
+   ! INBOUNDARY cut-faces:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+      DO IFACE=1,CUT_FACE(ICF)%NFACE
+         DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+            DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+               INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+               INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+               X1AXIS = VIND
+               ALLOCATE(EP_TAG(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)); EP_TAG(:)=.FALSE.
+               DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                  I = CUT_FACE(ICF)%INT_IJK(IAXIS,INPE)
+                  J = CUT_FACE(ICF)%INT_IJK(JAXIS,INPE)
+                  K = CUT_FACE(ICF)%INT_IJK(KAXIS,INPE)
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_FACE) .AND. (I <= IHI_FACE)
+                        FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                        FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  CASE(JAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                        FLGY = (J >= JLO_FACE) .AND. (J <= JHI_FACE)
+                        FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  CASE(KAXIS)
+                     IF (IJKFACE2(LOW_IND,I,J,K,X1AXIS) < 1 ) THEN
+                        FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                        FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                        FLGZ = (K >= KLO_FACE) .AND. (K <= KHI_FACE)
+                        INNM = FLGX .AND. FLGY .AND. FLGZ
+                        IF (INNM) THEN
+                           NOM=NM; IIO=I; JJO=J; KKO=K
+                        ELSE
+                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                        ENDIF
+                        IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                        CALL ASSIGN_TO_FC_R
+                     ENDIF
+                  END SELECT
+                  CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE) = IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS)
+               ENDDO
+               ! Now restrict count on cut-face :
+               IF(ANY(EP_TAG .EQV. .TRUE.)) CALL RESTRICT_EP(.TRUE.)
+               DEALLOCATE(EP_TAG)
+            ENDDO
+         ENDDO
+      ENDDO
    ENDDO
-   DEALLOCATE(IJKFACE2)
 
+   DEALLOCATE(IJKFACE2)
 
    ! Now Cell Variables:
    ALLOCATE(IJKCELL(LOW_IND:HIGH_IND,ISTR:IEND,JSTR:JEND,KSTR:KEND)); IJKCELL = IBM_UNDEFINED
@@ -16096,29 +17490,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ELSE
                CALL SEARCH_OTHER_MESHES(XCELL(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
             ENDIF
-            IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                              ! and add 1 to NFC_R for OMESH(NOM).
-               ! Use Automatic reallocation:
-               OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-               SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
-               IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
-                   ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
-                   IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
-                   JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
-                   KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
-               ENDIF
-               OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
-               OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
-               OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
-               IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
-            ENDIF
+            CALL ASSIGN_TO_CC_R
          ENDIF
          CUT_CELL(ICC)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKCELL(LOW_IND:HIGH_IND,I,J,K)
       ENDDO
@@ -16139,29 +17511,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ELSE
                   CALL SEARCH_OTHER_MESHES(XCELL(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                ENDIF
-               IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                                 ! and add 1 to NFC_R for OMESH(NOM).
-                  ! Use Automatic reallocation:
-                  OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-                  SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
-                  IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
-                      ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
-                      IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
-                      JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
-                      KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
-                      OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
-                      DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
-                  ENDIF
-                  OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
-                  OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
-                  OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
-                  IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
-               ENDIF
+               CALL ASSIGN_TO_CC_R
             ENDIF
             CUT_CELL(ICC)%NOMIND_CCCEN(LOW_IND:HIGH_IND,IPT,JCC) = IJKCELL(LOW_IND:HIGH_IND,I,J,K)
          ENDDO
@@ -16185,31 +17535,46 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ELSE
                CALL SEARCH_OTHER_MESHES(XCELL(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
             ENDIF
-            IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
-                              ! and add 1 to NFC_R for OMESH(NOM).
-               ! Use Automatic reallocation:
-               OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
-               SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
-               IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
-                   ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
-                   IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
-                   JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
-                   KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
-                   OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
-                   DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
-               ENDIF
-               OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
-               OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
-               OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
-               IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
-            ENDIF
+            CALL ASSIGN_TO_CC_R
          ENDIF
          MESHES(NM)%IBM_RCELL_H(IRCELL)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,IPT) = IJKCELL(LOW_IND:HIGH_IND,I,J,K)
+      ENDDO
+   ENDDO
+
+   ! INBOUNDARY cut-faces, cell centered vars:
+   VIND = 0
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+      DO IFACE=1,CUT_FACE(ICF)%NFACE
+         DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+            INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+            INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+            X1AXIS = VIND
+            ALLOCATE(EP_TAG(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)); EP_TAG(:)=.FALSE.
+            DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+               I = CUT_FACE(ICF)%INT_IJK(IAXIS,INPE)
+               J = CUT_FACE(ICF)%INT_IJK(JAXIS,INPE)
+               K = CUT_FACE(ICF)%INT_IJK(KAXIS,INPE)
+               ! If cell not counted yet:
+               IF (IJKCELL(LOW_IND,I,J,K) < 1 ) THEN
+                  FLGX = (I >= ILO_CELL) .AND. (I <= IHI_CELL)
+                  FLGY = (J >= JLO_CELL) .AND. (J <= JHI_CELL)
+                  FLGZ = (K >= KLO_CELL) .AND. (K <= KHI_CELL)
+                  INNM = FLGX .AND. FLGY .AND. FLGZ
+                  IF (INNM) THEN
+                     NOM=NM; IIO=I; JJO=J; KKO=K
+                  ELSE
+                     CALL SEARCH_OTHER_MESHES(XCELL(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                  ENDIF
+                  IF(NOM==0) EP_TAG(INPE) = .TRUE.
+                  CALL ASSIGN_TO_CC_R
+               ENDIF
+               CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE) = IJKCELL(LOW_IND:HIGH_IND,I,J,K)
+            ENDDO
+            ! Now restrict count on cut-face :
+            IF(ANY(EP_TAG .EQV. .TRUE.)) CALL RESTRICT_EP(.TRUE.)
+            DEALLOCATE(EP_TAG)
+         ENDDO
       ENDDO
    ENDDO
 
@@ -16303,8 +17668,472 @@ ENDDO MESHES_LOOP2
 ! Populates OMESH(NOM)% : NFCC_S, IIO_FCC_S, JJO_FCC_S, KKO_FCC_S, AXS_FCC_S
 CALL FILL_IJKO_INTERP_STENCILS
 
+RETURN
+
+CONTAINS
+
+! ------------------------------ RESTRICT_EP ----------------------------------
+
+SUBROUTINE RESTRICT_EP(CFRC_FLG)
+
+LOGICAL, INTENT(IN) :: CFRC_FLG
+
+REAL(EB):: PROD_COEF
+
+! Apply restriction to stencil points with NOM>0:
+ALLOCATE(INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI), &
+         INT_COEF(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI),            &
+         INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI))
+INT_IJK = IBM_UNDEFINED; INT_COEF = 0._EB; INT_NOMIND = IBM_UNDEFINED
+NPE_COUNT = 0
+PROD_COEF= 0._EB
+IF(CFRC_FLG) THEN
+   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+      IF(.NOT.EP_TAG(INPE)) THEN ! Point has a NOM /= 0
+         NPE_COUNT = NPE_COUNT + 1
+         INT_IJK(IAXIS:KAXIS,INT_NPE_LO+NPE_COUNT) = CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,INPE)
+         INT_COEF(INT_NPE_LO+NPE_COUNT) = CUT_FACE(ICF)%INT_COEF(INPE)
+         PROD_COEF = PROD_COEF + INT_COEF(INT_NPE_LO+NPE_COUNT)
+         INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+NPE_COUNT) = &
+         CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE)
+      ENDIF
+   ENDDO
+   CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_COUNT
+
+   IF (NPE_COUNT > 0) &
+   INT_COEF(INT_NPE_LO+1:INT_NPE_LO+NPE_COUNT) = INT_COEF(INT_NPE_LO+1:INT_NPE_LO+NPE_COUNT)/PROD_COEF
+
+   CUT_FACE(ICF)%INT_COEF(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_COEF(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+ELSE
+   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+      IF(.NOT.EP_TAG(INPE)) THEN ! Point has a NOM /= 0
+         NPE_COUNT = NPE_COUNT + 1
+         INT_IJK(IAXIS:KAXIS,INT_NPE_LO+NPE_COUNT) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,INPE)
+         INT_COEF(INT_NPE_LO+NPE_COUNT) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(INPE)
+         PROD_COEF = PROD_COEF + INT_COEF(INT_NPE_LO+NPE_COUNT)
+         INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+NPE_COUNT) = &
+         MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE)
+      ENDIF
+   ENDDO
+   MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_COUNT
+
+   IF (NPE_COUNT > 0) &
+   INT_COEF(INT_NPE_LO+1:INT_NPE_LO+NPE_COUNT) = INT_COEF(INT_NPE_LO+1:INT_NPE_LO+NPE_COUNT)/PROD_COEF
+
+   MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_COEF(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
+   INT_COEF(INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+ENDIF
+
+DEALLOCATE(INT_IJK,INT_NOMIND,INT_COEF)
 
 RETURN
+END SUBROUTINE RESTRICT_EP
+
+! ------------------------------- GET_DELN ------------------------------------
+
+SUBROUTINE GET_DELN(DELN,DXLOC,DYLOC,DZLOC,NVEC)
+
+REAL(EB), INTENT(IN) :: DXLOC,DYLOC,DZLOC
+REAL(EB), OPTIONAL, INTENT(IN) :: NVEC(MAX_DIM)
+REAL(EB), INTENT(OUT) :: DELN
+
+! Local Variables:
+REAL(EB) :: FCTN
+IF (PRESENT(NVEC)) THEN
+   FCTN = 3._EB/2._EB
+   IF( (ABS(NVEC(IAXIS))>GEOMEPS) .AND. (ABS(NVEC(JAXIS))>GEOMEPS) .AND. (ABS(NVEC(KAXIS))>GEOMEPS)) FCTN=SQRT(3._EB)
+   DELN = FCTN*(DXLOC*ABS(NVEC(IAXIS))+DYLOC*ABS(NVEC(JAXIS))+DZLOC*ABS(NVEC(KAXIS)))
+ELSE
+   DELN = SQRT(DXLOC**2._EB+DYLOC**2._EB+DZLOC**2._EB)
+ENDIF
+RETURN
+END SUBROUTINE GET_DELN
+
+! ---------------------------- ASSIGN_TO_CC_R ---------------------------------
+
+SUBROUTINE ASSIGN_TO_CC_R
+
+ IF (NOM > 0) THEN ! Add to IIO_FC_R,JJO_FC_R,KKO_FC_R,AXIS_FC_R list,
+                   ! and add 1 to NFC_R for OMESH(NOM).
+    ! Use Automatic reallocation:
+    OMESH(NOM)%NFCC_R(2)= OMESH(NOM)%NFCC_R(2) + 1
+    SIZE_REC=SIZE(OMESH(NOM)%IIO_CC_R,DIM=1)
+    IF(OMESH(NOM)%NFCC_R(2) > SIZE_REC) THEN
+        ALLOCATE(IIO_CC_R_AUX(SIZE_REC),JJO_CC_R_AUX(SIZE_REC),KKO_CC_R_AUX(SIZE_REC));
+        IIO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_CC_R(1:SIZE_REC)
+        JJO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_CC_R(1:SIZE_REC)
+        KKO_CC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_CC_R(1:SIZE_REC)
+        DEALLOCATE(OMESH(NOM)%IIO_CC_R); ALLOCATE(OMESH(NOM)%IIO_CC_R(SIZE_REC+DELTA_FC))
+        OMESH(NOM)%IIO_CC_R(1:SIZE_REC)=IIO_CC_R_AUX(1:SIZE_REC)
+        DEALLOCATE(OMESH(NOM)%JJO_CC_R); ALLOCATE(OMESH(NOM)%JJO_CC_R(SIZE_REC+DELTA_FC))
+        OMESH(NOM)%JJO_CC_R(1:SIZE_REC)=JJO_CC_R_AUX(1:SIZE_REC)
+        DEALLOCATE(OMESH(NOM)%KKO_CC_R); ALLOCATE(OMESH(NOM)%KKO_CC_R(SIZE_REC+DELTA_FC))
+        OMESH(NOM)%KKO_CC_R(1:SIZE_REC)=KKO_CC_R_AUX(1:SIZE_REC)
+        DEALLOCATE(IIO_CC_R_AUX,JJO_CC_R_AUX,KKO_CC_R_AUX)
+    ENDIF
+    OMESH(NOM)%IIO_CC_R(OMESH(NOM)%NFCC_R(2)) = IIO
+    OMESH(NOM)%JJO_CC_R(OMESH(NOM)%NFCC_R(2)) = JJO
+    OMESH(NOM)%KKO_CC_R(OMESH(NOM)%NFCC_R(2)) = KKO
+    IJKCELL(LOW_IND:HIGH_IND,I,J,K) = (/ NOM, OMESH(NOM)%NFCC_R(2) /)
+ ENDIF
+
+RETURN
+END SUBROUTINE ASSIGN_TO_CC_R
+
+! ---------------------------- ASSIGN_TO_FC_R ---------------------------------
+
+SUBROUTINE ASSIGN_TO_FC_R
+
+IF (NOM > 0) THEN
+   ! Use Automatic reallocation:
+   OMESH(NOM)%NFCC_R(1)= OMESH(NOM)%NFCC_R(1) + 1
+   SIZE_REC=SIZE(OMESH(NOM)%IIO_FC_R,DIM=1)
+   IF(OMESH(NOM)%NFCC_R(1) > SIZE_REC) THEN
+       ALLOCATE(IIO_FC_R_AUX(SIZE_REC),JJO_FC_R_AUX(SIZE_REC),KKO_FC_R_AUX(SIZE_REC));
+       ALLOCATE(AXS_FC_R_AUX(SIZE_REC))
+       IIO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%IIO_FC_R(1:SIZE_REC)
+       JJO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%JJO_FC_R(1:SIZE_REC)
+       KKO_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%KKO_FC_R(1:SIZE_REC)
+       AXS_FC_R_AUX(1:SIZE_REC)=OMESH(NOM)%AXS_FC_R(1:SIZE_REC)
+       DEALLOCATE(OMESH(NOM)%IIO_FC_R); ALLOCATE(OMESH(NOM)%IIO_FC_R(SIZE_REC+DELTA_FC))
+       OMESH(NOM)%IIO_FC_R(1:SIZE_REC)=IIO_FC_R_AUX(1:SIZE_REC)
+       DEALLOCATE(OMESH(NOM)%JJO_FC_R); ALLOCATE(OMESH(NOM)%JJO_FC_R(SIZE_REC+DELTA_FC))
+       OMESH(NOM)%JJO_FC_R(1:SIZE_REC)=JJO_FC_R_AUX(1:SIZE_REC)
+       DEALLOCATE(OMESH(NOM)%KKO_FC_R); ALLOCATE(OMESH(NOM)%KKO_FC_R(SIZE_REC+DELTA_FC))
+       OMESH(NOM)%KKO_FC_R(1:SIZE_REC)=KKO_FC_R_AUX(1:SIZE_REC)
+       DEALLOCATE(OMESH(NOM)%AXS_FC_R); ALLOCATE(OMESH(NOM)%AXS_FC_R(SIZE_REC+DELTA_FC))
+       OMESH(NOM)%AXS_FC_R(1:SIZE_REC)=AXS_FC_R_AUX(1:SIZE_REC)
+       DEALLOCATE(IIO_FC_R_AUX,JJO_FC_R_AUX,KKO_FC_R_AUX,AXS_FC_R_AUX)
+   ENDIF
+   OMESH(NOM)%IIO_FC_R(OMESH(NOM)%NFCC_R(1)) = IIO
+   OMESH(NOM)%JJO_FC_R(OMESH(NOM)%NFCC_R(1)) = JJO
+   OMESH(NOM)%KKO_FC_R(OMESH(NOM)%NFCC_R(1)) = KKO
+   OMESH(NOM)%AXS_FC_R(OMESH(NOM)%NFCC_R(1)) = X1AXIS
+   IJKFACE2(LOW_IND:HIGH_IND,I,J,K,X1AXIS) = (/ NOM, OMESH(NOM)%NFCC_R(1) /)
+ENDIF
+
+RETURN
+END SUBROUTINE ASSIGN_TO_FC_R
+
+! ---------------------------- GET_INTSTENCILS_EP -------------------------------
+
+SUBROUTINE GET_INTSTENCILS_EP(MASK_FLG,VIND,XYZ_PP,INTXN,NVEC,NPE_LIST_START,NPE_LIST_COUNT,&
+INT_IJK,INT_COEF)
+
+! This routine provides a set of interpolation points for an external normal point EP,
+! located at position XYZE(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS) + INTXN*NVEC(IAXIS:KAXIS):
+! The points will be face centered when:
+!     VIND = IAXIS => X faces
+!            JAXIS => Y faces
+!            KAXIS => Z faces
+! And cell centered when VIND = 0.
+! The number of interpolation points is provided in variable NPE_LIST_COUNT.
+! The IJK indexes on mesh of these points is defined in:
+! INT_IJK(IAXIS:KAXIS,NPE_LIST_START+1:NPE_LIST_START+NPE_LIST_COUNT)
+! INT_COEF(NPE_LIST_START+1:NPE_LIST_START+NPE_LIST_COUNT)
+
+LOGICAL, INTENT(IN) :: MASK_FLG
+INTEGER, INTENT(IN) :: VIND,NPE_LIST_START
+INTEGER, INTENT(OUT):: NPE_LIST_COUNT
+REAL(EB),INTENT(IN) :: XYZ_PP(IAXIS:KAXIS), NVEC(IAXIS:KAXIS), INTXN
+INTEGER, INTENT(INOUT), ALLOCATABLE, DIMENSION(:,:) :: INT_IJK
+REAL(EB), INTENT(INOUT),ALLOCATABLE, DIMENSION(:)   :: INT_COEF
+
+
+! Local variables:
+REAL(EB) :: XYZE(IAXIS:KAXIS)
+LOGICAL  :: IS_FACE_X,IS_FACE_Y,IS_FACE_Z
+INTEGER  :: INDX,INDY,INDZ,DIM_NPE,ILO,IHI,JLO,JHI,KLO,KHI,ILO_2,IHI_2,JLO_2,JHI_2,KLO_2,KHI_2
+INTEGER  :: II,JJ,KK,DUMAXIS,COUNT
+INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: MASK_IJK
+REAL(EB),ALLOCATABLE, DIMENSION(:,:,:) :: RAW_COEF
+REAL(EB) :: XYZ_LOHI(LOW_IND:HIGH_IND,IAXIS:KAXIS),X_P(IAXIS:KAXIS),RED_COEF
+
+! Default number of interpolation stencil points:
+NPE_LIST_COUNT = 0
+
+! Define external point:
+XYZE(IAXIS:KAXIS) = XYZ_PP(IAXIS:KAXIS) + INTXN*NVEC(IAXIS:KAXIS)
+
+! Find closest point on mesh NM to point:
+IS_FACE_X=.FALSE.;IS_FACE_Y=.FALSE.;IS_FACE_Z=.FALSE.
+IF(VIND==IAXIS) IS_FACE_X=.TRUE.
+IF(VIND==JAXIS) IS_FACE_Y=.TRUE.
+IF(VIND==KAXIS) IS_FACE_Z=.TRUE.
+CALL GET_X_IND(XYZE,IS_FACE_X,INDX)
+CALL GET_Y_IND(XYZE,IS_FACE_Y,INDY)
+CALL GET_Z_IND(XYZE,IS_FACE_Z,INDZ)
+
+IF(INDX == INDEX_UNDEFINED) RETURN
+IF(INDY == INDEX_UNDEFINED) RETURN
+IF(INDZ == INDEX_UNDEFINED) RETURN
+
+! Define stencil points:
+DIM_NPE = SIZE(INT_IJK, DIM=2)
+IF(NPE_LIST_START+MAX_INTERP_POINTS > DIM_NPE) THEN ! Reallocate size of INT_IJK, INT_COEF
+   ALLOCATE(INT_IJK_AUX(IAXIS:KAXIS,DIM_NPE),INT_COEF_AUX(1:DIM_NPE))
+   INT_IJK_AUX(IAXIS:KAXIS,1:DIM_NPE) = INT_IJK(IAXIS:KAXIS,1:DIM_NPE)
+   INT_COEF_AUX(1:DIM_NPE)          = INT_COEF(1:DIM_NPE)
+   DEALLOCATE(INT_IJK, INT_COEF)
+   ALLOCATE(INT_IJK(IAXIS:KAXIS,NPE_LIST_START+MAX_INTERP_POINTS+DELTA_VERT)); INT_IJK = IBM_UNDEFINED
+   ALLOCATE(INT_COEF(1:NPE_LIST_START+MAX_INTERP_POINTS+DELTA_VERT)); INT_COEF = 0._EB
+   INT_IJK(IAXIS:KAXIS,1:DIM_NPE) = INT_IJK_AUX(IAXIS:KAXIS,1:DIM_NPE)
+   INT_COEF(1:DIM_NPE)          = INT_COEF_AUX(1:DIM_NPE)
+   DEALLOCATE(INT_IJK_AUX,INT_COEF_AUX)
+ENDIF
+
+! Linear interpolation bounds:
+ILO = INDX-1;  IHI = INDX
+JLO = INDY-1;  JHI = INDY
+KLO = INDZ-1;  KHI = INDZ
+! Other interpolation bounds:
+IF (STENCIL_INTERPOLATION /= IBM_LINEAR_INTERPOLATION) THEN ! Either QUADRATIC_INTERPOLATION,WLS_INTERPOLATION.
+   ILO_2 = ILO_CELL; IHI_2 = IHI_CELL
+   JLO_2 = JLO_CELL; JHI_2 = JHI_CELL
+   KLO_2 = KLO_CELL; KHI_2 = KHI_CELL
+   SELECT CASE(VIND)
+   CASE(IAXIS)
+      ILO_2 = ILO_FACE; IHI_2 = IHI_FACE
+   CASE(JAXIS)
+      JLO_2 = JLO_FACE; JHI_2 = JHI_FACE
+   CASE(KAXIS)
+      KLO_2 = KLO_FACE; KHI_2 = KHI_FACE
+   END SELECT
+   IF(IHI == IHI_2+NGUARD ) THEN
+      ILO = ILO - 1
+   ELSEIF(ILO >= ILO_2-NGUARD ) THEN
+      IHI = IHI + 1
+   ENDIF
+   IF(JHI == JHI_2+NGUARD ) THEN
+      JLO = JLO - 1
+   ELSEIF(JLO >= JLO_2-NGUARD ) THEN
+      JHI = JHI + 1
+   ENDIF
+   IF(KHI == KHI_2+NGUARD ) THEN
+      KLO = KLO - 1
+   ELSEIF(KLO >= KLO_2-NGUARD ) THEN
+      KHI = KHI + 1
+   ENDIF
+
+ENDIF
+
+! Allocate stencil Allocatable arrays:
+ALLOCATE(MASK_IJK(ILO:IHI,JLO:JHI,KLO:KHI)); MASK_IJK=0;
+ALLOCATE(RAW_COEF(ILO:IHI,JLO:JHI,KLO:KHI)); RAW_COEF=0._EB;
+
+! Add collocation points to interpolation stencil:
+! Face vars:
+IF(VIND > 0) THEN
+   IF (MASK_FLG) THEN
+      DO KK = KLO,KHI
+         DO JJ = JLO,JHI
+            DO II = ILO,IHI
+               IF(FCVAR(II,JJ,KK,IBM_FFNF,VIND) /= IBM_GASPHASE) CYCLE ! Cycle if facevar is masked by IBM_FFNF.
+               NPE_LIST_COUNT = NPE_LIST_COUNT + 1
+               INT_IJK(IAXIS:KAXIS,NPE_LIST_START+NPE_LIST_COUNT) = (/ II, JJ, KK /)
+               ! Coeff computation left for the end.
+               MASK_IJK(II,JJ,KK) = 1
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE
+      DO KK = KLO,KHI
+         DO JJ = JLO,JHI
+            DO II = ILO,IHI
+               IF(FCVAR(II,JJ,KK,IBM_FGSC,VIND) /= IBM_GASPHASE) CYCLE ! Cycle solid and cut-faces.
+               NPE_LIST_COUNT = NPE_LIST_COUNT + 1
+               INT_IJK(IAXIS:KAXIS,NPE_LIST_START+NPE_LIST_COUNT) = (/ II, JJ, KK /)
+               ! Coeff computation left for the end.
+               MASK_IJK(II,JJ,KK) = 1
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF ! MASK_FLG
+ELSE ! Centered vars:
+   DO KK = KLO,KHI
+      DO JJ = JLO,JHI
+         DO II = ILO,IHI
+            IF(CCVAR(II,JJ,KK,IBM_CGSC) /= IBM_GASPHASE) CYCLE ! Cycle solid and cut-faces.
+            NPE_LIST_COUNT = NPE_LIST_COUNT + 1
+            INT_IJK(IAXIS:KAXIS,NPE_LIST_START+NPE_LIST_COUNT) = (/ II, JJ, KK /)
+            ! Coeff computation left for the end.
+            MASK_IJK(II,JJ,KK) = 1
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+! If NPE_LIST_COUNT == 0 return. Will use boundary value only on interpolated face:
+IF (NPE_LIST_COUNT == 0) THEN
+   DEALLOCATE(MASK_IJK,RAW_COEF)
+   RETURN
+ENDIF
+
+
+! At this point we have the interpolation stencil points for EP and VIND mesh.
+! Regarding the interpolation type chosen produce the interpolation coefficients in INT_COEFF.
+! Define Bounding Box of the Stencil:
+IF(VIND==IAXIS) THEN
+   XYZ_LOHI(LOW_IND:HIGH_IND,IAXIS) = (/ XFACE(ILO), XFACE(IHI) /)
+ELSE
+   XYZ_LOHI(LOW_IND:HIGH_IND,IAXIS) = (/ XCELL(ILO), XCELL(IHI) /)
+ENDIF
+IF(VIND==JAXIS) THEN
+   XYZ_LOHI(LOW_IND:HIGH_IND,JAXIS) = (/ YFACE(JLO), YFACE(JHI) /)
+ELSE
+   XYZ_LOHI(LOW_IND:HIGH_IND,JAXIS) = (/ YCELL(JLO), YCELL(JHI) /)
+ENDIF
+IF(VIND==KAXIS) THEN
+   XYZ_LOHI(LOW_IND:HIGH_IND,KAXIS) = (/ ZFACE(KLO), ZFACE(KHI) /)
+ELSE
+   XYZ_LOHI(LOW_IND:HIGH_IND,KAXIS) = (/ ZCELL(KLO), ZCELL(KHI) /)
+ENDIF
+
+! Masked Trilinear interpolation coefficients:
+IF (STENCIL_INTERPOLATION == IBM_LINEAR_INTERPOLATION) THEN
+   DO DUMAXIS=IAXIS,KAXIS
+      X_P(DUMAXIS) = (XYZE(DUMAXIS)-XYZ_LOHI(LOW_IND,DUMAXIS))/(XYZ_LOHI(HIGH_IND,DUMAXIS)-XYZ_LOHI(LOW_IND,DUMAXIS))
+   ENDDO
+   ! Masked trilinear interpolation:
+   DO KK = KLO,KHI
+      DO JJ = JLO,JHI
+         DO II = ILO,IHI
+            RAW_COEF(II,JJ,KK) = (REAL(II-ILO,EB)*X_P(IAXIS)+REAL(IHI-II,EB)*(1._EB-X_P(IAXIS))) * &
+                                 (REAL(JJ-JLO,EB)*X_P(JAXIS)+REAL(JHI-JJ,EB)*(1._EB-X_P(JAXIS))) * &
+                                 (REAL(KK-KLO,EB)*X_P(KAXIS)+REAL(KHI-KK,EB)*(1._EB-X_P(KAXIS)))
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Rescale remaining coefficients:
+   RED_COEF = 0._EB
+   DO KK = KLO,KHI
+      DO JJ = JLO,JHI
+         DO II = ILO,IHI
+            IF (MASK_IJK(II,JJ,KK) == 1) RED_COEF = RED_COEF + RAW_COEF(II,JJ,KK)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO KK = KLO,KHI
+      DO JJ = JLO,JHI
+         DO II = ILO,IHI
+            IF (MASK_IJK(II,JJ,KK) == 1) THEN
+               RAW_COEF(II,JJ,KK) = RAW_COEF(II,JJ,KK)/RED_COEF
+            ELSE
+               RAW_COEF(II,JJ,KK) = 0._EB
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Finally add coefficients to INT_COEF:
+   COUNT = 0
+   DO KK = KLO,KHI
+      DO JJ = JLO,JHI
+         DO II = ILO,IHI
+            IF(MASK_IJK(II,JJ,KK) == 1) THEN
+               COUNT = COUNT + 1
+               INT_COEF(NPE_LIST_START+COUNT) = RAW_COEF(II,JJ,KK)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+   DEALLOCATE(MASK_IJK,RAW_COEF)
+   RETURN
+ENDIF
+
+! Other interpolation schemes:
+! To do.
+
+DEALLOCATE(MASK_IJK,RAW_COEF)
+RETURN
+END SUBROUTINE GET_INTSTENCILS_EP
+
+SUBROUTINE GET_X_IND(XYZE,IS_FACE,INDX)
+REAL(EB),INTENT(IN) :: XYZE(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: IS_FACE
+INTEGER, INTENT(OUT):: INDX
+INTEGER :: IEP
+INDX = INDEX_UNDEFINED
+IF (IS_FACE) THEN ! X face.
+   IF(XYZE(IAXIS) >= XFACE(ILO_FACE-NGUARD)) THEN
+      DO IEP=ILO_FACE-CCGUARD,IHI_FACE+CCGUARD
+         IF (XYZE(IAXIS)+GEOFCT*GEOMEPS < XFACE(IEP)) THEN ! First X index that XYZ(IAXIS) is smaller.
+            INDX = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ELSE ! X center.
+   IF(XYZE(IAXIS) >= XCELL(ILO_CELL-NGUARD)) THEN
+      DO IEP=ILO_CELL-CCGUARD,IHI_CELL+CCGUARD
+         IF (XYZE(IAXIS)+GEOFCT*GEOMEPS < XCELL(IEP)) THEN ! First X index that XYZ(IAXIS) is smaller.
+            INDX = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ENDIF
+END SUBROUTINE GET_X_IND
+
+SUBROUTINE GET_Y_IND(XYZE,IS_FACE,INDY)
+REAL(EB),INTENT(IN) :: XYZE(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: IS_FACE
+INTEGER, INTENT(OUT):: INDY
+INTEGER :: IEP
+INDY = INDEX_UNDEFINED
+IF (IS_FACE) THEN ! Y face.
+   IF(XYZE(JAXIS) >= YFACE(JLO_FACE-NGUARD)) THEN
+      DO IEP=JLO_FACE-CCGUARD,JHI_FACE+CCGUARD
+         IF (XYZE(JAXIS)+GEOFCT*GEOMEPS < YFACE(IEP)) THEN ! First Y index that XYZ(JAXIS) is smaller.
+            INDY = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ELSE ! Y center.
+   IF(XYZE(JAXIS) >= YCELL(JLO_CELL-NGUARD)) THEN
+      DO IEP=JLO_CELL-CCGUARD,JHI_CELL+CCGUARD
+         IF (XYZE(JAXIS)+GEOFCT*GEOMEPS < YCELL(IEP)) THEN ! First Y index that XYZ(JAXIS) is smaller.
+            INDY = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ENDIF
+END SUBROUTINE GET_Y_IND
+
+SUBROUTINE GET_Z_IND(XYZE,IS_FACE,INDZ)
+REAL(EB),INTENT(IN) :: XYZE(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: IS_FACE
+INTEGER, INTENT(OUT):: INDZ
+INTEGER :: IEP
+INDZ = INDEX_UNDEFINED
+IF (IS_FACE) THEN ! Z face.
+   IF(XYZE(KAXIS) >= ZFACE(KLO_FACE-NGUARD)) THEN
+      DO IEP=KLO_FACE-CCGUARD,KHI_FACE+CCGUARD
+         IF (XYZE(KAXIS)+GEOFCT*GEOMEPS < ZFACE(IEP)) THEN ! First Z index that XYZ(KAXIS) is smaller.
+            INDZ = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ELSE ! Z center.
+   IF(XYZE(KAXIS) >= ZCELL(KLO_CELL-NGUARD)) THEN
+      DO IEP=KLO_CELL-CCGUARD,KHI_CELL+CCGUARD
+         IF (XYZE(KAXIS)+GEOFCT*GEOMEPS < ZCELL(IEP)) THEN ! First Z index that XYZ(KAXIS) is smaller.
+            INDZ = IEP; RETURN
+         ENDIF
+      ENDDO
+   ENDIF
+ENDIF
+END SUBROUTINE GET_Z_IND
+
+
 END SUBROUTINE GET_CRTCFCC_INTERPOLATION_STENCILS
 
 
@@ -16538,6 +18367,9 @@ CASE(KAXIS)
    ENDDO OTHER_MESH_LOOP_Z
 END SELECT
 
+IIO = 0
+JJO = 0
+KKO = 0
 NOM = 0
 
 END SUBROUTINE SEARCH_OTHER_MESHES_FACE
@@ -25403,7 +27235,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    CALL GET_CARTCELL_CUTCELLS(NM)
 
    ! Define CELL_COUNT_CC(NM), N_EDGES_DIM_CC(1:2,NM), reallocate and populate FDS egde and cell topology variables
-   IF ( (NM>=LOWER_MESH_INDEX) .AND. (NM<=UPPER_MESH_INDEX) ) CALL GET_REGULAR_CUTCELL_EDGES_BC(NM)
+   ! IF ( (NM>=LOWER_MESH_INDEX) .AND. (NM<=UPPER_MESH_INDEX) ) CALL GET_REGULAR_CUTCELL_EDGES_BC(NM)
 
    ! Deallocate arrays:
    ! Face centered positions and cell sizes:
@@ -25807,630 +27639,630 @@ CONTAINS
 
 ! --------------------- GET_REGULAR_CUTCELL_EDGES_BC --------------------------------
 
-SUBROUTINE GET_REGULAR_CUTCELL_EDGES_BC(NM)
-
-! This routine adds to FDS edge arrays OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR
-! the sum of regular edges that contain at least a neighboring IBM_CUTCFE cell and
-! two IBM_GASPHASE CELLS. All neighboring IBM_GASPHASE cells are added to CELL_COUNT_CC(NM).
-
-INTEGER, INTENT(IN) :: NM
-
-! Local variables:
-INTEGER :: ECOUNT, IBM_ECOUNT, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD
-LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CELL_ADDED
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TAU_E_AUX,OME_E_AUX,EDGE_INT_AUX,UVW_GHOST_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKE_AUX,EDGE_INDEX_AUX,WALL_INDEX_AUX,WALL_INDEX_HT3D_AUX
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: SOLID_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:) :: I_CELL_AUX,J_CELL_AUX,K_CELL_AUX,OBST_INDEX_C_AUX
-INTEGER :: ICMM,ICPM,ICPP,ICMP
-INTEGER :: IDUM,IOR,IW1,IW2
-INTEGER, PARAMETER :: IAXIS_WALL_INDS(1:4) = (/ -3, -2, 2, 3 /)
-INTEGER, PARAMETER :: JAXIS_WALL_INDS(1:4) = (/ -3, -1, 1, 3 /)
-INTEGER, PARAMETER :: KAXIS_WALL_INDS(1:4) = (/ -2, -1, 1, 2 /)
-
-! GET_CUTCELLS_VERBOSE variables:
-REAL(EB) :: CPUTIME, CPUTIME_START
-
-#ifdef DEBUG_SET_CUTCELLS
-CHARACTER(100) :: MSEGS_FILE
-IF (NM>=LOWER_MESH_INDEX .AND. NM<=UPPER_MESH_INDEX) THEN
-   ! Write out:
-   WRITE(MSEGS_FILE,'(A,A,I4.4,A)') TRIM(CHID),'_rcsegs_mesh_',NM,'.dat'
-   OPEN(333,FILE=TRIM(MSEGS_FILE),STATUS='UNKNOWN')
-   CLOSE(333)
-ENDIF
-#endif
-
-! Return if nothing to do for the mesh:
-IF(MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH == 0) RETURN
-
-IF (GET_CUTCELLS_VERBOSE) THEN
-   CALL CPU_TIME(CPUTIME_START)
-   WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating     REGULAR_CUTCELL_EDGES_BC for mesh :',NM,' ..'
-   IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating     REGULAR_CUTCELL_EDGES_BC for mesh :',NM,' ..'
-ENDIF
-
-ALLOCATE(CELL_ADDED(0:IBP1,0:JBP1,0:KBP1)); CELL_ADDED = .FALSE.
-
-! Now count added edge number for mesh N_EDGES_DIM_CC(2,NM), and added non zero cell indexes for mesh
-! CELL_COUNT_CC(NM).
-ECOUNT = 0; IBM_ECOUNT=0
-CCOUNT = 0;
-
-! X axis edges:
-DO K=0,KBAR
-   DO J=0,JBAR
-      IX_LOOP_1 : DO I=1,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,IAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO KADD=0,1
-            DO JADD=0,1
-               IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
-            IE = MESHES(NM)%EDGE_INDEX(4,CELL_INDEX(I,J,K)) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT:
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1
-               ! See if we need to add to CCOUNT any neighboring cells:
-               DO KADD=0,1
-                  DO JADD=0,1
-                  IF(CELL_INDEX(I     ,J+JADD,K+KADD)==0 .AND. .NOT.CELL_ADDED(I     ,J+JADD,K+KADD)) THEN
-                     CCOUNT = CCOUNT + 1
-                     CELL_ADDED(I     ,J+JADD,K+KADD) = .TRUE.
-                  ENDIF
-                  ENDDO
-               ENDDO
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=IAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 2)
-                     CASE( 2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-2)
-                     CASE(-3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 3)
-                     CASE( 3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-3)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_1
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_1
-                  ENDIF
-               ENDDO
-            ENDIF
-            IBM_ECOUNT = IBM_ECOUNT + 1
-         ENDIF
-      ENDDO IX_LOOP_1
-   ENDDO
-ENDDO
-
-! Y axis edges:
-DO K=0,KBAR
-   DO J=1,JBAR
-      IY_LOOP_1 : DO I=0,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,JAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO KADD=0,1
-            DO IADD=0,1
-               IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
-            IE = MESHES(NM)%EDGE_INDEX(8,CELL_INDEX(I,J,K)) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT:
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1
-               ! See if we need to add to CCOUNT any neighboring cells:
-               DO KADD=0,1
-                  DO IADD=0,1
-                  IF(CELL_INDEX(I+IADD,J     ,K+KADD)==0 .AND. .NOT.CELL_ADDED(I+IADD,J     ,K+KADD)) THEN
-                     CCOUNT = CCOUNT + 1
-                     CELL_ADDED(I+IADD,J     ,K+KADD) = .TRUE.
-                  ENDIF
-                  ENDDO
-               ENDDO
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=JAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 1)
-                     CASE( 1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-1)
-                     CASE(-3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 3)
-                     CASE( 3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-3)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_1
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_1
-                  ENDIF
-               ENDDO
-            ENDIF
-            IBM_ECOUNT = IBM_ECOUNT + 1
-         ENDIF
-      ENDDO IY_LOOP_1
-   ENDDO
-ENDDO
-
-! Z axis edges:
-DO K=1,KBAR
-   DO J=0,JBAR
-      IZ_LOOP_1 : DO I=0,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,KAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO JADD=0,1
-            DO IADD=0,1
-               IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
-            IE = MESHES(NM)%EDGE_INDEX(12,CELL_INDEX(I,J,K)) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT:
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1
-               ! See if we need to add to CCOUNT any neighboring cells:
-               DO JADD=0,1
-                  DO IADD=0,1
-                  IF(CELL_INDEX(I+IADD,J+JADD,K     )==0 .AND. .NOT.CELL_ADDED(I+IADD,J+JADD,K     )) THEN
-                     CCOUNT = CCOUNT + 1
-                     CELL_ADDED(I+IADD,J+JADD,K     ) = .TRUE.
-                  ENDIF
-                  ENDDO
-               ENDDO
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=KAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 1)
-                     CASE( 1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-1)
-                     CASE(-2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 2)
-                     CASE( 2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-2)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_1
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_1
-                  ENDIF
-               ENDDO
-            ENDIF
-            IBM_ECOUNT = IBM_ECOUNT + 1
-         ENDIF
-      ENDDO IZ_LOOP_1
-   ENDDO
-ENDDO
-
-IF (IBM_ECOUNT==0) THEN
-   DEALLOCATE(CELL_ADDED)
-   RETURN
-ENDIF
-
-! Allocate IBM_RCEDGE:
-MESHES(NM)%IBM_NRCEDGE = IBM_ECOUNT
-ALLOCATE(MESHES(NM)%IBM_RCEDGE(1:IBM_ECOUNT))
-
-! Reallocate edge variables OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR:
-IF (ECOUNT > 0) THEN
-   ! N_EDGES_DIM_CC(1:2,NM)
-   N_EDGES_DIM_CC(1,NM) = SIZE(MESHES(NM)%IJKE, DIM=2)
-   N_EDGES_DIM_CC(2,NM) = ECOUNT
-
-   ! OME_E, TAU_E:
-   ALLOCATE(OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)),TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)))
-   OME_E_AUX(:,:) = MESHES(NM)%OME_E(:,:)
-   DEALLOCATE(MESHES(NM)%OME_E); ALLOCATE(MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%OME_E = -1.E6_EB
-   MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-
-   TAU_E_AUX(:,:) = MESHES(NM)%TAU_E(:,:)
-   DEALLOCATE(MESHES(NM)%TAU_E); ALLOCATE(MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%TAU_E = -1.E6_EB
-   MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(OME_E_AUX, TAU_E_AUX)
-
-   ! IJKE, EDGE_INTERPOLATION_FACTOR:
-   ALLOCATE(IJKE_AUX(16,N_EDGES_DIM_CC(1,NM))); IJKE_AUX(:,:) = MESHES(NM)%IJKE(:,:)
-   DEALLOCATE(MESHES(NM)%IJKE); ALLOCATE(MESHES(NM)%IJKE(16,N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
-   MESHES(NM)%IJKE = 0; MESHES(NM)%IJKE(1:16,1:N_EDGES_DIM_CC(1,NM)) = IJKE_AUX(1:16,1:N_EDGES_DIM_CC(1,NM))
-   DEALLOCATE(IJKE_AUX)
-
-   ALLOCATE(EDGE_INT_AUX(N_EDGES_DIM_CC(1,NM),2));
-   EDGE_INT_AUX(:,:) = MESHES(NM)%EDGE_INTERPOLATION_FACTOR(:,:)
-   DEALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR);
-   ALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM),2))
-   MESHES(NM)%EDGE_INTERPOLATION_FACTOR = 1._EB
-   MESHES(NM)%EDGE_INTERPOLATION_FACTOR(1:N_EDGES_DIM_CC(1,NM),1:2) = EDGE_INT_AUX(1:N_EDGES_DIM_CC(1,NM),1:2)
-   DEALLOCATE(EDGE_INT_AUX)
-ENDIF
-
-! Reallocate cell indexing vars SOLID, OBST_INDEX_C, WALL_INDEX, WALL_INDEX_HT3D, EDGE_INDEX, UVW_GHOST,
-! I_CELL, J_CELL, K_CELL:
-IF (CCOUNT > 0) THEN
-   ! CELL_COUNT_CC(NM):
-   CELL_COUNT_CC(NM) = CCOUNT
-
-   ! SOLID:
-   ALLOCATE(SOLID_AUX(0:CELL_COUNT(NM))); SOLID_AUX(:)=MESHES(NM)%SOLID(:)
-   DEALLOCATE(MESHES(NM)%SOLID); ALLOCATE(MESHES(NM)%SOLID(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM)));
-   MESHES(NM)%SOLID = .FALSE.; MESHES(NM)%SOLID(0:CELL_COUNT(NM))=SOLID_AUX(0:CELL_COUNT(NM))
-   DEALLOCATE(SOLID_AUX)
-
-   ! WALL_INDEX, WALL_INDEX_HT3D, EDGE_INDEX, UVW_GHOST:
-   ALLOCATE(WALL_INDEX_AUX(0:CELL_COUNT(NM),-3:3)); WALL_INDEX_AUX(:,:) = MESHES(NM)%WALL_INDEX(:,:)
-   ALLOCATE(WALL_INDEX_HT3D_AUX(0:CELL_COUNT(NM),-3:3)); WALL_INDEX_HT3D_AUX(:,:) = MESHES(NM)%WALL_INDEX_HT3D(:,:)
-   ALLOCATE(EDGE_INDEX_AUX(1:12,0:CELL_COUNT(NM))); EDGE_INDEX_AUX(:,:) = MESHES(NM)%EDGE_INDEX(:,:)
-   DEALLOCATE(MESHES(NM)%WALL_INDEX, MESHES(NM)%WALL_INDEX_HT3D, MESHES(NM)%EDGE_INDEX)
-   ALLOCATE(MESHES(NM)%WALL_INDEX(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),-3:3)); MESHES(NM)%WALL_INDEX = 0
-   ALLOCATE(MESHES(NM)%WALL_INDEX_HT3D(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),-3:3)); MESHES(NM)%WALL_INDEX_HT3D = 0
-   ALLOCATE(MESHES(NM)%EDGE_INDEX(1:12,0:CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%EDGE_INDEX = 0
-   MESHES(NM)%WALL_INDEX(0:CELL_COUNT(NM),-3:3) = WALL_INDEX_AUX(0:CELL_COUNT(NM),-3:3)
-   MESHES(NM)%WALL_INDEX_HT3D(0:CELL_COUNT(NM),-3:3) = WALL_INDEX_HT3D_AUX(0:CELL_COUNT(NM),-3:3)
-   MESHES(NM)%EDGE_INDEX(1:12,0:CELL_COUNT(NM)) = EDGE_INDEX_AUX(1:12,0:CELL_COUNT(NM))
-   DEALLOCATE(WALL_INDEX_AUX, WALL_INDEX_HT3D_AUX, EDGE_INDEX_AUX)
-
-   ALLOCATE(UVW_GHOST_AUX(0:CELL_COUNT(NM),3)); UVW_GHOST_AUX(:,:) = MESHES(NM)%UVW_GHOST(:,:)
-   DEALLOCATE(MESHES(NM)%UVW_GHOST); ALLOCATE(MESHES(NM)%UVW_GHOST(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),3))
-   MESHES(NM)%UVW_GHOST(:,1)=U0
-   MESHES(NM)%UVW_GHOST(:,2)=V0
-   MESHES(NM)%UVW_GHOST(:,3)=W0
-   MESHES(NM)%UVW_GHOST(0:CELL_COUNT(NM),1:3) = UVW_GHOST_AUX(0:CELL_COUNT(NM),1:3)
-   DEALLOCATE(UVW_GHOST_AUX)
-
-   ! I_CELL, J_CELL, K_CELL, OBST_INDEX_C:
-   ALLOCATE(I_CELL_AUX(CELL_COUNT(NM)),J_CELL_AUX(CELL_COUNT(NM)),K_CELL_AUX(CELL_COUNT(NM)))
-   I_CELL_AUX(:) = MESHES(NM)%I_CELL(:); J_CELL_AUX(:) = MESHES(NM)%J_CELL(:); K_CELL_AUX(:) = MESHES(NM)%K_CELL(:)
-   ALLOCATE(OBST_INDEX_C_AUX(0:CELL_COUNT(NM))); OBST_INDEX_C_AUX(:) = MESHES(NM)%OBST_INDEX_C(:)
-   DEALLOCATE(MESHES(NM)%I_CELL,MESHES(NM)%J_CELL,MESHES(NM)%K_CELL,MESHES(NM)%OBST_INDEX_C)
-   ALLOCATE(MESHES(NM)%I_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%I_CELL = -1
-   ALLOCATE(MESHES(NM)%J_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%J_CELL = -1
-   ALLOCATE(MESHES(NM)%K_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%K_CELL = -1
-   ALLOCATE(MESHES(NM)%OBST_INDEX_C(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%OBST_INDEX_C = 0
-   MESHES(NM)%I_CELL(1:CELL_COUNT(NM)) = I_CELL_AUX(1:CELL_COUNT(NM))
-   MESHES(NM)%J_CELL(1:CELL_COUNT(NM)) = J_CELL_AUX(1:CELL_COUNT(NM))
-   MESHES(NM)%K_CELL(1:CELL_COUNT(NM)) = K_CELL_AUX(1:CELL_COUNT(NM))
-   MESHES(NM)%OBST_INDEX_C(0:CELL_COUNT(NM)) = OBST_INDEX_C_AUX(0:CELL_COUNT(NM))
-   DEALLOCATE(I_CELL_AUX,J_CELL_AUX,K_CELL_AUX,OBST_INDEX_C_AUX)
-
-ENDIF
-
-
-! Finally repeat search process and assign edge and cell values to cut-cell region entities:
-ECOUNT = N_EDGES_DIM_CC(1,NM); IBM_ECOUNT=0
-CCOUNT = CELL_COUNT(NM);
-
-! X axis edges:
-DO K=0,KBAR
-   DO J=0,JBAR
-      IX_LOOP_2 : DO I=1,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,IAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO KADD=0,1
-            DO JADD=0,1
-               IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells, NEW edge to force.
-            IE = MESHES(NM)%EDGE_INDEX(4,CELL_INDEX(I,J,K)) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
-               DO KADD=0,1
-                  DO JADD=0,1
-                     IF(MESHES(NM)%CELL_INDEX(I     ,J+JADD,K+KADD)==0) THEN ! Add cell to CELL_INDEX
-                        CCOUNT = CCOUNT + 1
-                        MESHES(NM)%CELL_INDEX(I     ,J+JADD,K+KADD) = CCOUNT
-                        MESHES(NM)%I_CELL(CCOUNT)=I
-                        MESHES(NM)%J_CELL(CCOUNT)=J+JADD
-                        MESHES(NM)%K_CELL(CCOUNT)=K+KADD
-                     ENDIF
-                  ENDDO
-               ENDDO
-               ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
-               ICPM = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
-               ICPP = MESHES(NM)%CELL_INDEX(I  ,J+1,K+1)
-               ICMP = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, IAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
-               MESHES(NM)%EDGE_INDEX(1,ICPP) = IE
-               MESHES(NM)%EDGE_INDEX(2,ICMP) = IE
-               MESHES(NM)%EDGE_INDEX(3,ICPM) = IE
-               MESHES(NM)%EDGE_INDEX(4,ICMM) = IE
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=IAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 2)
-                     CASE( 2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-2)
-                     CASE(-3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 3)
-                     CASE( 3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-3)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_2
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_2
-                  ENDIF
-               ENDDO
-            ENDIF
-
-            IBM_ECOUNT = IBM_ECOUNT + 1
-
-            ! Add info to IBM_RCEDGE:
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
-
-         ENDIF
-      ENDDO IX_LOOP_2
-   ENDDO
-ENDDO
-
-! Y axis edges:
-DO K=0,KBAR
-   DO J=1,JBAR
-      IY_LOOP_2 : DO I=0,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,JAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO KADD=0,1
-            DO IADD=0,1
-               IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
-            IE = MESHES(NM)%EDGE_INDEX(8,CELL_INDEX(I,J,K)) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
-               DO KADD=0,1
-                  DO IADD=0,1
-                     IF(MESHES(NM)%CELL_INDEX(I+IADD,J     ,K+KADD)==0) THEN ! Add cell to CELL_INDEX
-                        CCOUNT = CCOUNT + 1
-                        MESHES(NM)%CELL_INDEX(I+IADD,J     ,K+KADD) = CCOUNT
-                        MESHES(NM)%I_CELL(CCOUNT)=I+IADD
-                        MESHES(NM)%J_CELL(CCOUNT)=J
-                        MESHES(NM)%K_CELL(CCOUNT)=K+KADD
-                     ENDIF
-                  ENDDO
-               ENDDO
-               ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
-               ICMP = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
-               ICPP = MESHES(NM)%CELL_INDEX(I+1,J  ,K+1)
-               ICPM = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, JAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
-               MESHES(NM)%EDGE_INDEX(5,ICPP) = IE
-               MESHES(NM)%EDGE_INDEX(6,ICPM) = IE
-               MESHES(NM)%EDGE_INDEX(7,ICMP) = IE
-               MESHES(NM)%EDGE_INDEX(8,ICMM) = IE
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=JAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 1)
-                     CASE( 1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-1)
-                     CASE(-3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 3)
-                     CASE( 3)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-3)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_2
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_2
-                  ENDIF
-               ENDDO
-            ENDIF
-
-            IBM_ECOUNT = IBM_ECOUNT + 1
-
-            ! Add info to IBM_RCEDGE:
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
-
-         ENDIF
-      ENDDO IY_LOOP_2
-   ENDDO
-ENDDO
-
-! Z axis edges:
-DO K=1,KBAR
-   DO J=0,JBAR
-      IZ_LOOP_2 : DO I=0,IBAR
-         IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,KAXIS) /= IBM_GASPHASE) CYCLE
-         N_CC = 0; N_RG = 0
-         DO JADD=0,1
-            DO IADD=0,1
-               IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
-               IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
-            ENDDO
-         ENDDO
-         IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
-            IE = MESHES(NM)%EDGE_INDEX(12,CELL_INDEX(I,J,K)) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
-            ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
-            ! cells CELL_INDEX(I,J,K):
-            IF (IE==0) THEN
-               ECOUNT = ECOUNT + 1; IE = ECOUNT
-               DO JADD=0,1
-                  DO IADD=0,1
-                     IF(MESHES(NM)%CELL_INDEX(I+IADD,J+JADD,K     )==0) THEN ! Add cell to CELL_INDEX
-                        CCOUNT = CCOUNT + 1
-                        MESHES(NM)%CELL_INDEX(I+IADD,J+JADD,K     ) = CCOUNT
-                        MESHES(NM)%I_CELL(CCOUNT)=I+IADD
-                        MESHES(NM)%J_CELL(CCOUNT)=J+JADD
-                        MESHES(NM)%K_CELL(CCOUNT)=K
-                     ENDIF
-                  ENDDO
-               ENDDO
-               ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
-               ICPM = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
-               ICPP = MESHES(NM)%CELL_INDEX(I+1,J+1,K  )
-               ICMP = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
-               MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, KAXIS /)
-               MESHES(NM)%IJKE(5,IE) = ICMM
-               MESHES(NM)%IJKE(6,IE) = ICPM
-               MESHES(NM)%IJKE(7,IE) = ICMP
-               MESHES(NM)%IJKE(8,IE) = ICPP
-               MESHES(NM)%EDGE_INDEX( 9,ICPP) = IE
-               MESHES(NM)%EDGE_INDEX(10,ICMP) = IE
-               MESHES(NM)%EDGE_INDEX(11,ICPM) = IE
-               MESHES(NM)%EDGE_INDEX(12,ICMM) = IE
-            ELSE
-               ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
-               ! If so discard edge for CCIBM stress recalculation, no need to do it.
-               DO IDUM=1,4
-                  IOR=KAXIS_WALL_INDS(IDUM)
-                  SELECT CASE(IOR)
-                     CASE(-1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 1)
-                     CASE( 1)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-1)
-                     CASE(-2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 2)
-                     CASE( 2)
-                        IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
-                        IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-2)
-                  END SELECT
-                  IF (IW1>0) THEN
-                     IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_2
-                  ENDIF
-                  IF (IW2>0) THEN
-                     IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
-                        MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_2
-                  ENDIF
-               ENDDO
-            ENDIF
-
-            IBM_ECOUNT = IBM_ECOUNT + 1
-
-            ! Add info to IBM_RCEDGE:
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
-            MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
-
-         ENDIF
-      ENDDO IZ_LOOP_2
-   ENDDO
-ENDDO
-
-DEALLOCATE(CELL_ADDED)
-
-IF (GET_CUTCELLS_VERBOSE) THEN
-   CALL CPU_TIME(CPUTIME)
-   WRITE(LU_SETCC,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
-   ' sec. Reg-CC edges for BC : ', &
-   IBM_ECOUNT,MESHES(NM)%IBM_NRCEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT(NM),CELL_COUNT_CC(NM),CCOUNT,'. '
-   IF (MYID==0) THEN
-   WRITE(LU_ERR ,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
-   ' sec. Reg-CC edges for BC : ', &
-   IBM_ECOUNT,MESHES(NM)%IBM_NRCEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT(NM),CELL_COUNT_CC(NM),CCOUNT,'. '
-   ENDIF
-   ! DO I=1,MESHES(NM)%IBM_NRCEDGE
-   !    WRITE(LU_ERR,*) 'IE,I,J,K,IAXIS=',MESHES(NM)%IBM_RCEDGE(I)%IE,MESHES(NM)%IBM_RCEDGE(I)%IJK(IAXIS:KAXIS+1)
-   ! ENDDO
-ENDIF
-
-#ifdef DEBUG_SET_CUTCELLS
-! Write segment information for the mesh if it belongs to the process:
-! This conditional not needed for call form SET_CUTCELLS_3D. Left here dor completeness.
-IF (NM>=LOWER_MESH_INDEX .AND. NM<=UPPER_MESH_INDEX) THEN
-   ! Write out:
-   WRITE(MSEGS_FILE,'(A,A,I4.4,A)') TRIM(CHID),'_rcsegs_mesh_',NM,'.dat'
-   OPEN(333,FILE=TRIM(MSEGS_FILE),STATUS='UNKNOWN')
-   DO ECOUNT=1,MESHES(NM)%IBM_NRCEDGE
-      I=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(IAXIS)
-      J=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(JAXIS)
-      K=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(KAXIS)
-      IE=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(KAXIS+1)
-      SELECT CASE(IE)
-      CASE(IAXIS)
-         WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DXCELL(I),XCELL(I),YFACE(J),ZFACE(K)
-      CASE(JAXIS)
-         WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DYCELL(J),XFACE(I),YCELL(J),ZFACE(K)
-      CASE(KAXIS)
-         WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DZCELL(K),XFACE(I),YFACE(J),ZCELL(K)
-      END SELECT
-   ENDDO
-   CLOSE(333)
-ENDIF
-#endif /* DEBUG_SET_CUTCELLS */
-
-RETURN
-END SUBROUTINE GET_REGULAR_CUTCELL_EDGES_BC
+! SUBROUTINE GET_REGULAR_CUTCELL_EDGES_BC(NM)
+!
+! ! This routine adds to FDS edge arrays OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR
+! ! the sum of regular edges that contain at least a neighboring IBM_CUTCFE cell and
+! ! two IBM_GASPHASE CELLS. All neighboring IBM_GASPHASE cells are added to CELL_COUNT_CC(NM).
+!
+! INTEGER, INTENT(IN) :: NM
+!
+! ! Local variables:
+! INTEGER :: ECOUNT, IBM_ECOUNT, CCOUNT, I, J, K, N_CC, N_RG, IE, IADD, JADD, KADD
+! LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CELL_ADDED
+! REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TAU_E_AUX,OME_E_AUX,EDGE_INT_AUX,UVW_GHOST_AUX
+! INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKE_AUX,EDGE_INDEX_AUX,WALL_INDEX_AUX,WALL_INDEX_HT3D_AUX
+! LOGICAL, ALLOCATABLE, DIMENSION(:) :: SOLID_AUX
+! INTEGER, ALLOCATABLE, DIMENSION(:) :: I_CELL_AUX,J_CELL_AUX,K_CELL_AUX,OBST_INDEX_C_AUX
+! INTEGER :: ICMM,ICPM,ICPP,ICMP
+! INTEGER :: IDUM,IOR,IW1,IW2
+! INTEGER, PARAMETER :: IAXIS_WALL_INDS(1:4) = (/ -3, -2, 2, 3 /)
+! INTEGER, PARAMETER :: JAXIS_WALL_INDS(1:4) = (/ -3, -1, 1, 3 /)
+! INTEGER, PARAMETER :: KAXIS_WALL_INDS(1:4) = (/ -2, -1, 1, 2 /)
+!
+! ! GET_CUTCELLS_VERBOSE variables:
+! REAL(EB) :: CPUTIME, CPUTIME_START
+!
+! #ifdef DEBUG_SET_CUTCELLS
+! CHARACTER(100) :: MSEGS_FILE
+! IF (NM>=LOWER_MESH_INDEX .AND. NM<=UPPER_MESH_INDEX) THEN
+!    ! Write out:
+!    WRITE(MSEGS_FILE,'(A,A,I4.4,A)') TRIM(CHID),'_rcsegs_mesh_',NM,'.dat'
+!    OPEN(333,FILE=TRIM(MSEGS_FILE),STATUS='UNKNOWN')
+!    CLOSE(333)
+! ENDIF
+! #endif
+!
+! ! Return if nothing to do for the mesh:
+! IF(MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH == 0) RETURN
+!
+! IF (GET_CUTCELLS_VERBOSE) THEN
+!    CALL CPU_TIME(CPUTIME_START)
+!    WRITE(LU_SETCC,'(A,I10,A)',advance='no') ' Generating     REGULAR_CUTCELL_EDGES_BC for mesh :',NM,' ..'
+!    IF (MYID==0) WRITE(LU_ERR,'(A,I10,A)',advance='no') ' Generating     REGULAR_CUTCELL_EDGES_BC for mesh :',NM,' ..'
+! ENDIF
+!
+! ALLOCATE(CELL_ADDED(0:IBP1,0:JBP1,0:KBP1)); CELL_ADDED = .FALSE.
+!
+! ! Now count added edge number for mesh N_EDGES_DIM_CC(2,NM), and added non zero cell indexes for mesh
+! ! CELL_COUNT_CC(NM).
+! ECOUNT = 0; IBM_ECOUNT=0
+! CCOUNT = 0;
+!
+! ! X axis edges:
+! DO K=0,KBAR
+!    DO J=0,JBAR
+!       IX_LOOP_1 : DO I=1,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO KADD=0,1
+!             DO JADD=0,1
+!                IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
+!             IE = MESHES(NM)%EDGE_INDEX(4,CELL_INDEX(I,J,K)) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT:
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1
+!                ! See if we need to add to CCOUNT any neighboring cells:
+!                DO KADD=0,1
+!                   DO JADD=0,1
+!                   IF(CELL_INDEX(I     ,J+JADD,K+KADD)==0 .AND. .NOT.CELL_ADDED(I     ,J+JADD,K+KADD)) THEN
+!                      CCOUNT = CCOUNT + 1
+!                      CELL_ADDED(I     ,J+JADD,K+KADD) = .TRUE.
+!                   ENDIF
+!                   ENDDO
+!                ENDDO
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=IAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 2)
+!                      CASE( 2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-2)
+!                      CASE(-3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 3)
+!                      CASE( 3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-3)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_1
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_1
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!          ENDIF
+!       ENDDO IX_LOOP_1
+!    ENDDO
+! ENDDO
+!
+! ! Y axis edges:
+! DO K=0,KBAR
+!    DO J=1,JBAR
+!       IY_LOOP_1 : DO I=0,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO KADD=0,1
+!             DO IADD=0,1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
+!             IE = MESHES(NM)%EDGE_INDEX(8,CELL_INDEX(I,J,K)) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT:
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1
+!                ! See if we need to add to CCOUNT any neighboring cells:
+!                DO KADD=0,1
+!                   DO IADD=0,1
+!                   IF(CELL_INDEX(I+IADD,J     ,K+KADD)==0 .AND. .NOT.CELL_ADDED(I+IADD,J     ,K+KADD)) THEN
+!                      CCOUNT = CCOUNT + 1
+!                      CELL_ADDED(I+IADD,J     ,K+KADD) = .TRUE.
+!                   ENDIF
+!                   ENDDO
+!                ENDDO
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=JAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 1)
+!                      CASE( 1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-1)
+!                      CASE(-3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 3)
+!                      CASE( 3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-3)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_1
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_1
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!          ENDIF
+!       ENDDO IY_LOOP_1
+!    ENDDO
+! ENDDO
+!
+! ! Z axis edges:
+! DO K=1,KBAR
+!    DO J=0,JBAR
+!       IZ_LOOP_1 : DO I=0,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO JADD=0,1
+!             DO IADD=0,1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
+!             IE = MESHES(NM)%EDGE_INDEX(12,CELL_INDEX(I,J,K)) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT:
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1
+!                ! See if we need to add to CCOUNT any neighboring cells:
+!                DO JADD=0,1
+!                   DO IADD=0,1
+!                   IF(CELL_INDEX(I+IADD,J+JADD,K     )==0 .AND. .NOT.CELL_ADDED(I+IADD,J+JADD,K     )) THEN
+!                      CCOUNT = CCOUNT + 1
+!                      CELL_ADDED(I+IADD,J+JADD,K     ) = .TRUE.
+!                   ENDIF
+!                   ENDDO
+!                ENDDO
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=KAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 1)
+!                      CASE( 1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-1)
+!                      CASE(-2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 2)
+!                      CASE( 2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-2)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_1
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_1
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!          ENDIF
+!       ENDDO IZ_LOOP_1
+!    ENDDO
+! ENDDO
+!
+! IF (IBM_ECOUNT==0) THEN
+!    DEALLOCATE(CELL_ADDED)
+!    RETURN
+! ENDIF
+!
+! ! Allocate IBM_RCEDGE:
+! MESHES(NM)%IBM_NRCEDGE = IBM_ECOUNT
+! ALLOCATE(MESHES(NM)%IBM_RCEDGE(1:IBM_ECOUNT))
+!
+! ! Reallocate edge variables OME_E, TAU_E, IJKE, EDGE_INTERPOLATION_FACTOR:
+! IF (ECOUNT > 0) THEN
+!    ! N_EDGES_DIM_CC(1:2,NM)
+!    N_EDGES_DIM_CC(1,NM) = SIZE(MESHES(NM)%IJKE, DIM=2)
+!    N_EDGES_DIM_CC(2,NM) = ECOUNT
+!
+!    ! OME_E, TAU_E:
+!    ALLOCATE(OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)),TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM)))
+!    OME_E_AUX(:,:) = MESHES(NM)%OME_E(:,:)
+!    DEALLOCATE(MESHES(NM)%OME_E); ALLOCATE(MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
+!    MESHES(NM)%OME_E = -1.E6_EB
+!    MESHES(NM)%OME_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = OME_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
+!
+!    TAU_E_AUX(:,:) = MESHES(NM)%TAU_E(:,:)
+!    DEALLOCATE(MESHES(NM)%TAU_E); ALLOCATE(MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
+!    MESHES(NM)%TAU_E = -1.E6_EB
+!    MESHES(NM)%TAU_E(-2:2,0:N_EDGES_DIM_CC(1,NM)) = TAU_E_AUX(-2:2,0:N_EDGES_DIM_CC(1,NM))
+!    DEALLOCATE(OME_E_AUX, TAU_E_AUX)
+!
+!    ! IJKE, EDGE_INTERPOLATION_FACTOR:
+!    ALLOCATE(IJKE_AUX(16,N_EDGES_DIM_CC(1,NM))); IJKE_AUX(:,:) = MESHES(NM)%IJKE(:,:)
+!    DEALLOCATE(MESHES(NM)%IJKE); ALLOCATE(MESHES(NM)%IJKE(16,N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM)));
+!    MESHES(NM)%IJKE = 0; MESHES(NM)%IJKE(1:16,1:N_EDGES_DIM_CC(1,NM)) = IJKE_AUX(1:16,1:N_EDGES_DIM_CC(1,NM))
+!    DEALLOCATE(IJKE_AUX)
+!
+!    ALLOCATE(EDGE_INT_AUX(N_EDGES_DIM_CC(1,NM),2));
+!    EDGE_INT_AUX(:,:) = MESHES(NM)%EDGE_INTERPOLATION_FACTOR(:,:)
+!    DEALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR);
+!    ALLOCATE(MESHES(NM)%EDGE_INTERPOLATION_FACTOR(N_EDGES_DIM_CC(1,NM)+N_EDGES_DIM_CC(2,NM),2))
+!    MESHES(NM)%EDGE_INTERPOLATION_FACTOR = 1._EB
+!    MESHES(NM)%EDGE_INTERPOLATION_FACTOR(1:N_EDGES_DIM_CC(1,NM),1:2) = EDGE_INT_AUX(1:N_EDGES_DIM_CC(1,NM),1:2)
+!    DEALLOCATE(EDGE_INT_AUX)
+! ENDIF
+!
+! ! Reallocate cell indexing vars SOLID, OBST_INDEX_C, WALL_INDEX, WALL_INDEX_HT3D, EDGE_INDEX, UVW_GHOST,
+! ! I_CELL, J_CELL, K_CELL:
+! IF (CCOUNT > 0) THEN
+!    ! CELL_COUNT_CC(NM):
+!    CELL_COUNT_CC(NM) = CCOUNT
+!
+!    ! SOLID:
+!    ALLOCATE(SOLID_AUX(0:CELL_COUNT(NM))); SOLID_AUX(:)=MESHES(NM)%SOLID(:)
+!    DEALLOCATE(MESHES(NM)%SOLID); ALLOCATE(MESHES(NM)%SOLID(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM)));
+!    MESHES(NM)%SOLID = .FALSE.; MESHES(NM)%SOLID(0:CELL_COUNT(NM))=SOLID_AUX(0:CELL_COUNT(NM))
+!    DEALLOCATE(SOLID_AUX)
+!
+!    ! WALL_INDEX, WALL_INDEX_HT3D, EDGE_INDEX, UVW_GHOST:
+!    ALLOCATE(WALL_INDEX_AUX(0:CELL_COUNT(NM),-3:3)); WALL_INDEX_AUX(:,:) = MESHES(NM)%WALL_INDEX(:,:)
+!    ALLOCATE(WALL_INDEX_HT3D_AUX(0:CELL_COUNT(NM),-3:3)); WALL_INDEX_HT3D_AUX(:,:) = MESHES(NM)%WALL_INDEX_HT3D(:,:)
+!    ALLOCATE(EDGE_INDEX_AUX(1:12,0:CELL_COUNT(NM))); EDGE_INDEX_AUX(:,:) = MESHES(NM)%EDGE_INDEX(:,:)
+!    DEALLOCATE(MESHES(NM)%WALL_INDEX, MESHES(NM)%WALL_INDEX_HT3D, MESHES(NM)%EDGE_INDEX)
+!    ALLOCATE(MESHES(NM)%WALL_INDEX(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),-3:3)); MESHES(NM)%WALL_INDEX = 0
+!    ALLOCATE(MESHES(NM)%WALL_INDEX_HT3D(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),-3:3)); MESHES(NM)%WALL_INDEX_HT3D = 0
+!    ALLOCATE(MESHES(NM)%EDGE_INDEX(1:12,0:CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%EDGE_INDEX = 0
+!    MESHES(NM)%WALL_INDEX(0:CELL_COUNT(NM),-3:3) = WALL_INDEX_AUX(0:CELL_COUNT(NM),-3:3)
+!    MESHES(NM)%WALL_INDEX_HT3D(0:CELL_COUNT(NM),-3:3) = WALL_INDEX_HT3D_AUX(0:CELL_COUNT(NM),-3:3)
+!    MESHES(NM)%EDGE_INDEX(1:12,0:CELL_COUNT(NM)) = EDGE_INDEX_AUX(1:12,0:CELL_COUNT(NM))
+!    DEALLOCATE(WALL_INDEX_AUX, WALL_INDEX_HT3D_AUX, EDGE_INDEX_AUX)
+!
+!    ALLOCATE(UVW_GHOST_AUX(0:CELL_COUNT(NM),3)); UVW_GHOST_AUX(:,:) = MESHES(NM)%UVW_GHOST(:,:)
+!    DEALLOCATE(MESHES(NM)%UVW_GHOST); ALLOCATE(MESHES(NM)%UVW_GHOST(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM),3))
+!    MESHES(NM)%UVW_GHOST(:,1)=U0
+!    MESHES(NM)%UVW_GHOST(:,2)=V0
+!    MESHES(NM)%UVW_GHOST(:,3)=W0
+!    MESHES(NM)%UVW_GHOST(0:CELL_COUNT(NM),1:3) = UVW_GHOST_AUX(0:CELL_COUNT(NM),1:3)
+!    DEALLOCATE(UVW_GHOST_AUX)
+!
+!    ! I_CELL, J_CELL, K_CELL, OBST_INDEX_C:
+!    ALLOCATE(I_CELL_AUX(CELL_COUNT(NM)),J_CELL_AUX(CELL_COUNT(NM)),K_CELL_AUX(CELL_COUNT(NM)))
+!    I_CELL_AUX(:) = MESHES(NM)%I_CELL(:); J_CELL_AUX(:) = MESHES(NM)%J_CELL(:); K_CELL_AUX(:) = MESHES(NM)%K_CELL(:)
+!    ALLOCATE(OBST_INDEX_C_AUX(0:CELL_COUNT(NM))); OBST_INDEX_C_AUX(:) = MESHES(NM)%OBST_INDEX_C(:)
+!    DEALLOCATE(MESHES(NM)%I_CELL,MESHES(NM)%J_CELL,MESHES(NM)%K_CELL,MESHES(NM)%OBST_INDEX_C)
+!    ALLOCATE(MESHES(NM)%I_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%I_CELL = -1
+!    ALLOCATE(MESHES(NM)%J_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%J_CELL = -1
+!    ALLOCATE(MESHES(NM)%K_CELL(CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%K_CELL = -1
+!    ALLOCATE(MESHES(NM)%OBST_INDEX_C(0:CELL_COUNT(NM)+CELL_COUNT_CC(NM))); MESHES(NM)%OBST_INDEX_C = 0
+!    MESHES(NM)%I_CELL(1:CELL_COUNT(NM)) = I_CELL_AUX(1:CELL_COUNT(NM))
+!    MESHES(NM)%J_CELL(1:CELL_COUNT(NM)) = J_CELL_AUX(1:CELL_COUNT(NM))
+!    MESHES(NM)%K_CELL(1:CELL_COUNT(NM)) = K_CELL_AUX(1:CELL_COUNT(NM))
+!    MESHES(NM)%OBST_INDEX_C(0:CELL_COUNT(NM)) = OBST_INDEX_C_AUX(0:CELL_COUNT(NM))
+!    DEALLOCATE(I_CELL_AUX,J_CELL_AUX,K_CELL_AUX,OBST_INDEX_C_AUX)
+!
+! ENDIF
+!
+!
+! ! Finally repeat search process and assign edge and cell values to cut-cell region entities:
+! ECOUNT = N_EDGES_DIM_CC(1,NM); IBM_ECOUNT=0
+! CCOUNT = CELL_COUNT(NM);
+!
+! ! X axis edges:
+! DO K=0,KBAR
+!    DO J=0,JBAR
+!       IX_LOOP_2 : DO I=1,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO KADD=0,1
+!             DO JADD=0,1
+!                IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I     ,J+JADD,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells, NEW edge to force.
+!             IE = MESHES(NM)%EDGE_INDEX(4,CELL_INDEX(I,J,K)) ! EDGE in Xaxis in upper Y,Z boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
+!             ! cells CELL_INDEX(I,J,K):
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1; IE = ECOUNT
+!                DO KADD=0,1
+!                   DO JADD=0,1
+!                      IF(MESHES(NM)%CELL_INDEX(I     ,J+JADD,K+KADD)==0) THEN ! Add cell to CELL_INDEX
+!                         CCOUNT = CCOUNT + 1
+!                         MESHES(NM)%CELL_INDEX(I     ,J+JADD,K+KADD) = CCOUNT
+!                         MESHES(NM)%I_CELL(CCOUNT)=I
+!                         MESHES(NM)%J_CELL(CCOUNT)=J+JADD
+!                         MESHES(NM)%K_CELL(CCOUNT)=K+KADD
+!                      ENDIF
+!                   ENDDO
+!                ENDDO
+!                ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
+!                ICPM = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
+!                ICPP = MESHES(NM)%CELL_INDEX(I  ,J+1,K+1)
+!                ICMP = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
+!                MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, IAXIS /)
+!                MESHES(NM)%IJKE(5,IE) = ICMM
+!                MESHES(NM)%IJKE(6,IE) = ICPM
+!                MESHES(NM)%IJKE(7,IE) = ICMP
+!                MESHES(NM)%IJKE(8,IE) = ICPP
+!                MESHES(NM)%EDGE_INDEX(1,ICPP) = IE
+!                MESHES(NM)%EDGE_INDEX(2,ICMP) = IE
+!                MESHES(NM)%EDGE_INDEX(3,ICPM) = IE
+!                MESHES(NM)%EDGE_INDEX(4,ICMM) = IE
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=IAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 2)
+!                      CASE( 2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-2)
+!                      CASE(-3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 3)
+!                      CASE( 3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K+1),-3)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_2
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IX_LOOP_2
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!
+!             ! Add info to IBM_RCEDGE:
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
+!
+!          ENDIF
+!       ENDDO IX_LOOP_2
+!    ENDDO
+! ENDDO
+!
+! ! Y axis edges:
+! DO K=0,KBAR
+!    DO J=1,JBAR
+!       IY_LOOP_2 : DO I=0,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO KADD=0,1
+!             DO IADD=0,1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J     ,K+KADD,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
+!             IE = MESHES(NM)%EDGE_INDEX(8,CELL_INDEX(I,J,K)) ! EDGE in Yaxis in upper X,Z boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
+!             ! cells CELL_INDEX(I,J,K):
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1; IE = ECOUNT
+!                DO KADD=0,1
+!                   DO IADD=0,1
+!                      IF(MESHES(NM)%CELL_INDEX(I+IADD,J     ,K+KADD)==0) THEN ! Add cell to CELL_INDEX
+!                         CCOUNT = CCOUNT + 1
+!                         MESHES(NM)%CELL_INDEX(I+IADD,J     ,K+KADD) = CCOUNT
+!                         MESHES(NM)%I_CELL(CCOUNT)=I+IADD
+!                         MESHES(NM)%J_CELL(CCOUNT)=J
+!                         MESHES(NM)%K_CELL(CCOUNT)=K+KADD
+!                      ENDIF
+!                   ENDDO
+!                ENDDO
+!                ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
+!                ICMP = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
+!                ICPP = MESHES(NM)%CELL_INDEX(I+1,J  ,K+1)
+!                ICPM = MESHES(NM)%CELL_INDEX(I  ,J  ,K+1)
+!                MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, JAXIS /)
+!                MESHES(NM)%IJKE(5,IE) = ICMM
+!                MESHES(NM)%IJKE(6,IE) = ICPM
+!                MESHES(NM)%IJKE(7,IE) = ICMP
+!                MESHES(NM)%IJKE(8,IE) = ICPP
+!                MESHES(NM)%EDGE_INDEX(5,ICPP) = IE
+!                MESHES(NM)%EDGE_INDEX(6,ICPM) = IE
+!                MESHES(NM)%EDGE_INDEX(7,ICMP) = IE
+!                MESHES(NM)%EDGE_INDEX(8,ICMM) = IE
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=JAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1), 1)
+!                      CASE( 1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-1)
+!                      CASE(-3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 3)
+!                      CASE( 3)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K+1),-3)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K+1),-3)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_2
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IY_LOOP_2
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!
+!             ! Add info to IBM_RCEDGE:
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
+!
+!          ENDIF
+!       ENDDO IY_LOOP_2
+!    ENDDO
+! ENDDO
+!
+! ! Z axis edges:
+! DO K=1,KBAR
+!    DO J=0,JBAR
+!       IZ_LOOP_2 : DO I=0,IBAR
+!          IF (MESHES(NM)%ECVAR(I,J,K,IBM_EGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+!          N_CC = 0; N_RG = 0
+!          DO JADD=0,1
+!             DO IADD=0,1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==  IBM_CUTCFE) N_CC=N_CC+1
+!                IF (MESHES(NM)%CCVAR(I+IADD,J+JADD,K     ,IBM_CGSC)==IBM_GASPHASE) N_RG=N_RG+1
+!             ENDDO
+!          ENDDO
+!          IF (N_CC>0 .AND. N_RG>1) THEN ! At least one neighboring cut-cell, and two regular cells.
+!             IE = MESHES(NM)%EDGE_INDEX(12,CELL_INDEX(I,J,K)) ! EDGE in Zaxis in upper X,Y boundaries of cell I,J,K.
+!             ! If IE not counted yet increase ECOUNT, Add to EDGE IJKE, EDGE_INDEX, renumber if needed surrounding
+!             ! cells CELL_INDEX(I,J,K):
+!             IF (IE==0) THEN
+!                ECOUNT = ECOUNT + 1; IE = ECOUNT
+!                DO JADD=0,1
+!                   DO IADD=0,1
+!                      IF(MESHES(NM)%CELL_INDEX(I+IADD,J+JADD,K     )==0) THEN ! Add cell to CELL_INDEX
+!                         CCOUNT = CCOUNT + 1
+!                         MESHES(NM)%CELL_INDEX(I+IADD,J+JADD,K     ) = CCOUNT
+!                         MESHES(NM)%I_CELL(CCOUNT)=I+IADD
+!                         MESHES(NM)%J_CELL(CCOUNT)=J+JADD
+!                         MESHES(NM)%K_CELL(CCOUNT)=K
+!                      ENDIF
+!                   ENDDO
+!                ENDDO
+!                ICMM = MESHES(NM)%CELL_INDEX(I  ,J  ,K  )
+!                ICPM = MESHES(NM)%CELL_INDEX(I+1,J  ,K  )
+!                ICPP = MESHES(NM)%CELL_INDEX(I+1,J+1,K  )
+!                ICMP = MESHES(NM)%CELL_INDEX(I  ,J+1,K  )
+!                MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE) = (/ I, J, K, KAXIS /)
+!                MESHES(NM)%IJKE(5,IE) = ICMM
+!                MESHES(NM)%IJKE(6,IE) = ICPM
+!                MESHES(NM)%IJKE(7,IE) = ICMP
+!                MESHES(NM)%IJKE(8,IE) = ICPP
+!                MESHES(NM)%EDGE_INDEX( 9,ICPP) = IE
+!                MESHES(NM)%EDGE_INDEX(10,ICMP) = IE
+!                MESHES(NM)%EDGE_INDEX(11,ICPM) = IE
+!                MESHES(NM)%EDGE_INDEX(12,ICMM) = IE
+!             ELSE
+!                ! Search if WALL cells related to the edge are of type SOLID_BOUNDARY or MIRROR_BOUNDARY.
+!                ! If so discard edge for CCIBM stress recalculation, no need to do it.
+!                DO IDUM=1,4
+!                   IOR=KAXIS_WALL_INDS(IDUM)
+!                   SELECT CASE(IOR)
+!                      CASE(-1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ), 1)
+!                      CASE( 1)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ),-1)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-1)
+!                      CASE(-2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J  ,K  ), 2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J  ,K  ), 2)
+!                      CASE( 2)
+!                         IW1 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I  ,J+1,K  ),-2)
+!                         IW2 = MESHES(NM)%WALL_INDEX(CELL_INDEX(I+1,J+1,K  ),-2)
+!                   END SELECT
+!                   IF (IW1>0) THEN
+!                      IF(MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW1)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_2
+!                   ENDIF
+!                   IF (IW2>0) THEN
+!                      IF(MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. &
+!                         MESHES(NM)%WALL(IW2)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE IZ_LOOP_2
+!                   ENDIF
+!                ENDDO
+!             ENDIF
+!
+!             IBM_ECOUNT = IBM_ECOUNT + 1
+!
+!             ! Add info to IBM_RCEDGE:
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IJK(IAXIS:KAXIS+1) = MESHES(NM)%IJKE(IAXIS:KAXIS+1,IE)
+!             MESHES(NM)%IBM_RCEDGE(IBM_ECOUNT)%IE = IE
+!
+!          ENDIF
+!       ENDDO IZ_LOOP_2
+!    ENDDO
+! ENDDO
+!
+! DEALLOCATE(CELL_ADDED)
+!
+! IF (GET_CUTCELLS_VERBOSE) THEN
+!    CALL CPU_TIME(CPUTIME)
+!    WRITE(LU_SETCC,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+!    ' sec. Reg-CC edges for BC : ', &
+!    IBM_ECOUNT,MESHES(NM)%IBM_NRCEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT(NM),CELL_COUNT_CC(NM),CCOUNT,'. '
+!    IF (MYID==0) THEN
+!    WRITE(LU_ERR ,'(A,F8.3,A,7I8,A)') ' done. Time taken : ',CPUTIME-CPUTIME_START, &
+!    ' sec. Reg-CC edges for BC : ', &
+!    IBM_ECOUNT,MESHES(NM)%IBM_NRCEDGE,N_EDGES_DIM_CC(1:2,NM),CELL_COUNT(NM),CELL_COUNT_CC(NM),CCOUNT,'. '
+!    ENDIF
+!    ! DO I=1,MESHES(NM)%IBM_NRCEDGE
+!    !    WRITE(LU_ERR,*) 'IE,I,J,K,IAXIS=',MESHES(NM)%IBM_RCEDGE(I)%IE,MESHES(NM)%IBM_RCEDGE(I)%IJK(IAXIS:KAXIS+1)
+!    ! ENDDO
+! ENDIF
+!
+! #ifdef DEBUG_SET_CUTCELLS
+! ! Write segment information for the mesh if it belongs to the process:
+! ! This conditional not needed for call form SET_CUTCELLS_3D. Left here dor completeness.
+! IF (NM>=LOWER_MESH_INDEX .AND. NM<=UPPER_MESH_INDEX) THEN
+!    ! Write out:
+!    WRITE(MSEGS_FILE,'(A,A,I4.4,A)') TRIM(CHID),'_rcsegs_mesh_',NM,'.dat'
+!    OPEN(333,FILE=TRIM(MSEGS_FILE),STATUS='UNKNOWN')
+!    DO ECOUNT=1,MESHES(NM)%IBM_NRCEDGE
+!       I=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(IAXIS)
+!       J=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(JAXIS)
+!       K=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(KAXIS)
+!       IE=MESHES(NM)%IBM_RCEDGE(ECOUNT)%IJK(KAXIS+1)
+!       SELECT CASE(IE)
+!       CASE(IAXIS)
+!          WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DXCELL(I),XCELL(I),YFACE(J),ZFACE(K)
+!       CASE(JAXIS)
+!          WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DYCELL(J),XFACE(I),YCELL(J),ZFACE(K)
+!       CASE(KAXIS)
+!          WRITE(333,'(4I4,4F13.8)') I,J,K,IE,DZCELL(K),XFACE(I),YFACE(J),ZCELL(K)
+!       END SELECT
+!    ENDDO
+!    CLOSE(333)
+! ENDIF
+! #endif /* DEBUG_SET_CUTCELLS */
+!
+! RETURN
+! END SUBROUTINE GET_REGULAR_CUTCELL_EDGES_BC
 
 
 ! ---------------------- GET_INBCUTFACES_TO_CFACE --------------------------------
@@ -32125,25 +33957,73 @@ MESHES(NM)%CUT_FACE(ICF)%JDZ = IBM_UNDEFINED; MESHES(NM)%CUT_FACE(ICF)%JDH = IBM
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(MAX_DIM+1,LOW_IND:HIGH_IND,1:NFACE))
 MESHES(NM)%CUT_FACE(ICF)%CELL_LIST = IBM_UNDEFINED
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%IJK_CFCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE,1:NFACE))
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INBFC_CFCEN(3,1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%IJK_CFCEN = IBM_UNDEFINED; MESHES(NM)%CUT_FACE(ICF)%INBFC_CFCEN = IBM_UNDEFINED
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CFCEN(MAX_DIM,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CFCEN = 0._EB
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CFCEN(MAX_INTERP_POINTS_PLANE+1,1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CFCEN = 0._EB
+IF(IBM_USE_OUTER_PLANE .AND. MESHES(NM)%CUT_FACE(ICF)%STATUS==IBM_GASPHASE )THEN
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%VEL_CFCEN(  MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
-         MESHES(NM)%CUT_FACE(ICF)%VELS_CFCEN( MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
-         MESHES(NM)%CUT_FACE(ICF)%FV_CFCEN(   MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
-         MESHES(NM)%CUT_FACE(ICF)%DHDX1_CFCEN(MAX_INTERP_POINTS_PLANE+1,1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%VEL_CFCEN  = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%VELS_CFCEN = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%FV_CFCEN   = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%DHDX1_CFCEN= 0._EB
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%IJK_CARTCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE));
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CARTCEN(MAX_DIM))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INBFC_CARTCEN(3))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+   MESHES(NM)%CUT_FACE(ICF)%IJK_CARTCEN    = IBM_UNDEFINED; MESHES(NM)%CUT_FACE(ICF)%INBFC_CARTCEN=IBM_UNDEFINED
+   MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CARTCEN = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CARTCEN= 0._EB
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,1:MAX_INTERP_POINTS_PLANE,1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%NOMIND_CFCEN = IBM_UNDEFINED
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%VEL_CARTCEN(MAX_INTERP_POINTS_PLANE+1),  &
+            MESHES(NM)%CUT_FACE(ICF)%VELS_CARTCEN(MAX_INTERP_POINTS_PLANE+1), &
+            MESHES(NM)%CUT_FACE(ICF)%FV_CARTCEN(MAX_INTERP_POINTS_PLANE+1),   &
+            MESHES(NM)%CUT_FACE(ICF)%DHDX1_CARTCEN(MAX_INTERP_POINTS_PLANE+1))
+   MESHES(NM)%CUT_FACE(ICF)%VEL_CARTCEN  = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%VELS_CARTCEN = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%FV_CARTCEN   = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%DHDX1_CARTCEN= 0._EB
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%NOMIND_CARTCEN(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE))
+   MESHES(NM)%CUT_FACE(ICF)%NOMIND_CARTCEN = IBM_UNDEFINED
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%IJK_CFCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE,1:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INBFC_CFCEN(3,1:NFACE))
+   MESHES(NM)%CUT_FACE(ICF)%IJK_CFCEN = IBM_UNDEFINED; MESHES(NM)%CUT_FACE(ICF)%INBFC_CFCEN = IBM_UNDEFINED
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CFCEN(MAX_DIM,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CFCEN = 0._EB
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CFCEN(MAX_INTERP_POINTS_PLANE+1,1:NFACE))
+   MESHES(NM)%CUT_FACE(ICF)%INTCOEF_CFCEN = 0._EB
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%VEL_CFCEN(  MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
+            MESHES(NM)%CUT_FACE(ICF)%VELS_CFCEN( MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
+            MESHES(NM)%CUT_FACE(ICF)%FV_CFCEN(   MAX_INTERP_POINTS_PLANE+1,1:NFACE), &
+            MESHES(NM)%CUT_FACE(ICF)%DHDX1_CFCEN(MAX_INTERP_POINTS_PLANE+1,1:NFACE))
+   MESHES(NM)%CUT_FACE(ICF)%VEL_CFCEN  = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%VELS_CFCEN = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%FV_CFCEN   = 0._EB
+   MESHES(NM)%CUT_FACE(ICF)%DHDX1_CFCEN= 0._EB
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%NOMIND_CFCEN(LOW_IND:HIGH_IND,1:MAX_INTERP_POINTS_PLANE,1:NFACE))
+   MESHES(NM)%CUT_FACE(ICF)%NOMIND_CFCEN = IBM_UNDEFINED
+ELSE
+
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,(NFACE+1)*DELTA_INT))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_COEF((NFACE+1)*DELTA_INT))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_XYZBF(IAXIS:KAXIS,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_INBFC(1:3,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_XN(0:INT_N_EXT_PTS,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_CN(0:INT_N_EXT_PTS,0:NFACE))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_FVARS(1:N_INT_FVARS,(NFACE+1)*DELTA_INT))
+   ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,(NFACE+1)*DELTA_INT))
+
+   MESHES(NM)%CUT_FACE(ICF)%INT_IJK   =  IBM_UNDEFINED
+   MESHES(NM)%CUT_FACE(ICF)%INT_COEF  =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_XYZBF =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_NOUT  =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_INBFC =  IBM_UNDEFINED
+   MESHES(NM)%CUT_FACE(ICF)%INT_NPE   =  0
+   MESHES(NM)%CUT_FACE(ICF)%INT_XN    =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_CN    =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_FVARS  =  0._EB
+   MESHES(NM)%CUT_FACE(ICF)%INT_NOMIND=  IBM_UNDEFINED
+
+ENDIF
 
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%RHOPVN(-1:0,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%RHOPVN = 0._EB
 
@@ -34691,29 +36571,31 @@ LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL,DEFAULT_COMPONENT_ONLY
 REAL(EB) :: AZIM,ELEV,SCALE(3),XYZ0(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GROTATE,GROTATE_DOT,GAXIS(3),&
             SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),XB(6),DX,BOX_XYZ(3),&
             ZERO3(3)=(/0.0_EB,0.0_EB,0.0_EB/),ZMIN,VOLUME,TXMIN,TXMAX,TYMIN,TYMAX,TX,TY,DV1(MAX_DIM),DV2(MAX_DIM),&
-            NVECI(MAX_DIM),DXCEN(MAX_DIM),DOTI,X1V(NOD1:NOD3),TRANSPARENCY
+            NVECI(MAX_DIM),DXCEN(MAX_DIM),DOTI,X1V(NOD1:NOD3),TRANSPARENCY,CYLINDER_ORIGIN(3),CYLINDER_AXIS(3),&
+            CYLINDER_RADIUS,CYLINDER_LENGTH
 
 INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLUS=0,N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,&
            N_ZVALS,N_SURF_ID,MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,NSUB_GEOMS,GEOM_INDEX,FIRST_FACE_INDEX,I1,I2,I3,I4,I5,I6,I7,I8,&
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
-           WSELEM(NOD1:NOD3),X1AXIS,NNN
+           WSELEM(NOD1:NOD3),X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS
 
-LOGICAL :: AUTO_TEXTURE,COMPONENT_ONLY,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE
+LOGICAL :: AUTO_TEXTURE,COMPONENT_ONLY,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM
 REAL(EB), POINTER, DIMENSION(:) :: VNEW,VOLD,V1,V2,V3,V4
 INTEGER, POINTER, DIMENSION(:) :: FACEI,FACEJ,FACE_FROM,FACE_TO,VOL
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL(),GSUB=>NULL()
 
-INTEGER, PARAMETER :: CAD_GEOM_TYPE=0,BOX_GEOM_TYPE=1,SPHERE_GEOM_TYPE=2,TERRAIN_GEOM_TYPE=3
+INTEGER, PARAMETER :: CAD_GEOM_TYPE=0,BOX_GEOM_TYPE=1,SPHERE_GEOM_TYPE=2,TERRAIN_GEOM_TYPE=3,CYLINDER_GEOM_TYPE=4
 REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
 
-NAMELIST /GEOM/ AUTO_TEXTURE,AZIM,AZIM_DOT,BNDC_FILENAME,COMPONENT_ONLY,CTRL_ID,CUTCELLS,&
+NAMELIST /GEOM/ AUTO_TEXTURE,AZIM,AZIM_DOT,BNDC_FILENAME,BNDF_GEOM,COMPONENT_ONLY,CTRL_ID,CUTCELLS,&
                 DAZIM,DELEV,DEVC_ID,DSCALE,DT_BNDC,DT_GEOC,DXYZ0,DXYZ,&
                 ELEV,ELEV_DOT,FACES,GAXIS,GEOC_FILENAME,GEOM_IDS,GROTATE,GROTATE_DOT,ID,IJK,&
                 MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,SCALE,SCALE_DOT,&
                 SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
-                VERTS,VOLUS,XB,XYZ0,XYZ,XYZ_DOT,ZMIN,ZVALS
+                VERTS,VOLUS,XB,XYZ0,XYZ,XYZ_DOT,ZMIN,ZVALS,CYLINDER_ORIGIN,CYLINDER_AXIS,&
+                CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -35080,9 +36962,31 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
    ENDIF
 
+   ! Setup a cylinder object (CYLINDER_RADIUS, CYLINDER_LENGTH, CYLINDER_ORIGIN, CYLINDER_AXIS keywords):
+   IF (CYLINDER_LENGTH<MAX_VAL .AND. CYLINDER_RADIUS<MAX_VAL .AND. &
+   CYLINDER_ORIGIN(1)<MAX_VAL .AND. CYLINDER_ORIGIN(2)<MAX_VAL .AND. CYLINDER_ORIGIN(3)<MAX_VAL .AND. &
+   CYLINDER_AXIS(1)<MAX_VAL .AND. CYLINDER_AXIS(2)<MAX_VAL .AND. CYLINDER_AXIS(3)<MAX_VAL) THEN
+
+      GEOM_TYPE = CYLINDER_GEOM_TYPE
+
+      IF (CYLINDER_NSEG_THETA ==-1) CYLINDER_NSEG_THETA =  8
+      IF (CYLINDER_NSEG_AXIS  ==-1) CYLINDER_NSEG_AXIS  =  1
+
+      ! Call routine to create cylinder:
+      CALL DEFINE_CYLINDER(VERTS,MAX_VERTS,N_VERTS,FACES,MAX_FACES,N_FACES,VOLUS,MAX_VOLUS,N_VOLUS)
+
+      IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES)); SURFS = 0
+      IF (TRIM(SURF_ID(1))/='null') SURFS = 1
+
+   ENDIF
+
    G%N_LEVELS = N_LEVELS
    G%SPHERE_ORIGIN = SPHERE_ORIGIN
    G%SPHERE_RADIUS = SPHERE_RADIUS
+   G%CYLINDER_LENGTH = CYLINDER_LENGTH
+   G%CYLINDER_RADIUS = CYLINDER_RADIUS
+   G%CYLINDER_ORIGIN = CYLINDER_ORIGIN
+   G%CYLINDER_AXIS   = CYLINDER_AXIS
    G%IJK = IJK
    G%COMPONENT_ONLY = COMPONENT_ONLY
    G%GEOM_TYPE = GEOM_TYPE
@@ -35546,6 +37450,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       G%IS_DYNAMIC = .FALSE.
    ENDIF
 
+   ! Prevent drawing of boundary info if desired
+
+   G%SHOW_BNDF = BNDF_GEOM
+
    NSUB_GEOMS_IF: IF (NSUB_GEOMS>0) THEN
 
       ! if any component of a group is time dependent then the whole group is time dependent
@@ -35628,6 +37536,179 @@ IF (CC_IBM) CALL GET_GEOM_TRIBIN
 
 
 CONTAINS
+
+
+SUBROUTINE DEFINE_CYLINDER(VERTS,MAXVERTS,NVERTS,FACES,MAXFACES,NFACES,VOLS,MAXVOLS,NVOLS)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+
+INTEGER, INTENT(IN) :: MAXVERTS,MAXFACES,MAXVOLS
+INTEGER, INTENT(OUT) :: NFACES, NVERTS
+REAL(EB), INTENT(INOUT), TARGET :: VERTS(3*MAXVERTS)
+INTEGER, INTENT(OUT) :: FACES(4*MAXFACES)
+INTEGER, INTENT(OUT) :: NVOLS
+INTEGER, INTENT(OUT) :: VOLS(4*MAXVOLS)
+
+! Local Variables:
+REAL(EB), PARAMETER :: EX(IAXIS:KAXIS) = (/ 1._EB, 0._EB, 0._EB /)
+REAL(EB) :: E1(IAXIS:KAXIS), E2(IAXIS:KAXIS), E3(IAXIS:KAXIS), TGL(3,3), V(IAXIS:KAXIS,1), R(IAXIS:KAXIS,1)
+INTEGER :: NP_L,NP_T,IVERT,IFACE,ILE,ITH,IFC
+REAL(EB):: DELTA_L,DELTA_T,THETA,POS_1,POS_2,POS_3, LEN
+
+
+
+! Check if CYLINDER axis is any of IAXIS, JAXIS, KAXIS:
+IF (ABS(CYLINDER_AXIS(JAXIS))<TWO_EPSILON_EB .AND.  ABS(CYLINDER_AXIS(KAXIS))<TWO_EPSILON_EB) THEN ! IAXIS
+   E1(IAXIS:KAXIS) = EX(IAXIS:KAXIS)
+   E2(IAXIS:KAXIS) = (/ 0._EB, 1._EB, 0._EB /)
+   E3(IAXIS:KAXIS) = (/ 0._EB, 0._EB, 1._EB /)
+ELSEIF (ABS(CYLINDER_AXIS(KAXIS))<TWO_EPSILON_EB .AND.  ABS(CYLINDER_AXIS(IAXIS))<TWO_EPSILON_EB) THEN ! JAXIS
+   E1(IAXIS:KAXIS) = (/ 0._EB, 1._EB, 0._EB /)
+   E2(IAXIS:KAXIS) = (/ 0._EB, 0._EB, 1._EB /)
+   E3(IAXIS:KAXIS) = EX(IAXIS:KAXIS)
+ELSEIF (ABS(CYLINDER_AXIS(IAXIS))<TWO_EPSILON_EB .AND.  ABS(CYLINDER_AXIS(JAXIS))<TWO_EPSILON_EB) THEN ! KAXIS
+   E1(IAXIS:KAXIS) = (/ 0._EB, 0._EB, 1._EB /)
+   E2(IAXIS:KAXIS) = EX(IAXIS:KAXIS)
+   E3(IAXIS:KAXIS) = (/ 0._EB, 1._EB, 0._EB /)
+ELSE
+   ! Cylinder axis not aligned with any Eulerian Axis. Define an orthogonal se of unit vectors:
+   ! E1 in direction of cylinder axis:
+   LEN = SQRT(CYLINDER_AXIS(IAXIS)**2._EB + CYLINDER_AXIS(JAXIS)**2._EB + CYLINDER_AXIS(KAXIS)**2._EB)
+   E1(IAXIS:KAXIS) = 1/LEN * CYLINDER_AXIS(IAXIS:KAXIS)
+
+   ! E2 in direction normal to plane EX x E1:
+   CALL CROSS_PRODUCT(E2,EX,E1)
+   LEN = SQRT(E2(IAXIS)**2._EB + E2(JAXIS)**2._EB + E2(KAXIS)**2._EB)
+   E2(IAXIS:KAXIS) = 1/LEN * E2(IAXIS:KAXIS)
+
+   ! E3 in direction of E1 x E2
+   CALL CROSS_PRODUCT(E3,E1,E2)
+ENDIF
+
+! Define transformation matrix from local to global axes:
+TGL(IAXIS:KAXIS,IAXIS) = E1(IAXIS:KAXIS)
+TGL(IAXIS:KAXIS,JAXIS) = E2(IAXIS:KAXIS)
+TGL(IAXIS:KAXIS,KAXIS) = E3(IAXIS:KAXIS)
+
+! Now define cylinder in local axes E1,E2,E3, using CYLINDER_RADIUS and CYLINDER_LENGTH, centered at zero origin:
+! Define vertices:
+NP_L = CYLINDER_NSEG_AXIS + 1
+NP_T = CYLINDER_NSEG_THETA
+DELTA_L = CYLINDER_LENGTH / REAL(CYLINDER_NSEG_AXIS,EB)
+DELTA_T = 2._EB*PI / REAL(CYLINDER_NSEG_THETA,EB)
+IVERT= 0
+
+! Low plane center vertex:
+POS_1 = -CYLINDER_LENGTH/2._EB
+POS_2 = 0._EB; POS_3 = 0._EB;
+IVERT = IVERT + 1
+VERTS(3*IVERT-2:3*IVERT) = (/ POS_1, POS_2, POS_3 /)
+
+VERTEX_LOOP : DO ILE=1,NP_L
+   POS_1 = -CYLINDER_LENGTH/2._EB + REAL(ILE-1,EB)*DELTA_L
+   DO ITH=1,NP_T
+
+      THETA = REAL(ITH-1,EB)*DELTA_T
+      POS_2 = CYLINDER_RADIUS*COS(THETA)
+      POS_3 = CYLINDER_RADIUS*SIN(THETA)
+
+      IVERT = IVERT + 1
+      VERTS(3*IVERT-2:3*IVERT) = (/ POS_1, POS_2, POS_3 /)
+
+   ENDDO
+ENDDO VERTEX_LOOP
+
+! High plane center vertex:
+POS_1 = CYLINDER_LENGTH/2._EB
+POS_2 = 0._EB; POS_3 = 0._EB;
+IVERT = IVERT + 1
+VERTS(3*IVERT-2:3*IVERT) = (/ POS_1, POS_2, POS_3 /)
+
+NVERTS = IVERT
+
+! Define faces:
+! Low axis plane:
+IFACE=0
+IVERT=1
+DO IFC=1,NP_T
+   IF (IFC < NP_T) THEN
+      I1 = 1 + IFC + 1
+      I2 = 1 + IFC
+      I3 = IVERT
+   ELSE
+      I1 = IVERT + 1
+      I2 = IFC + 1
+      I3 = IVERT
+   ENDIF
+   IFACE=IFACE+1
+   FACES(3*IFACE-2:3*IFACE) = (/I1, I2, I3 /)
+ENDDO
+
+! Cylinder side faces:
+FACE_LOOP : DO ILE=2,NP_L
+   DO IFC=1,NP_T
+
+      ! Locate first vertex index:
+      IF (IFC < NP_T) THEN
+         I1 = (ILE-1)*NP_T + 1 + IFC
+         I2 = (ILE-1)*NP_T + 1 + IFC + 1
+         I3 = (ILE-2)*NP_T + 1 + IFC
+         I4 = (ILE-2)*NP_T + 1 + IFC + 1
+      ELSE
+         I1 = (ILE-1)*NP_T + 1 + IFC
+         I2 = (ILE-1)*NP_T + 1 + 1
+         I3 = (ILE-2)*NP_T + 1 + IFC
+         I4 = (ILE-2)*NP_T + 1 + 1
+      ENDIF
+
+      IFACE=IFACE+1
+      FACES(3*IFACE-2:3*IFACE) = (/I1, I3, I2/)
+      IFACE=IFACE+1
+      FACES(3*IFACE-2:3*IFACE) = (/I3, I4, I2/)
+
+   ENDDO
+ENDDO FACE_LOOP
+
+! High axis plane:
+IVERT=NVERTS
+DO IFC=1,NP_T
+   IF (IFC < NP_T) THEN
+      I1 = (NP_L-1)*NP_T + 1 + IFC
+      I2 = (NP_L-1)*NP_T + 1 + IFC + 1
+      I3 = IVERT
+   ELSE
+      I1 = (NP_L-1)*NP_T + 1 + IFC
+      I2 = (NP_L-1)*NP_T + 1 + 1
+      I3 = IVERT
+   ENDIF
+   IFACE=IFACE+1
+   FACES(3*IFACE-2:3*IFACE) = (/I1, I2, I3 /)
+ENDDO
+
+NFACES = IFACE
+
+! Transform vertices to global axes:
+DO IVERT=1,NVERTS
+   V(IAXIS:KAXIS,1) = VERTS(3*IVERT-2:3*IVERT)
+   R = MATMUL(TGL,V)
+   VERTS(3*IVERT-2:3*IVERT) = R(IAXIS:KAXIS,1)
+ENDDO
+
+! No volumes being defined.
+NVOLS = 0
+VOLS  = 0
+
+! WRITE(LU_ERR,*) 'Vertices:'
+! DO IVERT=1,NVERTS
+!    WRITE(LU_ERR,*) VERTS(3*IVERT-2:3*IVERT)
+! ENDDO
+! WRITE(LU_ERR,*) ' '
+! WRITE(LU_ERR,*) 'Faces:'
+! DO IFACE=1,NFACES
+!    WRITE(LU_ERR,*) FACES(3*IFACE-2:3*IFACE)
+! ENDDO
+
+RETURN
+END SUBROUTINE DEFINE_CYLINDER
 
 ! --------------------------- GET_GEOM_TRIBIN --------------------------------------
 
@@ -35914,11 +37995,18 @@ SUBROUTINE SET_GEOM_DEFAULTS
 
    SPHERE_ORIGIN = 1.001_EB*MAX_VAL
    SPHERE_RADIUS = 1.001_EB*MAX_VAL
+   CYLINDER_LENGTH = 1.001_EB*MAX_VAL
+   CYLINDER_RADIUS = 1.001_EB*MAX_VAL
+   CYLINDER_ORIGIN = 1.001_EB*MAX_VAL
+   CYLINDER_AXIS   = 1.001_EB*MAX_VAL
+   CYLINDER_NSEG_THETA = -1
+   CYLINDER_NSEG_AXIS  = -1
    N_LEVELS=-1
    N_LAT=-1
    N_LONG=-1
    SPHERE_TYPE=-1
    GEOM_TYPE=CAD_GEOM_TYPE
+   BNDF_GEOM=BNDF_DEFAULT
 
 END SUBROUTINE SET_GEOM_DEFAULTS
 

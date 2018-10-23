@@ -193,9 +193,11 @@ CPDIRFILES ()
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 if [ "`uname`" == "Darwin" ]; then
   FDSOS=_osx_64
+  OS=_osx
   PLATFORM=OSX64
 else
   FDSOS=_linux_64
+  OS=_linux
   PLATFORM=LINUX64
 fi
 
@@ -239,6 +241,13 @@ fi
 fds2asciidir=intel$FDSOS
 fds2ascii=fds2ascii$FDSOS
 
+if [ "$MPI_VERSION" == "INTEL" ]; then
+  testmpidir=impi_intel$OS
+else
+  testmpidir=mpi_intel$OS
+fi
+testmpi=test_mpi
+
 scp_fds_smvroot=$fds_smvroot
 fds_smvroot=~/$fds_smvroot
 fdsroot=$scp_fds_smvroot/fds/Build
@@ -253,10 +262,11 @@ uploaddir=$fds_smvroot/fds/Build/Bundle/uploads
 bundledir=$bundlebase
 webpagesdir=$fds_smvroot/webpages
 smvbindir=$scp_fds_smvroot/smv/Build/smokeview/$smokeviewdir
-fds_bundle=$fds_smvroot/fds/Utilities/Scripts/for_bundle
-smv_bundle=$fds_smvroot/smv/for_bundle
+fds_bundle=$fds_smvroot/fds/Build/Bundle/for_bundle
+smv_bundle=$fds_smvroot/smv/Build/Bundle/for_bundle
 texturedir=$smv_bundle/textures
 fds2asciiroot=$scp_fds_smvroot/fds/Utilities/fds2ascii
+testmpiroot=$scp_fds_smvroot/fds/Utilities/test_mpi
 makeinstaller=$fds_smvroot/fds/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/fds/Verification/FDS_Cases.sh
@@ -313,11 +323,13 @@ if [ "$fds_debug" == "1" ]; then
   SCP $fdshost $fdsroot/$fdsmpidirdb      $fdsmpidb  $bundledir/bin fds_db
 fi
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin fds2ascii
+SCP $fdshost $testmpiroot/$testmpidir $testmpi $bundledir/bin test_mpi
 
 CURDIR=`pwd`
 cd $bundledir/bin
 hashfile fds       > hash/fds.sha1
 hashfile fds2ascii > hash/fds2ascii.sha1
+hashfile test_mpi > hash/test_mpi.sha1
 cd $CURDIR
 
 if [ "$MPI_VERSION" != "INTEL" ]; then
@@ -371,7 +383,7 @@ if [[ "$INTEL_BIN_DIR" != "" ]] && [[ -e $INTEL_BIN_DIR ]]; then
     CP $INTEL_LIB_DIR libmpi.so.12     $bundledir/bin/LIB64 libmpi.so.12
   fi
 fi
-if [ "$OS_LIB_DIR" != "" ]; then
+if [[ "$OS_LIB_DIR" != "" ]] && [[ -e $OS_LIB_DIR ]]; then
   echo ""
   echo "--- copying run time libraries ---"
   echo ""

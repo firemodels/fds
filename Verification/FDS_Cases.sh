@@ -133,6 +133,8 @@ $QFDS -d Fires box_burn_away1.fds
 $QFDS -d Fires box_burn_away2.fds
 $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds
+$QFDS -d Fires box_burn_away5.fds
+$QFDS -d Fires box_burn_away6.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds

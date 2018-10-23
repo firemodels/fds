@@ -1149,10 +1149,12 @@ ENDIF
 END SUBROUTINE WALE_VISCOSITY
 
 
-SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S)
+SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S,DY2,U_DY2)
 
 REAL(EB), INTENT(OUT) :: SLIP_FACTOR,U_TAU,Y_PLUS
 REAL(EB), INTENT(IN) :: U,NU,DY,S ! S is the roughness length scale (Pope's notation)
+REAL(EB), OPTIONAL, INTENT(IN)  :: DY2
+REAL(EB), OPTIONAL, INTENT(OUT) :: U_DY2
 
 REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB ! 1/von Karman constant
 REAL(EB), PARAMETER :: B=5.2_EB,BTILDE_ROUGH=8.5_EB,BTILDE_MAX=9.5_EB ! see Pope (2000) pp. 294,297,298
@@ -1161,7 +1163,7 @@ REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
 REAL(EB), PARAMETER :: U1=5._EB,U2=RKAPPA*LOG(Y2)+B
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY
+REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY,Y_CELL_CENTER2,Y_PLUS2
 INTEGER :: ITER
 
 ! References:
@@ -1242,6 +1244,38 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
    SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDY*DY/(ABS(U)+EPS))) ! -1.0 <= SLIP_FACTOR <= 1.0
 
 ENDIF LES_IF
+
+DY2_IF : IF (PRESENT(DY2)) THEN
+   IF (SIM_MODE==DNS_MODE) THEN
+      Y_CELL_CENTER2 = 0.5*DY2
+      U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
+   ELSE
+      Y_CELL_CENTER2 = 0.5*DY2
+      S_PLUS = S/(DELTA_NU+EPS) ! roughness in viscous units
+      IF (S_PLUS < S0) THEN
+         ! smooth wall
+         Y_PLUS2 = Y_CELL_CENTER2/(DELTA_NU+EPS)
+         IF (Y_PLUS2 < Y_WERNER_WENGLE) THEN
+            ! viscous sublayer
+            U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
+         ELSE
+            ! log layer
+            U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+B) ! U_TAU*U_PLUS2
+         ENDIF
+      ELSE
+         ! rough wall
+         IF (S_PLUS < S1) THEN
+            BTILDE = B + RKAPPA*LOG(S_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
+         ELSE IF (S_PLUS < S2) THEN
+            BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
+         ELSE
+            BTILDE = BTILDE_ROUGH ! fully rough
+         ENDIF
+         Y_PLUS2 = Y_CELL_CENTER2/S
+         U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+BTILDE) ! U_TAU*U_PLUS2 Pope (2000) p. 297, Eq. (7.121)
+      ENDIF
+   ENDIF
+ENDIF DY2_IF
 
 CONTAINS
 

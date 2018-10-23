@@ -4,18 +4,28 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
   set SETUP_IFORT_COMPILER_64=1
 
+  set I_MPI_RELEASE_ROOT=%I_MPI_ROOT%\intel64\lib
+  set   I_MPI_DEBUG_ROOT=%I_MPI_ROOT%\intel64\lib
   IF DEFINED IFORT_COMPILER14 set IFORT_COMPILER=%IFORT_COMPILER14%
   IF DEFINED IFORT_COMPILER15 set IFORT_COMPILER=%IFORT_COMPILER15%
   IF DEFINED IFORT_COMPILER16 set IFORT_COMPILER=%IFORT_COMPILER16%
   IF DEFINED IFORT_COMPILER17 set IFORT_COMPILER=%IFORT_COMPILER17%
   IF DEFINED IFORT_COMPILER18 set IFORT_COMPILER=%IFORT_COMPILER18%
+  IF DEFINED IFORT_COMPILER19 set IFORT_COMPILER=%IFORT_COMPILER19%
+
+  IF DEFINED IFORT_COMPILER19 set I_MPI_RELEASE_ROOT=%I_MPI_ROOT%\intel64\lib\release
+  IF DEFINED IFORT_COMPILER19 set   I_MPI_DEBUG_ROOT=%I_MPI_ROOT%\intel64\lib\debug
 
   IF NOT DEFINED IFORT_COMPILER (
     echo "*** Error: Intel compiler environment variable not defined."
+    exit /b
   )
-  IF DEFINED IFORT_COMPILER (
-    echo Setting up compiler environment
-    call "%IFORT_COMPILER%\bin\compilervars" intel64
-    call "%IFORT_COMPILER%\mpi\intel64\bin\mpivars" release
-  )
+
+  set STARTUP="%IFORT_COMPILER%\bin\compilervars"
+  IF DEFINED IFORT_COMPILER19 set STARTUP="%IFORT_COMPILER19%\..\..\parallel_studio_xe_2019\bin\psxevars.bat"
+
+  echo Setting up compiler environment
+  call %STARTUP% intel64
+  call "%IFORT_COMPILER%\mpi\intel64\bin\mpivars" release
+
 :envexist

@@ -37,6 +37,9 @@ call :title2bash #  ---- MPI version ----
 call :dos2bash linux_mpi_version %linux_mpi_version%
 call :dos2bash osx_mpi_version   %osx_mpi_version%
 
+call :title2bash #  ---- INTEL compiler version ----
+call :dos2bash INTELVERSION %INTELVERSION%
+
 call :title2bash #  ---- Linux/OSX repo locations ----
 call :dos2bash linux_svn_root %linux_svn_root%
 call :dos2bash INTEL_LIB_DIR  %INTEL_LIB_DIR%
