@@ -26,7 +26,7 @@ Propane burner test case to check basic chemistry model and soot deposition
 &SPEC ID = 'CARBON DIOXIDE',  LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'WATER VAPOR',     LUMPED_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'PROPANE' /
-&SPEC ID = 'SOOT', AEROSOL=.TRUE. /
+&SPEC ID = 'SOOT', AEROSOL=.TRUE.,MEAN_DIAMETER=1.E-6 /
 
 &SPEC ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
       VOLUME_FRACTION = 3.7619,1.000, BACKGROUND = .TRUE. /
