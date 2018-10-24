@@ -246,8 +246,8 @@ A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 /
 \end{verbatim}
 
-\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{min}, x_{max}, y_{min})$ and $(y_{max})$
-where elevation data is defined with {\ct ZVALS}.
+\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$  and $(x_{\rm max}, y_{\rm max})$
+and where {\ct ZVALS} defines elevation data in this region.
 {\ct IJK}\ specifies how many vertices occur in this region along each dimension.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
 The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
@@ -2669,7 +2669,7 @@ Consider the solution of the following constant density, incompressible flow, mo
 %
 \begin{eqnarray}
   \frac{\partial \rho \mathbf{u}(\mathbf{x},t)}{\partial t} &=& -\left[ \mathbf{F_v}(\mathbf{u},\mathbf{x},t) + \boldsymbol{\nabla} p(\mathbf{x},t) + \mathbf{fe_v}(\mathbf{u},p) \right] \label{eq:mmsMom} \\
-  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right] 
+  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right]
   \label{eq:mmsZ}
 \end{eqnarray}
 %
@@ -2692,19 +2692,19 @@ which is similar on velocities and pressure to the functions given in reference~
    for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
 \end{equation}
 %
-which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside. 
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside.
 
- The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.  
+ The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.
 
 
 
-We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis. 
+We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis.
 %
 % figure
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
-       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png} 
+       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png}
       \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
 	\label{Fig:ManuSoln}
 \end{figure}
@@ -2712,7 +2712,7 @@ We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to t
 An angular parameter $\alpha$ defines the orientation of the local axes $x',y'$ respect to the Eulerian frame coordinates $x,y$. The center of $\Omega_1$ in the Eulerian frame is situated in position $\mathbf{x}_{Ec}=(\pi,\pi)$. The rotation matrix from Eulerian $E$ to local frame $B$ coordinates is
 %
 \begin{equation}
-  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c} 
+  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c}
                                           \cos(\alpha) & \sin(\alpha) \\
                                          -\sin(\alpha)  & \cos(\alpha) \end{array} \right]
 \end{equation}
@@ -2721,7 +2721,7 @@ In the local system, the center of the square in local coordinates is given by $
 %
 \begin{equation}
     \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +\mathbf{x}_{cp}'
-\end{equation}  
+\end{equation}
 %
 The same point $p$ location can be defined in terms of the $E$ frame as $\mathbf{x}_{Ep}= \mathbf{x}_{Ec} +\mathbf{x}_{cp}$ (Eulerian coordinates). Then
 %
@@ -2733,7 +2733,7 @@ and finally
 %
 \begin{equation}
     \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
-\end{equation}  
+\end{equation}
 %
 This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in the Eulerian frame (with Eulerian frame coordinates $x,y$) to the local frame coordinates where equations~\eqref{eq:upmf}-\eqref{eq:qmf} are defined. This transformation is used to define the initial conditions in the local frame, for points collocated in the Eulerian frame aligned fluid grid. Also, the manufactured variables can be defined at the final time to define error norms. Finally, the velocity components of interest are the ones defined in the Eulerian frame, and can be readily computed as
 %
@@ -2741,7 +2741,7 @@ This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in t
   \left\{ \begin{array}{c}  u \\ v \end{array} \right\}_p = [\mathbf{T}_{BE}]^T \left\{ \begin{array}{c}  u' \\ v' \end{array} \right\}_p
 \end{equation}
 %
-We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field. 
+We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field.
 When $\alpha=0$, a domain $\Omega$ of size $L_x=L_y=2\pi$ centered in $\mathbf{x}_{Ec}$ is sufficient for application of periodic boundary conditions. Then, for $\alpha=\arctan(1/r)$, $r=1,2,3,...$ the periodicity lengths on the Eulerian reference frame are $L_x=L_y=2\pi \sqrt{1+r^2}$.
 That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\sqrt{8} \pi$. If $\alpha=\arctan(1/2)$, $L_x=L_y=\sqrt{20} \pi$.
 %See figures~\ref{}a-c.
@@ -2761,13 +2761,13 @@ where in our case $Re_H= \rho \overline{u} H/ \mu \simeq 155$, being the analyti
    \Delta p / L = f \frac{L}{H}  \frac{1}{2} \rho \overline{u}^2
 \end{equation}
 %
-which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}. 
+which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}.
 %
 % figure
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
-       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png} 
+       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png}
       \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
 	\label{Fig:PoiseSketch}
 \end{figure}
@@ -2781,9 +2781,9 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf} 
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf}
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf} 
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf}
       \caption{Poiseuille flow created by two geometries: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
       \label{Fig:PoiseConvg}
 \end{figure}
