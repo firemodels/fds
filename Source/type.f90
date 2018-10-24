@@ -331,11 +331,13 @@ TYPE GEOMETRY_TYPE
    CHARACTER(60) :: BNDC_FILENAME='null',GEOC_FILENAME='null',TEXTURE_MAPPING
    LOGICAL :: COMPONENT_ONLY,IS_DYNAMIC=.TRUE.,HAVE_SURF,HAVE_MATL,AUTO_TEXTURE,HIDDEN,REMOVEABLE,SHOW_BNDF=.TRUE.
    INTEGER :: N_VERTS_BASE,N_FACES_BASE,N_VOLUS_BASE,N_VERTS,N_EDGES,N_FACES,N_VOLUS,NSUB_GEOMS,GEOM_TYPE,IJK(3),N_LEVELS,&
-              DEVC_INDEX=-1,CTRL_INDEX=-1,PROP_INDEX=-1,DEVC_INDEX_O=-1,CTRL_INDEX_O=-1,MATL_INDEX=-1
+              DEVC_INDEX=-1,CTRL_INDEX=-1,PROP_INDEX=-1,DEVC_INDEX_O=-1,CTRL_INDEX_O=-1,MATL_INDEX=-1,&
+              CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS
    REAL(EB) :: GEOM_VOLUME,GEOM_AREA,GEOM_XYZCEN(3),OMEGA=0._EB,XYZ0(3),AZIM_BASE,ELEV_BASE,SCALE_BASE(3),XYZ_BASE(3),&
                AZIM,ELEV,SCALE(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GAXIS(3),GROTATE,GROTATE_DOT,GROTATE_BASE,&
                XB(6),SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),MIN_LEDGE,MAX_LEDGE,MEAN_LEDGE,&
-               GEOM_BOX(LOW_IND:HIGH_IND,IAXIS:KAXIS),TRANSPARENCY
+               GEOM_BOX(LOW_IND:HIGH_IND,IAXIS:KAXIS),TRANSPARENCY,CYLINDER_ORIGIN(3),CYLINDER_AXIS(3),&
+               CYLINDER_RADIUS,CYLINDER_LENGTH
    INTEGER,ALLOCATABLE,DIMENSION(:) :: FACES,VOLUS,SUB_GEOMS,SURFS,MATLS
    INTEGER,ALLOCATABLE,DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES
    REAL(EB),ALLOCATABLE,DIMENSION(:) :: FACES_AREA,VERTS_BASE,VERTS,TFACES,DAZIM,DELEV,ZVALS
@@ -375,10 +377,23 @@ TYPE IBM_CUTEDGE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)             ::NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE IBM_CUTEDGE_TYPE
 
-! REGC_EDGE type, used for computation of wall model shear stress and vorticity.
+! REGC_EDGE type, used for computation of wall model turbulent viscosity, shear stress, vorticity.
 TYPE IBM_RCEDGE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    INTEGER :: IE
+   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
+   ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
+   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IEDGE).
+   ! IEDGE = 0, Cartesian GASPHASE EDGE.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF      ! (IAXIS:KAXIS,IEDGE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,IEDGE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,IEDGE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,IEDGE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 END TYPE IBM_RCEDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
@@ -409,25 +424,46 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDZ, JDH
    REAL(EB) :: VELN_CRF, VELD_CRF, DHDX_CRF, FN_CRF, VELNP1_CRF, VELINT_CRF
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
-   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)            ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN=0._EB,VELS_CARTCEN=0._EB
-                                                                      ! Stencil velocity values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN=0._EB,DHDX1_CARTCEN=0._EB
-                                                                      ! Stencil FV and DHDX1.
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::    IJK_CFCEN ! [ I J K ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: XYZ_BP_CFCEN ! [x y z] location of bnd pt.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                           ::  INBFC_CFCEN ! Inbound face BP belongs to.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::INTCOEF_CFCEN ! Interpo coefficients.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::VEL_CFCEN,VELS_CFCEN ! Stencil velocity values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::FV_CFCEN,DHDX1_CFCEN
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         :: NOMIND_CFCEN
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           :: RHOPVN
+
+   ! Fields related to IBM_USE_OUTER_PLANE=.TRUE.:
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::VEL_CARTCEN,VELS_CARTCEN  ! Stencil velocity values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: FV_CARTCEN,DHDX1_CARTCEN ! Stencil FV and DHDX1.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            :: NOMIND_CARTCEN
+
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)          ::    IJK_CFCEN ! [ I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            :: XYZ_BP_CFCEN ! [x y z] location of bnd pt.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::  INBFC_CFCEN ! Inbound face BP belongs to.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::INTCOEF_CFCEN ! Interpo coefficients.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::VEL_CFCEN,VELS_CFCEN ! Stencil velocity values.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::FV_CFCEN,DHDX1_CFCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)          :: NOMIND_CFCEN
+
+   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
+   ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
+   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
+   ! IFACE = 0, undelying Cartesian face, IFACE=1:NFACE GASPHASE cut-faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF,INT_NOUT ! (IAXIS:KAXIS,0:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,0:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,0:NFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,0:NFACE)  ! 0 is interpolation point.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+
+   ! Fields used in INBOUNDARY faces:
+   ! Here: VIND=0, EP=1:INT_N_EXT_PTS,
+   ! INT_H_IND=1, etc. N_INT_CVARS=INT_P_IND+N_TRACKED_SPECIES
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            :: RHOPVN
    INTEGER :: NOMICF(2)=0  ! [NOM icf]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)             :: CFACE_INDEX, SURF_INDEX
+   INTEGER,  ALLOCATABLE, DIMENSION(:)              :: CFACE_INDEX, SURF_INDEX
 END TYPE IBM_CUTFACE_TYPE
 
 
@@ -541,16 +577,34 @@ TYPE IBM_RCVEL_TYPE
    INTEGER :: NCFACE, IWC=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
-   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)            ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), DIMENSION(MAX_DIM)                                    :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  DIMENSION(3)                                          ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  ::VEL_CARTCEN=0._EB,VELS_CARTCEN=0._EB
+
+   ! Fields related to IBM_USE_OUTER_PLANE=.TRUE.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::INTCOEF_CARTCEN ! Interpo coefficients.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::VEL_CARTCEN,VELS_CARTCEN
                                                                      ! Stencil velocity values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)                  :: FV_CARTCEN=0._EB,DHDX1_CARTCEN=0._EB
+   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: FV_CARTCEN,DHDX1_CARTCEN
                                                                      ! Stencil FV and DHDX1.
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            :: NOMIND_CARTCEN
+
    REAL(EB) :: VELINT
+
+   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
+   ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
+   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
+   ! IFACE = 0 Cartesian GASPHASE face.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF, INT_NOUT ! (IAXIS:KAXIS,IFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,IFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,IFACE)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,IFACE) ! 0 is interpolation point.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS       ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+
 END TYPE IBM_RCVEL_TYPE
 
 ! Regular Cartesian cells interpolation type:
