@@ -2115,7 +2115,7 @@ of the ceiling, FDS will ignore the ceiling properties and apply the supply prop
 the second as it did in versions prior to FDS 5. Now, the rule for {\ct VENT}s is ``first come, first served.''
 Keep in mind, however, that the
 second {\ct VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
-standard error) saying which {\ct VENT} has priority.
+standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solutio of the problem.
 
 Smokeview can help identify where two {\ct VENT}s overlap, assuming each has a unique {\ct COLOR}. Because Smokeview draws {\ct VENT}s
 on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
@@ -7822,7 +7822,7 @@ The {\ct ISOF} (``ISOsurface File'') namelist group creates three-dimensional an
 \begin{lstlisting}
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
-where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line). 
+where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
 The parameter {\ct SKIP=n}\ (default: 1) can also be used to reduce data by skipping {\ct n-1}\ values in each direction.
 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
