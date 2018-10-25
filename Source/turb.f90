@@ -1138,6 +1138,7 @@ ENDDO
 ! using Caley-Hamilton theorem
 
 SD2 = ONSI*(S2*S2 + O2*O2) + TWTH*S2*O2 + 2._EB*IV_SO
+IF (SD2 < 0.0) SD2 = 0._EB
 
 DENOM = S2**2.5_EB + SD2**1.25_EB
 IF (DENOM>TWO_EPSILON_EB) THEN
