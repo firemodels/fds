@@ -53,7 +53,8 @@ set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\%fdsversion%\Examples
-set out_examples2=%svn_root%\fds\Verification
+set fds_examples=%svn_root%\fds\Verification
+set smv_examples=%svn_root%\smv\Verification
 
 set out_smv=%out_bundle%\%smvversion%
 set out_textures=%out_smv%\textures
@@ -203,11 +204,11 @@ set QFDS=call %copyFDScases%
 set RUNTFDS=call %copyFDScases%
 set RUNCFAST=call %copyCFASTcases%
 
-cd %out_examples2%
+cd %fds_examples%
 %svn_root%\smv\Build\sh2bat\intel_win_64\sh2bat %fds_casessh% %fds_casesbat%
 call %fds_casesbat%>Nul
 
-cd %out_examples2%
+cd %smv_examples%
 %svn_root%\smv\Build\sh2bat\intel_win_64\sh2bat %smv_casessh% %smv_casesbat%
 call %smv_casesbat%>Nul
 %svn_root%\smv\Build\sh2bat\intel_win_64\sh2bat %wui_casessh% %wui_casesbat%

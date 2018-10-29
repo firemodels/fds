@@ -18343,6 +18343,11 @@ IF (STENCIL_INTERPOLATION == IBM_LINEAR_INTERPOLATION) THEN
          ENDDO
       ENDDO
    ENDDO
+   IF (ABS(RED_COEF) < TWO_EPSILON_EB) THEN
+      NPE_LIST_COUNT = 0
+      DEALLOCATE(MASK_IJK,RAW_COEF)
+      RETURN
+   ENDIF
    DO KK = KLO,KHI
       DO JJ = JLO,JHI
          DO II = ILO,IHI
@@ -32491,7 +32496,7 @@ REAL(EB), DIMENSION(IBM_MAXCEELEM_FACE) :: ANGSEG, ANGSEGAUX
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT, XYZVERT_CART  ! Locations of vertices.
 
 INTEGER, SAVE :: SIZE_CFACES_CFELEM, SIZE_VERTS_CFELEM
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CFELEM
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CFELEM,CFELEM2
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CFE, CFEL
 
 INTEGER, SAVE :: SIZE_EDGES_NODEDG, SIZE_VERTS_NODEDG
@@ -33163,6 +33168,18 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    ENDIF
                 ENDDO
              ENDDO
+
+             ALLOCATE(CFELEM2(SIZE(CFELEM,DIM=1),SIZE(CFELEM,DIM=2))); CFELEM2 = IBM_UNDEFINED
+             NP=0
+             DO ICF=1,NFACE
+                IF(CFELEM(1,ICF)>2) THEN
+                   NP=NP+1
+                   CFELEM2(:,NP) = CFELEM(:,ICF)
+                ENDIF
+             ENDDO
+             CFELEM = CFELEM2
+             DEALLOCATE(CFELEM2)
+             NFACE = NP
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NFACE)                 = 0._EB
