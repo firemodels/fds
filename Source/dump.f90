@@ -5770,59 +5770,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
 ENDDO DEVICE_LOOP
 
-! Write the initial states of the evacuation devices (exit,door,entr)
-
-EVAC_ONLY6: IF (EVACUATION_ONLY(NM)) THEN
-   I=0  ! Counter for evacuation devices, doors+exits+entrys (evss do not change states)
-   DO N=1,N_DOORS
-      IF (.NOT.EVAC_DOORS(N)%SHOW .OR. EMESH_INDEX(NM)==0) CYCLE
-      I=I+1
-      IF (EVAC_DOORS(N)%IMODE>0 .AND. EVAC_DOORS(N)%IMESH==NM) THEN
-         EVAC_DOORS(N)%IMODE=-EVAC_DOORS(N)%IMODE   ! +: change status, -: has already changed status
-         M=>MESHES(NM)
-         IF (M%N_STRINGS+2>M%N_STRINGS_MAX) THEN
-            CALL RE_ALLOCATE_STRINGS(NM)
-         ENDIF
-         I_STATE=ABS(EVAC_DOORS(N)%IMODE)-1
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(A,5X,A,1X)') 'DEVICE_ACT',TRIM(EVAC_DOORS(N)%ID)
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(I6,F10.2,I6)') I+N_DEVC,T,I_STATE
-      ENDIF
-   ENDDO
-   DO N=1,N_EXITS
-      IF (EVAC_EXITS(N)%COUNT_ONLY .OR. .NOT.EVAC_EXITS(N)%SHOW .OR. EMESH_INDEX(NM)==0) CYCLE
-      I=I+1
-      IF (EVAC_EXITS(N)%IMODE>0 .AND. EVAC_EXITS(N)%IMESH==NM) THEN
-         EVAC_EXITS(N)%IMODE=-EVAC_EXITS(N)%IMODE   ! +: change status, -: has already changed status
-         M=>MESHES(NM)
-         IF (M%N_STRINGS+2>M%N_STRINGS_MAX) THEN
-            CALL RE_ALLOCATE_STRINGS(NM)
-         ENDIF
-         I_STATE=ABS(EVAC_EXITS(N)%IMODE)-1
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(A,5X,A,1X)') 'DEVICE_ACT',TRIM(EVAC_EXITS(N)%ID)
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(I6,F10.2,I6)') I+N_DEVC,T,I_STATE
-      ENDIF
-   ENDDO
-   DO N=1,N_ENTRYS
-      IF (.NOT.EVAC_ENTRYS(N)%SHOW .OR. EMESH_INDEX(NM)==0) CYCLE
-      I=I+1
-      IF (EVAC_ENTRYS(N)%IMODE>0 .AND. EVAC_ENTRYS(N)%IMESH==NM) THEN
-         EVAC_ENTRYS(N)%IMODE=-EVAC_ENTRYS(N)%IMODE   ! +: change status, -: has already changed status
-         M=>MESHES(NM)
-         IF (M%N_STRINGS+2>M%N_STRINGS_MAX) THEN
-            CALL RE_ALLOCATE_STRINGS(NM)
-         ENDIF
-         I_STATE=ABS(EVAC_ENTRYS(N)%IMODE)-1
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(A,5X,A,1X)') 'DEVICE_ACT',TRIM(EVAC_ENTRYS(N)%ID)
-         M%N_STRINGS = M%N_STRINGS + 1
-         WRITE(M%STRING(M%N_STRINGS),'(I6,F10.2,I6)') I+N_DEVC,T,I_STATE
-      ENDIF
-   ENDDO
-ENDIF EVAC_ONLY6
 
 END SUBROUTINE UPDATE_DEVICES
 
