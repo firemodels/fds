@@ -52,7 +52,7 @@ PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STA
        TIMINGS,FLUSH_GLOBAL_BUFFERS,FLUSH_EVACUATION_BUFFERS,FLUSH_LOCAL_BUFFERS,READ_RESTART,WRITE_DIAGNOSTICS, &
        WRITE_SMOKEVIEW_FILE,DUMP_MESH_OUTPUTS,UPDATE_GLOBAL_OUTPUTS,DUMP_DEVICES,DUMP_HRR,DUMP_MASS,DUMP_CONTROLS,&
        INITIALIZE_DIAGNOSTIC_FILE,DUMP_RESTART,&
-       DUMP_UVW,DUMP_GEOM,DUMP_GEOM_DIAG
+       DUMP_UVW,DUMP_GEOM,DUMP_GEOM_DIAG,UPDATE_DEVICES_2
 
 
 CONTAINS
@@ -69,7 +69,7 @@ TNOW = CURRENT_TIME()
 
 CALL UPDATE_HRR(DT,NM)
 CALL UPDATE_MASS(DT,NM)
-CALL UPDATE_DEVICES(T,DT,NM)
+CALL UPDATE_DEVICES_1(T,DT,NM)
 
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE UPDATE_GLOBAL_OUTPUTS
@@ -3093,7 +3093,7 @@ SUBROUTINE DUMP_RESTART(T,DT,NM)
 ! Dump data to a file for possible restart
 
 REAL(EB), INTENT(IN) :: T,DT
-INTEGER :: NOM,N,NN
+INTEGER :: NOM,N
 INTEGER, INTENT(IN) :: NM
 TYPE(OMESH_TYPE), POINTER :: M2=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
@@ -3164,7 +3164,8 @@ WRITE(LU_CORE(NM)) T,ICYC,PART_CLOCK(NM),RESTART_CLOCK,SLCF_CLOCK(NM),RADF_CLOCK
 DO N=1,N_DEVC
    DV => DEVICE(N)
    WRITE(LU_CORE(NM)) DV%T,DV%T_CHANGE,DV%TMP_L,DV%Y_C,DV%CURRENT_STATE,DV%PRIOR_STATE,&
-                      DV%LP_TAG,DV%PART_CLASS_INDEX
+                      DV%LP_TAG,DV%PART_CLASS_INDEX,DV%RMS_VALUE,DV%RMS_VALUE2,DV%COV_VALUE,DV%AVERAGE_VALUE,&
+                      DV%AVERAGE_VALUE2,DV%VALUE,DV%SMOOTHED_VALUE,DV%TIME_INTERVAL
    IF (DV%QUANTITY=='CHAMBER OBSCURATION') THEN
       WRITE(LU_CORE(NM)) UBOUND(DV%T_E,1)
       WRITE(LU_CORE(NM)) DV%N_T_E,DV%T_E,DV%Y_E
@@ -3172,14 +3173,6 @@ DO N=1,N_DEVC
    IF (DV%QUANTITY=='ASPIRATION') THEN
       WRITE(LU_CORE(NM)) DV%YY_SOOT,DV%TIME_ARRAY
    ENDIF
-   IF (DV%STATISTICS=='TIME INTEGRAL') THEN
-      WRITE(LU_CORE(NM)) DV%TI_T,DV%TI_VALUE
-   ENDIF
-   DO NN=1,DV%N_SUBDEVICES
-      SDV => DV%SUBDEVICE(NN)
-      WRITE(LU_CORE(NM)) SDV%RMS_VALUE,SDV%RMS_VALUE2,SDV%COV_VALUE,SDV%AVERAGE_VALUE,SDV%AVERAGE_VALUE2, & 
-                         SDV%VALUE,SDV%SMOOTHED_VALUE,SDV%TIME_INTERVAL
-   ENDDO
 ENDDO
 DO N=1,N_CTRL
    WRITE(LU_CORE(NM)) CONTROL(N)%T_CHANGE,CONTROL(N)%CURRENT_STATE,CONTROL(N)%PRIOR_STATE
@@ -3237,7 +3230,7 @@ SUBROUTINE READ_RESTART(T,DT,NM)
 USE COMP_FUNCTIONS, ONLY:SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE,ALLOCATE_STORAGE
 REAL(EB), INTENT(OUT) :: T,DT
-INTEGER :: NOM,N,NN,N_T_E_MAX,NS
+INTEGER :: NOM,N,N_T_E_MAX,NS
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: EX
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
@@ -3317,7 +3310,8 @@ ICYC_RESTART = ICYC
 DO N=1,N_DEVC
    DV => DEVICE(N)
    READ(LU_RESTART(NM)) DV%T,DV%T_CHANGE,DV%TMP_L,DV%Y_C,DV%CURRENT_STATE,DV%PRIOR_STATE,&
-                        DV%LP_TAG,DV%PART_CLASS_INDEX
+                        DV%LP_TAG,DV%PART_CLASS_INDEX,DV%RMS_VALUE,DV%RMS_VALUE2,DV%COV_VALUE,DV%AVERAGE_VALUE,&
+                        DV%AVERAGE_VALUE2,DV%VALUE,DV%SMOOTHED_VALUE,DV%TIME_INTERVAL
    IF (DV%QUANTITY=='CHAMBER OBSCURATION') THEN
       READ(LU_RESTART(NM)) N_T_E_MAX
       DV%T_E => REALLOCATE(DV%T_E,-1,N_T_E_MAX)
@@ -3327,14 +3321,6 @@ DO N=1,N_DEVC
    IF (DV%QUANTITY=='ASPIRATION') THEN
       READ(LU_RESTART(NM)) DV%YY_SOOT,DV%TIME_ARRAY
    ENDIF
-   IF (DV%STATISTICS=='TIME INTEGRAL') THEN
-      READ(LU_RESTART(NM)) DV%TI_T,DV%TI_VALUE
-   ENDIF
-   DO NN=1,DV%N_SUBDEVICES
-      SDV => DV%SUBDEVICE(NN)
-      READ(LU_RESTART(NM)) SDV%RMS_VALUE,SDV%RMS_VALUE2,SDV%COV_VALUE,SDV%AVERAGE_VALUE,SDV%AVERAGE_VALUE2, &
-                           SDV%VALUE,SDV%SMOOTHED_VALUE,SDV%TIME_INTERVAL
-   ENDDO
 ENDDO
 
 DO N=1,N_CTRL
@@ -5292,41 +5278,24 @@ END FUNCTION EDGE_VALUE
 END SUBROUTINE DUMP_SLCF
 
 
-SUBROUTINE UPDATE_DEVICES(T,DT,NM)
+SUBROUTINE UPDATE_DEVICES_1(T,DT,NM)
 
 ! Update the value of all sensing DEVICEs, any control function outputs, and associated output quantities
 
-USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS,GET_LAGRANGIAN_PARTICLE_INDEX
-USE EVAC, ONLY: EMESH_INDEX
+USE MEMORY_FUNCTIONS, ONLY : GET_LAGRANGIAN_PARTICLE_INDEX
 USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
 REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: VALUE,VALUE2,STAT_VALUE,SUM_VALUE,VOL,WGT_LINE,T_TMP,DVAL,DVAL2,DEV2,WGT_LINE_UNBIASED,WGT
 INTEGER, INTENT(IN) :: NM
-INTEGER :: N,I,J,K,STAT_COUNT,IW,SURF_INDEX,IND,LP_INDEX,LOCATION_INDICES(3),ICF
-LOGICAL :: NOT_FOUND
+REAL(EB) :: VALUE,VOL
+INTEGER :: N,I,J,K,IW,SURF_INDEX,LP_INDEX,ICF
 
 CALL POINT_TO_MESH(NM)
-
-! Weighting factor for running average of line devices
-
-WGT_LINE = DT/MAX(DT,T-(T_DEVC_LINE_END-DT_DEVC_LINE))
-WGT_LINE_UNBIASED = 1._EB/WGT_LINE-1._EB
-IF (WGT_LINE_UNBIASED>TWO_EPSILON_EB) THEN
-   WGT_LINE_UNBIASED = 1._EB/WGT_LINE_UNBIASED
-ELSE
-   WGT_LINE_UNBIASED = WGT_LINE
-ENDIF
-
-IF (T>T_DEVC_LINE_END) THEN
-   WGT_LINE = 0._EB
-   WGT_LINE_UNBIASED = 0._EB
-ENDIF
 
 ! If any device has QUANTITY='PARTICLE FLUX N', pre-compute PARTICLE fluxes
 
 IF (DEVC_PARTICLE_FLUX .AND. .NOT.EVACUATION_ONLY(NM)) CALL COMPUTE_PARTICLE_FLUXES(NM)
 
-! Loop over all devices and determine its current VALUE
+! Loop over all devices, calculate quantity, and perform spatial averaging, min/max, etc.
 
 DEVICE_LOOP: DO N=1,N_DEVC
 
@@ -5345,7 +5314,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       IF (DV%LP_TAG>0) THEN
          CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%PART_CLASS_INDEX,DV%LP_TAG,LP_INDEX)
          IF (LP_INDEX==0) CYCLE DEVICE_LOOP
-         IF (LP_INDEX>0)  DV%MESH = NM
+         IF (LP_INDEX>0)  SDV%MESH = NM
       ELSE
          CYCLE DEVICE_LOOP
       ENDIF
@@ -5361,14 +5330,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (DV%NO_UPDATE_DEVC_INDEX>0) THEN
       IF (DEVICE(DV%NO_UPDATE_DEVC_INDEX)%CURRENT_STATE) THEN
-         SDV%VALUE = SDV%SMOOTHED_VALUE
-         SDV%TIME_INTERVAL = 1._EB
+         SDV%VALUE_1 = DV%SMOOTHED_VALUE
          CYCLE DEVICE_LOOP
       ENDIF
    ELSEIF (DV%NO_UPDATE_CTRL_INDEX>0) THEN
       IF (CONTROL(DV%NO_UPDATE_CTRL_INDEX)%CURRENT_STATE) THEN
-         SDV%VALUE = SDV%SMOOTHED_VALUE
-         SDV%TIME_INTERVAL = 1._EB
+         SDV%VALUE_1 = DV%SMOOTHED_VALUE
          CYCLE DEVICE_LOOP
       ENDIF
    ENDIF
@@ -5378,17 +5345,10 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ! Initial values for statistics
 
-   NOT_FOUND  = .TRUE.
-   STAT_COUNT =  0
-   SUM_VALUE = 0._EB
-   SELECT CASE(DV%STATISTICS)
-      CASE('MAX','TIME MAX')
-         STAT_VALUE = -HUGE(0.0_EB) + 1.0_EB
-      CASE('MIN','TIME MIN')
-         STAT_VALUE =  HUGE(0.0_EB) - 1.0_EB
-      CASE DEFAULT
-         STAT_VALUE =  0.0_EB
-   END SELECT
+   SDV%VALUE_1 = 0._EB
+   SDV%VALUE_2 = 0._EB
+   IF (DV%TEMPORAL_STATISTIC=='MAX' .OR. DV%SPATIAL_STATISTIC=='MAX') SDV%VALUE_1 = -HUGE(0.0_EB) + 1.0_EB
+   IF (DV%TEMPORAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MIN') SDV%VALUE_1 =  HUGE(0.0_EB) - 1.0_EB
 
    ! Select hvac or gas phase or solid phase output quantity
 
@@ -5396,28 +5356,21 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       CASE(-1000:0) OUTPUT_INDEX_SELECT ! solid phase
 
-         SOLID_STATS_SELECT: SELECT CASE(DV%STATISTICS)
+         SOLID_STATS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
 
-            CASE('null','RMS','TIME MIN','TIME MAX') SOLID_STATS_SELECT
+            CASE('null') SOLID_STATS_SELECT
 
                IF (DV%WALL_INDEX>0) THEN
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                             OPT_WALL_INDEX=DV%WALL_INDEX)
+                  SDV%VALUE_1 = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                   OPT_WALL_INDEX=DV%WALL_INDEX)
                ELSEIF (DV%LP_TAG>0) THEN
-                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                             OPT_LP_INDEX=LP_INDEX)
+                  SDV%VALUE_1 = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                   OPT_LP_INDEX=LP_INDEX)
                ELSEIF (DV%CFACE_INDEX>0) THEN
                   ! It should not be possible to tie a DEVC directly to a CFACE.
                   ! If you want values from a specific CFACE, give it a unique SURF_ID and apply this SURF_ID to the DEVC output.
-                  VALUE = -1000._EB
+                  SDV%VALUE_1 = -1000._EB
                ENDIF
-
-            CASE('TIME INTEGRAL') SOLID_STATS_SELECT
-
-               VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,&
-                                                                    DV%PART_CLASS_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
-               DV%TI_VALUE = VALUE
-               DV%TI_T = T
 
             CASE DEFAULT SOLID_STATS_SELECT
 
@@ -5435,26 +5388,21 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   IF (WC%X<SDV%X1-MICRON .OR. WC%X>SDV%X2+MICRON .OR. &
                       WC%Y<SDV%Y1-MICRON .OR. WC%Y>SDV%Y2+MICRON .OR. &
                       WC%Z<SDV%Z1-MICRON .OR. WC%Z>SDV%Z2+MICRON) CYCLE WALL_CELL_LOOP
-                  NOT_FOUND = .FALSE.
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,OPT_WALL_INDEX=IW)
-                  SELECT CASE(DV%STATISTICS)
+                  SELECT CASE(DV%SPATIAL_STATISTIC)
                      CASE('MAX')
-                        IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK/)
-                        STAT_VALUE = MAX(STAT_VALUE,VALUE)
+                        SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
                      CASE('MIN')
-                        IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK/)
-                        STAT_VALUE = MIN(STAT_VALUE,VALUE)
+                        SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
                      CASE('MEAN')
-                        STAT_VALUE = STAT_VALUE + VALUE
-                        STAT_COUNT = STAT_COUNT + 1
-                     CASE('AREA INTEGRAL')
-                        STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA*VALUE
+                        SDV%VALUE_1 = SDV%VALUE_1 + VALUE
+                        SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
                      CASE('SURFACE INTEGRAL')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + VALUE*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
+                           SDV%VALUE_1 = SDV%VALUE_1 + VALUE*WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + WC%ONE_D%AREA
+                           SDV%VALUE_1 = SDV%VALUE_1 + WC%ONE_D%AREA*WC%ONE_D%AREA_ADJUST
                   END SELECT
                ENDDO WALL_CELL_LOOP
 
@@ -5472,27 +5420,22 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   IF (CFA%X<SDV%X1-MICRON .OR. CFA%X>SDV%X2+MICRON .OR. &
                       CFA%Y<SDV%Y1-MICRON .OR. CFA%Y>SDV%Y2+MICRON .OR. &
                       CFA%Z<SDV%Z1-MICRON .OR. CFA%Z>SDV%Z2+MICRON) CYCLE CFACE_LOOP
-                  NOT_FOUND = .FALSE.
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                      OPT_CFACE_INDEX=ICF)
-                  SELECT CASE(DV%STATISTICS)
+                  SELECT CASE(DV%SPATIAL_STATISTIC)
                      CASE('MAX')
-                        IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/CFA%ONE_D%II,CFA%ONE_D%JJ,CFA%ONE_D%KK/)
-                        STAT_VALUE = MAX(STAT_VALUE,VALUE)
+                        SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
                      CASE('MIN')
-                        IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/CFA%ONE_D%II,CFA%ONE_D%JJ,CFA%ONE_D%KK/)
-                        STAT_VALUE = MIN(STAT_VALUE,VALUE)
+                        SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
                      CASE('MEAN')
-                        STAT_VALUE = STAT_VALUE + VALUE
-                        STAT_COUNT = STAT_COUNT + 1
-                     CASE('AREA INTEGRAL')
-                        STAT_VALUE = STAT_VALUE + CFA%ONE_D%AREA*VALUE
+                        SDV%VALUE_1 = SDV%VALUE_1 + VALUE
+                        SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
                      CASE('SURFACE INTEGRAL')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + VALUE*CFA%ONE_D%AREA*CFA%ONE_D%AREA_ADJUST
+                           SDV%VALUE_1 = SDV%VALUE_1 + VALUE*CFA%ONE_D%AREA*CFA%ONE_D%AREA_ADJUST
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                           STAT_VALUE = STAT_VALUE + CFA%ONE_D%AREA
+                           SDV%VALUE_1 = SDV%VALUE_1 + CFA%ONE_D%AREA
                   END SELECT
 
                ENDDO CFACE_LOOP
@@ -5501,30 +5444,19 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       CASE(1:299,500:N_OUTPUT_QUANTITIES) OUTPUT_INDEX_SELECT ! gas phase
 
-         GAS_STATS_SELECT: SELECT CASE(DV%STATISTICS)
+         GAS_STATS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
 
-            CASE('null','RMS','TIME MIN','TIME MAX') GAS_STATS_SELECT
+            CASE('null') GAS_STATS_SELECT
 
                I = MIN( IBP1, MAX(0, DV%I + DV%GHOST_CELL_IOR(1) ) )
                J = MIN( JBP1, MAX(0, DV%J + DV%GHOST_CELL_IOR(2) ) )
                K = MIN( KBP1, MAX(0, DV%K + DV%GHOST_CELL_IOR(3) ) )
-               VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
-                                        DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
+               SDV%VALUE_1 = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
+                                              DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
 
-            CASE('COV','CORRCOEF') GAS_STATS_SELECT
-
-               VALUE  = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
-                                         DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
-               VALUE2 = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT2_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
-                                         DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
-
-            CASE('TIME INTEGRAL') GAS_STATS_SELECT
-
-               VALUE = DV%TI_VALUE + (T-DV%TI_T)*GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                                  DV%PART_CLASS_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,&
-                                                                  DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
-               DV%TI_VALUE = VALUE
-               DV%TI_T = T
+               IF (DV%TEMPORAL_STATISTIC=='COV' .OR. DV%TEMPORAL_STATISTIC=='CORRCOEF') &
+                  SDV%VALUE_2 = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT2_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                 DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
 
             CASE DEFAULT GAS_STATS_SELECT
 
@@ -5539,65 +5471,45 @@ DEVICE_LOOP: DO N=1,N_DEVC
                             IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE I_DEVICE_CELL_LOOP
                         ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
-                        NOT_FOUND = .FALSE.
                         VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
                                                  DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
-                        STATISTICS_SELECT: SELECT CASE(DV%STATISTICS)
+                        STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
                            CASE('MAX')
-                              IF (VALUE>STAT_VALUE) LOCATION_INDICES(1:3) = (/I,J,K/)
-                              STAT_VALUE = MAX(STAT_VALUE,VALUE)
+                              SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
                            CASE('MIN')
-                              IF (VALUE<STAT_VALUE) LOCATION_INDICES(1:3) = (/I,J,K/)
-                              STAT_VALUE = MIN(STAT_VALUE,VALUE)
+                              SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
                            CASE('MEAN')
-                              STAT_VALUE = STAT_VALUE + VALUE
-                              STAT_COUNT = STAT_COUNT + 1
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE
+                              SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
                            CASE('VOLUME INTEGRAL')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                                 STAT_VALUE = STAT_VALUE + VALUE*VOL
+                                 SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL
                            CASE('MASS INTEGRAL')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
-                                 STAT_VALUE = STAT_VALUE + VALUE*VOL*RHO(I,J,K)
+                                 SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*RHO(I,J,K)
                            CASE('AREA INTEGRAL')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
                                  SELECT CASE (ABS(DV%IOR_ASSUMED))
                                     CASE(1)
-                                       STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*VALUE
+                                       SDV%VALUE_1 = SDV%VALUE_1 + RC(I)*DY(J)*DZ(K)*VALUE
                                     CASE(2)
-                                       STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*VALUE
+                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*DZ(K)*VALUE
                                     CASE(3)
-                                       STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)*VALUE
+                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*RC(I)*DY(J)*VALUE
                                     END SELECT
                               ENDIF
                            CASE('VOLUME')
-                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + VOL
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                                 SDV%VALUE_1 = SDV%VALUE_1 + VOL
                            CASE('MASS')
-                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) STAT_VALUE = STAT_VALUE + &
-                                                                                                                    VOL*RHO(I,J,K)
-                           CASE('TENSOR SURFACE INTEGRAL')
-                              ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of XB
-                              IND=0
-                              IF (DV%QUANTITY=='F_X') IND=1
-                              IF (DV%QUANTITY=='F_Y') IND=2
-                              IF (DV%QUANTITY=='F_Z') IND=3
-                              IF (SDV%I1/=SDV%I2) THEN
-                                 IF (I==SDV%I1) STAT_VALUE = STAT_VALUE - RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-1,NM)
-                                 IF (I==SDV%I2) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+1,NM)
-                              ENDIF
-                              IF (SDV%J1/=SDV%J2) THEN
-                                 IF (J==SDV%J1) STAT_VALUE = STAT_VALUE - DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-2,NM)
-                                 IF (J==SDV%J2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+2,NM)
-                              ENDIF
-                              IF (SDV%K1/=SDV%K2) THEN
-                                 IF (K==SDV%K1) STAT_VALUE = STAT_VALUE - DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,-3,NM)
-                                 IF (K==SDV%K2) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,+3,NM)
-                              ENDIF
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                                 SDV%VALUE_1 = SDV%VALUE_1 + VOL*RHO(I,J,K)
                            CASE('VOLUME MEAN')
-                              STAT_VALUE = STAT_VALUE + VALUE*VOL
-                              SUM_VALUE = SUM_VALUE + VOL
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL
+                              SDV%VALUE_2 = SDV%VALUE_2 + VOL
                            CASE('MASS MEAN')
-                              STAT_VALUE = STAT_VALUE + VALUE*RHO(I,J,K)*VOL
-                              SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*RHO(I,J,K)*VOL
+                              SDV%VALUE_2 = SDV%VALUE_2 + VOL*RHO(I,J,K)
                      END SELECT STATISTICS_SELECT
                   ENDDO I_DEVICE_CELL_LOOP
                ENDDO J_DEVICE_CELL_LOOP
@@ -5607,171 +5519,127 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       CASE(300:350) OUTPUT_INDEX_SELECT  ! HVAC output
 
-         VALUE = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX,DV%DUCT_CELL_INDEX)
+         SDV%VALUE_1 = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX,DV%DUCT_CELL_INDEX)
 
       CASE(400:450) OUTPUT_INDEX_SELECT  ! Particle-specific output
 
-         IF (LP_INDEX>0) VALUE = PARTICLE_OUTPUT(T,ABS(DV%OUTPUT_INDEX),LP_INDEX)
+         IF (LP_INDEX>0) SDV%VALUE_1 = PARTICLE_OUTPUT(T,ABS(DV%OUTPUT_INDEX),LP_INDEX)
 
    END SELECT OUTPUT_INDEX_SELECT
 
+ENDDO DEVICE_LOOP
+
+END SUBROUTINE UPDATE_DEVICES_1
+
+
+SUBROUTINE UPDATE_DEVICES_2(T,DT)
+
+! Perform temporal operations on the DEViCes
+
+REAL(EB), INTENT(IN) :: T,DT
+REAL(EB) :: WGT
+INTEGER :: N
+
+DEVICE_LOOP: DO N=1,N_DEVC
+
+   DV => DEVICE(N)
+
    ! Update DEViCe values
 
-   SELECT CASE (DV%STATISTICS)
-      CASE('null')
-      CASE('RMS')
-      CASE('COV')
-      CASE('CORRCOEF')
-      CASE('TIME MIN')
-      CASE('TIME MAX')
-      CASE('TIME INTEGRAL')
-      CASE('MASS MEAN','VOLUME MEAN')
-         VALUE = STAT_VALUE / SUM_VALUE
+   SELECT CASE (DV%SPATIAL_STATISTIC)
       CASE DEFAULT
-         IF (NOT_FOUND) STAT_VALUE = 0._EB
-         STAT_COUNT = MAX(STAT_COUNT,1)
-         VALUE = STAT_VALUE/REAL(STAT_COUNT,EB)
-   END SELECT
-
-   ! For the special case of MAXLOC MINLOC, put the max/min location in VALUE
-
-   SELECT CASE(DV%STATISTICS_LOCATION_INDEX)
-      CASE(1)
-         VALUE = XC(LOCATION_INDICES(1))
-      CASE(2)
-         VALUE = YC(LOCATION_INDICES(2))
-      CASE(3)
-         VALUE = ZC(LOCATION_INDICES(3))
+         DV%INSTANT_VALUE = DV%VALUE_1
+      CASE('MASS MEAN','VOLUME MEAN','MEAN')
+         DV%INSTANT_VALUE = DV%VALUE_1 / DV%VALUE_2
    END SELECT
 
    ! Optional absolute value
 
-   IF (DV%ABSOLUTE_VALUE) VALUE = ABS(VALUE)
+   IF (DV%ABSOLUTE_VALUE) DV%INSTANT_VALUE = ABS(DV%INSTANT_VALUE)
 
    ! Convert units of device quantity
 
-   VALUE = DV%CONVERSION_FACTOR*VALUE + DV%CONVERSION_ADDEND
+   DV%INSTANT_VALUE = DV%CONVERSION_FACTOR*DV%INSTANT_VALUE + DV%CONVERSION_ADDEND
 
    ! Record initial value and then subtract from computed value
 
    IF (DV%INITIAL_VALUE<-1.E9_EB) THEN
       IF (DV%RELATIVE) THEN
-         DV%INITIAL_VALUE = VALUE
+         DV%INITIAL_VALUE = DV%INSTANT_VALUE
       ELSE
          DV%INITIAL_VALUE = 0._EB
       ENDIF
    ENDIF
+   DV%INSTANT_VALUE = DV%INSTANT_VALUE - DV%INITIAL_VALUE
 
-   VALUE = VALUE - DV%INITIAL_VALUE
+   ! Create a smoothed output
 
-   IF (SDV%SMOOTHED_VALUE < -1.E9_EB) SDV%SMOOTHED_VALUE = VALUE
+   IF (DV%SMOOTHED_VALUE < -1.E9_EB) DV%SMOOTHED_VALUE = DV%INSTANT_VALUE
+   DV%SMOOTHED_VALUE = DV%SMOOTHED_VALUE*DV%SMOOTHING_FACTOR + DV%VALUE_1*(1._EB-DV%SMOOTHING_FACTOR)
 
-   ! Override the evacuation flow field calculation phase geometry changes
+   ! Do not start summing time devices if this is the start of the simulation
 
-   T_TMP = T
-   IF (EVACUATION_ONLY(NM) .AND. DV%QUANTITY=='TIME' .AND. DV%SETPOINT<=T_BEGIN) THEN
-      IF (EMESH_INDEX(NM)>0) THEN
-         VALUE = VALUE - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
-         T_TMP = T - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
-      ELSE
-         T_TMP = T
-      END IF
-   END IF
+   IF (T==T_BEGIN) THEN
+      DV%TIME_INTERVAL = 1._EB
+      DV%VALUE = DV%INSTANT_VALUE
+      IF (DV%TEMPORAL_STATISTIC=='TIME INTEGRAL') DV%VALUE = 0._EB
+      CYCLE DEVICE_LOOP
+   ENDIF
 
-   ! Update instantaneous device value
+   ! Zero out temporal stats before their starting time
 
-   SDV%INSTANT_VALUE = VALUE
+   IF (T < DV%STATISTICS_START) THEN
+      DV%VALUE = 0._EB
+      DV%TIME_INTERVAL = 1._EB
+      CYCLE DEVICE_LOOP
+   ENDIF
 
-   ! Keep a running tally of VALUEs
+   ! Apply the various temporal statistics
 
-   DV_LINE_IF: IF (DV%LINE==0) THEN
-      RMS_COV_CORR: IF (DV%STATISTICS=='RMS' .OR. DV%STATISTICS=='COV' .OR. DV%STATISTICS=='CORRCOEF') THEN
-         IF (T < DV%STATISTICS_START) THEN
-            SDV%VALUE = 0._EB
-            SDV%TIME_INTERVAL = 1._EB
-         ELSE
-            SELECT CASE (DV%STATISTICS)
-               CASE('RMS')
-                  SDV%AVERAGE_VALUE = SDV%AVERAGE_VALUE + DT*VALUE
-                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
-                  SDV%RMS_VALUE = SDV%RMS_VALUE+(VALUE-SDV%AVERAGE_VALUE*WGT)**2*DT
-                  SDV%VALUE = SQRT(SDV%RMS_VALUE*WGT)
-                  SDV%TIME_INTERVAL = 1._EB
-               CASE('COV')
-                  SDV%AVERAGE_VALUE  = SDV%AVERAGE_VALUE  + DT*VALUE
-                  SDV%AVERAGE_VALUE2 = SDV%AVERAGE_VALUE2 + DT*VALUE2
-                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
-                  SDV%COV_VALUE = SDV%COV_VALUE+(VALUE-SDV%AVERAGE_VALUE*WGT)*(VALUE2-SDV%AVERAGE_VALUE2*WGT)*DT
-                  SDV%VALUE = SDV%COV_VALUE*WGT
-                  SDV%TIME_INTERVAL = 1._EB
-               CASE('CORRCOEF')
-                  SDV%AVERAGE_VALUE  = SDV%AVERAGE_VALUE  + DT*VALUE
-                  SDV%AVERAGE_VALUE2 = SDV%AVERAGE_VALUE2 + DT*VALUE2
-                  WGT = 1._EB/(T - DV%STATISTICS_START + DT)
-                  SDV%COV_VALUE = SDV%COV_VALUE+(VALUE-SDV%AVERAGE_VALUE*WGT)*(VALUE2-SDV%AVERAGE_VALUE2*WGT)*DT
-                  SDV%RMS_VALUE  = SDV%RMS_VALUE+(VALUE-SDV%AVERAGE_VALUE*WGT)**2*DT
-                  SDV%RMS_VALUE2 = SDV%RMS_VALUE2+(VALUE2-SDV%AVERAGE_VALUE2*WGT)**2*DT
-                  SDV%VALUE = SDV%COV_VALUE/SQRT(SDV%RMS_VALUE*SDV%RMS_VALUE2)
-                  SDV%TIME_INTERVAL = 1._EB
-           END SELECT
-         ENDIF
-      ELSE RMS_COV_CORR
-         IF (DV%TIME_AVERAGED .AND. OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%TIME_AVERAGED) THEN
-            SDV%TIME_INTERVAL = SDV%TIME_INTERVAL + DT
-            SDV%VALUE = SDV%VALUE + VALUE*DT
-         ELSE
-            SDV%TIME_INTERVAL = 1._EB
-            SDV%VALUE = VALUE
-         ENDIF
-      ENDIF RMS_COV_CORR
-
-   ELSE DV_LINE_IF ! DV%LINE > 0
-
-      SDV%TIME_INTERVAL = 1._EB
-      SDV%AVERAGE_VALUE = (1._EB-WGT_LINE)*SDV%AVERAGE_VALUE + WGT_LINE*VALUE
-      IF (T>(T_DEVC_LINE_END-DT_DEVC_LINE)) THEN
-         DV%TIME_MIN_VALUE = MIN(DV%TIME_MIN_VALUE,VALUE)
-         DV%TIME_MAX_VALUE = MAX(DV%TIME_MAX_VALUE,VALUE)
-      ENDIF
-      SELECT CASE(TRIM(DV%STATISTICS))
-         CASE('RMS') ! root mean square
-            SDV%RMS_VALUE = (1._EB-WGT_LINE_UNBIASED)*SDV%RMS_VALUE + WGT_LINE_UNBIASED*(VALUE-SDV%AVERAGE_VALUE)**2
-            SDV%VALUE = SQRT(SDV%RMS_VALUE)
-         CASE('COV') ! covariance
-            SDV%AVERAGE_VALUE2 = (1._EB-WGT_LINE)*SDV%AVERAGE_VALUE2 + WGT_LINE*VALUE2
-            DVAL  = VALUE  - SDV%AVERAGE_VALUE
-            DVAL2 = VALUE2 - SDV%AVERAGE_VALUE2
-            SDV%COV_VALUE = (1._EB-WGT_LINE_UNBIASED)*SDV%COV_VALUE + WGT_LINE_UNBIASED*DVAL*DVAL2
-            SDV%VALUE = SDV%COV_VALUE
-         CASE('CORRCOEF') ! correlation coefficient
-            SDV%AVERAGE_VALUE2 = (1._EB-WGT_LINE)*SDV%AVERAGE_VALUE2 + WGT_LINE*VALUE2
-            DVAL  = VALUE  - SDV%AVERAGE_VALUE
-            DVAL2 = VALUE2 - SDV%AVERAGE_VALUE2
-            SDV%COV_VALUE  = (1._EB-WGT_LINE_UNBIASED)*SDV%COV_VALUE  + WGT_LINE_UNBIASED*DVAL*DVAL2
-            SDV%RMS_VALUE  = (1._EB-WGT_LINE_UNBIASED)*SDV%RMS_VALUE  + WGT_LINE_UNBIASED*(VALUE -SDV%AVERAGE_VALUE )**2
-            SDV%RMS_VALUE2 = (1._EB-WGT_LINE_UNBIASED)*SDV%RMS_VALUE2 + WGT_LINE_UNBIASED*(VALUE2-SDV%AVERAGE_VALUE2)**2
-            DEV2 = SQRT(SDV%RMS_VALUE*SDV%RMS_VALUE2)
-            IF (DEV2>TWO_EPSILON_EB) THEN
-               SDV%VALUE = SDV%COV_VALUE/DEV2
-            ELSE
-               SDV%VALUE = 0._EB
-            ENDIF
-         CASE('TIME MIN')
-            SDV%VALUE = DV%TIME_MIN_VALUE
-         CASE('TIME MAX')
-            SDV%VALUE = DV%TIME_MAX_VALUE
-         CASE DEFAULT
-            SDV%VALUE = SDV%AVERAGE_VALUE
-      END SELECT
-
-   ENDIF DV_LINE_IF
-
-   SDV%SMOOTHED_VALUE = SDV%SMOOTHED_VALUE*DV%SMOOTHING_FACTOR+VALUE*(1._EB-DV%SMOOTHING_FACTOR)
+   SELECT CASE (DV%TEMPORAL_STATISTIC)
+      CASE DEFAULT
+         DV%TIME_INTERVAL = 1.
+         DV%VALUE = DV%INSTANT_VALUE
+      CASE('TIME AVERAGE')
+         DV%TIME_INTERVAL = DV%TIME_INTERVAL + DT
+         DV%VALUE = DV%VALUE + DV%INSTANT_VALUE*DT
+      CASE('TIME INTEGRAL')
+         DV%AVERAGE_VALUE  = DV%AVERAGE_VALUE  + DT*DV%INSTANT_VALUE
+         DV%TIME_INTERVAL = 1._EB
+         DV%VALUE = DV%AVERAGE_VALUE
+      CASE('MAX')
+         DV%TIME_INTERVAL = 1._EB
+         DV%VALUE = MAX(DV%INSTANT_VALUE,DV%TIME_MAX_VALUE)
+      CASE('MIN')
+         DV%TIME_INTERVAL = 1._EB
+         DV%VALUE = MIN(DV%INSTANT_VALUE,DV%TIME_MIN_VALUE)
+      CASE('RMS')
+         DV%AVERAGE_VALUE = DV%AVERAGE_VALUE + DT*DV%INSTANT_VALUE
+         WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+         DV%RMS_VALUE = DV%RMS_VALUE + (DV%INSTANT_VALUE-DV%AVERAGE_VALUE*WGT)**2*DT
+         DV%VALUE = SQRT(DV%RMS_VALUE*WGT)
+         DV%TIME_INTERVAL = 1._EB
+      CASE('COV')
+         DV%AVERAGE_VALUE  = DV%AVERAGE_VALUE  + DT*DV%INSTANT_VALUE
+         DV%AVERAGE_VALUE2 = DV%AVERAGE_VALUE2 + DT*DV%VALUE_2
+         WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+         DV%COV_VALUE = DV%COV_VALUE + (DV%INSTANT_VALUE-DV%AVERAGE_VALUE*WGT)*(DV%VALUE_2-DV%AVERAGE_VALUE2*WGT)*DT
+         DV%VALUE = DV%COV_VALUE*WGT
+         DV%TIME_INTERVAL = 1._EB
+      CASE('CORRCOEF')
+         DV%AVERAGE_VALUE  = DV%AVERAGE_VALUE  + DT*DV%INSTANT_VALUE
+         DV%AVERAGE_VALUE2 = DV%AVERAGE_VALUE2 + DT*DV%VALUE_2
+         WGT = 1._EB/(T - DV%STATISTICS_START + DT)
+         DV%COV_VALUE  = DV%COV_VALUE + (DV%INSTANT_VALUE-DV%AVERAGE_VALUE*WGT)*(DV%VALUE_2-DV%AVERAGE_VALUE2*WGT)*DT
+         DV%RMS_VALUE  = DV%RMS_VALUE + (DV%INSTANT_VALUE-DV%AVERAGE_VALUE*WGT)**2*DT
+         DV%RMS_VALUE2 = DV%RMS_VALUE2+ (DV%VALUE_2-DV%AVERAGE_VALUE2*WGT)**2*DT
+         DV%VALUE      = DV%COV_VALUE/SQRT(DV%RMS_VALUE*DV%RMS_VALUE2)
+         DV%TIME_INTERVAL = 1._EB
+   END SELECT
 
 ENDDO DEVICE_LOOP
 
-
-END SUBROUTINE UPDATE_DEVICES
+END SUBROUTINE UPDATE_DEVICES_2
 
 
 REAL(EB) RECURSIVE FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX, &
