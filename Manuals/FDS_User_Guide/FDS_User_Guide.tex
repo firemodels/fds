@@ -7467,10 +7467,10 @@ where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the {\ct PROPOR
 \subsubsection{Example Case: using PID for time integration of mass loss rate }
 \label{sec:pidintmlr}
 
-The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct STATISTICS='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
+The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
 \begin{lstlisting}
 &DEVC ID='MY MLR', XB=..., QUANTITY='BURNING RATE', SURF_ID='s1',
-      STATISTICS='SURFACE INTEGRAL'/
+      SPATIAL_STATISTIC='SURFACE INTEGRAL'/
 &CTRL ID='MY PID', FUNCTION_TYPE='PID', INPUT_ID='MY MLR',
       PROPORTIONAL_GAIN=0, DIFFERENTIAL_GAIN=0, INTEGRAL_GAIN=1/
 &DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
@@ -7665,7 +7665,7 @@ and a column will be added to the output file {\ct CHID\_devc.csv} under the lab
 
 \subsubsection{Devices on Solid Surfaces}
 
-When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
+When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
@@ -7690,9 +7690,10 @@ You can use a single {\ct DEVC} line to specify a linear array of devices. By ad
 
 Sometimes it is convenient to calculate a steady-state profile. For example, the vertical velocity profile along the centerline of a doorway can be recorded with the following line of input:
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20 /
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20, 
+      STATISTICS_START=20., STATISTICS_END=40. /
 \end{lstlisting}
-In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the time interval between {\ct T\_DEVC\_LINE\_END} minus {\ct DT\_DEVC\_LINE} and {\ct T\_DEVC\_LINE\_END}. Both {\ct T\_DEVC\_LINE\_END} and {\ct DT\_DEVC\_LINE} are specified on the {\ct DUMP} line. The default value of the former is {\ct T\_END} and the latter is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_DEVC\_LINE\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over a time interval of duration {\ct DT\_DEVC\_LINE}.
+In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points time-averaged over the interval between {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default value of the latter is {\ct T\_END} and the former is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=STATISTICS\_START}.  Prior to this time, the values are zero.  This prevents initial transient from biasing the final average value or other temporal statistics.
 
 A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
 
@@ -7709,17 +7710,9 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 
 
-\subsubsection{Single-Point Statistics}
+\subsubsection{Other Statistics for a Linear Array of Devices}
 
-\begin{description}
-\item[Mean] By default, a {\em line} of devices records a mean or time-averaged profile of a particular quantity,
-\be
-   \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
-\ee
-where $n$ is the number of uniform output samples.
-
-\item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
-\end{description}
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
 
 
 \subsection{Quantities at Certain Depth}
@@ -7811,7 +7804,7 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
-Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct STATISTICS} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct STATISTICS} on a {\ct BNDF} line.
+Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
 
 
 
@@ -7874,7 +7867,7 @@ As an example of how to use these kinds of output quantities, the test case {\ct
 \be
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
-In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is specified on the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}. Summing the values of {\ct 'AMPUA'} over the entire floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
+In the simulation, the quantity {\ct 'AMPUA'} with {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} is specified on the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}. Summing the values of {\ct 'AMPUA'} over the entire floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
 
 \begin{figure}[ht]
 \centering
@@ -7888,7 +7881,7 @@ In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTE
 
 If you want to monitor the accumulation of solid particles that have fallen on a solid surface, use a device as follows:
 \begin{lstlisting}
-&DEVC ID=..., XB=..., QUANTITY='MPUV', PART_ID='rods', STATISTICS='VOLUME INTEGRAL' /
+&DEVC ID=..., XB=..., QUANTITY='MPUV', PART_ID='rods', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
 \end{lstlisting}
 The volume over which to integrate, {\ct XB}, should be at least one grid cell thick above the surface.
 
@@ -7900,7 +7893,7 @@ Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \
 
 The quantities {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce slice and Plot3D colored contours of the mass flux of particles in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s. You can also apply these quantities to a device. For example, in the case called {\ct bucket\_test\_4.fds}, the input line
 \begin{lstlisting}
-&DEVC XB=..., ID='flux', QUANTITY='PARTICLE FLUX Z', STATISTICS='AREA INTEGRAL'  /
+&DEVC XB=..., ID='flux', QUANTITY='PARTICLE FLUX Z', SPATIAL_STATISTIC='AREA INTEGRAL'  /
 \end{lstlisting}
 records the integrated mass flux of {\em all} particles passing through the given horizontal plane. Figure~\ref{bucket_test_4_fig} presents the results of this simple test case in which water spraying at a rate of 0.0005~kg/s for 55~s passes through a measurement plane and onto the floor. The total water accumulated is 0.0275~kg.
 
@@ -8120,7 +8113,7 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\ep
 \begin{lstlisting}
 &DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
 \end{lstlisting}
-Note that the parameter {\ct STATISTICS} is not appropriate for this quantity. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
 
 \item[\ct 'RADIANCE']
 \hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
@@ -8462,108 +8455,88 @@ In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice
 
 A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
+&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh. Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Also, be careful not to specify a volume that extends beyond a single mesh. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
-
-Use the {\ct STATISTICS} feature with caution because it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 
 
 \subsubsection{Minimum or Maximum Value}
 
-For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MIN'} or {\ct STATISTICS='MAX'} computes the minimum or maximum value, respectively
+For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct ='MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
 \be
    \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
 \ee
-over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 
 \subsubsection{Average Value}
 
-For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MEAN'} computes the average value,
+For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, the {\ct SPATIAL\_STATISTIC} {\ct 'MEAN'} computes the average value,
 \be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
-over the cells that are included in the specified volume bounded by {\ct XB}. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Volume-Weighted Mean}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
 \be \frac{1}{V} \; \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass-Weighted Mean}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
 \be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\int \rho \; \d x \, \d y \, \d z}  \ee
-which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Volume Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS INTEGRAL'} produces the discrete analog of
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
 \be \int \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Area Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB}.
-Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
-the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
-you have named {\ct 'my gas'} through an
-area normal to the $x$ direction. Note also that you must specify an area to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
+the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an
+area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Surface Integral}
 
-For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
+For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
 \be \int \phi \; \d A \ee
-Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
-fluxes are appropriate output quantities.
+Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
 
 \subsubsection{Limiting the Integration}
 
-The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct STATISTICS} types of {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
-
+The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', STATISTICS='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
+&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', SPATIAL_STATISTIC='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
 \end{lstlisting}
 would output the total mass of methane in the volume {\ct XB} where the mass fraction was between 0.03 and 0.15.
 
-A set of additional {\ct STATISTICS} are available for use with {\ct QUANTITY\_RANGE}: {\ct 'AREA'}, {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These {\ct STATISTICS} output the area, mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
-
+A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'AREA'}, {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the area, mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='NET HEAT FLUX', STATISTICS='SURFACE AREA', QUANTITY_RANGE(1)=10./
+&DEVC XB=..., QUANTITY='NET HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
 \end{lstlisting}
-would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10 kW/m$^2$.
+would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10~kW/m$^2$.
 
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
 
-The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via
-the device ({\ct DEVC}) namelist group only. For example:
-
+The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via the device ({\ct DEVC}) namelist group only. For example:
 \begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
 \end{lstlisting}
-
-\noindent
-outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'},
-and {\ct 'HEAT FLOW'} are defined:
+outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} are defined:
 \begin{align}
 \dot{V} &= \int \bu \cdot \d \mathbf{S}  \\
 \dot{m} &= \int \rho \bu \cdot \d \mathbf{S} \\
@@ -8575,9 +8548,9 @@ The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the inte
 \label{info:wallflows}
 
 The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  If you want the mass flow of a particular gas species, include the {\ct SPEC\_ID} of that gas species. Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
-\begin{align}
-\dot{q}_{\si{w}} &= \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
-\end{align}
+\be
+\dot{q}_{\mathrm{w}} = \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
+\ee
 
 \subsubsection{Mass Flux at a Boundary}
 \label{info:wallflux}
@@ -8590,25 +8563,40 @@ The purpose of {\ct 'MASS FLUX WALL'} is for generating detailed species mass ba
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
 
-In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying
-{\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of
+In addition to the spatial statistics, temporal statistics can be applied to {\ct DEVC} output via the parameter {\ct TEMPORAL\_STATISTIC}. Both {\ct SPATIAL\_STATISTIC} and {\ct TEMPORAL\_STATISTIC} can be specified simultaneously on the {\ct DEVC} line, assuming the combination makes sense. The {\ct SPATIAL\_STATISTIC} is applied first, say an integration of the {\ct QUANTITY} over a given volume {\ct XB}, followed by the {\ct TEMPORAL\_STATISTIC}, like a time integral.
+
+\subsubsection{Time Average}
+
+The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, unless it is inappropriate for the chosen {\ct QUANTITY}. With this statistic, FDS outputs the average value of the {\ct QUANTITY} over the time period of {\ct DT\_DEVC}~s just prior to the time of output. The parameter {\ct DT\_DEVC} is specified on the {\ct DUMP} line.
+
+\subsubsection{Running Average}
+
+The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\label{info:line_file}.
+
+\subsubsection{Time Integral}
+
+{\ct TEMPORAL\_STATISTIC='TIME INTEGRAL'} produces a discrete analog of the time integral:
 \be
  \int_{t_0}^t \phi(\tau) \; \d \tau
 \ee
-Note that the spatial and time integrals can not be used simultaneously.
 
-\subsection{Statistical Outputs}
-\label{info:rmscovcorr}
+\subsubsection{Minimum and Maximum Values over Time}
 
-Statistical quantities can also be generated for either point or line devices.  Note that these are quantities only have significant meaning if the flow is steady-state.  These quantities are estimated using a logarithmic averaging process.  The weighting coefficient for the averaging is determined by the desired time interval for the device.  For a point device this time interval is starts at {\ct STATISTICS\_START} on the {\ct DEVC} line and continues until {\ct T\_END}.  For a line device is is determined by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line.
+Set {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to determine the minimum or maximum value of the {\ct QUANTITY} over a time interval:
+\be
+   \min_{t_0<=t<=t_1} \phi(t) \quad ; \quad  \max_{t_0<=t<=t_1} \phi(t)
+\ee
+where $t_0$ is {\ct STATISTICS\_START} and $t_1$ is {\ct STATISTICS\_END}.
 
 \subsubsection{Root Mean Square}
 \label{info:rms}
+\label{info:rmscovcorr}
 
-If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
+{\ct TEMPORAL\_STATISTIC='RMS'} produces the unbiased estimate of the {\em root mean square} of the {\ct QUANTITY} $\phi$:
 \be
    \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
 
 \subsubsection{Covariance}
 \label{info:covariance}
@@ -8617,19 +8605,18 @@ If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two ran
 \be
    \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
 \ee
-To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
+To output this statistic you must add a {\ct QUANTITY2} to the {\ct DEVC} line and set {\ct TEMPORAL\_STATISTIC='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
 \begin{lstlisting}
-&DUMP DT_DEVC_LINE=20/
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      STATISTICS='COV', ID='wT-cov_line', POINTS=20/
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_line', POINTS=20 /
 &DEVC XYZ=X1,Y1,Z1, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      STATISTICS='COV', ID='wT-cov_point', STATISTICS_DT=20/
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_point', STATISTICS_START=20. /
 \end{lstlisting}
 
 \subsubsection{Correlation Coefficient}
 \label{info:corrcoef}
 
-Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
+Setting {\ct TEMPORAL\_STATISTIC='CORRCOEF'} outputs the \emph{correlation coefficient} given by
 \be
    \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
 \ee
@@ -8638,23 +8625,16 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 \subsection{Wind and the Pressure Coefficient}
 \label{info:pressure_coefficient}
 
-In the field of wind engineering, a commonly used quantity is known as
-the {\ct PRESSURE\_COEFFICIENT}:
+In the field of wind engineering, a commonly used quantity is known as the {\ct PRESSURE\_COEFFICIENT}:
 \be
    C_p = \frac{p-p_\infty}{\ha \rho_\infty U^2}
 \ee
-$p_\infty$ is the ambient, or ``free stream'' pressure, and
-$\rho_\infty$ is the ambient density.  The parameter $U$ is the
-free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
-{\ct PROP} line
-
+$p_\infty$ is the ambient, or ``free stream'' pressure, and $\rho_\infty$ is the ambient density.  The parameter $U$ is the free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the {\ct PROP} line
 \begin{lstlisting}
 &BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &PROP ID='U', CHARACTERISTIC_VELOCITY=3.4 /
 \end{lstlisting}
-
-\noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
 
@@ -8953,7 +8933,7 @@ Table~\ref{tab:output}, spread over the following pages, summarizes the various 
 For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD} and/or {\ct SOOT\_YIELD} are specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} are included as output species. The fuel species can be output via the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 \begin{lstlisting}
 &DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z',
-      SPEC_ID='CARBON MONOXIDE', STATISTICS='AREA INTEGRAL' /
+      SPEC_ID='CARBON MONOXIDE', SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just remember that all output quantity names ought to be in single quotes.
 
@@ -9261,12 +9241,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical     & Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
-{\ct PART\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PROP\_ID}          & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
-{\ct QUANTITY}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct SPEC\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct STATISTICS}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
+{\ct PART\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct QUANTITY}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct SPEC\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 \end{longtable}
 
 
@@ -9462,12 +9442,13 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
-{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
+{\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &  {\ct .TRUE.} \\ \hline
+{\ct TEMPORAL\_STATISTIC}   & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TIME\_HISTORY}         & Logical         & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
@@ -9510,7 +9491,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & 1000000                        \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &  s        & $\Delta t${\ct /2}             \\ \hline
 {\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 %{\ct DT\_GEOM}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_HRR}                       & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -9539,7 +9519,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
-{\ct T\_DEVC\_LINE\_END}            & Real         & Section~\ref{info:line_file}           &  s        & {\ct T\_END}                   \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
