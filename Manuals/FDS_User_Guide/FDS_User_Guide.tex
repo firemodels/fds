@@ -7091,14 +7091,11 @@ The same smoke detector model is used that was described above, but now, the spe
 \subsection{Beam Detection Systems}
 \label{info:beam_detector}
 
-A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the
-total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
-cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
+A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
 \be
   \hbox{Obscuration}  = \left(1 - \exp \left( -K_{\rm m} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee
-where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the soot density of the mesh cell, $ \Delta x_i$
-is the distance within the mesh cell that is traversed by the beam, and $K_{\rm m}$ is the mass extinction coefficient. The line in the input file has the form:
+where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the soot density of the mesh cell, $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam, and $K_{\rm m}$ is the mass extinction coefficient. The line in the input file has the form:
 \begin{lstlisting}
 &DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=33.0 /
 \end{lstlisting}
@@ -7108,16 +7105,13 @@ A similar {\ct QUANTITY} is {\ct 'TRANSMISSION'} which is given by the following
 \ee
 Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
 
-Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
-Break the beam detector path into multiple {\ct DEVC} lines, one for each mesh that the beam crosses.  The total obscuration is given by
-\be
-  O  = \left[ 1 -  \prod_{i=1}^N \left( 1-O_i/100 \right)  \right] \times 100  \; \hbox{\%}
-\ee
-where $O_i$ is the FDS output for the beam detector of the $i$th path (note that the bracketed term contains a product rather than a sum).
+
 
 \subsubsection{Example Case: A Beam Detector}
 
-A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a pathlength of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+
+Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7128,22 +7122,7 @@ A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning 
 \label{beam_detector}
 \end{figure}
 
-\subsubsection{Special Topic: Beam Detectors Spanning Multiple Meshes}
-The data from a device are processed and stored on the mesh in which the device is spatially located; therefore you cannot specify a single beam detector which spans multiple meshes. To model a single beam detector which is required to span multiple meshes, specify one beam on each mesh spanned and use a combination of secondary {\ct DEVC}s and {\ct CTRL}s to sum the obscuration from each of the constituent beams. For example, to model {\ct beam\_1}, which is required to span two meshes, specify two constituent beams (\,{\ct beam\_1a} and {\ct beam\_1b}\,) and sum their obscuration to output the total obscuration of {\ct beam\_1}:
-\begin{lstlisting}
-&DEVC ID='beam_1a', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
-&DEVC ID='beam_1b', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
-&CTRL ID='beam_1a_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1a', CONSTANT=100. /
-&CTRL ID='beam_1b_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1b', CONSTANT=100. /
-&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
-&CTRL ID='beam_1_f', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1_m', CONSTANT=100. /
-&DEVC ID='beam_1', QUANTITY='CONTROL VALUE', CTRL_ID='beam_1_f', XYZ=... /
-\end{lstlisting}
-The outputs of the constituent beams are suppressed and the obscuration of {\ct beam\_1} will be in percent. The constant on the line:
-\begin{lstlisting}
-&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
-\end{lstlisting}
-needs to be modified to suit the number of constituent beams. To maintain correct decimal placement, the value of the negative exponent should be equal to the number of constituent beams multiplied by \num{2}, minus \num{2}.
+
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
