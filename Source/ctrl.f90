@@ -37,11 +37,13 @@ CONTROL_LOOP_2: DO NC=1,N_CTRL
    CALL EVALUATE_CONTROL(T,NC,DT,CTRL_STOP_STATUS)
 END DO CONTROL_LOOP_2
 
-! Update devices that are used to print out control function results
+! Update devices that are used to print out control function results only for devices that require an 'INSTANT VALUE'; 
+! that is, a value from this current time step.
 
 IF (UPDATE_DEVICES_AGAIN) THEN
    DEVICE_LOOP: DO N=1,N_DEVC
       DV => DEVICE(N)
+      IF (DV%TEMPORAL_STATISTIC/='INSTANT VALUE') CYCLE DEVICE_LOOP
       SELECT CASE(DV%QUANTITY)
          CASE('CONTROL VALUE')
             DV%VALUE = CONTROL(DV%CTRL_INDEX)%INSTANT_VALUE * DV%CONVERSION_FACTOR
