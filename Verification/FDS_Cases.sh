@@ -111,7 +111,7 @@ $QFDS -d Controls rms_cov_corr.fds
 $QFDS -d Controls rms_example.fds
 
 $QFDS -d Detectors aspiration_detector.fds
-$QFDS -d Detectors beam_detector.fds
+$QFDS -p 8 -d Detectors beam_detector.fds
 $QFDS -d Detectors objects_dynamic.fds
 $QFDS -d Detectors objects_static.fds
 $QFDS -d Detectors smoke_detector.fds
