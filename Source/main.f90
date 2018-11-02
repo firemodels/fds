@@ -3088,20 +3088,17 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
       ENDIF
    ENDDO
 
-   ! Exchange the INSTANT_VALUE, SMOOTHED_VALUE, and T_CHANGE of each DEViCe
+   ! Sum and then exchange VALUE_1 and VALUE_2 and T_CHANGE of each DEViCe
 
    TC_LOC = 0._EB
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      DO N=1,N_DEVC
-         DV => DEVICE(N)
-         DO NN=1,DV%N_SUBDEVICES
-            SDV => DV%SUBDEVICE(NN)
-            IF (SDV%MESH==NM) THEN
-               TC_LOC(N)          = TC_LOC(N)        + SDV%INSTANT_VALUE
-               TC_LOC(N+N_DEVC)   = TC_LOC(N+N_DEVC) + SDV%SMOOTHED_VALUE
-               TC_LOC(N+2*N_DEVC) = DV%T_CHANGE
-            ENDIF
-         ENDDO
+   DO N=1,N_DEVC
+      DV => DEVICE(N)
+      IF (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX') CYCLE
+      DO NN=1,DV%N_SUBDEVICES
+         SDV => DV%SUBDEVICE(NN)
+         TC_LOC(N)          = TC_LOC(N)        + SDV%VALUE_1
+         TC_LOC(N+N_DEVC)   = TC_LOC(N+N_DEVC) + SDV%VALUE_2
+         TC_LOC(N+2*N_DEVC) = DV%T_CHANGE
       ENDDO
    ENDDO
    IF (N_MPI_PROCESSES>1) THEN
@@ -3109,11 +3106,67 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
    ELSE
       TC_GLB = TC_LOC
    ENDIF
-   DEVICE(1:N_DEVC)%INSTANT_VALUE  = TC_GLB(         1:  N_DEVC)
-   DEVICE(1:N_DEVC)%SMOOTHED_VALUE = TC_GLB(  N_DEVC+1:2*N_DEVC)
-   DEVICE(1:N_DEVC)%T_CHANGE       = TC_GLB(2*N_DEVC+1:3*N_DEVC)
+   DO N=1,N_DEVC
+      DV => DEVICE(N)
+      IF (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX') CYCLE
+      DV%VALUE_1  = TC_GLB(         N)
+      DV%VALUE_2  = TC_GLB(  N_DEVC+N)
+      DV%T_CHANGE = TC_GLB(2*N_DEVC+N)
+   ENDDO
+
+   ! Get the spatial MIN value over all meshes
+
+   IF (MIN_DEVICES_EXIST) THEN
+      TC_LOC = 1.E10_EB
+      DO N=1,N_DEVC
+         DV => DEVICE(N)
+         IF (DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         DO NN=1,DV%N_SUBDEVICES
+            SDV => DV%SUBDEVICE(NN)
+            TC_LOC(N) = MIN(TC_LOC(N),SDV%VALUE_1)
+         ENDDO
+      ENDDO
+      IF (N_MPI_PROCESSES>1) THEN
+         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERR)
+      ELSE
+         TC_GLB = TC_LOC
+      ENDIF
+      DO N=1,N_DEVC
+         DV => DEVICE(N)
+         IF (DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         DV%VALUE_1 = TC_GLB(N)
+      ENDDO
+   ENDIF
+
+   ! Get the spatial MAX value over all meshes
+
+   IF (MAX_DEVICES_EXIST) THEN
+      TC_LOC = -1.E10_EB
+      DO N=1,N_DEVC
+         DV => DEVICE(N)
+         IF (DV%SPATIAL_STATISTIC/='MAX') CYCLE
+         DO NN=1,DV%N_SUBDEVICES
+            SDV => DV%SUBDEVICE(NN)
+            TC_LOC(N) = MAX(TC_LOC(N),SDV%VALUE_1)
+         ENDDO
+      ENDDO
+      IF (N_MPI_PROCESSES>1) THEN
+         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERR)
+      ELSE
+         TC_GLB = TC_LOC
+      ENDIF
+      DO N=1,N_DEVC
+         DV => DEVICE(N)
+         IF (DV%SPATIAL_STATISTIC/='MAX') CYCLE
+         DV%VALUE_1 = TC_GLB(N)
+      ENDDO
+   ENDIF
 
 ENDIF EXCHANGE_DEVICE
+
+! Perform the temporal operations on the device outputs
+
+CALL UPDATE_DEVICES_2(T,DT)
 
 ! Check for change in control function output of device
 
@@ -3236,9 +3289,7 @@ SUBROUTINE DUMP_GLOBAL_OUTPUTS
 ! Dump HRR data to CHID_hrr.csv, MASS data to CHID_mass.csv, DEVICE data to _devc.csv
 
 REAL(EB) :: TNOW
-INTEGER :: NN
 TYPE(DEVICE_TYPE), POINTER :: DV
-TYPE(SUBDEVICE_TYPE), POINTER :: SDV
 
 TNOW = CURRENT_TIME()
 
@@ -3298,39 +3349,6 @@ ENDIF
 
 IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
 
-   ! Let all MPI processes know the value of TIME_INTERVAL
-
-   DO N=1,N_DEVC
-      DV => DEVICE(N)
-      IF (DV%N_SUBDEVICES==0) CYCLE
-      TI_LOC(N) = DV%SUBDEVICE(1)%TIME_INTERVAL
-   ENDDO
-   IF (N_MPI_PROCESSES>1) THEN
-      CALL MPI_ALLREDUCE(TI_LOC(1),TI_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERR)
-   ELSE
-      TI_GLB = TI_LOC
-   ENDIF
-   DEVICE(1:N_DEVC)%TIME_INTERVAL = TI_GLB(1:N_DEVC)
-
-   ! Get the current VALUEs of all DEViCes into DEVICE(:)%VALUE on node 0
-
-   IF (MINVAL(DEVICE(1:N_DEVC)%TIME_INTERVAL)>0._EB) THEN
-      TC_LOC = 0._EB
-      DO N=1,N_DEVC
-         DV => DEVICE(N)
-         DO NN=1,DV%N_SUBDEVICES
-            SDV => DV%SUBDEVICE(NN)
-            TC_LOC(N) = TC_LOC(N) + SDV%VALUE
-         ENDDO
-      ENDDO
-      IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_REDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IERR)
-      ELSE
-         TC_GLB(1:N_DEVC) = TC_LOC(1:N_DEVC)
-      ENDIF
-      IF (MYID==0) DEVICE(1:N_DEVC)%VALUE = TC_GLB(1:N_DEVC)
-   ENDIF
-
    ! Exchange PDPA histogram info
 
    DO N=1,N_DEVC
@@ -3351,11 +3369,6 @@ IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
          DV => DEVICE(N)
          DV%VALUE = 0._EB
          DV%TIME_INTERVAL = 0._EB
-         DO NN=1,DV%N_SUBDEVICES
-            SDV => DV%SUBDEVICE(NN)
-            SDV%VALUE = 0._EB
-            SDV%TIME_INTERVAL = 0._EB
-         ENDDO
       ENDDO
    ENDIF
 ENDIF

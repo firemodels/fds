@@ -1990,7 +1990,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
-      IF (IW==0 .AND. DV%STATISTICS=='null') THEN
+      IF (IW==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
          WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
          STOP_STATUS = SETUP_STOP
          RETURN
