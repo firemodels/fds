@@ -12397,14 +12397,17 @@ SUBROUTINE PROC_DEVC(DT)
 
 ! Process the DEViCes
 
-USE COMP_FUNCTIONS, ONLY : CHANGE_UNITS
+USE COMP_FUNCTIONS, ONLY: CHANGE_UNITS
+USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE CONTROL_VARIABLES
-USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE, DEVICE, N_DEVC, PROPERTY, PROPERTY_TYPE, MAX_PDPA_HISTOGRAM_NBINS, N_PDPA_HISTOGRAM
+USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,SUBDEVICE_TYPE,DEVICE,N_DEVC,PROPERTY,PROPERTY_TYPE,MAX_PDPA_HISTOGRAM_NBINS,&
+                            N_PDPA_HISTOGRAM
 
 REAL(EB), INTENT(IN) :: DT
-INTEGER  :: N,NN,NNN,QUANTITY_INDEX,QUANTITY2_INDEX,MAXCELLS,I,J,K
-REAL(EB) :: XX,YY,ZZ,XX1,YY1,ZZ1,DISTANCE,SCANDISTANCE,DX,DY,DZ
+INTEGER  :: N,NN,NNN,NS,QUANTITY_INDEX,QUANTITY2_INDEX,MAXCELLS,I,J,K,NOM
+REAL(EB) :: XX,YY,ZZ,DISTANCE,SCANDISTANCE,DX,DY,DZ
 TYPE (DEVICE_TYPE),  POINTER :: DV=>NULL()
+TYPE (SUBDEVICE_TYPE),  POINTER :: SDV=>NULL()
 
 IF (N_DEVC==0) RETURN
 
@@ -12507,6 +12510,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ENDIF
       ENDIF
 
+      IF (DV%QUANTITY=='TRANSMISSION') DV%QUANTITY2 = 'PATHLENGTH'
+
    ENDIF QUANTITY_IF
 
    ! Even if the device is not in a mesh that is handled by the current MPI process, assign its unit.
@@ -12533,14 +12538,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    ! COVariance and CORRelation COEFficient STATISTICS requiring QUANTITY2
 
    QUANTITY2_IF: IF (TRIM(DV%QUANTITY2)/='null') THEN
-      IF (DV%TEMPORAL_STATISTIC/='COV' .AND. DV%TEMPORAL_STATISTIC/='CORRCOEF') THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: QUANTITY2 only applicable for COV and CORRCOEF STATISTIC for DEVC ',TRIM(DV%ID)
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-      IF (DV%RELATIVE) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: RELATIVE not applicable for COV and CORRCOEF STATISTIC for DEVC ',TRIM(DV%ID)
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
+      IF (DV%RELATIVE) WRITE(MESSAGE,'(A,A)') 'WARNING: RELATIVE not applicable for multi-QUANTITY DEViCe ',TRIM(DV%ID)
       DV%RELATIVE=.FALSE.
       CALL GET_QUANTITY_INDEX(DV%SMOKEVIEW_LABEL,DV%SMOKEVIEW_BAR_LABEL,QUANTITY2_INDEX,I_DUM(1), &
                               DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX(1),DV%REAC_INDEX,I_DUM(2),&
@@ -12659,50 +12657,34 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             DX = (DV%X2-DV%X1) * 0.0001_EB
             DY = (DV%Y2-DV%Y1) * 0.0001_EB
             DZ = (DV%Z2-DV%Z1) * 0.0001_EB
-            XX = DV%X1
-            YY = DV%Y1
-            ZZ = DV%Z1
-            MAXCELLS = 2*MAX(M%IBAR,M%JBAR,M%KBAR)
-            ALLOCATE(DV%I_PATH(MAXCELLS))
-            ALLOCATE(DV%J_PATH(MAXCELLS))
-            ALLOCATE(DV%K_PATH(MAXCELLS))
-            ALLOCATE(DV%D_PATH(MAXCELLS))
-            DV%D_PATH    = 0._EB
-            DV%I_PATH = MIN(M%IBAR , INT(GINV(DV%X1-M%XS,1,DV%MESH)*M%RDXI)   + 1)
-            DV%J_PATH = MIN(M%JBAR , INT(GINV(DV%Y1-M%YS,2,DV%MESH)*M%RDETA)  + 1)
-            DV%K_PATH = MIN(M%KBAR , INT(GINV(DV%Z1-M%ZS,3,DV%MESH)*M%RDZETA) + 1)
-            DV%N_PATH = 1
-            NN = 1
-            DO NNN=1,10000
-               XX = XX + DX
-               I = MIN(M%IBAR , INT(GINV(XX-M%XS,1,DV%MESH)*M%RDXI)   + 1)
-               YY = YY + DY
-               J = MIN(M%JBAR , INT(GINV(YY-M%YS,2,DV%MESH)*M%RDETA)  + 1)
-               ZZ = ZZ + DZ
-               K = MIN(M%KBAR , INT(GINV(ZZ-M%ZS,3,DV%MESH)*M%RDZETA) + 1)
-               IF (I==DV%I_PATH(NN) .AND. J==DV%J_PATH(NN) .AND. K==DV%K_PATH(NN)) THEN
-                  DV%D_PATH(NN) = DV%D_PATH(NN) + SCANDISTANCE
-               ELSE
-                  NN = NN + 1
-                  DV%I_PATH(NN) = I
-                  DV%J_PATH(NN) = J
-                  DV%K_PATH(NN) = K
-                  XX1 = DX
-                  YY1 = DY
-                  ZZ1 = DZ
-                  IF (PROCESS(DV%MESH)==MYID) THEN
-                     IF (I<DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1)-1)
-                     IF (I>DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1))
-                     IF (J<DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1)-1)
-                     IF (J>DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1))
-                     IF (K<DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1)-1)
-                     IF (K>DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1))
-                  ENDIF
-                  DV%D_PATH(NN)   = SCANDISTANCE - SQRT(XX1**2+YY1**2+ZZ1**2)
-                  DV%D_PATH(NN-1) = DV%D_PATH(NN-1) + SCANDISTANCE - DV%D_PATH(NN)
-               ENDIF
+
+            DO NS=1,DV%N_SUBDEVICES
+               SDV => DV%SUBDEVICE(NS)
+               M => MESHES(SDV%MESH)
+               MAXCELLS = 2*MAX(M%IBAR,M%JBAR,M%KBAR)
+               ALLOCATE(SDV%I_PATH(0:MAXCELLS))
+               ALLOCATE(SDV%J_PATH(0:MAXCELLS))
+               ALLOCATE(SDV%K_PATH(0:MAXCELLS))
+               ALLOCATE(SDV%D_PATH(MAXCELLS))
+               SDV%D_PATH    = 0._EB
+               SDV%I_PATH(0) = -1
+               SDV%J_PATH(0) = -1
+               SDV%K_PATH(0) = -1
+               NN = 0
+               DO NNN=1,10000
+                  XX = DV%X1 + (NNN-0.5_EB)*DX
+                  YY = DV%Y1 + (NNN-0.5_EB)*DY
+                  ZZ = DV%Z1 + (NNN-0.5_EB)*DZ
+                  CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,I,J,K)
+                  IF (NOM/=SDV%MESH) CYCLE
+                  IF (I/=SDV%I_PATH(NN-1) .OR. J/=SDV%J_PATH(NN-1) .OR. K/=SDV%K_PATH(NN-1)) NN = NN + 1
+                  SDV%D_PATH(NN) = SDV%D_PATH(NN) + SCANDISTANCE
+                  SDV%I_PATH(NN) = I
+                  SDV%J_PATH(NN) = J
+                  SDV%K_PATH(NN) = K
+               ENDDO
+               SDV%N_PATH = NN
             ENDDO
-            DV%N_PATH = NN
          ENDIF
    
       CASE ('CONTROL')
