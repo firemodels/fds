@@ -12677,7 +12677,11 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                   ZZ = DV%Z1 + (NNN-0.5_EB)*DZ
                   CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,I,J,K)
                   IF (NOM/=SDV%MESH) CYCLE
-                  IF (I/=SDV%I_PATH(NN-1) .OR. J/=SDV%J_PATH(NN-1) .OR. K/=SDV%K_PATH(NN-1)) NN = NN + 1
+                  IF (NN>0) THEN
+                     IF (I/=SDV%I_PATH(NN-1) .OR. J/=SDV%J_PATH(NN-1) .OR. K/=SDV%K_PATH(NN-1)) NN = NN + 1
+                  ELSE
+                     NN = 1
+                  ENDIF
                   SDV%D_PATH(NN) = SDV%D_PATH(NN) + SCANDISTANCE
                   SDV%I_PATH(NN) = I
                   SDV%J_PATH(NN) = J
