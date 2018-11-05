@@ -990,9 +990,9 @@ SELECT CASE(TASK_NUMBER)
       CALL ChkMemErr('MAIN','STATE_GLB',IZERO)
       ALLOCATE(STATE_LOC(2*N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','STATE_LOC',IZERO)
-      ALLOCATE(TC_GLB(3*N_DEVC),STAT=IZERO)
+      ALLOCATE(TC_GLB(2*N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','TC_GLB',IZERO)
-      ALLOCATE(TC_LOC(3*N_DEVC),STAT=IZERO)
+      ALLOCATE(TC_LOC(2*N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','TC_LOC',IZERO)
 
       ! Allocate a few arrays needed to exchange divergence and pressure info among meshes
@@ -3027,8 +3027,7 @@ SUBROUTINE EXCHANGE_GLOBAL_OUTPUTS
 
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EMESH_INDEX
 REAL(EB) :: TNOW
-INTEGER :: NN,N,I_STATE,I
-INTEGER :: NM,DISP
+INTEGER :: NN,N,I_STATE,I,OP_INDEX,MPI_OP_INDEX,NM,DISP
 TYPE(DEVICE_TYPE), POINTER :: DV
 TYPE(SUBDEVICE_TYPE), POINTER :: SDV
 
@@ -3068,9 +3067,10 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
    STATE_LOC = .FALSE.  ! _LOC is a temporary array that holds the STATE value for the devices on each node
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       DO N=1,N_DEVC
-         IF (DEVICE(N)%MESH==NM) THEN
-            STATE_LOC(N)        = DEVICE(N)%CURRENT_STATE
-            STATE_LOC(N+N_DEVC) = DEVICE(N)%PRIOR_STATE
+         DV => DEVICE(N)
+         IF (DV%MESH==NM) THEN
+            STATE_LOC(N)        = DV%CURRENT_STATE
+            STATE_LOC(N+N_DEVC) = DV%PRIOR_STATE
          ENDIF
       ENDDO
    ENDDO
@@ -3079,8 +3079,12 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
    ELSE
       STATE_GLB = STATE_LOC
    ENDIF
-   DEVICE(1:N_DEVC)%CURRENT_STATE = STATE_GLB(       1:  N_DEVC)
-   DEVICE(1:N_DEVC)%PRIOR_STATE   = STATE_GLB(N_DEVC+1:2*N_DEVC)
+   DO N=1,N_DEVC
+      DV => DEVICE(N)
+      DV%CURRENT_STATE = STATE_GLB(N)
+      DV%PRIOR_STATE   = STATE_GLB(N+N_DEVC)
+      IF (DV%CURRENT_STATE .NEQV. DV%PRIOR_STATE) DV%T_CHANGE = T
+   ENDDO
 
    ! Dry pipe sprinkler logic
 
@@ -3092,79 +3096,55 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
       ENDIF
    ENDDO
 
-   ! Sum and then exchange VALUE_1 and VALUE_2 and T_CHANGE of each DEViCe
+   ! Each DEViCe has 0 or more SUBDEVICEs. These SUBDEVICEs contain the values of the DEViCe on the meshes controlled 
+   ! by the copy of the DEViCe controlled by this MPI process. Each MPI process has a copy of every DEViCe, but only 
+   ! the MPI process that controls the meshes has a copy of the DEViCe for which SUBDEVICEs have been allocated.
 
-   TC_LOC = 0._EB
-   DO N=1,N_DEVC
-      DV => DEVICE(N)
-      IF (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX') CYCLE
-      DO NN=1,DV%N_SUBDEVICES
-         SDV => DV%SUBDEVICE(NN)
-         TC_LOC(N)          = TC_LOC(N)        + SDV%VALUE_1
-         TC_LOC(N+N_DEVC)   = TC_LOC(N+N_DEVC) + SDV%VALUE_2
-         TC_LOC(N+2*N_DEVC) = DV%T_CHANGE
-      ENDDO
-   ENDDO
-   IF (N_MPI_PROCESSES>1) THEN
-      CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),3*N_DEVC,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
-   ELSE
-      TC_GLB = TC_LOC
-   ENDIF
-   DO N=1,N_DEVC
-      DV => DEVICE(N)
-      IF (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX') CYCLE
-      DV%VALUE_1  = TC_GLB(         N)
-      DV%VALUE_2  = TC_GLB(  N_DEVC+N)
-      DV%T_CHANGE = TC_GLB(2*N_DEVC+N)
-   ENDDO
+   ! In the following loop, for OP_INDEX=1, we add together VALUE_1 and possibly VALUE_2 for all SUBDEVICEs (i.e. meshes) 
+   ! allocated by the copy of the DEViCe associated with the current MPI process, MYID. Then we do an MPI_ALLREDUCE that 
+   ! adds the VALUE_1 and VALUE_2 from other SUBDEVICEs allocated by the copies of the DEViCE stored by the other MPI processes. 
+   ! For OP_INDEX=2 and 3, we take the MIN or MAX insteading of adding VALUE_1 togheter.
 
-   ! Get the spatial MIN value over all meshes
-
-   IF (MIN_DEVICES_EXIST) THEN
-      TC_LOC = 1.E10_EB
+   OPERATION_LOOP: DO OP_INDEX=1,3
+      IF (OP_INDEX==2 .AND. .NOT.MIN_DEVICES_EXIST) CYCLE OPERATION_LOOP
+      IF (OP_INDEX==3 .AND. .NOT.MAX_DEVICES_EXIST) CYCLE OPERATION_LOOP
+      SELECT CASE(OP_INDEX) 
+         CASE(1) ; TC_LOC =  0._EB    ; MPI_OP_INDEX = MPI_SUM
+         CASE(2) ; TC_LOC =  1.E10_EB ; MPI_OP_INDEX = MPI_MIN
+         CASE(3) ; TC_LOC = -1.E10_EB ; MPI_OP_INDEX = MPI_MAX
+      END SELECT
       DO N=1,N_DEVC
          DV => DEVICE(N)
-         IF (DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX')) CYCLE
+         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC/='MAX') CYCLE
          DO NN=1,DV%N_SUBDEVICES
             SDV => DV%SUBDEVICE(NN)
-            TC_LOC(N) = MIN(TC_LOC(N),SDV%VALUE_1)
+            SELECT CASE(OP_INDEX)
+               CASE(1)
+                  TC_LOC(N)          = TC_LOC(N)        + SDV%VALUE_1
+                  TC_LOC(N+N_DEVC)   = TC_LOC(N+N_DEVC) + SDV%VALUE_2
+               CASE(2)
+                  TC_LOC(N) = MIN(TC_LOC(N),SDV%VALUE_1)
+               CASE(3)
+                  TC_LOC(N) = MAX(TC_LOC(N),SDV%VALUE_1)
+            END SELECT
          ENDDO
       ENDDO
       IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERR)
+         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),2*N_DEVC,MPI_DOUBLE_PRECISION,MPI_OP_INDEX,MPI_COMM_WORLD,IERR)
       ELSE
          TC_GLB = TC_LOC
       ENDIF
       DO N=1,N_DEVC
          DV => DEVICE(N)
-         IF (DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX')) CYCLE
+         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC/='MIN') CYCLE
+         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC/='MAX') CYCLE
          DV%VALUE_1 = TC_GLB(N)
+         IF (OP_INDEX==1) DV%VALUE_2 = TC_GLB(N_DEVC+N)
       ENDDO
-   ENDIF
-
-   ! Get the spatial MAX value over all meshes
-
-   IF (MAX_DEVICES_EXIST) THEN
-      TC_LOC = -1.E10_EB
-      DO N=1,N_DEVC
-         DV => DEVICE(N)
-         IF (DV%SPATIAL_STATISTIC/='MAX') CYCLE
-         DO NN=1,DV%N_SUBDEVICES
-            SDV => DV%SUBDEVICE(NN)
-            TC_LOC(N) = MAX(TC_LOC(N),SDV%VALUE_1)
-         ENDDO
-      ENDDO
-      IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IERR)
-      ELSE
-         TC_GLB = TC_LOC
-      ENDIF
-      DO N=1,N_DEVC
-         DV => DEVICE(N)
-         IF (DV%SPATIAL_STATISTIC/='MAX') CYCLE
-         DV%VALUE_1 = TC_GLB(N)
-      ENDDO
-   ENDIF
+   ENDDO OPERATION_LOOP
 
 ENDIF EXCHANGE_DEVICE
 
@@ -3205,25 +3185,13 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ! If a DEViCe changes state, save the Smokeview file strings and time of state change
 
    NM = DV%MESH
-   IF (PROCESS(NM)/=MYID) CYCLE DEVICE_LOOP
-   M=>MESHES(NM)
 
-   IF (DV%CURRENT_STATE .NEQV. DV%PRIOR_STATE) THEN
-      DV%T_CHANGE = T
+   IF (PROCESS(NM)==MYID .AND. &
+       ((DV%CURRENT_STATE.NEQV.DV%PRIOR_STATE) .OR. (ABS(T-T_BEGIN)<SPACING(T).AND..NOT.DV%CURRENT_STATE))) THEN
+      M=>MESHES(NM)
       IF (M%N_STRINGS+2>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       I_STATE=0
       IF (DV%CURRENT_STATE) I_STATE=1
-      M%N_STRINGS = M%N_STRINGS + 1
-      WRITE(M%STRING(M%N_STRINGS),'(A,5X,A,1X)') 'DEVICE_ACT',TRIM(DV%ID)
-      M%N_STRINGS = M%N_STRINGS + 1
-      WRITE(M%STRING(M%N_STRINGS),'(I6,F10.2,I6)') N,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR,I_STATE
-   ENDIF
-
-   ! Write initial state of DEViCes to the Smokeview file
-
-   IF (ABS(T-T_BEGIN)<SPACING(T) .AND. .NOT.DV%CURRENT_STATE) THEN
-      IF (M%N_STRINGS+2>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
-      I_STATE=0
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(A,5X,A,1X)') 'DEVICE_ACT',TRIM(DV%ID)
       M%N_STRINGS = M%N_STRINGS + 1
@@ -3283,7 +3251,6 @@ EVAC_ONLY: IF (ANY(EVACUATION_ONLY)) THEN
    ENDDO
 ENDIF EVAC_ONLY
 
-
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE EXCHANGE_GLOBAL_OUTPUTS
 
@@ -3340,7 +3307,7 @@ ENDIF
 
 IF (MYID==MAX(0,EVAC_PROCESS)) CALL EVAC_CSV(T)
 
-! Dump out Mass info after first "gathering" data to node 0
+! Dump out mass info into CHID_mass.csv
 
 IF (T>=MINT_CLOCK) THEN
    IF (MYID==0) CALL DUMP_MASS(T,DT)
