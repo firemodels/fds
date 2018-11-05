@@ -450,7 +450,7 @@ LOGICAL, PARAMETER :: FORCE_SOLID_FACE    = .TRUE.
 LOGICAL, PARAMETER :: FORCE_GAS_FACE      = .TRUE.
 LOGICAL, PARAMETER :: INTERP_TO_CARTFACE  = .FALSE. ! If True => direct interpolation to cut-face
                                                     ! Cartesian Centroid in forcing, if False => flux average.
-LOGICAL, PARAMETER :: FORCE_REGC_FACE     = .TRUE.
+LOGICAL, SAVE ::      FORCE_REGC_FACE     = .TRUE.
 LOGICAL, SAVE ::      FORCE_REGC_FACE_NXT = .FALSE. ! Do not Force Regular Faces next to cut-faces.
 
 LOGICAL, SAVE :: CC_INJECT_RHO0 = .FALSE. ! .TRUE.: inject RHO0 and use Boundary W velocity for cut-cell centroid.
@@ -513,6 +513,10 @@ INTEGER, PARAMETER :: IBM_WLS_INTERPOLATION       = 3
 INTEGER, SAVE :: STENCIL_INTERPOLATION        = IBM_LINEAR_INTERPOLATION ! Set to linear by default.
 
 LOGICAL, PARAMETER :: CFACE_INTERPOLATE = .TRUE.
+
+! Forces integrated from IBM:
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FORCE_IBM  ! [IAXIS:KAXIS,NMESHES]
+
 
 ! End Variable declaration for CC_IBM.
 !! ---------------------------------------------------------------------------------
@@ -577,6 +581,7 @@ SUBROUTINE CCREGION_COMPUTE_VISCOSITY(DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY: LES_FILTER_WIDTH_FUNCTION
 USE TURBULENCE, ONLY: WALE_VISCOSITY
+USE TURBULENCE, ONLY : WALL_MODEL
 
 REAL(EB), INTENT(IN):: DT
 INTEGER, INTENT(IN) :: NM
@@ -586,6 +591,14 @@ INTEGER :: I,J,K
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UU=>NULL(),VV=>NULL(),WW=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB) :: NU_EDDY,DELTA,A_IJ(3,3),DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
+
+REAL(EB) :: NVEC(IAXIS:KAXIS), TVEC1(IAXIS:KAXIS), TVEC2(IAXIS:KAXIS), VEL_WALL(IAXIS:KAXIS), VEL_CELL(IAXIS:KAXIS), &
+            DN, RHO_WALL, MU_WALL, SLIP_FACTOR, TT(IAXIS:KAXIS), SS(IAXIS:KAXIS), &
+            U_NORM, U_ORTH, U_STRM, U_CELL, V_CELL, W_CELL
+INTEGER  :: ICF,IND1,IND2
+TYPE(CFACE_TYPE), POINTER :: CFA
+TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
+TYPE(SURFACE_TYPE), POINTER :: SF
 
 ! No need to compute WALE model turbulent viscosity on cut-cell region.
 IF (SIM_MODE==DNS_MODE) RETURN
@@ -612,6 +625,10 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
           IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+          IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) THEN
+             MU(I,J,K) = MU_DNS(I,J,K)
+             CYCLE
+          ENDIF
           IF(.NOT.(CCVAR(I,J,K,IBM_CGSC)==IBM_CUTCFE .OR. CCVAR(I,J,K,IBM_UNKZ)>0)) CYCLE
 
           DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
@@ -638,6 +655,43 @@ DO K=1,KBAR
 ENDDO
 
 CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+
+
+! Now compute U_TAU and Y_PLUS on CFACES:
+DO ICF=1,N_CFACE_CELLS
+
+   CFA => CFACE(ICF)
+   ONE_D => CFA%ONE_D
+   SF => SURFACE(CFA%SURF_INDEX)
+
+   ! Surface Velocity:
+   NVEC = CFA%NVEC
+
+   ! right now VEL_T not defined for CFACEs
+   TVEC1=(/ 0._EB,0._EB,0._EB/)
+   TVEC2=(/ 0._EB,0._EB,0._EB/)
+   ! velocity vector of the surface
+   VEL_WALL = -ONE_D%UW*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
+
+   ! find cut-cell adjacent to CFACE
+   IND1 = CFA%CUT_FACE_IND1
+   IND2 = CFA%CUT_FACE_IND2
+   CALL GET_UVWGAS_CFACE(U_CELL,V_CELL,W_CELL,IND1,IND2)
+   ! velocity vector in the centroid of the gas (cut) cell
+   VEL_CELL = (/U_CELL,V_CELL,W_CELL/) ! (/1._EB,0._EB,0._EB/) ! test
+
+   CALL GET_MUDNS_CFACE(MU_WALL,IND1,IND2)
+
+   ! Gives local velocity components U_STRM , U_ORTH , U_NORM
+   ! in terms of unit vectors SS,TT,NN:
+   CALL GET_LOCAL_VELOCITY(VEL_CELL-VEL_WALL,NVEC,TT,SS,U_NORM,U_ORTH,U_STRM)
+
+   DN  = 1._EB/ONE_D%RDN
+   RHO_WALL = ONE_D%RHO_F
+
+   CALL WALL_MODEL(SLIP_FACTOR,ONE_D%U_TAU,ONE_D%Y_PLUS,U_STRM,MU_WALL/RHO_WALL,DN,SF%ROUGHNESS)
+
+ENDDO
 
 RETURN
 END SUBROUTINE CCREGION_COMPUTE_VISCOSITY
@@ -1511,7 +1565,7 @@ IF (INT_NPE_HI > 0) THEN
    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
       ! PRESS = PRESS + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_P_IND,INPE)
       PRESS = PRESS + CUT_FACE(IND1)%INT_COEF(INPE)* &
-                 CUT_FACE(IND1)%INT_CVARS( INT_RHO_IND,INPE)*CUT_FACE(IND1)%INT_CVARS( INT_H_IND,INPE)
+      CUT_FACE(IND1)%INT_CVARS( INT_RHO_IND,INPE)*CUT_FACE(IND1)%INT_CVARS( INT_H_IND,INPE)
    ENDDO
 ELSE
    ! Underlying cell approximate value:
@@ -2762,7 +2816,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       IF (CODE==1 .AND. M2%NFCC_R(1)>0) THEN
          NQT2 = 3 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(IBM_USE_OUTER_PLANE) THEN
+         IF(IBM_PLANE_INTERPOLATION) THEN
            ! First loop cut-faces:
            DO ICF=1,M%N_CUTFACE_MESH
               IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
@@ -2814,7 +2868,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                  ENDDO
               ENDDO
            ENDDO
-         ELSE ! IBM_USE_OUTER_PLANE
+         ELSE ! IBM_PLANE_INTERPOLATION
            ! First loop cut-faces:
            DO ICF=1,M%N_CUTFACE_MESH
               IFACE_START=1
@@ -2852,7 +2906,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                  ENDDO
               ENDDO
            ENDDO
-         ENDIF  ! IBM_USE_OUTER_PLANE
+         ENDIF  ! IBM_PLANE_INTERPOLATION
       ENDIF
 
       ! Unpack densities and species mass fractions following CORRECTOR exchange
@@ -2883,7 +2937,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       IF (CODE==4 .AND. M2%NFCC_R(1)>0) THEN
          NQT2 = 3 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(IBM_USE_OUTER_PLANE) THEN
+         IF(IBM_PLANE_INTERPOLATION) THEN
            ! First loop cut-faces:
            DO ICF=1,M%N_CUTFACE_MESH
               IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
@@ -2935,7 +2989,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                  ENDDO
               ENDDO
            ENDDO
-         ELSE ! IBM_USE_OUTER_PLANE
+         ELSE ! IBM_PLANE_INTERPOLATION
            ! First loop cut-faces:
            DO ICF=1,M%N_CUTFACE_MESH
               IFACE_START=1
@@ -2973,7 +3027,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                  ENDDO
               ENDDO
            ENDDO
-         ENDIF ! IBM_USE_OUTER_PLANE
+         ENDIF ! IBM_PLANE_INTERPOLATION
       ENDIF
 
       ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
@@ -12112,6 +12166,10 @@ END SUBROUTINE CCIBM_H_INTERP
 
 SUBROUTINE CCIBM_INTERP_FACE_VEL(DT,NM,STORE_FLG)
 
+
+USE TURBULENCE, ONLY : WALL_MODEL
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
+
 ! This routine is used to interpolate velocities in Cartesian Faces of type IBM_CUTCFE
 ! (containing GASPHASE cut-faces), such that shear stresses used in momentum evorution
 ! for surrounding regular cells are accurate.
@@ -12134,8 +12192,15 @@ REAL(EB) :: NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_NORM2,U_ORTH,U_STR
 INTEGER :: IFACE, EP, VIND, INPE, ICF1, ICF2, ICFA, INT_NPE_LO, INT_NPE_HI
 REAL(EB):: DXN_STRM, DXN_STRM2, COEF
 
+REAL(EB):: X1F, IDX, CCM1, CCP1, TMPV(-1:0), RHOV(-1:0), MUV(-1:0), NU, MU_FACE, RHO_FACE, PRFCT
+REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), SLIP_FACTOR, U_TAU, Y_PLUS, SRGH
+! REAL(EB):: MU_T, TAU_WALL, TAU_OFF_WALL
+INTEGER :: ICC,JCC,ISIDE
+REAL(EB):: DT2
+
 REAL(EB) :: TNOW
 
+DT2 = 0._EB*DT
 
 IF ( FREEZE_VELOCITY ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
@@ -12145,10 +12210,12 @@ IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
+   PRFCT = 0._EB
 ELSE
    UU => US
    VV => VS
    WW => WS
+   PRFCT = 1._EB
 ENDIF
 
 STORE_FLG_CND : IF (STORE_FLG) THEN
@@ -12166,7 +12233,7 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
       X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
 
-      IF(IBM_USE_OUTER_PLANE) THEN
+      IF(IBM_PLANE_INTERPOLATION) THEN
          ! Interpolate Un approx to cartesian-face centroids:
          VAL(1:5) = 0._EB
          U_IBM = 0._EB
@@ -12226,13 +12293,15 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
                IF (ICFA>0) VELN = -CFACE(ICFA)%ONE_D%UW
             ENDIF
             NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
-            TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB
+            TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB; U_IBM = 0._EB
             IF (NORM2(NN) > TWO_EPSILON_EB) THEN
                U_SURF(IAXIS:KAXIS) = VELN*NN
                U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
                ! Gives local velocity components U_STRM , U_ORTH , U_NORM in terms of unit vectors
                ! SS,TT,NN
                CALL GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+               ! U_STRM    = U_RELA(X1AXIS)
+               ! SS(X1AXIS)= 1._EB ! Make stream the X1AXIS dir.
 
                ! Apply wall model to define streamwise velocity at interpolation point:
                DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
@@ -12241,12 +12310,74 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
                                                         ! Linear velocity variation should be used be used.
                ! Linear variation:
                U_NORM2 = DXN_STRM2/DXN_STRM*U_NORM      ! Assumes relative U_normal decreases linearly to boundry.
-               U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
+
+
+               IF(DXN_STRM2 < 0._EB) THEN
+                  ! Linear variation:
+                  U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
+                  ! Velocity U_ORTH is zero by construction. Surface velocity is added to get absolute vel.
+                  U_IBM = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+               ELSE
+                  X1F= MESHES(NM)%CUT_FACE(ICF)%XYZCEN(X1AXIS,1)
+                  IDX= 1._EB/ ( MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1) - &
+                                MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1) )
+                  CCM1= IDX*(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1)-X1F)
+                  CCP1= IDX*(X1F-MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1))
+                  ! For NU use interpolation of values on neighboring cut-cells:
+                  TMPV(-1:0) = -1._EB; RHOV(-1:0) = 0._EB
+                  DO ISIDE=-1,0
+                     ZZ_GET = 0._EB
+                     SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,1))
+                     CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                        ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,1)
+                        JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,1)
+                        TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                        ZZ_GET(1:N_TRACKED_SPECIES) =  &
+                               PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                        (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                        RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + &
+                               (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                     END SELECT
+                     CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                  ENDDO
+                  MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
+                  RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
+                  NU      = MU_FACE/RHO_FACE
+                  CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,DXN_STRM2,U_STRM2)
+
+                  ! Hardwire tau_wall:
+                  ! Tau(y) = Tau_wall*(1.-Y/delta_channel)
+                  ! TAU_WALL = -0.001512_EB !-RHO_FACE*U_TAU**2._EB
+                  ! SELECT CASE (X1AXIS)
+                  ! CASE(IAXIS)
+                  !    IF(FCVAR(I,J+1,K,IBM_FGSC,IAXIS)==IBM_GASPHASE) THEN
+                  !       MU_T=MAX(MU_FACE,0.25_EB*(MU(I,J,K)+MU(I+1,J,K)+MU(I,J+1,K)+MU(I+1,J+1,K)))
+                  !       TAU_OFF_WALL = TAU_WALL*(1._EB-DY(J)/0.5_EB)  ! 0.5 m half duct width.
+                  !       U_IBM = UVW_EP(X1AXIS,EP,IFACE) - DY(J)*TAU_OFF_WALL/MU_T
+                  !
+                  !    ELSEIF(FCVAR(I,J-1,K,IBM_FGSC,IAXIS)==IBM_GASPHASE) THEN
+                  !       MU_T=MAX(MU_FACE,0.25_EB*(MU(I,J,K)+MU(I+1,J,K)+MU(I,J-1,K)+MU(I+1,J-1,K)))
+                  !       TAU_OFF_WALL = TAU_WALL*(1._EB-DY(J)/0.5_EB)  ! 0.5 m half duct width.
+                  !       U_IBM = UVW_EP(X1AXIS,EP,IFACE) + DY(J)*TAU_OFF_WALL/MU_T
+                  !
+                  !    ELSEIF(FCVAR(I,J,K+1,IBM_FGSC,IAXIS)==IBM_GASPHASE) THEN
+                  !       MU_T=MAX(MU_FACE,0.25_EB*(MU(I,J,K)+MU(I+1,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1)))
+                  !       TAU_OFF_WALL = TAU_WALL*(1._EB-DZ(K)/0.5_EB)  ! 0.5 m half duct width.
+                  !       U_IBM = UVW_EP(X1AXIS,EP,IFACE) - DZ(K)*TAU_OFF_WALL/MU_T
+                  !
+                  !    ELSEIF(FCVAR(I,J,K-1,IBM_FGSC,IAXIS)==IBM_GASPHASE) THEN
+                  !       MU_T=MAX(MU_FACE,0.25_EB*(MU(I,J,K)+MU(I+1,J,K)+MU(I,J,K-1)+MU(I+1,J,K-1)))
+                  !       TAU_OFF_WALL = TAU_WALL*(1._EB-DZ(K)/0.5_EB)  ! 0.5 m half duct width.
+                  !       U_IBM = UVW_EP(X1AXIS,EP,IFACE) + DZ(K)*TAU_OFF_WALL/MU_T
+                  !
+                  !    ENDIF
+                  ! CASE DEFAULT
+                  ! Velocity U_ORTH is zero by construction. Surface velocity is added to get absolute vel.
+                  U_IBM = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+                  !END SELECT
+
+               ENDIF
             ENDIF
-
-            ! Velocity U_ORTH is zero by construction. Surface velocity is added to get absolute vel.
-            U_IBM = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
-
          ENDIF
 
       ENDIF
@@ -12307,6 +12438,7 @@ SUBROUTINE CCIBM_VELOCITY_FLUX2(T,DT)
 
 USE TURBULENCE, ONLY : WALL_MODEL
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
+USE MPI
 
 REAL(EB), INTENT(IN) :: T,DT
 
@@ -12322,17 +12454,34 @@ REAL(EB):: X1F, IDX, CCM1, CCP1, TMPV(-1:0), RHOV(-1:0), MUV(-1:0), NU, MU_FACE,
 REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), DXN_STRM, DXN_STRM2, SLIP_FACTOR, SRGH, U_NORM2, U_STRM2, U_TAU, Y_PLUS
 REAL(EB):: DUUDT, DVVDT, DWWDT, U_IBM, V_IBM, W_IBM
 
-
 REAL(EB):: VAL_EP, DUMEB, COEF
 
 REAL(EB) :: TNOW
 
 REAL(EB):: MTIME
 
+CHARACTER(100), SAVE :: FILENAME
+LOGICAL, SAVE :: FIRST_CALL = .TRUE.
+LOGICAL, PARAMETER :: WRITE_FORCES = .FALSE.
+INTEGER :: IERR
+
 TNOW = CURRENT_TIME()
 
 ! Force T to be used var:
 MTIME=T
+
+! Initialize force writing, hacked in:
+IF (FIRST_CALL .AND. WRITE_FORCES) THEN
+   ALLOCATE(FORCE_IBM(IAXIS:KAXIS,NMESHES))
+   IF(MYID==0) THEN
+      WRITE(FILENAME,'(A,A)') TRIM(CHID),'_IBM_forces.res'
+      OPEN(UNIT=665,FILE=TRIM(FILENAME),STATUS='unknown')
+      WRITE(665,'(A)') 'TIME,          FX,          FY,          FZ'
+      CLOSE(665)
+   ENDIF
+   FIRST_CALL = .FALSE.
+ENDIF
+IF (WRITE_FORCES .AND. CORRECTOR) FORCE_IBM(:,:) = 0._EB
 
 ! First of all exchange fresh FV guard cell information
 IF (PREDICTOR) THEN
@@ -12440,6 +12589,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ! Gives local velocity components U_STRM , U_ORTH , U_NORM
                      ! in terms of unit vectors SS,TT,NN:
                      CALL GET_LOCAL_VELOCITY(U_RELA,NN,TT,SS,U_NORM,U_ORTH,U_STRM)
+                     ! U_STRM    = U_RELA(X1AXIS)
+                     ! SS(X1AXIS)= 1._EB ! Make stream the X1AXIS dir.
 
                      ! Apply wall model to define streamwise velocity at interpolation point:
                      DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
@@ -12516,6 +12667,9 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
             FVX(I,J,K) = - DUUDT
 
+            IF (WRITE_FORCES .AND. CORRECTOR)  &
+            FORCE_IBM(IAXIS,NM) = FORCE_IBM(IAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I+1,J,K))*FVX(I,J,K)*DX(I)*DY(J)*DZ(K)
+
          CASE(JAXIS)
 
             ! Flux average velocities to Cartesian face center:
@@ -12534,6 +12688,9 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
             FVY(I,J,K) = - DVVDT
 
+            IF (WRITE_FORCES .AND. CORRECTOR)  &
+            FORCE_IBM(JAXIS,NM) = FORCE_IBM(JAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I,J+1,K))*FVY(I,J,K)*DX(I)*DY(J)*DZ(K)
+
          CASE(KAXIS)
 
             ! Flux average velocities to Cartesian face center:
@@ -12551,6 +12708,9 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
             ! FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
             FVZ(I,J,K) = - DWWDT
+
+            IF (WRITE_FORCES .AND. CORRECTOR)  &
+            FORCE_IBM(KAXIS,NM) = FORCE_IBM(KAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K+1))*FVZ(I,J,K)*DX(I)*DY(J)*DZ(K)
 
          END SELECT
 
@@ -12726,6 +12886,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
          ! FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
          FVX(I,J,K) = - DUUDT
+
+         IF (WRITE_FORCES .AND. CORRECTOR)  &
+         FORCE_IBM(IAXIS,NM) = FORCE_IBM(IAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I+1,J,K))*FVX(I,J,K)*DX(I)*DY(J)*DZ(K)
+
       CASE(JAXIS)
          ! Compute Forcing:
          V_IBM = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT
@@ -12733,6 +12897,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
          ! FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
          FVY(I,J,K) = - DVVDT
+
+         IF (WRITE_FORCES .AND. CORRECTOR)  &
+         FORCE_IBM(JAXIS,NM) = FORCE_IBM(JAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I,J+1,K))*FVY(I,J,K)*DX(I)*DY(J)*DZ(K)
+
       CASE(KAXIS)
          ! Compute Forcing:
          W_IBM = MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT
@@ -12740,6 +12908,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
          ! FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
          FVZ(I,J,K) = - DWWDT
+
+         IF (WRITE_FORCES .AND. CORRECTOR)  &
+         FORCE_IBM(KAXIS,NM) = FORCE_IBM(KAXIS,NM) + 0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K+1))*FVZ(I,J,K)*DX(I)*DY(J)*DZ(K)
+
       END SELECT
 
    ENDDO REGCFACE_LOOP
@@ -12748,6 +12920,14 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO MESH_LOOP
 
+IF(WRITE_FORCES .AND. CORRECTOR) THEN
+   CALL MPI_ALLREDUCE(MPI_IN_PLACE,FORCE_IBM,MAX_DIM*NMESHES,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+   IF(MYID==0) THEN
+      OPEN(UNIT=665,FILE=TRIM(FILENAME),STATUS='OLD',POSITION='APPEND')
+      WRITE(665,'(4F12.8)') T,SUM(FORCE_IBM(IAXIS,:)),SUM(FORCE_IBM(JAXIS,:)),SUM(FORCE_IBM(KAXIS,:))
+      CLOSE(665)
+   ENDIF
+ENDIF
 
 RETURN
 END SUBROUTINE CCIBM_VELOCITY_FLUX2
@@ -12814,7 +12994,7 @@ REAL(EB):: MTIME
 IF ( FREEZE_VELOCITY ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
 
-IF (.NOT.IBM_USE_OUTER_PLANE) THEN ! New Volume interpolation on set of external points.
+IF (.NOT.IBM_PLANE_INTERPOLATION) THEN ! New Volume interpolation on set of external points.
    CALL CCIBM_VELOCITY_FLUX2(T,DT)
    RETURN
 ENDIF
@@ -14859,7 +15039,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             END SELECT
             IF (IFACE > 0) XYZ(IAXIS:KAXIS) = CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,IFACE)
 
-            IF (IBM_USE_OUTER_PLANE) THEN
+            IF (IBM_PLANE_INTERPOLATION) THEN
 
                PTS(IAXIS:KAXIS,NOD1:NOD4) = CUT_FACE(ICF)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
                XYZ_PP(IAXIS:KAXIS)        = CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
@@ -15011,7 +15191,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                XYZ(IAXIS:KAXIS) = (/ XC(I), YC(J), Z(K) /)
          END SELECT
 
-         IF (IBM_USE_OUTER_PLANE) THEN
+         IF (IBM_PLANE_INTERPOLATION) THEN
 
             PTS(IAXIS:KAXIS,NOD1:NOD4) = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
             XYZ_PP(IAXIS:KAXIS)        = MESHES(NM)%IBM_RCFACE_VEL(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
@@ -15398,6 +15578,8 @@ IF (FORCE_REGC_FACE_NXT) THEN
    DO_GASNXT_CUTFACE = .TRUE.
    DO_GASNXT_CARTCELL= .TRUE.
 ENDIF
+
+IF(.NOT.IBM_PLANE_INTERPOLATION) FORCE_REGC_FACE = .FALSE. ! 3D Interpolation.
 
 ! First fill IJK of cut-cells for CUT_FACE and IBM_RCFACE_VEL, in field CELL_LIST:
 ! Meshes Loop:
@@ -15931,7 +16113,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    MESHES(NM)%IBM_NRCFACE_VEL = IRC
 
    ! Allocate interpolation containers for IBM_RCFACE_VEL:
-   IF(IBM_USE_OUTER_PLANE) THEN
+   IF(IBM_PLANE_INTERPOLATION) THEN
       DO IRC=1,MESHES(NM)%IBM_NRCFACE_VEL
          ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%IJK_CARTCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE))
          ALLOCATE(MESHES(NM)%IBM_RCFACE_VEL(IRC)%XYZ_BP_CARTCEN(MAX_DIM))
@@ -16271,7 +16453,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          END SELECT
 
-         IF(.NOT.IBM_USE_OUTER_PLANE) THEN
+         IF(.NOT.IBM_PLANE_INTERPOLATION) THEN
             NPE_LIST_START = 0
             ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,IAXIS:KAXIS,1:INT_N_EXT_PTS,0:CUT_FACE(ICF)%NFACE), &
                      INT_IJK(IAXIS:KAXIS,(CUT_FACE(ICF)%NFACE+1)*DELTA_INT),                      &
@@ -16360,7 +16542,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Here test if point in boundary and interpolation point coincide:
             IF (DISTANCE <= MIN_DIST_VEL) THEN
 
-               IF(IBM_USE_OUTER_PLANE) THEN
+               IF(IBM_PLANE_INTERPOLATION) THEN
 
                   ! Dummy values for external interpolation nodes:
                   PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
@@ -16417,7 +16599,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                NORM_DV           = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
                DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS) ! NOUT
 
-               IF(IBM_USE_OUTER_PLANE) THEN
+               IF(IBM_PLANE_INTERPOLATION) THEN
 
                   ! Versor to GASPHASE:
                   IF (DIR_FCT > 0._EB) THEN ! Versor from boundary point to centroid
@@ -16468,7 +16650,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDIF
 
             ! Add coefficients to CUT_FACE fields:
-            IF(IBM_USE_OUTER_PLANE) THEN
+            IF(IBM_PLANE_INTERPOLATION) THEN
 
                IF (IFACE == 0) THEN
                  CUT_FACE(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) = &
@@ -16526,7 +16708,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO ! IFACE loop
          NULLIFY(X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP)
 
-         IF(.NOT.IBM_USE_OUTER_PLANE) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
+         IF(.NOT.IBM_PLANE_INTERPOLATION) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
 
 
       ELSEIF(CUT_FACE(ICF)%STATUS == IBM_INBOUNDARY) THEN ! CUTFACE_STATUS_IF
@@ -16754,7 +16936,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       XYZ_PP(IAXIS:KAXIS) = 0._EB
       FOUND_INBFC(1:3)    = 0
 
-      IF(.NOT.IBM_USE_OUTER_PLANE) THEN
+      IF(.NOT.IBM_PLANE_INTERPOLATION) THEN
          NPE_LIST_START = 0
          ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,IAXIS:KAXIS,1:INT_N_EXT_PTS,0:0), &
                   INT_IJK(IAXIS:KAXIS,DELTA_INT),                            &
@@ -16827,7 +17009,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Here test if point in boundary and interpolation point coincide:
       IF (DISTANCE <= MIN_DIST_VEL) THEN
 
-         IF(IBM_USE_OUTER_PLANE) THEN
+         IF(IBM_PLANE_INTERPOLATION) THEN
 
             ! Dummy values for external interpolation nodes:
             PTS2(IAXIS,1:MAX_INTERP_POINTS_PLANE) = I ! IJK triangle nodes
@@ -16870,7 +17052,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          NORM_DV         = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
          DV(IAXIS:KAXIS) = (1._EB / NORM_DV) * DV(IAXIS:KAXIS) ! NOUT
 
-         IF(IBM_USE_OUTER_PLANE) THEN
+         IF(IBM_PLANE_INTERPOLATION) THEN
 
             ! The fluid points are points that lay on the plane outside in the
             ! largest Cartesian component direction of the normal.
@@ -16915,7 +17097,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       ! Add coefficients to REGC_FACE_VEL fields:
-      IF(IBM_USE_OUTER_PLANE) THEN
+      IF(IBM_PLANE_INTERPOLATION) THEN
 
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK_CARTCEN(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) =  &
                                                PTS2(IAXIS:KAXIS,1:MAX_INTERP_POINTS_PLANE) ! IJK ot triangle nodes
@@ -16966,7 +17148,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       NULLIFY(X1FACEP,X2FACEP,X3FACEP,X2CELLP,X3CELLP)
-      IF(.NOT.IBM_USE_OUTER_PLANE) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
+      IF(.NOT.IBM_PLANE_INTERPOLATION) DEALLOCATE(INT_NPE,INT_IJK,INT_COEF,INT_NOUT)
 
    ENDDO RCVEL_FACE_LOOP
 
@@ -17393,7 +17575,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! Figure out which other meshes this mesh will receive face centered variables from:
    ! Cut-faces stencils:
-   IF(IBM_USE_OUTER_PLANE) THEN
+   IF(IBM_PLANE_INTERPOLATION) THEN
       DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
          IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
          X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
@@ -17534,7 +17716,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ENDDO
 
-  ELSE ! IBM_USE_OUTER_PLANE for cut-faces.
+  ELSE ! IBM_PLANE_INTERPOLATION for cut-faces.
 
       DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
          IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
@@ -17605,10 +17787,10 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
       ENDDO
 
-   ENDIF ! IBM_USE_OUTER_PLANE
+   ENDIF ! IBM_PLANE_INTERPOLATION
 
    ! RC faces stencils:
-   IF(IBM_USE_OUTER_PLANE) THEN
+   IF(IBM_PLANE_INTERPOLATION) THEN
 
       DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
          X1AXIS = MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(KAXIS+1)
@@ -17683,7 +17865,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ENDDO
 
-   ELSE ! IBM_USE_OUTER_PLANE for RC faces.
+   ELSE ! IBM_PLANE_INTERPOLATION for RC faces.
 
       IFACE = 0
       DO ICF=1,MESHES(NM)%IBM_NRCFACE_VEL
@@ -18377,6 +18559,11 @@ IF (STENCIL_INTERPOLATION == IBM_LINEAR_INTERPOLATION) THEN
          ENDDO
       ENDDO
    ENDDO
+   IF (ABS(RED_COEF) < TWO_EPSILON_EB) THEN
+      NPE_LIST_COUNT = 0
+      DEALLOCATE(MASK_IJK,RAW_COEF)
+      RETURN
+   ENDIF
    DO KK = KLO,KHI
       DO JJ = JLO,JHI
          DO II = ILO,IHI
@@ -32525,7 +32712,7 @@ REAL(EB), DIMENSION(IBM_MAXCEELEM_FACE) :: ANGSEG, ANGSEGAUX
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           ::     XYZVERT, XYZVERT_CART  ! Locations of vertices.
 
 INTEGER, SAVE :: SIZE_CFACES_CFELEM, SIZE_VERTS_CFELEM
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CFELEM
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CFELEM,CFELEM2
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CFE, CFEL
 
 INTEGER, SAVE :: SIZE_EDGES_NODEDG, SIZE_VERTS_NODEDG
@@ -33197,6 +33384,18 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    ENDIF
                 ENDDO
              ENDDO
+
+             ALLOCATE(CFELEM2(SIZE(CFELEM,DIM=1),SIZE(CFELEM,DIM=2))); CFELEM2 = IBM_UNDEFINED
+             NP=0
+             DO ICF=1,NFACE
+                IF(CFELEM(1,ICF)>2) THEN
+                   NP=NP+1
+                   CFELEM2(:,NP) = CFELEM(:,ICF)
+                ENDIF
+             ENDDO
+             CFELEM = CFELEM2
+             DEALLOCATE(CFELEM2)
+             NFACE = NP
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NFACE)                 = 0._EB
@@ -34312,7 +34511,7 @@ ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(MAX_DIM+1,LOW_IND:HIGH_IND,1:NFACE))
 MESHES(NM)%CUT_FACE(ICF)%CELL_LIST = IBM_UNDEFINED
 
 
-IF(IBM_USE_OUTER_PLANE .AND. MESHES(NM)%CUT_FACE(ICF)%STATUS==IBM_GASPHASE )THEN
+IF(IBM_PLANE_INTERPOLATION .AND. MESHES(NM)%CUT_FACE(ICF)%STATUS==IBM_GASPHASE )THEN
 
    ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%IJK_CARTCEN(MAX_DIM,MAX_INTERP_POINTS_PLANE));
    ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZ_BP_CARTCEN(MAX_DIM))

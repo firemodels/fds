@@ -272,13 +272,17 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (PERIODIC_TEST==21) CALL ROTATED_CUBE_ANN_SOLN(NM,T_BEGIN) ! No Rotation.
    IF (PERIODIC_TEST==22) CALL ROTATED_CUBE_ANN_SOLN(NM,T_BEGIN) ! 28 deg Rotation.
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
-   CALL COMPUTE_VISCOSITY(T_BEGIN,NM) ! needed here for KRES prior to mesh exchange
 ENDDO
 
 IF (CC_IBM) THEN
    CALL INIT_CUTCELL_DATA  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    IF (PERIODIC_TEST==101) CALL LINEARFIELDS_INTERP_TEST
 ENDIF
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (TGA_SURF_INDEX>0 .OR. EVACUATION_ONLY(NM)) CYCLE
+   CALL COMPUTE_VISCOSITY(T_BEGIN,NM) ! needed here for KRES prior to mesh exchange
+ENDDO
 
 ! Exchange information at mesh boundaries related to the various initialization routines just completed
 

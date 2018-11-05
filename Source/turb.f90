@@ -1248,10 +1248,10 @@ ENDIF LES_IF
 
 DY2_IF : IF (PRESENT(DY2)) THEN
    IF (SIM_MODE==DNS_MODE) THEN
-      Y_CELL_CENTER2 = 0.5*DY2
+      Y_CELL_CENTER2 = 0.5_EB*DY2
       U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
    ELSE
-      Y_CELL_CENTER2 = 0.5*DY2
+      Y_CELL_CENTER2 = 0.5_EB*DY2
       S_PLUS = S/(DELTA_NU+EPS) ! roughness in viscous units
       IF (S_PLUS < S0) THEN
          ! smooth wall
