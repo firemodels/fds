@@ -7767,7 +7767,7 @@ Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the 
 
 Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.  If {\ct CELL\_CENTERED=.TRUE.} is combined with {\ct VECTOR=.TRUE.} then the staggered velocity components will be displayed.  For example,
 \begin{lstlisting}
-&SLCF PBY=0, QUANTITY='VELOCITY', VELOCITY=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 will show the staggered velocity components as cell face normal vectors in Smokeview.
 
