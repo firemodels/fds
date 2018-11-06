@@ -2316,6 +2316,22 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 \end{figure}
 
 
+\section{Multi-Mesh Layer Height Calculation (\texorpdfstring{\textct{layer}}{layer})}
+\label{layer}
+
+The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh.fds} simulate a fire in a small compartment where the average smoke layer height and temperature are calculated. Figure~\ref{race_test_fig} displays the results for both cases. Note that the 4 mesh case is run on 3 MPI processes to ensure that the layer calculation works for an arbitrary number of meshes and MPI processes.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/layer_height} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/layer_temps}
+\end{tabular*}
+\caption[Result of the \textct{layer} test cases]{Average layer height (left) and temperatures (right) for simulations on 1 mesh and 4 meshes.}
+\label{layer_fig}
+\end{figure}
+
+
+
 
 \chapter{Thermal Radiation}
 
