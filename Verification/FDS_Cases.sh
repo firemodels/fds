@@ -277,6 +277,8 @@ $QFDS -d HVAC leak_test_2.fds
 $QFDS -d HVAC leak_test.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
 
+$QFDS -d Miscellaneous layer_1mesh.fds
+$QFDS -p 3 -d Miscellaneous layer_4mesh.fds
 $QFDS -d Miscellaneous pyramid.fds
 $QFDS -d Miscellaneous mesh_transformation.fds
 $QFDS -d Miscellaneous obst_sphere.fds
