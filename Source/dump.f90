@@ -6843,8 +6843,9 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_WALL_INDEX,OPT_LP_INDEX,OPT_CFACE_INDEX
 INTEGER, INTENT(IN) :: INDX,Y_INDEX,Z_INDEX,PART_INDEX,NM
 REAL(EB) :: CONCORR,VOLSUM,MFT,ZZ_GET(1:N_TRACKED_SPECIES),Y_SPECIES,KSGS,DEPTH,UN,H_S,RHO_D_DYDN,U_CELL,V_CELL,W_CELL,&
             AAA,BBB,CCC,ALP,BET,GAM,MMM,X0,X1,XC0,XC1,TMP_BAR,VOL,DVOL,DN,PRESS,&
-            NVEC(3),PVEC(3),TAU_IJ(3,3),VEL_CELL(3),VEL_WALL(3),MU_WALL,RHO_WALL,FVEC(3),SVEC(3),TVEC1(3),TVEC2(3)
-INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX,ICC,IND1,IND2
+            NVEC(3),PVEC(3),TAU_IJ(3,3),VEL_CELL(3),VEL_WALL(3),MU_WALL,RHO_WALL,FVEC(3),SVEC(3),TVEC1(3),TVEC2(3),&
+            P1,P2,Z1,Z2
+INTEGER :: II1,II2,IIG,JJG,KKG,NN,NR,IWX,SURF_INDEX,I,J,K,IW,II,JJ,KK,NWP,IOR,M_INDEX,ICC,IND1,IND2,IC2
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
@@ -7344,18 +7345,52 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
 
    CASE(65) ! WALL PRESSURE (takes optional IOR or ORIENTATION vector)
       IF (PRESENT(OPT_WALL_INDEX)) THEN
-         SELECT CASE(ONE_D%IOR)
-            CASE( 1); NVEC=(/ 1._EB,0._EB,0._EB/)
-            CASE(-1); NVEC=(/-1._EB,0._EB,0._EB/)
-            CASE( 2); NVEC=(/0._EB, 1._EB,0._EB/)
-            CASE(-2); NVEC=(/0._EB,-1._EB,0._EB/)
-            CASE( 3); NVEC=(/0._EB,0._EB, 1._EB/)
-            CASE(-3); NVEC=(/0._EB,0._EB,-1._EB/)
-         END SELECT
          IIG = ONE_D%IIG
          JJG = ONE_D%JJG
          KKG = ONE_D%KKG
-         PVEC = ONE_D%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG)) * NVEC ! surface normal pressure force
+         ! quadratic extrapolation to surface pressure
+         P1 = ONE_D%RHO_G*(H(IIG,JJG,KKG)-KRES(IIG,JJG,KKG))
+         P2 = P1
+         SELECT CASE(ONE_D%IOR)
+            CASE( 1)
+               NVEC=(/ 1._EB,0._EB,0._EB/)
+               Z1 = 0.5_EB*DX(IIG)
+               Z2 = DX(IIG)+0.5_EB*DX(IIG+1)
+               IC2 = CELL_INDEX(IIG+1,JJG,KKG)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG+1,JJG,KKG)-KRES(IIG+1,JJG,KKG))
+            CASE(-1)
+               NVEC=(/-1._EB,0._EB,0._EB/)
+               Z1 = 0.5_EB*DX(IIG)
+               Z2 = DX(IIG)+0.5_EB*DX(IIG-1)
+               IC2 = CELL_INDEX(IIG-1,JJG,KKG)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG-1,JJG,KKG)-KRES(IIG-1,JJG,KKG))
+            CASE( 2)
+               NVEC=(/0._EB, 1._EB,0._EB/)
+               Z1 = 0.5_EB*DY(JJG)
+               Z2 = DY(JJG)+0.5_EB*DY(JJG+1)
+               IC2 = CELL_INDEX(IIG,JJG+1,KKG)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG+1,KKG)-KRES(IIG,JJG+1,KKG))
+            CASE(-2)
+               NVEC=(/0._EB,-1._EB,0._EB/)
+               Z1 = 0.5_EB*DY(JJG)
+               Z2 = DY(JJG)+0.5_EB*DY(JJG-1)
+               IC2 = CELL_INDEX(IIG,JJG-1,KKG)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG-1,KKG)-KRES(IIG,JJG-1,KKG))
+            CASE( 3)
+               NVEC=(/0._EB,0._EB, 1._EB/)
+               Z1 = 0.5_EB*DZ(KKG)
+               Z2 = DZ(KKG)+0.5_EB*DZ(KKG+1)
+               IC2 = CELL_INDEX(IIG,JJG,KKG+1)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG,KKG+1)-KRES(IIG,JJG,KKG+1))
+            CASE(-3)
+               NVEC=(/0._EB,0._EB,-1._EB/)
+               Z1 = 0.5_EB*DZ(KKG)
+               Z2 = DZ(KKG)+0.5_EB*DZ(KKG-1)
+               IC2 = CELL_INDEX(IIG,JJG,KKG-1)
+               IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG,KKG-1)-KRES(IIG,JJG,KKG-1))
+         END SELECT
+
+         PVEC = P1 - (P2-P1)*Z1**2 / (Z2**2-Z1**2) * NVEC ! surface normal pressure force
       ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
          NVEC = CFA%NVEC
          ! find cut-cell adjacent to CFACE
