@@ -2,7 +2,7 @@
 # sphere up to a Reynolds number of 300 under subsonic to supersonic conditions. Int. J.
 # Heat and Mass Transfer, 120:284-299, 2018.
 
-&HEAD CHID='Nagata_heated_sphere_Re300_TR_2_60D', TITLE='Heated sphere Re=300, temp ratio=2, D/dx=60.' /
+&HEAD CHID='Nagata_heated_sphere_Re300_TR_0p5_60D', TITLE='Heated sphere Re=300, temp ratio=0.5, D/dx=60.' /
 
 # Mesh : Total 50 + 32 : 82 meshes.
 # Coarse level: 6*3*3-4 : 50 meshes.
@@ -37,7 +37,7 @@ K_LOWER_SKIP=1, K_UPPER_SKIP=1, K_UPPER=2 /
 &VENT PBZ= 3., SURF_ID='PERIODIC' /
 
 # Geom:
-&SURF ID='SPHERE', COLOR='RED', TMP_FRONT=313.15 / TR = 2 = (313.5+273.15)/(20.0+273.15)
+&SURF ID='SPHERE', COLOR='RED', TMP_FRONT=-126.575 / TR = 0.5 = (-126.575+273.15)/(20.0+273.15)
 &GEOM ID='sphere', SURF_ID='SPHERE', SPHERE_ORIGIN=0,0,0, SPHERE_RADIUS=.5, N_LEVELS=3 /
 
 # Output:
