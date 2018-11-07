@@ -1524,16 +1524,32 @@ TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(IN), POINTER :: ONE_D
 
 ! Local Variables:
 INTEGER :: VIND, EP, INT_NPE_LO, INT_NPE_HI, INPE, ICC, IIG, JJG, KKG
+! REAL(EB):: VVEL(IAXIS:KAXIS), U_NORM
 
 ! Cell-centered variables:
-VIND=0;  EP  =1
-INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+VIND=0; EP  = 1
 INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
 IF (INT_NPE_HI > 0) THEN
+   ! ! First normal velocity:
+   ! VVEL(IAXIS:KAXIS) = 0._EB
+   ! DO VIND=IAXIS,KAXIS
+   !    INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+   !    INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
+   !    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+   !       VVEL(VIND) = VVEL(VIND) + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_FVARS(INT_VEL_IND,INPE)
+   !    ENDDO
+   ! ENDDO
+   ! U_NORM = DOT_PRODUCT(VVEL , CFACE(CUT_FACE(IND1)%CFACE_INDEX(IND2))%NVEC)
+
+   ! Now Pressure:
+   ! VIND=0;
    PRESS=0._EB
+   INT_NPE_LO  = CUT_FACE(IND1)%INT_NPE( LOW_IND,VIND,EP,IND2)
+   ! INT_NPE_HI  = CUT_FACE(IND1)%INT_NPE(HIGH_IND,VIND,EP,IND2)
    DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
       PRESS = PRESS + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_P_IND,INPE)
    ENDDO
+   ! PRESS = PRESS + ONE_D%RHO_F*U_NORM**2._EB
 ELSE
    ! Underlying cell approximate value:
    ICC = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2)
@@ -1593,7 +1609,7 @@ TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(INOUT), POINTER :: ONE_D
 INTEGER :: IND1, IND2, ICC, JCC, I ,J ,K, IFACE, IFC2, IFACE2, NFCELL, ICCF, X1AXIS, LOWHIGH, ILH, IBOD, IWSEL
 REAL(EB):: PREDFCT,U_CAVG(IAXIS:KAXIS),AREA_TANG(IAXIS:KAXIS),AF,VELN,NVEC(IAXIS:KAXIS),ABS_NVEC(IAXIS:KAXIS),K_G
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
-REAL(EB):: VVEL(IAXIS:KAXIS)
+REAL(EB):: VVEL(IAXIS:KAXIS), V_TANG(IAXIS:KAXIS)
 INTEGER :: VIND,EP,INPE,INT_NPE_LO,INT_NPE_HI
 
 ! ONE_D%TMP_G, ONE_D%RHO_G, ONE_D%ZZ_G(:), ONE_D%RSUM_G, ONE_D%U_TANG
@@ -1650,7 +1666,8 @@ IF(CFACE_INTERPOLATE) THEN
             VVEL(VIND) = VVEL(VIND) + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_FVARS(INT_VEL_IND,INPE)
          ENDDO
       ENDDO
-      ONE_D%U_TANG = SQRT(VVEL(IAXIS)**2._EB+VVEL(JAXIS)**2._EB+VVEL(KAXIS)**2._EB)
+      V_TANG(IAXIS:KAXIS) = VVEL(IAXIS:KAXIS) - DOT_PRODUCT(VVEL,CFACE(ICF)%NVEC)*CFACE(ICF)%NVEC(IAXIS:KAXIS)
+      ONE_D%U_TANG = SQRT(V_TANG(IAXIS)**2._EB+V_TANG(JAXIS)**2._EB+V_TANG(KAXIS)**2._EB)
 
    ELSE
       CALL CFACE_THVARS_CC
@@ -15566,6 +15583,7 @@ REAL(EB),ALLOCATABLE, DIMENSION(:)   :: INT_COEF_AUX
 INTEGER :: N_CVAR_START, N_CVAR_COUNT, N_FVAR_START, N_FVAR_COUNT
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EP_TAG
 
+LOGICAL, PARAMETER :: FACE_MASK = .TRUE.
 
 ! Total number of cell centered variables to be exchanges into external normal probe points of CFACES.
 N_INT_CVARS = INT_P_IND + N_TRACKED_SPECIES
@@ -15741,7 +15759,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF( FCVAR(INFACE,JNFACE,KNFACE,IBM_FGSC,X1AXIS) == IBM_CUTCFE ) THEN
 
                      ! This takes into account faces in the guard-cell region:
-                     FCVAR(INDI,INDJ,INDK,IBM_FFNF,X1AXIS) = IBM_CUTCFE ! Can't be used for interp.
+                     IF(FORCE_REGC_FACE) FCVAR(INDI,INDJ,INDK,IBM_FFNF,X1AXIS) = IBM_CUTCFE !Don't use for interp.
 
                      ! For this mesh, don't do interpolation on faces that are not internal or boundary faces.
                      IF(IX1 < X1LO_FACE .OR. IX1 > X1HI_FACE) EXIT
@@ -16637,7 +16655,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
                      INT_XN(EP) = REAL(EP,EB)*DELN
                      DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point, masked interpolation.
-                        CALL GET_INTSTENCILS_EP(.TRUE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                        CALL GET_INTSTENCILS_EP(FACE_MASK,VIND,XYZ_PP,INT_XN(EP),DV, &
                                                 NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
                         ! Start position for interpolation stencil related to velocity component VIND, of external
                         ! point EP related to cut-face IFACE:
@@ -16729,7 +16747,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             A_TOT = A_TOT + CFACE(ICF1)%AREA
          ENDDO
          DV(IAXIS:KAXIS) = DV(IAXIS:KAXIS)/(A_TOT+TWO_EPSILON_EB)
-         CALL GET_DELN(DELN,DXCELL(I),DYCELL(J),DZCELL(K),NVEC=DV)
+         CALL GET_DELN(DELN,DXCELL(I),DYCELL(J),DZCELL(K),NVEC=DV,CLOSE_PT=.TRUE.)
 
          NPE_LIST_START = 0
          ALLOCATE(INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,1:CUT_FACE(ICF)%NFACE), &
@@ -17085,7 +17103,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
                INT_XN(EP) = NORM_DV + REAL(EP,EB)*DELN
                DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point, masked interpolation.
-                  CALL GET_INTSTENCILS_EP(.TRUE.,VIND,XYZ_PP,INT_XN(EP),DV, &
+                  CALL GET_INTSTENCILS_EP(FACE_MASK,VIND,XYZ_PP,INT_XN(EP),DV, &
                                           NPE_LIST_START,NPE_LIST_COUNT,INT_IJK,INT_COEF)
                   INT_NPE(LOW_IND,VIND,EP,IFACE)  = NPE_LIST_START
                   INT_NPE(HIGH_IND,VIND,EP,IFACE) = NPE_LIST_COUNT
@@ -18277,10 +18295,11 @@ END SUBROUTINE RESTRICT_EP
 
 ! ------------------------------- GET_DELN ------------------------------------
 
-SUBROUTINE GET_DELN(DELN,DXLOC,DYLOC,DZLOC,NVEC)
+SUBROUTINE GET_DELN(DELN,DXLOC,DYLOC,DZLOC,NVEC,CLOSE_PT)
 
 REAL(EB), INTENT(IN) :: DXLOC,DYLOC,DZLOC
 REAL(EB), OPTIONAL, INTENT(IN) :: NVEC(MAX_DIM)
+LOGICAL, OPTIONAL, INTENT(IN) :: CLOSE_PT
 REAL(EB), INTENT(OUT) :: DELN
 
 ! Local Variables:
@@ -18288,6 +18307,9 @@ REAL(EB) :: FCTN
 IF (PRESENT(NVEC)) THEN
    FCTN = 3._EB/2._EB
    IF( (ABS(NVEC(IAXIS))>GEOMEPS) .AND. (ABS(NVEC(JAXIS))>GEOMEPS) .AND. (ABS(NVEC(KAXIS))>GEOMEPS)) FCTN=SQRT(3._EB)
+   IF(PRESENT(CLOSE_PT)) THEN
+      IF(CLOSE_PT) FCTN = 1._EB
+   ENDIF
    DELN = FCTN*(DXLOC*ABS(NVEC(IAXIS))+DYLOC*ABS(NVEC(JAXIS))+DZLOC*ABS(NVEC(KAXIS)))
 ELSE
    DELN = SQRT(DXLOC**2._EB+DYLOC**2._EB+DZLOC**2._EB)
@@ -18486,7 +18508,7 @@ IF(VIND > 0) THEN
       DO KK = KLO,KHI
          DO JJ = JLO,JHI
             DO II = ILO,IHI
-               IF(FCVAR(II,JJ,KK,IBM_FGSC,VIND) /= IBM_GASPHASE) CYCLE ! Cycle solid and cut-faces.
+               IF(FCVAR(II,JJ,KK,IBM_FGSC,VIND) == IBM_SOLID) CYCLE ! Cycle solid faces.
                NPE_LIST_COUNT = NPE_LIST_COUNT + 1
                INT_IJK(IAXIS:KAXIS,NPE_LIST_START+NPE_LIST_COUNT) = (/ II, JJ, KK /)
                ! Coeff computation left for the end.
@@ -18499,7 +18521,7 @@ ELSE ! Centered vars:
    DO KK = KLO,KHI
       DO JJ = JLO,JHI
          DO II = ILO,IHI
-            IF(CCVAR(II,JJ,KK,IBM_CGSC) /= IBM_GASPHASE) CYCLE ! Cycle solid and cut-faces.
+            IF(CCVAR(II,JJ,KK,IBM_CGSC) == IBM_SOLID) CYCLE ! Cycle solid cells.
             NPE_LIST_COUNT = NPE_LIST_COUNT + 1
             INT_IJK(IAXIS:KAXIS,NPE_LIST_START+NPE_LIST_COUNT) = (/ II, JJ, KK /)
             ! Coeff computation left for the end.
