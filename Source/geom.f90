@@ -12277,7 +12277,7 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
 
          UVW_EP = 0._EB
          ! Interpolate Un+1 approx to External Points:
-         IFACE=0
+         IFACE=0; VAL_EP=0._EB
          DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
             DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
                INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
@@ -12456,6 +12456,7 @@ SUBROUTINE CCIBM_VELOCITY_FLUX2(T,DT)
 
 USE TURBULENCE, ONLY : WALL_MODEL
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE MPI
 
 REAL(EB), INTENT(IN) :: T,DT
@@ -12470,7 +12471,7 @@ REAL(EB) :: NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_ORTH,U_STRM
 INTEGER :: ICC, JCC, ICF1, ICF2, ICFA, ISIDE
 REAL(EB):: X1F, IDX, CCM1, CCP1, TMPV(-1:0), RHOV(-1:0), MUV(-1:0), NU, MU_FACE, RHO_FACE, PRFCT
 REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), DXN_STRM, DXN_STRM2, SLIP_FACTOR, SRGH, U_NORM2, U_STRM2, U_TAU, Y_PLUS
-REAL(EB):: DUUDT, DVVDT, DWWDT, U_IBM, V_IBM, W_IBM
+REAL(EB):: DUUDT, DVVDT, DWWDT, U_IBM, V_IBM, W_IBM, GRAV_COMP, DUMMY=0._EB
 
 REAL(EB):: VAL_EP, DUMEB, COEF
 
@@ -12600,7 +12601,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ENDIF
                   ENDIF
                   NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
-                  TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB
+                  TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB; GRAV_COMP=0._EB
                   IF (NORM2(NN) > TWO_EPSILON_EB) THEN
                      U_SURF(IAXIS:KAXIS) = VELN*NN
                      U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
@@ -12646,10 +12647,42 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
                         NU      = MU_FACE/RHO_FACE
                         CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,DXN_STRM2,U_STRM2)
+
+                        ! Test for adding Gravity component into Un+1:
+                        SELECT CASE(X1AXIS)
+                        CASE(IAXIS)
+                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(IAXIS)*(RHO_FACE-RHO_0(K))
+                        CASE(JAXIS)
+                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(JAXIS)*(RHO_FACE-RHO_0(K))
+                        CASE(KAXIS)
+                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(KAXIS)*(RHO_FACE-0.5_EB*SUM(RHO_0(K:K+1)))
+                        END SELECT
+                        GRAV_COMP = DT*1._EB/RHO_FACE*GRAV_COMP
+                        IF (CORRECTOR) GRAV_COMP = 0.5_EB*GRAV_COMP
+
+
+                        ! Here we should have all comopnents to do one integration step of BL equations:
+                        ! The end result are normal and streamwise U_NORM2 and U_STRM2 components at the forcing point
+                        ! (cut-face centroid location).
+                        ! The forcing point is located at a CUT_FACE(ICF)%INT_XN(0,IFACE) distance from the boundary
+                        ! in the NOUT direction.
+                        ! ---------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+                        ! ---------------------------------------------------------------------------------------------
+
+
+
                      ENDIF
                   ENDIF
                   ! Velocity U_ORTH is zero by construction.
-                  CUT_FACE(ICF)%VELINT(IFACE) = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
+                  CUT_FACE(ICF)%VELINT(IFACE) = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS) + GRAV_COMP
 
 #ifdef DEBUG_IBM_INTERPOLATION
                   IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
