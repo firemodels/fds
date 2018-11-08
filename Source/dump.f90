@@ -7390,7 +7390,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG,KKG-1)-KRES(IIG,JJG,KKG-1))
          END SELECT
 
-         PVEC = P1 - (P2-P1)*Z1**2 / (Z2**2-Z1**2) * NVEC ! surface normal pressure force
+         PVEC = ( P1 - (P2-P1)*Z1**2 / (Z2**2-Z1**2) ) * NVEC ! surface normal pressure force
       ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
          NVEC = CFA%NVEC
          ! find cut-cell adjacent to CFACE
