@@ -5545,6 +5545,18 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
 
+   ! Zero out VALUE of the device before the temporal window
+
+   IF (T<DV%STATISTICS_START) THEN
+      DV%VALUE = 0._EB
+      DV%TIME_INTERVAL = 1._EB
+      CYCLE DEVICE_LOOP
+   ENDIF
+
+   ! Freeze current VALUE and TIME_INTERVAL for a device beyond the temporal window
+
+   IF (T>DV%STATISTICS_END) CYCLE DEVICE_LOOP
+
    ! Update DEViCe values
 
    SELECT CASE (DV%SPATIAL_STATISTIC)
@@ -5610,12 +5622,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       CYCLE DEVICE_LOOP
    ENDIF
 
-   ! Zero out temporal stats before their starting time
-
-   IF (T<DV%STATISTICS_START .OR. T>DV%STATISTICS_END) THEN
-      DV%TIME_INTERVAL = 1._EB
-      CYCLE DEVICE_LOOP
-   ENDIF
+   ! Weight factor for time-averaging
 
    WGT = DT/MAX(DT,T-DV%STATISTICS_START)
    DV%AVERAGE_VALUE = (1._EB-WGT)*DV%AVERAGE_VALUE  + WGT*DV%INSTANT_VALUE
@@ -7390,7 +7397,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                IF (.NOT.SOLID(IC2)) P2 = ONE_D%RHO_G*(H(IIG,JJG,KKG-1)-KRES(IIG,JJG,KKG-1))
          END SELECT
 
-         PVEC = P1 - (P2-P1)*Z1**2 / (Z2**2-Z1**2) * NVEC ! surface normal pressure force
+         PVEC = ( P1 - (P2-P1)*Z1**2 / (Z2**2-Z1**2) ) * NVEC ! surface normal pressure force
       ELSEIF (PRESENT(OPT_CFACE_INDEX)) THEN
          NVEC = CFA%NVEC
          ! find cut-cell adjacent to CFACE
