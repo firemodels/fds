@@ -12466,18 +12466,14 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 INTEGER :: NM,I,J,K,ICF,IFACE,X1AXIS,NFACE,IW,EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UVW_EP
-REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM)
-REAL(EB) :: NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_ORTH,U_STRM
-INTEGER :: ICC, JCC, ICF1, ICF2, ICFA, ISIDE
-REAL(EB):: X1F, IDX, CCM1, CCP1, TMPV(-1:0), RHOV(-1:0), MUV(-1:0), NU, MU_FACE, RHO_FACE, PRFCT
-REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), DXN_STRM, DXN_STRM2, SLIP_FACTOR, SRGH, U_NORM2, U_STRM2, U_TAU, Y_PLUS
-REAL(EB):: DUUDT, DVVDT, DWWDT, U_IBM, V_IBM, W_IBM, GRAV_COMP, DUMMY=0._EB
-
-REAL(EB):: VAL_EP, DUMEB, COEF
-
-REAL(EB) :: TNOW
-
-REAL(EB):: MTIME
+INTEGER :: ICC,JCC,ICF1,ICF2,ICFA,ISIDE
+REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM),&
+            NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,U_NORM,U_ORTH,U_STRM,&
+            X1F,IDX,CCM1,CCP1,TMPV(-1:0),RHOV(-1:0),MUV(-1:0),NU,MU_FACE,RHO_FACE,PRFCT,&
+            ZZ_GET(1:N_TRACKED_SPECIES),DXN_STRM,DXN_STRM2,SLIP_FACTOR,SRGH,U_NORM2,U_STRM2,U_TAU,Y_PLUS,&
+            DUUDT,DVVDT,DWWDT,U_IBM,V_IBM,W_IBM,GRAV_COMP,DUMMY=0._EB,&
+            VAL_EP,DUMEB,COEF,TNOW,MTIME,&
+            DUDS,DUDN,TAU_SN_EP,TAU_W,GRAV_SS,RHS
 
 CHARACTER(100), SAVE :: FILENAME
 LOGICAL, SAVE :: FIRST_CALL = .TRUE.
@@ -12584,8 +12580,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ENDDO
                   ENDDO
                ENDDO
-               IF(INT_N_EXT_PTS==1) THEN
-                  ! Transform External points velocities into local coordinate system, defined by the velocity vector in
+               INT_N_EXT_PTS_IF: IF(INT_N_EXT_PTS==1) THEN
+                  ! Transform External point velocities into local coordinate system, defined by the velocity vector in
                   ! the first external point, and the surface:
                   EP = 1
                   U_VELO(IAXIS:KAXIS) = UVW_EP(IAXIS:KAXIS,EP,IFACE)
@@ -12601,8 +12597,13 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ENDIF
                   ENDIF
                   NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
-                  TT=0._EB; SS=0._EB; U_NORM=0._EB; U_ORTH=0._EB; U_STRM=0._EB; GRAV_COMP=0._EB
-                  IF (NORM2(NN) > TWO_EPSILON_EB) THEN
+                  TT=0._EB
+                  SS=0._EB
+                  U_NORM=0._EB
+                  U_ORTH=0._EB
+                  U_STRM=0._EB
+                  GRAV_COMP=0._EB
+                  NN_IF: IF (NORM2(NN) > TWO_EPSILON_EB) THEN
                      U_SURF(IAXIS:KAXIS) = VELN*NN
                      U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
                      ! Gives local velocity components U_STRM , U_ORTH , U_NORM
@@ -12617,10 +12618,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                                               ! Note if this is a -ve number (i.e. Cartesian Faces),
                                                               ! Linear velocity variation should be used be used.
                      U_NORM2 = DXN_STRM2/DXN_STRM*U_NORM      ! Assumes relative U_normal decreases linearly to boundry.
-                     IF(DXN_STRM2 < 0._EB) THEN
+                     DXN_STRM2_IF: IF(DXN_STRM2 < 0._EB) THEN
                         ! Linear variation:
                         U_STRM2 = DXN_STRM2/DXN_STRM*U_STRM
-                     ELSE
+                     ELSE DXN_STRM2_IF
+                        ! Wall function:
                         X1F= MESHES(NM)%CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
                         IDX= 1._EB/ ( MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE) - &
                                       MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, IFACE) )
@@ -12650,14 +12652,14 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
                         ! Test for adding Gravity component into Un+1:
                         SELECT CASE(X1AXIS)
-                        CASE(IAXIS)
-                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(IAXIS)*(RHO_FACE-RHO_0(K))
-                        CASE(JAXIS)
-                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(JAXIS)*(RHO_FACE-RHO_0(K))
-                        CASE(KAXIS)
-                           GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(KAXIS)*(RHO_FACE-0.5_EB*SUM(RHO_0(K:K+1)))
+                           CASE(IAXIS)
+                              GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(IAXIS)*(RHO_FACE-RHO_0(K))
+                           CASE(JAXIS)
+                              GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(JAXIS)*(RHO_FACE-RHO_0(K))
+                           CASE(KAXIS)
+                              GRAV_COMP = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(KAXIS)*(RHO_FACE-0.5_EB*SUM(RHO_0(K:K+1)))
                         END SELECT
-                        GRAV_COMP = DT*1._EB/RHO_FACE*GRAV_COMP
+                        GRAV_COMP = DT*GRAV_COMP/RHO_FACE
                         IF (CORRECTOR) GRAV_COMP = 0.5_EB*GRAV_COMP
 
 
@@ -12668,21 +12670,23 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ! in the NOUT direction.
                         ! ---------------------------------------------------------------------------------------------
 
+                        DUDS = 0._EB ! streamwise gradient of streamwise component
+                        DUDN = 0._EB ! wall-normal gradient of streamwise component
+                        TAU_SN_EP = 0._EB ! turbulent stress at external point
+                        TAU_W = -RHO_FACE*U_TAU**2
+                        GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
+                        U_NORM2 = 0._EB ! normal component of velocity at forcing point, U_NORM2 = UW + DXN_STRM * ( DIV - DUDS )
 
-
-
-
-
-
+                        ! All values evaluated at forcing point
+                        RHS = U_STRM2*DUDS + U_NORM2*DUDN + ( (TAU_SN_EP-TAU_W)/DXN_STRM + GRAV_SS )/RHO_FACE
+                        U_STRM2 = U_STRM - DT*RHS
 
                         ! ---------------------------------------------------------------------------------------------
 
-
-
-                     ENDIF
-                  ENDIF
+                     ENDIF DXN_STRM2_IF
+                  ENDIF NN_IF
                   ! Velocity U_ORTH is zero by construction.
-                  CUT_FACE(ICF)%VELINT(IFACE) = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS) + GRAV_COMP
+                  CUT_FACE(ICF)%VELINT(IFACE) = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
 
 #ifdef DEBUG_IBM_INTERPOLATION
                   IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
@@ -12691,7 +12695,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      CALL DEBUG_WAIT
                   ENDIF
 #endif
-               ENDIF
+               ENDIF INT_N_EXT_PTS_IF
 
             ENDDO IFACE_LOOP
             DEALLOCATE(UVW_EP)
