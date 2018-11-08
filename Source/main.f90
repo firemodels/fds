@@ -512,7 +512,7 @@ MAIN_LOOP: DO
 
    ! Clip final time step
 
-   IF ((T+DT)>T_END) DT = MAX(T_END-T,TWO_EPSILON_EB)
+   IF ((T+DT)>T_END) DT = T_END-T+TWO_EPSILON_EB
 
    ! Determine when to dump out diagnostics to the .out file
 
@@ -879,7 +879,7 @@ MAIN_LOOP: DO
 
    ! Stop the run normally
 
-   IF (T>=T_END-TWO_EPSILON_EB .AND. ICYC>0) EXIT MAIN_LOOP
+   IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
 
@@ -3341,10 +3341,12 @@ IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
       DEVC_CLOCK = MIN(DEVC_CLOCK + DT_DEVC, T_END)
       DO N=1,N_DEVC
          DV => DEVICE(N)
+         IF (T>DV%STATISTICS_END) CYCLE
          DV%VALUE = 0._EB
          DV%TIME_INTERVAL = 0._EB
       ENDDO
    ENDIF
+
 ENDIF
 
 ! Dump CONTROL info. No gathering required as CONTROL is updated on all meshes
