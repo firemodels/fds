@@ -8571,6 +8571,12 @@ Set {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to determine the min
 \ee
 where $t_0$ is {\ct STATISTICS\_START} and $t_1$ is {\ct STATISTICS\_END}.
 
+For some applications you might need to predict a minimum or maximum value of the {\ct QUANTITY} over a time interval that is longer than the simulation time. For example, in wind engineering the so-called 50~year maximum wind speed can be estimated using maximum yearly values collected over, say, 10~years. The idea is that extreme values conform to certain statistical distributions from which one can extrapolate extreme values over long time periods. In FDS, you can do something similar. If you add the parameter {\ct TIME\_PERIOD} to the {\ct DEVC} line where you have also set the {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'}, the time interval bounded by $t_0$ and $t_1$ is subdivided into $N=${\ct N\_INTERVALS} (default 10), and a minimum or maximum value is stored for each interval. At the end of the simulation, the set of maximum values (minimum values are handled similarly) are ranked in ascending order, $m=1,N$. Next, the cumulative statistical distribution is introduced~\cite{Harris:JWE1996}:
+\be
+   F(\phi) = 1 - \exp[-\exp(\phi)]  \quad ; \quad  \phi = \ln[-\ln(1-F)]
+\ee
+which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
+
 \subsubsection{Root Mean Square}
 \label{info:rms}
 \label{info:rmscovcorr}
@@ -9408,6 +9414,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+{\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 {\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
@@ -9433,6 +9440,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TEMPORAL\_STATISTIC}   & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TIME\_HISTORY}         & Logical         & Section~\ref{info:line_file}                                    &       &               \\ \hline
+{\ct TIME\_PERIOD}          & Real            & Section~\ref{info:time_integral}                                & s     &               \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                     &       &  0            \\ \hline
