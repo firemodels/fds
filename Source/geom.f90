@@ -12670,16 +12670,19 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ! in the NOUT direction.
                         ! ---------------------------------------------------------------------------------------------
 
-                        DUDS = 0._EB ! streamwise gradient of streamwise component
-                        DUDN = 0._EB ! wall-normal gradient of streamwise component
-                        TAU_SN_EP = 0._EB ! turbulent stress at external point
-                        TAU_W = -RHO_FACE*U_TAU**2
-                        GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
-                        U_NORM2 = 0._EB ! normal component of velocity at forcing point, U_NORM2 = UW + DXN_STRM * ( DIV - DUDS )
+                        ! skip this for now until dynamic is working
+                        IF (.FALSE.) THEN
+                           DUDS = 0._EB ! streamwise gradient of streamwise component
+                           DUDN = 0._EB ! wall-normal gradient of streamwise component
+                           TAU_SN_EP = 0._EB ! turbulent stress at external point
+                           TAU_W = -RHO_FACE*U_TAU**2
+                           GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
+                           U_NORM2 = 0._EB ! normal component of velocity at forcing point, U_NORM2 = UW + DXN_STRM * ( DIV - DUDS )
 
-                        ! All values evaluated at forcing point
-                        RHS = U_STRM2*DUDS + U_NORM2*DUDN + ( (TAU_SN_EP-TAU_W)/DXN_STRM + GRAV_SS )/RHO_FACE
-                        U_STRM2 = U_STRM - DT*RHS
+                           ! All values evaluated at forcing point
+                           RHS = U_STRM2*DUDS + U_NORM2*DUDN + ( (TAU_SN_EP-TAU_W)/DXN_STRM + GRAV_SS )/RHO_FACE
+                           U_STRM2 = U_STRM - DT*RHS
+                        ENDIF
 
                         ! ---------------------------------------------------------------------------------------------
 
