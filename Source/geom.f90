@@ -12629,7 +12629,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
                      DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
                         ! Value of velocity component VIND, for stencil point INPE of external normal point EP.
-                        DUMEB = DT*(CUT_FACE(ICF)%INT_FVARS(INT_FV_IND,INPE)+CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE))
+                        DUMEB = 0._EB ! DT*(CUT_FACE(ICF)%INT_FVARS(INT_FV_IND,INPE)+CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE))
                         ! Case PREDICTOR => Un+1_aprx = Un - DT*(FVXn + DH/DXn):
                         IF (PREDICTOR) VAL_EP = CUT_FACE(ICF)%INT_FVARS(INT_VEL_IND,INPE) - DUMEB
                         ! Case CORRECTOR => Un+1_aprx = 1/2*(Un + Us) - DT/2*(FVXs + DH/DXs):
@@ -12764,7 +12764,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         DUSTRMDN_FP = DXN_STRM_FP/DXN_STRM_EP*DUSTRMDN_EP ! Assumes linear variation of DUDN in height.
 
                         ! dP/ds = Grad(P) . SS
-                        DPDS = DOT_PRODUCT(GRADP_EP(IAXIS:KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
+                        DPDS = 0._EB ! DOT_PRODUCT(GRADP_EP(IAXIS:KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
 
                         ! Turbulent stress at external point
                         ! Cosines to Local SS,TT,NN system:
@@ -12813,7 +12813,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ( DPDS + (TAU_SN_EP-TAU_W)/DXN_STRM_EP + GRAV_SS )/RHO_FACE
 
                         ! Ustream at Forcing point for time level n+1:
-                        U_STRM_FP = U_STRM_FP - DT*RHS
+                        IF (PREDICTOR) U_STRM_FP = U_STRM_FP - DT*RHS
+                        IF (CORRECTOR) U_STRM_FP = U_STRM_FP - 0.5_EB*DT*RHS
 
                         ! ---------------------------------------------------------------------------------------------
 
