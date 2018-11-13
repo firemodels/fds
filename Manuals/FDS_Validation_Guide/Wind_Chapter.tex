@@ -7,39 +7,72 @@ This chapter presents results of simulations of wind over structures and atmosph
 
 \section{UWO Wind Tunnel Experiments}
 
-A description of the UWO Wind Tunnel Experiments is included in Section~\ref{UWO_Wind_Tunnel_Description}. 
+A description of the UWO Wind Tunnel Experiments is included in Section~\ref{UWO_Wind_Tunnel_Description}.
 
-Figures~\ref{UWO_Test_7_pressure_coefficients_180} and \ref{UWO_Test_7_pressure_coefficients_270} show comparisons of measured and predicted mean and rms values of the pressure coefficients on the surface of a 1:100 scale model of a building in a wind tunnel. The comparison is made for two wind directions. For 180$^\circ$, the windward side of the scale model is its shorter side, and pressure coefficients are compared along lines that are approximately 0~cm, 3~cm, and 4~cm from the axial centerline. The width of the scale model is 9~cm. For 270$^\circ$, the windward side of the scale model is its longer side, and pressure coefficients are compared along lines that are approximately 1~cm, 4~cm, and 7~cm from the centerline. The length of the scale model is 14~cm. The ``side'' profiles are along the side of the scale model, approximately halfway up the height. The discontinuities in the plots represent the transition from the windward side, to the roof, to the leeward side. The side plots do not include windward or leeward side data.
+Figures~\ref{UWO_Test_7_pressure_coefficients_180_1} through \ref{UWO_Test_7_pressure_coefficients_270_2} show comparisons of measured and predicted mean, rms, minimum and maximum values of the pressure coefficients on the surface of a 1:100 scale model of a building in a wind tunnel. The comparison is made for two wind directions. For 180$^\circ$, the windward side of the scale model is its shorter side, and pressure coefficients are compared along lines that are approximately 0~cm, 3~cm, and 4~cm from the axial centerline. The width of the scale model is 9~cm. For 270$^\circ$, the windward side of the scale model is its longer side, and pressure coefficients are compared along lines that are approximately 1~cm, 4~cm, and 7~cm from the centerline. The length of the scale model is 14~cm. The ``side'' profiles are along the side of the scale model, approximately halfway up the height. The discontinuities in the plots represent the transition from the windward side, to the roof, to the leeward side. The side plots do not include windward or leeward side data.
+
+The simulations are run for 5~s whereas the experiments were run for 100~s. The minimum and maximum values for the 5~s simulation are extrapolated so that they may be compared to the measured min and max for the 100~s experiment. The procedure is described in the FDS User's Guide~\cite{FDS_Users_Guide}, in the section describing the {\ct TEMPORAL\_STATISTIC} {\ct 'MIN'} and {\ct 'MAX'}.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0009} &
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0009} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0009} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0009} \\
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0296} &
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0296} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0437} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0437} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_side}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0296} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0296}
 \end{tabular*}
 \caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 180\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 180\si{\degree} wind direction.}
-\label{UWO_Test_7_pressure_coefficients_180}
+\label{UWO_Test_7_pressure_coefficients_180_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0437} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0437} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0437} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0437} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_side} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_side}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_side} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_side}
+\end{tabular*}
+\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 180\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 180\si{\degree} wind direction.}
+\label{UWO_Test_7_pressure_coefficients_180_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0067} &
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0067} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0067} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0067} \\
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0368} &
 \includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0368} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0669} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0669} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_side}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0368} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0368}
 \end{tabular*}
 \caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 270\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 270\si{\degree} wind direction.}
-\label{UWO_Test_7_pressure_coefficients_270}
+\label{UWO_Test_7_pressure_coefficients_270_1}
 \end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0669} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0669} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0669} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0669} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_side} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_side}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_side} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_side}
+\end{tabular*}
+\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 270\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 270\si{\degree} wind direction.}
+\label{UWO_Test_7_pressure_coefficients_270_2}
+\end{figure}
+
 
 
 
