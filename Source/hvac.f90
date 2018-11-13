@@ -1602,8 +1602,9 @@ SELECT CASE (FA%FAN_TYPE)
       IF (DU%REVERSE) VDOT = -VDOT
       DEL_P = EVALUATE_RAMP(VDOT,0._EB,FA%RAMP_INDEX)*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
    CASE(4) ! System curve-based quadratic fan BETA
-      FLOW1 = DU%VEL_SYSTEM(1,1,2)*DU%AREA
-      FLOW2 = DU%VEL_SYSTEM(2,DU%QFAN_N,2)*DU%AREA
+      ! Set initial bounds for bisect
+      FLOW1 = 0._EB
+      FLOW2 = FA%MAX_PRES
       FAN_ITER = 0
       FAN_LOOP: DO
          FAN_ITER = FAN_ITER + 1
