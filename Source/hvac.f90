@@ -401,10 +401,12 @@ DO NN=1,N_HVAC_READ
             FAN(I_FAN)%FAN_TYPE = 1
          ELSEIF(RAMP_ID/='null') THEN
             FAN(I_FAN)%FAN_TYPE = 3
-         ELSEIF(QFAN_BETA .EQV. .TRUE.) THEN
-            FAN(I_FAN)%FAN_TYPE = 4
          ELSE
             FAN(I_FAN)%FAN_TYPE = 2
+         ENDIF
+         IF(FAN(I_FAN)%FAN_TYPE == 2 .AND. QFAN_BETA .EQV. .TRUE.) THEN
+            FAN(I_FAN)%FAN_TYPE = 4
+            QFAN_BETA_TEST=.TRUE.
          ENDIF
 
       CASE('FILTER')
@@ -914,29 +916,31 @@ IF (N_ZONE >0) ALLOCATE(DPSTAR(1:N_ZONE))
 CALL DPSTARCALC
 DUCTNODE%P = DUCTNODE%P - P_INF
 
-! If a ductrun has a quadratic fan(s) and requires system curve steady state solution: allocate, zero, populate and solve matrices
-! BETA WARNING: system curve is calculated based on total ductrun, this ignores dampers opening and closing. Need to fix
-DO NR = 1, N_DUCTRUNS
-   DR => DUCTRUN(NR)
-   IF (DR%N_QFANS > 0) THEN
-      ALLOCATE(DR%LHS_SYSTEM_1(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of first point of system curve
-      ALLOCATE(DR%LHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of second point of system curve
-      ALLOCATE(DR%RHS_SYSTEM_1(DR%N_MATRIX_SYSTEM)) ! RHS of first point of system curve
-      ALLOCATE(DR%RHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_QFANS)) ! RHS of first point of system curve
-      DR%LHS_SYSTEM_1(:,:) = 0._EB
-      DR%LHS_SYSTEM_2(:,:) = 0._EB
-      DR%RHS_SYSTEM_1(:) = 0._EB
-      DR%RHS_SYSTEM_2(:,:) = 0._EB
-      CALL RHS_SYSTEM(NR)
-      CALL LHS_SYSTEM(NR)
-      CALL MATRIX_SYSTEM_SOLVE(NR)
-      ! Deallocate matrices used for solving steady state system curve
-      DEALLOCATE(DR%LHS_SYSTEM_1)
-      DEALLOCATE(DR%LHS_SYSTEM_2)
-      DEALLOCATE(DR%RHS_SYSTEM_1)
-      DEALLOCATE(DR%RHS_SYSTEM_2)
-   ENDIF
-ENDDO
+IF (QFAN_BETA_TEST) THEN
+   ! If a ductrun has a quadratic fan(s) and requires system curve steady state solution: allocate, zero, populate and solve matrices
+   ! BETA WARNING: system curve is calculated based on total ductrun, this ignores dampers opening and closing. Need to fix
+   DO NR = 1, N_DUCTRUNS
+      DR => DUCTRUN(NR)
+      IF (DR%N_QFANS > 0) THEN
+         ALLOCATE(DR%LHS_SYSTEM_1(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of first point of system curve
+         ALLOCATE(DR%LHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of second point of system curve
+         ALLOCATE(DR%RHS_SYSTEM_1(DR%N_MATRIX_SYSTEM)) ! RHS of first point of system curve
+         ALLOCATE(DR%RHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_QFANS)) ! RHS of first point of system curve
+         DR%LHS_SYSTEM_1(:,:) = 0._EB
+         DR%LHS_SYSTEM_2(:,:) = 0._EB
+         DR%RHS_SYSTEM_1(:) = 0._EB
+         DR%RHS_SYSTEM_2(:,:) = 0._EB
+         CALL RHS_SYSTEM(NR)
+         CALL LHS_SYSTEM(NR)
+         CALL MATRIX_SYSTEM_SOLVE(NR)
+         ! Deallocate matrices used for solving steady state system curve
+         DEALLOCATE(DR%LHS_SYSTEM_1)
+         DEALLOCATE(DR%LHS_SYSTEM_2)
+         DEALLOCATE(DR%RHS_SYSTEM_1)
+         DEALLOCATE(DR%RHS_SYSTEM_2)
+      ENDIF
+   ENDDO
+ENDIF
 
 ! Solution of the HVAC network
 DO NNE = 1, N_NETWORKS
@@ -2159,32 +2163,32 @@ DO NN = 1, N_DUCTNODES
    DUCTNODE_DR(NN) = DUCTRUN_NCOUNTER(NODE_COUNTER(NN))
 ENDDO
 
-! Populates number of quadratic fans and indexes them within DUCT
-DO NR = 1, N_DUCTRUNS
-   N_QFANS = 0
-   DO ND = 1, DUCTRUN(NR)%N_DUCTS
-      IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX > 0) THEN
-         IF (FAN(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX)%FAN_TYPE == 4) THEN
-            N_QFANS = N_QFANS + 1
-            DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%QFAN_N = N_QFANS
+IF (QFAN_BETA_TEST) THEN
+   ! Populates number of quadratic fans and indexes them within DUCT
+   DO NR = 1, N_DUCTRUNS
+      N_QFANS = 0
+      DO ND = 1, DUCTRUN(NR)%N_DUCTS
+         IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX > 0) THEN
+            IF (FAN(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX)%FAN_TYPE == 4) THEN
+               N_QFANS = N_QFANS + 1
+               DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%QFAN_N = N_QFANS
+            ENDIF
          ENDIF
-      ENDIF
+      ENDDO
+      DUCTRUN(NR)%N_QFANS = N_QFANS
    ENDDO
-   DUCTRUN(NR)%N_QFANS = N_QFANS
-ENDDO
-
-! Allocate and zero solution matrix indices and system curve velocities
-DO NR = 1, N_DUCTRUNS
-   ALLOCATE(DUCTRUN(NR)%MATRIX_SYSTEM_INDEX(DUCTRUN(NR)%N_DUCTS+DUCTRUN(NR)%N_DUCTNODES))
-   DUCTRUN(NR)%MATRIX_SYSTEM_INDEX = 0
-   DO ND = 1, DUCTRUN(NR)%N_DUCTS
-      ALLOCATE(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,DUCTRUN(NR)%N_QFANS,2)) ! vel_system(sys#,fan#,old/new)
-      DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(1,:,:) = 0._EB
-      DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,:,:) = TWO_EPSILON_EB
+   ! Allocate and zero solution matrix indices and system curve velocities
+   DO NR = 1, N_DUCTRUNS
+      ALLOCATE(DUCTRUN(NR)%MATRIX_SYSTEM_INDEX(DUCTRUN(NR)%N_DUCTS+DUCTRUN(NR)%N_DUCTNODES))
+      DUCTRUN(NR)%MATRIX_SYSTEM_INDEX = 0
+      DO ND = 1, DUCTRUN(NR)%N_DUCTS
+         ALLOCATE(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,DUCTRUN(NR)%N_QFANS,2)) ! vel_system(sys#,fan#,old/new)
+         DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(1,:,:) = 0._EB
+         DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,:,:) = TWO_EPSILON_EB
+      ENDDO
    ENDDO
-ENDDO
-
 CALL SETUP_SOLUTION_SYSTEM_POINTERS
+ENDIF
 
 DEALLOCATE(DUCTRUN_DCOUNTER)
 DEALLOCATE(DUCTRUN_NCOUNTER)
