@@ -1604,7 +1604,7 @@ SELECT CASE (FA%FAN_TYPE)
    CASE(4) ! System curve-based quadratic fan BETA
       ! Set initial bounds for bisect
       FLOW1 = 0._EB
-      FLOW2 = FA%MAX_PRES
+      FLOW2 = FA%MAX_FLOW
       FAN_ITER = 0
       FAN_LOOP: DO
          FAN_ITER = FAN_ITER + 1
