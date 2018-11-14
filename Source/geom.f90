@@ -502,8 +502,8 @@ INTEGER, PARAMETER :: MAX_INTERP_POINTS_VOL_QUAD=27 !27 stencil points for quadr
 INTEGER, SAVE :: MAX_INTERP_POINTS = MAX_INTERP_POINTS_VOL_LIN ! Default linear interpolation.
 INTEGER, SAVE :: DELTA_INT = 1*MAX_DIM*MAX_INTERP_POINTS_VOL_LIN ! The 1 is for INT_N_EXT_PTS
 INTEGER, PARAMETER :: INT_VEL_IND=1, INT_VELS_IND=2, INT_FV_IND=3, INT_DHDX_IND=4, INT_DPDX_IND=6, N_INT_FVARS=6
-INTEGER, PARAMETER :: INT_H_IND=1, INT_RHO_IND=2, INT_TMP_IND=3, INT_RSUM_IND=4, INT_MU_IND=5, INT_KRES_IND=6, &
-                      INT_D_IND=7, INT_P_IND=8
+INTEGER, PARAMETER :: INT_H_IND=1, INT_RHO_IND=2, INT_TMP_IND=3, INT_RSUM_IND=4, INT_MU_IND=5, INT_MUDNS_IND=6, &
+                      INT_KRES_IND=7, INT_D_IND=8, INT_P_IND=9
 INTEGER, SAVE :: N_INT_CVARS
 
 ! Types of interpolation:
@@ -1600,14 +1600,13 @@ END SUBROUTINE GET_PRES_CFACE_TEST
 
 SUBROUTINE CFACE_THERMAL_GASVARS(ICF,ONE_D)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY
-
 INTEGER, INTENT(IN) :: ICF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), INTENT(INOUT), POINTER :: ONE_D
 
 ! Local Variables:
 INTEGER :: IND1, IND2, ICC, JCC, I ,J ,K, IFACE, IFC2, IFACE2, NFCELL, ICCF, X1AXIS, LOWHIGH, ILH, IBOD, IWSEL
 REAL(EB):: PREDFCT,U_CAVG(IAXIS:KAXIS),AREA_TANG(IAXIS:KAXIS),AF,VELN,NVEC(IAXIS:KAXIS),ABS_NVEC(IAXIS:KAXIS),K_G
+REAL(EB):: MU_DNS_G
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 REAL(EB):: VVEL(IAXIS:KAXIS), V_TANG(IAXIS:KAXIS)
 INTEGER :: VIND,EP,INPE,INT_NPE_LO,INT_NPE_HI
@@ -1638,22 +1637,22 @@ IF(CFACE_INTERPOLATE) THEN
       ONE_D%RSUM_G= 0._EB
       ONE_D%RHO_G = 0._EB
       ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = 0._EB
-      ! Viscosity, Use MU from bearing cartesian cell:
+      ! Viscosity:
       ONE_D%MU_G = 0._EB
-
+      MU_DNS_G   = 0._EB
       DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-         ONE_D%TMP_G = ONE_D%TMP_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_TMP_IND,INPE)
-         ONE_D%RSUM_G= ONE_D%RSUM_G+ CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(INT_RSUM_IND,INPE)
-         ONE_D%RHO_G = ONE_D%RHO_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_RHO_IND,INPE)
-         ONE_D%MU_G  = ONE_D%MU_G  + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_MU_IND,INPE)
+         ONE_D%TMP_G = ONE_D%TMP_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_TMP_IND,INPE)
+         ONE_D%RSUM_G= ONE_D%RSUM_G+ CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS( INT_RSUM_IND,INPE)
+         ONE_D%RHO_G = ONE_D%RHO_G + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(  INT_RHO_IND,INPE)
+         ONE_D%MU_G  = ONE_D%MU_G  + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(   INT_MU_IND,INPE)
+         MU_DNS_G    = MU_DNS_G    + CUT_FACE(IND1)%INT_COEF(INPE)*CUT_FACE(IND1)%INT_CVARS(INT_MUDNS_IND,INPE)
          ONE_D%ZZ_G(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES) + &
                                            CUT_FACE(IND1)%INT_COEF(INPE)*    &
                                            CUT_FACE(IND1)%INT_CVARS(INT_P_IND+1:INT_P_IND+N_TRACKED_SPECIES,INPE)
       ENDDO
 
       ! Gas conductivity:
-      K_G = ONE_D%MU_G*CPOPR
-      IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
+      CALL GET_CCREGION_CELL_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),ONE_D%MU_G,MU_DNS_G,ONE_D%TMP_G,K_G)
       ONE_D%K_G = K_G
 
       ! Finally U_TANG velocity:
@@ -1719,8 +1718,7 @@ CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use value from CUT_CELL data struct:
    ONE_D%MU_G = MU(I,J,K)
 
    ! Gas conductivity:
-   K_G = ONE_D%MU_G*CPOPR
-   IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),K_G,ONE_D%TMP_G)
+   CALL GET_CCREGION_CELL_CONDUCTIVITY(ONE_D%ZZ_G(1:N_TRACKED_SPECIES),MU(I,J,K),MU_DNS(I,J,K),ONE_D%TMP_G,K_G)
    ONE_D%K_G = K_G
 
    ! Finally U_TANG velocity: For now compute the Area average component on each direction:
@@ -2297,7 +2295,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(2)==0) CYCLE OTHER_MESH_LOOP_13
          SNODE = PROCESS(NOM)
          ! Cell centered variables:
-         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(10+N_TRACKED_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(11+N_TRACKED_SPECIES)))
          IF (RNODE/=SNODE) THEN
             N_REQ13 = N_REQ13 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG13(1),SIZE(M3%REAL_RECV_PKG13),MPI_DOUBLE_PRECISION, &
@@ -2351,7 +2349,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(2)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(10+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(11+N_TRACKED_SPECIES)))
             N_REQ13 = N_REQ13 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG13(1),SIZE(M3%REAL_SEND_PKG13),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ13(N_REQ13),IERR)
@@ -2429,7 +2427,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       IF (CODE==1 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 10+N_TOTAL_SCALARS
+         NQT2 = 11+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG213 : DO ICC=1,M3%NFCC_S(2)
@@ -2444,11 +2442,12 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%D(I,J,K)                             ! DIV^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+10+NN)= M%ZZS(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG213
          ELSE
@@ -2466,11 +2465,12 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%D(I,J,K)                             ! DIV^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)= M%ZZS(I,J,K,NN)
+                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG213
          ENDIF
@@ -2605,7 +2605,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       IF (CODE==4 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 10+N_TOTAL_SCALARS
+         NQT2 = 11+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG313 : DO ICC=1,M3%NFCC_S(2)
@@ -2620,11 +2620,12 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%DS(I,J,K)                            ! DIV^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+10+NN)= M%ZZ(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG313
          ELSE
@@ -2642,11 +2643,12 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
                M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%KRES(I,J,K)                          ! KRES^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%DS(I,J,K)                            ! DIV^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
+               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)= M%ZZ(I,J,K,NN)
+                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG313
          ENDIF
@@ -2849,7 +2851,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
-         NQT2 = 10+N_TOTAL_SCALARS
+         NQT2 = 11+N_TOTAL_SCALARS
          VIND = 0 ! Cell centered variables.
          ! First loop cut-faces:
          DO ICF=1,M%N_CUTFACE_MESH
@@ -2861,16 +2863,17 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
                      NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
                      LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                     M%CUT_FACE(ICF)%INT_CVARS(   INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
-                     M%CUT_FACE(ICF)%INT_CVARS(INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
-                     M%CUT_FACE(ICF)%INT_CVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
-                     M%CUT_FACE(ICF)%INT_CVARS(INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
-                     M%CUT_FACE(ICF)%INT_CVARS(   INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
-                     M%CUT_FACE(ICF)%INT_CVARS(   INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
+                     M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+                     M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
+                     M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
+                     M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
+                     M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
+                     M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
+                     M%CUT_FACE(ICF)%INT_CVARS( INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
+                     M%CUT_FACE(ICF)%INT_CVARS(    INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
+                     M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)
                      DO NN=1,N_TOTAL_SCALARS
-                        M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+10+NN)
+                        M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)
                      ENDDO
                   ENDDO
                ENDDO
@@ -4113,7 +4116,7 @@ END SUBROUTINE FINISH_CCIBM
 SUBROUTINE CCREGION_DIVERGENCE_PART_1(T,DT,NM)
 
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z, &
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z, &
                               GET_SENSIBLE_ENTHALPY,GET_VISCOSITY,GET_MOLECULAR_WEIGHT
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_Z_SRC
 
@@ -4129,7 +4132,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB) :: RDT,CCM1,CCP1,IDX,AF,TMP_G,H_S,&
             ZZ_FACE(MAX_SPECIES),TNOW,RHOPV(-1:0),TMPV(-1:0),X1F,PRFCT,PRFCTV, &
-            CPV(-1:0),KPV(-1:0),KPDTDN,FCT,NEW_RHO_D_DZDN ! ZZPV2(-1:0,1:MAX_SPECIES),
+            CPV(-1:0),KPV(-1:0),KPDTDN,FCT,NEW_RHO_D_DZDN,MUV(-1:0),MU_DNSV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -6925,15 +6928,12 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
    ! K*DTDN:
    TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
-   KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
    ! KP on low-high side cells:
-   IF (SIM_MODE==DNS_MODE) THEN
-      DO ISIDE=-1,0
-         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-      ENDDO
-   ENDIF
-
+   DO ISIDE=-1,0
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
+      CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I+FCELL+ISIDE,J,K),&
+                                             MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),KPV(ISIDE))
+   ENDDO
    KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DX(I)
 
    ! Add K*DTDN dot n to corresponding cell DP:
@@ -6956,15 +6956,12 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
    ! K*DTDN:
    TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
-   KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
    ! KP on low-high side cells:
-   IF (SIM_MODE==DNS_MODE) THEN
-      DO ISIDE=-1,0
-         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
-         CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-      ENDDO
-   ENDIF
-
+   DO ISIDE=-1,0
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
+      CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J+FCELL+ISIDE,K),&
+                                             MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),KPV(ISIDE))
+   ENDDO
    KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DY(J)
 
    ! Add K*DTDN dot n to corresponding cell DP:
@@ -6987,15 +6984,12 @@ DO IFACE=1,MESHES(NM)%IBM_NREGFACE_Z(X1AXIS)
 
    ! K*DTDN:
    TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
-   KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
    ! KP on low-high side cells:
-   IF (SIM_MODE==DNS_MODE) THEN
-      DO ISIDE=-1,0
-         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
-         CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-      ENDDO
-   ENDIF
-
+   DO ISIDE=-1,0
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
+      CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J,K+FCELL+ISIDE),&
+                                             MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),KPV(ISIDE))
+   ENDDO
    KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DZ(K)
 
    ! Add K*DTDN dot n to corresponding cell DP:
@@ -7028,7 +7022,6 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
 
          TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
-         KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
          DO ISIDE=-1,0
             ZZ_GET = 0._EB
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7042,7 +7035,9 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            ! KP on low-high side cells:
+            CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I+FCELL+ISIDE,J,K),&
+                                                   MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),KPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -7078,7 +7073,6 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
 
          TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
-         KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
          DO ISIDE=-1,0
             ZZ_GET = 0._EB
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7092,7 +7086,9 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            ! KP on low-high side cells:
+            CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J+FCELL+ISIDE,K),&
+                                                   MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),KPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -7128,7 +7124,6 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          CCP1 = IDX*(X1F -IBM_RCFACE_Z(IFACE)%XCEN(X1AXIS,LOW_IND))
 
          TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
-         KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
          DO ISIDE=-1,0
             ZZ_GET = 0._EB
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7142,7 +7137,9 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
                       PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
                (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
             END SELECT
-            IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+            ! KP on low-high side cells:
+            CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J,K+FCELL+ISIDE),&
+                                                   MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),KPV(ISIDE))
          ENDDO
 
          KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
@@ -7185,11 +7182,14 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
    X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
    SELECT CASE(X1AXIS)
    CASE(IAXIS)
-      KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
+      MUV(-1:0)    = MU(I+FCELL-1:I+FCELL,J,K)
+      MU_DNSV(-1:0)= MU_DNS(I+FCELL-1:I+FCELL,J,K)
    CASE(JAXIS)
-      KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
+      MUV(-1:0)    = MU(I,J+FCELL-1:J+FCELL,K)
+      MU_DNSV(-1:0)= MU_DNS(I,J+FCELL-1:J+FCELL,K)
    CASE(KAXIS)
-      KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
+      MUV(-1:0)    = MU(I,J,K+FCELL-1:K+FCELL)
+      MU_DNSV(-1:0)= MU_DNS(I,J,K+FCELL-1:K+FCELL)
    END SELECT
    DO IFACE=1,CUT_FACE(ICF)%NFACE
       AF = CUT_FACE(ICF)%AREA(IFACE)
@@ -7211,7 +7211,8 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
                    PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
             (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
          END SELECT
-         IF (SIM_MODE==DNS_MODE) CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
+         ! KP on low-high side cells:
+         CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MUV(ISIDE),MU_DNSV(ISIDE),TMPV(ISIDE),KPV(ISIDE))
       ENDDO
       KPDTDN = (CCM1*KPV(-1)+CCP1*KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
       ! Add to divergence integral of surrounding cut-cells:
@@ -7358,24 +7359,28 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
             ENDIF
             SELECT CASE(X1AXIS)
             CASE(IAXIS)
-               KPV(-1:0)   =   MU(I+FCELL-1:I+FCELL  ,J,K)*CPOPR
-               TMPV(-1:0)  =  TMP(I+FCELL-1:I+FCELL  ,J,K)
+               MUV(-1:0)    =     MU(I+FCELL-1:I+FCELL  ,J,K)
+               MU_DNSV(-1:0)= MU_DNS(I+FCELL-1:I+FCELL  ,J,K)
+               KPV(-1:0)    =     MU(I+FCELL-1:I+FCELL  ,J,K)*CPOPR
+               TMPV(-1:0)   =    TMP(I+FCELL-1:I+FCELL  ,J,K)
             CASE(JAXIS)
-               KPV(-1:0)   =   MU(I,J+FCELL-1:J+FCELL  ,K)*CPOPR
-               TMPV(-1:0)  =  TMP(I,J+FCELL-1:J+FCELL  ,K)
+               MUV(-1:0)    =     MU(I,J+FCELL-1:J+FCELL  ,K)
+               MU_DNSV(-1:0)= MU_DNS(I,J+FCELL-1:J+FCELL,  K)
+               KPV(-1:0)    =     MU(I,J+FCELL-1:J+FCELL  ,K)*CPOPR
+               TMPV(-1:0)   =    TMP(I,J+FCELL-1:J+FCELL  ,K)
             CASE(KAXIS)
-               KPV(-1:0)   =   MU(I,J,K+FCELL-1:K+FCELL  )*CPOPR
-               TMPV(-1:0)  =  TMP(I,J,K+FCELL-1:K+FCELL  )
+               MUV(-1:0)    =     MU(I,J,K+FCELL-1:K+FCELL  )
+               MU_DNSV(-1:0)= MU_DNS(I,J,K+FCELL-1:K+FCELL  )
+               KPV(-1:0)    =     MU(I,J,K+FCELL-1:K+FCELL  )*CPOPR
+               TMPV(-1:0)   =    TMP(I,J,K+FCELL-1:K+FCELL  )
             END SELECT
             ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,IFACE)
             IF (ICC > MESHES(NM)%N_CUTCELL_MESH) CYCLE ! Cut-cell is guard-cell cc.
             JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,IFACE)
             TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
-            IF (SIM_MODE==DNS_MODE) THEN
-               ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
-                                       (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
-               CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-            ENDIF
+            ZZ_GET(1:N_TRACKED_SPECIES) =  PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                                    (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+            CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MUV(ISIDE),MU_DNSV(ISIDE),TMPV(ISIDE),KPV(ISIDE))
             KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) * IDX
             IF (PREDICTOR) THEN
                CUT_CELL(ICC)%DS(JCC) = CUT_CELL(ICC)%DS(JCC) + FCT*KPDTDN * AF ! +ve or -ve dot
@@ -7451,14 +7456,12 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
      CASE(IAXIS)
         ! K*DTDN:
         TMPV(-1:0)  = TMP(I+FCELL-1:I+FCELL,J,K)
-        KPV(-1:0)   =  MU(I+FCELL-1:I+FCELL,J,K)*CPOPR
         ! KP on low-high side cells:
-        IF (SIM_MODE==DNS_MODE) THEN
-           DO ISIDE=-1,0
-              ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
-              CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-           ENDDO
-        ENDIF
+        DO ISIDE=-1,0
+           ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I+FCELL+ISIDE,J,K,1:N_TRACKED_SPECIES)
+           CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I+FCELL+ISIDE,J,K),&
+                                                  MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),KPV(ISIDE))
+        ENDDO
         KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DX(I)
         ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
         IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
@@ -7469,14 +7472,12 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
      CASE(JAXIS)
         ! K*DTDN:
         TMPV(-1:0)  = TMP(I,J+FCELL-1:J+FCELL,K)
-        KPV(-1:0)   =  MU(I,J+FCELL-1:J+FCELL,K)*CPOPR
         ! KP on low-high side cells:
-        IF (SIM_MODE==DNS_MODE) THEN
-           DO ISIDE=-1,0
-              ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
-              CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-           ENDDO
-        ENDIF
+        DO ISIDE=-1,0
+           ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J+FCELL+ISIDE,K,1:N_TRACKED_SPECIES)
+           CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J+FCELL+ISIDE,K),&
+                                                  MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),KPV(ISIDE))
+        ENDDO
         KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DY(J)
         ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
         IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
@@ -7487,14 +7488,12 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
      CASE(KAXIS)
         ! K*DTDN:
         TMPV(-1:0)  = TMP(I,J,K+FCELL-1:K+FCELL)
-        KPV(-1:0)   =  MU(I,J,K+FCELL-1:K+FCELL)*CPOPR
         ! KP on low-high side cells:
-        IF (SIM_MODE==DNS_MODE) THEN
-           DO ISIDE=-1,0
-              ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
-              CALL GET_CONDUCTIVITY(ZZ_GET,KPV(ISIDE),TMPV(ISIDE))
-           ENDDO
-        ENDIF
+        DO ISIDE=-1,0
+           ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K+FCELL+ISIDE,1:N_TRACKED_SPECIES)
+           CALL GET_CCREGION_CELL_CONDUCTIVITY(ZZ_GET,MU(I,J,K+FCELL+ISIDE),&
+                                                  MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),KPV(ISIDE))
+        ENDDO
         KPDTDN = 0.5_EB*(KPV(-1)+KPV(0)) * (TMPV(0)-TMPV(-1)) / DZ(K)
         ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
         IF(LHFACE == LOW_IND) THEN ! Face on low side of cell
@@ -7513,6 +7512,35 @@ END SUBROUTINE CCREGION_CONDUCTION_HEAT_FLUX
 
 
 END SUBROUTINE CCREGION_DIVERGENCE_PART_1
+
+! ----------------------- GET_CCREGION_CELL_CONDUCTIVITY -------------------------
+
+SUBROUTINE GET_CCREGION_CELL_CONDUCTIVITY(ZZ_CELL,MU_CELL,MU_DNS_CELL,TMP_CELL,KP_CELL)
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT
+
+REAL(EB), INTENT(IN)  :: ZZ_CELL(1:N_TRACKED_SPECIES),MU_CELL,MU_DNS_CELL,TMP_CELL
+REAL(EB), INTENT(OUT) :: KP_CELL
+
+! Local Vars:
+REAL(EB) :: CP_CELL
+
+IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
+   CALL GET_CONDUCTIVITY(ZZ_CELL,KP_CELL,TMP_CELL)
+   IF (SIM_MODE==LES_MODE) THEN
+      IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+         CALL GET_SPECIFIC_HEAT(ZZ_CELL,CP_CELL,TMP_CELL)
+         KP_CELL = KP_CELL + MAX(0._EB,MU_CELL-MU_DNS_CELL)*CP_CELL*RPR
+      ELSE
+         KP_CELL = KP_CELL + MAX(0._EB,MU_CELL-MU_DNS_CELL)*CPOPR
+      ENDIF
+   ENDIF
+ELSE ! VLES
+   KP_CELL = MU_CELL*CPOPR
+ENDIF
+
+RETURN
+END SUBROUTINE GET_CCREGION_CELL_CONDUCTIVITY
 
 ! ----------------------- CCREGION_DIFFUSIVE_MASS_FLUXES -------------------------
 
@@ -12268,6 +12296,10 @@ REAL(EB):: ZZ_GET(1:N_TRACKED_SPECIES), SLIP_FACTOR, U_TAU, Y_PLUS, SRGH
 INTEGER :: ICC,JCC,ISIDE
 REAL(EB):: DT2
 
+LOGICAL:: MATCH_VEL_DERIV
+INTEGER:: NFACE
+
+
 REAL(EB) :: TNOW
 
 DT2 = 0._EB*DT
@@ -12302,11 +12334,42 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
       K      = CUT_FACE(ICF)%IJK(KAXIS)
       X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
 
+      NFACE = CUT_FACE(ICF)%NFACE
+
+      ! 1. For the given Cartesian face search for edges shared with faces of type IBM_GASPHASE.
+      ! 2. For these regular edges find which IFACE is next to them.
+      ! 3. Define IFACE centroid distance to the edge.
+      ! 4. Compute U_IBM on underlaying Cartesian face with VEL of cut-face and VEL of bounding IBM_GASPHASE
+      !    regular face, such that DV1/DX2 matches.
+      U_IBM = 0._EB
+      MATCH_VEL_DERIV = .FALSE.
+
+      ! TO DO.
+      ! SELECT CASE(X1AXIS)
+      ! CASE(IAXIS)
+      !    ! Check type of faces in Y, Z directions:
+      !    IF(FCVAR(I,J+1,K,IBM_FGSC,X1AXIS) == IBM_GASPHASE) THEN
+      !       IFACE=MAXLOC(CUT_FACE(ICF)%XYZCEN(JAXIS,1:NFACE))
+      !       VFACE= (1._EB-PRFCT)*CUT_FACE(ICF)%VEL(IFACE)+ PRFCT*CUT_FACE(ICF)%VELS(IFACE)
+      !       COUNT = COUNT + 1
+      !       U_IBM = U_IBM + &
+      !       UU(I,J+1,K) - DYN(J)/(0.5*DYN(J)+ABS(Y(J)-CUT_FACE(ICF)%XYZCEN(JAXIS,IFACE)))*(UU(I,J+1,K)-VFACE)
+      !    ENDIF
+      !
+      !
+      ! CASE(JAXIS)
+      !
+      !
+      ! CASE(KAXIS)
+      !
+      ! END SELECT
+
+
+      MATCH_IF : IF(.NOT.MATCH_VEL_DERIV) THEN
 
       IF(IBM_PLANE_INTERPOLATION) THEN
          ! Interpolate Un approx to cartesian-face centroids:
          VAL(1:5) = 0._EB
-         U_IBM = 0._EB
          ! Get UBn:
          INBFC_CARTCEN(1:3) = CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
          XYZ_PP(IAXIS:KAXIS)= CUT_FACE(ICF)%XYZ_BP_CARTCEN(IAXIS:KAXIS)
@@ -12451,6 +12514,8 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
          ENDIF
 
       ENDIF
+
+      ENDIF MATCH_IF
 
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
