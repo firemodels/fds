@@ -4115,7 +4115,6 @@ END SUBROUTINE FINISH_CCIBM
 
 SUBROUTINE CCREGION_DIVERGENCE_PART_1(T,DT,NM)
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z, &
                               GET_SENSIBLE_ENTHALPY,GET_VISCOSITY,GET_MOLECULAR_WEIGHT
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_Z_SRC
@@ -7513,6 +7512,35 @@ END SUBROUTINE CCREGION_CONDUCTION_HEAT_FLUX
 
 END SUBROUTINE CCREGION_DIVERGENCE_PART_1
 
+! ------------------------ GET_CCREGION_CELL_DIFFUSIVITY -------------------------
+
+SUBROUTINE GET_CCREGION_CELL_DIFFUSIVITY(RHO_CELL,D_Z_N,MU_CELL,MU_DNS_CELL,TMP_CELL,D_Z_TEMP)
+
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
+USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS
+
+REAL(EB), INTENT(IN) :: RHO_CELL,D_Z_N(0:5000),MU_CELL,MU_DNS_CELL,TMP_CELL
+REAL(EB), INTENT(OUT):: D_Z_TEMP
+
+REAL(EB) :: D_Z_TEMP_DNS
+
+SELECT CASE(SIM_MODE)
+CASE(LES_MODE)
+   CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_CELL,D_Z_TEMP_DNS)
+   D_Z_TEMP = D_Z_TEMP_DNS + MAX(0._EB,MU_CELL-MU_DNS_CELL)*RSC/RHO_CELL
+CASE(DNS_MODE)
+   IF(PERIODIC_TEST==7) THEN
+      D_Z_TEMP = DIFF_MMS / RHO_CELL
+   ELSE
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_CELL,D_Z_TEMP)
+   ENDIF
+CASE DEFAULT
+   D_Z_TEMP = MU_CELL*RSC/RHO_CELL ! VLES
+END SELECT
+
+RETURN
+END SUBROUTINE GET_CCREGION_CELL_DIFFUSIVITY
+
 ! ----------------------- GET_CCREGION_CELL_CONDUCTIVITY -------------------------
 
 SUBROUTINE GET_CCREGION_CELL_CONDUCTIVITY(ZZ_CELL,MU_CELL,MU_DNS_CELL,TMP_CELL,KP_CELL)
@@ -7545,8 +7573,7 @@ END SUBROUTINE GET_CCREGION_CELL_CONDUCTIVITY
 ! ----------------------- CCREGION_DIFFUSIVE_MASS_FLUXES -------------------------
 
 SUBROUTINE CCREGION_DIFFUSIVE_MASS_FLUXES(NM)
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
-USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS
+
 INTEGER, INTENT(IN) :: NM
 
 ! NOTE: this routine assumes POINT_TO_MESH(NM) has been previously called.
@@ -7555,7 +7582,7 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: N,I,J,K,X1AXIS,ISIDE,IFACE,ICC,JCC,ICF
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-REAL(EB) :: D_Z_N(0:5000),CCM1,CCP1,IDX,DIFF_FACE,VELD,D_Z_TEMP(-1:0),MUV(-1:0), &
+REAL(EB) :: D_Z_N(0:5000),CCM1,CCP1,IDX,DIFF_FACE,VELD,D_Z_TEMP(-1:0),MUV(-1:0),MU_DNSV(-1:0), &
             RHOPV(-1:0),RHOPVN(-1:0),TMPV(-1:0),ZZPV(-1:0),X1F,PRFCT
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET,RHO_D_DZDN_GET
 INTEGER :: N_LOOKUP
@@ -7606,23 +7633,10 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DXN(I)
 
       ! Diffusive Part:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I+FCELL+ISIDE,J,K)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I+FCELL+ISIDE,J,K),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                          MU_DNS(I+FCELL+ISIDE,J,K),TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+      ENDDO
 
       ! One Term defined flux:
       DIFF_FACE = CCM1*RHOP(I+FCELL-1,J,K)*D_Z_TEMP(-1) + CCP1*RHOP(I+FCELL  ,J,K)*D_Z_TEMP(0)
@@ -7676,23 +7690,10 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DYN(J)
 
       ! Diffusive Part:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I,J+FCELL+ISIDE,K)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J+FCELL+ISIDE,K),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                          MU_DNS(I,J+FCELL+ISIDE,K),TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+      ENDDO
 
       ! One Term defined flux:
       DIFF_FACE = CCM1*RHOP(I,J+FCELL-1,K)*D_Z_TEMP(-1) + CCP1*RHOP(I,J+FCELL  ,K)*D_Z_TEMP(0)
@@ -7746,23 +7747,11 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
       IDX= 1._EB/DZN(K)
 
       ! Diffusive Part:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I,J,K+FCELL+ISIDE)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
-         ENDDO
-      ENDIF
+      ! Diffusive Part:
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J,K+FCELL+ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                          MU_DNS(I,J,K+FCELL+ISIDE),TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+      ENDDO
 
       ! One Term defined flux:
       DIFF_FACE = CCM1*RHOP(I,J,K+FCELL-1)*D_Z_TEMP(-1) + CCP1*RHOP(I,J,K+FCELL  )*D_Z_TEMP(0)
@@ -7842,8 +7831,8 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                                MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Diffusion Velocity D/rho drho/dx
             VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
@@ -7877,8 +7866,8 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                                MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Diffusion Velocity D/rho drho/dy
             VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
@@ -7912,28 +7901,14 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                                MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Diffusion Velocity D/rho drho/dz
             VELD = IDX*(     RHOPV(0)-     RHOPV(-1))/ &
                        (CCP1*RHOPV(0)+CCM1*RHOPV(-1)) ! DIFF_FACE further down.
 
       ENDSELECT
-
-      ! Interpolate D_Z to the face, linear interpolation:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
-            ENDDO
-         ELSE
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ENDIF
 
       ! One Term defined flux:
       DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
@@ -7990,11 +7965,14 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
 
          SELECT CASE (X1AXIS)
          CASE(IAXIS)
-            MUV(-1:0) = MU(I+FCELL-1:I+FCELL  ,J,K)
+            MUV(-1:0)     =     MU(I+FCELL-1:I+FCELL  ,J,K)
+            MU_DNSV(-1:0) = MU_DNS(I+FCELL-1:I+FCELL  ,J,K)
          CASE(JAXIS)
-            MUV(-1:0) = MU(I,J+FCELL-1:J+FCELL  ,K)
+            MUV(-1:0)     =     MU(I,J+FCELL-1:J+FCELL  ,K)
+            MU_DNSV(-1:0) = MU_DNS(I,J+FCELL-1:J+FCELL  ,K)
          CASE(KAXIS)
-            MUV(-1:0) = MU(I,J,K+FCELL-1:K+FCELL  )
+            MUV(-1:0)     =     MU(I,J,K+FCELL-1:K+FCELL  )
+            MU_DNSV(-1:0) = MU_DNS(I,J,K+FCELL-1:K+FCELL  )
          END SELECT
 
          ! Interpolate D_Z to the face, linear interpolation:
@@ -8013,15 +7991,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                print*, 'CUT_FACE face not connected to CC cell',NM,IFACE
                TMPV(ISIDE) = -1._EB
             END SELECT
-            IF (SIM_MODE==DNS_MODE) THEN
-               IF(PERIODIC_TEST==7) THEN
-                  D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
-               ELSE
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-               ENDIF
-            ELSE
-               D_Z_TEMP(ISIDE) = MUV(ISIDE)*RSC/RHOPV(ISIDE)
-            ENDIF
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MUV(ISIDE),MU_DNSV(ISIDE),TMPV(ISIDE),D_Z_TEMP(ISIDE))
          ENDDO
 
          ! One Term defined flux:
@@ -8172,20 +8142,23 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
             CCM1= 0.5_EB; CCP1= 0.5_EB
             SELECT CASE (X1AXIS)
             CASE(IAXIS)
-               MUV(-1:0)   =   MU(I+FCELL-1:I+FCELL  ,J,K)
-               TMPV(-1:0)  =  TMP(I+FCELL-1:I+FCELL  ,J,K)
-               RHOPV(-1:0) = RHOP(I+FCELL-1:I+FCELL  ,J,K)
-               ZZPV(-1:0)  =  ZZP(I+FCELL-1:I+FCELL  ,J,K,N)
+               MUV(-1:0)       =     MU(I+FCELL-1:I+FCELL  ,J,K)
+               MU_DNSV(-1:0)   = MU_DNS(I+FCELL-1:I+FCELL  ,J,K)
+               TMPV(-1:0)      =    TMP(I+FCELL-1:I+FCELL  ,J,K)
+               RHOPV(-1:0)     =   RHOP(I+FCELL-1:I+FCELL  ,J,K)
+               ZZPV(-1:0)      =    ZZP(I+FCELL-1:I+FCELL  ,J,K,N)
             CASE(JAXIS)
-               MUV(-1:0)   =   MU(I,J+FCELL-1:J+FCELL  ,K)
-               TMPV(-1:0)  =  TMP(I,J+FCELL-1:J+FCELL  ,K)
-               RHOPV(-1:0) = RHOP(I,J+FCELL-1:J+FCELL  ,K)
-               ZZPV(-1:0)  =  ZZP(I,J+FCELL-1:J+FCELL  ,K,N)
+               MUV(-1:0)       =     MU(I,J+FCELL-1:J+FCELL  ,K)
+               MU_DNSV(-1:0)   = MU_DNS(I,J+FCELL-1:J+FCELL  ,K)
+               TMPV(-1:0)      =    TMP(I,J+FCELL-1:J+FCELL  ,K)
+               RHOPV(-1:0)     =   RHOP(I,J+FCELL-1:J+FCELL  ,K)
+               ZZPV(-1:0)      =    ZZP(I,J+FCELL-1:J+FCELL  ,K,N)
             CASE(KAXIS)
-               MUV(-1:0)   =   MU(I,J,K+FCELL-1:K+FCELL  )
-               TMPV(-1:0)  =  TMP(I,J,K+FCELL-1:K+FCELL  )
-               RHOPV(-1:0) = RHOP(I,J,K+FCELL-1:K+FCELL  )
-               ZZPV(-1:0)  =  ZZP(I,J,K+FCELL-1:K+FCELL  ,N)
+               MUV(-1:0)       =     MU(I,J,K+FCELL-1:K+FCELL  )
+               MU_DNSV(-1:0)   = MU_DNS(I,J,K+FCELL-1:K+FCELL  )
+               TMPV(-1:0)      =    TMP(I,J,K+FCELL-1:K+FCELL  )
+               RHOPV(-1:0)     =   RHOP(I,J,K+FCELL-1:K+FCELL  )
+               ZZPV(-1:0)      =    ZZP(I,J,K+FCELL-1:K+FCELL  ,N)
             END SELECT
             ! Interpolate D_Z to the face, linear interpolation:
             DO ISIDE=-1,0
@@ -8199,11 +8172,8 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
                   ZZPV(ISIDE) =        PRFCT *CUT_CELL(ICC)%ZZ(N,JCC) + &
                                 (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(N,JCC)
                END SELECT
-               IF (SIM_MODE==DNS_MODE) THEN
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-               ELSE
-                  D_Z_TEMP(ISIDE) = MUV(ISIDE)*RSC/RHOPV(ISIDE)
-               ENDIF
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MUV(ISIDE),&
+                                                MU_DNSV(ISIDE),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
 
             ! One Term defined flux:
@@ -9685,7 +9655,6 @@ END SUBROUTINE CCREGION_DENSITY_IMPLICIT
 
 SUBROUTINE GET_ZZ_CCIMPREG_3D
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 ! Local Variables:
 INTEGER :: NM,N,I,J,K,ICC,JCC,NCELL
 REAL(EB), POINTER, DIMENSION(:,:,:)   :: RHOP=>NULL(),UP=>NULL()
@@ -10555,7 +10524,6 @@ END SUBROUTINE GET_ADVMATRIX_DENSITY_3D
 
 SUBROUTINE GET_RHOZZ_CCIMPREG_3D
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 ! Local Variables:
 INTEGER :: NM,N,I,J,K,ICC,JCC,NCELL,NMX
 REAL(EB), POINTER, DIMENSION(:,:,:)   :: RHOP=>NULL(),UP=>NULL()
@@ -22532,13 +22500,13 @@ END SUBROUTINE ADD_INPLACE_NNZ_H_WHLDOM
 
 SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_SYMM_3D(N)
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 INTEGER, INTENT(IN) :: N
 
 ! Local Variables:
 INTEGER :: NM
 INTEGER :: I,J,K
 REAL(EB):: PRFCT,D_Z_TEMP(-1:0),D_Z_N(0:5000),RHO_D,X1F,TMPV(-1:0),RHOPV(-1:0),RHOPVN(-1:0),TMP_ISIDE
+REAL(EB):: MUV(-1:0),MU_DNSV(-1:0)
 INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ISIDE,ICF
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,IROW,JCOL,ICC,JCC,IW
 REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_P1
@@ -22632,15 +22600,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         DO ISIDE=-1,0
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
-         ENDDO
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I+FCELL+ISIDE,J,K),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                          MU_DNS(I+FCELL+ISIDE,J,K),TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+      ENDDO
       RHOPVN(-1:0)= RHOPN(I+FCELL-1:I+FCELL  ,J,K)
       RHOPV(-1:0) =  RHOP(I+FCELL-1:I+FCELL  ,J,K)
       RHO_D   = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
@@ -22717,15 +22680,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         DO ISIDE=-1,0
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
-         ENDDO
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J+FCELL+ISIDE,K),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                          MU_DNS(I,J+FCELL+ISIDE,K),TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+      ENDDO
       RHOPVN(-1:0) = RHOPN(I,J+FCELL-1:J+FCELL  ,K)
       RHOPV(-1:0)  =  RHOP(I,J+FCELL-1:J+FCELL  ,K)
       RHO_D = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
@@ -22802,15 +22760,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         DO ISIDE=-1,0
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
-         ENDDO
-      ELSE
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J,K+FCELL+ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                          MU_DNS(I,J,K+FCELL+ISIDE),TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+      ENDDO
       RHOPVN(-1:0)= RHOPN(I,J,K+FCELL-1:K+FCELL  )
       RHOPV(-1:0) =  RHOP(I,J,K+FCELL-1:K+FCELL  )
       RHO_D = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
@@ -22915,10 +22868,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
             ! Advective Part: Velocity u
             VELC = UP(I,J,K)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
-            ENDDO
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                             MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
 
          CASE(JAXIS)
             AF = DX(I)*DZ(K)
@@ -22954,10 +22905,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
             ! Advective Part: Velocity v
             VELC = VP(I,J,K)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
-            ENDDO
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                             MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
 
          CASE(KAXIS)
             AF = DX(I)*DY(J)
@@ -22993,19 +22942,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
             ! Advective Part: Velocity w
             VELC = WP(I,J,K)
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
-            ENDDO
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                             MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),D_Z_TEMP(ISIDE))
 
       ENDSELECT
 
-      ! Interpolate D_Z to the face, linear interpolation:
-      IF (SIM_MODE==DNS_MODE) THEN
-         DO ISIDE=-1,0
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-         ENDDO
-      ENDIF
       RHO_D = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
 
       IF ( DIFF_FROM_DIVG ) THEN
@@ -23063,12 +23004,18 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CASE(IAXIS)
             IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            MUV(-1:0)     =     MU(I+FCELL-1:I+FCELL  ,J,K)
+            MU_DNSV(-1:0) = MU_DNS(I+FCELL-1:I+FCELL  ,J,K)
          CASE(JAXIS)
             IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            MUV(-1:0)     =     MU(I,J+FCELL-1:J+FCELL  ,K)
+            MU_DNSV(-1:0) = MU_DNS(I,J+FCELL-1:J+FCELL  ,K)
          CASE(KAXIS)
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
+            MUV(-1:0)     =     MU(I,J,K+FCELL-1:K+FCELL  )
+            MU_DNSV(-1:0) = MU_DNS(I,J,K+FCELL-1:K+FCELL  )
       ENDSELECT
 
       DO IFACE=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
@@ -23102,25 +23049,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                print*, 'MESHES(NM)%CUT_FACE face not connected to CC cell',NM,IFACE
                TMP_ISIDE = -1._EB
             END SELECT
-            IF (SIM_MODE==DNS_MODE) CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MUV(ISIDE),MU_DNSV(ISIDE),TMP_ISIDE,D_Z_TEMP(ISIDE))
          ENDDO
-         SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                          ! underlying Cartesian turb MU.
-               ENDDO
-            CASE(JAXIS)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                          ! underlying Cartesian turb MU.
-               ENDDO
-            CASE(KAXIS)
-               DO ISIDE=-1,0
-                  D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                          ! underlying Cartesian turb MU.
-               ENDDO
-         ENDSELECT
          RHO_D = CCM1*RHOPV(-1)*D_Z_TEMP(-1) + CCP1*RHOPV(0)*D_Z_TEMP(0)
 
          IF ( DIFF_FROM_DIVG ) THEN
@@ -23174,14 +23104,13 @@ END SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_SYMM_3D
 
 SUBROUTINE GET_ADVDIFFMATRIX_SCALAR_3D(N)
 
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
-USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS
 INTEGER, INTENT(IN) :: N
 
 ! Local Variables:
 INTEGER :: NM
 INTEGER :: I,J,K
-REAL(EB):: PRFCT,D_Z_TEMP(-1:0),MUV(-1:0),D_Z_N(0:5000),DIFF_FACE,X1F,TMPV(-1:0),RHOPV(-1:0),TMP_ISIDE
+REAL(EB):: PRFCT,D_Z_TEMP(-1:0),D_Z_N(0:5000),DIFF_FACE,X1F,TMPV(-1:0),RHOPV(-1:0),TMP_ISIDE
+REAL(EB):: MUV(-1:0),MU_DNSV(-1:0)
 INTEGER :: X1AXIS,IFACE,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ISIDE,ICF
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,IROW,JCOL,ICC,JCC,IW
 REAL(EB):: AF,IDX,CCM1,CCP1,BIJ,KFACE(2,2),CIJP,CIJM,VELC,VELD,ALPHAP1,AM_P1,AP_P1
@@ -23336,23 +23265,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I+FCELL+ISIDE,J,K)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOP(I+FCELL+ISIDE,J,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I+FCELL+ISIDE,J,K),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                          MU_DNS(I+FCELL+ISIDE,J,K),TMP(I+FCELL+ISIDE,J,K),D_Z_TEMP(ISIDE))
+      ENDDO
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       IF(DIFF_FROM_DIVG) DIFF_FACE=MESHES(NM)%IBM_REGFACE_IAXIS_Z(IFACE)%DIFF_FACE(N)
@@ -23433,23 +23349,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I,J+FCELL+ISIDE,K)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE ! LES
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOP(I,J+FCELL+ISIDE,K)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J+FCELL+ISIDE,K),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                          MU_DNS(I,J+FCELL+ISIDE,K),TMP(I,J+FCELL+ISIDE,K),D_Z_TEMP(ISIDE))
+      ENDDO
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       IF(DIFF_FROM_DIVG) DIFF_FACE=MESHES(NM)%IBM_REGFACE_JAXIS_Z(IFACE)%DIFF_FACE(N)
@@ -23528,23 +23431,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CCP1 = 0.5_EB
 
       ! Interpolate D_Z to the face:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOP(I,J,K+FCELL+ISIDE)
-            ENDDO
-         ELSE
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ELSE
-         DO ISIDE=-1,0
-            D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOP(I,J,K+FCELL+ISIDE)
-         ENDDO
-      ENDIF
+      DO ISIDE=-1,0
+         CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOP(I,J,K+FCELL+ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                          MU_DNS(I,J,K+FCELL+ISIDE),TMP(I,J,K+FCELL+ISIDE),D_Z_TEMP(ISIDE))
+      ENDDO
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       IF(DIFF_FROM_DIVG) DIFF_FACE=MESHES(NM)%IBM_REGFACE_KAXIS_Z(IFACE)%DIFF_FACE(N)
@@ -23645,8 +23535,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I+FCELL+ISIDE,J,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I+FCELL+ISIDE,J,K),&
+                                                MU_DNS(I+FCELL+ISIDE,J,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Advective Part: Velocity u+D/rho drho/dx
             VELC = UP(I,J,K)
@@ -23681,8 +23571,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I,J+FCELL+ISIDE,K)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J+FCELL+ISIDE,K),&
+                                                MU_DNS(I,J+FCELL+ISIDE,K),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Advective Part: Velocity v+D/rho drho/dy
             VELC = VP(I,J,K)
@@ -23717,8 +23607,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   print*, 'MESHES(NM)%IBM_NRCFACE_Z face not connected to REG or CC cell',NM,IFACE
                   TMPV(ISIDE) = -1._EB
                END SELECT
-               D_Z_TEMP(ISIDE)= MU(I,J,K+FCELL+ISIDE)*RSC/RHOPV(ISIDE) ! Here we use the cut-cells
-                                                                       ! underlying Cartesian turb MU.
+               CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MU(I,J,K+FCELL+ISIDE),&
+                                                MU_DNS(I,J,K+FCELL+ISIDE),TMPV(ISIDE),D_Z_TEMP(ISIDE))
             ENDDO
             ! Advective Part: Velocity w+D/rho drho/dz
             VELC = WP(I,J,K)
@@ -23727,19 +23617,6 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ENDSELECT
 
-      ! Interpolate D_Z to the face, linear interpolation:
-      IF (SIM_MODE==DNS_MODE) THEN
-         IF(PERIODIC_TEST==7) THEN
-            ! Interpolate D_Z to the face:
-            DO ISIDE=-1,0
-               D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
-            ENDDO
-         ELSE
-            DO ISIDE=-1,0
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMPV(ISIDE),D_Z_TEMP(ISIDE))
-            ENDDO
-         ENDIF
-      ENDIF
       DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
       IF(DIFF_FROM_DIVG) DIFF_FACE=MESHES(NM)%IBM_RCFACE_Z(IFACE)%DIFF_FACE(N)
@@ -23798,15 +23675,18 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       LOCROW_2 = HIGH_IND
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
-            MUV(-1:0) = MU(I+FCELL-1:I+FCELL  ,J,K)
+            MUV(-1:0)     =     MU(I+FCELL-1:I+FCELL  ,J,K)
+            MU_DNSV(-1:0) = MU_DNS(I+FCELL-1:I+FCELL  ,J,K)
             IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
          CASE(JAXIS)
-            MUV(-1:0) = MU(I,J+FCELL-1:J+FCELL  ,K)
+            MUV(-1:0)     =     MU(I,J+FCELL-1:J+FCELL  ,K)
+            MU_DNSV(-1:0) = MU_DNS(I,J+FCELL-1:J+FCELL  ,K)
             IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
          CASE(KAXIS)
-            MUV(-1:0) = MU(I,J,K+FCELL-1:K+FCELL  )
+            MUV(-1:0)     =     MU(I,J,K+FCELL-1:K+FCELL  )
+            MU_DNSV(-1:0) = MU_DNS(I,J,K+FCELL-1:K+FCELL  )
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row, i.e. in the current mesh.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row, i.e. in the current mesh.
       ENDSELECT
@@ -23840,15 +23720,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                print*, 'MESHES(NM)%CUT_FACE face not connected to CC cell',NM,IFACE
                TMP_ISIDE = -1._EB
             END SELECT
-            IF (SIM_MODE==DNS_MODE) THEN
-               IF(PERIODIC_TEST==7) THEN
-                  D_Z_TEMP(ISIDE) = DIFF_MMS / RHOPV(ISIDE)
-               ELSE
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_ISIDE,D_Z_TEMP(ISIDE))
-               ENDIF
-            ELSE
-               D_Z_TEMP(ISIDE)= MUV(ISIDE)*RSC/RHOPV(ISIDE)
-            ENDIF
+            CALL GET_CCREGION_CELL_DIFFUSIVITY(RHOPV(ISIDE),D_Z_N,MUV(ISIDE),MU_DNSV(ISIDE),TMP_ISIDE,D_Z_TEMP(ISIDE))
          ENDDO
          DIFF_FACE = CCM1*D_Z_TEMP(-1) + CCP1*D_Z_TEMP(0)
 
