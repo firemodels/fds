@@ -406,7 +406,7 @@ INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT
                                                  ! aligned with X1PLN plane.)
 
 ! Outer Geometric entity to use for interpolation to velocity/stress normal probe external points:
-LOGICAL :: IBM_PLANE_INTERPOLATION=.TRUE. ! If .TRUE. use external plane, if .FALSE. use external cubic volume.
+LOGICAL :: IBM_PLANE_INTERPOLATION=.FALSE. ! If .TRUE. use external plane, if .FALSE. use external cubic volume.
 
 ! CELL_INDEX counter related to GEOMS.
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
