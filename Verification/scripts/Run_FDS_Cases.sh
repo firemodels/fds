@@ -51,7 +51,7 @@ echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
 echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
-echo "-F - rerun 'regular' cases that failed"
+echo "-F - rerun 'regular' cases that failed with 'BAD TERMINATION' errors"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
@@ -281,6 +281,8 @@ if [ "$RERUN" == "1" ]; then
   grep -f badcaselist FDS_Cases.sh >> RERUN_Cases.sh
   nlines=`cat RERUN_Cases.sh | wc -l`
   if [ $nlines -gt 1 ]; then
+    echo warning the following cases failed with BAD TERMINATION errors. They were rerun
+    grep 'BAD TERMINATION' -A 2 */*.log 
     chmod +x RERUN_Cases.sh
     ./RERUN_Cases.sh
     if [ "$CHECKCASES" == "" ]; then
