@@ -99,7 +99,7 @@ function usage {
   echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -D n   - delay job submission by n seconds"
+  echo " -D n - delay the case submission by n seconds"
   echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
