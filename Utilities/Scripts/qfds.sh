@@ -99,6 +99,7 @@ function usage {
   echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
+  echo " -D n   - delay job submission by n seconds"
   echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
@@ -130,6 +131,7 @@ CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
 cd $CURDIR
+SLEEP=
 
 #*** define toplevel of the repos
 
@@ -238,7 +240,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ac:Cd:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
+while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -252,6 +254,9 @@ case $OPTION  in
    ;;
   d)
    dir="$OPTARG"
+   ;;
+  D)
+   SLEEP="sleep $OPTARG"
    ;;
   e)
    exe="$OPTARG"
@@ -884,6 +889,7 @@ chmod +x $scriptfile
 if [ "$SCRIPTFILES" != "" ]; then
   echo $(basename "$scriptfile") >> $SCRIPTFILES
 fi
+$SLEEP
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
