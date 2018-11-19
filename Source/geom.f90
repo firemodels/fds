@@ -26730,35 +26730,35 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
             CALL CUT_FACE_ARRAY_REALLOC(NM,NCUTFACE)
 
-            CUT_FACE(NCUTFACE)%NVERT  = NVERT
-            CUT_FACE(NCUTFACE)%NFACE  = NFACE
-            CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
-            CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NVERT  = NVERT
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE  = NFACE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
             CALL NEW_FACE_ALLOC(NM,NCUTFACE,NVERT,NFACE,NVERT+1)
 
             ! Vertices:
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I), YFACE(J-1), ZFACE(K-1) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I), YFACE(J  ), ZFACE(K-1) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I), YFACE(J  ), ZFACE(K  ) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I), YFACE(J-1), ZFACE(K  ) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I), YFACE(J-1), ZFACE(K-1) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I), YFACE(J  ), ZFACE(K-1) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I), YFACE(J  ), ZFACE(K  ) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I), YFACE(J-1), ZFACE(K  ) /)
 
             ! Centroid:
-            CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
             (/ XFACE(I  )+XFACE(I  ), YFACE(J-1)+YFACE(J  ), ZFACE(K-1)+ZFACE(K  ) /)
 
             ! Load Ordered nodes to CFELEM and geom properties:
-            CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
-            CUT_FACE(NCUTFACE)%AREA(NFACE) = DYCELL(J)*DZCELL(K)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE) = DYCELL(J)*DZCELL(K)
 
             ! Fields for cut-cell volume/centroid computation:
             ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXAREA(NFACE)   =   XFACE(I)*CUT_FACE(NCUTFACE)%AREA(NFACE)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXAREA(NFACE)   =   XFACE(I)*MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE)
             ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) =   XFACE(I)**2._EB*CUT_FACE(NCUTFACE)%AREA(NFACE)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) =   XFACE(I)**2._EB*MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE)
             ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
-            CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
             ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
-            CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
          ENDDO
       ENDDO
    ENDDO
@@ -26807,36 +26807,36 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
             CALL CUT_FACE_ARRAY_REALLOC(NM,NCUTFACE)
 
-            CUT_FACE(NCUTFACE)%NVERT  = NVERT
-            CUT_FACE(NCUTFACE)%NFACE  = NFACE
-            CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
-            CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NVERT  = NVERT
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE  = NFACE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
             CALL NEW_FACE_ALLOC(NM,NCUTFACE,NVERT,NFACE,NVERT+1)
 
 
             ! Vertices:
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I-1), YFACE(J), ZFACE(K-1) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I-1), YFACE(J), ZFACE(K  ) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I  ), YFACE(J), ZFACE(K  ) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I  ), YFACE(J), ZFACE(K-1) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I-1), YFACE(J), ZFACE(K-1) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I-1), YFACE(J), ZFACE(K  ) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I  ), YFACE(J), ZFACE(K  ) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I  ), YFACE(J), ZFACE(K-1) /)
 
             ! Centroid:
-            CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
             (/ XFACE(I-1)+XFACE(I  ), YFACE(J  )+YFACE(J  ), ZFACE(K-1)+ZFACE(K  ) /)
 
             ! Load Ordered nodes to CFELEM and geom properties:
-            CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
-            CUT_FACE(NCUTFACE)%AREA(NFACE) = DXCELL(I)*DZCELL(K)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE) = DXCELL(I)*DZCELL(K)
 
             ! Fields for cut-cell volume/centroid computation:
             ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
             ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
             ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
-            CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = YFACE(J)**2._EB*CUT_FACE(NCUTFACE)%AREA(NFACE)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = YFACE(J)**2._EB*MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE)
             ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
-            CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = 0._EB
          ENDDO
       ENDDO
    ENDDO
@@ -26885,36 +26885,36 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
 
             CALL CUT_FACE_ARRAY_REALLOC(NM,NCUTFACE)
 
-            CUT_FACE(NCUTFACE)%NVERT  = NVERT
-            CUT_FACE(NCUTFACE)%NFACE  = NFACE
-            CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
-            CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NVERT  = NVERT
+            MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE  = NFACE
+            MESHES(NM)%CUT_FACE(NCUTFACE)%IJK(1:MAX_DIM+1) = (/ I, J, K, X1AXIS /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%STATUS = IBM_GASPHASE
             CALL NEW_FACE_ALLOC(NM,NCUTFACE,NVERT,NFACE,NVERT+1)
 
 
             ! Vertices:
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I-1), YFACE(J-1), ZFACE(K) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I  ), YFACE(J-1), ZFACE(K) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I  ), YFACE(J  ), ZFACE(K) /)
-            CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I-1), YFACE(J  ), ZFACE(K) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,1) = (/ XFACE(I-1), YFACE(J-1), ZFACE(K) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,2) = (/ XFACE(I  ), YFACE(J-1), ZFACE(K) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,3) = (/ XFACE(I  ), YFACE(J  ), ZFACE(K) /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZVERT(IAXIS:KAXIS,4) = (/ XFACE(I-1), YFACE(J  ), ZFACE(K) /)
 
             ! Centroid:
-            CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
+            MESHES(NM)%CUT_FACE(NCUTFACE)%XYZCEN(IAXIS:KAXIS,NFACE) = 0.5_EB* &
             (/ XFACE(I-1)+XFACE(I  ), YFACE(J-1)+YFACE(J  ), ZFACE(K  )+ZFACE(K  ) /)
 
             ! Load Ordered nodes to CFELEM and geom properties:
-            CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
-            CUT_FACE(NCUTFACE)%AREA(NFACE) = DXCELL(I)*DYCELL(J)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1:NVERT+1,NFACE) = (/ NVERT, 1, 2, 3, 4 /)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE) = DXCELL(I)*DYCELL(J)
 
             ! Fields for cut-cell volume/centroid computation:
             ! dot(i,nc)*int(x)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXAREA(NFACE)   = 0._EB
             ! dot(i,nc)*int(x^2)dA, where nc=j => dot(i,nc)=0:
-            CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%INXSQAREA(NFACE) = 0._EB
             ! dot(j,nc)*int(y^2)dA, where y=yface(J) constant nc=j:
-            CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
+            MESHES(NM)%CUT_FACE(NCUTFACE)%JNYSQAREA(NFACE) = 0._EB
             ! dot(k,nc)*int(z^2)dA, where nc=j => dot(k,nc)=0:
-            CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = ZFACE(K)**2._EB*CUT_FACE(NCUTFACE)%AREA(NFACE)
+            MESHES(NM)%CUT_FACE(NCUTFACE)%KNZSQAREA(NFACE) = ZFACE(K)**2._EB*MESHES(NM)%CUT_FACE(NCUTFACE)%AREA(NFACE)
          ENDDO
       ENDDO
    ENDDO
@@ -28182,13 +28182,13 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    IF (ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
 
    ! Here we have to deallocate if no geometric entities were defined:
-   ! EDGE_CROSS and CUT_EDGE are deallocated:
+   ! EDGE_CROSS is deallocated:
    !IF (MESHES(NM)%N_EDGE_CROSS == 0) THEN
    IF (ALLOCATED(MESHES(NM)%EDGE_CROSS)) DEALLOCATE(MESHES(NM)%EDGE_CROSS)
    !ENDIF
-   !IF (MESHES(NM)%N_CUTEDGE_MESH == 0) THEN
-   IF (ALLOCATED(MESHES(NM)%CUT_EDGE)) DEALLOCATE(MESHES(NM)%CUT_EDGE)
-   !ENDIF
+   IF (MESHES(NM)%N_CUTEDGE_MESH == 0) THEN
+      IF (ALLOCATED(MESHES(NM)%CUT_EDGE)) DEALLOCATE(MESHES(NM)%CUT_EDGE)
+   ENDIF
    IF (MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_BBCUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH == 0) THEN
       IF (ALLOCATED(MESHES(NM)%CUT_FACE)) DEALLOCATE(MESHES(NM)%CUT_FACE)
    ENDIF
