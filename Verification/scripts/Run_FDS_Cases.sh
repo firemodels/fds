@@ -40,6 +40,7 @@ WAIT=
 EXE=
 CHECKCASES=
 RERUN=
+DELAY=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -49,6 +50,7 @@ echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
+echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
 echo "-F - rerun 'regular' cases that failed with 'BAD TERMINATION' errors"
@@ -113,7 +115,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:Cde:D:Fghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
@@ -128,6 +130,9 @@ case $OPTION in
   d)
    DEBUG=_db
    SINGLE="1"
+   ;;
+  D)
+   DELAY="-D $OPTARG"
    ;;
   e)
    EXE="$OPTARG"
@@ -214,7 +219,7 @@ else
   export FDSMPI=$full_filepath
 fi
 
-export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"
+export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION $DELAY"
 
 if [ "$resource_manager" == "SLURM" ]; then
    export RESOURCE_MANAGER="SLURM"
