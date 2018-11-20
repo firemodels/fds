@@ -5371,9 +5371,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   SDV%VALUE_1 = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                                    OPT_LP_INDEX=LP_INDEX)
                ELSEIF (DV%CFACE_INDEX>0) THEN
-                  ! It should not be possible to tie a DEVC directly to a CFACE.
-                  ! If you want values from a specific CFACE, give it a unique SURF_ID and apply this SURF_ID to the DEVC output.
-                  SDV%VALUE_1 = -1000._EB
+                  SDV%VALUE_1 = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                   OPT_CFACE_INDEX=DV%CFACE_INDEX)
                ENDIF
 
             CASE DEFAULT SOLID_STATS_SELECT
