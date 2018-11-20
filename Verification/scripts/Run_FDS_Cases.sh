@@ -39,6 +39,8 @@ GEOMCASES=1
 WAIT=
 EXE=
 CHECKCASES=
+RERUN=
+DELAY=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
@@ -48,8 +50,10 @@ echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
 echo "-d - use debug version of FDS"
+echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
+echo "-F - rerun 'regular' cases that failed with 'BAD TERMINATION' errors"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
@@ -111,13 +115,14 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:Cde:D:ghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
    BENCHMARK=1
    GEOMCASES=
    REGULAR=
+   RERUN=
    ;;
   C)
    CHECKCASES="1"
@@ -126,13 +131,23 @@ case $OPTION in
    DEBUG=_db
    SINGLE="1"
    ;;
+  D)
+   DELAY="-D $OPTARG"
+   ;;
   e)
    EXE="$OPTARG"
+   ;;
+  F)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=1
    ;;
   g)
    BENCHMARK=
    GEOMCASES=1
    REGULAR=
+   RERUN=
    ;;
   h)
    usage;
@@ -163,6 +178,7 @@ case $OPTION in
    BENCHMARK=
    GEOMCASES=1
    REGULAR=1
+   RERUN=
    ;;
   s)
    export STOPFDS=1
@@ -203,7 +219,7 @@ else
   export FDSMPI=$full_filepath
 fi
 
-export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION"
+export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION $DELAY"
 
 if [ "$resource_manager" == "SLURM" ]; then
    export RESOURCE_MANAGER="SLURM"
@@ -259,6 +275,24 @@ if [ "$GEOMCASES" == "1" ]; then
   ./GEOM_Cases.sh
   if [ "$CHECKCASES" == "" ]; then
     echo FDS geometry cases submitted
+  fi
+fi
+
+cd $CURDIR
+cd ..
+if [ "$RERUN" == "1" ]; then
+  grep 'BAD TERMINATION' */*.log | awk -F':' '{print($1)}' | sort -u | awk -F'/' '{print($2)}' | awk -F'.' '{print($1".fds")}' > badcaselist
+  echo "#!/bin/bash" > RERUN_Cases.sh
+  grep -f badcaselist FDS_Cases.sh >> RERUN_Cases.sh
+  nlines=`cat RERUN_Cases.sh | wc -l`
+  if [ $nlines -gt 1 ]; then
+    echo warning the following cases failed with BAD TERMINATION errors. They were rerun
+    grep 'BAD TERMINATION' -A 2 */*.log 
+    chmod +x RERUN_Cases.sh
+    ./RERUN_Cases.sh
+    if [ "$CHECKCASES" == "" ]; then
+      echo "FDS cases that failed with BAD TERMINATION errors re-submitted"
+    fi
   fi
 fi
 
