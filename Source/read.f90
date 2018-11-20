@@ -12491,10 +12491,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
-      IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. (DV%SPATIAL_STATISTIC=='null'.OR.DV%LINE>0) .AND. DV%INIT_ID=='null') THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Specify orientation of DEVC ',TRIM(DV%ID),' using the parameter IOR'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
+      ! This check is commented as DEVCs with IOR==0 can be related to CFACES. The test that IOR/=0 for WALL CELLS
+      ! is done in init.f90 routine INITIALIZE_DEVICES (IOR==0 but no CFACE found).
+      !IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. (DV%SPATIAL_STATISTIC=='null'.OR.DV%LINE>0) .AND. DV%INIT_ID=='null') !THEN
+      !   WRITE(MESSAGE,'(A,A,A)') 'ERROR: Specify orientation of DEVC ',TRIM(DV%ID),' using the parameter IOR'
+      !   CALL SHUTDOWN(MESSAGE) ; RETURN
+      !ENDIF
 
       IF (QUANTITY_INDEX < 0 .AND. (DV%SPATIAL_STATISTIC=='MASS MEAN' .OR. DV%SPATIAL_STATISTIC=='VOLUME MEAN' .OR. &
                                     DV%SPATIAL_STATISTIC=='VOLUME INTEGRAL' .OR. DV%SPATIAL_STATISTIC=='MASS INTEGRAL' .OR. &
