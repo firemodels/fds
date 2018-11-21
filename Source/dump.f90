@@ -3717,7 +3717,7 @@ ISOF_LOOP: DO N=1,N_ISOF
       ENDDO
    ENDDO
 
-   ! Fill up xxxxx2 arrays if the isosurface is colored with QUANTITY2
+   ! Fill up QUANTITY2 and QQ2 arrays if the isosurface is colored with a second quantity
 
    IF ( IS%INDEX2 /= -1 ) THEN
       HAVE_ISO2 = 1

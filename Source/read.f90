@@ -12970,7 +12970,7 @@ READ_ISOF_LOOP: DO N=1,N_ISOF
                            QUANTITY,'null',SPEC_ID,'null','null','null','null','null',-1._EB,I_DUM(7))
 
    IF ( QUANTITY2 /= 'null' ) THEN
-      CALL GET_QUANTITY_INDEX(IS%SMOKEVIEW_LABEL,IS%SMOKEVIEW_BAR_LABEL,IS%INDEX2,I_DUM(1), &
+      CALL GET_QUANTITY_INDEX(IS%SMOKEVIEW_LABEL2,IS%SMOKEVIEW_BAR_LABEL2,IS%INDEX2,I_DUM(1), &
                            IS%Y_INDEX2,IS%Z_INDEX2,I_DUM(2),I_DUM(3),I_DUM(4),I_DUM(5),I_DUM(6),'ISOF', &
                            QUANTITY2,'null',SPEC_ID2,'null','null','null','null','null',-1._EB,I_DUM(7))
    ENDIF
