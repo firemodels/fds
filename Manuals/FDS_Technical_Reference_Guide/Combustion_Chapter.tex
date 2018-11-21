@@ -385,9 +385,9 @@ If $Y_{\OTWO,ijk}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alp
 
 There is a second constraint on the reaction in this simple model; that is, extinction is assumed if
 \be
-   \dot{q}_{ijk}''' < \frac{20}{(\dx \, \dy \, \dz)^{1/3}} \; \frac{\mathrm{kW}}{\mathrm{m}^3}
+   \dot{q}_{ijk}''' < \frac{20}{(\dx \, \dy \, \dz)^{1/3}}\, \left( \frac{T_{\OI}-T_{ijk}}{T_{\OI}-T_\infty} \right) \; \frac{\mathrm{kW}}{\mathrm{m}^3}
 \ee
-where $\dot{q}_{ijk}'''$ is the potential heat release rate per unit volume in the grid cell of dimension $\dx \, \dy \, \dz$. The value of 20~kW/m$^2$ has not been rigorously evaluated. It merely prevents spurious combustion of diluted fuel gas that finds pockets of oxygen in an otherwise oxygen-limited environment.
+where $\dot{q}_{ijk}'''$ is the potential heat release rate per unit volume in the grid cell of volume $\dx \, \dy \, \dz$. The value of 20~kW/m$^2$ has not been rigorously evaluated. It merely prevents spurious combustion of diluted fuel gas that finds pockets of oxygen in an otherwise oxygen-limited environment. The temperature-dependent function on the right hand side of the inequality is the same linear function as that in Eq.~(\ref{extinction_model}). This function ensures that both fuel and oxygen can be totally consumed in a hot gas layer during flashover.
 
 \subsection{Extinction Based on Both Fuel and Oxygen}
 

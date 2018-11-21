@@ -1963,9 +1963,10 @@ M => MESHES(NM)
 DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
-   IF (DV%OUTPUT_INDEX>=0) CYCLE DEVICE_LOOP
 
-   IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a wall cell
+   IF (DV%OUTPUT_INDEX>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
+
+   IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a WALL cell or CFACE
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
       II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
@@ -1975,52 +1976,40 @@ DEVICE_LOOP: DO N=1,N_DEVC
       JJG = JJ
       KKG = KK
       IOR = DV%IOR
+      IW  = 0
+      ICF = 0
 
-      IF (IOR == 0) THEN ! Assume looking for CFACE:
+      IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
+         ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
+         ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
+         ! currently assumes II and IIG, etc., are on the same mesh
+         SELECT CASE (IOR)
+            CASE ( 1); DO IIG=II,IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-1); DO IIG=II,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 2); DO JJG=JJ,JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-2); DO JJG=JJ,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 3); DO KKG=KK,KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-3); DO KKG=KK,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+         END SELECT
+      ENDIF
 
-         CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
+      IF (IOR/=0) CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
-         IF (ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
-            WRITE(LU_ERR,'(A,I0,A,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,', ID = ',DV%ID
-            WRITE(LU_ERR,'(A)') 'FDS cannot determine which GEOM boundary cell to assign.'
-            WRITE(LU_ERR,'(A)') '- If you are not using &GEOMs, make sure you provide IOR for the device.'
-            WRITE(LU_ERR,'(A)') &
-            '- If you are using &GEOMs, make sure the DEVC is located within one cell distance of the GEOM surface.'
-            STOP_STATUS = SETUP_STOP
-            RETURN
-         ELSE
-            DV%CFACE_INDEX = ICF
-            SURF_INDEX = M%CFACE(ICF)%SURF_INDEX
-         ENDIF
-         IF (ICF==0) SURF_INDEX = DV%SURF_INDEX
+      IF (IW==0)  CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
 
-      ELSE ! Wall Cells:
-         IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
-            ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
-            ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
-            ! currently assumes II and IIG, etc., are on the same mesh
-            SELECT CASE (IOR)
-               CASE ( 1); DO IIG=II,IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-               CASE (-1); DO IIG=II,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-               CASE ( 2); DO JJG=JJ,JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-               CASE (-2); DO JJG=JJ,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-               CASE ( 3); DO KKG=KK,KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-               CASE (-3); DO KKG=KK,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            END SELECT
-         ENDIF
-
-         CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
-
-         IF (IW==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
-            WRITE(LU_ERR,'(A,I0,A,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,', ID = ',DV%ID
-            WRITE(LU_ERR,'(A)') 'FDS cannot determine which boundary cell to assign.'
-            STOP_STATUS = SETUP_STOP
-            RETURN
-         ELSE
-            DV%WALL_INDEX = IW
-            SURF_INDEX = M%WALL(IW)%SURF_INDEX
-         ENDIF
-         IF (IW==0) SURF_INDEX = DV%SURF_INDEX
+      IF (IW==0 .AND. ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
+         WRITE(LU_ERR,'(A,I0,A,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,', ID = ',TRIM(DV%ID)
+         WRITE(LU_ERR,'(A)') 'FDS cannot determine which boundary cell to assign.'
+         STOP_STATUS = SETUP_STOP
+         RETURN
+      ELSEIF (IW>0) THEN
+         DV%WALL_INDEX = IW
+         SURF_INDEX = M%WALL(IW)%SURF_INDEX
+      ELSEIF (ICF>0) THEN
+         DV%CFACE_INDEX = ICF
+         SURF_INDEX = M%CFACE(ICF)%SURF_INDEX
+      ELSE
+         SURF_INDEX = DV%SURF_INDEX
       ENDIF
 
    ELSE ! Assume the device is tied to a particle
