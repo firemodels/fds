@@ -912,10 +912,11 @@ ENDDO
 ALLOCATE(M%IBLK(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
 CALL ChkMemErr('DUMP','IBLK',IZERO)
 ALLOCATE(M%QQ(0:IBP1,0:JBP1,0:KBP1,5),STAT=IZERO)
-ALLOCATE(M%QQ_C(0:IBP1,0:JBP1,0:KBP1,1),STAT=IZERO)
 CALL ChkMemErr('DUMP','QQ',IZERO)
+ALLOCATE(M%QQ2(0:IBP1,0:JBP1,0:KBP1,1),STAT=IZERO)
+CALL ChkMemErr('DUMP','QQ2',IZERO)
 M%QQ=0._FB
-M%QQ_C=0._FB
+M%QQ2=0._FB
 
 WRITE_XYZ_FILE: IF (WRITE_XYZ .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    OPEN(LU_XYZ(NM),FILE=FN_XYZ(NM),FORM='UNFORMATTED',STATUS='REPLACE')
@@ -3637,8 +3638,8 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: SUM
 REAL(FB) :: STIME
-INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO_C
-REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY_C, B,S
+INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR, HAVE_ISO2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY,QUANTITY2, B,S
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
@@ -3687,7 +3688,7 @@ ISOF_LOOP: DO N=1,N_ISOF
    IS => ISOSURFACE_FILE(N)
    ERROR = 0
    ISOOFFSET = 1
-   HAVE_ISO_C = 0
+   HAVE_ISO2 = 0
 
    ! Fill up the dummy array QUANTITY with the appropriate gas phase output
 
@@ -3711,19 +3712,19 @@ ISOF_LOOP: DO N=1,N_ISOF
          ENDDO
       ENDDO
    ENDDO
-   
-   ! Fill up xxxxx_C arrays if the isosurface is colored with QUANTITY_C
-   
-   IF ( IS%INDEX_C /= -1 ) THEN
-      HAVE_ISO_C = 1
-      QUANTITY_C => WORK4
-      
-   ! Fill up the dummy array QUANTITY_C with the appropriate gas phase output
+
+   ! Fill up xxxxx2 arrays if the isosurface is colored with QUANTITY2
+
+   IF ( IS%INDEX2 /= -1 ) THEN
+      HAVE_ISO2 = 1
+      QUANTITY2 => WORK4
+
+   ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               QUANTITY_C(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX_C,0,IS%Y_INDEX_C,IS%Z_INDEX_C,0,IS%VELO_INDEX_C,0,0,0,0,T,DT,NM)
+               QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0,T,DT,NM)
             ENDDO
          ENDDO
       ENDDO
@@ -3733,16 +3734,16 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               QQ_C(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY_C(I,J,K)*B(I,J,K)        + QUANTITY_C(I+1,J,K)*B(I+1,J,K)+ &
-                                                  QUANTITY_C(I,J,K+1)*B(I,J,K+1)    + QUANTITY_C(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                                  QUANTITY_C(I,J+1,K)*B(I,J+1,K)    + QUANTITY_C(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                                  QUANTITY_C(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY_C(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+               QQ2(I+1,J+1,K+1,1) = REAL(S(I,J,K)*(QUANTITY2(I,J,K)*B(I,J,K)        + QUANTITY2(I+1,J,K)*B(I+1,J,K)+ &
+                                                   QUANTITY2(I,J,K+1)*B(I,J,K+1)    + QUANTITY2(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                                   QUANTITY2(I,J+1,K)*B(I,J+1,K)    + QUANTITY2(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                                   QUANTITY2(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY2(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
             ENDDO
          ENDDO
       ENDDO
    ENDIF
-   
-   CALL ISO_TO_FILE(LU_ISOF(N,NM),STIME,QQ,QQ_C,HAVE_ISO_C,&
+
+   CALL ISO_TO_FILE(LU_ISOF(N,NM),STIME,QQ,QQ,HAVE_ISO2,&
         IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
 
 ENDDO ISOF_LOOP
