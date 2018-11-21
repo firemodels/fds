@@ -2501,7 +2501,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_DISCRETIZATION, SCARC_MULTIGRID, SCARC_SMOOT
                 SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY
 
 REAL(EB), INTENT(IN) :: DT
-INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP
+INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT
 CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,OUTFORM
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
 
@@ -2531,18 +2531,22 @@ WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
 IF (APPEND) RETURN
 
 IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
+   CELL_COUNT = 0
    MESH_LOOP: DO NM=1,NMESHES
       M => MESHES(NM)
       WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Number of Grid Cells          ',M%IBAR*M%JBAR*M%KBAR
+      CELL_COUNT = CELL_COUNT + M%IBAR*M%JBAR*M%KBAR
       WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
    ENDDO MESH_LOOP
+   WRITE(LU_OUTPUT,'(/A,I9)')    'Total Number of Grid Cells     ',CELL_COUNT
 ENDIF
 
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
