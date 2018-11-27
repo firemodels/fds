@@ -7795,7 +7795,7 @@ The {\ct ISOF} (``ISOsurface File'') namelist group creates three-dimensional an
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
 where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
-The parameter {\ct QUANTITY2}\ can be used to color the isosurface with a second quantity.
+The parameter {\ct QUANTITY2}\ can be used to color the isosurface.
 For example, the line:
 \begin{lstlisting}
 &ISOF QUANTITY='MIXTURE FRACTION' , VALUE(1)=0.05, QUANTITY2='TEMPERATURE' /
