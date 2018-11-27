@@ -40071,7 +40071,10 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME, N_VERTS, N_FACES, N_VOLUS)
       ENDIF
    ENDDO
 
-   !CALL GEOMCLIPS
+ ! remove this if statement when GEOMCLIPS is ready for use
+   IF ( I .EQ. 0 ) THEN
+      CALL GEOMCLIPS
+   ENDIF
 
    CALL GEOM2TEXTURE
 
