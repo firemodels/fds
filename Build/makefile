@@ -94,8 +94,8 @@ endif
 endif # OS test
 endif # MKLROOT test
 
-obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
-          ieva.o pois.o scrc.o evac.o gsmv.o geom.o radi.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
+obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o gsmv.o  smvv.o irad.o turb.o soot.o\
+          ieva.o pois.o scrc.o evac.o geom.o radi.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o velo.o pres.o init.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -379,7 +379,7 @@ data.o : prec.o func.o cons.o
 func.o : prec.o cons.o type.o mesh.o devc.o
 turb.o : func.o prec.o cons.o mesh.o
 soot.o : prec.o mesh.o cons.o func.o turb.o
-smvv.o : prec.o func.o
+smvv.o : geom.o prec.o func.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 samr.o : prec.o cons.o mesh.o turb.o
 gsmv.o : func.o prec.o cons.o mesh.o
