@@ -7795,6 +7795,12 @@ The {\ct ISOF} (``ISOsurface File'') namelist group creates three-dimensional an
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
 where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
+The parameter {\ct QUANTITY2}\ can be used to color the isosurface with a second quantity.
+For example, the line:
+\begin{lstlisting}
+&ISOF QUANTITY='MIXTURE FRACTION' , VALUE(1)=0.05, QUANTITY2='TEMPERATURE' /
+\end{lstlisting}
+draws a surface where the mixture fraction has a value of 0.05 and colors the surface using temperature.
 The parameter {\ct SKIP=n}\ (default: 1) can also be used to reduce data by skipping {\ct n-1}\ values in each direction.
 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
@@ -9705,11 +9711,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct QUANTITY}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
+{\ct QUANTITY2}             & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct REDUCE\_TRIANGLES}     & Integer       & Reference~\cite{Smokeview_Users_Guide}    &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
+{\ct SPEC\_ID2}             & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct SKIP}                  & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct VELO\_INDEX}           & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
+{\ct VELO\_INDEX2}          & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
 \end{longtable}
 
 
