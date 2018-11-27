@@ -41,7 +41,8 @@ INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20
 ! Hardwired length of most labels
 
 INTEGER, PARAMETER :: LABEL_LENGTH=60, MESSAGE_LENGTH=200
-INTEGER, PARAMETER :: MESH_STRING_LENGTH=LABEL_LENGTH + 70 ! Size of M%STRING to accomodate SMV SLCF lines data + ~60 character SLCF ID.
+! Size of M%STRING to accomodate SMV SLCF lines data + ~60 character SLCF ID.
+INTEGER, PARAMETER :: MESH_STRING_LENGTH=LABEL_LENGTH + 70
 
 ! Hardwired length of output quantities
 
