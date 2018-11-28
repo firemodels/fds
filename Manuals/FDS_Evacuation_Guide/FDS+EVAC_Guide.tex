@@ -1710,15 +1710,8 @@ out.  Just one person was enough to trigger the use of an emergency
 exit.
 
 
-Many prescriptive fire codes implicitly assume that the total exit
-width of buildings is used in egress.  Herding behavior, as well as
-people's tendency to favor the familiar routes, may easily lead to
-outcomes that contradict with these assumptions.  The exit selection
-algorithm of FDS+Evac was modified so that these kinds of phenomena
-could be modeled.  Three new agent types were introduced in FDS+Evac
-so now there are four types: conservative type, active type, follower
-type, and herding type.  The conservative type is the original agent
-type in FDS+Evac.
+Many prescriptive fire codes implicitly assume that the total exit capacities of buildings are evenly used in egress.  Herding behavior, as well as people's tendency to favor the familiar routes, may easily lead to
+outcomes against these assumptions, and thus a common scenario is that some exits are overcrowded while others are underused.  In order to exhibit these kinds of phenomena the exit selection algorithm of FDS+Evac was modified and three new agent types were introduced.  So now there are four types of agents: conservative type, active type, herding type and follower type.  The conservative type is the original agent type used in the early version of FDS+Evac.  
 
 
 The exit selection algorithm of FDS+Evac is based on a game theoretic
