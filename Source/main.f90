@@ -2869,7 +2869,7 @@ TNOW = CURRENT_TIME()
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (MYID>0) THEN
       CALL MPI_SEND(MESHES(NM)%N_STRINGS,1,MPI_INTEGER,0,1,MPI_COMM_WORLD,IERR)
-      IF (MESHES(NM)%N_STRINGS>0) CALL MPI_SEND(MESHES(NM)%STRING(1),MESHES(NM)%N_STRINGS*80,MPI_CHARACTER,0,NM, &
+      IF (MESHES(NM)%N_STRINGS>0) CALL MPI_SEND(MESHES(NM)%STRING(1),MESHES(NM)%N_STRINGS*MESH_STRING_LENGTH,MPI_CHARACTER,0,NM, &
                                                 MPI_COMM_WORLD,IERR)
    ENDIF
 ENDDO
@@ -2885,7 +2885,8 @@ IF (MYID==0) THEN
          CALL MPI_RECV(N_STRINGS_DUM,1,MPI_INTEGER,PROCESS(NOM),1,MPI_COMM_WORLD,STATUS,IERR)
          IF (N_STRINGS_DUM>0) THEN
             ALLOCATE(STRING_DUM(N_STRINGS_DUM))
-            CALL MPI_RECV(STRING_DUM(1),N_STRINGS_DUM*80,MPI_CHARACTER,PROCESS(NOM),NOM,MPI_COMM_WORLD,STATUS,IERR)
+            CALL MPI_RECV(STRING_DUM(1),N_STRINGS_DUM*MESH_STRING_LENGTH, &
+            MPI_CHARACTER,PROCESS(NOM),NOM,MPI_COMM_WORLD,STATUS,IERR)
          ENDIF
       ELSE
          N_STRINGS_DUM = MESHES(NOM)%N_STRINGS
@@ -3095,19 +3096,19 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
       ENDIF
    ENDDO
 
-   ! Each DEViCe has 0 or more SUBDEVICEs. These SUBDEVICEs contain the values of the DEViCe on the meshes controlled 
-   ! by the copy of the DEViCe controlled by this MPI process. Each MPI process has a copy of every DEViCe, but only 
+   ! Each DEViCe has 0 or more SUBDEVICEs. These SUBDEVICEs contain the values of the DEViCe on the meshes controlled
+   ! by the copy of the DEViCe controlled by this MPI process. Each MPI process has a copy of every DEViCe, but only
    ! the MPI process that controls the meshes has a copy of the DEViCe for which SUBDEVICEs have been allocated.
 
-   ! In the following loop, for OP_INDEX=1, we add together VALUE_1 and possibly VALUE_2 for all SUBDEVICEs (i.e. meshes) 
-   ! allocated by the copy of the DEViCe associated with the current MPI process, MYID. Then we do an MPI_ALLREDUCE that 
-   ! adds the VALUE_1 and VALUE_2 from other SUBDEVICEs allocated by the copies of the DEViCE stored by the other MPI processes. 
+   ! In the following loop, for OP_INDEX=1, we add together VALUE_1 and possibly VALUE_2 for all SUBDEVICEs (i.e. meshes)
+   ! allocated by the copy of the DEViCe associated with the current MPI process, MYID. Then we do an MPI_ALLREDUCE that
+   ! adds the VALUE_1 and VALUE_2 from other SUBDEVICEs allocated by the copies of the DEViCE stored by the other MPI processes.
    ! For OP_INDEX=2 and 3, we take the MIN or MAX insteading of adding VALUE_1 togheter.
 
    OPERATION_LOOP: DO OP_INDEX=1,3
       IF (OP_INDEX==2 .AND. .NOT.MIN_DEVICES_EXIST) CYCLE OPERATION_LOOP
       IF (OP_INDEX==3 .AND. .NOT.MAX_DEVICES_EXIST) CYCLE OPERATION_LOOP
-      SELECT CASE(OP_INDEX) 
+      SELECT CASE(OP_INDEX)
          CASE(1) ; TC_LOC =  0._EB    ; MPI_OP_INDEX = MPI_SUM ; DIM_FAC = 3
          CASE(2) ; TC_LOC =  1.E10_EB ; MPI_OP_INDEX = MPI_MIN ; DIM_FAC = 1
          CASE(3) ; TC_LOC = -1.E10_EB ; MPI_OP_INDEX = MPI_MAX ; DIM_FAC = 1
