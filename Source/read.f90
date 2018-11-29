@@ -13093,8 +13093,7 @@ MESH_LOOP: DO NM=1,NMESHES
       CALL CHECK_XB(XB)
 
       ! Define scalar quantity slices of type "INCLUDE_GEOM" if they cross the bounding box of a GEOM
-      ! being handled. Careful here: we might need to check if SLICE ends up being INCLUDE_GEOM in some
-      ! process,t and AllReduce this information to all processes handling the slice.
+      ! being handled.
       IF (.NOT. VECTOR) THEN
          DO IG=1,N_GEOMETRY
             IF (XB(1)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,IAXIS) .OR. &
@@ -13103,7 +13102,7 @@ MESH_LOOP: DO NM=1,NMESHES
                 XB(4)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,JAXIS) .OR. &
                 XB(5)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,KAXIS) .OR. &
                 XB(6)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,KAXIS)) CYCLE ! Slice not crossing GEOM BBox.
-             SLICETYPE = 'INCLUDE_GEOM'
+            IF(TRIM(SLICETYPE)=='STRUCTURED') SLICETYPE = 'INCLUDE_GEOM'
          ENDDO
       ENDIF
 
