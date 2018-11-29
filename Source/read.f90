@@ -12995,7 +12995,7 @@ SUBROUTINE READ_SLCF
 
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
 REAL(EB) :: AGL_SLICE
-INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,IOR
+INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,IOR,IG
 LOGICAL :: VECTOR,CELL_CENTERED, FACE_CENTERED, FIRE_LINE, EVACUATION,LEVEL_SET_FIRE_LINE
 CHARACTER(LABEL_LENGTH) :: QUANTITY,SPEC_ID,PART_ID,QUANTITY2,PROP_ID,REAC_ID,SLICETYPE,MATL_ID
 REAL(EB), PARAMETER :: TOL=1.E-10_EB
@@ -13094,6 +13094,21 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDIF
 
       CALL CHECK_XB(XB)
+
+      ! Define scalar quantity slices of type "INCLUDE_GEOM" if they cross the bounding box of a GEOM
+      ! being handled. Careful here: we might need to check if SLICE ends up being INCLUDE_GEOM in some
+      ! process,t and AllReduce this information to all processes handling the slice.
+      IF (.NOT. VECTOR) THEN
+         DO IG=1,N_GEOMETRY
+            IF (XB(1)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,IAXIS) .OR. &
+                XB(2)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,IAXIS) .OR. &
+                XB(3)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,JAXIS) .OR. &
+                XB(4)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,JAXIS) .OR. &
+                XB(5)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,KAXIS) .OR. &
+                XB(6)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,KAXIS)) CYCLE ! Slice not crossing GEOM BBox.
+             SLICETYPE = 'INCLUDE_GEOM'
+         ENDDO
+      ENDIF
 
       XB(1) = MAX(XB(1),XS)
       XB(2) = MIN(XB(2),XF)
