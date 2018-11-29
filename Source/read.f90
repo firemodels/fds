@@ -13132,6 +13132,7 @@ MESH_LOOP: DO NM=1,NMESHES
       VECTORLOOP: DO ITER=1,NITER
          N = N + 1
          SL=>SLICE(N)
+         SL%SLCF_INDEX=NN
          SL%ID = ID
          SL%SLICETYPE = TRIM(SLICETYPE)
          SL%IOR = IOR
