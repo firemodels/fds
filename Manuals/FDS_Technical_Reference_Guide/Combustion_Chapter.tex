@@ -377,11 +377,17 @@ Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler} includes $X_{\OI}$ and 
 \subsection{Extinction Based Mainly on Oxygen Concentration}
 \label{o2_based_model}
 
-The simple extinction model (referred to as {\ct 'EXTINCTION 1'} in the FDS input file) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen mass fraction that is a simple linear function of the cell bulk temperature, $T_{ijk}$:
+The first of two optional extinction models (referred to as {\ct 'EXTINCTION 1'} in the FDS input file) linearizes Eq.~(\ref{YO2eq}) to form a limiting oxygen mass fraction that is a piecewise-linear function of the cell bulk temperature, $T_{ijk}$:
 \be
-   Y_{\OTWO,\lim}(T_{ijk}) = Y_{\OI} \, \left( \frac{T_{\OI}-T_{ijk}}{T_{\OI}-T_\infty} \right)  \label{extinction_model}
+   Y_{\OTWO,\lim}(T_{ijk}) = \left\{ \begin{array}{c@{\quad \quad}l} Y_{\OI} \, \left( \frac{T_{\OI}-T_{ijk}}{T_{\OI}-T_\infty} \right) & T_{ijk}<T_{\rm cut} \\[.1in]  0 &  T_{ijk} \ge T_{\rm cut} \end{array} \right.  \label{extinction_model}
 \ee
 If $Y_{\OTWO,ijk}<Y_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell at that time step. For a control volume at a temperature of \SI{300}{K}, i.e., near room temperature, the limiting oxygen mass fraction is approximately 0.14.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+
+The cut-off temperature, $T_{\rm cut}$, in Eq.~(\ref{extinction_model}) is needed for simulations in which the characteristic grid cell size, $\dx$, is much larger than 1~cm. In such cases, the combustion occurs within a fraction of the grid cell and its energy cannot raise the cell bulk temperature to the critical value. This cut-off temperature is a weighted average of the critical flame temperature, $T_{\OI}$, and 600~$^\circ$C, a temperature at which unburned fuel and oxygen within the hot gas layer of a compartment mix and burn:
+\be
+   T_{\rm cut} = f \, T_{\OI} + ( 1 - f ) \, 873 \; \mathrm{K} \quad ; \quad f = \frac{\min(1 \; \mathrm{cm},\dx)}{\dx}
+\ee
+Measurements of Pitts~\cite{Pitts:1995}, Bundy~\cite{Bundy:1}, and others, have shown that the upper layer oxygen concentration drops to zero in flashover compartment fire experiments when the temperature increases above approximately 600~$^\circ$C.
 
 There is a second constraint on the reaction in this simple model; that is, extinction is assumed if
 \be
@@ -391,7 +397,7 @@ where $\dot{q}_{ijk}'''$ is the potential heat release rate per unit volume in t
 
 \subsection{Extinction Based on Both Fuel and Oxygen}
 
-There is a second extinction model in FDS, referred to as {\ct 'EXTINCTION 2'}, that considers both the oxygen and the fuel content of a given grid cell at the start of a time step. If the potential heat release from the reactants cannot raise the temperature of the cell above the empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning and the end of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
+The second optional extinction model in FDS, referred to as {\ct 'EXTINCTION 2'}, is intended for simulations where the grid cell size is on the order of 1~cm or less. The model considers both the oxygen and the fuel content of a given grid cell at the start of a time step. If the potential heat release from the reactants cannot raise the temperature of the cell above the empirically determined critical flame temperature, $T_{\rm CFT}$, combustion is suppressed.  Consider the simple reaction $\mbox{Fuel} + \mbox{Air} \rightarrow \mbox{Products}$. The mass fractions of lumped species Fuel, Air, and Products in the cell at the beginning and the end of the time step are $[Z_{\rm F}^0, Z_{\rm A}^0, Z_{\rm P}^0]$ and $[Z_{\rm F}, Z_{\rm A}, Z_{\rm P}]$, respectively. The Products include the products of combustion as well as diluents like argon or water vapor from droplet evaporation. Define a modified form of the equivalence ratio:
 \be
    \label{eq:dza}
    \tilde{\phi} \equiv  \min \left( \, 1 \, , \, \frac{s \, Z_{\rm F}^0}{Z_{\rm A}^0} \, \right) = \frac{Z_{\rm A}^0-Z_{\rm A}}{Z_{\rm A}^0}
