@@ -3825,7 +3825,7 @@ TABLE_LOOP: DO J=1,5000
             CPBAR_Z(J,N) = CPBAR_Z(0,N) + CP_Z(J,N)
          ENDIF
       ENDIF
-         IF (MU_TMP_Z(N) > 0._EB) THEN
+      IF (MU_TMP_Z(N) > 0._EB) THEN
          MU_RSQMW_Z(J,N) = MU_TMP_Z(N)
       ELSE
          MU_RSQMW_Z(J,N) = SUM(Z2Y(:,N) * MU_TMP(:)) / SUM(Z2Y(:,N) * RSQ_MW_Y(:)) * RSQ_MW_Z(N)
