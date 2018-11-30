@@ -3776,7 +3776,7 @@ END SUBROUTINE LOOKUP_CRITICAL_FLAME_TEMPERATURE
 
 SUBROUTINE LOOKUP_LOWER_OXYGEN_LIMIT(FUEL,LOWER_OXYGEN_LIMIT)
 
-! For a given FUEL, send back the Critical Flame Temperature in degrees C
+! For a given FUEL, return the Lower Oxygen Limit as a volume fraction
 
 CHARACTER(LABEL_LENGTH),INTENT(IN) :: FUEL
 REAL(EB), INTENT(OUT) :: LOWER_OXYGEN_LIMIT
