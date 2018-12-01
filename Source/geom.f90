@@ -39931,6 +39931,28 @@ DO I = 1, N
 ENDDO
 END SUBROUTINE ROTATE_VEC
 
+! ---------------------------- GEOMCLIPS ----------------------------------------
+
+SUBROUTINE GEOMCLIPS
+USE BOXTETRA_ROUTINES, ONLY : GEOMCLIP
+REAL(EB) :: XB(6)
+INTEGER :: I
+TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+
+   ! clip geometries to mesh
+
+XB(1)=-1.0
+XB(2)=0.0
+XB(3)=-1.0
+XB(4)=0.0
+XB(5)=0.0
+XB(6)=1.0
+DO I = 1, N_GEOMETRY
+   G=>GEOMETRY(I)
+   CALL GEOMCLIP(G%VERTS, G%N_VERTS, G%FACES, G%N_FACES, XB)
+END DO
+END SUBROUTINE GEOMCLIPS
+
 ! ---------------------------- PROCESS_GEOM ----------------------------------------
 
 SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME, N_VERTS, N_FACES, N_VOLUS)
@@ -39979,6 +40001,12 @@ SUBROUTINE PROCESS_GEOM(IS_DYNAMIC,TIME, N_VERTS, N_FACES, N_VOLUS)
          CALL TRANSLATE_VEC_INPLACE(G%XYZ,G%N_VERTS,G%VERTS)
       ENDIF
    ENDDO
+
+ ! remove this if statement when GEOMCLIPS is ready for use
+   IF ( I .EQ. 0 ) THEN
+      CALL GEOMCLIPS
+   ENDIF
+
    CALL GEOM2TEXTURE
 
    N_VERTS = 0
