@@ -68,7 +68,9 @@ SUBROUTINE ISO_TO_FILE(LU_ISO,LU_ISO2, NM,IBAR, JBAR, KBAR, T,VDATA, VDATA2, HAV
   ! isosurface geometry was generated from a routine originally written in C which uses array indices that start at 0
   ! add 1 to be compatible with Fortran (which start array indices at 1)
 
-  TRIANGLES_ALL(1:3*NTRIANGLES_ALL) = 1 + TRIANGLES_ALL(1:3*NTRIANGLES_ALL)
+  IF (NTRIANGLES_ALL>0) THEN
+     TRIANGLES_ALL(1:3*NTRIANGLES_ALL) = 1 + TRIANGLES_ALL(1:3*NTRIANGLES_ALL) 
+  ENDIF
 
   IF (DELTA > 0.0_FB) THEN
     MESH_BOUNDS(1) = XPLT(1)
