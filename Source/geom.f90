@@ -12365,6 +12365,7 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
       X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
       IF(IBM_PLANE_INTERPOLATION) THEN
          ! Interpolate Un approx to cartesian-face centroids:
+         U_IBM    = 0._EB
          VAL(1:5) = 0._EB
          ! Get UBn:
          INBFC_CARTCEN(1:3) = CUT_FACE(ICF)%INBFC_CARTCEN(1:3)
