@@ -1948,10 +1948,12 @@ END SUBROUTINE INITIALIZE_MESH_VARIABLES_2
 
 SUBROUTINE INITIALIZE_DEVICES(NM)
 
+USE COMPLEX_GEOMETRY, ONLY : GET_CFACE_INDEX
+
 ! Find the WALL_INDEX for a device that is near a solid wall
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG
+INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG,ICF
 REAL(EB) :: DEPTH
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (MESH_TYPE), POINTER :: M
@@ -1961,9 +1963,10 @@ M => MESHES(NM)
 DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
-   IF (DV%OUTPUT_INDEX>=0) CYCLE DEVICE_LOOP
 
-   IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a wall cell
+   IF (DV%OUTPUT_INDEX>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
+
+   IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a WALL cell or CFACE
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
       II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
@@ -1973,6 +1976,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
       JJG = JJ
       KKG = KK
       IOR = DV%IOR
+      IW  = 0
+      ICF = 0
 
       IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
          ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
@@ -1988,17 +1993,24 @@ DEVICE_LOOP: DO N=1,N_DEVC
          END SELECT
       ENDIF
 
-      CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
+      IF (IOR/=0) CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
-      IF (IW==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
-         WRITE(LU_ERR,'(A,I0,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
+      IF (IW==0)  CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
+
+      IF (IW==0 .AND. ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
+         WRITE(LU_ERR,'(A,I0,A,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,', ID = ',TRIM(DV%ID)
+         WRITE(LU_ERR,'(A)') 'FDS cannot determine which boundary cell to assign.'
          STOP_STATUS = SETUP_STOP
          RETURN
-      ELSE
+      ELSEIF (IW>0) THEN
          DV%WALL_INDEX = IW
          SURF_INDEX = M%WALL(IW)%SURF_INDEX
+      ELSEIF (ICF>0) THEN
+         DV%CFACE_INDEX = ICF
+         SURF_INDEX = M%CFACE(ICF)%SURF_INDEX
+      ELSE
+         SURF_INDEX = DV%SURF_INDEX
       ENDIF
-      IF (IW==0) SURF_INDEX = DV%SURF_INDEX
 
    ELSE ! Assume the device is tied to a particle
 

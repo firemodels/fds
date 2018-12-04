@@ -376,6 +376,7 @@ module-whatis   "Loads fds paths and libraries."
 
 conflict FDS6
 conflict openmpi
+conflict intel
 
 prepend-path    PATH            \$FDS_root/bin
 prepend-path    LD_LIBRARY_PATH \$FDS_root/bin/LIB64

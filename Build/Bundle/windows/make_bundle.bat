@@ -139,6 +139,7 @@ cat *.sha1              >>  %uploads%\%basename%.sha1
 
 cd %curdir%
 CALL :COPY %in_intel_dll%\libiomp5md.dll     %out_bin%\libiomp5md.dll
+CALL :COPY %in_intel_dll%\libfabric.dll      %out_bin%\libfabric.dll
 
 CALL :COPY %in_impi%\impi.dll                %out_bin%\impi.dll
 CALL :COPY %in_impi%\mpiexec.hydra.exe       %out_bin%\mpiexec.exe
