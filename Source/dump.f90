@@ -985,7 +985,7 @@ CALL ChkMemErr('DUMP','IBLK',IZERO)
         WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF(N,NM)) ! geometry
         IF (IS%INDEX2 /= -1 ) THEN
            M%N_STRINGS = M%N_STRINGS + 1
-           WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF2(N,NM)) ! data 
+           WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF2(N,NM)) ! data
         ENDIF
         M%N_STRINGS = M%N_STRINGS + 1
         WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(IS%SMOKEVIEW_LABEL) ! labels for geometry
@@ -8508,6 +8508,7 @@ STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
 CALL POINT_TO_MESH(NM)
 
 FILE_LOOP: DO NF=1,N_BNDF
+   IF (N_PATCH == 0) CYCLE FILE_LOOP
    BF => BOUNDARY_FILE(NF)
    PY => PROPERTY(BF%PROP_INDEX)
    WRITE(LU_BNDF(NF,NM)) STIME
@@ -8588,7 +8589,14 @@ FILE_LOOP: DO NF=1,N_BNDF
 
    ENDDO PATCH_LOOP
 
-   IF (CC_IBM) THEN
+ENDDO FILE_LOOP
+
+IF (CC_IBM) THEN
+   FILE_LOOP2 : DO NF=1,N_BNDF
+      BF => BOUNDARY_FILE(NF)
+      PY => PROPERTY(BF%PROP_INDEX)
+      IND  = ABS(BF%INDEX)
+      NC = 0
       I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
       ! write geometry for slice file
       IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
@@ -8608,9 +8616,8 @@ FILE_LOOP: DO NF=1,N_BNDF
                                    IND,BF%Y_INDEX,BF%Z_INDEX)
          CLOSE(LU_BNDG(NF,NM))
       ENDIF
-   ENDIF
-
-ENDDO FILE_LOOP
+   ENDDO FILE_LOOP2
+ENDIF
 
 FROM_BNDF = .FALSE.
 
