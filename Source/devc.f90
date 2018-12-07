@@ -52,8 +52,8 @@ TYPE DEVICE_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DEVC_INDEX,SUBDEVICE_INDEX
    CHARACTER(LABEL_LENGTH) :: ID,PROP_ID,QUANTITY,QUANTITY2,CTRL_ID,DEVC_ID,SPATIAL_STATISTIC='null',TEMPORAL_STATISTIC='null',&
                     SURF_ID,PART_ID='null',SPEC_ID='null',MATL_ID='null',&
-                    SMOKEVIEW_BAR_LABEL,UNITS='null',XYZ_UNITS='m',DUCT_ID='null',NODE_ID(2)='null',&
-                    R_ID='null',X_ID='null',Y_ID='null',Z_ID='null',&
+                    SMOKEVIEW_BAR_LABEL,UNITS='null',XYZ_UNITS='m',DUCT_ID='null',NODE_ID(2)='null',MOVE_ID='null',&
+                    D_ID='null',R_ID='null',X_ID='null',Y_ID='null',Z_ID='null',&
                     INIT_ID='null',NO_UPDATE_DEVC_ID='null',NO_UPDATE_CTRL_ID='null',REAC_ID='null'
    CHARACTER(60) :: SMOKEVIEW_LABEL
    LOGICAL :: INITIAL_STATE,CURRENT_STATE,LATCH,PRIOR_STATE,DRY=.FALSE.,&

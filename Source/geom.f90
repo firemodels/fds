@@ -216,8 +216,6 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 #endif /* WITH_MKL */
 
 IMPLICIT NONE
-REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
-
 
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
