@@ -2193,33 +2193,12 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 \subsection{Texture Maps}
 \label{info:texture_map}
 
-There are various ways of prescribing the color of various objects
-within the computational domain, but there is also a way of pasting
-images onto the obstructions for the purpose of making the Smokeview
-images more realistic. This technique is known as ``texture mapping.''
-For example, to apply a wood paneling image to a wall,
-add to the {\ct SURF} line defining the physical properties of the
-paneling the line:
+There are various ways of prescribing the color of various objects within the computational domain, but there is also a way of pasting images onto the obstructions for the purpose of making the Smokeview images more realistic. This technique is known as ``texture mapping.'' For example, to apply a wood paneling image to a wall, add to the {\ct SURF} line defining the physical properties of the paneling the line:
 \begin{lstlisting}
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
 \end{lstlisting}
-Assuming that a JPEG file called {\ct paneling.jpg} exists in the
-working directory, Smokeview should read it and display the image
-wherever the paneling is used.
-Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
-the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
-and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case,
-the JPEG image is of a 1~m wide by 2~m high piece of
-paneling. Smokeview replicates the image as often as necessary to
-make it appear that the paneling is applied where desired.
-Consider carefully how the image repeats itself when
-applied in a scene. If the image has no obvious pattern, there is no
-problem with the image being repeated. If the image has an obvious
-direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
-the {\ct VENT} or {\ct OBST} line to which a texture map
-should be applied. For example,
-
+Assuming that a JPEG file called {\ct paneling.jpg} exists in the working directory, Smokeview should read it and display the image wherever the paneling is used. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH} and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to the {\ct VENT} or {\ct OBST} line to which a texture map should be applied. For example,
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
@@ -9930,7 +9909,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Coordinate transformation parameters ({\ct MULT} namelist group)]{For more information see Section~\ref{info:MOVE}.}
-\label{tbl:MULT} \\
+\label{tbl:MOVE} \\
 \hline
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
 \hline \hline
