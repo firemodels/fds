@@ -855,21 +855,9 @@ Validation Suite} removed for clarity.
 ...
 &TAIL / End of file.
 \end{lstlisting}
-It is recommended that when looking at a new scenario,
-first select a pre-written input file that resembles the case,
-make the necessary changes, then run the case at fairly low
-mesh resolution to determine if the geometry is set up correctly.
-It is best to start off with a relatively simple file that captures the main
-features of the problem without getting tied down with too much detail that
-might mask a fundamental flaw in the calculation. Initial calculations ought
-to be meshed coarsely so that the run times are less than an hour and
-corrections can easily be made without wasting too much time.
-As you learn how to write input files, you will continually
-run and re-run your case as you add in complexity.
+It is recommended that when looking at a new scenario, first select a pre-written input file that resembles the case, make the necessary changes, then run the case at fairly low mesh resolution to determine if the geometry is set up correctly. It is best to start off with a relatively simple file that captures the main features of the problem without getting tied down with too much detail that might mask a fundamental flaw in the calculation. Initial calculations ought to be meshed coarsely so that the run times are less than an hour and corrections can easily be made without wasting too much time. As you learn how to write input files, you will continually run and re-run your case as you add in complexity.
 
-Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and
-where you can find the reference to where it is introduced in the document and the
-table containing all of the keywords for each group.
+Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and where you can find the reference to where it is introduced in the document and the table containing all of the keywords for each group.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
@@ -895,6 +883,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 {\ct MATL}  & Material Property            & \ref{info:MATL} & \ref{tbl:MATL}  \\ \hline
 {\ct MESH}  & Mesh Parameters              & \ref{info:MESH} & \ref{tbl:MESH}  \\ \hline
 {\ct MISC}  & Miscellaneous                & \ref{info:MISC} & \ref{tbl:MISC}  \\ \hline
+{\ct MOVE}  & Transformation Parameters    & \ref{info:MOVE} & \ref{tbl:MOVE}  \\ \hline
 {\ct MULT}  & Multiplier Parameters        & \ref{info:MULT} & \ref{tbl:MULT}  \\ \hline
 {\ct OBST}  & Obstruction                  & \ref{info:OBST} & \ref{tbl:OBST}  \\ \hline
 {\ct PART}  & Lagrangian Particle          & \ref{info:PART} & \ref{tbl:PART}  \\ \hline
@@ -922,9 +911,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 \section{Concatenating input files}
 \label{info:CATF}
 
-The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an
-FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
-%
+The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
 \begin{lstlisting}
 &HEAD CHID='couch2', TITLE='Single Couch Test Case using two meshes & CATF files.'  /
 &MESH IJK=12,10,24, XB=1.1,2.3,3.6,4.6,0.0,2.4, MULT_ID='mesh' /
@@ -961,7 +948,6 @@ the namelist {\ct OTHER\_FILES} field. These contain information in the form of 
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
 \end{lstlisting}
-%
 In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an
 automated script.
 
@@ -1513,7 +1499,7 @@ One additional parameter might be useful in some special cases. The numerical tr
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
 
@@ -2207,33 +2193,12 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 \subsection{Texture Maps}
 \label{info:texture_map}
 
-There are various ways of prescribing the color of various objects
-within the computational domain, but there is also a way of pasting
-images onto the obstructions for the purpose of making the Smokeview
-images more realistic. This technique is known as ``texture mapping.''
-For example, to apply a wood paneling image to a wall,
-add to the {\ct SURF} line defining the physical properties of the
-paneling the line:
+There are various ways of prescribing the color of various objects within the computational domain, but there is also a way of pasting images onto the obstructions for the purpose of making the Smokeview images more realistic. This technique is known as ``texture mapping.'' For example, to apply a wood paneling image to a wall, add to the {\ct SURF} line defining the physical properties of the paneling the line:
 \begin{lstlisting}
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
 \end{lstlisting}
-Assuming that a JPEG file called {\ct paneling.jpg} exists in the
-working directory, Smokeview should read it and display the image
-wherever the paneling is used.
-Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
-the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
-and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case,
-the JPEG image is of a 1~m wide by 2~m high piece of
-paneling. Smokeview replicates the image as often as necessary to
-make it appear that the paneling is applied where desired.
-Consider carefully how the image repeats itself when
-applied in a scene. If the image has no obvious pattern, there is no
-problem with the image being repeated. If the image has an obvious
-direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
-the {\ct VENT} or {\ct OBST} line to which a texture map
-should be applied. For example,
-
+Assuming that a JPEG file called {\ct paneling.jpg} exists in the working directory, Smokeview should read it and display the image wherever the paneling is used. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH} and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to the {\ct VENT} or {\ct OBST} line to which a texture map should be applied. For example,
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
@@ -4849,6 +4814,19 @@ Similar to using {\ct PROFILE=`ATMOSPHERIC'} on {\ct SURF}, it is possible to sp
 Note that {\ct V} indicates the velocity component normal to the surface.  You can also specify {\ct RAMP\_V\_X} and {\ct RAMP\_V\_Y} and add these to the {\ct SURF}.  Note that only profiles in the planar directions will affect a given surface.  That is, if the surface is oriented in the $y-z$ plane, only {\ct RAMP\_V\_Y} and {\ct RAMP\_V\_Z} apply.  In the {\ct RAMP} definition {\ct T} is the independent variable and {\ct F} is the dependent variable.  In this example, {\ct T} is the $z$ coordinate in meters and {\ct F} is the factor multiplying {\ct VEL} on the {\ct SURF} line.  Two ramps may be applied to a surface.
 
 {\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case are included under the heading ``Backward Facing Step'' in the FDS Validation Guide~\cite{FDS_Validation_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
+
+
+\section{Rotation and Translation}
+\label{info:MOVE}
+
+It is possible to rotate and/or translate various objects within an FDS simulation using the namelist group called {\ct MOVE}. For example, the line
+\begin{lstlisting}
+&MOVE ID='spin', ROTATION_ANGLE=45., X0=2., Y0=3., Z0=4., AXIS=1,0,0 /
+\end{lstlisting}
+causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
+
+Currently, this feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
+
 
 
 \chapter{Chemical Species}
@@ -7674,7 +7652,7 @@ Sometimes it is convenient to calculate a steady-state profile. For example, the
 \end{lstlisting}
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points time-averaged over the interval between {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default value of the latter is {\ct T\_END} and the former is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=STATISTICS\_START}.  Prior to this time, the values are zero.  This prevents initial transient from biasing the final average value or other temporal statistics.
 
-A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}. If you want the data plotted as a function of the distance from the first point on the line, ({\ct X1,Y1,Z1}), provide the label {\ct D\_ID}.
 
 You can convert the spatial coordinate of a steady-state profile by setting {\ct COORD\_FACTOR} on the {\ct DEVC} line. For example, to convert from the default unit of meters to centimeters, set {\ct COORD\_FACTOR} to 100. Also set {\ct XYZ\_UNITS} to the appropriate character string, in this case {\ct XYZ\_UNITS='cm'}.
 
@@ -7802,7 +7780,7 @@ For example, the line:
 \end{lstlisting}
 draws a surface where the mixture fraction has a value of 0.05~kg/kg and colors the surface this using temperature.
 The parameter {\ct SKIP=n}\ (default: 1) can also be used to reduce data by skipping {\ct n-1}\ values in each direction.
-The parameter (\ct DELTA=val}\ can also be used to reduce data by forcing each triangle to have all
+The parameter {\ct DELTA=val}\ can also be used to reduce data by forcing each triangle to have all
 sides larger than {\ct val}.
 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
@@ -9411,6 +9389,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
+{\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct .FALSE.} \\ \hline
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct .FALSE.} \\ \hline
@@ -9926,6 +9905,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
+
+\section{\texorpdfstring{{\tt MOVE}}{MOVE} (Coordinate Transformation Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Coordinate transformation parameters ({\ct MULT} namelist group)]{For more information see Section~\ref{info:MOVE}.}
+\label{tbl:MOVE} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
+\hline \hline
+\endhead
+{\ct AXIS(1:3)}       & Real Triplet     & Axis of rotation                                &        & (0,0,1)                    \\ \hline
+{\ct DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
+{\ct DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
+{\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
+{\ct ID }             & Character        & Identification tag                              &        &                            \\ \hline
+{\ct ROTATION\_ANGLE} & Real             & Angle of rotation about {\ct AXIS}              & deg.   & 0.                         \\ \hline
+{\ct X0}              & Real             & $x$ origin                                      & m      & 0.                         \\ \hline
+{\ct Y0}              & Real             & $y$ origin                                      & m      & 0.                         \\ \hline
+{\ct Z0}              & Real             & $z$ origin                                      & m      & 0.                         \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
 
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
