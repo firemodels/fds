@@ -5577,6 +5577,17 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                        SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*RC(I)*DY(J)*VALUE
                                     END SELECT
                               ENDIF
+                           CASE('AREA')
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
+                                 SELECT CASE (ABS(DV%IOR_ASSUMED))
+                                    CASE(1)
+                                       SDV%VALUE_1 = SDV%VALUE_1 + RC(I)*DY(J)*DZ(K)
+                                    CASE(2)
+                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*DZ(K)
+                                    CASE(3)
+                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*RC(I)*DY(J)
+                                    END SELECT
+                              ENDIF
                            CASE('VOLUME')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                                  SDV%VALUE_1 = SDV%VALUE_1 + VOL
