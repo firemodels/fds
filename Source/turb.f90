@@ -419,6 +419,8 @@ SUBROUTINE TWOD_IRROTATIONAL_UMD(NM)
 ! Salman Verma, University of Maryland
 !
 ! Velocity field, u = z and w = -x, is divergence free and irrotational
+!
+! Used for PERIODIC_TEST==12,13
 !-------------------------------------------------------------------------------
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
@@ -453,9 +455,9 @@ ENDDO
 
 ! fill ghost values for smokeview
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
          UVW_GHOST(IC,1) = U(I,J,K)
