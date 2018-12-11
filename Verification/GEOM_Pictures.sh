@@ -1,14 +1,14 @@
 #!/bin/bash
 
 $RUNSMV -d Complex_Geometry geom_simple.fds
-$RUNSMV -d Complex_Geometry geom_azim.fds
-$RUNSMV -d Complex_Geometry geom_elev.fds
-$RUNSMV -d Complex_Geometry geom_scale.fds
+#$RUNSMV -d Complex_Geometry geom_azim.fds
+#$RUNSMV -d Complex_Geometry geom_elev.fds
+#$RUNSMV -d Complex_Geometry geom_scale.fds
 $RUNSMV -d Complex_Geometry geom_obst.fds
 $RUNSMV -d Complex_Geometry geom_sphere1a.fds
 $RUNSMV -d Complex_Geometry geom_sphere1c.fds
 $RUNSMV -d Complex_Geometry geom_sphere1e.fds
-$RUNSMV -d Complex_Geometry geom_sphere2.fds
+#$RUNSMV -d Complex_Geometry geom_sphere2.fds
 $RUNSMV -d Complex_Geometry geom_sphere3b.fds
 $RUNSMV -d Complex_Geometry geom_sphere3d.fds
 $RUNSMV -d Complex_Geometry geom_sphere3f.fds

@@ -371,72 +371,61 @@ For example, in the following {\ct GEOM}\ namelist,
 
 {\small
 \begin{verbatim}
+&MOVE ID='ChairMove', AXIS=...,...,..., ROTATION_ANGLE=..., DX=, /
 &GEOM ID='chair'
+
+      SURF_ID='woodSID','apholsterySID',
 
       VERTS=X1,Y1,Z1,...,XM,YM,ZM,
 
-      FACES=F1_1,F1_2,F1_3,...,FN_1,FN_2,FN_3,
+      FACES=F1_1,F1_2,F1_3,F1_SID...,FN_1,FN_2,FN_3,F2_SID
 
-      SCALE=sx,sy,sz,
-      AZIM=az,
-      ELEV=elev,
-
-      XYZ0=x0,y0,z0,
-      XYZ=x,y,z,
+      MOVE_ID='ChairMove'
 /
 \end{verbatim}
 }
 
-\noindent the chair object is translated by $(x,y,z)$ by specifying {\ct XYZ=x,y,z}.
-Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\ct SCALE=sx,sy,sz}.
-An object may be flipped by using a negative scale factor.
-An object is rotated using {\ct AZIM=az}\ and {\ct ELEV=elev}.
-{\ct AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\ct XYZ0}.
-{\ct ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\ct XYZ0}..
-An object may also be rotated about an arbitrary axis.
-{\ct GAXIS} is used to specify this axis.
-{\ct GROTATE}\ is used to specify the amount of rotation about this axis.
-All rotation angles are specified in degrees.
+\noindent the chair object is translated and rotated using a reference to the $\&MOVE$ namelist, defined and explained in section XX.
 
-\subsection{Grouping Objects}
-One may group objects to form a new object.  In the following example,
-{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
-is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
-are place at a particular locations using the {\ct DXYZ}\ keyword.
-
-{\small
-\begin{verbatim}
-&GEOM ID='chair' ..... /
-
-&GEOM ID='sofa' ...... /
-
-&GEOM ID='living room set'
-
-      XYZ=[0,0,0],
-      AZIM=[0],
-      ELEV=[0],
-
-      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
-                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
-      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
-                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
-/
-\end{verbatim}
-}
-
-\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
-previous {GEOM}\ lines.  Forward references are not permitted.
-One may scale, rotate and translate objects as they are placed in the group using
-{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
-
-The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
-The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
-For example,
-DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
-
-The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
-It will not appear by itself in the FDS model.
+%\subsection{Grouping Objects}
+%One may group objects to form a new object.  In the following example,
+%{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
+%is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
+%are place at a particular locations using the {\ct DXYZ}\ keyword.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='chair' ..... /
+%
+%&GEOM ID='sofa' ...... /
+%
+%&GEOM ID='living room set'
+%
+%      XYZ=[0,0,0],
+%      AZIM=[0],
+%      ELEV=[0],
+%
+%      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
+%                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
+%      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
+%                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
+%/
+%\end{verbatim}
+%}
+%
+%\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
+%previous {GEOM}\ lines.  Forward references are not permitted.
+%One may scale, rotate and translate objects as they are placed in the group using
+%{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
+%
+%The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
+%The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
+%The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
+%For example,
+%DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
+%
+%The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
+%It will not appear by itself in the FDS model.
 
 %\subsection{Dynamic Objects}
 %An object's position and orientation may change with time.
@@ -467,25 +456,14 @@ It will not appear by itself in the FDS model.
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
-{\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct MOVE\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct N\_LAT}       & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
 {\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &  1                       \\ \hline
@@ -496,12 +474,25 @@ It will not appear by itself in the FDS model.
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
 
 
 % Related to moving geometry:
+%{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
+%{\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+%{\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+%{\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
+%{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
+%{\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+
 %{\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 %{\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 %{\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
@@ -2103,97 +2094,97 @@ SURF_ID='surf1'/
 \label{fig:geom_simple}
 \end{figure}
 
-\subsection{geom\_azim.fds}
-Figure \ref{fig:geom_azim} was created using the following GEOM namelists.
-The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
-centered at $(0,0,0)$.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
-
-&GEOM ID='geom2',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
-
-&GEOM ID='geom3',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
-  \end{tabular}
-\end{center}
- \caption{Three triangles generated at different azimuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
-\label{fig:geom_azim}
-\end{figure}
-
-\subsection{geom\_elev.fds}
-Figure \ref{fig:geom_elev} was created using the following GEOM namelists.
-The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
-passing through $(0,0,0)$.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
-
-&GEOM ID='geom2',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
-
-&GEOM ID='geom3',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
-  \end{tabular}
-\end{center}
- \caption{Three triangles generated at different elevation angles using the {\ct ELEV}\ keyword. Case: geom\_elev.fds}
-\label{fig:geom_elev}
-\end{figure}
-
-\subsection{geom\_scale.fds}
-Figure \ref{fig:geom_scale} was created using the following GEOM namelists.
-The {\ct SCALE}\ keyword is used to change the size of the object.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom4',
-VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
-FACES=1,2,3,XYZ0=-2.0,0.0,0.0,SCALE=1.0,1.0,1.0,SURF_ID='surf1'/
-
-&GEOM ID='geom4',
-VERTS= 0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
-FACES=1,2,3,XYZ0= 0.0,0.0,0.0,SCALE=1.0,1.0,2.0,SURF_ID='surf2'/
-
-&GEOM ID='geom4',
-VERTS= 2.0,0.0,0.0,3.0,0.0,0.0,3.0,0.0,1.0,
-FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
-  \end{tabular}
-\end{center}
-\caption{Three triangles generated at different scale sizes using the {\ct SCALE}\ keyword. Case: geom\_scale.fds}
-\label{fig:geom_scale}
-\end{figure}
+%\subsection{geom\_azim.fds}
+%Figure \ref{fig:geom_azim} was created using the following GEOM namelists.
+%The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
+%centered at $(0,0,0)$.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom1',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom2',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom3',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different azimuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
+%\label{fig:geom_azim}
+%\end{figure}
+%
+%\subsection{geom\_elev.fds}
+%Figure \ref{fig:geom_elev} was created using the following GEOM namelists.
+%The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
+%passing through $(0,0,0)$.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom1',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom2',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom3',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different elevation angles using the {\ct ELEV}\ keyword. Case: geom\_elev.fds}
+%\label{fig:geom_elev}
+%\end{figure}
+%
+%\subsection{geom\_scale.fds}
+%Figure \ref{fig:geom_scale} was created using the following GEOM namelists.
+%The {\ct SCALE}\ keyword is used to change the size of the object.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom4',
+%VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
+%FACES=1,2,3,XYZ0=-2.0,0.0,0.0,SCALE=1.0,1.0,1.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom4',
+%VERTS= 0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
+%FACES=1,2,3,XYZ0= 0.0,0.0,0.0,SCALE=1.0,1.0,2.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom4',
+%VERTS= 2.0,0.0,0.0,3.0,0.0,0.0,3.0,0.0,1.0,
+%FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different scale sizes using the {\ct SCALE}\ keyword. Case: geom\_scale.fds}
+%\label{fig:geom_scale}
+%\end{figure}
 
 \subsection{geom\_obst.fds}
 Figure \ref{fig:geom_obst} was created using the following GEOM namelist.
@@ -2796,9 +2787,35 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 
 
 
-\subsection{Parallel consistency test of helium plume around sphere, 1 mesh vs. 3 meshes}
 
-
+%\subsection{Flow around Sphere at different Reynolds numbers}
+%
+%We look first at the canonical case of isothermal flow around a sphere of diameter $D$, for Reynolds numbers up to $Re=300$. This flow is steady for Reynolds numbers up to $Re \simeq 270$ where it transitions to an oscillatory state.
+%
+%The first set of steady cases are defined in a domain of size $[-3.7D,12.5D]$ in the streamwise $x$ direction, and $[-2.7D,2.7D]$ in the cross stream directions $y$ and $z$. A resolution of 40 cubic cells in $D$ is defined around the sphere and on the wake region up to $4.4D$. A coarser resolution of 20 cells in $D$ is defined in the far field. 
+%In figure~\ref{}a, the streamwise velocity curves along the axis of the sphere and from its center downstream are shown. The zero crossings of these curves on the fluid region define the length $x_s$ of the recirculation bubble behind the sphere.
+%In figure~\ref{}b, $x_s$ is compared against results reported by Johnson and Patel~\cite{}. The agreement is very good, with a difference of the order of $10\%$ at $Re=50$ and $5\%$ on the other $Re=100,150,200$ data points.  
+%
+%% Figs steady:
+%%\begin{figure}
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\caption{}
+%%\end{figure}
+%
+%% Something on the force coefficients for steady.
+%
+%For the case of $Re=300$, the domain size defined is $[4D,14D]$ in the streamwise $x$ direction, and $[-3D,3D]$ in the cross stream directions. The blockage ratio for the sphere is in this case $2.18\%$. Tomboulides and Orzag~\cite{} provide an estimated laminar boundary layer thickness $\delta \simeq 0.065D$. We define a marginal resolution of $60$ cubic cells on $D$ on the sphere surface and in the wake region up to a downstream distance of $11D$. The Strouhal number from the streamwise velocity signal at $x=3.93D$ computed at oscillatory state is XXX, in excellent agreement with the the value of $St=0.136$ and $0.137$ provided in references~\cite{},\cite{} (computed from force coefficients). In figures~\ref{}a,b, mean and RMS streamwise velocity as function of axis positions downstream of the sphere are shown. Close agreement with reference~\cite{} is found. Lower RMS peaks on the near wake are noted on the current computation, likely consequence of a marginal resolution behind the sphere. 
+%
+%
+%% Figs Re=300:
+%%\begin{figure}
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\caption{}
+%%\end{figure}
+%
+%% Something on the force coefficients for Re=300.
 
 
 \subsection{Consistency test for OBST and GEOM of flow around heated cubes}
