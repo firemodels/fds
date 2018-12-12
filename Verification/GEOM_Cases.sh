@@ -1,14 +1,14 @@
 #!/bin/bash
 
 $QFDS -d Complex_Geometry geom_simple.fds
-$QFDS -d Complex_Geometry geom_azim.fds
-$QFDS -d Complex_Geometry geom_elev.fds
-$QFDS -d Complex_Geometry geom_scale.fds
+#$QFDS -d Complex_Geometry geom_azim.fds
+#$QFDS -d Complex_Geometry geom_elev.fds
+#$QFDS -d Complex_Geometry geom_scale.fds
 $QFDS -d Complex_Geometry geom_obst.fds
 $QFDS -d Complex_Geometry geom_sphere1a.fds
 $QFDS -d Complex_Geometry geom_sphere1c.fds
 $QFDS -d Complex_Geometry geom_sphere1e.fds
-$QFDS -d Complex_Geometry geom_sphere2.fds
+#$QFDS -d Complex_Geometry geom_sphere2.fds
 $QFDS -d Complex_Geometry geom_sphere3b.fds
 $QFDS -d Complex_Geometry geom_sphere3d.fds
 $QFDS -d Complex_Geometry geom_sphere3f.fds
