@@ -1,4 +1,4 @@
-&HEAD CHID='irrot_charm_square_wave_16', TITLE='Irrotational flow field, square wave' /
+&HEAD CHID='soborot_superbee_square_wave_16', TITLE='Solid body rotation flow field, square wave' /
 
 &MESH IJK=16,1,16, XB=-1,0,-0.5,0.5,0,1/
 
@@ -10,7 +10,7 @@
       NOISE=F
       PERIODIC_TEST=12
       FREEZE_VELOCITY=T
-      FLUX_LIMITER='CHARM'
+      FLUX_LIMITER='SUPERBEE'
       CFL_MAX=1.0
       SIMULATION_MODE='DNS'
       /

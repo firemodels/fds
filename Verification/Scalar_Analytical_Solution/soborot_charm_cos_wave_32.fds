@@ -1,4 +1,4 @@
-&HEAD CHID='irrot_charm_cos_wave_32', TITLE='Irrotational flow field, cosine wave' /
+&HEAD CHID='soborot_charm_cos_wave_32', TITLE='Solid body rotation flow field, cosine wave' /
 
 &MESH IJK=32,1,32, XB=-1,0,-0.5,0.5,0,1/
 
