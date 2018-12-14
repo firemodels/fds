@@ -1,8 +1,8 @@
-&HEAD CHID='irrot_mp5_cos_wave_64', TITLE='Irrotational flow field, cosine wave' /
+&HEAD CHID='soborot_superbee_cos_wave_64', TITLE='Solid body rotation flow field, cosine wave' /
 
 &MESH IJK=64,1,64, XB=-1,0,-0.5,0.5,0,1/
 
-&TIME T_END=1.575745, DT=10/
+&TIME T_END=1.575745, DT=0/
 
 &DUMP NFRAMES=10/
 
@@ -10,7 +10,7 @@
       NOISE=F
       PERIODIC_TEST=13
       FREEZE_VELOCITY=T
-      FLUX_LIMITER='MP5'
+      FLUX_LIMITER='SUPERBEE'
       CFL_MAX=1.0
       SIMULATION_MODE='DNS'
       /

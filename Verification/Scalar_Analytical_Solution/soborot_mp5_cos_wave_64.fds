@@ -1,4 +1,4 @@
-&HEAD CHID='irrot_charm_cos_wave_64', TITLE='Irrotational flow field, cosine wave' /
+&HEAD CHID='soborot_mp5_cos_wave_64', TITLE='Solid body rotation flow field, cosine wave' /
 
 &MESH IJK=64,1,64, XB=-1,0,-0.5,0.5,0,1/
 
@@ -10,7 +10,7 @@
       NOISE=F
       PERIODIC_TEST=13
       FREEZE_VELOCITY=T
-      FLUX_LIMITER='CHARM'
+      FLUX_LIMITER='MP5'
       CFL_MAX=1.0
       SIMULATION_MODE='DNS'
       /

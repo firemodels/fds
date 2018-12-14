@@ -1,16 +1,16 @@
-&HEAD CHID='irrot_godunov_square_wave_16', TITLE='Irrotational flow field, square wave' /
+&HEAD CHID='soborot_charm_cos_wave_16', TITLE='Solid body rotation flow field, cosine wave' /
 
 &MESH IJK=16,1,16, XB=-1,0,-0.5,0.5,0,1/
 
-&TIME T_END=3.14159, DT=10/
+&TIME T_END=1.575745, DT=10/
 
 &DUMP NFRAMES=10/
 
 &MISC STRATIFICATION=F
       NOISE=F
-      PERIODIC_TEST=12
+      PERIODIC_TEST=13
       FREEZE_VELOCITY=T
-      FLUX_LIMITER='GODUNOV'
+      FLUX_LIMITER='CHARM'
       CFL_MAX=1.0
       SIMULATION_MODE='DNS'
       /

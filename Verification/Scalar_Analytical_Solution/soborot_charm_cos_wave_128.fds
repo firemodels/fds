@@ -1,6 +1,7 @@
-&HEAD CHID='irrot_superbee_square_wave_128_1mesh', TITLE='Irrotational flow field, square wave' /
+&HEAD CHID='soborot_charm_cos_wave_128', TITLE='Solid body rotation flow field, cosine wave' /
 
-&MESH IJK=128,1,128, XB=-1,0,-0.5,0.5,0,1/ test single mesh
+&MULT ID='m1', DX=0.5,DZ=0.5, I_UPPER=1,K_UPPER=1/ 4 mesh
+&MESH IJK=64,1,64, XB=-1,-0.5,-0.5,0.5,0,0.5, MULT_ID='m1'/
 
 &TIME T_END=1.575745, DT=10/
 
@@ -8,9 +9,9 @@
 
 &MISC STRATIFICATION=F
       NOISE=F
-      PERIODIC_TEST=12
+      PERIODIC_TEST=13
       FREEZE_VELOCITY=T
-      FLUX_LIMITER='SUPERBEE'
+      FLUX_LIMITER='CHARM'
       CFL_MAX=1.0
       SIMULATION_MODE='DNS'
       /
