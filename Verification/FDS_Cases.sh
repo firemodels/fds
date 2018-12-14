@@ -622,7 +622,7 @@ $QFDS -p 4 -d Scalar_Analytical_Solution irrot_mp5_cos_wave_128.fds
 $QFDS -d Scalar_Analytical_Solution irrot_mp5_cos_wave_16.fds
 $QFDS -d Scalar_Analytical_Solution irrot_mp5_cos_wave_32.fds
 $QFDS -d Scalar_Analytical_Solution irrot_mp5_cos_wave_64.fds
-$QFDS --p 4 d Scalar_Analytical_Solution irrot_superbee_cos_wave_128.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution irrot_superbee_cos_wave_128.fds
 $QFDS -d Scalar_Analytical_Solution irrot_superbee_cos_wave_16.fds
 $QFDS -d Scalar_Analytical_Solution irrot_superbee_cos_wave_32.fds
 $QFDS -d Scalar_Analytical_Solution irrot_superbee_cos_wave_64.fds
