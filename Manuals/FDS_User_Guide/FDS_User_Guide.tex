@@ -6551,7 +6551,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
 
-The {\ct MISC} input parameter {\ct DRAG\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct DRAG\_CFL\_MAX} may resolve them.
+The {\ct MISC} input parameter {\ct PARTICLE\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct PARTICLE\_CFL\_MAX} below 1 may resolve them.
 
 \subsection{Electrical Cables}
 \label{info:THIEF}
@@ -9833,7 +9833,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
