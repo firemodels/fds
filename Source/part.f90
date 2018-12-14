@@ -177,7 +177,6 @@ ENDDO OVERALL_INSERT_LOOP
 
 ! Compute initial particle CFL
 
-PART_UVWMAX = 0._EB
 IF (PARTICLE_CFL) THEN
    DO IP=1,NLP
       LP => LAGRANGIAN_PARTICLE(IP)
@@ -1259,10 +1258,6 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: NOM
 REAL(EB) :: TNOW
 
-! Set DRAG_CFL=0 even in cases where there are no particles
-
-MESHES(NM)%DRAG_CFL = 0._EB
-
 IF (EVACUATION_ONLY(NM)) RETURN
 
 ! Zero out the number of the PARTICLEs in the "orphanage"; that is, the place to hold PARTICLEs transferring from mesh to mesh
@@ -1907,9 +1902,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
             LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*DY(JJG_OLD)*DZ(KKG_OLD)*SFAC
             LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*DX(IIG_OLD)*DZ(KKG_OLD)*SFAC
             LP%ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*DX(IIG_OLD)*DY(JJG_OLD)*SFAC
-            DRAG_MAX(1) = LP%ACCEL_X*DT_P/(-UBAR+TWO_EPSILON_EB)
-            DRAG_MAX(2) = LP%ACCEL_Y*DT_P/(-VBAR+TWO_EPSILON_EB)
-            DRAG_MAX(3) = LP%ACCEL_Z*DT_P/(-WBAR+TWO_EPSILON_EB)
+            DRAG_MAX(1) = LP%ACCEL_X/(-UBAR+TWO_EPSILON_EB)
+            DRAG_MAX(2) = LP%ACCEL_Y/(-VBAR+TWO_EPSILON_EB)
+            DRAG_MAX(3) = LP%ACCEL_Z/(-WBAR+TWO_EPSILON_EB)
          ELSE
             LP%ACCEL_X = 0._EB
             LP%ACCEL_Y = 0._EB
@@ -1925,11 +1920,11 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          LP%ACCEL_X = -(MIN(DX(IIG_OLD),LP%DX)/DX(IIG_OLD))*(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
          LP%ACCEL_Y = -(MIN(DY(JJG_OLD),LP%DY)/DY(JJG_OLD))*(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
          LP%ACCEL_Z = -(MIN(DZ(KKG_OLD),LP%DZ)/DZ(KKG_OLD))*(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
-         DRAG_MAX(1) = LP%ACCEL_X*DT_P/(-UBAR+TWO_EPSILON_EB)
-         DRAG_MAX(2) = LP%ACCEL_Y*DT_P/(-VBAR+TWO_EPSILON_EB)
-         DRAG_MAX(3) = LP%ACCEL_Z*DT_P/(-WBAR+TWO_EPSILON_EB)
+         DRAG_MAX(1) = LP%ACCEL_X/(-UBAR+TWO_EPSILON_EB)
+         DRAG_MAX(2) = LP%ACCEL_Y/(-VBAR+TWO_EPSILON_EB)
+         DRAG_MAX(3) = LP%ACCEL_Z/(-WBAR+TWO_EPSILON_EB)
    END SELECT
-   IF (ANY(DRAG_MAX>DRAG_CFL)) DRAG_CFL = MAX(DRAG_CFL,MAXVAL(DRAG_MAX))
+   IF (ANY(ABS(DRAG_MAX)>PART_UVWMAX)) PART_UVWMAX = MAX(PART_UVWMAX,MAXVAL(DRAG_MAX))
 
 ENDIF PARTICLE_NON_STATIC_IF
 
