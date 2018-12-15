@@ -614,6 +614,7 @@ $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution soborot_superbee_square_wave_128.fds
+$QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_128_1mesh.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_64.fds
@@ -626,7 +627,6 @@ $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution soborot_superbee_cos_wave_128.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_128_1mesh.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_64.fds
