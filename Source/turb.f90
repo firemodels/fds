@@ -457,12 +457,33 @@ ENDDO
 
 DO K=0,KBP1
    DO J=0,JBP1
+      DO I=0,IBAR
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         V_EDGE_X(IC) = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
+         W_EDGE_X(IC) = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBP1
+   DO J=0,JBAR
       DO I=0,IBP1
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
-         UVW_GHOST(IC,1) = U(I,J,K)
-         UVW_GHOST(IC,2) = V(I,J,K)
-         UVW_GHOST(IC,3) = W(I,J,K)
+         U_EDGE_Y(IC) = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
+         W_EDGE_Y(IC) = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=0,JBP1
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         U_EDGE_Z(IC) = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
+         V_EDGE_Z(IC) = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
       ENDDO
    ENDDO
 ENDDO
