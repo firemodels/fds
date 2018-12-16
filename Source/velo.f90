@@ -1971,7 +1971,12 @@ IF (CORRECTOR) THEN
    V_Z = -1.E6_EB
    W_X = -1.E6_EB
    W_Y = -1.E6_EB
-   UVW_GHOST = -1.E6_EB
+   U_EDGE_Y = -1.E6_EB
+   U_EDGE_Z = -1.E6_EB
+   V_EDGE_X = -1.E6_EB
+   V_EDGE_Z = -1.E6_EB
+   W_EDGE_X = -1.E6_EB
+   W_EDGE_Y = -1.E6_EB
 ENDIF
 
 ! Set OME_E and TAU_E to very negative number
@@ -2596,7 +2601,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
 ENDDO EDGE_LOOP
 
-! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview only
+! Store cell edge velocity averages of the velocity components for use in Smokeview only
 
 IF (CORRECTOR) THEN
    DO K=0,KBAR
@@ -2604,12 +2609,12 @@ IF (CORRECTOR) THEN
          DO I=0,IBAR
             IC = CELL_INDEX(I,J,K)
             IF (IC==0) CYCLE
-            IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K)
-            IF (U_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J,K)
-            IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K)
-            IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K)
-            IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K)
-            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K)
+            IF (U_Y(I,J,K)>-1.E5_EB) U_EDGE_Y(IC) = U_Y(I,J,K)
+            IF (U_Z(I,J,K)>-1.E5_EB) U_EDGE_Z(IC) = U_Z(I,J,K)
+            IF (V_X(I,J,K)>-1.E5_EB) V_EDGE_X(IC) = V_X(I,J,K)
+            IF (V_Z(I,J,K)>-1.E5_EB) V_EDGE_Z(IC) = V_Z(I,J,K)
+            IF (W_X(I,J,K)>-1.E5_EB) W_EDGE_X(IC) = W_X(I,J,K)
+            IF (W_Y(I,J,K)>-1.E5_EB) W_EDGE_Y(IC) = W_Y(I,J,K)
          ENDDO
       ENDDO
    ENDDO

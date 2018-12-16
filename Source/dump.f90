@@ -4961,7 +4961,6 @@ ENDIF
 
 END SUBROUTINE
 
-! ---------------------------- DUMP_SLCF ----------------------------------------
 
 SUBROUTINE DUMP_SLCF(T,DT,NM,IFRMT)
 
@@ -4972,11 +4971,12 @@ USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE TRAN, ONLY : GET_IJK
 INTEGER, INTENT(IN) :: NM,IFRMT
 REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: SUM,TT
+REAL(EB) :: BSUM,TT
 INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
            IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO
 INTEGER :: KTS,NTSL
-REAL(EB), POINTER, DIMENSION(:,:,:) :: C,B,S,QUANTITY
+REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
+INTEGER, POINTER, DIMENSION(:,:,:) :: C
 REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
@@ -4997,24 +4997,16 @@ CALL POINT_TO_MESH(NM)
 
 ! Create an array, C, that is 1 at cell faces (I,J,K) for which U, V, and W are defined and 0 otherwise.
 
-C => WORK3
-C = 1._EB
-
-C(0,0,0:KBP1) = 0._EB
-C(0,JBP1,0:KBP1) = 0._EB
-C(IBP1,0,0:KBP1) = 0._EB
-C(IBP1,JBP1,0:KBP1) = 0._EB
-C(0:IBP1,0,0) = 0._EB
-C(0:IBP1,0,KBP1) = 0._EB
-C(0:IBP1,JBP1,0) = 0._EB
-C(0:IBP1,JBP1,KBP1) = 0._EB
-C(0,0:JBP1,0) = 0._EB
-C(0,0:JBP1,KBP1) = 0._EB
-C(IBP1,0:JBP1,0) = 0._EB
-C(IBP1,0:JBP1,KBP1) = 0._EB
-
-IF (TWO_D) C(:,   0,:) = 0._EB
-IF (TWO_D) C(:,JBP1,:) = 0._EB
+C => IWORK1
+C = 0
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (SOLID(IC) .OR. EXTERIOR(IC)) C(I,J,K) = 1
+      ENDDO
+   ENDDO
+ENDDO
 
 ! Create an array, B, that is 1 in any cell that is to be included in the 8-cell corner average, 0 otherwise.
 
@@ -5037,8 +5029,8 @@ S = 0._EB
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         SUM = B(I,J,K)+B(I+1,J+1,K+1)+B(I+1,J,K)+B(I,J+1,K)+B(I,J,K+1)+B(I+1,J+1,K)+B(I+1,J,K+1)+B(I,J+1,K+1)
-         IF (SUM>0._EB) S(I,J,K) = 1._EB/SUM
+         BSUM = B(I,J,K)+B(I+1,J+1,K+1)+B(I+1,J,K)+B(I,J+1,K)+B(I,J,K+1)+B(I+1,J+1,K)+B(I+1,J,K+1)+B(I,J+1,K+1)
+         IF (BSUM>0._EB) S(I,J,K) = 1._EB/BSUM
       ENDDO
    ENDDO
 ENDDO
@@ -5197,18 +5189,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
                CASE(CELL_CENTER)
                   QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
                CASE(CELL_FACE)
-                  QQ(I,J,K,IQQ) = REAL(FACE_VALUE(QUANTITY,C,OUTPUT_QUANTITY(IND)%IOR,IND),FB)
-                  IC = CELL_INDEX(I,J,K)
-                  IF (IC>0) THEN
-                     SELECT CASE(IND)
-                        CASE(6)
-                           IF (UVW_GHOST(IC,1)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,1),FB)
-                        CASE(7)
-                           IF (UVW_GHOST(IC,2)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,2),FB)
-                        CASE(8)
-                           IF (UVW_GHOST(IC,3)>-1.E5_EB) QQ(I,J,K,IQQ) = REAL(UVW_GHOST(IC,3),FB)
-                     END SELECT
-                  ENDIF
+                  QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
                CASE(CELL_EDGE)
                   QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
             END SELECT
@@ -5307,40 +5288,92 @@ ENDIF
 END FUNCTION CORNER_VALUE
 
 
-REAL(EB) FUNCTION FACE_VALUE(A,C,IOR,INDX)
+REAL(EB) FUNCTION FACE_VALUE()
 
-REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A,C
-INTEGER, INTENT(IN) :: IOR,INDX
-REAL(EB) :: SUM
+REAL(EB) :: AA(0:1,0:1),WGT(0:1,0:1)
+INTEGER :: II,JJ,KK,IIM,JJM,KKM,ICX,ICY,ICZ
+LOGICAL :: SET(0:1,0:1)
 
-SELECT CASE(IOR)
-   CASE(1)
-      SUM = MAX(C(I,J,K),C(I+1,J,K))+MAX(C(I,J,K+1),C(I+1,J,K+1))+MAX(C(I,J+1,K),C(I+1,J+1,K))+MAX(C(I,J+1,K+1),C(I+1,J+1,K+1))
-      IF (ABS(SUM)<=TWO_EPSILON_EB) THEN
-         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
-      ELSE
-         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K+1)) + &
-                        A(I,J+1,K)*MAX(C(I,J+1,K),C(I+1,J+1,K)) + A(I,J+1,K+1)*MAX(C(I,J+1,K+1),C(I+1,J+1,K+1)) )/SUM
-      ENDIF
-   CASE(2)
-      SUM = MAX(C(I,J,K),C(I,J+1,K))+MAX(C(I,J,K+1),C(I,J+1,K+1))+MAX(C(I+1,J,K),C(I+1,J+1,K))+MAX(C(I+1,J,K+1),C(I+1,J+1,K+1))
-      IF (ABS(SUM)<=TWO_EPSILON_EB) THEN
-         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
-      ELSE
-         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I,J+1,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I,J+1,K+1)) + &
-                        A(I+1,J,K)*MAX(C(I+1,J,K),C(I+1,J+1,K)) + A(I+1,J,K+1)*MAX(C(I+1,J,K+1),C(I+1,J+1,K+1)) )/SUM
-      ENDIF
-   CASE(3)
-      SUM = MAX(C(I,J,K),C(I,J,K+1))+MAX(C(I+1,J,K),C(I+1,J,K+1))+MAX(C(I,J+1,K),C(I,J+1,K+1))+MAX(C(I+1,J+1,K),C(I+1,J+1,K+1))
-      IF (ABS(SUM)<=TWO_EPSILON_EB) THEN
-         FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
-      ELSE
-         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I,J,K+1))     + A(I+1,J,K)  *MAX(C(I+1,J,K),C(I+1,J,K+1)) + &
-                        A(I,J+1,K)*MAX(C(I,J+1,K),C(I,J+1,K+1)) + A(I+1,J+1,K)*MAX(C(I+1,J+1,K),C(I+1,J+1,K+1)) )/SUM
-      ENDIF
+SELECT CASE(OUTPUT_QUANTITY(IND)%IOR)
+   CASE(1) ; AA(0:1,0:1) = QUANTITY(I,J:J+1,K:K+1)
+   CASE(2) ; AA(0:1,0:1) = QUANTITY(I:I+1,J,K:K+1)
+   CASE(3) ; AA(0:1,0:1) = QUANTITY(I:I+1,J:J+1,K)
 END SELECT
+WGT  = 0.25_EB
+IC = CELL_INDEX(I,J,K)
+IF (IC>0) THEN
+   SET = .FALSE.
+   SELECT CASE(IND)
+      CASE(6)
+         DO KK=0,1
+            DO JJ=0,1
+               IF (C(I,J+JJ,K+KK)==1 .AND.  C(I+1,J+JJ,K+KK)==1) THEN
+                  JJM = MOD(JJ+1,2)
+                  KKM = MOD(KK+1,2)
+                  ICY = CELL_INDEX(I,J,K+KK)
+                  ICZ = CELL_INDEX(I,J+JJ,K)
+                  IF (U_EDGE_Y(ICY)>-1.E5_EB .AND.  .NOT.SET(JJ,KK)) THEN
+                     AA(JJ,KK) = 2._EB*U_EDGE_Y(ICY) - AA(JJM,KK)
+                     SET(JJ,KK) = .TRUE.
+                  ENDIF
+                  IF (U_EDGE_Z(ICZ)>-1.E5_EB .AND.  .NOT.SET(JJ,KK)) THEN
+                     AA(JJ,KK) = 2._EB*U_EDGE_Z(ICZ) - AA(JJ,KKM)
+                     SET(JJ,KK) = .TRUE.
+                  ENDIF
+                  IF (.NOT.SET(JJ,KK)) WGT(JJ,KK) = 0._EB
+               ENDIF
+            ENDDO
+         ENDDO
+      CASE(7)
+         DO KK=0,1
+            DO II=0,1
+               IF (C(I+II,J,K+KK)==1 .AND.  C(I+II,J+1,K+KK)==1) THEN
+                  IIM = MOD(II+1,2)
+                  KKM = MOD(KK+1,2)
+                  ICX = CELL_INDEX(I,J,K+KK)
+                  ICZ = CELL_INDEX(I+II,J,K)
+                  IF (V_EDGE_X(ICX)>-1.E5_EB .AND.  .NOT.SET(II,KK)) THEN
+                     AA(II,KK) = 2._EB*V_EDGE_X(ICX) - AA(IIM,KK)
+                     SET(II,KK) = .TRUE.
+                  ENDIF
+                  IF (V_EDGE_Z(ICZ)>-1.E5_EB .AND.  .NOT.SET(II,KK)) THEN
+                     AA(II,KK) = 2._EB*V_EDGE_Z(ICZ) - AA(II,KKM)
+                     SET(II,KK) = .TRUE.
+                  ENDIF
+                  IF (.NOT.SET(II,KK)) WGT(II,KK) = 0._EB
+               ENDIF
+            ENDDO
+         ENDDO
+      CASE(8)
+         DO JJ=0,1
+            DO II=0,1
+               IF (C(I+II,J+JJ,K)==1 .AND.  C(I+II,J+JJ,K+1)==1) THEN
+                  IIM = MOD(II+1,2)
+                  JJM = MOD(JJ+1,2)
+                  ICX = CELL_INDEX(I,J+JJ,K)
+                  ICY = CELL_INDEX(I+II,J,K)
+                  IF (W_EDGE_X(ICX)>-1.E5_EB .AND.  .NOT.SET(II,JJ)) THEN
+                     AA(II,JJ) = 2._EB*W_EDGE_X(ICX) - AA(IIM,JJ)
+                     SET(II,JJ) = .TRUE.
+                  ENDIF
+                  IF (W_EDGE_Y(ICY)>-1.E5_EB .AND.  .NOT.SET(II,JJ)) THEN
+                     AA(II,JJ) = 2._EB*W_EDGE_Y(ICY) - AA(II,JJM)
+                     SET(II,JJ) = .TRUE.
+                  ENDIF
+                  IF (.NOT.SET(II,JJ)) WGT(II,JJ) = 0._EB
+               ENDIF
+            ENDDO
+         ENDDO
+   END SELECT
+ENDIF
+IF (SUM(WGT)>0._EB) THEN
+   FACE_VALUE = SUM(AA*WGT)/SUM(WGT)
+ELSE
+   FACE_VALUE = OUTPUT_QUANTITY(IND)%AMBIENT_VALUE
+ENDIF
 
 END FUNCTION FACE_VALUE
+
 
 REAL(EB) FUNCTION EDGE_VALUE(A,S,INDX)
 

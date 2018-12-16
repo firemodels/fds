@@ -5862,8 +5862,10 @@ CONTAINS
                       MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
                    END DO
                 END DO
-                MFF%UVW_GHOST(:,1)=-1.E6_EB
-                MFF%UVW_GHOST(:,2)=-1.E6_EB
+                MFF%U_EDGE_Y(:)=-1.E6_EB
+                MFF%U_EDGE_Z(:)=-1.E6_EB
+                MFF%V_EDGE_X(:)=-1.E6_EB
+                MFF%V_EDGE_Z(:)=-1.E6_EB
              END DO
           END IF EVAC_ONLY_NM
        END DO ReadEffLoop
