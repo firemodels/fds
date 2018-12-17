@@ -837,15 +837,11 @@ The first slug is set to unity over the region $x \times z = [0.125,\,0.375] \ti
 The second slug is set to 1/2 over the region $x \times z = [0.500,\,0.750] \times [0.500,\,0.750]$.
 With the scalar bounds set to [0,1], these slugs demonstrate both the boundedness and TVD (total variation diminishing) behavior of the transport scheme.
 
-This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time.
-The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.
-Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells.
-To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
+This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time. The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.
+Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells. To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
 
 The results of the test are shown visually in Fig.~\ref{fig_move_slug}.  The upper-left image shows the initial condition.
-The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise.
-The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right),
-this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
+The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise. The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right), this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
 
 \begin{figure}[p]
    \begin{tabular}{rl}
@@ -858,6 +854,10 @@ this test case confirms that relatively low levels of diffusion are incurred at 
    \label{fig_move_slug}
 \end{figure}
 
+\newpage
+
+\clearpage
+
 \subsection{Solid Body Rotation Velocity Field (\texorpdfstring{\textct{soborot}}{soborot})}
 \label{sec:soborot_error}
 
@@ -867,6 +867,19 @@ u &= z \\
 w & = -x
 \end{align}
 
+The domain is a unit square with the origin at the lower-right.  Two wave forms are examined.  The first is a simple square wave with a passive scalar introduced at the $z=0$ boundary plane with a mass fraction value of $1$ for $0.25 \le r \le 0.75$, where $r$ is the radial position from the origin.  The second is a section of a compressed cosine wave with the phase shifted so that the minimum aligns with the start and end of the square wave.  The initial condition is given by $\frac{1}{2}(1 + \cos(4\pi r))$ for $0.25 \le r \le 0.75$.  The velocity field is held fixed.  The scalar fields are evolved for $\pi/2$ s (1/4 rotation).  The scalar concentration is measured along the upper-left diagonal as shown in Fig.~\ref{fig_soborot_images}.  The constant velocity field is shown on the left and the solution of the square wave for the CHARM scheme at $\delta x = 1/64$ m is shown on the right.
+
+\begin{figure}[ht]{}
+   \begin{tabular}{rl}
+      \includegraphics[width=3in]{SCRIPT_FIGURES/soborot_charm_square_wave_vectors} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/soborot_charm_square_wave_tracer} \\
+   \end{tabular}
+   \caption[Solid body rotation scalar transport]{(Left) Solid body rotation velocity field. (Right) Tracer concentration at time $\pi/2$ (1/4 rotation).}
+   \label{fig_soborot_images}
+\end{figure}
+
+The steady state analytical solution to this problem is that the scalar field remains constant as a function of radius from the origin.  In Fig.~\ref{fig_soborot_square_wave} we plot the L2 Error for Godunov, CHARM, and Superbee flux limiter schemes for the square wave initial condition.  As shown in \cite{Leveque:1}, the Godunov scheme shows ${\cal O}(\delta x^{1/2})$ convergence for this discontinuous solution.  Other schemes have smaller initial errors, but also ultimately converge at the same rate for this problem.
+
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_godunov_square_wave} &
@@ -874,9 +887,11 @@ w & = -x
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_square_wave} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_square_wave_error}
    \end{tabular*}
-   \caption[Solid body rotation square wave convergence]{Under construction.}
+   \caption[Solid body rotation square wave convergence]{Solid body rotation square wave solution convergence.  Scalar fields along upper-left diagonal for Godunov (upper-left), CHARM (upper-right), and Superbee (lower-left).  (Lower-right) L2 Error.}
    \label{fig_soborot_square_wave}
 \end{figure}
+
+For the consine wave intial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM and MP5 schemes, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -885,7 +900,7 @@ w & = -x
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_mp5_cos_wave} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error}
    \end{tabular*}
-   \caption[Solid body rotation cosine wave convergence]{Under construction.}
+   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left), CHARM (upper-right), and MP5 (lower-left).  (Lower-right) L2 Error.}
    \label{fig_soborot_cos_wave}
 \end{figure}
 

@@ -275,6 +275,7 @@ H(3)=loglog(dx,[e_godunov_16 e_godunov_32 e_godunov_64 e_godunov_128],'ksq-');
 H(4)=loglog(dx,[e_superbee_16 e_superbee_32 e_superbee_64 e_superbee_128],'k*-');
 H(5)=loglog(dx,[e_charm_16 e_charm_32 e_charm_64 e_charm_128],'ko-');
 
+axis([min(dx) .1 min(dx) max(dx.^.5)])
 xlabel('Grid Spacing (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('L2 Error','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 text(.009,.18,'Square Wave Error','FontName',Font_Name,'FontSize',Label_Font_Size)
@@ -500,9 +501,10 @@ H(3)=loglog(dx,[e_charm_16 e_charm_32 e_charm_64 e_charm_128],'ko-');
 H(4)=loglog(dx,[e_superbee_16 e_superbee_32 e_superbee_64 e_superbee_128],'k*-');
 H(5)=loglog(dx,[e_mp5_16 e_mp5_32 e_mp5_64 e_mp5_128],'ksq-');
 
+axis([min(dx) .1 min(dx.^2) max(dx)])
 xlabel('Grid Spacing (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('L2 Error','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-text(.009,.05,'Cosine Wave Error','FontName',Font_Name,'FontSize',Label_Font_Size)
+text(.009,.04,'Cosine Wave Error','FontName',Font_Name,'FontSize',Label_Font_Size)
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
