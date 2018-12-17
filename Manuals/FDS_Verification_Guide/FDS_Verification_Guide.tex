@@ -822,12 +822,13 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_convergence}
    \end{tabular*}
-   \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
+   \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for VLES and CHARM is the default for LES and DNS.}
    \label{fig_compression_wave}
 \end{figure}
 
+\section{Scalar Transport}
 
-\section{Scalar Transport (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
+\subsection{Uniform Velocity Field (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
 
 In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.
 The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.
@@ -853,8 +854,39 @@ this test case confirms that relatively low levels of diffusion are incurred at 
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf} &
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf} \\
    \end{tabular}
-   \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
+   \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for VLES (FDS default).}
    \label{fig_move_slug}
+\end{figure}
+
+\subsection{Solid Body Rotation Velocity Field (\texorpdfstring{\textct{soborot}}{soborot})}
+\label{sec:soborot_error}
+
+In this series of tests, the velocity field is a simple solid-body rotation about the origin.  The field is given by
+\begin{align}
+u &= z \\
+w & = -x
+\end{align}
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_godunov_square_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_square_wave}   \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_square_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_square_wave_error}
+   \end{tabular*}
+   \caption[Solid body rotation square wave convergence]{Under construction.}
+   \label{fig_soborot_square_wave}
+\end{figure}
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_cos_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_cos_wave}   \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_mp5_cos_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error}
+   \end{tabular*}
+   \caption[Solid body rotation cosine wave convergence]{Under construction.}
+   \label{fig_soborot_cos_wave}
 \end{figure}
 
 \section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring{\textct{saad}}{saad})}

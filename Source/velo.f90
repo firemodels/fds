@@ -1971,7 +1971,12 @@ IF (CORRECTOR) THEN
    V_Z = -1.E6_EB
    W_X = -1.E6_EB
    W_Y = -1.E6_EB
-   UVW_GHOST = -1.E6_EB
+   U_EDGE_Y = -1.E6_EB
+   U_EDGE_Z = -1.E6_EB
+   V_EDGE_X = -1.E6_EB
+   V_EDGE_Z = -1.E6_EB
+   W_EDGE_X = -1.E6_EB
+   W_EDGE_Y = -1.E6_EB
 ENDIF
 
 ! Set OME_E and TAU_E to very negative number
@@ -2596,7 +2601,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
 ENDDO EDGE_LOOP
 
-! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview only
+! Store cell edge velocity averages of the velocity components for use in Smokeview only
 
 IF (CORRECTOR) THEN
    DO K=0,KBAR
@@ -2604,12 +2609,12 @@ IF (CORRECTOR) THEN
          DO I=0,IBAR
             IC = CELL_INDEX(I,J,K)
             IF (IC==0) CYCLE
-            IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K)
-            IF (U_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J,K)
-            IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K)
-            IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K)
-            IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K)
-            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K)
+            IF (U_Y(I,J,K)>-1.E5_EB) U_EDGE_Y(IC) = U_Y(I,J,K)
+            IF (U_Z(I,J,K)>-1.E5_EB) U_EDGE_Z(IC) = U_Z(I,J,K)
+            IF (V_X(I,J,K)>-1.E5_EB) V_EDGE_X(IC) = V_X(I,J,K)
+            IF (V_Z(I,J,K)>-1.E5_EB) V_EDGE_Z(IC) = V_Z(I,J,K)
+            IF (W_X(I,J,K)>-1.E5_EB) W_EDGE_X(IC) = W_X(I,J,K)
+            IF (W_Y(I,J,K)>-1.E5_EB) W_EDGE_Y(IC) = W_Y(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -3100,7 +3105,7 @@ ENDIF PARABOLIC_IF
 
 ! Adjust time step size if necessary
 
-IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX .AND. DRAG_CFL < DRAG_CFL_MAX) .OR. LOCK_TIME_STEP) THEN
+IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX) .OR. LOCK_TIME_STEP) THEN
    DT_NEW(NM) = DT
    IF (CFL<=CFL_MIN .AND. VN<VN_MIN .AND. PART_CFL<PARTICLE_CFL_MIN .AND. .NOT.LOCK_TIME_STEP) THEN
       SELECT CASE (RESTRICT_TIME_STEP)
@@ -3112,9 +3117,7 @@ IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX .AND. DRAG_CFL 
 ELSE
    DT_NEW(NM) = 0.9_EB*MIN( CFL_MAX/MAX(UVWMAX,DT_EPS)               , &
                             VN_MAX/(2._EB*R_DX2*MAX(MUTRM,DT_EPS))   , &
-                            PARTICLE_CFL_MAX/MAX(PART_UVWMAX,DT_EPS) , &
-                            DT*DRAG_CFL_MAX/MAX(DRAG_CFL,DT_EPS))
-   DRAG_CFL = 0._EB
+                            PARTICLE_CFL_MAX/MAX(PART_UVWMAX,DT_EPS))
    CHANGE_TIME_STEP_INDEX(NM) = -1
 ENDIF
 
