@@ -5502,7 +5502,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%OPERATING_PRESSURE       = OPERATING_PRESSURE
    PY%PART_ID                  = PART_ID
    PY%QUANTITY                 = QUANTITY
-   IF (PY%PART_ID/='null' .AND. PY%QUANTITY == 'null' ) PY%QUANTITY = 'NOZZLE'
+   IF (PY%PART_ID/='null' .AND. PY%QUANTITY == 'null' ) PY%QUANTITY = 'NOZZLE FLOW RATE'
    PY%RTI                      = RTI
    IF (SMOKEVIEW_ID(1)/='null') THEN
       PY%SMOKEVIEW_ID          = SMOKEVIEW_ID
@@ -5517,7 +5517,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
             PY%SMOKEVIEW_ID(1) = 'sensor'
          CASE('SPRINKLER LINK TEMPERATURE')
             PY%SMOKEVIEW_ID(1) = 'sprinkler_pendent'
-         CASE('NOZZLE')
+         CASE('NOZZLE FLOW RATE')
             PY%SMOKEVIEW_ID(1) = 'nozzle'
          CASE('LINK TEMPERATURE')
             PY%SMOKEVIEW_ID(1) = 'heat_detector'
