@@ -3209,7 +3209,7 @@ ENDDO DEVICE_LOOP
 
 ! If a door,entr,exit changes state, save the Smokeview file strings and time of state change
 
-EVAC_ONLY: IF (ANY(EVACUATION_ONLY)) THEN
+EVAC_ONLY: IF (ANY(EVACUATION_ONLY) .AND. MYID==EVAC_PROCESS) THEN
    I=0  ! Counter for evacuation devices, doors+exits+entrys (evss do not change states)
    DO N=1,N_DOORS
       NM = EVAC_DOORS(N)%IMESH
