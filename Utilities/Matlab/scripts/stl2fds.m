@@ -19,12 +19,12 @@ clear all
 clc
 
 % STL File Reader routines path:
-addpath('/YOUR_STLREAD_PATH/STLRead')
+%addpath('/YOUR_STLREAD_PATH/STLRead')
 
 % Directory containing .stl file:
-basedir='/YOUR_STLFILE_PATH/';
+basedir='./';
 % Name of .stl file:
-file='STLFILE_NAME.stl';
+file='dome.stl';
 
 %% Parameters:
 IAXIS = 1; JAXIS = 2; KAXIS = 3; MDIM = 3;
@@ -146,10 +146,10 @@ fileout=[file(1:end-3) 'dat'];
 [fid]=fopen([basedir fileout],'w');
 
 GEOM_ID='FEM_MESH';
-MATL_ID=file(1:end-4);
+SURF_ID=file(1:end-4);
 
 % Write &GEOM namelist
-[wid]=fprintf(fid,'&GEOM ID=''%8s'', MATL_ID=''%5s''\n',GEOM_ID,MATL_ID);
+[wid]=fprintf(fid,'&GEOM ID=''%8s'', SURF_ID=''%5s''\n',GEOM_ID,SURF_ID);
 
 % Vertices:
 [wid]=fprintf(fid,'VERTS=\n');
@@ -163,7 +163,7 @@ end
 % Surface Triangles:
 [wid]=fprintf(fid,'FACES=\n');
 for iwsel=1:nfaces
-    [wid]=fprintf(fid,' %6d,   %6d,   %6d,\n',WSELEM(iwsel,NOD1:NOD3));
+    [wid]=fprintf(fid,' %6d,   %6d,   %6d, %6d\n',WSELEM(iwsel,NOD1:NOD3),1);
 end
 
 [wid]=fprintf(fid,'/ \n');
