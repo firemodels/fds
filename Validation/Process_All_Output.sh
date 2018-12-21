@@ -96,6 +96,7 @@ PROCESS UMD_Line_Burner
 PROCESS UMD_Polymers
 PROCESS USCG_HAI
 PROCESS USN_Hangars
+PROCESS UWO_Wind_Tunnel
 PROCESS Vegetation
 PROCESS Vettori_Flat_Ceiling
 PROCESS Vettori_Sloped_Ceiling
