@@ -60,7 +60,7 @@ IF (FN_INPUT(1:1)==' ') THEN
       CALL WRITE_SUMMARY_INFO(LU_ERR)
       WRITE(LU_ERR,'(/A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
    ENDIF
- 2 STOP_STATUS = VERSION_STOP ; RETURN
+   STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
 ! Stop FDS if the input file cannot be found in the current directory
