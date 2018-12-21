@@ -1455,11 +1455,15 @@ IF (MYID==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Unrealizable mass density'
+      CASE DEFAULT
+         WRITE(MESSAGE,'(A)') 'null'
    END SELECT
 
-   WRITE(LU_ERR,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
-   INQUIRE(LU_OUTPUT,OPENED=OPN)
-   IF (OPN) WRITE(LU_OUTPUT,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
+   IF (MESSAGE/='null') THEN
+      WRITE(LU_ERR,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
+      INQUIRE(LU_OUTPUT,OPENED=OPN)
+      IF (OPN) WRITE(LU_OUTPUT,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
+   ENDIF
 
 ENDIF
 
