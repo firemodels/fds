@@ -33,8 +33,8 @@ REGULAR=1
 BENCHMARK=1
 OOPT=
 POPT=
-INTEL=
-INTEL2=
+INTEL=i
+INTEL2="-I"
 GEOMCASES=1
 WAIT=
 EXE=
@@ -61,6 +61,7 @@ echo "-J - use Intel MPI version of FDS"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
+echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
 echo "     other options: fire70s, vis"
@@ -115,7 +116,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:q:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:Q:r:RsS:w:W' OPTION
 do
 case $OPTION in
   b)
@@ -164,6 +165,10 @@ case $OPTION in
    ;;
   o)
    nthreads="$OPTARG"
+   ;;
+  O)
+   INTEL=
+   INTEL2=
    ;;
   q)
    QUEUE="$OPTARG"

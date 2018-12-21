@@ -7,71 +7,144 @@ This chapter presents results of simulations of wind over structures and atmosph
 
 \section{UWO Wind Tunnel Experiments}
 
-A description of the UWO Wind Tunnel Experiments is included in Section~\ref{UWO_Wind_Tunnel_Description}.
+A description of the UWO Wind Tunnel experiments is included in Section~\ref{UWO_Wind_Tunnel_Description}. Schematic drawings of the wind tunnel models are shown in Fig.~\ref{UWO_Drawings}.
 
-Figures~\ref{UWO_Test_7_pressure_coefficients_180_1} through \ref{UWO_Test_7_pressure_coefficients_270_2} show comparisons of measured and predicted mean, rms, minimum and maximum values of the pressure coefficients on the surface of a 1:100 scale model of a building in a wind tunnel. The comparison is made for two wind directions. For 180$^\circ$, the windward side of the scale model is its shorter side, and pressure coefficients are compared along lines that are approximately 0~cm, 3~cm, and 4~cm from the axial centerline. The width of the scale model is 9~cm. For 270$^\circ$, the windward side of the scale model is its longer side, and pressure coefficients are compared along lines that are approximately 1~cm, 4~cm, and 7~cm from the centerline. The length of the scale model is 14~cm. The ``side'' profiles are along the side of the scale model, approximately halfway up the height. The discontinuities in the plots represent the transition from the windward side, to the roof, to the leeward side. The side plots do not include windward or leeward side data.
+Figures~\ref{UWO_Test_7_pressure_coefficients_180_1} through \ref{UWO_Test_7_pressure_coefficients_270_2} show comparisons of measured and predicted mean, rms, minimum and maximum values of the pressure coefficients on the surface of a 1:100 scale model of a building in a wind tunnel. The model building is shown at the top of Fig.~\ref{UWO_Drawings}. Figures~\ref{UWO_SS21_Test_6_pressure_coefficients_0_1} through \ref{UWO_SS21_Test_6_pressure_coefficients_45_4} show similar results for the model shown at the bottom of Fig.~\ref{UWO_Drawings}. The comparisons are made for two wind directions for each model. For SS20-Test~7, the 180$^\circ$ wind direction is perpendicular to the model's shorter side. The 270$^\circ$ wind direction is perpendicular to the model's longer side. For the SS21-Test~6 model, the wind directions are 0$^\circ$ (perpendicular to short side) and 45$^\circ$.
 
-The simulations are run for 5~s whereas the experiments were run for 100~s. The minimum and maximum values for the 5~s simulation are extrapolated so that they may be compared to the measured min and max for the 100~s experiment. The procedure is described in the FDS User's Guide~\cite{FDS_Users_Guide}, in the section describing the {\ct TEMPORAL\_STATISTIC} {\ct 'MIN'} and {\ct 'MAX'}.
+The diagrams in Fig.~\ref{UWO_Drawings} indicate the location of the ``lines'' where the data is compared. The discontinuities in the lines represent the transition from the windward side, to the roof, to the leeward side. The side plots do not include windward or leeward side data.
+
+The simulations are run for approximately one-tenth the time as that of the experiments, which were run for 100~s. The minimum and maximum values for the simulations are extrapolated so that they may be compared to the measured min and max for the 100~s experiment. The procedure is described in the FDS User's Guide~\cite{FDS_Users_Guide}, in the section describing the {\ct TEMPORAL\_STATISTIC} {\ct 'MIN'} and {\ct 'MAX'}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=5.5in]{FIGURES/UWO_Wind_Tunnel/UWO-BLT-SS20-Test7}
+\includegraphics[width=5.5in]{FIGURES/UWO_Wind_Tunnel/UWO-BLWT-SS21-Test6-40ft}
+\caption[UWO Wind Tunnel schematic drawings]{UWO Wind Tunnel schematic drawings. (Top) SS20-Test 7. (Bottom) SS21-Test 6. The numbers at the base of the models denote the starting points of the lines over which the measurements and predictions are compared.}
+\label{UWO_Drawings}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0009} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0009} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0009} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0009} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0296} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0296} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0296} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0296}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_line_2} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_line_2}
 \end{tabular*}
-\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 180\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 180\si{\degree} wind direction.}
+\caption[UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 180\si{\degree}]{UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 180\si{\degree} wind direction.}
 \label{UWO_Test_7_pressure_coefficients_180_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_p0437} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_p0437} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_p0437} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_p0437} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_side}  \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_side}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_180_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_180_line_4}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_180_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_180_line_4}
 \end{tabular*}
-\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 180\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 180\si{\degree} wind direction.}
+\caption[UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 180\si{\degree}]{UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 180\si{\degree} wind direction.}
 \label{UWO_Test_7_pressure_coefficients_180_2}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0067} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0067} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0067} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0067} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0368} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0368} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0368} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0368}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_line_5} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_line_5} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_line_5} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_line_5} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_line_6} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_line_6} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_line_6} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_line_6}
 \end{tabular*}
-\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 270\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 270\si{\degree} wind direction.}
+\caption[UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 270\si{\degree}]{UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 270\si{\degree} wind direction.}
 \label{UWO_Test_7_pressure_coefficients_270_1}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_p0669} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_p0669} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_p0669} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_p0669} \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_side}  \\
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_side} &
-\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_side}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_line_7} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_line_7} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_line_7} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_line_7} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_mean_270_line_8} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_rms_270_line_8}  \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_min_270_line_8} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_Cp_max_270_line_8}
 \end{tabular*}
-\caption[UWO Wind Tunnel Test 7 Pressure Coefficients, 270\si{\degree}]{UWO Wind Tunnel Test 7 mean pressure coefficients, 270\si{\degree} wind direction.}
+\caption[UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 270\si{\degree}]{UWO Wind Tunnel, SS20-Test 7 pressure coefficients, 270\si{\degree} wind direction.}
 \label{UWO_Test_7_pressure_coefficients_270_2}
 \end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_0_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_0_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_0_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_0_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_0_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_0_line_2} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_0_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_0_line_2}
+\end{tabular*}
+\caption[UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 0\si{\degree}]{UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 0\si{\degree} wind direction.}
+\label{UWO_SS21_Test_6_pressure_coefficients_0_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_0_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_0_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_0_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_0_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_0_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_0_line_4} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_0_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_0_line_4}
+\end{tabular*}
+\caption[UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 0\si{\degree}]{UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 0\si{\degree} wind direction.}
+\label{UWO_SS21_Test_6_pressure_coefficients_0_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_45_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_45_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_45_line_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_45_line_1} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_45_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_45_line_2} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_45_line_2} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_45_line_2}
+\end{tabular*}
+\caption[UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 45\si{\degree}]{UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 45\si{\degree} wind direction.}
+\label{UWO_SS21_Test_6_pressure_coefficients_45_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_45_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_45_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_45_line_3} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_45_line_3} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_mean_45_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_rms_45_line_4} \\
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_min_45_line_4} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/UWO_Wind_Tunnel/UWO_SS21_Test_6_Cp_max_45_line_4}
+\end{tabular*}
+\caption[UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 45\si{\degree}]{UWO Wind Tunnel, SS21-Test 6 pressure coefficients, 45\si{\degree} wind direction.}
+\label{UWO_SS21_Test_6_pressure_coefficients_45_4}
+\end{figure}
+
+
 
 
 

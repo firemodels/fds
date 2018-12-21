@@ -122,7 +122,7 @@ for i=1:length(cases)
     Git_Filename = [datadir,chid,'_',cases{i},'_10_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
-    %set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);

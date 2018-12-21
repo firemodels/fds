@@ -15,7 +15,7 @@ PRIVATE
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_IRROTATIONAL_UMD, &
+          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
           LOGLAW_HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, YUAN_HEAT_FLUX_MODEL, &
@@ -414,11 +414,13 @@ ENDDO
 END SUBROUTINE TWOD_VORTEX_UMD
 
 
-SUBROUTINE TWOD_IRROTATIONAL_UMD(NM)
+SUBROUTINE TWOD_SOBOROT_UMD(NM)
 !-------------------------------------------------------------------------------
 ! Salman Verma, University of Maryland
 !
-! Velocity field, u = z and w = -x, is divergence free and irrotational
+! Solid body rotation velocity field, u = z and w = -x.
+!
+! Used for PERIODIC_TEST==12,13
 !-------------------------------------------------------------------------------
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
@@ -453,14 +455,35 @@ ENDDO
 
 ! fill ghost values for smokeview
 
-DO K=0,KBAR
-   DO J=0,JBAR
+DO K=0,KBP1
+   DO J=0,JBP1
       DO I=0,IBAR
          IC = CELL_INDEX(I,J,K)
          IF (IC==0) CYCLE
-         UVW_GHOST(IC,1) = U(I,J,K)
-         UVW_GHOST(IC,2) = V(I,J,K)
-         UVW_GHOST(IC,3) = W(I,J,K)
+         V_EDGE_X(IC) = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
+         W_EDGE_X(IC) = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBP1
+   DO J=0,JBAR
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         U_EDGE_Y(IC) = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
+         W_EDGE_Y(IC) = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=0,JBP1
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         U_EDGE_Z(IC) = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
+         V_EDGE_Z(IC) = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
       ENDDO
    ENDDO
 ENDDO
@@ -489,7 +512,7 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WALL(IW)%ONE_D%UW = WALL(IW)%ONE_D%UWS
 ENDDO
 
-END SUBROUTINE TWOD_IRROTATIONAL_UMD
+END SUBROUTINE TWOD_SOBOROT_UMD
 
 
 SUBROUTINE VARDEN_DYNSMAG(NM)

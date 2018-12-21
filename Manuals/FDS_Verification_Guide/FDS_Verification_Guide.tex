@@ -822,12 +822,13 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Fig.~\ref{fig_
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_time_series} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/compression_wave_convergence}
    \end{tabular*}
-   \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
+   \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for VLES and CHARM is the default for LES and DNS.}
    \label{fig_compression_wave}
 \end{figure}
 
+\section{Scalar Transport}
 
-\section{Scalar Transport (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
+\subsection{Uniform Velocity Field (\texorpdfstring{\textct{move\_slug}}{move\_slug})}
 
 In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.
 The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.
@@ -836,15 +837,11 @@ The first slug is set to unity over the region $x \times z = [0.125,\,0.375] \ti
 The second slug is set to 1/2 over the region $x \times z = [0.500,\,0.750] \times [0.500,\,0.750]$.
 With the scalar bounds set to [0,1], these slugs demonstrate both the boundedness and TVD (total variation diminishing) behavior of the transport scheme.
 
-This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time.
-The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.
-Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells.
-To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
+This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time. The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.
+Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells. To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
 
 The results of the test are shown visually in Fig.~\ref{fig_move_slug}.  The upper-left image shows the initial condition.
-The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise.
-The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right),
-this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
+The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise. The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right), this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
 
 \begin{figure}[p]
    \begin{tabular}{rl}
@@ -853,8 +850,58 @@ this test case confirms that relatively low levels of diffusion are incurred at 
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf} &
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf} \\
    \end{tabular}
-   \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
+   \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for VLES (FDS default).}
    \label{fig_move_slug}
+\end{figure}
+
+\newpage
+
+\clearpage
+
+\subsection{Solid Body Rotation Velocity Field (\texorpdfstring{\textct{soborot}}{soborot})}
+\label{sec:soborot_error}
+
+In this series of tests, the velocity field is a simple solid-body rotation about the origin.  The field is given by
+\begin{align}
+u &= z \\
+w & = -x
+\end{align}
+
+The domain is a unit square with the origin at the lower-right.  Two wave forms are examined.  The first is a simple square wave with a passive scalar introduced at the $z=0$ boundary plane with a mass fraction value of $1$ for $0.25 \le r \le 0.75$, where $r$ is the radial position from the origin.  The second is a section of a compressed cosine wave with the phase shifted so that the minimum aligns with the start and end of the square wave.  The initial condition is given by $\frac{1}{2}(1 + \cos(4\pi r))$ for $0.25 \le r \le 0.75$.  The velocity field is held fixed.  The scalar fields are evolved for $\pi/2$ s (1/4 rotation).  The scalar concentration is measured along the upper-left diagonal as shown in Fig.~\ref{fig_soborot_images}.  The constant velocity field is shown on the left and the solution of the square wave for the CHARM scheme at $\delta x = 1/64$ m is shown on the right.
+
+\begin{figure}[ht]{}
+   \begin{tabular}{rl}
+      \includegraphics[width=3in]{SCRIPT_FIGURES/soborot_charm_square_wave_vectors} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/soborot_charm_square_wave_tracer} \\
+   \end{tabular}
+   \caption[Solid body rotation scalar transport]{(Left) Solid body rotation velocity field. (Right) Tracer concentration at time $\pi/2$ (1/4 rotation).}
+   \label{fig_soborot_images}
+\end{figure}
+
+The steady state analytical solution to this problem is that the scalar field remains constant as a function of radius from the origin.  In Fig.~\ref{fig_soborot_square_wave} we plot the L2 Error for Godunov, CHARM, and Superbee flux limiter schemes for the square wave initial condition.  As shown in \cite{Leveque:1}, the Godunov scheme shows ${\cal O}(\delta x^{1/2})$ convergence for this discontinuous solution.  Other schemes have smaller initial errors, but also ultimately converge at the same rate for this problem.
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_godunov_square_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_square_wave}   \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_square_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_square_wave_error}
+   \end{tabular*}
+   \caption[Solid body rotation square wave convergence]{Solid body rotation square wave solution convergence.  Scalar fields along upper-left diagonal for Godunov (upper-left), CHARM (upper-right), and Superbee (lower-left).  (Lower-right) L2 Error.}
+   \label{fig_soborot_square_wave}
+\end{figure}
+
+For the consine wave intial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM and MP5 schemes, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_cos_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_cos_wave}   \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_mp5_cos_wave} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error}
+   \end{tabular*}
+   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left), CHARM (upper-right), and MP5 (lower-left).  (Lower-right) L2 Error.}
+   \label{fig_soborot_cos_wave}
 \end{figure}
 
 \section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring{\textct{saad}}{saad})}
@@ -3314,7 +3361,7 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 
 
 \section{Aerosol Behavior}
-\subsection{Gravitational Settling and Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_gravitational\_deposition}}{aerosol\_gravitational\_deposition})}
+\subsection{Gravitational Settling and Deposition of Aerosols\\(\texorpdfstring{\textct{aerosol\_gravitational\_deposition}}{aerosol\_gravitational\_deposition})}
 	\label{aerosol_gravitational_deposition}
 
 This verification test consists of two test cases. The second case, {\ct aerosol\_gravitational\_deposition\_2}, reverses the z-component of gravity. The case consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct GRAVITATIONAL\_SETTLING} and {\ct GRAVITATIONAL\_DEPOSITION} are turned off. Since the box has a constant density over its height, a uniform settling rate over time is expected.
@@ -3327,11 +3374,11 @@ This verification test consists of two test cases. The second case, {\ct aerosol
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_gas}
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_wall}
 	\end{tabular}
-	\caption[Gas phase soot mass fractions and wall surface densities for the \textct{aerosol\_gravitational\_deposition} (Top) and \textct{aerosol\_gravitational\_deposition\_2} (Bottom) cases]{Time evolution of soot mass fraction in the gas (left) and soot surface density on the wall (right) for the \textct{aerosol\_gravitational\_deposition} (Top) and \textct{aerosol\_gravitational\_deposition\_2} (Bottom) cases.}
+	\caption[Gas phase soot mass fractions and wall surface densities for gravitational deposition]{Time evolution of soot mass fraction in the gas (left) and soot surface density on the wall (right) for the \textct{aerosol\_gravitational\_deposition} (Top) and \textct{aerosol\_gravitational\_deposition\_2} (Bottom) cases.}
 	\label{fig:gravitational_deposition}
 \end{figure}
 
-\subsection{Thermophoretic Settling and Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_thermophoretic\_deposition}}{aerosol\_thermophoretic\_deposition})}
+\subsection{Thermophoretic Settling and Deposition of Aerosols\\(\texorpdfstring{\textct{aerosol\_thermophoretic\_deposition}}{aerosol\_thermophoretic\_deposition})}
 	\label{aerosol_thermophoretic_deposition}
 
 This verification test consists of two test cases. The second case, {\ct aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 10~cm on side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. The gas temperature is initialized to its steady-state temperature gradient. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct THERMOPHORETIC\_SETTLING} and {\ct THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settlings rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically
@@ -3344,7 +3391,7 @@ This verification test consists of two test cases. The second case, {\ct aerosol
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_gas}
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_wall}
 	\end{tabular}
-	\caption[Gas phase soot densities and wall surface densities for the \textct{aerosol\_thermophoretic\_deposition} (Top) and \textct{aerosol\_thermophoretic\_deposition\_2} (Bottom) cases]{Time evolution of soot density in the gas (left) and soot surface density on the wall (right) for the \textct{aerosol\_thermophoretic\_deposition} (Top) and \textct{aerosol\_thermophoretic\_deposition\_2} (Bottom) cases.}
+	\caption[Gas phase soot densities and wall surface densities for thermophoretic deposition]{Time evolution of soot density in the gas (left) and soot surface density on the wall (right) for the \textct{aerosol\_thermophoretic\_deposition} (Top) and \textct{aerosol\_thermophoretic\_deposition\_2} (Bottom) cases.}
 	\label{fig:thermophoretic_deposition}
 \end{figure}
 

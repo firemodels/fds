@@ -1441,11 +1441,11 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (DNS default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=1} (DNS and LES defaults, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} (LES default, $L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
@@ -4933,7 +4933,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &                            \\ \hline
 {\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       &                            \\ \hline
 {\ct HYDROGEN PEROXIDE}  & 34.014680  & H$_2$O$_2$       & 3.02     & 106.5    &  Y       &                            \\ \hline
-{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$O$_2$       & 3.623    & 301.1    &  Y       &                            \\ \hline
+{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$S           & 3.623    & 301.1    &  Y       &                            \\ \hline
 {\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &                            \\ \hline
 {\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &                            \\ \hline
 {\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}            \\ \hline
@@ -6139,7 +6139,7 @@ By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporat
 
 The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
 
-\subsubsection{{\it Known} Liquid/Gas Species}
+\subsubsection{Known Liquid/Gas Species}
 
 If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
 \begin{lstlisting}
@@ -6148,7 +6148,7 @@ If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column
 \end{lstlisting}
 There might be other optional parameters listed on the {\ct PART} line, but these are the ones that are absolutely necessary. In addition, if {\ct SPEC\_ID='WATER VAPOR'} the droplets are not only assigned the thermo-physical properties of water, but also the radiation absorption properties are set to that of water, and the droplets are colored blue in Smokeview.
 
-\subsubsection{{\it Unknown} Liquid/Gas Species}
+\subsubsection{Unknown Liquid/Gas Species}
 
 If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
@@ -6551,7 +6551,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
 
-The {\ct MISC} input parameter {\ct DRAG\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct DRAG\_CFL\_MAX} may resolve them.
+The {\ct MISC} input parameter {\ct PARTICLE\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct PARTICLE\_CFL\_MAX} below 1 may resolve them.
 
 \subsection{Electrical Cables}
 \label{info:THIEF}
@@ -7879,6 +7879,9 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE AGE'} (s) \\
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
+{\ct 'PARTICLE PHASE'} \\
+{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
@@ -9833,7 +9836,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
