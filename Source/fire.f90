@@ -961,8 +961,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDDO
    N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
    Q(II,JJ,KK) = Q_OTHER/REAL(N_INT_CELLS,EB)
-if (nm==1 .and. ii==17 .and. jj==14 .and. kk==18) write(0,*) 'mesh 1 ',Q(II,JJ,KK)
-if (nm==2 .and. ii==0  .and. jj==14 .and. kk==18) write(0,*) 'mesh 2 ',Q(II,JJ,KK)
 ENDDO WALL_LOOP
 
 T_USED(10)=T_USED(10)+CURRENT_TIME()-TNOW
