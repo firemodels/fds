@@ -3619,12 +3619,6 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ZP(NPP) = LP%Z
       DO NN=1,LPC%N_QUANTITIES
          SELECT CASE(LPC%QUANTITIES_INDEX(NN))
-            CASE( 6)  ! U-VELOCITY
-               QP(NPP,NN) = LP%U
-            CASE( 7)  ! V-VELOCITY
-               QP(NPP,NN) = LP%V
-            CASE( 8)  ! W-VELOCITY
-               QP(NPP,NN) = LP%W
             CASE(434)  ! PARTICLE DIAMETER
                QP(NPP,NN) = 2.E6*SUM(LP%ONE_D%LAYER_THICKNESS)
             CASE(435)  ! PARTICLE VELOCITY
@@ -3639,6 +3633,18 @@ LAGRANGIAN_PARTICLE_CLASS_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                QP(NPP,NN) = T-LP%T_INSERT
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
                QP(NPP,NN) = LP%PWT
+            CASE(441)  ! PARTICLE X
+               QP(NPP,NN) = LP%X
+            CASE(442)  ! PARTICLE Y
+               QP(NPP,NN) = LP%Y
+            CASE(443)  ! PARTICLE Z
+               QP(NPP,NN) = LP%Z
+            CASE(444)  ! PARTICLE U
+               QP(NPP,NN) = LP%U
+            CASE(445)  ! PARTICLE V
+               QP(NPP,NN) = LP%V
+            CASE(446)  ! PARTICLE W
+               QP(NPP,NN) = LP%W
             CASE(:-1)  ! Any solid phase quantity (assume Z_INDEX=-1 for now)
                QP(NPP,NN) = SOLID_PHASE_OUTPUT(NM,ABS(LPC%QUANTITIES_INDEX(NN)),LPC%QUANTITIES_Y_INDEX(NN),&
                                                LPC%QUANTITIES_Z_INDEX(NN),N,OPT_LP_INDEX=I)
