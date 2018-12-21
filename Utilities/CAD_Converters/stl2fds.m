@@ -29,12 +29,16 @@ file='dome.stl';
 %% Parameters:
 IAXIS = 1; JAXIS = 2; KAXIS = 3; MDIM = 3;
 NOD1  = 1; NOD2  = 2; NOD3  = 3; MNOD = 3;
+fast = true; % Use matlab functions in conversion stl -> FEM_MESH.
+plot_normals    = false;
+do_sanity_tests = false;
 
 %% Import an STL mesh:
 fprintf('%s \b','1. Reading binary .stl file...  ')
 tstart=cputime;
 fv      = stlread([basedir file]);
 [F,V,N] = stlread([basedir file]);
+nfaces=length(N(:,IAXIS));
 telapsed=cputime-tstart;
 fprintf('%s \n',['STL file read. ' num2str(telapsed) ' sec'])
 
@@ -53,18 +57,17 @@ view([-135 35]);
 
 % Add normals to check on display that they are pointing correctly outside
 % of the object.
-hold on
-nfaces=length(N(:,IAXIS));
-a=0.5;
-for iface=1:nfaces
-    xyz1=1/3*(V(F(iface,NOD1),IAXIS:KAXIS) + ...
-              V(F(iface,NOD2),IAXIS:KAXIS) + ...
-              V(F(iface,NOD3),IAXIS:KAXIS));
-    xyz2=xyz1(IAXIS:KAXIS)+a*N(iface,IAXIS:KAXIS);
-    plot3([xyz1(IAXIS) xyz2(IAXIS)], ...
-          [xyz1(JAXIS) xyz2(JAXIS)], ...
-          [xyz1(KAXIS) xyz2(KAXIS)],'r');
-end
+if(plot_normals)
+    hold on
+    a=0.5;
+    xyz1=1/3*(V(F(1:nfaces,NOD1),IAXIS:KAXIS) + ...
+          V(F(1:nfaces,NOD2),IAXIS:KAXIS) + ...
+          V(F(1:nfaces,NOD3),IAXIS:KAXIS));
+    xyz2=xyz1(1:nfaces,IAXIS:KAXIS)+a*N(1:nfaces,IAXIS:KAXIS);     
+    plot3([xyz1(1:nfaces,IAXIS) xyz2(1:nfaces,IAXIS)]', ...
+          [xyz1(1:nfaces,JAXIS) xyz2(1:nfaces,JAXIS)]', ...
+          [xyz1(1:nfaces,KAXIS) xyz2(1:nfaces,KAXIS)]','r');
+end  
 telapsed=cputime-tstart;
 fprintf('%s \n',['Plot completed. ' num2str(telapsed) ' sec'])
 
@@ -75,36 +78,48 @@ tstart=cputime;
 GEOMEPS = 10^-14*(max(max(V))-min(min(V)));
 % Number of nodes obtained from .stl file:
 stlnodes=length(V(:,IAXIS));
-
-IND=zeros(1,stlnodes);
-XYZ=zeros(stlnodes,MDIM);
 WSELEM=zeros(nfaces,MNOD);
-% First Node XYZ:
-nnodes=1;
-inod=1;
-XYZ(nnodes,IAXIS:KAXIS)=V(inod,IAXIS:KAXIS);
-IND(inod)=nnodes;
-% Fill rest of XYZ and IND:
-for inod=2:stlnodes
-   inlist=0;
-   for jnod=1:nnodes
-       if(norm(V(inod,IAXIS:KAXIS)-XYZ(jnod,IAXIS:KAXIS)) < GEOMEPS) 
-           inlist=1;
-           IND(inod)=jnod;
-           break
-       end
-   end
-   if(~inlist)
-       nnodes=nnodes+1;
-       XYZ(nnodes,IAXIS:KAXIS)=V(inod,IAXIS:KAXIS);
-       IND(inod)=nnodes;
-   end
-end
-XYZ=XYZ(1:nnodes,IAXIS:KAXIS);
 
-% Re-index faces:
-for iface=1:nfaces
-    WSELEM(iface,NOD1:NOD3)=IND(F(iface,NOD1:NOD3));
+if (~fast)
+    IND=zeros(1,stlnodes);
+    XYZ=zeros(stlnodes,MDIM);
+    % First Node XYZ:
+    nnodes=1;
+    inod=1;
+    XYZ(nnodes,IAXIS:KAXIS)=V(inod,IAXIS:KAXIS);
+    IND(inod)=nnodes;
+    % Fill rest of XYZ and IND:
+    for inod=2:stlnodes
+       inlist=0;
+       for jnod=1:nnodes
+           if(norm(V(inod,IAXIS:KAXIS)-XYZ(jnod,IAXIS:KAXIS)) < GEOMEPS) 
+               inlist=1;
+               IND(inod)=jnod;
+               break
+           end
+       end
+       if(~inlist)
+           nnodes=nnodes+1;
+           XYZ(nnodes,IAXIS:KAXIS)=V(inod,IAXIS:KAXIS);
+           IND(inod)=nnodes;
+       end
+    end
+    XYZ=XYZ(1:nnodes,IAXIS:KAXIS);
+
+    % Re-index faces:
+    for iface=1:nfaces
+        WSELEM(iface,NOD1:NOD3)=IND(F(iface,NOD1:NOD3));
+    end
+
+else
+  
+    [XYZ,IA,IC]=uniquetol(V,GEOMEPS,'ByRows',true,'DataScale',1);
+    nnodes = length(XYZ(:,IAXIS));
+    % Re-index faces:
+    for iface=1:nfaces
+        WSELEM(iface,NOD1:NOD3)=IC(F(iface,NOD1:NOD3));
+    end
+    
 end
 telapsed=cputime-tstart;
 fprintf('%s \n',['Conversion finished. ' num2str(telapsed) ' sec'])
@@ -112,29 +127,36 @@ fprintf('%s \n',['Conversion finished. ' num2str(telapsed) ' sec'])
 %% Sanity Tests:
 fprintf('%s \b','4. Test for repeated nodes, faces...  ')
 tstart=cputime;
-% Check we don't have repeated nodes:
-for inod=1:nnodes
-    DIFF=abs(XYZ(:,IAXIS)-XYZ(inod,IAXIS)) + ...
-         abs(XYZ(:,JAXIS)-XYZ(inod,JAXIS)) + ...
-         abs(XYZ(:,KAXIS)-XYZ(inod,KAXIS));
-    [vdf,idf]=find(DIFF < GEOMEPS);
-    if (length(vdf)>1)
-        disp(['Found same nodes: ' num2str([inod idf])])
+if(do_sanity_tests)
+    % Check we don't have repeated nodes:
+    for inod=1:nnodes
+        DIFF=abs(XYZ(:,IAXIS)-XYZ(inod,IAXIS)) + ...
+             abs(XYZ(:,JAXIS)-XYZ(inod,JAXIS)) + ...
+             abs(XYZ(:,KAXIS)-XYZ(inod,KAXIS));
+        [vdf,idf]=find(DIFF < GEOMEPS);
+        if (length(vdf)>1)
+            disp(['Found same nodes: ' num2str([inod idf])])
+        end
+    end
+
+    % Check we don't have repeated faces:
+    for iface=1:nfaces
+        DIFF=abs(WSELEM(:,NOD1)-WSELEM(iface,NOD1)) + ...
+             abs(WSELEM(:,NOD2)-WSELEM(iface,NOD2)) + ...
+             abs(WSELEM(:,NOD3)-WSELEM(iface,NOD3));
+        [vdf,idf]=find(DIFF < GEOMEPS);
+        if (length(vdf)>1)
+            disp(['Found same faces: ' num2str([iface idf])])
+        end
     end
 end
 
-% Check we don't have repeated faces:
-for iface=1:nfaces
-    DIFF=abs(WSELEM(:,NOD1)-WSELEM(iface,NOD1)) + ...
-         abs(WSELEM(:,NOD2)-WSELEM(iface,NOD2)) + ...
-         abs(WSELEM(:,NOD3)-WSELEM(iface,NOD3));
-    [vdf,idf]=find(DIFF < GEOMEPS);
-    if (length(vdf)>1)
-        disp(['Found same faces: ' num2str([iface idf])])
-    end
-end
 telapsed=cputime-tstart;
-fprintf('%s \n\n',['Tests finished. ' num2str(telapsed) ' sec'])
+if(do_sanity_tests)
+    fprintf('%s \n\n',['Tests finished. ' num2str(telapsed) ' sec'])
+else
+    fprintf('%s \n\n',['Tests skipped. ' num2str(telapsed) ' sec'])
+end
 fprintf('%s \n\n',['FEM_MESH contains ' num2str(nnodes) ' VERTS and ' ...
                                         num2str(nfaces) ' FACES.'])
 
