@@ -62,7 +62,7 @@ IF (FN_INPUT(1:1)==' ') THEN
       WRITE(LU_ERR,'(/A)')  ' Hit Enter to Escape...'
       READ(5,*,ERR=2,END=2)
    ENDIF
- 2 STOP
+ 2 STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
 ! Stop FDS if the input file cannot be found in the current directory
@@ -70,7 +70,7 @@ ENDIF
 INQUIRE(FILE=FN_INPUT,EXIST=EX)
 IF (.NOT.EX) THEN
    IF (MYID==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
-   STOP
+   STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
 ! Allocate the global orientation vector
