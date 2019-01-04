@@ -590,7 +590,7 @@ comp2 slots=1
 comp3 slots=2
 \end{lstlisting}
 where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler because it is possible for multiple jobs to share the same nodes/cores when a scheduler is not used.
-
+If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer. 
 
 
 
