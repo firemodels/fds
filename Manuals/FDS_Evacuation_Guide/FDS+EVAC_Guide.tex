@@ -707,11 +707,9 @@ on the web page {\tt http://www.vtt.fi/fdsevac/}.
 
 \section{Type of the Model}
 
-\noindent FDS+Evac is a combined agent-based egress calculation model
-and a Computational Fluid Dynamics (CFD) model of fire-driven fluid
-flow, where the fire and egress parts are interacting.  FDS+Evac can
-also be used just to calculate the egress problem without any
-fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
+\noindent FDS+Evac is a fire simulation tool combined with an evacuation module.  
+The fire simulation is based on a well-established Computational Fluid Dynamics 
+(CFD) model of fire-driven fluid flow, and the evacuation simulation is based on multi=agent modelling of pedestrian crowd.  The fire and evacuation components are interacting in several aspects, while each component can also be run independently.  In other words, FDS+Evac can also be used just to calculate the egress problem without any fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
 simulate fire drills.  FDS+Evac models the egress of the agents using
 continuous space and time, but the building geometry is fitted to the
 underlying rectilinear mesh.  FDS+Evac uses simple rules and
@@ -859,11 +857,7 @@ can partly control the model and algorithm by usng parameters in PERS namelist
 behaviours are not yet validated.
 
 
-\textbf{Detection and Reaction Times:} The pre-movement time of the
-evacuating agents is decided by the user input by giving distributions
-for the detection and reaction times.  In addition to the detection
-time given by the user, the local smoke concentration can be used to
-trigger the detection of a fire.  Currently, the fire detection can
+\textbf{Detection and Reaction Times:} The pre-movement time of the evacuating agents is defined by the user input where the probablity distributions are given for the detection time and reaction time, and such time slots are functional if there is no fire simulation.  If fire simulation is included, the local smoke concentration can be used to trigger the detection of a fire.  Currently, the fire detection can
 also be connected to the control logic of FDS, \emph{e.g.}  the
 smoke/heat detectors in FDS fire calculation can also be used to
 trigger the movement of the agents.
