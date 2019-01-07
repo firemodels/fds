@@ -107,6 +107,10 @@ IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
 CALL STOP_CHECK(1)
 
+! If SOLID_HT3D=T in any mesh, then set SOLID_HT3D=T in all meshes.
+
+CALL MPI_ALLREDUCE(MPI_IN_PLACE,SOLID_HT3D,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
+
 ! Setup number of OPENMP threads
 
 CALL OPENMP_SET_THREADS
@@ -132,10 +136,11 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Shut down the run if it is only for checking the set up
 
-IF (SETUP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) THEN
-   STOP_STATUS = SETUP_ONLY_STOP
-   CALL STOP_CHECK(1)
-ENDIF
+IF (SETUP_ONLY .AND. .NOT.CHECK_MESH_ALIGNMENT) STOP_STATUS = SETUP_ONLY_STOP
+
+! Check for errors and shutdown if found
+
+CALL STOP_CHECK(1)
 
 ! MPI process 0 reopens the Smokeview file for additional output
 
@@ -340,10 +345,12 @@ ENDDO
 
 ! Potentially read data from a previous calculation
 
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   IF (RESTART) CALL READ_RESTART(T,DT,NM)
-ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+IF (RESTART) THEN
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      CALL READ_RESTART(T,DT,NM)
+   ENDDO
+   CALL STOP_CHECK(1)
+ENDIF
 
 ! Initialize particle distributions
 
@@ -1422,7 +1429,6 @@ SUBROUTINE END_FDS
 ! End the calculation gracefully, even if there is an error
 
 CHARACTER(255) :: MESSAGE
-LOGICAL :: OPN
 
 IF (STOP_STATUS==NO_STOP .OR. STOP_STATUS==USER_STOP) CALL DUMP_TIMERS
 
@@ -1462,8 +1468,7 @@ IF (MYID==0) THEN
 
    IF (MESSAGE/='null') THEN
       WRITE(LU_ERR,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
-      INQUIRE(LU_OUTPUT,OPENED=OPN)
-      IF (OPN) WRITE(LU_OUTPUT,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
+      IF (OUT_FILE_OPENED) WRITE(LU_OUTPUT,'(/A,A,A,A)') TRIM(MESSAGE),' (CHID: ',TRIM(CHID),')'
    ENDIF
 
 ENDIF

@@ -2705,7 +2705,8 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
          SF%MASS_FLUX = -RHOA*(RSUM0/RSUM_F)*(TMPA/SF%TMP_FRONT)*SF%MASS_FRACTION*WC%UW0
          SF%SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
       ELSE
-         CALL SHUTDOWN('ERROR: SURF: '//TRIM(SF%ID)//' must specify velocity boundary condition for conversion')
+         CALL SHUTDOWN('ERROR: SURF: '//TRIM(SF%ID)//' must specify velocity boundary condition for conversion',&
+                        PROCESS_0_ONLY=.FALSE.)
          IERR = 1
          RETURN
       ENDIF
@@ -2793,7 +2794,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
 
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE) THEN
       IF (M%ZC(K)<GROUND_LEVEL) THEN
-         CALL SHUTDOWN('ERROR: SURF '//TRIM(SF%ID)//' cannot be applied below GROUND_LEVEL')
+         CALL SHUTDOWN('ERROR: SURF '//TRIM(SF%ID)//' cannot be applied below GROUND_LEVEL',PROCESS_0_ONLY=.FALSE.)
          IERR = 1
          RETURN
       ENDIF
@@ -2804,7 +2805,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
       SELECT CASE(ABS(IOR))
          CASE(1)
             IF (SF%RAMP_V_X/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_X assigned to SURF '//TRIM(SF%ID))
+               CALL SHUTDOWN('ERROR: RAMP_V_X assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -2812,7 +2813,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             WC%UW0 = WC%UW0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
          CASE(2)
             IF (SF%RAMP_V_Y/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_Y assigned to SURF '//TRIM(SF%ID))
+               CALL SHUTDOWN('ERROR: RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -2820,7 +2821,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
             WC%UW0 = WC%UW0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
          CASE(3)
             IF (SF%RAMP_V_Z/='null') THEN
-               CALL SHUTDOWN('ERROR: RAMP_V_Z assigned to SURF '//TRIM(SF%ID))
+               CALL SHUTDOWN('ERROR: RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
@@ -3860,7 +3861,7 @@ OPEN(UNIT=LU_UVW,FILE=FN_UVW,FORM='FORMATTED',STATUS='OLD',IOSTAT=IERROR)
 IF (IERROR/=0) THEN
    WRITE(STR,'(I3)') NM
    MESSAGE = 'ERROR: Problem with MESH '//TRIM(ADJUSTL(STR))//'; UVW_FILE '//TRIM(FN_UVW)//' does not exist.'
-   CALL SHUTDOWN(MESSAGE)
+   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
    RETURN
 ENDIF
 
