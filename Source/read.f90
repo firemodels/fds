@@ -149,10 +149,6 @@ CLOSE (LU_INPUT)
 
 CALL SET_QUANTITIES_AMBIENT
 
-! If SOLID_HT3D=T in any mesh, then set SOLID_HT3D=T in all meshes.
-
-CALL MPI_ALLREDUCE(MPI_IN_PLACE,SOLID_HT3D,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERROR)
-
 END SUBROUTINE READ_DATA
 
 SUBROUTINE READ_CATF
@@ -462,7 +458,7 @@ USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS
                 EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
                 EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE, N_STRS, INPUT_EVAC_GRIDS, NO_EVAC_MESHES
 INTEGER, INTENT(IN) :: IMODE
-INTEGER :: IJK(3),NM,NM2,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES,IERR, &
+INTEGER :: IJK(3),NM,NM2,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES, &
            NMESHES_EVAC, NMESHES_FIRE, NM_EVAC, N_THREADS
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
 LOGICAL :: EVACUATION, EVAC_HUMANS,OVERLAPPING_X,OVERLAPPING_Y,OVERLAPPING_Z,POSSIBLY_PERIODIC
@@ -593,13 +589,11 @@ NMESHES_EVAC = NMESHES - NMESHES_FIRE
 
 IF (NO_EVACUATION) THEN
    IF (NMESHES<N_MPI_PROCESSES) THEN
-      CALL MPI_FINALIZE(IERR)
       WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: The number of MPI processes, ',N_MPI_PROCESSES,', exceeds the number of meshes, ',NMESHES
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 ELSE
    IF(NMESHES_FIRE+1<N_MPI_PROCESSES) THEN
-      CALL MPI_FINALIZE(IERR)
       WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: The number of MPI processes, ',N_MPI_PROCESSES,&
            ', exceeds the number of fire meshes + 1, ',NMESHES_FIRE+1
       CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -8220,7 +8214,11 @@ COUNT_RAMP_POINTS: DO N=1,N_RAMP
          READ(LU_INPUT,NML=RAMP,ERR=56,IOSTAT=IOS)
          IF (ID/=RAMP_ID(N)) CYCLE SEARCH_LOOP
          RP%NUMBER_DATA_POINTS = RP%NUMBER_DATA_POINTS + 1
-         56 IF (IOS>0) THEN ; CALL SHUTDOWN('ERROR: Problem with RAMP '//TRIM(RAMP_ID(N)) ) ; RETURN ; ENDIF
+      56 IF (IOS>0) THEN 
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Problem with RAMP, line number ',INPUT_FILE_LINE_NUMBER
+            CALL SHUTDOWN(MESSAGE)
+            RETURN
+         ENDIF
       ENDDO SEARCH_LOOP
    ENDIF
 
@@ -8556,7 +8554,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (MULT_INDEX==-1) THEN
          WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST_O+1,&
                                           ', line number',INPUT_FILE_LINE_NUMBER
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       MR => MULTIPLIER(MULT_INDEX)
       K_MULT_LOOP2: DO KK=MR%K_LOWER,MR%K_UPPER
@@ -8587,7 +8585,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO K_MULT_LOOP2
       2 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with OBST number ',N_OBST_O+1,', line number ',INPUT_FILE_LINE_NUMBER
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
    ENDDO COUNT_OBST_LOOP
    1 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -8700,15 +8698,15 @@ MESH_LOOP: DO NM=1,NMESHES
          IF ((SHAPE_TYPE==OBST_SPHERE_TYPE .OR. SHAPE_TYPE==OBST_CYLINDER_TYPE .OR. SHAPE_TYPE==OBST_CONE_TYPE) &
             .AND. RADIUS<0._EB) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires RADIUS'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF ((SHAPE_TYPE==OBST_CYLINDER_TYPE .OR. SHAPE_TYPE==OBST_CONE_TYPE) .AND. HEIGHT<0._EB) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' SHAPE requires HEIGHT'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (SHAPE_TYPE==OBST_BOX_TYPE .AND. (LENGTH<0._EB .OR. WIDTH<0._EB .OR. HEIGHT<0._EB)) THEN
             WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OBST ',NN,' BOX SHAPE requires LENGTH, WIDTH, HEIGHT'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (ORIENTATION(1)==0._EB .AND. &
              ORIENTATION(2)==0._EB .AND. &
@@ -8966,7 +8964,7 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (SURF_ID/='null') CALL CHECK_SURF_NAME(SURF_ID,EX)
                IF (.NOT.EX) THEN
                   WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID),' does not exist'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
                DO NNNN=1,3
@@ -8974,7 +8972,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_IDS(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_IDS(NNNN),EX)
                   IF (.NOT.EX) THEN
                      WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_IDS(NNNN)),' does not exist'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDDO
 
@@ -8983,7 +8981,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_ID6(NNNN)/='null') CALL CHECK_SURF_NAME(SURF_ID6(NNNN),EX)
                   IF (.NOT.EX) THEN
                      WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURF_ID ',TRIM(SURF_ID6(NNNN)),' does not exist'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDDO
 
@@ -9089,7 +9087,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                IF (.NOT.HT3D .AND. ABS(INTERNAL_HEAT_SOURCE)>TWO_EPSILON_EB) THEN
                   WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Problem with OBST number ',NN,', INTERNAL_HEAT_SOURCE requires HT3D=T.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
                ! No HT3D for EVAC or zero volume OBST
@@ -9143,7 +9141,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                      IF (OB%MATL_SURF_INDEX==-1) THEN
                         WRITE(MESSAGE,'(A,I0,A)') "ERROR: Problem with OBST number ",NN,", HT3D requires a MATL_ID."
-                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                      ENDIF
 
                      SF => SURFACE(OB%MATL_SURF_INDEX)
@@ -9153,7 +9151,7 @@ MESH_LOOP: DO NM=1,NMESHES
                      IF (SF%N_LAYERS/=1) THEN
                         WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
                            TRIM(SF%ID),"', N_LAYERS must be 1 for HT3D SURF."
-                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                      ENDIF
 
                      ! Emissivities for SURF with MATL_IDs set in READ_SURF
@@ -9175,7 +9173,7 @@ MESH_LOOP: DO NM=1,NMESHES
                            IF (.NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
                               WRITE(MESSAGE,'(A,A,A)') &
                                  'ERROR: MATL ',TRIM(ML%ID),', PYRO3D requires residue (NU_MATL) or BURN_AWAY'
-                              CALL SHUTDOWN(MESSAGE) ; RETURN
+                              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                            ENDIF
                         ENDIF
                         OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
@@ -9189,7 +9187,7 @@ MESH_LOOP: DO NM=1,NMESHES
                         IF ( SURFACE(OB%SURF_INDEX(NNN))%N_MATL>0 ) THEN
                            WRITE(MESSAGE,'(A,I0,A,A,A)') "ERROR: Problem with OBST number ",NN,", SURF_ID='", &
                               TRIM(SURFACE(OB%SURF_INDEX(NNN))%ID),"', cannot specify MATL_ID on both OBST and SURF."
-                           CALL SHUTDOWN(MESSAGE) ; RETURN
+                           CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                         ENDIF
                      ENDDO
 
@@ -9670,13 +9668,13 @@ COUNT_LOOP: DO
       ENDDO
       IF (N_HOLE_NEW==0) THEN
          WRITE(MESSAGE,'(A,A,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on HOLE line', N_HOLE_O
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
    ENDIF
    N_HOLE   = N_HOLE   + N_HOLE_NEW
    2 IF (IOS>0) THEN
       WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Problem with HOLE number',N_HOLE_O+1,', line number ',INPUT_FILE_LINE_NUMBER
-      CALL SHUTDOWN(MESSAGE) ; RETURN
+      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
    ENDIF
 ENDDO COUNT_LOOP
 1 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -9748,7 +9746,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
             IF (CONTROLLED(N) .OR. CONTROLLED(NN)) THEN
                WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Cannot overlap HOLEs with a DEVC_ID or CTRL_ID. HOLE number ',N_HOLE_O+1,&
                                              ', line number ',INPUT_FILE_LINE_NUMBER
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             ENDIF
          ENDIF
       ENDDO
@@ -10150,7 +10148,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (SURF_ID=='HVAC') THEN
             WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Cannot use MULT with an HVAC VENT, VENT ', N_VENT+1,&
                                          ', line number ',INPUT_FILE_LINE_NUMBER
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          DO N=1,N_MULT
             MR => MULTIPLIER(N)
@@ -10159,18 +10157,18 @@ MESH_LOOP_1: DO NM=1,NMESHES
          IF (N_VENT_NEW==0) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1,&
                                              ', line number ',INPUT_FILE_LINE_NUMBER
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
       ENDIF
       IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
          WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: must specify an ID for an HVAC VENT, VENT ', N_VENT+1,&
                                       ', line number ',INPUT_FILE_LINE_NUMBER
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       N_VENT = N_VENT + N_VENT_NEW
       4 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: Problem with VENT ',N_VENT+1,', line number ',INPUT_FILE_LINE_NUMBER
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
    ENDDO COUNT_VENT_LOOP
    3 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -10247,7 +10245,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses PBX, PBY or PBZ.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB(1) = XS
          XB(2) = XF
@@ -10263,11 +10261,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',NN,' multi-mesh PERIODIC boundary'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (MULT_ID/='null') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses MB.'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          XB(1) = XS
          XB(2) = XF
@@ -10290,7 +10288,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                 XB(5) = ZF
             CASE DEFAULT
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT',NN,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
       ENDIF
 
@@ -10299,13 +10297,13 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. NN<N_VENT_O-1) THEN
          IF (ID=='null')WRITE(MESSAGE,'(A,I0,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
          IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
       IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4))  .AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
          IF (ID=='null') WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,      ' must be a plane'
          IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
       CALL CHECK_XB(XB)
@@ -10392,7 +10390,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   IF (ABS(XB1-XB2)>SPACING(XB2)  .AND. ABS(XB3-XB4)>SPACING(XB4) ) THEN
                      IF (ID=='null') WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Evacuation VENT ',NN,      ' must be a vertical plane'
                      IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: Evacuation VENT ',TRIM(ID),' must be a vertical plane'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
 
@@ -10446,7 +10444,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (.NOT.EX) THEN
                   WRITE(MESSAGE,'(A,A,A,I0,A,I0)') 'ERROR: SURF_ID ',TRIM(SURF_ID),' not found for VENT ',N_VENT,&
                                                    ', line number ',INPUT_FILE_LINE_NUMBER
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
                ! Assign SURF_INDEX, Index of the Boundary Condition
@@ -10492,7 +10490,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   IF (ID=='null') WRITE(MESSAGE,'(A,I0,A,I0)') 'ERROR: VENT ',NN, &
                      ' cannot be controlled by a device, line number ',INPUT_FILE_LINE_NUMBER
                   IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
                ! Set the VENT color index
@@ -10524,7 +10522,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (RADIUS>0._EB) THEN
                   IF (ANY(XYZ<-1.E5_EB)) THEN
                      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,' requires center point XYZ'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   VT%RADIUS = RADIUS
                ENDIF
@@ -10559,15 +10557,15 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   SYNTHETIC_EDDY_METHOD = .TRUE.
                   IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) THEN
                      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,' L_EDDY = 0 in Synthetic Eddy Method'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) THEN
                      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,' VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                   IF (TRIM(SURF_ID)=='HVAC') THEN
                      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: VENT ',NN,' Synthetic Eddy Method not permitted with HVAC'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDIF
 
@@ -10665,7 +10663,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       IF (VT%IOR==0) THEN
          WRITE(MESSAGE,'(A,I0,A,I0)')  'ERROR: Specify orientation of VENT ',VT%ORDINAL, ', MESH NUMBER',NM
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
       ! Other error messages for VENTs
@@ -10675,36 +10673,36 @@ MESH_LOOP_2: DO NM=1,NMESHES
             IF (I1>=1 .AND. I1<=IBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2+1,J2,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
             ENDIF
          CASE(2)
             IF (J1>=1 .AND. J1<=JBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2+1,K2)) .AND.  .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
             ENDIF
          CASE(3)
             IF (K1>=1 .AND. K1<=KBM1) THEN
                IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY.OR.VT%BOUNDARY_TYPE==MIRROR_BOUNDARY.OR.VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: OPEN, MIRROR, OR PERIODIC VENT ',VT%ORDINAL, ' must be an exterior boundary.'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
                IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
                IF (.NOT.SOLID(CELL_INDEX(I2,J2,K2+1)) .AND. .NOT.SOLID(CELL_INDEX(I2,J2,K2))) THEN
                   WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' must be attached to a solid obstruction'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
             ENDIF
       END SELECT
@@ -10731,7 +10729,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       ! Check UVW
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
          WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
-         CALL SHUTDOWN(MESSAGE) ; RETURN
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
    ENDDO VENT_LOOP_2
@@ -10746,7 +10744,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
          DO NN=1,N-1
             IF (TRIM(VT%ID)==TRIM(VENTS(NN)%ID) .AND. VENTS(NN)%SURF_INDEX==HVAC_SURF_INDEX) THEN
                WRITE(MESSAGE,'(A,A)')  'ERROR: Two HVAC VENTS have the same ID.  VENT ID: ',TRIM(VT%ID)
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             ENDIF
          ENDDO
       ENDIF

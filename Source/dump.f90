@@ -1405,9 +1405,20 @@ INTEGER :: TYPE_INDICATOR
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 INTEGER :: IG
 
-! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
+! If this is a RESTART case but an old .smv file does not exist, shutdown with an ERROR.
+
+INQUIRE(FILE=FN_SMV,EXIST=EX)
+IF (.NOT.EX .AND. APPEND) THEN
+   WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
+   CALL SHUTDOWN(MESSAGE) ; RETURN
+ENDIF
+
+! If this is a RESTART case, there is no need to open the .smv file except for Process 0.
 
 IF (MYID>0 .AND. APPEND) RETURN
+
+! In cases where the MPI processes write to their own .smv file, give each .smv file for the MPI processes 
+! greater than 0 a unique name.
 
 IF (MYID>0 .AND.      SHARED_FILE_SYSTEM) OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
 
@@ -1416,7 +1427,7 @@ IF (MYID>0 .AND. .NOT.SHARED_FILE_SYSTEM) THEN
    OPEN(LU_SMV,FILE=PROCESS_FN_SMV,FORM='FORMATTED', STATUS='REPLACE')
 ENDIF
 
-! Do the following printouts only for master node
+! Do the following printouts only for MPI Process 0.
 
 MASTER_NODE_IF: IF (MYID==0) THEN
 
@@ -1435,12 +1446,6 @@ WRITE(LU_INFO,'(A)') ' '
 CLOSE(LU_INFO)
 
 ! Open up the Smokeview ".smv" file
-
-INQUIRE(FILE=FN_SMV,EXIST=EX)
-IF (.NOT.EX .AND. APPEND) THEN
-   WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
 
 IF (APPEND) THEN
    OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
@@ -2555,6 +2560,8 @@ ELSE
    OPEN(LU_OUTPUT,FILE=FN_OUTPUT,FORM='FORMATTED',STATUS='REPLACE')
 ENDIF
 
+OUT_FILE_OPENED = .TRUE.
+
 ! Write out the input parameters to output file (unit 6)
 
 CALL WRITE_SUMMARY_INFO(LU_OUTPUT)
@@ -3269,7 +3276,7 @@ SUBROUTINE READ_RESTART(T,DT,NM)
 
 ! Read data from a previous calculation
 
-USE COMP_FUNCTIONS, ONLY:SHUTDOWN
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE,ALLOCATE_STORAGE
 REAL(EB), INTENT(OUT) :: T,DT
 INTEGER :: NOM,N,N_T_E_MAX,NS
@@ -3285,7 +3292,7 @@ IF (EVACUATION_ONLY(NM)) RETURN ! No restart for evacuation
 INQUIRE(FILE=FN_RESTART(NM),EXIST=EX)
 IF (.NOT.EX) THEN
    WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ",TRIM(FN_RESTART(NM)),", does not exist in the current directory"
-   CALL SHUTDOWN(MESSAGE)
+   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
 ENDIF
 
 OPEN(LU_RESTART(NM),FILE=FN_RESTART(NM),FORM='UNFORMATTED',STATUS='OLD')
@@ -6249,7 +6256,7 @@ IND_SELECT: SELECT CASE(IND)
       IF (IW>0) THEN
          IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             WRITE(MESSAGE,'(A)') "ERROR: Output QUANTITY 'MASS FLUX' not appropriate at solid boundary"
-            CALL SHUTDOWN(MESSAGE)
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
           ENDIF
       ENDIF
 

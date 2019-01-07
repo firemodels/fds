@@ -2753,7 +2753,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ! Check that NWP_NEW has not exceeded the allocated space N_CELLS_MAX
       IF (NWP_NEW > SF%N_CELLS_MAX) THEN
          WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: N_CELLS_MAX should be at least ',NWP_NEW,' for surface ',TRIM(SF%ID)
-         CALL SHUTDOWN(MESSAGE)
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
       ENDIF
 
       ! Shrinking wall has gone to zero thickness.
